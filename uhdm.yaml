@@ -1,0 +1,53 @@
+# Copyright 2019 Alain Dargelas
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Universal Verilog Data Model (UVDM) formal description
+
+- obj_def:
+  - name: design
+  - object:
+    - class: module
+      - name: allModules
+      - vpi: vpiModule
+      - count: any
+    - class: module
+      - name: topModules
+      - vpi: vpiModule
+      - count: any
+  
+
+- obj_def:
+  - name: module
+  - property:
+    - name: top module
+      - type: bool
+      - vpi: vpiTopModule
+      - card: 1
+    - name: decay time
+      - type: int
+      - vpi: vpiDefDecayTime
+      - card: 1
+  - object:
+    - class_ref: scope
+      - name: scope
+      - vpi: vpiInternalScope
+      - card: any
+    - obj_ref: port
+      - card: any
+    - obj_refs: interface
+      - card: any
+    - obj_ref: interface_array
+      - name: interface array
+      - card: any
+      
