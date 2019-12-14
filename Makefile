@@ -1,2 +1,2 @@
 all:
-	tclsh model_gen.tcl 
+	tclsh model_gen.tcl model/uhdm.yaml

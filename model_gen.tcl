@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set model_file "uhdm.yaml"
+set model_file $argv
 
 # proc copied from: https://wiki.tcl-lang.org/page/pdict%3A+Pretty+print+a+dict
 proc pdict { d {i 0} {p "  "} {s " -> "} } {
@@ -116,11 +116,45 @@ proc parse_model { file } {
     return $models
 }
 
+proc generate_headers { models } {
+    puts "=========="
+    exec sh -c "mkdir -p headers"
+    set fid [open "templates/class_header.h"]
+    set template_content [read $fid]
+    close $fid
+    foreach model $models {
+	global $model
+	set data [subst $$model] 
+	set classname [dict get $data name]
+	set template $template_content
+
+	puts "Generating headers/$classname.h"
+	set oid [open "headers/$classname.h" "w"]
+	regsub -all {<CLASSNAME>} $template $classname template
+	regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
+	
+	puts $oid $template
+	close $oid
+	
+    } 
+}
+
+proc debug_models { models } {
+    # Model printout
+    foreach model $models {
+	puts "=========="
+	global $model
+	pdict $model
+    }
+}
+
 
 set models [parse_model $model_file]
 
-foreach model $models {
-    puts "=========="
-    pdict $model
-}
+debug_models $models
+
+generate_headers $models
+
+
+
 
