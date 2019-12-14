@@ -119,24 +119,51 @@ proc parse_model { file } {
 proc generate_headers { models } {
     puts "=========="
     exec sh -c "mkdir -p headers"
+    exec sh -c "mkdir -p src"
     set fid [open "templates/class_header.h"]
     set template_content [read $fid]
     close $fid
+    set mainId [open "src/main.cpp" "w"]
     foreach model $models {
 	global $model
+	puts "** $model **"
 	set data [subst $$model] 
 	set classname [dict get $data name]
 	set template $template_content
 
 	puts "Generating headers/$classname.h"
+	puts $mainId "#include \"headers/$classname.h\""
 	set oid [open "headers/$classname.h" "w"]
 	regsub -all {<CLASSNAME>} $template $classname template
 	regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
+	set methods ""
+	set members ""
+	dict for {key val} $data {
+	    #puts "$key $val"
+	    if {$key == "properties"} {
+		dict for {prop conf} $val {
+		    set name [dict get $conf name]
+		    set vpi  [dict get $conf vpi]
+		    set type [dict get $conf type]
+		    set card [dict get $conf card]
+		    if {$card == 1} {
+			append methods "\n    $type ${vpi}() { return m_$vpi; }\n"
+			append methods "\n    void set_${vpi}($type data) { m_$vpi = data; }\n"
+			append members "\n    $type m_$vpi;\n"
+		    }
+		}
+	    }
+	}
+	regsub {<METHODS>} $template $methods template
+	regsub {<MEMBERS>} $template $members template
 	
 	puts $oid $template
 	close $oid
 	
-    } 
+    }
+    puts $mainId "int main () { };"
+    close $mainId
+    
 }
 
 proc debug_models { models } {
