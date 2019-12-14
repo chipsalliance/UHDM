@@ -12,42 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Verilog Data Model (UVDM) formal description
+# Universal Hardware Data Model (UHDM) formal description
 
-- obj_def:
-  - name: design
-  - object:
-    - class: module
-      - name: allModules
-      - vpi: vpiModule
-      - count: any
-    - class: module
-      - name: topModules
-      - vpi: vpiModule
-      - count: any
-  
+- obj_def: design
+  - class: allModules
+    type: module
+    vpi: vpiModule
+    card: any
+  - class: topModules
+    name: module
+    vpi: vpiModule
+    card: any
 
-- obj_def:
-  - name: module
-  - property:
-    - name: top module
-      - type: bool
-      - vpi: vpiTopModule
-      - card: 1
-    - name: decay time
-      - type: int
-      - vpi: vpiDefDecayTime
-      - card: 1
-  - object:
-    - class_ref: scope
-      - name: scope
-      - vpi: vpiInternalScope
-      - card: any
-    - obj_ref: port
-      - card: any
-    - obj_refs: interface
-      - card: any
-    - obj_ref: interface_array
-      - name: interface array
-      - card: any
-      
+- obj_def: module
+  - property: top module
+    type: bool
+    vpi: vpiTopModule
+    card: 1
+  - property: decay time
+    type: int
+    vpi: vpiDefDecayTime
+    card: 1
+  - class_ref: scope
+    name: scope
+    vpi: vpiInternalScope
+    card: any
+  - obj_ref: port
+    card: any
+  - obj_ref: interface
+    card: any
+  - obj_ref: interface_array
+    name: interface array
+    card: any
