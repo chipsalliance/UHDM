@@ -31,11 +31,11 @@ namespace UHDM {
     module(){};
     virtual ~module();
     
-    bool vpiTopModule() { return m_vpiTopModule; }
+    bool get_vpiTopModule() { return m_vpiTopModule; }
 
     void set_vpiTopModule(bool data) { m_vpiTopModule = data; }
 
-    int vpiDefDecayTime() { return m_vpiDefDecayTime; }
+    int get_vpiDefDecayTime() { return m_vpiDefDecayTime; }
 
     void set_vpiDefDecayTime(int data) { m_vpiDefDecayTime = data; }
 

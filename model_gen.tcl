@@ -118,10 +118,10 @@ proc parse_model { file } {
 
 proc printMethods { type vpi card } {
     if {$card == "1"} {
-	append methods "\n    $type ${vpi}() { return m_$vpi; }\n"
+	append methods "\n    $type get_${vpi}() { return m_$vpi; }\n"
 	append methods "\n    void set_${vpi}($type data) { m_$vpi = data; }\n"
     } elseif {$card == "any"} {
-	append methods "\n    const VectorOf${type}Ref ${vpi}() { return m_$vpi; }\n"
+	append methods "\n    const VectorOf${type}Ref get_${vpi}() { return m_$vpi; }\n"
 	append methods "\n    void set_${vpi}(VectorOf${type}Ref data) { m_$vpi = data; }\n"	
     }
     return $methods
@@ -157,6 +157,7 @@ proc generate_headers { models } {
     set mainId [open "src/main.cpp" "w"]
     puts $mainId "#include <string>"
     puts $mainId "#include <vector>"
+    puts $mainId "#include \"include/vpi_user.h\""
     puts $mainId "#include \"headers/containers.h\""
     set containerId [open "headers/containers.h" "w"]
     

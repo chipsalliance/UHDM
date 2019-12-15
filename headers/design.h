@@ -31,11 +31,11 @@ namespace UHDM {
     design(){};
     virtual ~design();
     
-    const VectorOfmoduleRef allModules() { return m_allModules; }
+    const VectorOfmoduleRef get_allModules() { return m_allModules; }
 
     void set_allModules(VectorOfmoduleRef data) { m_allModules = data; }
 
-    const VectorOfmoduleRef topModules() { return m_topModules; }
+    const VectorOfmoduleRef get_topModules() { return m_topModules; }
 
     void set_topModules(VectorOfmoduleRef data) { m_topModules = data; }
 
