@@ -14,16 +14,6 @@
 
 # Universal Hardware Data Model (UHDM) formal description
 
-- obj_def: design
-  - class: allModules
-    type: module
-    vpi: vpiModule
-    card: any
-  - class: topModules
-    name: module
-    vpi: vpiModule
-    card: any
-
 - obj_def: module
   - property: top_module
     name: top module
@@ -45,4 +35,14 @@
     card: any
   - obj_ref: interface_array
     name: interface array
+    card: any
+
+- obj_def: design
+  - class: allModules
+    type: module
+    vpi: vpiModule
+    card: any
+  - class: topModules
+    type: module
+    vpi: vpiModule
     card: any

@@ -116,6 +116,37 @@ proc parse_model { file } {
     return $models
 }
 
+proc printMethods { type vpi card } {
+    if {$card == "1"} {
+	append methods "\n    $type ${vpi}() { return m_$vpi; }\n"
+	append methods "\n    void set_${vpi}($type data) { m_$vpi = data; }\n"
+    } elseif {$card == "any"} {
+	append methods "\n    const VectorOf${type}Ref ${vpi}() { return m_$vpi; }\n"
+	append methods "\n    void set_${vpi}(VectorOf${type}Ref data) { m_$vpi = data; }\n"	
+    }
+    return $methods
+}
+
+proc printMembers { type vpi card } {
+    if {$card == "1"} {
+	append members "\n    $type m_$vpi;\n"
+    } elseif {$card == "any"} {
+	append members "\n    VectorOf${type} m_$vpi;\n"	
+    }
+}
+
+proc printTypeDefs { containerId type card } {
+    global CONTAINER
+    if {$card == "any"} {
+	if ![info exist CONTAINER($type)] {
+	    set CONTAINER($type) 1
+	    puts $containerId "  class ${type};"
+	    puts $containerId "  typedef std::vector<${type}*> VectorOf${type};"
+	    puts $containerId "  typedef std::vector<${type}*>& VectorOf${type}Ref;"
+	}
+    }
+}
+
 proc generate_headers { models } {
     puts "=========="
     exec sh -c "mkdir -p headers"
@@ -124,6 +155,11 @@ proc generate_headers { models } {
     set template_content [read $fid]
     close $fid
     set mainId [open "src/main.cpp" "w"]
+    puts $mainId "#include <string>"
+    puts $mainId "#include <vector>"
+    puts $mainId "#include \"headers/containers.h\""
+    set containerId [open "headers/containers.h" "w"]
+    
     foreach model $models {
 	global $model
 	puts "** $model **"
@@ -139,23 +175,33 @@ proc generate_headers { models } {
 	set methods ""
 	set members ""
 	dict for {key val} $data {
-	    #puts "$key $val"
+	   # puts "$key $val"
 	    if {$key == "properties"} {
 		dict for {prop conf} $val {
 		    set name [dict get $conf name]
 		    set vpi  [dict get $conf vpi]
 		    set type [dict get $conf type]
 		    set card [dict get $conf card]
-		    if {$card == 1} {
-			append methods "\n    $type ${vpi}() { return m_$vpi; }\n"
-			append methods "\n    void set_${vpi}($type data) { m_$vpi = data; }\n"
-			append members "\n    $type m_$vpi;\n"
-		    }
+		    printTypeDefs $containerId $type $card
+		    append methods [printMethods $type $vpi $card] 
+		    append members [printMembers $type $vpi $card]
+		}
+	    }
+	    if {$key == "class"} {
+		dict for {iter content} $val {
+		    puts "$iter $content"
+		    set name $iter
+		    set vpi  [dict get $content vpi]
+		    set type [dict get $content type]
+		    set card [dict get $content card]
+		    printTypeDefs $containerId $type $card
+		    append methods [printMethods $type $name $card] 
+		    append members [printMembers $type $name $card]
 		}
 	    }
 	}
-	regsub {<METHODS>} $template $methods template
-	regsub {<MEMBERS>} $template $members template
+	regsub -all {<METHODS>} $template $methods template
+	regsub -all {<MEMBERS>} $template $members template
 	
 	puts $oid $template
 	close $oid
@@ -163,6 +209,8 @@ proc generate_headers { models } {
     }
     puts $mainId "int main () { };"
     close $mainId
+    close $containerId
+
     
 }
 
