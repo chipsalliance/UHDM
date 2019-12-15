@@ -1,0 +1,31 @@
+sudo: required
+
+# Enable C++ support
+language: cpp
+# Compiler selection
+compiler:
+  - gcc
+  
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+before_install:
+    - sudo apt-get install tclsh
+    - eval "${MATRIX_EVAL}"
+
+install:
+
+# Build steps
+script:
+  - make
+  
