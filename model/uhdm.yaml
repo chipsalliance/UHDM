@@ -42,7 +42,7 @@
     type: module
     vpi: vpiModule
     card: any
-  - class: topModules
+ - class: topModules
     type: module
     vpi: vpiModule
     card: any

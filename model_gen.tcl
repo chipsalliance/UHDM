@@ -54,11 +54,12 @@ proc pdict { d {i 0} {p "  "} {s " -> "} } {
 }
 
 proc parse_model { file } {
+    global ID
     set models {}
     set fid [open $file]
     set content [read $fid]
     close $fid
-
+    set objectId 500
     set lines [split $content "\n"]
     set OBJ(curr) ""
     set INDENT(curr) 0
@@ -75,7 +76,14 @@ proc parse_model { file } {
 	
 	if [regexp {\- obj_def: (.*)} $line tmp name] {
 	    global obj_def$modelId
-	    set obj_def$modelId [dict create "name" $name "type" obj_def "properties" {} "class_ref" {} "obj_ref" {}]	   
+	    if [info exist ID($name)] {
+		set id $ID($name)
+	    } else {
+		set id $objectId
+		incr objectId
+		set ID($name) $id
+	    }
+	    set obj_def$modelId [dict create "name" $name "type" obj_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]	   
 	    lappend models obj_def$modelId 
 	    set OBJ(curr) obj_def$modelId
 	    incr modelId
@@ -104,10 +112,18 @@ proc parse_model { file } {
 	    dict set $OBJ(curr) $obj_type $obj_name type $type
 	}
 	if [regexp {vpi: (.*)} $line tmp vpiType] {
-	    dict set $OBJ(curr) $obj_type $obj_name vpi $vpiType
+	    dict set $OBJ(curr) $obj_type $obj_name vpi $vpiType	    
 	}
 	if [regexp {card: (.*)} $line tmp card] {
 	    dict set $OBJ(curr) $obj_type $obj_name card $card
+	    if [info exist ID($name)] {
+		set id $ID($name)
+	    } else {
+		set id $objectId
+		incr objectId
+		set ID($name) $id
+	    }
+	    dict set $OBJ(curr) $obj_type $obj_name "id" $id
 	}
 	if [regexp {name: (.*)} $line tmp name] {
 	    dict set $OBJ(curr) $obj_type $obj_name name $name
@@ -140,27 +156,39 @@ proc printTypeDefs { containerId type card } {
     if {$card == "any"} {
 	if ![info exist CONTAINER($type)] {
 	    set CONTAINER($type) 1
-	    puts $containerId "  class ${type};"
-	    puts $containerId "  typedef std::vector<${type}*> VectorOf${type};"
-	    puts $containerId "  typedef std::vector<${type}*>& VectorOf${type}Ref;"
+	    puts $containerId "class $type;"
+	    puts $containerId "typedef std::vector<${type}*> VectorOf${type};"
+	    puts $containerId "typedef std::vector<${type}*>& VectorOf${type}Ref;"
+	    puts $containerId "typedef std::vector<${type}*>::iterator VectorOf${type}Itr;"	   
 	}
     }
 }
 
-proc generate_headers { models } {
+proc generate_code { models } {
+    global ID
     puts "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
     set fid [open "templates/class_header.h"]
     set template_content [read $fid]
     close $fid
-    set mainId [open "src/main.cpp" "w"]
+    set mainId [open "headers/uhdm.h" "w"]
     puts $mainId "#include <string>"
     puts $mainId "#include <vector>"
     puts $mainId "#include \"include/vpi_user.h\""
-    puts $mainId "#include \"headers/containers.h\""
+    puts $mainId "#include \"include/vpi_uhdm.h\""
     set containerId [open "headers/containers.h" "w"]
-    
+    puts $containerId "#ifndef CONTAINER_H
+#define CONTAINER_H
+namespace UHDM {"
+
+    set fid [open "templates/vpi_user.cpp" ]
+    set vpi_user [read $fid]
+    close $fid
+    set vpi_userId [open "src/vpi_user.cpp" "w"]
+    set vpi_iterate_body ""
+    set vpi_scan_body ""
+    set headers ""
     foreach model $models {
 	global $model
 	puts "** $model **"
@@ -169,12 +197,14 @@ proc generate_headers { models } {
 	set template $template_content
 
 	puts "Generating headers/$classname.h"
-	puts $mainId "#include \"headers/$classname.h\""
+	append headers "#include \"headers/$classname.h\"\n"
 	set oid [open "headers/$classname.h" "w"]
 	regsub -all {<CLASSNAME>} $template $classname template
 	regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
 	set methods ""
 	set members ""
+	puts $containerId "#define ${classname}ID $ID($classname)"
+	
 	dict for {key val} $data {
 	   # puts "$key $val"
 	    if {$key == "properties"} {
@@ -195,9 +225,27 @@ proc generate_headers { models } {
 		    set vpi  [dict get $content vpi]
 		    set type [dict get $content type]
 		    set card [dict get $content card]
+		    set id   [dict get $content id]
 		    printTypeDefs $containerId $type $card
+		    puts $containerId "#define $name $id"
 		    append methods [printMethods $type $name $card] 
 		    append members [printMembers $type $name $card]
+		    
+		    if {$card == "any"} {
+			append vpi_iterate_body "\n\    
+if (handle->m_type == ${classname}ID) {\                
+  if (type == $name) {\n\
+    return (unsigned int*) new uhdm_handle($name, \n\
+            new VectorOf${type}Itr((($classname*)(handle))->get_${name}().begin()));\n\
+		      }\n\
+				       }\n"
+
+                      append vpi_scan_body "\n\
+  if (handle->m_type == $name) {\
+    VectorOf${type}Itr* the_itr = (VectorOf${type}Itr*)itr;
+				}"
+
+		    }
 		}
 	    }
 	}
@@ -208,10 +256,20 @@ proc generate_headers { models } {
 	close $oid
 	
     }
-    puts $mainId "int main () { };"
+    
+    puts $mainId "#include \"headers/containers.h\""
+    puts $mainId $headers
     close $mainId
+
+    puts $containerId "};
+#endif"
     close $containerId
 
+    regsub {<HEADERS>} $vpi_user $headers vpi_user
+    regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body vpi_user
+    regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
+    puts $vpi_userId $vpi_user
+    close $vpi_userId
     
 }
 
@@ -229,7 +287,7 @@ set models [parse_model $model_file]
 
 debug_models $models
 
-generate_headers $models
+generate_code $models
 
 
 

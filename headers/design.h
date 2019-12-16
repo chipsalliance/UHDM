@@ -16,7 +16,7 @@
 
 /*
  * File:   design.h
- * Author: alain
+ * Author: 
  *
  * Created on December 14, 2019, 10:03 PM
  */
@@ -26,10 +26,10 @@
 
 namespace UHDM {
 
-  class design {
+  class design : public base_class {
   public:
-    design(){};
-    virtual ~design();
+    design(){}
+    virtual ~design(){}
     
     const VectorOfmoduleRef get_allModules() { return m_allModules; }
 

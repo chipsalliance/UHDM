@@ -15,39 +15,29 @@
  */
 
 /*
- * File:   module.h
+ * File:   vpi_user.cpp
  * Author: 
  *
  * Created on December 14, 2019, 10:03 PM
  */
+#include <string>
+#include <vector>
+#include "include/vpi_user.h"
+#include "include/vpi_uhdm.h"
+#include "headers/containers.h"
 
-#ifndef MODULE_H
-#define MODULE_H
+<HEADERS>
 
-namespace UHDM {
+using namespace UHDM;
 
-  class module : public base_class {
-  public:
-    module(){}
-    virtual ~module(){}
-    
-    bool get_vpiTopModule() { return m_vpiTopModule; }
+vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
+  uhdm_handle* handle = (uhdm_handle*) refHandle;
+  base_class*  object = (base_class*) handle->m_object;
+  <VPI_ITERATE_BODY>
+}
 
-    void set_vpiTopModule(bool data) { m_vpiTopModule = data; }
-
-    int get_vpiDefDecayTime() { return m_vpiDefDecayTime; }
-
-    void set_vpiDefDecayTime(int data) { m_vpiDefDecayTime = data; }
-
-  private:
-    
-    bool m_vpiTopModule;
-
-    int m_vpiDefDecayTime;
-
-  };
-
-};
-
-#endif
-
+vpiHandle vpi_scan (vpiHandle iterator) {
+  uhdm_handle* handle = (uhdm_handle*) iterator;
+  void* itr = handle->m_object;
+  <VPI_SCAN_BODY>
+}

@@ -16,7 +16,7 @@
 
 /*
  * File:   <CLASSNAME>.h
- * Author: alain
+ * Author: 
  *
  * Created on December 14, 2019, 10:03 PM
  */
@@ -26,10 +26,10 @@
 
 namespace UHDM {
 
-  class <CLASSNAME> {
+  class <CLASSNAME> : public base_class {
   public:
-    <CLASSNAME>(){};
-    virtual ~<CLASSNAME>();
+    <CLASSNAME>(){}
+    virtual ~<CLASSNAME>(){}
     <METHODS>
   private:
     <MEMBERS>
