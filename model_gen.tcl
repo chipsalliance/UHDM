@@ -137,8 +137,8 @@ proc printMethods { type vpi card } {
 	append methods "\n    $type get_${vpi}() { return m_$vpi; }\n"
 	append methods "\n    void set_${vpi}($type data) { m_$vpi = data; }\n"
     } elseif {$card == "any"} {
-	append methods "\n    const VectorOf${type}Ref get_${vpi}() { return m_$vpi; }\n"
-	append methods "\n    void set_${vpi}(VectorOf${type}Ref data) { m_$vpi = data; }\n"	
+	append methods "\n    const VectorOf${type}Ptr get_${vpi}() { return m_$vpi; }\n"
+	append methods "\n    void set_${vpi}(VectorOf${type}Ptr data) { m_$vpi = data; }\n"	
     }
     return $methods
 }
@@ -147,7 +147,7 @@ proc printMembers { type vpi card } {
     if {$card == "1"} {
 	append members "\n    $type m_$vpi;\n"
     } elseif {$card == "any"} {
-	append members "\n    VectorOf${type} m_$vpi;\n"	
+	append members "\n    VectorOf${type}Ptr m_$vpi;\n"	
     }
 }
 
@@ -158,6 +158,7 @@ proc printTypeDefs { containerId type card } {
 	    set CONTAINER($type) 1
 	    puts $containerId "class $type;"
 	    puts $containerId "typedef std::vector<${type}*> VectorOf${type};"
+	    puts $containerId "typedef std::vector<${type}*>* VectorOf${type}Ptr;"
 	    puts $containerId "typedef std::vector<${type}*>& VectorOf${type}Ref;"
 	    puts $containerId "typedef std::vector<${type}*>::iterator VectorOf${type}Itr;"	   
 	}
@@ -235,16 +236,19 @@ namespace UHDM {"
 			append vpi_iterate_body "\n\    
 if (handle->m_type == ${classname}ID) {\                
   if (type == $name) {\n\
-    return (unsigned int*) new uhdm_handle($name, \n\
-            new VectorOf${type}Itr((($classname*)(handle))->get_${name}().begin()));\n\
+    return (unsigned int*) new uhdm_handle($name, (($classname*)(object))->get_${name}());\n\
 		      }\n\
 				       }\n"
 
-                      append vpi_scan_body "\n\
-  if (handle->m_type == $name) {\
-    VectorOf${type}Itr* the_itr = (VectorOf${type}Itr*)itr;
-				}"
-
+                     append vpi_scan_body "\n
+  if (handle->m_type == $name) {\n\
+    VectorOf${type}Ptr the_vec = (VectorOf${type}Ptr)vect;\n\
+      if (handle->m_index < the_vec->size()) {\n\
+          uhdm_handle* h = new uhdm_handle(${type}ID, the_vec->at(handle->m_index));\n\
+	  handle->m_index++;\n\
+          return (vpiHandle) h;\n\
+      }\n\
+  }"
 		    }
 		}
 	    }

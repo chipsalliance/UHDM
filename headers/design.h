@@ -31,19 +31,19 @@ namespace UHDM {
     design(){}
     virtual ~design(){}
     
-    const VectorOfmoduleRef get_allModules() { return m_allModules; }
+    const VectorOfmodulePtr get_allModules() { return m_allModules; }
 
-    void set_allModules(VectorOfmoduleRef data) { m_allModules = data; }
+    void set_allModules(VectorOfmodulePtr data) { m_allModules = data; }
 
-    const VectorOfmoduleRef get_topModules() { return m_topModules; }
+    const VectorOfmodulePtr get_topModules() { return m_topModules; }
 
-    void set_topModules(VectorOfmoduleRef data) { m_topModules = data; }
+    void set_topModules(VectorOfmodulePtr data) { m_topModules = data; }
 
   private:
     
-    VectorOfmodule m_allModules;
+    VectorOfmodulePtr m_allModules;
 
-    VectorOfmodule m_topModules;
+    VectorOfmodulePtr m_topModules;
 
   };
 

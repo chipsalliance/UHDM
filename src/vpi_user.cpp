@@ -22,6 +22,7 @@
  */
 #include <string>
 #include <vector>
+#include <iostream>
 #include "include/vpi_user.h"
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
@@ -39,16 +40,14 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
 if (handle->m_type == designID) {                
   if (type == allModules) {
- return (unsigned int*) new uhdm_handle(allModules, 
- new VectorOfmoduleItr(((design*)(handle))->get_allModules().begin()));
+ return (unsigned int*) new uhdm_handle(allModules, ((design*)(object))->get_allModules());
  }
  }
 
     
 if (handle->m_type == designID) {                
   if (type == topModules) {
- return (unsigned int*) new uhdm_handle(topModules, 
- new VectorOfmoduleItr(((design*)(handle))->get_topModules().begin()));
+ return (unsigned int*) new uhdm_handle(topModules, ((design*)(object))->get_topModules());
  }
  }
 
@@ -56,11 +55,26 @@ if (handle->m_type == designID) {
 
 vpiHandle vpi_scan (vpiHandle iterator) {
   uhdm_handle* handle = (uhdm_handle*) iterator;
-  void* itr = handle->m_object;
+  void* vect = handle->m_object;
   
- if (handle->m_type == allModules) { VectorOfmoduleItr* the_itr = (VectorOfmoduleItr*)itr;
-				}
- if (handle->m_type == topModules) { VectorOfmoduleItr* the_itr = (VectorOfmoduleItr*)itr;
-				}
+
+  if (handle->m_type == allModules) {
+ VectorOfmodulePtr the_vec = (VectorOfmodulePtr)vect;
+ if (handle->m_index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->m_index));
+ handle->m_index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->m_type == topModules) {
+ VectorOfmodulePtr the_vec = (VectorOfmodulePtr)vect;
+ if (handle->m_index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->m_index));
+ handle->m_index++;
+ return (vpiHandle) h;
+ }
+ }
+  return 0;
 }
 

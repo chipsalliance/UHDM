@@ -22,6 +22,7 @@
  */
 #include <string>
 #include <vector>
+#include <iostream>
 #include "include/vpi_user.h"
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
@@ -38,6 +39,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
 vpiHandle vpi_scan (vpiHandle iterator) {
   uhdm_handle* handle = (uhdm_handle*) iterator;
-  void* itr = handle->m_object;
+  void* vect = handle->m_object;
   <VPI_SCAN_BODY>
+  return 0;
 }
