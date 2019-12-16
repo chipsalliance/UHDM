@@ -236,7 +236,7 @@ namespace UHDM {"
 			append vpi_iterate_body "\n\    
 if (handle->m_type == ${classname}ID) {\                
   if (type == $name) {\n\
-    return (unsigned int*) new uhdm_handle($name, (($classname*)(object))->get_${name}());\n\
+    return (vpiHandle) new uhdm_handle($name, (($classname*)(object))->get_${name}());\n\
 		      }\n\
 				       }\n"
 
