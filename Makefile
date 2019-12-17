@@ -1,3 +1,4 @@
+CXXFLAGS=-Wall -Wextra -W -Wno-unused-parameter
 GENERATED_HEADERS=headers/module.h headers/design.h
 GENERATED_SOURCE=src/vpi_user.cpp
 
@@ -9,7 +10,7 @@ $(GENERATED_SOURCE): model_gen.tcl model/uhdm.yaml
 	tclsh ./model_gen.tcl model/uhdm.yaml
 
 unittest: src/vpi_user.cpp
-	$(CXX) -g src/main.cpp src/vpi_user.cpp -I. -o $@
+	$(CXX) $(CXXFLAGS) -g src/main.cpp src/vpi_user.cpp -I. -o $@
 
 run-test: unittest
 	./unittest
