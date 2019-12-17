@@ -37,18 +37,18 @@ using namespace UHDM;
 
 vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   uhdm_handle* handle = (uhdm_handle*) refHandle;
-  base_class*  object = (base_class*) handle->m_object;
+  BaseClass*  object = (BaseClass*) handle->object;
   
     
-if (handle->m_type == designID) {                
-  if (type == allModules) {
+if (handle->type == designID) {
+ if (type == allModules) {
  return (vpiHandle) new uhdm_handle(allModules, ((design*)(object))->get_allModules());
  }
  }
 
     
-if (handle->m_type == designID) {                
-  if (type == topModules) {
+if (handle->type == designID) {
+ if (type == topModules) {
  return (vpiHandle) new uhdm_handle(topModules, ((design*)(object))->get_topModules());
  }
  }
@@ -57,23 +57,23 @@ if (handle->m_type == designID) {
 
 vpiHandle vpi_scan (vpiHandle iterator) {
   uhdm_handle* handle = (uhdm_handle*) iterator;
-  void* vect = handle->m_object;
+  void* vect = handle->object;
   
 
-  if (handle->m_type == allModules) {
+  if (handle->type == allModules) {
  VectorOfmodulePtr the_vec = (VectorOfmodulePtr)vect;
- if (handle->m_index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->m_index));
- handle->m_index++;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->index));
+ handle->index++;
  return (vpiHandle) h;
  }
  }
 
-  if (handle->m_type == topModules) {
+  if (handle->type == topModules) {
  VectorOfmodulePtr the_vec = (VectorOfmodulePtr)vect;
- if (handle->m_index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->m_index));
- handle->m_index++;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->index));
+ handle->index++;
  return (vpiHandle) h;
  }
  }

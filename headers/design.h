@@ -28,10 +28,10 @@
 
 namespace UHDM {
 
-  class design : public base_class {
+  class design : public BaseClass {
   public:
     design(){}
-    virtual ~design(){}
+    ~design() final {}
     
     const VectorOfmodulePtr get_allModules() { return m_allModules; }
 
