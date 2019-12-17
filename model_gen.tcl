@@ -165,6 +165,35 @@ proc printTypeDefs { containerId type card } {
     }
 }
 
+proc printIterateBody { name classname card } {
+    set vpi_iterate_body ""
+    if {$card == "any"} {
+	append vpi_iterate_body "\n\    
+if (handle->type == ${classname}ID) {\n\
+  if (type == $name) {\n\
+     return (vpiHandle) new uhdm_handle($name, (($classname*)(object))->get_${name}());\n\
+  }\n\
+}\n"
+    return $vpi_iterate_body
+   }
+}
+
+proc printScanBody { name type card } {
+    set vpi_scan_body ""
+    if {$card == "any"} {
+	append vpi_scan_body "\n
+  if (handle->type == $name) {\n\
+    VectorOf${type}Ptr the_vec = (VectorOf${type}Ptr)vect;\n\
+      if (handle->index < the_vec->size()) {\n\
+          uhdm_handle* h = new uhdm_handle(${type}ID, the_vec->at(handle->index));\n\
+	  handle->index++;\n\
+          return (vpiHandle) h;\n\
+      }\n\
+  }"
+    }
+    return $vpi_scan_body
+}
+
 proc generate_code { models } {
     global ID
     puts "=========="
@@ -235,25 +264,8 @@ namespace UHDM {"
 		    puts $mainId "#define $name $id"
 		    append methods [printMethods $type $name $card] 
 		    append members [printMembers $type $name $card]
-		    
-		    if {$card == "any"} {
-			append vpi_iterate_body "\n\    
-if (handle->type == ${classname}ID) {\n\
-  if (type == $name) {\n\
-    return (vpiHandle) new uhdm_handle($name, (($classname*)(object))->get_${name}());\n\
-		      }\n\
-				       }\n"
-
-                     append vpi_scan_body "\n
-  if (handle->type == $name) {\n\
-    VectorOf${type}Ptr the_vec = (VectorOf${type}Ptr)vect;\n\
-      if (handle->index < the_vec->size()) {\n\
-          uhdm_handle* h = new uhdm_handle(${type}ID, the_vec->at(handle->index));\n\
-	  handle->index++;\n\
-          return (vpiHandle) h;\n\
-      }\n\
-  }"
-		    }
+		    append vpi_iterate_body [printIterateBody $name $classname $card]
+                    append vpi_scan_body [printScanBody $name $type $card] 		    
 		}
 	    }
 	}
