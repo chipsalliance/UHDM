@@ -134,20 +134,20 @@ proc parse_model { file } {
 
 proc printMethods { type vpi card } {
     if {$card == "1"} {
-	append methods "\n    $type get_${vpi}() { return m_$vpi; }\n"
-	append methods "\n    void set_${vpi}($type data) { m_$vpi = data; }\n"
+	append methods "\n    $type get_${vpi}() const { return ${vpi}_; }\n"
+	append methods "\n    void set_${vpi}($type data) { ${vpi}_ = data; }\n"
     } elseif {$card == "any"} {
-	append methods "\n    const VectorOf${type}Ptr get_${vpi}() { return m_$vpi; }\n"
-	append methods "\n    void set_${vpi}(VectorOf${type}Ptr data) { m_$vpi = data; }\n"	
+	append methods "\n    const VectorOf${type}Ptr get_${vpi}() const { return ${vpi}_; }\n"
+	append methods "\n    void set_${vpi}(VectorOf${type}Ptr data) { ${vpi}_ = data; }\n"
     }
     return $methods
 }
 
 proc printMembers { type vpi card } {
     if {$card == "1"} {
-	append members "\n    $type m_$vpi;\n"
+	append members "\n    $type ${vpi}_;\n"
     } elseif {$card == "any"} {
-	append members "\n    VectorOf${type}Ptr m_$vpi;\n"	
+	append members "\n    VectorOf${type}Ptr ${vpi}_;\n"
     }
 }
 
@@ -160,7 +160,7 @@ proc printTypeDefs { containerId type card } {
 	    puts $containerId "typedef std::vector<${type}*> VectorOf${type};"
 	    puts $containerId "typedef std::vector<${type}*>* VectorOf${type}Ptr;"
 	    puts $containerId "typedef std::vector<${type}*>& VectorOf${type}Ref;"
-	    puts $containerId "typedef std::vector<${type}*>::iterator VectorOf${type}Itr;"	   
+	    puts $containerId "typedef std::vector<${type}*>::iterator VectorOf${type}Itr;"
 	}
     }
 }
