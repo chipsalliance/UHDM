@@ -15,6 +15,8 @@ int main (int argc, char** argv) {
   vpiHandle modItr = vpi_iterate(allModules,top); 
   while (vpiHandle obj_h = vpi_scan(modItr) ) {
     std::cout << obj_h << std::endl;
+    vpi_release_handle (obj_h);
   }
+  vpi_release_handle(modItr);
   return 0;
 };

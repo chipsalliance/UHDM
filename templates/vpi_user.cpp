@@ -33,15 +33,136 @@
 
 using namespace UHDM;
 
+vpiHandle vpi_handle_by_name (PLI_BYTE8    *name,
+                              vpiHandle    scope) {
+  return 0;
+}
+
+vpiHandle vpi_handle_by_index (vpiHandle object,
+                                PLI_INT32    indx) {
+  return 0;
+}
+
+/* for traversing relationships */
+
+vpiHandle vpi_handle (PLI_INT32 type,
+                      vpiHandle   refHandle) {
+  return 0;
+}
+
+vpiHandle vpi_handle_multi (PLI_INT32 type,
+                            vpiHandle   refHandle1,
+                            vpiHandle   refHandle2,
+                            ... ) {
+  return 0;
+}
+
 vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   uhdm_handle* handle = (uhdm_handle*) refHandle;
   BaseClass*  object = (BaseClass*) handle->object;
   <VPI_ITERATE_BODY>
+  return 0;   
 }
 
 vpiHandle vpi_scan (vpiHandle iterator) {
   uhdm_handle* handle = (uhdm_handle*) iterator;
   void* vect = handle->object;
   <VPI_SCAN_BODY>
+  return 0;
+}
+
+PLI_INT32 vpi_free_object (vpiHandle object) {
+  return vpi_release_handle(object);
+}
+
+PLI_INT32 vpi_release_handle (vpiHandle object) {
+  delete object;
+  return 0;
+}
+
+/* for processing properties */
+
+PLI_INT32 vpi_get (PLI_INT32   property,
+                   vpiHandle   object) {
+  return 0;
+}
+
+PLI_INT64 vpi_get64 (PLI_INT32 property,
+                     vpiHandle   object) {
+  return 0;
+}
+
+PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
+                        vpiHandle   object) {
+  return 0;
+}
+
+
+/* delay processing */
+
+void vpi_get_delays (vpiHandle object,
+                     p_vpi_delay delay_p) {
+}
+
+void vpi_put_delays (vpiHandle object,
+                     p_vpi_delay delay_p) {
+}
+
+/* value processing */
+
+void vpi_get_value (vpiHandle expr,
+                    p_vpi_value value_p) {
+}
+
+vpiHandle vpi_put_value (vpiHandle object,
+                         p_vpi_value value_p,
+                         p_vpi_time time_p,
+                         PLI_INT32 flags) {
+  return 0;
+}
+
+void vpi_get_value_array (vpiHandle object,
+                          p_vpi_arrayvalue arrayvalue_p,
+                          PLI_INT32 *index_p,
+                          PLI_UINT32 num) {
+}
+
+void vpi_put_value_array (vpiHandle object,
+                          p_vpi_arrayvalue arrayvalue_p,
+                          PLI_INT32 *index_p,
+                          PLI_UINT32 num) {
+}
+
+/* time processing */
+
+void vpi_get_time(vpiHandle object,
+                  p_vpi_time time_p) {
+}
+
+
+PLI_INT32 vpi_get_data (PLI_INT32 id,
+                        PLI_BYTE8 *dataLoc,
+			PLI_INT32 numOfBytes) {
+  return 0;
+}
+
+PLI_INT32 vpi_put_data (PLI_INT32 id,
+                        PLI_BYTE8 *dataLoc,
+			PLI_INT32 numOfBytes) {
+  return 0;
+}
+
+void *vpi_get_userdata (vpiHandle obj) {
+  return 0;
+}
+
+PLI_INT32 vpi_put_userdata (vpiHandle obj,
+                            void *userdata) {
+  return 0;
+}
+
+vpiHandle vpi_handle_by_multi_index (vpiHandle obj,
+                                     PLI_INT32 num_index,
+                                     PLI_INT32 *index_array) {
   return 0;
 }
