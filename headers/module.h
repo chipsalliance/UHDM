@@ -33,19 +33,19 @@ namespace UHDM {
     module(){}
     virtual ~module(){}
     
-    bool get_vpiTopModule() { return m_vpiTopModule; }
+    bool get_vpiTopModule() const { return vpiTopModule_; }
 
-    void set_vpiTopModule(bool data) { m_vpiTopModule = data; }
+    void set_vpiTopModule(bool data) { vpiTopModule_ = data; }
 
-    int get_vpiDefDecayTime() { return m_vpiDefDecayTime; }
+    int get_vpiDefDecayTime() const { return vpiDefDecayTime_; }
 
-    void set_vpiDefDecayTime(int data) { m_vpiDefDecayTime = data; }
+    void set_vpiDefDecayTime(int data) { vpiDefDecayTime_ = data; }
 
   private:
     
-    bool m_vpiTopModule;
+    bool vpiTopModule_;
 
-    int m_vpiDefDecayTime;
+    int vpiDefDecayTime_;
 
   };
 
