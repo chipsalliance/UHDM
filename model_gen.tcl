@@ -53,6 +53,19 @@ proc pdict { d {i 0} {p "  "} {s " -> "} } {
     return
 }
 
+proc parse_vpi_user_defines { } {
+    global ID
+    set fid [open "include/vpi_user.h"]
+    set content [read $fid]
+    set lines [split $content "\n"]
+    foreach line $lines {
+	if [regexp {^#define[ ]+(vpi[a-zA-Z0-9]*)[ ]+([0-9]+)} $line tmp name value] {
+	    set ID($name) $value
+	}
+    }
+    close $fid
+}
+
 proc parse_model { file } {
     global ID
     set models {}
@@ -66,6 +79,8 @@ proc parse_model { file } {
     set modelId 0
     set obj_name ""
     set obj_type ""
+    set vpiType ""
+    set vpiObj ""
     foreach line $lines {
 	set spaces ""
 	regexp {^([ ]*)} $line tmp spaces
@@ -75,6 +90,8 @@ proc parse_model { file } {
 	set INDENT(curr) $indent
 	
 	if [regexp {\- obj_def: (.*)} $line tmp name] {
+	    set vpiType ""
+	    set vpiObj  ""
 	    global obj_def$modelId
 	    if [info exist ID($name)] {
 		set id $ID($name)
@@ -114,10 +131,15 @@ proc parse_model { file } {
 	if [regexp {vpi: (.*)} $line tmp vpiType] {
 	    dict set $OBJ(curr) $obj_type $obj_name vpi $vpiType	    
 	}
+	if [regexp {vpi_obj: (.*)} $line tmp vpiObj] {
+	    dict set $OBJ(curr) $obj_type $obj_name vpi $vpiObj	    
+	}
 	if [regexp {card: (.*)} $line tmp card] {
 	    dict set $OBJ(curr) $obj_type $obj_name card $card
 	    if [info exist ID($name)] {
 		set id $ID($name)
+	    } elseif [info exist ID($vpiType)] {
+		set id $ID($vpiType)
 	    } else {
 		set id $objectId
 		incr objectId
@@ -240,7 +262,6 @@ namespace UHDM {"
 	puts $mainId "#define ${classname}ID $ID($classname)"
 	
 	dict for {key val} $data {
-	   # puts "$key $val"
 	    if {$key == "properties"} {
 		dict for {prop conf} $val {
 		    set name [dict get $conf name]
@@ -250,6 +271,7 @@ namespace UHDM {"
 		    printTypeDefs $containerId $type $card
 		    append methods [printMethods $type $vpi $card] 
 		    append members [printMembers $type $vpi $card]
+                    puts "PROP: $prop $conf"
 		}
 	    }
 	    if {$key == "class"} {
@@ -276,16 +298,19 @@ namespace UHDM {"
 	close $oid
 	
     }
-    
+
+    # uhdm.h
     puts $mainId "#include \"headers/containers.h\""
     puts $mainId $headers
     puts $mainId "#endif" 
     close $mainId
 
+    # containers.h
     puts $containerId "};
 #endif"
     close $containerId
 
+    # vpi_user.cpp
     regsub {<HEADERS>} $vpi_user $headers vpi_user
     regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body vpi_user
     regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
@@ -303,6 +328,7 @@ proc debug_models { models } {
     }
 }
 
+parse_vpi_user_defines
 
 set models [parse_model $model_file]
 

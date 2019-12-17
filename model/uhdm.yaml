@@ -40,9 +40,9 @@
 - obj_def: design
   - class: allModules
     type: module
-    vpi: vpiModule
+    vpi_obj: vpiModule
     card: any
  - class: topModules
     type: module
-    vpi: vpiModule
+    vpi_obj: vpiModule
     card: any
