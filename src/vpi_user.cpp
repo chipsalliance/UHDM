@@ -97,7 +97,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   
 
   if (handle->type == allModules) {
- VectorOfmodulePtr the_vec = (VectorOfmodulePtr)vect;
+ VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->index));
  handle->index++;
@@ -106,7 +106,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
 
   if (handle->type == topModules) {
- VectorOfmodulePtr the_vec = (VectorOfmodulePtr)vect;
+ VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->index));
  handle->index++;
