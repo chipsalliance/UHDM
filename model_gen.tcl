@@ -173,11 +173,15 @@ proc generate_code { models } {
     set fid [open "templates/class_header.h"]
     set template_content [read $fid]
     close $fid
+    
     set mainId [open "headers/uhdm.h" "w"]
     puts $mainId "#include <string>"
     puts $mainId "#include <vector>"
+    puts $mainId "#ifndef UHDM_H
+#define UHDM_H"
     puts $mainId "#include \"include/vpi_user.h\""
     puts $mainId "#include \"include/vpi_uhdm.h\""
+    
     set containerId [open "headers/containers.h" "w"]
     puts $containerId "#ifndef CONTAINER_H
 #define CONTAINER_H
@@ -204,7 +208,7 @@ namespace UHDM {"
 	regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
 	set methods ""
 	set members ""
-	puts $containerId "#define ${classname}ID $ID($classname)"
+	puts $mainId "#define ${classname}ID $ID($classname)"
 	
 	dict for {key val} $data {
 	   # puts "$key $val"
@@ -228,7 +232,7 @@ namespace UHDM {"
 		    set card [dict get $content card]
 		    set id   [dict get $content id]
 		    printTypeDefs $containerId $type $card
-		    puts $containerId "#define $name $id"
+		    puts $mainId "#define $name $id"
 		    append methods [printMethods $type $name $card] 
 		    append members [printMembers $type $name $card]
 		    
@@ -263,6 +267,7 @@ if (handle->type == ${classname}ID) {\n\
     
     puts $mainId "#include \"headers/containers.h\""
     puts $mainId $headers
+    puts $mainId "#endif" 
     close $mainId
 
     puts $containerId "};

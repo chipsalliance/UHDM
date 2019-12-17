@@ -28,6 +28,7 @@
 #include "include/vpi_user.h"
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
+#include "headers/uhdm.h"
 
 <HEADERS>
 

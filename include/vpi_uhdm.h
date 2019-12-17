@@ -1,4 +1,8 @@
 // -*- c++ -*-
+
+#ifndef VPI_UHDM_H
+#define VPI_UHDM_H
+
 namespace UHDM {
 class BaseClass {
 public:
@@ -16,3 +20,5 @@ struct uhdm_handle {
   void* object;
   unsigned int index;
 };
+
+#endif
