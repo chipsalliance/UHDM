@@ -162,8 +162,8 @@ proc printMethods { type vpi card } {
 	append methods "\n    $type get_${vpi}() const { return ${vpi}_; }\n"
 	append methods "\n    void set_${vpi}($type data) { ${vpi}_ = data; }\n"
     } elseif {$card == "any"} {
-	append methods "\n    VectorOf${type}Ptr get_${vpi}() const { return ${vpi}_; }\n"
-	append methods "\n    void set_${vpi}(VectorOf${type}Ptr data) { ${vpi}_ = data; }\n"
+	append methods "\n    VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
+	append methods "\n    void set_${vpi}(VectorOf${type}* data) { ${vpi}_ = data; }\n"
     }
     return $methods
 }
@@ -175,7 +175,7 @@ proc printMembers { type vpi card } {
     if {$card == "1"} {
 	append members "\n    $type ${vpi}_;\n"
     } elseif {$card == "any"} {
-	append members "\n    VectorOf${type}Ptr ${vpi}_;\n"
+	append members "\n    VectorOf${type}* ${vpi}_;\n"
     }
 }
 
@@ -186,8 +186,6 @@ proc printTypeDefs { containerId type card } {
 	    set CONTAINER($type) 1
 	    puts $containerId "class $type;"
 	    puts $containerId "typedef std::vector<${type}*> VectorOf${type};"
-	    puts $containerId "typedef std::vector<${type}*>* VectorOf${type}Ptr;"
-	    puts $containerId "typedef std::vector<${type}*>& VectorOf${type}Ref;"
 	    puts $containerId "typedef std::vector<${type}*>::iterator VectorOf${type}Itr;"
 	}
     }
@@ -239,7 +237,7 @@ proc printScanBody { name type card } {
     if {$card == "any"} {
 	append vpi_scan_body "\n
   if (handle->type == $name) {\n\
-    VectorOf${type}Ptr the_vec = (VectorOf${type}Ptr)vect;\n\
+    VectorOf${type}* the_vec = (VectorOf${type}*)vect;\n\
       if (handle->index < the_vec->size()) {\n\
           uhdm_handle* h = new uhdm_handle(${type}ID, the_vec->at(handle->index));\n\
 	  handle->index++;\n\

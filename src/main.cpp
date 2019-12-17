@@ -11,7 +11,7 @@ int main (int argc, char** argv) {
   m1->set_vpiName("M1");
   module* m2 = new module();
   m2->set_vpiName("M2");
-  VectorOfmodulePtr v1 = new VectorOfmodule;
+  VectorOfmodule* v1 = new VectorOfmodule();
   v1->push_back(m1);
   v1->push_back(m2);
   d->set_allModules(v1);
