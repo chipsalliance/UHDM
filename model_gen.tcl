@@ -162,7 +162,7 @@ proc printMethods { type vpi card } {
 	append methods "\n    $type get_${vpi}() const { return ${vpi}_; }\n"
 	append methods "\n    void set_${vpi}($type data) { ${vpi}_ = data; }\n"
     } elseif {$card == "any"} {
-	append methods "\n    VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
+	append methods "\n    const VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
 	append methods "\n    void set_${vpi}(VectorOf${type}* data) { ${vpi}_ = data; }\n"
     }
     return $methods

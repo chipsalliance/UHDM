@@ -71,8 +71,8 @@ vpiHandle vpi_handle_multi (PLI_INT32 type,
 }
 
 vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
-  uhdm_handle* handle = (uhdm_handle*) refHandle;
-  BaseClass*  object = (BaseClass*) handle->object;
+  const uhdm_handle* const handle = (uhdm_handle*) refHandle;
+  const BaseClass*  object = (BaseClass*) handle->object;
   
     
  if (handle->type == designID) {
@@ -92,8 +92,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 }
 
 vpiHandle vpi_scan (vpiHandle iterator) {
-  uhdm_handle* handle = (uhdm_handle*) iterator;
-  void* vect = handle->object;
+  uhdm_handle* const handle = (uhdm_handle*) iterator;
+  const void* const vect = handle->object;
   
 
   if (handle->type == allModules) {
