@@ -28,10 +28,10 @@
 
 namespace UHDM {
 
-  class module : public base_class {
+  class module : public BaseClass {
   public:
     module(){}
-    virtual ~module(){}
+    ~module() final {}
     
     bool get_vpiTopModule() const { return vpiTopModule_; }
 

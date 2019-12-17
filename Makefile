@@ -6,7 +6,7 @@ all: generate-api run-test
 
 generate-api: $(GENERATED_SOURCE)
 
-$(GENERATED_SOURCE): model_gen.tcl model/uhdm.yaml
+$(GENERATED_SOURCE): model_gen.tcl model/uhdm.yaml templates/vpi_user.cpp
 	tclsh ./model_gen.tcl model/uhdm.yaml
 
 unittest: src/vpi_user.cpp

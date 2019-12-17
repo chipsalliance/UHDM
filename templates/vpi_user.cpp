@@ -35,13 +35,13 @@ using namespace UHDM;
 
 vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   uhdm_handle* handle = (uhdm_handle*) refHandle;
-  base_class*  object = (base_class*) handle->m_object;
+  BaseClass*  object = (BaseClass*) handle->object;
   <VPI_ITERATE_BODY>
 }
 
 vpiHandle vpi_scan (vpiHandle iterator) {
   uhdm_handle* handle = (uhdm_handle*) iterator;
-  void* vect = handle->m_object;
+  void* vect = handle->object;
   <VPI_SCAN_BODY>
   return 0;
 }

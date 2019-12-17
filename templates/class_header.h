@@ -28,10 +28,10 @@
 
 namespace UHDM {
 
-  class <CLASSNAME> : public base_class {
+  class <CLASSNAME> : public BaseClass {
   public:
     <CLASSNAME>(){}
-    virtual ~<CLASSNAME>(){}
+    ~<CLASSNAME>() final {}
     <METHODS>
   private:
     <MEMBERS>

@@ -234,18 +234,18 @@ namespace UHDM {"
 		    
 		    if {$card == "any"} {
 			append vpi_iterate_body "\n\    
-if (handle->m_type == ${classname}ID) {\                
+if (handle->type == ${classname}ID) {\n\
   if (type == $name) {\n\
     return (vpiHandle) new uhdm_handle($name, (($classname*)(object))->get_${name}());\n\
 		      }\n\
 				       }\n"
 
                      append vpi_scan_body "\n
-  if (handle->m_type == $name) {\n\
+  if (handle->type == $name) {\n\
     VectorOf${type}Ptr the_vec = (VectorOf${type}Ptr)vect;\n\
-      if (handle->m_index < the_vec->size()) {\n\
-          uhdm_handle* h = new uhdm_handle(${type}ID, the_vec->at(handle->m_index));\n\
-	  handle->m_index++;\n\
+      if (handle->index < the_vec->size()) {\n\
+          uhdm_handle* h = new uhdm_handle(${type}ID, the_vec->at(handle->index));\n\
+	  handle->index++;\n\
           return (vpiHandle) h;\n\
       }\n\
   }"
