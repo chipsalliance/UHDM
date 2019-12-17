@@ -159,7 +159,7 @@ proc printMethods { type vpi card } {
 	append methods "\n    $type get_${vpi}() const { return ${vpi}_; }\n"
 	append methods "\n    void set_${vpi}($type data) { ${vpi}_ = data; }\n"
     } elseif {$card == "any"} {
-	append methods "\n    const VectorOf${type}Ptr get_${vpi}() const { return ${vpi}_; }\n"
+	append methods "\n    VectorOf${type}Ptr get_${vpi}() const { return ${vpi}_; }\n"
 	append methods "\n    void set_${vpi}(VectorOf${type}Ptr data) { ${vpi}_ = data; }\n"
     }
     return $methods
@@ -191,13 +191,27 @@ proc printIterateBody { name classname card } {
     set vpi_iterate_body ""
     if {$card == "any"} {
 	append vpi_iterate_body "\n\    
-if (handle->type == ${classname}ID) {\n\
+ if (handle->type == ${classname}ID) {\n\
   if (type == $name) {\n\
      return (vpiHandle) new uhdm_handle($name, (($classname*)(object))->get_${name}());\n\
   }\n\
 }\n"
     return $vpi_iterate_body
    }
+}
+
+proc printGetBody {classname type vpi card} {
+    set vpi_get_body ""
+    if {$card == 1} {
+	append vpi_get_body "\n\
+ if (handle->type == ${classname}ID) {
+     if (property == $vpi) {
+       return (($classname*)(obj))->get_${vpi}();
+     } 
+}
+"
+    }
+    return $vpi_get_body
 }
 
 proc printScanBody { name type card } {
@@ -244,6 +258,8 @@ namespace UHDM {"
     set vpi_userId [open "src/vpi_user.cpp" "w"]
     set vpi_iterate_body ""
     set vpi_scan_body ""
+    set vpi_handle_body ""
+    set vpi_get_body ""
     set headers ""
     foreach model $models {
 	global $model
@@ -269,9 +285,10 @@ namespace UHDM {"
 		    set type [dict get $conf type]
 		    set card [dict get $conf card]
 		    printTypeDefs $containerId $type $card
+                    # properties are already defined in vpi_user.h, no need to redefine them
 		    append methods [printMethods $type $vpi $card] 
 		    append members [printMembers $type $vpi $card]
-                    puts "PROP: $prop $conf"
+                    append vpi_get_body [printGetBody $classname $type $vpi $card]
 		}
 	    }
 	    if {$key == "class"} {
@@ -283,6 +300,7 @@ namespace UHDM {"
 		    set card [dict get $content card]
 		    set id   [dict get $content id]
 		    printTypeDefs $containerId $type $card
+                    # define access properties (allModules...)
 		    puts $mainId "#define $name $id"
 		    append methods [printMethods $type $name $card] 
 		    append members [printMembers $type $name $card]
@@ -314,6 +332,8 @@ namespace UHDM {"
     regsub {<HEADERS>} $vpi_user $headers vpi_user
     regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body vpi_user
     regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
+    regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body vpi_user
+    regsub {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
     puts $vpi_userId $vpi_user
     close $vpi_userId
     

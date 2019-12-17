@@ -50,6 +50,9 @@ vpiHandle vpi_handle_by_index (vpiHandle object,
 
 vpiHandle vpi_handle (PLI_INT32 type,
                       vpiHandle   refHandle) {
+  //uhdm_handle* handle = (uhdm_handle*) refHandle;
+  //BaseClass*  object = (BaseClass*) handle->object;
+  
   return 0;
 }
 
@@ -65,14 +68,14 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   BaseClass*  object = (BaseClass*) handle->object;
   
     
-if (handle->type == designID) {
+ if (handle->type == designID) {
  if (type == allModules) {
  return (vpiHandle) new uhdm_handle(allModules, ((design*)(object))->get_allModules());
  }
  }
 
     
-if (handle->type == designID) {
+ if (handle->type == designID) {
  if (type == topModules) {
  return (vpiHandle) new uhdm_handle(topModules, ((design*)(object))->get_topModules());
  }
@@ -111,7 +114,7 @@ PLI_INT32 vpi_free_object (vpiHandle object) {
 }
 
 PLI_INT32 vpi_release_handle (vpiHandle object) {
-  delete object;
+  delete (uhdm_handle*) object;
   return 0;
 }
 
@@ -119,6 +122,21 @@ PLI_INT32 vpi_release_handle (vpiHandle object) {
 
 PLI_INT32 vpi_get (PLI_INT32   property,
                    vpiHandle   object) {
+  uhdm_handle* handle = (uhdm_handle*) object;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  
+ if (handle->type == moduleID) {
+     if (property == vpiTopModule) {
+       return ((module*)(obj))->get_vpiTopModule();
+     } 
+}
+
+ if (handle->type == moduleID) {
+     if (property == vpiDefDecayTime) {
+       return ((module*)(obj))->get_vpiDefDecayTime();
+     } 
+}
+
   return 0;
 }
 

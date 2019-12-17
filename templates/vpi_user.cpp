@@ -48,6 +48,9 @@ vpiHandle vpi_handle_by_index (vpiHandle object,
 
 vpiHandle vpi_handle (PLI_INT32 type,
                       vpiHandle   refHandle) {
+  //uhdm_handle* handle = (uhdm_handle*) refHandle;
+  //BaseClass*  object = (BaseClass*) handle->object;
+  <VPI_HANDLE_BODY>
   return 0;
 }
 
@@ -77,7 +80,7 @@ PLI_INT32 vpi_free_object (vpiHandle object) {
 }
 
 PLI_INT32 vpi_release_handle (vpiHandle object) {
-  delete object;
+  delete (uhdm_handle*) object;
   return 0;
 }
 
@@ -85,6 +88,9 @@ PLI_INT32 vpi_release_handle (vpiHandle object) {
 
 PLI_INT32 vpi_get (PLI_INT32   property,
                    vpiHandle   object) {
+  uhdm_handle* handle = (uhdm_handle*) object;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  <VPI_GET_BODY>
   return 0;
 }
 

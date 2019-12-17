@@ -33,11 +33,11 @@ namespace UHDM {
     design(){}
     ~design() final {}
     
-    const VectorOfmodulePtr get_allModules() const { return allModules_; }
+    VectorOfmodulePtr get_allModules() const { return allModules_; }
 
     void set_allModules(VectorOfmodulePtr data) { allModules_ = data; }
 
-    const VectorOfmodulePtr get_topModules() const { return topModules_; }
+    VectorOfmodulePtr get_topModules() const { return topModules_; }
 
     void set_topModules(VectorOfmodulePtr data) { topModules_ = data; }
 
