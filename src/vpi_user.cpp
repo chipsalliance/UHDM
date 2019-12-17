@@ -29,7 +29,14 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 #include "headers/uhdm.h"
+#include <string.h>
 
+#include "headers/scope.h"
+#include "headers/port.h"
+#include "headers/interface.h"
+#include "headers/interface_array.h"
+#include "headers/cont_assign.h"
+#include "headers/process.h"
 #include "headers/module.h"
 #include "headers/design.h"
 
@@ -142,11 +149,35 @@ PLI_INT32 vpi_get (PLI_INT32   property,
 
 PLI_INT64 vpi_get64 (PLI_INT32 property,
                      vpiHandle   object) {
+  uhdm_handle* handle = (uhdm_handle*) object;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  
+ if (handle->type == moduleID) {
+     if (property == vpiTopModule) {
+       return ((module*)(obj))->get_vpiTopModule();
+     } 
+}
+
+ if (handle->type == moduleID) {
+     if (property == vpiDefDecayTime) {
+       return ((module*)(obj))->get_vpiDefDecayTime();
+     } 
+}
+
   return 0;
 }
 
 PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
                         vpiHandle   object) {
+   uhdm_handle* handle = (uhdm_handle*) object;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  
+ if (handle->type == moduleID) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiName().c_str());
+     } 
+}
+
   return 0;
 }
 

@@ -155,6 +155,9 @@ proc parse_model { file } {
 }
 
 proc printMethods { type vpi card } {
+    if {$type == "string"} {
+	set type "std::string"
+    }
     if {$card == "1"} {
 	append methods "\n    $type get_${vpi}() const { return ${vpi}_; }\n"
 	append methods "\n    void set_${vpi}($type data) { ${vpi}_ = data; }\n"
@@ -166,6 +169,9 @@ proc printMethods { type vpi card } {
 }
 
 proc printMembers { type vpi card } {
+    if {$type == "string"} {
+	set type "std::string"
+    }
     if {$card == "1"} {
 	append members "\n    $type ${vpi}_;\n"
     } elseif {$card == "any"} {
@@ -202,7 +208,7 @@ proc printIterateBody { name classname card } {
 
 proc printGetBody {classname type vpi card} {
     set vpi_get_body ""
-    if {$card == 1} {
+    if {($card == 1) && ($type != "string")} {
 	append vpi_get_body "\n\
  if (handle->type == ${classname}ID) {
      if (property == $vpi) {
@@ -212,6 +218,20 @@ proc printGetBody {classname type vpi card} {
 "
     }
     return $vpi_get_body
+}
+
+proc printGetStrBody {classname type vpi card} {
+    set vpi_get_str_body ""
+    if {$card == 1 && ($type == "string")} {
+	append vpi_get_str_body "\n\
+ if (handle->type == ${classname}ID) {
+     if (property == $vpi) {
+       return (PLI_BYTE8*) strdup((($classname*)(obj))->get_${vpi}().c_str());
+     } 
+}
+"
+    }
+    return $vpi_get_str_body
 }
 
 proc printScanBody { name type card } {
@@ -260,6 +280,7 @@ namespace UHDM {"
     set vpi_scan_body ""
     set vpi_handle_body ""
     set vpi_get_body ""
+    set vpi_get_str_body ""
     set headers ""
     foreach model $models {
 	global $model
@@ -289,6 +310,7 @@ namespace UHDM {"
 		    append methods [printMethods $type $vpi $card] 
 		    append members [printMembers $type $vpi $card]
                     append vpi_get_body [printGetBody $classname $type $vpi $card]
+                    append vpi_get_str_body [printGetStrBody $classname $type $vpi $card]
 		}
 	    }
 	    if {$key == "class"} {
@@ -333,7 +355,9 @@ namespace UHDM {"
     regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body vpi_user
     regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
     regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body vpi_user
-    regsub {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
+    regsub -all {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
+    regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
+
     puts $vpi_userId $vpi_user
     close $vpi_userId
     

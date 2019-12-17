@@ -29,6 +29,7 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 #include "headers/uhdm.h"
+#include <string.h>
 
 <HEADERS>
 
@@ -96,11 +97,17 @@ PLI_INT32 vpi_get (PLI_INT32   property,
 
 PLI_INT64 vpi_get64 (PLI_INT32 property,
                      vpiHandle   object) {
+  uhdm_handle* handle = (uhdm_handle*) object;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  <VPI_GET_BODY>
   return 0;
 }
 
 PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
                         vpiHandle   object) {
+   uhdm_handle* handle = (uhdm_handle*) object;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  <VPI_GET_STR_BODY>
   return 0;
 }
 

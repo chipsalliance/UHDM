@@ -14,7 +14,24 @@
 
 # Universal Hardware Data Model (UHDM) formal description
 
+- obj_def: scope
+
+- obj_def: port
+
+- obj_def: interface
+
+- obj_def: interface_array
+
+- obj_def: cont_assign
+
+- obj_def: process
+ 
 - obj_def: module
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
   - property: top_module
     name: top module
     type: bool
@@ -35,6 +52,13 @@
     card: any
   - obj_ref: interface_array
     name: interface array
+    card: any
+  - class_ref: process
+    card: any
+  - obj_ref: cont_assign
+    name: interface array
+    card: any
+  - obj_ref: module
     card: any
 
 - obj_def: design

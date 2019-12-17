@@ -33,6 +33,10 @@ namespace UHDM {
     module(){}
     ~module() final {}
     
+    std::string get_vpiName() const { return vpiName_; }
+
+    void set_vpiName(std::string data) { vpiName_ = data; }
+
     bool get_vpiTopModule() const { return vpiTopModule_; }
 
     void set_vpiTopModule(bool data) { vpiTopModule_ = data; }
@@ -43,6 +47,8 @@ namespace UHDM {
 
   private:
     
+    std::string vpiName_;
+
     bool vpiTopModule_;
 
     int vpiDefDecayTime_;
