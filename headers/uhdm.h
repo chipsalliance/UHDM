@@ -5,27 +5,25 @@
 #include "include/vpi_user.h"
 #include "include/vpi_uhdm.h"
 #define uhdmscope 511
-#define uhdmport 512
-#define uhdminterface 513
-#define uhdminterface_array 514
-#define uhdmcont_assign 515
-#define uhdmprocess 516
-#define uhdmmodule 517
-#define uhdmports 518
-#define uhdminterfaces 519
-#define uhdminterface_arrays 520
-#define uhdmcont_assigns 521
-#define uhdmmodules 522
-#define uhdmdesign 523
-#define uhdmallModules 524
-#define uhdmtopModules 525
+#define uhdminterface 512
+#define uhdminterface_array 513
+#define uhdmcont_assign 514
+#define uhdmport 515
+#define uhdmmodule 516
+#define uhdmports 517
+#define uhdminterfaces 518
+#define uhdminterface_arrays 519
+#define uhdmcont_assigns 520
+#define uhdmmodules 521
+#define uhdmdesign 522
+#define uhdmallModules 523
+#define uhdmtopModules 524
 #include "headers/containers.h"
 #include "headers/scope.h"
-#include "headers/port.h"
 #include "headers/interface.h"
 #include "headers/interface_array.h"
 #include "headers/cont_assign.h"
-#include "headers/process.h"
+#include "headers/port.h"
 #include "headers/module.h"
 #include "headers/design.h"
 

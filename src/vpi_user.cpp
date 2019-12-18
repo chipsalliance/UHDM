@@ -32,11 +32,10 @@
 #include <string.h>
 
 #include "headers/scope.h"
-#include "headers/port.h"
 #include "headers/interface.h"
 #include "headers/interface_array.h"
 #include "headers/cont_assign.h"
-#include "headers/process.h"
+#include "headers/port.h"
 #include "headers/module.h"
 #include "headers/design.h"
 
