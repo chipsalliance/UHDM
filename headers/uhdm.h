@@ -4,16 +4,21 @@
 #define UHDM_H
 #include "include/vpi_user.h"
 #include "include/vpi_uhdm.h"
-#define scopeID 500
-#define portID 501
-#define interfaceID 502
-#define interface_arrayID 503
-#define cont_assignID 504
-#define processID 505
-#define moduleID 506
-#define designID 507
-#define allModules 508
-#define topModules 509
+#define uhdmscope 511
+#define uhdmport 512
+#define uhdminterface 513
+#define uhdminterface_array 514
+#define uhdmcont_assign 515
+#define uhdmprocess 516
+#define uhdmmodule 517
+#define uhdmports 518
+#define uhdminterfaces 519
+#define uhdminterface_arrays 520
+#define uhdmcont_assigns 521
+#define uhdmmodules 522
+#define uhdmdesign 523
+#define uhdmallModules 524
+#define uhdmtopModules 525
 #include "headers/containers.h"
 #include "headers/scope.h"
 #include "headers/port.h"
