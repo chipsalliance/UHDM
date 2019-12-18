@@ -85,6 +85,42 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   
     
  if (handle->type == uhdmmodule) {
+ if (type == vpiInternalScope) {
+ if (((module*)(object))->get_scope())
+ return (vpiHandle) new uhdm_handle(uhdmscope, ((module*)(object))->get_scope());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiProcess) {
+ if (((module*)(object))->get_process())
+ return (vpiHandle) new uhdm_handle(uhdmprocess, ((module*)(object))->get_process());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiPrimitive) {
+ if (((module*)(object))->get_primitive())
+ return (vpiHandle) new uhdm_handle(uhdmprimitive, ((module*)(object))->get_primitive());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiPrimitiveArray) {
+ if (((module*)(object))->get_primitive_array())
+ return (vpiHandle) new uhdm_handle(uhdmprimitive_array, ((module*)(object))->get_primitive_array());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
  if (type == vpiPort) {
  if (((module*)(object))->get_ports())
  return (vpiHandle) new uhdm_handle(uhdmports, ((module*)(object))->get_ports());
@@ -165,6 +201,24 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
+ if (handle->type == uhdmmodule) {
+ if (type == uhdmalias_stmt) {
+ if (((module*)(object))->get_alias_stmt())
+ return (vpiHandle) new uhdm_handle(uhdmalias_stmt, ((module*)(object))->get_alias_stmt());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == uhdmclocking_block) {
+ if (((module*)(object))->get_clocking_block())
+ return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_clocking_block());
+ else return 0;
+  }
+ }
+
+    
  if (handle->type == uhdmdesign) {
  if (type == uhdmallModules) {
  if (((design*)(object))->get_allModules())
@@ -191,6 +245,42 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   uhdm_handle* handle = (uhdm_handle*) iterator;
   const void* vect = handle->object;
   
+
+  if (handle->type == uhdmscope) {
+ VectorOfscope* the_vec = (VectorOfscope*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmscope, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmprocess) {
+ VectorOfprocess* the_vec = (VectorOfprocess*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmprocess, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmprimitive) {
+ VectorOfprimitive* the_vec = (VectorOfprimitive*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmprimitive, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmprimitive_array) {
+ VectorOfprimitive_array* the_vec = (VectorOfprimitive_array*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmprimitive_array, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
 
   if (handle->type == uhdmports) {
  VectorOfport* the_vec = (VectorOfport*)vect;
@@ -268,6 +358,24 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmio_decl, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmalias_stmt) {
+ VectorOfalias_stmt* the_vec = (VectorOfalias_stmt*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmalias_stmt, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmclocking_block) {
+ VectorOfclocking_block* the_vec = (VectorOfclocking_block*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmclocking_block, the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
