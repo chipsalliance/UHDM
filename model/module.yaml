@@ -30,6 +30,26 @@
     type: int
     vpi: vpiDefDecayTime
     card: 1
+  - obj_ref: global_clocking
+    name: global clocking
+    vpi: vpiGlobalClocking
+    type: clocking_block
+    card: 1
+  - obj_ref: default_clocking
+    name: default clocking
+    vpi: vpiDefaultClocking
+    type: clocking_block
+    card: 1
+  - class_ref: instance_array
+    name: instance_array
+    vpi: vpiInstanceArray
+    type: instance_array
+    card: 1
+#  - class_ref: module_array
+#    name: module_array
+#    vpi: vpiModuleArray
+#    type: module_array
+#    card: 1
   - class_ref: scope
     name: scope
     vpi: vpiInternalScope
@@ -89,7 +109,7 @@
   - obj_ref: def_param
     vpi: vpiDefParam
     type: def_param
-    card: any    
+    card: any
   - obj_ref: io_decl
     vpi: vpiIODecl
     type: io_decl

@@ -4,41 +4,45 @@
 #define UHDM_H
 #include "include/vpi_user.h"
 #include "include/vpi_uhdm.h"
-#define uhdmprocess 520
-#define uhdmscope 521
-#define uhdminterface 522
-#define uhdminterface_array 523
-#define uhdmcont_assign 524
-#define uhdmport 525
-#define uhdmmodule 526
-#define uhdmscope 521
-#define uhdmprocess 520
-#define uhdmprimitive 527
-#define uhdmprimitive_array 528
-#define uhdmports 529
-#define uhdminterfaces 530
-#define uhdminterface_arrays 531
-#define uhdmcont_assigns 532
-#define uhdmmodules 533
-#define uhdmmodule_array 534
-#define uhdmmod_path 535
-#define uhdmtchk 536
-#define uhdmdef_param 537
-#define uhdmio_decl 538
-#define uhdmalias_stmt 539
-#define uhdmclocking_block 540
-#define uhdmmodule_array 534
-#define uhdmprimitive 527
-#define uhdmprimitive_array 528
-#define uhdmmod_path 535
-#define uhdmtchk 536
-#define uhdmdef_param 537
-#define uhdmio_decl 538
-#define uhdmalias_stmt 539
-#define uhdmclocking_block 540
-#define uhdmdesign 541
-#define uhdmallModules 542
-#define uhdmtopModules 543
+#define uhdmprocess 523
+#define uhdmscope 524
+#define uhdminterface 525
+#define uhdminterface_array 526
+#define uhdmcont_assign 527
+#define uhdmport 528
+#define uhdmmodule_array 529
+#define uhdmprimitive 530
+#define uhdmprimitive_array 531
+#define uhdmmod_path 532
+#define uhdmtchk 533
+#define uhdmdef_param 534
+#define uhdmio_decl 535
+#define uhdmalias_stmt 536
+#define uhdmclocking_block 537
+#define uhdminstance_array 538
+#define uhdmmodule 539
+#define uhdminstance_array 538
+#define uhdmscope 524
+#define uhdmprocess 523
+#define uhdmprimitive 530
+#define uhdmprimitive_array 531
+#define uhdmglobal_clocking 540
+#define uhdmdefault_clocking 541
+#define uhdmports 542
+#define uhdminterfaces 543
+#define uhdminterface_arrays 544
+#define uhdmcont_assigns 545
+#define uhdmmodules 546
+#define uhdmmodule_array 529
+#define uhdmmod_path 532
+#define uhdmtchk 533
+#define uhdmdef_param 534
+#define uhdmio_decl 535
+#define uhdmalias_stmt 536
+#define uhdmclocking_block 537
+#define uhdmdesign 547
+#define uhdmallModules 548
+#define uhdmtopModules 549
 #include "headers/containers.h"
 #include "headers/process.h"
 #include "headers/scope.h"
@@ -46,7 +50,6 @@
 #include "headers/interface_array.h"
 #include "headers/cont_assign.h"
 #include "headers/port.h"
-#include "headers/module.h"
 #include "headers/module_array.h"
 #include "headers/primitive.h"
 #include "headers/primitive_array.h"
@@ -56,6 +59,8 @@
 #include "headers/io_decl.h"
 #include "headers/alias_stmt.h"
 #include "headers/clocking_block.h"
+#include "headers/instance_array.h"
+#include "headers/module.h"
 #include "headers/design.h"
 
 #endif

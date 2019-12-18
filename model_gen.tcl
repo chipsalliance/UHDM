@@ -94,6 +94,9 @@ proc parse_model { file } {
     set vpiType ""
     set vpiObj ""
     foreach line $lines {
+	if [regexp {^#} $line] {
+	    continue
+	}
 	set spaces ""
 	regexp {^([ ]*)} $line tmp spaces
 	set indent [string length $spaces]

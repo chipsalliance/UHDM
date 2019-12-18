@@ -37,7 +37,6 @@
 #include "headers/interface_array.h"
 #include "headers/cont_assign.h"
 #include "headers/port.h"
-#include "headers/module.h"
 #include "headers/module_array.h"
 #include "headers/primitive.h"
 #include "headers/primitive_array.h"
@@ -47,6 +46,8 @@
 #include "headers/io_decl.h"
 #include "headers/alias_stmt.h"
 #include "headers/clocking_block.h"
+#include "headers/instance_array.h"
+#include "headers/module.h"
 #include "headers/design.h"
 
 
@@ -187,6 +188,15 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  if (type == vpiTchk) {
  if (((module*)(object))->get_tchk())
  return (vpiHandle) new uhdm_handle(uhdmtchk, ((module*)(object))->get_tchk());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiDefParam) {
+ if (((module*)(object))->get_def_param())
+ return (vpiHandle) new uhdm_handle(uhdmdef_param, ((module*)(object))->get_def_param());
  else return 0;
   }
  }
@@ -349,6 +359,15 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  VectorOftchk* the_vec = (VectorOftchk*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmtchk, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmdef_param) {
+ VectorOfdef_param* the_vec = (VectorOfdef_param*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmdef_param, the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
