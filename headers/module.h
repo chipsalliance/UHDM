@@ -45,6 +45,26 @@ namespace UHDM {
 
     void set_vpiDefDecayTime(int data) { vpiDefDecayTime_ = data; }
 
+    VectorOfport* get_ports() const { return ports_; }
+
+    void set_ports(VectorOfport* data) { ports_ = data; }
+
+    VectorOfinterface* get_interfaces() const { return interfaces_; }
+
+    void set_interfaces(VectorOfinterface* data) { interfaces_ = data; }
+
+    VectorOfinterface_array* get_interface_arrays() const { return interface_arrays_; }
+
+    void set_interface_arrays(VectorOfinterface_array* data) { interface_arrays_ = data; }
+
+    VectorOfcont_assign* get_cont_assigns() const { return cont_assigns_; }
+
+    void set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; }
+
+    VectorOfmodule* get_modules() const { return modules_; }
+
+    void set_modules(VectorOfmodule* data) { modules_ = data; }
+
   private:
     
     std::string vpiName_;
@@ -52,6 +72,16 @@ namespace UHDM {
     bool vpiTopModule_;
 
     int vpiDefDecayTime_;
+
+    VectorOfport* ports_;
+
+    VectorOfinterface* interfaces_;
+
+    VectorOfinterface_array* interface_arrays_;
+
+    VectorOfcont_assign* cont_assigns_;
+
+    VectorOfmodule* modules_;
 
   };
 

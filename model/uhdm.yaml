@@ -46,27 +46,41 @@
     name: scope
     vpi: vpiInternalScope
     card: any
-  - obj_ref: port
+  - obj_ref: ports
+    vpi: vpiPort
+    name: port
+    type: port
     card: any
-  - obj_ref: interface
+  - obj_ref: interfaces
+    name: interface
+    vpi: uhdminterface
+    type: interface
     card: any
-  - obj_ref: interface_array
+  - obj_ref: interface_arrays
+    vpi: uhdminterface_array
     name: interface array
+    type: interface_array
     card: any
   - class_ref: process
     card: any
-  - obj_ref: cont_assign
-    name: interface array
+  - obj_ref: cont_assigns
+    name: cont assign
+    vpi: vpiContAssign
+    type: cont_assign
     card: any
-  - obj_ref: module
+  - obj_ref: modules
+    vpi: vpiModule
+    type: module
     card: any
 
 - obj_def: design
   - class: allModules
     type: module
     vpi_obj: vpiModule
+    vpi: uhdmallModules
     card: any
- - class: topModules
+  - class: topModules
     type: module
     vpi_obj: vpiModule
+    vpi: uhdmtopModules
     card: any

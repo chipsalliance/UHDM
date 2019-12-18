@@ -66,10 +66,12 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   uhdm_handle* handle = (uhdm_handle*) refHandle;
   BaseClass*  object = (BaseClass*) handle->object;
   <VPI_ITERATE_BODY>
+  std::cout << "Bad usage of vpi_iterate" << std::endl;    
   return 0;   
 }
 
 vpiHandle vpi_scan (vpiHandle iterator) {
+  if (!iterator) return 0;
   uhdm_handle* handle = (uhdm_handle*) iterator;
   void* vect = handle->object;
   <VPI_SCAN_BODY>
