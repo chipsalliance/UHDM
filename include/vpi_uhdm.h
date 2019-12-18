@@ -13,11 +13,11 @@ public:
 
 
 struct uhdm_handle {
-  uhdm_handle(unsigned int type, void* object) :
+  uhdm_handle(unsigned int type, const void* object) :
     type(type), object(object), index(0) {}
 
-  unsigned int type;
-  void* object;
+  const unsigned int type;
+  const void* object;
   unsigned int index;
 };
 
