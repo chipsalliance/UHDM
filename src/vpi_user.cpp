@@ -31,12 +31,22 @@
 #include "headers/uhdm.h"
 #include <string.h>
 
+#include "headers/process.h"
 #include "headers/scope.h"
 #include "headers/interface.h"
 #include "headers/interface_array.h"
 #include "headers/cont_assign.h"
 #include "headers/port.h"
 #include "headers/module.h"
+#include "headers/module_array.h"
+#include "headers/primitive.h"
+#include "headers/primitive_array.h"
+#include "headers/mod_path.h"
+#include "headers/tchk.h"
+#include "headers/def_param.h"
+#include "headers/io_decl.h"
+#include "headers/alias_stmt.h"
+#include "headers/clocking_block.h"
 #include "headers/design.h"
 
 
@@ -119,6 +129,42 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
+ if (handle->type == uhdmmodule) {
+ if (type == vpiModuleArray) {
+ if (((module*)(object))->get_module_array())
+ return (vpiHandle) new uhdm_handle(uhdmmodule_array, ((module*)(object))->get_module_array());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiModPath) {
+ if (((module*)(object))->get_mod_path())
+ return (vpiHandle) new uhdm_handle(uhdmmod_path, ((module*)(object))->get_mod_path());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiTchk) {
+ if (((module*)(object))->get_tchk())
+ return (vpiHandle) new uhdm_handle(uhdmtchk, ((module*)(object))->get_tchk());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiIODecl) {
+ if (((module*)(object))->get_io_decl())
+ return (vpiHandle) new uhdm_handle(uhdmio_decl, ((module*)(object))->get_io_decl());
+ else return 0;
+  }
+ }
+
+    
  if (handle->type == uhdmdesign) {
  if (type == uhdmallModules) {
  if (((design*)(object))->get_allModules())
@@ -186,6 +232,42 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmmodule, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmmodule_array) {
+ VectorOfmodule_array* the_vec = (VectorOfmodule_array*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmmodule_array, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmmod_path) {
+ VectorOfmod_path* the_vec = (VectorOfmod_path*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmmod_path, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmtchk) {
+ VectorOftchk* the_vec = (VectorOftchk*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmtchk, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmio_decl) {
+ VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmio_decl, the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
