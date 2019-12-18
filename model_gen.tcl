@@ -334,7 +334,7 @@ namespace UHDM {"
                     append vpi_get_str_body [printGetStrBody $classname $type $vpi $card]
 		}
 	    }
-	    if {($key == "class") || ($key == "obj_ref")} {
+	    if {($key == "class") || ($key == "obj_ref") || ($key == "class_ref")} {
 		dict for {iter content} $val {
 		    set name $iter
 		    set vpi  [dict get $content vpi]

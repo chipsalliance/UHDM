@@ -1,6 +1,18 @@
 #ifndef CONTAINER_H
 #define CONTAINER_H
 namespace UHDM {
+class scope;
+typedef std::vector<scope*> VectorOfscope;
+typedef std::vector<scope*>::iterator VectorOfscopeItr;
+class process;
+typedef std::vector<process*> VectorOfprocess;
+typedef std::vector<process*>::iterator VectorOfprocessItr;
+class primitive;
+typedef std::vector<primitive*> VectorOfprimitive;
+typedef std::vector<primitive*>::iterator VectorOfprimitiveItr;
+class primitive_array;
+typedef std::vector<primitive_array*> VectorOfprimitive_array;
+typedef std::vector<primitive_array*>::iterator VectorOfprimitive_arrayItr;
 class port;
 typedef std::vector<port*> VectorOfport;
 typedef std::vector<port*>::iterator VectorOfportItr;
@@ -28,5 +40,11 @@ typedef std::vector<tchk*>::iterator VectorOftchkItr;
 class io_decl;
 typedef std::vector<io_decl*> VectorOfio_decl;
 typedef std::vector<io_decl*>::iterator VectorOfio_declItr;
+class alias_stmt;
+typedef std::vector<alias_stmt*> VectorOfalias_stmt;
+typedef std::vector<alias_stmt*>::iterator VectorOfalias_stmtItr;
+class clocking_block;
+typedef std::vector<clocking_block*> VectorOfclocking_block;
+typedef std::vector<clocking_block*>::iterator VectorOfclocking_blockItr;
 };
 #endif
