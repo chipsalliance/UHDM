@@ -45,6 +45,10 @@ namespace UHDM {
 
     void set_vpiDefDecayTime(int data) { vpiDefDecayTime_ = data; }
 
+    instance_array get_instance_array() const { return instance_array_; }
+
+    void set_instance_array(instance_array data) { instance_array_ = data; }
+
     const VectorOfscope* get_scope() const { return scope_; }
 
     void set_scope(VectorOfscope* data) { scope_ = data; }
@@ -60,6 +64,14 @@ namespace UHDM {
     const VectorOfprimitive_array* get_primitive_array() const { return primitive_array_; }
 
     void set_primitive_array(VectorOfprimitive_array* data) { primitive_array_ = data; }
+
+    clocking_block get_global_clocking() const { return global_clocking_; }
+
+    void set_global_clocking(clocking_block data) { global_clocking_ = data; }
+
+    clocking_block get_default_clocking() const { return default_clocking_; }
+
+    void set_default_clocking(clocking_block data) { default_clocking_ = data; }
 
     const VectorOfport* get_ports() const { return ports_; }
 
@@ -93,6 +105,10 @@ namespace UHDM {
 
     void set_tchk(VectorOftchk* data) { tchk_ = data; }
 
+    const VectorOfdef_param* get_def_param() const { return def_param_; }
+
+    void set_def_param(VectorOfdef_param* data) { def_param_ = data; }
+
     const VectorOfio_decl* get_io_decl() const { return io_decl_; }
 
     void set_io_decl(VectorOfio_decl* data) { io_decl_ = data; }
@@ -113,6 +129,8 @@ namespace UHDM {
 
     int vpiDefDecayTime_;
 
+    instance_array instance_array_;
+
     VectorOfscope* scope_;
 
     VectorOfprocess* process_;
@@ -120,6 +138,10 @@ namespace UHDM {
     VectorOfprimitive* primitive_;
 
     VectorOfprimitive_array* primitive_array_;
+
+    clocking_block global_clocking_;
+
+    clocking_block default_clocking_;
 
     VectorOfport* ports_;
 
@@ -136,6 +158,8 @@ namespace UHDM {
     VectorOfmod_path* mod_path_;
 
     VectorOftchk* tchk_;
+
+    VectorOfdef_param* def_param_;
 
     VectorOfio_decl* io_decl_;
 
