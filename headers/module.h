@@ -33,6 +33,14 @@ namespace UHDM {
     module(){}
     ~module() final {}
     
+    BaseClass* get_vpiParent() const { return vpiParent_; }
+
+    void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
+
+    int get_uhdmParentType() const { return uhdmParentType_; }
+
+    void set_uhdmParentType(int data) { uhdmParentType_ = data; }
+
     std::string get_vpiName() const { return vpiName_; }
 
     void set_vpiName(std::string data) { vpiName_ = data; }
@@ -45,9 +53,9 @@ namespace UHDM {
 
     void set_vpiDefDecayTime(int data) { vpiDefDecayTime_ = data; }
 
-    instance_array get_instance_array() const { return instance_array_; }
+    instance_array* get_instance_array() const { return instance_array_; }
 
-    void set_instance_array(instance_array data) { instance_array_ = data; }
+    void set_instance_array(instance_array* data) { instance_array_ = data; }
 
     const VectorOfscope* get_scope() const { return scope_; }
 
@@ -65,13 +73,13 @@ namespace UHDM {
 
     void set_primitive_array(VectorOfprimitive_array* data) { primitive_array_ = data; }
 
-    clocking_block get_global_clocking() const { return global_clocking_; }
+    clocking_block* get_global_clocking() const { return global_clocking_; }
 
-    void set_global_clocking(clocking_block data) { global_clocking_ = data; }
+    void set_global_clocking(clocking_block* data) { global_clocking_ = data; }
 
-    clocking_block get_default_clocking() const { return default_clocking_; }
+    clocking_block* get_default_clocking() const { return default_clocking_; }
 
-    void set_default_clocking(clocking_block data) { default_clocking_ = data; }
+    void set_default_clocking(clocking_block* data) { default_clocking_ = data; }
 
     const VectorOfport* get_ports() const { return ports_; }
 
@@ -123,13 +131,17 @@ namespace UHDM {
 
   private:
     
+    BaseClass* vpiParent_;
+
+    int uhdmParentType_;
+
     std::string vpiName_;
 
     bool vpiTopModule_;
 
     int vpiDefDecayTime_;
 
-    instance_array instance_array_;
+    instance_array* instance_array_;
 
     VectorOfscope* scope_;
 
@@ -139,9 +151,9 @@ namespace UHDM {
 
     VectorOfprimitive_array* primitive_array_;
 
-    clocking_block global_clocking_;
+    clocking_block* global_clocking_;
 
-    clocking_block default_clocking_;
+    clocking_block* default_clocking_;
 
     VectorOfport* ports_;
 

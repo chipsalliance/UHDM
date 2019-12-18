@@ -9,10 +9,16 @@ int main (int argc, char** argv) {
   module* m1 = new module();
   m1->set_vpiTopModule(true);
   m1->set_vpiName("M1");
+  m1->set_vpiParent(d);
+  m1->set_uhdmParentType(uhdmdesign);
   module* m2 = new module();
   m2->set_vpiName("M2");
+  m2->set_vpiParent(m1);
+  m2->set_uhdmParentType(uhdmmodule);
   module* m3 = new module();
   m3->set_vpiName("M3");
+  m3->set_vpiParent(m1);
+  m3->set_uhdmParentType(uhdmmodule);
   VectorOfmodule* v1 = new VectorOfmodule();
   v1->push_back(m1);
   d->set_allModules(v1);
@@ -31,8 +37,9 @@ int main (int argc, char** argv) {
 
     vpiHandle submodItr = vpi_iterate(vpiModule, obj_h); 
     while (vpiHandle sub_h = vpi_scan(submodItr) ) {
-      std::cout << "\n  \\_ " << vpi_get_str(vpiName, sub_h)
-		<< " " << vpi_get(vpiTopModule, sub_h);
+      std::cout << "\n  \\_ " << vpi_get_str(vpiName, sub_h) 
+		<< " " << vpi_get(vpiTopModule, sub_h)
+		<< " parent: " << vpi_get_str(vpiName, vpi_handle(vpiParent, sub_h));
       vpi_release_handle (sub_h);
     }
     vpi_release_handle (submodItr);

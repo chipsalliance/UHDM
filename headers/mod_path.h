@@ -33,8 +33,20 @@ namespace UHDM {
     mod_path(){}
     ~mod_path() final {}
     
+    BaseClass* get_vpiParent() const { return vpiParent_; }
+
+    void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
+
+    int get_uhdmParentType() const { return uhdmParentType_; }
+
+    void set_uhdmParentType(int data) { uhdmParentType_ = data; }
+
   private:
     
+    BaseClass* vpiParent_;
+
+    int uhdmParentType_;
+
   };
 
 };

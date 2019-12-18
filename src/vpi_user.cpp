@@ -67,9 +67,117 @@ vpiHandle vpi_handle_by_index (vpiHandle object,
 
 vpiHandle vpi_handle (PLI_INT32 type,
                       vpiHandle   refHandle) {
-  //uhdm_handle* handle = (uhdm_handle*) refHandle;
-  //BaseClass*  object = (BaseClass*) handle->object;
+  uhdm_handle* handle = (uhdm_handle*) refHandle;
+  BaseClass*  object = (BaseClass*) handle->object;
   
+ if (handle->type == uhdmprocess) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((process*)(object))->get_uhdmParentType(), ((process*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmscope) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((scope*)(object))->get_uhdmParentType(), ((scope*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdminterface) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((interface*)(object))->get_uhdmParentType(), ((interface*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdminterface_array) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((interface_array*)(object))->get_uhdmParentType(), ((interface_array*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmcont_assign) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((cont_assign*)(object))->get_uhdmParentType(), ((cont_assign*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmport) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((port*)(object))->get_uhdmParentType(), ((port*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmmodule_array) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((module_array*)(object))->get_uhdmParentType(), ((module_array*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmprimitive) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((primitive*)(object))->get_uhdmParentType(), ((primitive*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmprimitive_array) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((primitive_array*)(object))->get_uhdmParentType(), ((primitive_array*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmmod_path) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((mod_path*)(object))->get_uhdmParentType(), ((mod_path*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmtchk) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((tchk*)(object))->get_uhdmParentType(), ((tchk*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmdef_param) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((def_param*)(object))->get_uhdmParentType(), ((def_param*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmio_decl) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((io_decl*)(object))->get_uhdmParentType(), ((io_decl*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmalias_stmt) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((alias_stmt*)(object))->get_uhdmParentType(), ((alias_stmt*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmclocking_block) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((clocking_block*)(object))->get_uhdmParentType(), ((clocking_block*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdminstance_array) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((instance_array*)(object))->get_uhdmParentType(), ((instance_array*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((module*)(object))->get_uhdmParentType(), ((module*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmdesign) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((design*)(object))->get_uhdmParentType(), ((design*)(object))->get_vpiParent());
+ } 
+}
+
   return 0;
 }
 

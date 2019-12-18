@@ -163,8 +163,12 @@ proc printMethods { type vpi card } {
 	set type "std::string"
     }
     if {$card == "1"} {
-	append methods "\n    $type get_${vpi}() const { return ${vpi}_; }\n"
-	append methods "\n    void set_${vpi}($type data) { ${vpi}_ = data; }\n"
+	set pointer ""
+	if {($type != "int") && ($type != "bool") && ($type != "std::string")} {
+	    set pointer "*"
+	}
+	append methods "\n    ${type}${pointer} get_${vpi}() const { return ${vpi}_; }\n"
+	append methods "\n    void set_${vpi}(${type}${pointer} data) { ${vpi}_ = data; }\n"
     } elseif {$card == "any"} {
 	append methods "\n    const VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
 	append methods "\n    void set_${vpi}(VectorOf${type}* data) { ${vpi}_ = data; }\n"
@@ -177,7 +181,11 @@ proc printMembers { type vpi card } {
 	set type "std::string"
     }
     if {$card == "1"} {
-	append members "\n    $type ${vpi}_;\n"
+	set pointer ""
+	if {($type != "int") && ($type != "bool") && ($type != "std::string")} {
+	    set pointer "*"
+	}
+	append members "\n    ${type}${pointer} ${vpi}_;\n"
     } elseif {$card == "any"} {
 	append members "\n    VectorOf${type}* ${vpi}_;\n"
     }
@@ -222,6 +230,22 @@ proc printGetBody {classname type vpi card} {
 "
     }
     return $vpi_get_body
+}
+
+
+proc printGetHandleBody { classname type vpi card } {
+    if {$type == "BaseClass"} {
+	set type "(($classname*)(object))->get_uhdmParentType()"
+    }
+    set vpi_get_handle_body ""
+     append vpi_get_handle_body "\n\
+ if (handle->type == uhdm${classname}) {
+     if (type == $vpi) {
+       return (vpiHandle) new uhdm_handle($type, (($classname*)(object))->get_${vpi}());\n\
+     } 
+}
+"  
+    return $vpi_get_handle_body
 }
 
 proc printGetStrBody {classname type vpi card} {
@@ -321,6 +345,13 @@ namespace UHDM {"
 	set methods ""
 	set members ""
 	defineType $mainId uhdm${classname} ""
+
+        # Builtin "Parent pointer and Parent type" method and field
+        append methods [printMethods BaseClass vpiParent 1] 
+	append members [printMembers BaseClass vpiParent 1]
+        append methods [printMethods int uhdmParentType 1] 
+	append members [printMembers int uhdmParentType 1]
+        append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent 1]
 	
 	dict for {key val} $data {
 	    if {$key == "properties"} {
