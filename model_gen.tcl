@@ -155,6 +155,7 @@ proc parse_model { file } {
 }
 
 proc printMethods { type vpi card } {
+    set methods ""
     if {$type == "string"} {
 	set type "std::string"
     }

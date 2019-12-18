@@ -60,3 +60,39 @@
     vpi: vpiModule
     type: module
     card: any
+  - obj_ref: module_array
+    vpi: vpiModuleArray
+    type: module_array
+    card: any
+  - class_ref: primitive
+    vpi: vpiPrimitive
+    type: primitive
+    card: any
+  - class_ref: primitive_array
+    vpi: vpiPrimitiveArray
+    type: primitive_array
+    card: any
+  - obj_ref: mod_path
+    vpi: vpiModPath
+    type: mod_path
+    card: any
+  - obj_ref: tchk
+    vpi: vpiTchk
+    type: tchk
+    card: any
+  - obj_ref: def_param
+    vpi: vpiDefParam
+    type: def_param
+    card: any    
+  - obj_ref: io_decl
+    vpi: vpiIODecl
+    type: io_decl
+    card: any
+  - obj_ref: alias_stmt
+    vpi: uhdmAliasDecl
+    type: alias_stmt
+    card: any    
+  - obj_ref: clocking_block
+    vpi: uhdmClockingBlock
+    type: clocking_block
+    card: any    

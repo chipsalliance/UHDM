@@ -65,6 +65,22 @@ namespace UHDM {
 
     void set_modules(VectorOfmodule* data) { modules_ = data; }
 
+    const VectorOfmodule_array* get_module_array() const { return module_array_; }
+
+    void set_module_array(VectorOfmodule_array* data) { module_array_ = data; }
+
+    const VectorOfmod_path* get_mod_path() const { return mod_path_; }
+
+    void set_mod_path(VectorOfmod_path* data) { mod_path_ = data; }
+
+    const VectorOftchk* get_tchk() const { return tchk_; }
+
+    void set_tchk(VectorOftchk* data) { tchk_ = data; }
+
+    const VectorOfio_decl* get_io_decl() const { return io_decl_; }
+
+    void set_io_decl(VectorOfio_decl* data) { io_decl_ = data; }
+
   private:
     
     std::string vpiName_;
@@ -82,6 +98,14 @@ namespace UHDM {
     VectorOfcont_assign* cont_assigns_;
 
     VectorOfmodule* modules_;
+
+    VectorOfmodule_array* module_array_;
+
+    VectorOfmod_path* mod_path_;
+
+    VectorOftchk* tchk_;
+
+    VectorOfio_decl* io_decl_;
 
   };
 
