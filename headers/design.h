@@ -33,6 +33,14 @@ namespace UHDM {
     design(){}
     ~design() final {}
     
+    BaseClass* get_vpiParent() const { return vpiParent_; }
+
+    void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
+
+    int get_uhdmParentType() const { return uhdmParentType_; }
+
+    void set_uhdmParentType(int data) { uhdmParentType_ = data; }
+
     const VectorOfmodule* get_allModules() const { return allModules_; }
 
     void set_allModules(VectorOfmodule* data) { allModules_ = data; }
@@ -43,6 +51,10 @@ namespace UHDM {
 
   private:
     
+    BaseClass* vpiParent_;
+
+    int uhdmParentType_;
+
     VectorOfmodule* allModules_;
 
     VectorOfmodule* topModules_;

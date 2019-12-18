@@ -49,8 +49,8 @@ vpiHandle vpi_handle_by_index (vpiHandle object,
 
 vpiHandle vpi_handle (PLI_INT32 type,
                       vpiHandle   refHandle) {
-  //uhdm_handle* handle = (uhdm_handle*) refHandle;
-  //BaseClass*  object = (BaseClass*) handle->object;
+  uhdm_handle* handle = (uhdm_handle*) refHandle;
+  BaseClass*  object = (BaseClass*) handle->object;
   <VPI_HANDLE_BODY>
   return 0;
 }
