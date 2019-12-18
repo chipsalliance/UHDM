@@ -33,6 +33,7 @@
   - class_ref: scope
     name: scope
     vpi: vpiInternalScope
+    type: scope
     card: any
   - obj_ref: ports
     vpi: vpiPort
@@ -50,6 +51,9 @@
     type: interface_array
     card: any
   - class_ref: process
+    name: process
+    vpi: vpiProcess
+    type: process
     card: any
   - obj_ref: cont_assigns
     name: cont assign
@@ -65,10 +69,12 @@
     type: module_array
     card: any
   - class_ref: primitive
+    name: primitive
     vpi: vpiPrimitive
     type: primitive
     card: any
   - class_ref: primitive_array
+    name: primitive_array
     vpi: vpiPrimitiveArray
     type: primitive_array
     card: any
@@ -89,10 +95,10 @@
     type: io_decl
     card: any
   - obj_ref: alias_stmt
-    vpi: uhdmAliasDecl
+    vpi: uhdmalias_stmt
     type: alias_stmt
-    card: any    
+    card: any
   - obj_ref: clocking_block
-    vpi: uhdmClockingBlock
+    vpi: uhdmclocking_block
     type: clocking_block
-    card: any    
+    card: any

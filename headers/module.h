@@ -45,6 +45,22 @@ namespace UHDM {
 
     void set_vpiDefDecayTime(int data) { vpiDefDecayTime_ = data; }
 
+    const VectorOfscope* get_scope() const { return scope_; }
+
+    void set_scope(VectorOfscope* data) { scope_ = data; }
+
+    const VectorOfprocess* get_process() const { return process_; }
+
+    void set_process(VectorOfprocess* data) { process_ = data; }
+
+    const VectorOfprimitive* get_primitive() const { return primitive_; }
+
+    void set_primitive(VectorOfprimitive* data) { primitive_ = data; }
+
+    const VectorOfprimitive_array* get_primitive_array() const { return primitive_array_; }
+
+    void set_primitive_array(VectorOfprimitive_array* data) { primitive_array_ = data; }
+
     const VectorOfport* get_ports() const { return ports_; }
 
     void set_ports(VectorOfport* data) { ports_ = data; }
@@ -81,6 +97,14 @@ namespace UHDM {
 
     void set_io_decl(VectorOfio_decl* data) { io_decl_ = data; }
 
+    const VectorOfalias_stmt* get_alias_stmt() const { return alias_stmt_; }
+
+    void set_alias_stmt(VectorOfalias_stmt* data) { alias_stmt_ = data; }
+
+    const VectorOfclocking_block* get_clocking_block() const { return clocking_block_; }
+
+    void set_clocking_block(VectorOfclocking_block* data) { clocking_block_ = data; }
+
   private:
     
     std::string vpiName_;
@@ -88,6 +112,14 @@ namespace UHDM {
     bool vpiTopModule_;
 
     int vpiDefDecayTime_;
+
+    VectorOfscope* scope_;
+
+    VectorOfprocess* process_;
+
+    VectorOfprimitive* primitive_;
+
+    VectorOfprimitive_array* primitive_array_;
 
     VectorOfport* ports_;
 
@@ -106,6 +138,10 @@ namespace UHDM {
     VectorOftchk* tchk_;
 
     VectorOfio_decl* io_decl_;
+
+    VectorOfalias_stmt* alias_stmt_;
+
+    VectorOfclocking_block* clocking_block_;
 
   };
 
