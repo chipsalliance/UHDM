@@ -66,13 +66,15 @@ proc parse_vpi_user_defines { } {
     close $fid
 }
 
+set OBJECTID 500
+
 proc parse_model { file } {
-    global ID
+    global ID OBJECTID
     set models {}
     set fid [open $file]
     set content [read $fid]
     close $fid
-    set objectId 500
+
     set lines [split $content "\n"]
     set OBJ(curr) ""
     set INDENT(curr) 0
@@ -93,13 +95,9 @@ proc parse_model { file } {
 	    set vpiType ""
 	    set vpiObj  ""
 	    global obj_def$modelId
-	    if [info exist ID($name)] {
-		set id $ID($name)
-	    } else {
-		set id $objectId
-		incr objectId
-		set ID($name) $id
-	    }
+
+	    set id [defineType 0 $name $vpiType]
+
 	    set obj_def$modelId [dict create "name" $name "type" obj_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]	   
 	    lappend models obj_def$modelId 
 	    set OBJ(curr) obj_def$modelId
@@ -136,15 +134,7 @@ proc parse_model { file } {
 	}
 	if [regexp {card: (.*)} $line tmp card] {
 	    dict set $OBJ(curr) $obj_type $obj_name card $card
-	    if [info exist ID($name)] {
-		set id $ID($name)
-	    } elseif [info exist ID($vpiType)] {
-		set id $ID($vpiType)
-	    } else {
-		set id $objectId
-		incr objectId
-		set ID($name) $id
-	    }
+	    set id [defineType 0 $name $vpiType]
 	    dict set $OBJ(curr) $obj_type $obj_name "id" $id
 	}
 	if [regexp {name: (.*)} $line tmp name] {
@@ -191,13 +181,15 @@ proc printTypeDefs { containerId type card } {
     }
 }
 
-proc printIterateBody { name classname card } {
+proc printIterateBody { name classname vpi card } {
     set vpi_iterate_body ""
     if {$card == "any"} {
 	append vpi_iterate_body "\n\    
- if (handle->type == ${classname}ID) {\n\
-  if (type == $name) {\n\
-     return (vpiHandle) new uhdm_handle($name, (($classname*)(object))->get_${name}());\n\
+ if (handle->type == uhdm${classname}) {\n\
+  if (type == $vpi) {\n\
+     if ((($classname*)(object))->get_${name}())\n\
+       return (vpiHandle) new uhdm_handle(uhdm${name}, (($classname*)(object))->get_${name}());\n\
+     else return 0;
   }\n\
 }\n"
     return $vpi_iterate_body
@@ -208,7 +200,7 @@ proc printGetBody {classname type vpi card} {
     set vpi_get_body ""
     if {($card == 1) && ($type != "string")} {
 	append vpi_get_body "\n\
- if (handle->type == ${classname}ID) {
+ if (handle->type == uhdm${classname}) {
      if (property == $vpi) {
        return (($classname*)(obj))->get_${vpi}();
      } 
@@ -222,7 +214,7 @@ proc printGetStrBody {classname type vpi card} {
     set vpi_get_str_body ""
     if {$card == 1 && ($type == "string")} {
 	append vpi_get_str_body "\n\
- if (handle->type == ${classname}ID) {
+ if (handle->type == uhdm${classname}) {
      if (property == $vpi) {
        return (PLI_BYTE8*) strdup((($classname*)(obj))->get_${vpi}().c_str());
      } 
@@ -232,20 +224,40 @@ proc printGetStrBody {classname type vpi card} {
     return $vpi_get_str_body
 }
 
-proc printScanBody { name type card } {
+proc printScanBody { name classname type card } {
     set vpi_scan_body ""
     if {$card == "any"} {
 	append vpi_scan_body "\n
-  if (handle->type == $name) {\n\
+  if (handle->type == uhdm${name}) {\n\
     VectorOf${type}* the_vec = (VectorOf${type}*)vect;\n\
       if (handle->index < the_vec->size()) {\n\
-          uhdm_handle* h = new uhdm_handle(${type}ID, the_vec->at(handle->index));\n\
+          uhdm_handle* h = new uhdm_handle(uhdm${type}, the_vec->at(handle->index));\n\
 	  handle->index++;\n\
           return (vpiHandle) h;\n\
       }\n\
   }"
     }
     return $vpi_scan_body
+}
+
+proc defineType { fid name vpiType } {
+    global ID OBJECTID
+    if [info exist ID($name)] {
+	set id $ID($name)
+	if {$fid != 0} {
+	    puts $fid "#define $name $id"
+	}
+    } elseif [info exist ID($vpiType)] {
+	set id $ID($vpiType)
+    } else {
+	set id $OBJECTID
+	incr OBJECTID
+	set ID($name) $id
+	if {$fid != 0} {
+	    puts $fid "#define $name $id"
+	}
+    }    
+    return $id
 }
 
 proc generate_code { models } {
@@ -294,7 +306,7 @@ namespace UHDM {"
 	regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
 	set methods ""
 	set members ""
-	puts $mainId "#define ${classname}ID $ID($classname)"
+	defineType $mainId uhdm${classname} ""
 	
 	dict for {key val} $data {
 	    if {$key == "properties"} {
@@ -311,9 +323,8 @@ namespace UHDM {"
                     append vpi_get_str_body [printGetStrBody $classname $type $vpi $card]
 		}
 	    }
-	    if {$key == "class"} {
+	    if {($key == "class") || ($key == "obj_ref")} {
 		dict for {iter content} $val {
-		    puts "$iter $content"
 		    set name $iter
 		    set vpi  [dict get $content vpi]
 		    set type [dict get $content type]
@@ -321,11 +332,11 @@ namespace UHDM {"
 		    set id   [dict get $content id]
 		    printTypeDefs $containerId $type $card
                     # define access properties (allModules...)
-		    puts $mainId "#define $name $id"
+		    defineType $mainId uhdm${name} ""
 		    append methods [printMethods $type $name $card] 
 		    append members [printMembers $type $name $card]
-		    append vpi_iterate_body [printIterateBody $name $classname $card]
-                    append vpi_scan_body [printScanBody $name $type $card] 		    
+		    append vpi_iterate_body [printIterateBody $name $classname $vpi $card]
+                    append vpi_scan_body [printScanBody $name $classname $type $card] 		    
 		}
 	    }
 	}

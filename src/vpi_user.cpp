@@ -75,40 +75,136 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   BaseClass*  object = (BaseClass*) handle->object;
   
     
- if (handle->type == designID) {
- if (type == allModules) {
- return (vpiHandle) new uhdm_handle(allModules, ((design*)(object))->get_allModules());
- }
+ if (handle->type == uhdmmodule) {
+ if (type == vpiPort) {
+ if (((module*)(object))->get_ports())
+ return (vpiHandle) new uhdm_handle(uhdmports, ((module*)(object))->get_ports());
+ else return 0;
+  }
  }
 
     
- if (handle->type == designID) {
- if (type == topModules) {
- return (vpiHandle) new uhdm_handle(topModules, ((design*)(object))->get_topModules());
- }
+ if (handle->type == uhdmmodule) {
+ if (type == uhdminterface) {
+ if (((module*)(object))->get_interfaces())
+ return (vpiHandle) new uhdm_handle(uhdminterfaces, ((module*)(object))->get_interfaces());
+ else return 0;
+  }
  }
 
+    
+ if (handle->type == uhdmmodule) {
+ if (type == uhdminterface_array) {
+ if (((module*)(object))->get_interface_arrays())
+ return (vpiHandle) new uhdm_handle(uhdminterface_arrays, ((module*)(object))->get_interface_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiContAssign) {
+ if (((module*)(object))->get_cont_assigns())
+ return (vpiHandle) new uhdm_handle(uhdmcont_assigns, ((module*)(object))->get_cont_assigns());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiModule) {
+ if (((module*)(object))->get_modules())
+ return (vpiHandle) new uhdm_handle(uhdmmodules, ((module*)(object))->get_modules());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmdesign) {
+ if (type == uhdmallModules) {
+ if (((design*)(object))->get_allModules())
+ return (vpiHandle) new uhdm_handle(uhdmallModules, ((design*)(object))->get_allModules());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmdesign) {
+ if (type == uhdmtopModules) {
+ if (((design*)(object))->get_topModules())
+ return (vpiHandle) new uhdm_handle(uhdmtopModules, ((design*)(object))->get_topModules());
+ else return 0;
+  }
+ }
+
+  std::cout << "Bad usage of vpi_iterate" << std::endl;    
   return 0;   
 }
 
 vpiHandle vpi_scan (vpiHandle iterator) {
+  if (!iterator) return 0;
   uhdm_handle* handle = (uhdm_handle*) iterator;
   void* vect = handle->object;
   
 
-  if (handle->type == allModules) {
- VectorOfmodule* the_vec = (VectorOfmodule*)vect;
+  if (handle->type == uhdmports) {
+ VectorOfport* the_vec = (VectorOfport*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(uhdmport, the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
  }
 
-  if (handle->type == topModules) {
+  if (handle->type == uhdminterfaces) {
+ VectorOfinterface* the_vec = (VectorOfinterface*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdminterface, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdminterface_arrays) {
+ VectorOfinterface_array* the_vec = (VectorOfinterface_array*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdminterface_array, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmcont_assigns) {
+ VectorOfcont_assign* the_vec = (VectorOfcont_assign*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmcont_assign, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmmodules) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(moduleID, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(uhdmmodule, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmallModules) {
+ VectorOfmodule* the_vec = (VectorOfmodule*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmmodule, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmtopModules) {
+ VectorOfmodule* the_vec = (VectorOfmodule*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmmodule, the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -132,13 +228,13 @@ PLI_INT32 vpi_get (PLI_INT32   property,
   uhdm_handle* handle = (uhdm_handle*) object;
   BaseClass*  obj = (BaseClass*) handle->object;
   
- if (handle->type == moduleID) {
+ if (handle->type == uhdmmodule) {
      if (property == vpiTopModule) {
        return ((module*)(obj))->get_vpiTopModule();
      } 
 }
 
- if (handle->type == moduleID) {
+ if (handle->type == uhdmmodule) {
      if (property == vpiDefDecayTime) {
        return ((module*)(obj))->get_vpiDefDecayTime();
      } 
@@ -152,13 +248,13 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
   uhdm_handle* handle = (uhdm_handle*) object;
   BaseClass*  obj = (BaseClass*) handle->object;
   
- if (handle->type == moduleID) {
+ if (handle->type == uhdmmodule) {
      if (property == vpiTopModule) {
        return ((module*)(obj))->get_vpiTopModule();
      } 
 }
 
- if (handle->type == moduleID) {
+ if (handle->type == uhdmmodule) {
      if (property == vpiDefDecayTime) {
        return ((module*)(obj))->get_vpiDefDecayTime();
      } 
@@ -172,7 +268,7 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
    uhdm_handle* handle = (uhdm_handle*) object;
   BaseClass*  obj = (BaseClass*) handle->object;
   
- if (handle->type == moduleID) {
+ if (handle->type == uhdmmodule) {
      if (property == vpiName) {
        return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiName().c_str());
      } 
