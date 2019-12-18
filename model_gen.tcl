@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set model_file $argv
+set model_files $argv
 
 # proc copied from: https://wiki.tcl-lang.org/page/pdict%3A+Pretty+print+a+dict
 proc pdict { d {i 0} {p "  "} {s " -> "} } {
@@ -72,8 +72,18 @@ proc parse_model { file } {
     global ID OBJECTID
     set models {}
     set fid [open $file]
-    set content [read $fid]
+    set modellist [read $fid]
     close $fid
+
+    set lines [split $modellist "\n"]
+    foreach line $lines {
+	if {$line != ""} {
+	    set fid [open model/$line]
+	    set model [read $fid]
+	    append content "$model\n"
+	    close $fid
+	}
+    }
 
     set lines [split $content "\n"]
     set OBJ(curr) ""
@@ -383,7 +393,7 @@ proc debug_models { models } {
 
 parse_vpi_user_defines
 
-set models [parse_model $model_file]
+set models [parse_model $model_files]
 
 debug_models $models
 

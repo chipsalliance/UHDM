@@ -12,16 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "design" formal description
-
-- obj_def: design
-  - class: allModules
-    type: module
-    vpi_obj: vpiModule
-    vpi: uhdmallModules
-    card: any
-  - class: topModules
-    type: module
-    vpi_obj: vpiModule
-    vpi: uhdmtopModules
-    card: any
+# Universal Hardware Data Model (UHDM) "interface" formal description
+ 
+- obj_def: interface
