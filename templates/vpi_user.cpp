@@ -25,7 +25,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "include/vpi_user.h"
+#include "include/sv_vpi_user.h"
+#include "include/vhpi_user.h"
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 #include "headers/uhdm.h"

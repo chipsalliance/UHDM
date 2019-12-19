@@ -25,7 +25,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "include/vpi_user.h"
+#include "include/sv_vpi_user.h"
+#include "include/vhpi_user.h"
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 #include "headers/uhdm.h"
@@ -169,6 +170,24 @@ vpiHandle vpi_handle (PLI_INT32 type,
  if (handle->type == uhdmmodule) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((module*)(object))->get_uhdmParentType(), ((module*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (type == vpiInstanceArray) {
+       return (vpiHandle) new uhdm_handle(uhdminstance_array, ((module*)(object))->get_instance_array());
+ } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (type == vpiGlobalClocking) {
+       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_global_clocking());
+ } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (type == vpiDefaultClocking) {
+       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_default_clocking());
  } 
 }
 
@@ -587,6 +606,12 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
  if (handle->type == uhdmmodule) {
      if (property == vpiName) {
        return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmdesign) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((design*)(obj))->get_vpiName().c_str());
      } 
 }
 

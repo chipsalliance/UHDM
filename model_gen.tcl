@@ -66,7 +66,8 @@ proc parse_vpi_user_defines { } {
     close $fid
 }
 
-set OBJECTID 500
+# Above sv_vpi_user.h and vhpi_user.h ranges
+set OBJECTID 2000
 
 proc parse_model { file } {
     global ID OBJECTID
@@ -233,18 +234,20 @@ proc printGetBody {classname type vpi card} {
 }
 
 
-proc printGetHandleBody { classname type vpi card } {
+proc printGetHandleBody { classname type vpi object card } {
     if {$type == "BaseClass"} {
 	set type "(($classname*)(object))->get_uhdmParentType()"
     }
     set vpi_get_handle_body ""
-     append vpi_get_handle_body "\n\
+    if {$card == 1} {
+	append vpi_get_handle_body "\n\
  if (handle->type == uhdm${classname}) {
      if (type == $vpi) {
-       return (vpiHandle) new uhdm_handle($type, (($classname*)(object))->get_${vpi}());\n\
+       return (vpiHandle) new uhdm_handle($type, (($classname*)(object))->get_${object}());\n\
      } 
 }
-"  
+"
+    }
     return $vpi_get_handle_body
 }
 
@@ -312,7 +315,8 @@ proc generate_code { models } {
     puts $mainId "#include <vector>"
     puts $mainId "#ifndef UHDM_H
 #define UHDM_H"
-    puts $mainId "#include \"include/vpi_user.h\""
+    puts $mainId "#include \"include/sv_vpi_user.h\""
+    puts $mainId "#include \"include/vhpi_user.h\""
     puts $mainId "#include \"include/vpi_uhdm.h\""
     
     set containerId [open "headers/containers.h" "w"]
@@ -351,7 +355,7 @@ namespace UHDM {"
 	append members [printMembers BaseClass vpiParent 1]
         append methods [printMethods int uhdmParentType 1] 
 	append members [printMembers int uhdmParentType 1]
-        append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent 1]
+        append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
 	
 	dict for {key val} $data {
 	    if {$key == "properties"} {
@@ -381,7 +385,8 @@ namespace UHDM {"
 		    append methods [printMethods $type $name $card] 
 		    append members [printMembers $type $name $card]
 		    append vpi_iterate_body [printIterateBody $name $classname $vpi $card]
-                    append vpi_scan_body [printScanBody $name $classname $type $card] 		    
+                    append vpi_scan_body [printScanBody $name $classname $type $card]
+                    append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]		    
 		}
 	    }
 	}
