@@ -386,7 +386,7 @@ namespace UHDM {"
 		    append members [printMembers $type $name $card]
 		    append vpi_iterate_body [printIterateBody $name $classname $vpi $card]
                     append vpi_scan_body [printScanBody $name $classname $type $card]
-                    append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $type $card]		    
+                    append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]		    
 		}
 	    }
 	}

@@ -15,6 +15,11 @@
 # Universal Hardware Data Model (UHDM) "design" formal description
 
 - obj_def: design
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
   - class: allModules
     type: module
     vpi_obj: vpiModule

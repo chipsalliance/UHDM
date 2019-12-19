@@ -181,13 +181,13 @@ vpiHandle vpi_handle (PLI_INT32 type,
 
  if (handle->type == uhdmmodule) {
      if (type == vpiGlobalClocking) {
-       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_clocking_block());
+       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_global_clocking());
  } 
 }
 
  if (handle->type == uhdmmodule) {
      if (type == vpiDefaultClocking) {
-       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_clocking_block());
+       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_default_clocking());
  } 
 }
 
@@ -606,6 +606,12 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
  if (handle->type == uhdmmodule) {
      if (property == vpiName) {
        return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmdesign) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((design*)(obj))->get_vpiName().c_str());
      } 
 }
 
