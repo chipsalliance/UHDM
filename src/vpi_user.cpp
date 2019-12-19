@@ -25,7 +25,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "include/vpi_user.h"
+#include "include/sv_vpi_user.h"
+#include "include/vhpi_user.h"
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 #include "headers/uhdm.h"
@@ -169,6 +170,24 @@ vpiHandle vpi_handle (PLI_INT32 type,
  if (handle->type == uhdmmodule) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((module*)(object))->get_uhdmParentType(), ((module*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (type == vpiInstanceArray) {
+       return (vpiHandle) new uhdm_handle(uhdminstance_array, ((module*)(object))->get_instance_array());
+ } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (type == vpiGlobalClocking) {
+       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_clocking_block());
+ } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (type == vpiDefaultClocking) {
+       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_clocking_block());
  } 
 }
 
