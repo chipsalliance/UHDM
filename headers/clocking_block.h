@@ -52,9 +52,25 @@ namespace UHDM {
   class clocking_blockFactory {
   friend Serializer;
   public:
-    static clocking_block* make();
+  static clocking_block* make() {
+    clocking_block* obj = new clocking_block();
+    objects_.push_back(obj);
+    return obj;
+  }
   private:
     static std::vector<clocking_block*> objects_;
+  };
+ 	      
+  class VectorOfclocking_blockFactory {
+  friend Serializer;
+  public:
+  static std::vector<clocking_block*>* make() {
+    std::vector<clocking_block*>* obj = new std::vector<clocking_block*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<clocking_block*>*> objects_;
   };
 
 };

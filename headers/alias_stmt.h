@@ -52,9 +52,25 @@ namespace UHDM {
   class alias_stmtFactory {
   friend Serializer;
   public:
-    static alias_stmt* make();
+  static alias_stmt* make() {
+    alias_stmt* obj = new alias_stmt();
+    objects_.push_back(obj);
+    return obj;
+  }
   private:
     static std::vector<alias_stmt*> objects_;
+  };
+ 	      
+  class VectorOfalias_stmtFactory {
+  friend Serializer;
+  public:
+  static std::vector<alias_stmt*>* make() {
+    std::vector<alias_stmt*>* obj = new std::vector<alias_stmt*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<alias_stmt*>*> objects_;
   };
 
 };

@@ -70,9 +70,25 @@ namespace UHDM {
   class designFactory {
   friend Serializer;
   public:
-    static design* make();
+  static design* make() {
+    design* obj = new design();
+    objects_.push_back(obj);
+    return obj;
+  }
   private:
     static std::vector<design*> objects_;
+  };
+ 	      
+  class VectorOfdesignFactory {
+  friend Serializer;
+  public:
+  static std::vector<design*>* make() {
+    std::vector<design*>* obj = new std::vector<design*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<design*>*> objects_;
   };
 
 };

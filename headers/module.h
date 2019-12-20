@@ -184,9 +184,25 @@ namespace UHDM {
   class moduleFactory {
   friend Serializer;
   public:
-    static module* make();
+  static module* make() {
+    module* obj = new module();
+    objects_.push_back(obj);
+    return obj;
+  }
   private:
     static std::vector<module*> objects_;
+  };
+ 	      
+  class VectorOfmoduleFactory {
+  friend Serializer;
+  public:
+  static std::vector<module*>* make() {
+    std::vector<module*>* obj = new std::vector<module*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<module*>*> objects_;
   };
 
 };

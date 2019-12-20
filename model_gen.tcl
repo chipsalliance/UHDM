@@ -337,6 +337,9 @@ proc generate_code { models } {
 
 	puts "Generating headers/$classname.h"
 	append headers "#include \"headers/$classname.h\"\n"
+	append factories "std::vector<${classname}*> ${classname}Factory::objects_;\n"
+	append factories "std::vector<std::vector<${classname}*>*> VectorOf${classname}Factory::objects_;\n"
+	
 	set oid [open "headers/$classname.h" "w"]
 	regsub -all {<CLASSNAME>} $template $classname template
 	regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
@@ -429,6 +432,15 @@ proc generate_code { models } {
     set vpi_userId [open "src/vpi_user.cpp" "w"]
     puts $vpi_userId $vpi_user
     close $vpi_userId
+
+    # Serializer.cpp
+    set fid [open "templates/Serializer.cpp" ]
+    set serializer_content [read $fid]
+    close $fid
+    regsub {<FACTORIES>} $serializer_content $factories serializer_content
+    set serializerId [open "src/Serializer.cpp" "w"]
+    puts $serializerId $serializer_content
+    close $serializerId
     
 }
 

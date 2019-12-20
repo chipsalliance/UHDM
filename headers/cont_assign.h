@@ -52,9 +52,25 @@ namespace UHDM {
   class cont_assignFactory {
   friend Serializer;
   public:
-    static cont_assign* make();
+  static cont_assign* make() {
+    cont_assign* obj = new cont_assign();
+    objects_.push_back(obj);
+    return obj;
+  }
   private:
     static std::vector<cont_assign*> objects_;
+  };
+ 	      
+  class VectorOfcont_assignFactory {
+  friend Serializer;
+  public:
+  static std::vector<cont_assign*>* make() {
+    std::vector<cont_assign*>* obj = new std::vector<cont_assign*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<cont_assign*>*> objects_;
   };
 
 };

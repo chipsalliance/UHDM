@@ -52,9 +52,25 @@ namespace UHDM {
   class portFactory {
   friend Serializer;
   public:
-    static port* make();
+  static port* make() {
+    port* obj = new port();
+    objects_.push_back(obj);
+    return obj;
+  }
   private:
     static std::vector<port*> objects_;
+  };
+ 	      
+  class VectorOfportFactory {
+  friend Serializer;
+  public:
+  static std::vector<port*>* make() {
+    std::vector<port*>* obj = new std::vector<port*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<port*>*> objects_;
   };
 
 };

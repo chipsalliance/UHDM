@@ -52,9 +52,25 @@ namespace UHDM {
   class processFactory {
   friend Serializer;
   public:
-    static process* make();
+  static process* make() {
+    process* obj = new process();
+    objects_.push_back(obj);
+    return obj;
+  }
   private:
     static std::vector<process*> objects_;
+  };
+ 	      
+  class VectorOfprocessFactory {
+  friend Serializer;
+  public:
+  static std::vector<process*>* make() {
+    std::vector<process*>* obj = new std::vector<process*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<process*>*> objects_;
   };
 
 };

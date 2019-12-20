@@ -52,9 +52,25 @@ namespace UHDM {
   class interfaceFactory {
   friend Serializer;
   public:
-    static interface* make();
+  static interface* make() {
+    interface* obj = new interface();
+    objects_.push_back(obj);
+    return obj;
+  }
   private:
     static std::vector<interface*> objects_;
+  };
+ 	      
+  class VectorOfinterfaceFactory {
+  friend Serializer;
+  public:
+  static std::vector<interface*>* make() {
+    std::vector<interface*>* obj = new std::vector<interface*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<interface*>*> objects_;
   };
 
 };
