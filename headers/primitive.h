@@ -49,6 +49,14 @@ namespace UHDM {
 
   };
 
+  class primitiveFactory {
+  friend Serializer;
+  public:
+    static primitive* make();
+  private:
+    static std::vector<primitive*> objects_;
+  };
+
 };
 
 #endif

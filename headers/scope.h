@@ -49,6 +49,14 @@ namespace UHDM {
 
   };
 
+  class scopeFactory {
+  friend Serializer;
+  public:
+    static scope* make();
+  private:
+    static std::vector<scope*> objects_;
+  };
+
 };
 
 #endif

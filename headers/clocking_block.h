@@ -49,6 +49,14 @@ namespace UHDM {
 
   };
 
+  class clocking_blockFactory {
+  friend Serializer;
+  public:
+    static clocking_block* make();
+  private:
+    static std::vector<clocking_block*> objects_;
+  };
+
 };
 
 #endif

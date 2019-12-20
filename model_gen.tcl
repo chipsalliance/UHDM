@@ -110,7 +110,7 @@ proc parse_model { file } {
 	    set vpiObj  ""
 	    global obj_def$modelId
 
-	    set id [defineType 0 $name $vpiType]
+	    foreach {id define} [defineType 0 $name $vpiType] {}
 
 	    set obj_def$modelId [dict create "name" $name "type" obj_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]	   
 	    lappend models obj_def$modelId 
@@ -148,7 +148,10 @@ proc parse_model { file } {
 	}
 	if [regexp {card: (.*)} $line tmp card] {
 	    dict set $OBJ(curr) $obj_type $obj_name card $card
-	    set id [defineType 0 $name $vpiType]
+	    foreach {id define} [defineType 0 $name $vpiType] {}
+	    if {$define != ""} {
+              append defines "$define\n"
+            }
 	    dict set $OBJ(curr) $obj_type $obj_name "id" $id
 	}
 	if [regexp {name: (.*)} $line tmp name] {
@@ -178,6 +181,7 @@ proc printMethods { type vpi card } {
 }
 
 proc printMembers { type vpi card } {
+    set members ""
     if {$type == "string"} {
 	set type "std::string"
     }
@@ -190,18 +194,21 @@ proc printMembers { type vpi card } {
     } elseif {$card == "any"} {
 	append members "\n    VectorOf${type}* ${vpi}_;\n"
     }
+    return $members
 }
 
-proc printTypeDefs { containerId type card } {
+proc printTypeDefs { type card } {
     global CONTAINER
+    set typedefs ""
     if {$card == "any"} {
 	if ![info exist CONTAINER($type)] {
 	    set CONTAINER($type) 1
-	    puts $containerId "class $type;"
-	    puts $containerId "typedef std::vector<${type}*> VectorOf${type};"
-	    puts $containerId "typedef std::vector<${type}*>::iterator VectorOf${type}Itr;"
+	    append typedefs "class $type;\n"
+	    append typedefs "typedef std::vector<${type}*> VectorOf${type};\n"
+	    append typedefs "typedef std::vector<${type}*>::iterator VectorOf${type}Itr;\n"
 	}
     }
+    return $typedefs
 }
 
 proc printIterateBody { name classname vpi card } {
@@ -281,12 +288,14 @@ proc printScanBody { name classname type card } {
     return $vpi_scan_body
 }
 
-proc defineType { fid name vpiType } {
+proc defineType { def name vpiType } {
     global ID OBJECTID
+    set id ""
+    set define ""
     if [info exist ID($name)] {
 	set id $ID($name)
-	if {$fid != 0} {
-	    puts $fid "#define $name $id"
+	if {$def != 0} {
+	    set define "#define $name $id"
 	}
     } elseif [info exist ID($vpiType)] {
 	set id $ID($vpiType)
@@ -294,11 +303,11 @@ proc defineType { fid name vpiType } {
 	set id $OBJECTID
 	incr OBJECTID
 	set ID($name) $id
-	if {$fid != 0} {
-	    puts $fid "#define $name $id"
+	if {$def != 0} {
+	    set define "#define $name $id"
 	}
-    }    
-    return $id
+    }
+    return [list $id $define]
 }
 
 proc generate_code { models } {
@@ -309,31 +318,16 @@ proc generate_code { models } {
     set fid [open "templates/class_header.h"]
     set template_content [read $fid]
     close $fid
-    
-    set mainId [open "headers/uhdm.h" "w"]
-    puts $mainId "#include <string>"
-    puts $mainId "#include <vector>"
-    puts $mainId "#ifndef UHDM_H
-#define UHDM_H"
-    puts $mainId "#include \"include/sv_vpi_user.h\""
-    puts $mainId "#include \"include/vhpi_user.h\""
-    puts $mainId "#include \"include/vpi_uhdm.h\""
-    
-    set containerId [open "headers/containers.h" "w"]
-    puts $containerId "#ifndef CONTAINER_H
-#define CONTAINER_H
-namespace UHDM {"
 
-    set fid [open "templates/vpi_user.cpp" ]
-    set vpi_user [read $fid]
-    close $fid
-    set vpi_userId [open "src/vpi_user.cpp" "w"]
     set vpi_iterate_body ""
     set vpi_scan_body ""
     set vpi_handle_body ""
     set vpi_get_body ""
     set vpi_get_str_body ""
     set headers ""
+    set defines ""
+    set typedefs ""
+    set containers ""
     foreach model $models {
 	global $model
 	puts "** $model **"
@@ -348,8 +342,10 @@ namespace UHDM {"
 	regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
 	set methods ""
 	set members ""
-	defineType $mainId uhdm${classname} ""
-
+	foreach {id define} [defineType 1 uhdm${classname} ""] {}
+        if {$define != ""} {
+          append defines "$define\n"
+        } 
         # Builtin "Parent pointer and Parent type" method and field
         append methods [printMethods BaseClass vpiParent 1] 
 	append members [printMembers BaseClass vpiParent 1]
@@ -364,7 +360,7 @@ namespace UHDM {"
 		    set vpi  [dict get $conf vpi]
 		    set type [dict get $conf type]
 		    set card [dict get $conf card]
-		    printTypeDefs $containerId $type $card
+		    append containers [printTypeDefs $type $card]
                     # properties are already defined in vpi_user.h, no need to redefine them
 		    append methods [printMethods $type $vpi $card] 
 		    append members [printMembers $type $vpi $card]
@@ -379,9 +375,12 @@ namespace UHDM {"
 		    set type [dict get $content type]
 		    set card [dict get $content card]
 		    set id   [dict get $content id]
-		    printTypeDefs $containerId $type $card
+		    append containers [printTypeDefs $type $card]
                     # define access properties (allModules...)
-		    defineType $mainId uhdm${name} ""
+		    foreach {id define} [defineType 1 uhdm${name} ""] {}
+                    if {$define != ""} {
+                      append defines "$define\n"
+                    }
 		    append methods [printMethods $type $name $card] 
 		    append members [printMembers $type $name $card]
 		    append vpi_iterate_body [printIterateBody $name $classname $vpi $card]
@@ -399,24 +398,35 @@ namespace UHDM {"
     }
 
     # uhdm.h
-    puts $mainId "#include \"headers/containers.h\""
-    puts $mainId $headers
-    puts $mainId "#endif" 
-    close $mainId
+    set fid [open "templates/uhdm.h"]
+    set uhdm_content [read $fid]
+    close $fid 
+    set uhdmId [open "headers/uhdm.h" "w"]
+    regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
+    regsub -all {<INCLUDE_FILES>} $uhdm_content $headers uhdm_content
+    puts $uhdmId $uhdm_content
+    close $uhdmId
 
     # containers.h
-    puts $containerId "};
-#endif"
+    set fid [open "templates/containers.h"]
+    set container_content [read $fid]
+    close $fid 
+    set containerId [open "headers/containers.h" "w"]
+    regsub -all {<CONTAINERS>} $container_content $containers container_content
+    puts $containerId $container_content
     close $containerId
 
     # vpi_user.cpp
+    set fid [open "templates/vpi_user.cpp" ]
+    set vpi_user [read $fid]
+    close $fid
     regsub {<HEADERS>} $vpi_user $headers vpi_user
     regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body vpi_user
     regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
     regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body vpi_user
     regsub -all {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
     regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
-
+    set vpi_userId [open "src/vpi_user.cpp" "w"]
     puts $vpi_userId $vpi_user
     close $vpi_userId
     

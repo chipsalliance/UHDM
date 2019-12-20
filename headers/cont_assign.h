@@ -49,6 +49,14 @@ namespace UHDM {
 
   };
 
+  class cont_assignFactory {
+  friend Serializer;
+  public:
+    static cont_assign* make();
+  private:
+    static std::vector<cont_assign*> objects_;
+  };
+
 };
 
 #endif

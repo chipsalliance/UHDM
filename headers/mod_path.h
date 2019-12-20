@@ -49,6 +49,14 @@ namespace UHDM {
 
   };
 
+  class mod_pathFactory {
+  friend Serializer;
+  public:
+    static mod_path* make();
+  private:
+    static std::vector<mod_path*> objects_;
+  };
+
 };
 
 #endif

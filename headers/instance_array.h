@@ -49,6 +49,14 @@ namespace UHDM {
 
   };
 
+  class instance_arrayFactory {
+  friend Serializer;
+  public:
+    static instance_array* make();
+  private:
+    static std::vector<instance_array*> objects_;
+  };
+
 };
 
 #endif

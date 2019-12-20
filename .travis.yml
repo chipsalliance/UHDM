@@ -21,6 +21,8 @@ matrix:
 
 before_install:
     - sudo apt-get install tclsh
+    - sudo apt-get install capnproto
+    - sudo apt-get install libcapnp-dev
     - eval "${MATRIX_EVAL}"
 
 install:

@@ -49,6 +49,14 @@ namespace UHDM {
 
   };
 
+  class io_declFactory {
+  friend Serializer;
+  public:
+    static io_decl* make();
+  private:
+    static std::vector<io_decl*> objects_;
+  };
+
 };
 
 #endif

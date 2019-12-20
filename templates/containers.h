@@ -17,34 +17,18 @@
  */
 
 /*
- * File:   <CLASSNAME>.h
+ * File:   containers.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef <UPPER_CLASSNAME>_H
-#define <UPPER_CLASSNAME>_H
+
+#ifndef CONTAINERS_H
+#define CONTAINERS_H
 
 namespace UHDM {
-
-  class <CLASSNAME> : public BaseClass {
-  public:
-    <CLASSNAME>(){}
-    ~<CLASSNAME>() final {}
-    <METHODS>
-  private:
-    <MEMBERS>
-  };
-
-  class <CLASSNAME>Factory {
-  friend Serializer;
-  public:
-    static <CLASSNAME>* make();
-  private:
-    static std::vector<<CLASSNAME>*> objects_;
-  };
-
+  <CONTAINERS>
 };
 
 #endif

@@ -23,28 +23,25 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef <UPPER_CLASSNAME>_H
-#define <UPPER_CLASSNAME>_H
+#include <string>
+#include <vector>
+#ifndef UHDM_H
+#define UHDM_H
+#include "include/sv_vpi_user.h"
+#include "include/vhpi_user.h"
+#include "include/vpi_uhdm.h"
+#include "headers/containers.h"
+
 
 namespace UHDM {
-
-  class <CLASSNAME> : public BaseClass {
-  public:
-    <CLASSNAME>(){}
-    ~<CLASSNAME>() final {}
-    <METHODS>
-  private:
-    <MEMBERS>
-  };
-
-  class <CLASSNAME>Factory {
-  friend Serializer;
-  public:
-    static <CLASSNAME>* make();
-  private:
-    static std::vector<<CLASSNAME>*> objects_;
+  class Serializer {
   };
 
 };
+
+
+<DEFINES>
+
+<INCLUDE_FILES>
 
 #endif

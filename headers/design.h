@@ -67,6 +67,14 @@ namespace UHDM {
 
   };
 
+  class designFactory {
+  friend Serializer;
+  public:
+    static design* make();
+  private:
+    static std::vector<design*> objects_;
+  };
+
 };
 
 #endif

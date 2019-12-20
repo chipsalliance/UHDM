@@ -49,6 +49,14 @@ namespace UHDM {
 
   };
 
+  class def_paramFactory {
+  friend Serializer;
+  public:
+    static def_param* make();
+  private:
+    static std::vector<def_param*> objects_;
+  };
+
 };
 
 #endif

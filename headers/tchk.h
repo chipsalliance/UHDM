@@ -49,6 +49,14 @@ namespace UHDM {
 
   };
 
+  class tchkFactory {
+  friend Serializer;
+  public:
+    static tchk* make();
+  private:
+    static std::vector<tchk*> objects_;
+  };
+
 };
 
 #endif

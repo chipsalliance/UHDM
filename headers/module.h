@@ -181,6 +181,14 @@ namespace UHDM {
 
   };
 
+  class moduleFactory {
+  friend Serializer;
+  public:
+    static module* make();
+  private:
+    static std::vector<module*> objects_;
+  };
+
 };
 
 #endif
