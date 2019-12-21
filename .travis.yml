@@ -29,5 +29,6 @@ install:
 
 # Build steps
 script:
-  - make
+  - make clean
+  - make all
   
