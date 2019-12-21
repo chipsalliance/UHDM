@@ -6,22 +6,22 @@ language: cpp
 compiler:
   - gcc
   
-matrix:
-  fast_finish: true
-  include:
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+#matrix:
+#  fast_finish: true
+#  include:
+#    - os: linux
+#      addons:
+#        apt:
+#          sources:
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - g++-7
+#      env:
+#        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
 before_install:
-    - sudo apt-get install tclsh
-# Does not work on Travis, maybe an old verision:    
+    - sudo apt-get install build-essential tclsh
+# Does not work on Travis, maybe an old version:    
 #    - sudo apt-get install capnproto
 #    - sudo apt-get install libcapnp-dev
     - eval "${MATRIX_EVAL}"
