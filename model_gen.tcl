@@ -487,6 +487,8 @@ proc generate_code { models } {
     set capnpId [open "src/UHDM.capnp" "w"]
     puts $capnpId $capnp_content
     close $capnpId
+    puts "Generating Capnp schema..."
+    exec sh -c "rm -rf src/UHDM.capnp.*"
     exec sh -c "capnp compile -oc++:. src/UHDM.capnp"
     
     # Serializer.cpp
