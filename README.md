@@ -10,7 +10,9 @@ Universal Hardware Data Model
 # HowTo
  * git clone https://github.com/alainmarcel/UHDM.git
  * cd UHDM
- * make
+ * make all
+
+
 
 
  
