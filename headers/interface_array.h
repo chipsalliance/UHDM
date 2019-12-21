@@ -49,6 +49,30 @@ namespace UHDM {
 
   };
 
+  class interface_arrayFactory {
+  friend Serializer;
+  public:
+  static interface_array* make() {
+    interface_array* obj = new interface_array();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+    static std::vector<interface_array*> objects_;
+  };
+ 	      
+  class VectorOfinterface_arrayFactory {
+  friend Serializer;
+  public:
+  static std::vector<interface_array*>* make() {
+    std::vector<interface_array*>* obj = new std::vector<interface_array*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<interface_array*>*> objects_;
+  };
+
 };
 
 #endif

@@ -49,6 +49,30 @@ namespace UHDM {
 
   };
 
+  class def_paramFactory {
+  friend Serializer;
+  public:
+  static def_param* make() {
+    def_param* obj = new def_param();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+    static std::vector<def_param*> objects_;
+  };
+ 	      
+  class VectorOfdef_paramFactory {
+  friend Serializer;
+  public:
+  static std::vector<def_param*>* make() {
+    std::vector<def_param*>* obj = new std::vector<def_param*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<def_param*>*> objects_;
+  };
+
 };
 
 #endif

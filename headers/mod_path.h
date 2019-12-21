@@ -49,6 +49,30 @@ namespace UHDM {
 
   };
 
+  class mod_pathFactory {
+  friend Serializer;
+  public:
+  static mod_path* make() {
+    mod_path* obj = new mod_path();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+    static std::vector<mod_path*> objects_;
+  };
+ 	      
+  class VectorOfmod_pathFactory {
+  friend Serializer;
+  public:
+  static std::vector<mod_path*>* make() {
+    std::vector<mod_path*>* obj = new std::vector<mod_path*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+  static std::vector<std::vector<mod_path*>*> objects_;
+  };
+
 };
 
 #endif

@@ -5,30 +5,38 @@ using namespace UHDM;
 
 int main (int argc, char** argv) {
   // Design building
-  design* d = new design();
+  design* d = designFactory::make();
   d->set_vpiName("design1");
-  module* m1 = new module();
+  module* m1 = moduleFactory::make();
   m1->set_vpiTopModule(true);
   m1->set_vpiName("M1");
   m1->set_vpiParent(d);
   m1->set_uhdmParentType(uhdmdesign);
-  module* m2 = new module();
+  module* m2 = moduleFactory::make();
   m2->set_vpiName("M2");
   m2->set_vpiParent(m1);
   m2->set_uhdmParentType(uhdmmodule);
-  module* m3 = new module();
+  module* m3 = moduleFactory::make();
   m3->set_vpiName("M3");
   m3->set_vpiParent(m1);
   m3->set_uhdmParentType(uhdmmodule);
-  VectorOfmodule* v1 = new VectorOfmodule();
+  VectorOfmodule* v1 = VectorOfmoduleFactory::make();
   v1->push_back(m1);
   d->set_allModules(v1);
-  VectorOfmodule* v2 = new VectorOfmodule();
+  VectorOfmodule* v2 = VectorOfmoduleFactory::make();
   v2->push_back(m2);
   v2->push_back(m3);
   m1->set_modules(v2);
-  vpiHandle design1 = (vpiHandle) new uhdm_handle(uhdmdesign, d);
+  vpiHandle design1 = uhdm_handleFactory::make(uhdmdesign, d);
 
+  std::cout << "Save design" << std::endl;
+  Serializer::save("design.uhdmap");
+  std::cout << "Restore design" << std::endl;
+  std::vector<vpiHandle> restoredDesigns = Serializer::restore("design.uhdmap");
+  for (auto restoredDesign : restoredDesigns) {
+    std::cout << "Restored design name: " << vpi_get_str(vpiName, restoredDesign) << std::endl;
+  }
+  
   // VPI test
   vpiHandle modItr = vpi_iterate(uhdmallModules,design1); 
   while (vpiHandle obj_h = vpi_scan(modItr) ) {

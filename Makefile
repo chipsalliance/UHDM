@@ -10,7 +10,7 @@ $(GENERATED_SOURCE): model_gen.tcl model/uhdm.yaml templates/vpi_user.cpp
 	tclsh ./model_gen.tcl model/models.lst
 
 unittest: src/vpi_user.cpp
-	$(CXX) $(CXXFLAGS) -std=c++11 -g -Iinclude src/main.cpp src/vpi_user.cpp -I. -o $@
+	$(CXX) $(CXXFLAGS) -std=c++14 -g -Iinclude src/main.cpp src/vpi_user.cpp src/Serializer.cpp src/UHDM.capnp.c++ -I. -lcapnp -lkj -o $@
 
 run-test: unittest
 	./unittest
