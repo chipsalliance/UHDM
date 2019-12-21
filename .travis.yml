@@ -5,8 +5,23 @@ language: cpp
 # Compiler selection
 compiler:
   - gcc
-  
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+
 before_install:
+  - eval "${MATRIX_EVAL}"
   - sudo apt-get install build-essential tclsh
   - curl -O https://capnproto.org/capnproto-c++-0.7.0.tar.gz
   - tar zxf capnproto-c++-0.7.0.tar.gz
