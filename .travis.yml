@@ -14,12 +14,12 @@ before_install:
   - ./configure
   - make -j 
   - sudo make install
+  - cd ..
   
 install:
 
 # Build steps
 script:
-  - cd ../UHDM
   - make clean
   - make
   
