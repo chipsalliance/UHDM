@@ -180,6 +180,28 @@ proc printMethods { type vpi card } {
     return $methods
 }
 
+proc printCapnpSchema {type vpi card capnpIndex} {
+    set members ""
+    if {$type == "string"} {
+	set type "Text"
+    }
+    if {$type == "unsigned int"} {
+        set type "UInt32"
+    }
+    if {$type == "int"} {
+        set type "Int32"
+    }
+    if {$type == "bool"} {
+        set type "Bool"
+    }
+    if {$card == "1"} {
+	append members "  ${vpi} @$capnpIndex :${type};\n"
+    } elseif {$card == "any"} {
+	append members "  ${vpi} @$capnpIndex :List(${type});\n"
+    }
+    return $members
+}
+
 proc printMembers { type vpi card } {
     set members ""
     if {$type == "string"} {
@@ -328,6 +350,9 @@ proc generate_code { models } {
     set defines ""
     set typedefs ""
     set containers ""
+    set capnp_save ""
+    set capnp_restore ""
+    set capnp_schema ""
     foreach model $models {
 	global $model
 	puts "** $model **"
@@ -335,10 +360,16 @@ proc generate_code { models } {
 	set classname [dict get $data name]
 	set template $template_content
 
+	set Classname [string toupper $classname 0 0]
+	regsub -all  {_} $Classname "" Classname
+	
 	puts "Generating headers/$classname.h"
 	append headers "#include \"headers/$classname.h\"\n"
 	append factories "std::vector<${classname}*> ${classname}Factory::objects_;\n"
 	append factories "std::vector<std::vector<${classname}*>*> VectorOf${classname}Factory::objects_;\n"
+
+	set capnpIndex 0
+        append capnp_schema "struct $Classname \{\n"
 	
 	set oid [open "headers/$classname.h" "w"]
 	regsub -all {<CLASSNAME>} $template $classname template
@@ -355,6 +386,10 @@ proc generate_code { models } {
         append methods [printMethods int uhdmParentType 1] 
 	append members [printMembers int uhdmParentType 1]
         append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
+        append capnp_schema "  vpiParent @${capnpIndex} :UInt32;\n"
+        incr capnpIndex
+	append capnp_schema "  uhdmParentType @${capnpIndex} :UInt32;\n"
+        incr capnpIndex
 	
 	dict for {key val} $data {
 	    if {$key == "properties"} {
@@ -369,6 +404,8 @@ proc generate_code { models } {
 		    append members [printMembers $type $vpi $card]
                     append vpi_get_body [printGetBody $classname $type $vpi $card]
                     append vpi_get_str_body [printGetStrBody $classname $type $vpi $card]
+		    append capnp_schema [printCapnpSchema $type $vpi $card $capnpIndex]
+		    incr capnpIndex
 		}
 	    }
 	    if {($key == "class") || ($key == "obj_ref") || ($key == "class_ref")} {
@@ -388,12 +425,21 @@ proc generate_code { models } {
 		    append members [printMembers $type $name $card]
 		    append vpi_iterate_body [printIterateBody $name $classname $vpi $card]
                     append vpi_scan_body [printScanBody $name $classname $type $card]
-                    append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]		    
+                    append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]
+
+		    set Type [string toupper $type 0 0]
+		    regsub -all  {_} $Type "" Type
+		    regsub -all  {_} $name "" Name
+		    append capnp_schema [printCapnpSchema $Type $Name $card $capnpIndex]
+		    incr capnpIndex
 		}
+	    
 	    }
 	}
 	regsub -all {<METHODS>} $template $methods template
 	regsub -all {<MEMBERS>} $template $members template
+
+	append capnp_schema "\n\}\n"
 	
 	puts $oid $template
 	close $oid
@@ -433,11 +479,23 @@ proc generate_code { models } {
     puts $vpi_userId $vpi_user
     close $vpi_userId
 
+    # UHDM.capnp
+    set fid [open "templates/UHDM.capnp"]
+    set capnp_content [read $fid]
+    close $fid
+    regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema capnp_content
+    set capnpId [open "src/UHDM.capnp" "w"]
+    puts $capnpId $capnp_content
+    close $capnpId
+    exec sh -c "capnp compile -oc++:. src/UHDM.capnp"
+    
     # Serializer.cpp
     set fid [open "templates/Serializer.cpp" ]
     set serializer_content [read $fid]
     close $fid
     regsub {<FACTORIES>} $serializer_content $factories serializer_content
+    regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content
+    regsub {<CAPNP_RESTORE>} $serializer_content $capnp_restore serializer_content
     set serializerId [open "src/Serializer.cpp" "w"]
     puts $serializerId $serializer_content
     close $serializerId

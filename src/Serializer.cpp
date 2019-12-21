@@ -25,6 +25,15 @@
 
 #include <vector>
 #include "headers/uhdm.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include "UHDM.capnp.h"
+#include <capnp/message.h>
+#include <capnp/serialize-packed.h>
+#include <iostream>
+
 
 using namespace UHDM;
 
@@ -68,4 +77,40 @@ std::vector<design*> designFactory::objects_;
 std::vector<std::vector<design*>*> VectorOfdesignFactory::objects_;
 
 
+void Serializer::save(std::string file) {
+  int fileid = open(file.c_str(), O_CREAT | O_WRONLY , S_IRWXU);
+  ::capnp::MallocMessageBuilder message;
+  UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
+  
+  ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designFactory::objects_.size());
+
+  unsigned int index = 0;
+  for (auto design : designFactory::objects_) {
+    designs[index].setVpiName(design->get_vpiName());
+    index++;
+  }
+  
+  
+  
+  writePackedMessageToFd(fileid, message);   
+  close(fileid);
+}
+
+const std::vector<vpiHandle> Serializer::restore(std::string file) {
+  std::vector<vpiHandle> designs;
+  int fileid = open(file.c_str(), O_RDONLY);
+  ::capnp::PackedFdMessageReader message(fileid);
+  UhdmRoot::Reader cap_root = message.getRoot<UhdmRoot>();
+  
+  for (Design::Reader d : cap_root.getDesigns()) {
+    design* uhdm_design = designFactory::make(); 
+    uhdm_design->set_vpiName(d.getVpiName());
+    vpiHandle designH = uhdm_handleFactory::make(uhdmdesign, uhdm_design);
+    designs.push_back(designH);
+  
+     
+  } 
+  close(fileid); 
+  return designs;
+}
 

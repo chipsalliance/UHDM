@@ -32,14 +32,6 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 
-
-namespace UHDM {
-  class Serializer {
-  };
-
-};
-
-
 #define uhdmprocess 2023
 #define uhdmscope 2024
 #define uhdminterface 2025

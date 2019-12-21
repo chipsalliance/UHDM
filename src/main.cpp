@@ -29,6 +29,14 @@ int main (int argc, char** argv) {
   m1->set_modules(v2);
   vpiHandle design1 = uhdm_handleFactory::make(uhdmdesign, d);
 
+  std::cout << "Save design" << std::endl;
+  Serializer::save("design.uhdmap");
+  std::cout << "Restore design" << std::endl;
+  std::vector<vpiHandle> restoredDesigns = Serializer::restore("design.uhdmap");
+  for (auto restoredDesign : restoredDesigns) {
+    std::cout << "Restored design name: " << vpi_get_str(vpiName, restoredDesign) << std::endl;
+  }
+  
   // VPI test
   vpiHandle modItr = vpi_iterate(uhdmallModules,design1); 
   while (vpiHandle obj_h = vpi_scan(modItr) ) {

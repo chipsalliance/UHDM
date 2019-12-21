@@ -32,14 +32,6 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 
-
-namespace UHDM {
-  class Serializer {
-  };
-
-};
-
-
 <DEFINES>
 
 <INCLUDE_FILES>
