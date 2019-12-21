@@ -21,20 +21,21 @@ matrix:
 
 before_install:
     - sudo apt-get install tclsh
+# Does not work on Travis, maybe an old verision:    
 #    - sudo apt-get install capnproto
 #    - sudo apt-get install libcapnp-dev
     - eval "${MATRIX_EVAL}"
-
-install:
-
-# Build steps
-script:
   - curl -O https://capnproto.org/capnproto-c++-0.7.0.tar.gz
   - tar zxf capnproto-c++-0.7.0.tar.gz
   - cd capnproto-c++-0.7.0
   - ./configure
-  - make -j check
+  - make -j 
   - sudo make install
+  
+install:
+
+# Build steps
+script:
   - make clean
   - make all
   
