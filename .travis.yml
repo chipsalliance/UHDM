@@ -19,5 +19,7 @@ install:
 
 # Build steps
 script:
+  - cd ../UHDM
+  - make clean
   - make
   
