@@ -397,6 +397,9 @@ proc generate_code { models } {
         incr capnpIndex
 	append capnp_root_schema "  factory${Classname} @${capnpRootSchemaIndex} :List($Classname);\n"
 	incr capnpRootSchemaIndex
+	append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(getId(obj->get_vpiParent()));\n"
+	append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->get_uhdmParentType());\n"
+
 	
 	dict for {key val} $data {
 	    if {$key == "properties"} {
