@@ -186,10 +186,10 @@ proc printCapnpSchema {type vpi card capnpIndex} {
 	set type "Text"
     }
     if {$type == "unsigned int"} {
-        set type "UInt32"
+        set type "UInt64"
     }
     if {$type == "int"} {
-        set type "Int32"
+        set type "Int64"
     }
     if {$type == "bool"} {
         set type "Bool"
@@ -353,6 +353,9 @@ proc generate_code { models } {
     set capnp_save ""
     set capnp_restore ""
     set capnp_schema ""
+    set capnp_root_schema ""
+    set capnpRootSchemaIndex 1
+    set classes ""
     foreach model $models {
 	global $model
 	puts "** $model **"
@@ -367,7 +370,7 @@ proc generate_code { models } {
 	append headers "#include \"headers/$classname.h\"\n"
 	append factories "std::vector<${classname}*> ${classname}Factory::objects_;\n"
 	append factories "std::vector<std::vector<${classname}*>*> VectorOf${classname}Factory::objects_;\n"
-
+        lappend classes $classname
 	set capnpIndex 0
         append capnp_schema "struct $Classname \{\n"
 	
@@ -379,17 +382,21 @@ proc generate_code { models } {
 	foreach {id define} [defineType 1 uhdm${classname} ""] {}
         if {$define != ""} {
           append defines "$define\n"
-        } 
+        }
+	append SAVE($classname) ""
+	
         # Builtin "Parent pointer and Parent type" method and field
         append methods [printMethods BaseClass vpiParent 1] 
 	append members [printMembers BaseClass vpiParent 1]
         append methods [printMethods int uhdmParentType 1] 
 	append members [printMembers int uhdmParentType 1]
         append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
-        append capnp_schema "  vpiParent @${capnpIndex} :UInt32;\n"
+        append capnp_schema "  vpiParent @${capnpIndex} :UInt64;\n"
         incr capnpIndex
-	append capnp_schema "  uhdmParentType @${capnpIndex} :UInt32;\n"
+	append capnp_schema "  uhdmParentType @${capnpIndex} :UInt64;\n"
         incr capnpIndex
+	append capnp_root_schema "  factory${Classname} @${capnpRootSchemaIndex} :List($Classname);\n"
+	incr capnpRootSchemaIndex
 	
 	dict for {key val} $data {
 	    if {$key == "properties"} {
@@ -406,7 +413,12 @@ proc generate_code { models } {
                     append vpi_get_str_body [printGetStrBody $classname $type $vpi $card]
 		    append capnp_schema [printCapnpSchema $type $vpi $card $capnpIndex]
 		    incr capnpIndex
+		
+		    set Vpi [string toupper $vpi 0 0]
+		    regsub -all  {_} $Vpi "" Vpi
+		    append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->get_${vpi}());\n"
 		}
+
 	    }
 	    if {($key == "class") || ($key == "obj_ref") || ($key == "class_ref")} {
 		dict for {iter content} $val {
@@ -430,7 +442,8 @@ proc generate_code { models } {
 		    set Type [string toupper $type 0 0]
 		    regsub -all  {_} $Type "" Type
 		    regsub -all  {_} $name "" Name
-		    append capnp_schema [printCapnpSchema $Type $Name $card $capnpIndex]
+		    # all types are reduced to index
+		    append capnp_schema [printCapnpSchema UInt64 $Name $card $capnpIndex]
 		    incr capnpIndex
 		}
 	    
@@ -484,6 +497,7 @@ proc generate_code { models } {
     set capnp_content [read $fid]
     close $fid
     regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema capnp_content
+    regsub {<CAPNP_ROOT_SCHEMA>} $capnp_content $capnp_root_schema capnp_content
     set capnpId [open "src/UHDM.capnp" "w"]
     puts $capnpId $capnp_content
     close $capnpId
@@ -495,7 +509,33 @@ proc generate_code { models } {
     set fid [open "templates/Serializer.cpp" ]
     set serializer_content [read $fid]
     close $fid
+    foreach class $classes {
+	set Class [string toupper $class 0 0]
+	regsub -all  {_} $Class "" Class
+	if {$SAVE($class) != ""} {
+	    append capnp_save "
+ ::capnp::List<$Class>::Builder ${Class}s = cap_root.initFactory${Class}(${class}Factory::objects_.size());
+ index = 0;
+ for (auto obj : ${class}Factory::objects_) {
+$SAVE($class)
+   index++;
+ }"
+	}
+    }
+    set capnp_id ""
+    foreach class $classes {
+  	append capnp_id "
+  index = 0;
+  for (auto obj : ${class}Factory::objects_) {
+    setId(obj, index);
+    index++;
+  }"       
+    }
+
+
+    
     regsub {<FACTORIES>} $serializer_content $factories serializer_content
+    regsub {<CAPNP_ID>} $serializer_content $capnp_id serializer_content
     regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content
     regsub {<CAPNP_RESTORE>} $serializer_content $capnp_restore serializer_content
     set serializerId [open "src/Serializer.cpp" "w"]

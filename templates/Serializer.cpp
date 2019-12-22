@@ -24,6 +24,7 @@
  */
 
 #include <vector>
+#include <map>
 #include "headers/uhdm.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -39,22 +40,44 @@ using namespace UHDM;
 
 std::vector<uhdm_handle*> uhdm_handleFactory::objects_;
 
+std::map<BaseClass*, unsigned long> allIds;
+
+void setId(BaseClass* p, unsigned long id) {
+  allIds.insert(std::make_pair(p, id));
+}
+
+static unsigned long incrId = 0;
+unsigned long getId(BaseClass* p) {
+  std::map<BaseClass*, unsigned long>::iterator itr = allIds.find(p);
+  if (itr == allIds.end()) {
+    unsigned long tmp = incrId;
+    allIds.insert(std::make_pair(p, incrId));
+    incrId++;
+    return tmp;		  
+  } else {
+    return (*itr).second;
+  }
+}
+
+
 <FACTORIES>
 
 void Serializer::save(std::string file) {
   int fileid = open(file.c_str(), O_CREAT | O_WRONLY , S_IRWXU);
   ::capnp::MallocMessageBuilder message;
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
+  unsigned long index = 0;
+
+<CAPNP_ID>
   
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designFactory::objects_.size());
-
-  unsigned int index = 0;
+  index = 0;
   for (auto design : designFactory::objects_) {
     designs[index].setVpiName(design->get_vpiName());
     index++;
   }
   
-  <CAPNP_SAVE>
+<CAPNP_SAVE>
   
   writePackedMessageToFd(fileid, message);   
   close(fileid);
