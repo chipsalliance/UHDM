@@ -24,6 +24,7 @@
  */
 
 #include <vector>
+#include <map>
 #include "headers/uhdm.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -38,6 +39,26 @@
 using namespace UHDM;
 
 std::vector<uhdm_handle*> uhdm_handleFactory::objects_;
+
+std::map<BaseClass*, unsigned long> allIds;
+
+void setId(BaseClass* p, unsigned long id) {
+  allIds.insert(std::make_pair(p, id));
+}
+
+static unsigned long incrId = 0;
+unsigned long getId(BaseClass* p) {
+  std::map<BaseClass*, unsigned long>::iterator itr = allIds.find(p);
+  if (itr == allIds.end()) {
+    unsigned long tmp = incrId;
+    allIds.insert(std::make_pair(p, incrId));
+    incrId++;
+    return tmp;		  
+  } else {
+    return (*itr).second;
+  }
+}
+
 
 std::vector<process*> processFactory::objects_;
 std::vector<std::vector<process*>*> VectorOfprocessFactory::objects_;
@@ -81,16 +102,256 @@ void Serializer::save(std::string file) {
   int fileid = open(file.c_str(), O_CREAT | O_WRONLY , S_IRWXU);
   ::capnp::MallocMessageBuilder message;
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
+  unsigned long index = 0;
+
+
+  index = 0;
+  for (auto obj : processFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : scopeFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : interfaceFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : interface_arrayFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : cont_assignFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : portFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : module_arrayFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : primitiveFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : primitive_arrayFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : mod_pathFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : tchkFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : def_paramFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : io_declFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : alias_stmtFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : clocking_blockFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : instance_arrayFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : moduleFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 0;
+  for (auto obj : designFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
   
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designFactory::objects_.size());
-
-  unsigned int index = 0;
+  index = 0;
   for (auto design : designFactory::objects_) {
     designs[index].setVpiName(design->get_vpiName());
     index++;
   }
   
-  
+
+ ::capnp::List<Process>::Builder Processs = cap_root.initFactoryProcess(processFactory::objects_.size());
+ index = 0;
+ for (auto obj : processFactory::objects_) {
+    Processs[index].setVpiParent(getId(obj->get_vpiParent()));
+    Processs[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Scope>::Builder Scopes = cap_root.initFactoryScope(scopeFactory::objects_.size());
+ index = 0;
+ for (auto obj : scopeFactory::objects_) {
+    Scopes[index].setVpiParent(getId(obj->get_vpiParent()));
+    Scopes[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Interface>::Builder Interfaces = cap_root.initFactoryInterface(interfaceFactory::objects_.size());
+ index = 0;
+ for (auto obj : interfaceFactory::objects_) {
+    Interfaces[index].setVpiParent(getId(obj->get_vpiParent()));
+    Interfaces[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Interfacearray>::Builder Interfacearrays = cap_root.initFactoryInterfacearray(interface_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : interface_arrayFactory::objects_) {
+    Interfacearrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Interfacearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Contassign>::Builder Contassigns = cap_root.initFactoryContassign(cont_assignFactory::objects_.size());
+ index = 0;
+ for (auto obj : cont_assignFactory::objects_) {
+    Contassigns[index].setVpiParent(getId(obj->get_vpiParent()));
+    Contassigns[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Port>::Builder Ports = cap_root.initFactoryPort(portFactory::objects_.size());
+ index = 0;
+ for (auto obj : portFactory::objects_) {
+    Ports[index].setVpiParent(getId(obj->get_vpiParent()));
+    Ports[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Modulearray>::Builder Modulearrays = cap_root.initFactoryModulearray(module_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : module_arrayFactory::objects_) {
+    Modulearrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Modulearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Primitive>::Builder Primitives = cap_root.initFactoryPrimitive(primitiveFactory::objects_.size());
+ index = 0;
+ for (auto obj : primitiveFactory::objects_) {
+    Primitives[index].setVpiParent(getId(obj->get_vpiParent()));
+    Primitives[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Primitivearray>::Builder Primitivearrays = cap_root.initFactoryPrimitivearray(primitive_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : primitive_arrayFactory::objects_) {
+    Primitivearrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Primitivearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Modpath>::Builder Modpaths = cap_root.initFactoryModpath(mod_pathFactory::objects_.size());
+ index = 0;
+ for (auto obj : mod_pathFactory::objects_) {
+    Modpaths[index].setVpiParent(getId(obj->get_vpiParent()));
+    Modpaths[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Tchk>::Builder Tchks = cap_root.initFactoryTchk(tchkFactory::objects_.size());
+ index = 0;
+ for (auto obj : tchkFactory::objects_) {
+    Tchks[index].setVpiParent(getId(obj->get_vpiParent()));
+    Tchks[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Defparam>::Builder Defparams = cap_root.initFactoryDefparam(def_paramFactory::objects_.size());
+ index = 0;
+ for (auto obj : def_paramFactory::objects_) {
+    Defparams[index].setVpiParent(getId(obj->get_vpiParent()));
+    Defparams[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Iodecl>::Builder Iodecls = cap_root.initFactoryIodecl(io_declFactory::objects_.size());
+ index = 0;
+ for (auto obj : io_declFactory::objects_) {
+    Iodecls[index].setVpiParent(getId(obj->get_vpiParent()));
+    Iodecls[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Aliasstmt>::Builder Aliasstmts = cap_root.initFactoryAliasstmt(alias_stmtFactory::objects_.size());
+ index = 0;
+ for (auto obj : alias_stmtFactory::objects_) {
+    Aliasstmts[index].setVpiParent(getId(obj->get_vpiParent()));
+    Aliasstmts[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Clockingblock>::Builder Clockingblocks = cap_root.initFactoryClockingblock(clocking_blockFactory::objects_.size());
+ index = 0;
+ for (auto obj : clocking_blockFactory::objects_) {
+    Clockingblocks[index].setVpiParent(getId(obj->get_vpiParent()));
+    Clockingblocks[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Instancearray>::Builder Instancearrays = cap_root.initFactoryInstancearray(instance_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : instance_arrayFactory::objects_) {
+    Instancearrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Instancearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+
+   index++;
+ }
+ ::capnp::List<Module>::Builder Modules = cap_root.initFactoryModule(moduleFactory::objects_.size());
+ index = 0;
+ for (auto obj : moduleFactory::objects_) {
+    Modules[index].setVpiParent(getId(obj->get_vpiParent()));
+    Modules[index].setUhdmParentType(obj->get_uhdmParentType());
+    Modules[index].setVpiName(obj->get_vpiName());
+    Modules[index].setVpiTopModule(obj->get_vpiTopModule());
+    Modules[index].setVpiDefDecayTime(obj->get_vpiDefDecayTime());
+
+   index++;
+ }
+ ::capnp::List<Design>::Builder Designs = cap_root.initFactoryDesign(designFactory::objects_.size());
+ index = 0;
+ for (auto obj : designFactory::objects_) {
+    Designs[index].setVpiParent(getId(obj->get_vpiParent()));
+    Designs[index].setUhdmParentType(obj->get_uhdmParentType());
+    Designs[index].setVpiName(obj->get_vpiName());
+
+   index++;
+ }
   
   writePackedMessageToFd(fileid, message);   
   close(fileid);
