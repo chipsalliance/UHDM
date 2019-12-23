@@ -59,7 +59,6 @@ unsigned long getId(BaseClass* p) {
   }
 }
 
-
 std::vector<process*> processFactory::objects_;
 std::vector<std::vector<process*>*> VectorOfprocessFactory::objects_;
 std::vector<scope*> scopeFactory::objects_;
@@ -97,6 +96,127 @@ std::vector<std::vector<module*>*> VectorOfmoduleFactory::objects_;
 std::vector<design*> designFactory::objects_;
 std::vector<std::vector<design*>*> VectorOfdesignFactory::objects_;
 
+
+BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
+  switch (objectType) {
+  case uhdmprocess: return processFactory::objects_[index];
+  case uhdmscope: return scopeFactory::objects_[index];
+  case uhdminterface: return interfaceFactory::objects_[index];
+  case uhdminterface_array: return interface_arrayFactory::objects_[index];
+  case uhdmcont_assign: return cont_assignFactory::objects_[index];
+  case uhdmport: return portFactory::objects_[index];
+  case uhdmmodule_array: return module_arrayFactory::objects_[index];
+  case uhdmprimitive: return primitiveFactory::objects_[index];
+  case uhdmprimitive_array: return primitive_arrayFactory::objects_[index];
+  case uhdmmod_path: return mod_pathFactory::objects_[index];
+  case uhdmtchk: return tchkFactory::objects_[index];
+  case uhdmdef_param: return def_paramFactory::objects_[index];
+  case uhdmio_decl: return io_declFactory::objects_[index];
+  case uhdmalias_stmt: return alias_stmtFactory::objects_[index];
+  case uhdmclocking_block: return clocking_blockFactory::objects_[index];
+  case uhdminstance_array: return instance_arrayFactory::objects_[index];
+  case uhdmmodule: return moduleFactory::objects_[index];
+  case uhdmdesign: return designFactory::objects_[index];
+
+  default:
+    return NULL;
+  }
+  return NULL;
+}
+
+void Serializer::purge() {
+
+  for (auto obj : processFactory::objects_) {
+    delete obj;
+  }
+  processFactory::objects_.clear();
+
+  for (auto obj : scopeFactory::objects_) {
+    delete obj;
+  }
+  scopeFactory::objects_.clear();
+
+  for (auto obj : interfaceFactory::objects_) {
+    delete obj;
+  }
+  interfaceFactory::objects_.clear();
+
+  for (auto obj : interface_arrayFactory::objects_) {
+    delete obj;
+  }
+  interface_arrayFactory::objects_.clear();
+
+  for (auto obj : cont_assignFactory::objects_) {
+    delete obj;
+  }
+  cont_assignFactory::objects_.clear();
+
+  for (auto obj : portFactory::objects_) {
+    delete obj;
+  }
+  portFactory::objects_.clear();
+
+  for (auto obj : module_arrayFactory::objects_) {
+    delete obj;
+  }
+  module_arrayFactory::objects_.clear();
+
+  for (auto obj : primitiveFactory::objects_) {
+    delete obj;
+  }
+  primitiveFactory::objects_.clear();
+
+  for (auto obj : primitive_arrayFactory::objects_) {
+    delete obj;
+  }
+  primitive_arrayFactory::objects_.clear();
+
+  for (auto obj : mod_pathFactory::objects_) {
+    delete obj;
+  }
+  mod_pathFactory::objects_.clear();
+
+  for (auto obj : tchkFactory::objects_) {
+    delete obj;
+  }
+  tchkFactory::objects_.clear();
+
+  for (auto obj : def_paramFactory::objects_) {
+    delete obj;
+  }
+  def_paramFactory::objects_.clear();
+
+  for (auto obj : io_declFactory::objects_) {
+    delete obj;
+  }
+  io_declFactory::objects_.clear();
+
+  for (auto obj : alias_stmtFactory::objects_) {
+    delete obj;
+  }
+  alias_stmtFactory::objects_.clear();
+
+  for (auto obj : clocking_blockFactory::objects_) {
+    delete obj;
+  }
+  clocking_blockFactory::objects_.clear();
+
+  for (auto obj : instance_arrayFactory::objects_) {
+    delete obj;
+  }
+  instance_arrayFactory::objects_.clear();
+
+  for (auto obj : moduleFactory::objects_) {
+    delete obj;
+  }
+  moduleFactory::objects_.clear();
+
+  for (auto obj : designFactory::objects_) {
+    delete obj;
+  }
+  designFactory::objects_.clear();
+
+}
 
 void Serializer::save(std::string file) {
   int fileid = open(file.c_str(), O_CREAT | O_WRONLY , S_IRWXU);
@@ -487,6 +607,7 @@ void Serializer::save(std::string file) {
 }
 
 const std::vector<vpiHandle> Serializer::restore(std::string file) {
+  purge();
   std::vector<vpiHandle> designs;
   int fileid = open(file.c_str(), O_RDONLY);
   ::capnp::PackedFdMessageReader message(fileid);
@@ -589,6 +710,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Process::Reader obj : Processs) {
    processFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   processFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -596,6 +718,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Scope::Reader obj : Scopes) {
    scopeFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   scopeFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -603,6 +726,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Interface::Reader obj : Interfaces) {
    interfaceFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   interfaceFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -610,6 +734,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Interfacearray::Reader obj : Interfacearrays) {
    interface_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   interface_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -617,6 +742,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Contassign::Reader obj : Contassigns) {
    cont_assignFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   cont_assignFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -624,6 +750,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Port::Reader obj : Ports) {
    portFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   portFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -631,6 +758,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Modulearray::Reader obj : Modulearrays) {
    module_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   module_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -638,6 +766,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Primitive::Reader obj : Primitives) {
    primitiveFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   primitiveFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -645,6 +774,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Primitivearray::Reader obj : Primitivearrays) {
    primitive_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   primitive_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -652,6 +782,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Modpath::Reader obj : Modpaths) {
    mod_pathFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   mod_pathFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -659,6 +790,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Tchk::Reader obj : Tchks) {
    tchkFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   tchkFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -666,6 +798,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Defparam::Reader obj : Defparams) {
    def_paramFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   def_paramFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -673,6 +806,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Iodecl::Reader obj : Iodecls) {
    io_declFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   io_declFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -680,6 +814,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Aliasstmt::Reader obj : Aliasstmts) {
    alias_stmtFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   alias_stmtFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -687,6 +822,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Clockingblock::Reader obj : Clockingblocks) {
    clocking_blockFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   clocking_blockFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -694,6 +830,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Instancearray::Reader obj : Instancearrays) {
    instance_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   instance_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
 
    index++;
  }
@@ -701,9 +838,10 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Module::Reader obj : Modules) {
    moduleFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
-   moduleFactory::objects_[index]->set_vpiName(obj.getVpiName());
-   moduleFactory::objects_[index]->set_vpiTopModule(obj.getVpiTopModule());
-   moduleFactory::objects_[index]->set_vpiDefDecayTime(obj.getVpiDefDecayTime());
+   moduleFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+    moduleFactory::objects_[index]->set_vpiName(obj.getVpiName());
+    moduleFactory::objects_[index]->set_vpiTopModule(obj.getVpiTopModule());
+    moduleFactory::objects_[index]->set_vpiDefDecayTime(obj.getVpiDefDecayTime());
    if (obj.getInstancearray()) 
      moduleFactory::objects_[index]->set_instance_array(instance_arrayFactory::objects_[obj.getInstancearray()-1]);
     
@@ -845,7 +983,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  index = 0;
  for (Design::Reader obj : Designs) {
    designFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
-   designFactory::objects_[index]->set_vpiName(obj.getVpiName());
+   designFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+    designFactory::objects_[index]->set_vpiName(obj.getVpiName());
     
     if (obj.getAllModules().size()) { 
       VectorOfmodule* vect = VectorOfmoduleFactory::make();
@@ -867,14 +1006,10 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
   
   
-  for (Design::Reader d : cap_root.getDesigns()) {
-    design* uhdm_design = designFactory::make(); 
-    uhdm_design->set_vpiName(d.getVpiName());
-    vpiHandle designH = uhdm_handleFactory::make(uhdmdesign, uhdm_design);
+   for (auto d : designFactory::objects_) {
+    vpiHandle designH = uhdm_handleFactory::make(uhdmdesign, d);
     designs.push_back(designH);
   }
-  
-
    
   close(fileid); 
   return designs;

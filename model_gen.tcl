@@ -351,11 +351,12 @@ proc generate_code { models } {
     set typedefs ""
     set containers ""
     set capnp_save ""
-    set capnp_restore ""
     set capnp_schema ""
     set capnp_root_schema ""
     set capnpRootSchemaIndex 1
     set classes ""
+    set factory_object_type_map ""
+    set factory_purge ""
     foreach model $models {
 	global $model
 	puts "** $model **"
@@ -370,6 +371,7 @@ proc generate_code { models } {
 	append headers "#include \"headers/$classname.h\"\n"
 	append factories "std::vector<${classname}*> ${classname}Factory::objects_;\n"
 	append factories "std::vector<std::vector<${classname}*>*> VectorOf${classname}Factory::objects_;\n"
+	append factory_object_type_map "  case uhdm${classname}: return ${classname}Factory::objects_\[index\];\n"
         lappend classes $classname
 	set capnpIndex 0
         append capnp_schema "struct $Classname \{\n"
@@ -401,8 +403,7 @@ proc generate_code { models } {
 	append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(getId(obj->get_vpiParent()));\n"
 	append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->get_uhdmParentType());\n"
 	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_uhdmParentType(obj.getUhdmParentType());\n"
-#	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiParent(${type}Factory::objects_\[obj.getVpiParent()-1\]);\n"
-
+	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
 	
 	dict for {key val} $data {
 	    if {$key == "properties"} {
@@ -573,14 +574,24 @@ $RESTORE($class)
     setId(obj, index);
     index++;
   }"
+
+	append factory_purge "
+  for (auto obj : ${class}Factory::objects_) {
+    delete obj;
+  }
+  ${class}Factory::objects_.clear();
+"
+
+	
     }
     
     regsub {<FACTORIES>} $serializer_content $factories serializer_content
+    regsub {<FACTORY_PURGE>} $serializer_content $factory_purge serializer_content
+    regsub {<FACTORY_OBJECT_TYPE_MAP>} $serializer_content $factory_object_type_map serializer_content
     regsub {<CAPNP_ID>} $serializer_content $capnp_id serializer_content
     regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content
     regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
     regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
-    regsub {<CAPNP_RESTORE>} $serializer_content $capnp_restore serializer_content
     set serializerId [open "src/Serializer.cpp" "w"]
     puts $serializerId $serializer_content
     close $serializerId

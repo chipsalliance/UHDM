@@ -59,8 +59,20 @@ unsigned long getId(BaseClass* p) {
   }
 }
 
-
 <FACTORIES>
+
+BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
+  switch (objectType) {
+<FACTORY_OBJECT_TYPE_MAP>
+  default:
+    return NULL;
+  }
+  return NULL;
+}
+
+void Serializer::purge() {
+<FACTORY_PURGE>
+}
 
 void Serializer::save(std::string file) {
   int fileid = open(file.c_str(), O_CREAT | O_WRONLY , S_IRWXU);
@@ -84,6 +96,7 @@ void Serializer::save(std::string file) {
 }
 
 const std::vector<vpiHandle> Serializer::restore(std::string file) {
+  purge();
   std::vector<vpiHandle> designs;
   int fileid = open(file.c_str(), O_RDONLY);
   ::capnp::PackedFdMessageReader message(fileid);
@@ -94,14 +107,10 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
   
 <CAPNP_RESTORE_FACTORIES>  
   
-  for (Design::Reader d : cap_root.getDesigns()) {
-    design* uhdm_design = designFactory::make(); 
-    uhdm_design->set_vpiName(d.getVpiName());
-    vpiHandle designH = uhdm_handleFactory::make(uhdmdesign, uhdm_design);
+   for (auto d : designFactory::objects_) {
+    vpiHandle designH = uhdm_handleFactory::make(uhdmdesign, d);
     designs.push_back(designH);
   }
-  
-<CAPNP_RESTORE>
    
   close(fileid); 
   return designs;
