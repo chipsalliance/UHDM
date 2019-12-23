@@ -27,7 +27,6 @@ int main (int argc, char** argv) {
   v2->push_back(m2);
   v2->push_back(m3);
   m1->set_modules(v2);
-  //vpiHandle design1 = uhdm_handleFactory::make(uhdmdesign, d);
 
   std::cout << "Save design" << std::endl;
   Serializer::save("design.uhdmap");

@@ -59,7 +59,6 @@ unsigned long getId(BaseClass* p) {
   }
 }
 
-
 <FACTORIES>
 
 BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
@@ -71,11 +70,9 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   return NULL;
 }
 
-
 void Serializer::purge() {
 <FACTORY_PURGE>
 }
-
 
 void Serializer::save(std::string file) {
   int fileid = open(file.c_str(), O_CREAT | O_WRONLY , S_IRWXU);

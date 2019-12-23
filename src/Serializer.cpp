@@ -59,7 +59,6 @@ unsigned long getId(BaseClass* p) {
   }
 }
 
-
 std::vector<process*> processFactory::objects_;
 std::vector<std::vector<process*>*> VectorOfprocessFactory::objects_;
 std::vector<scope*> scopeFactory::objects_;
@@ -124,7 +123,6 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   }
   return NULL;
 }
-
 
 void Serializer::purge() {
 
@@ -219,7 +217,6 @@ void Serializer::purge() {
   designFactory::objects_.clear();
 
 }
-
 
 void Serializer::save(std::string file) {
   int fileid = open(file.c_str(), O_CREAT | O_WRONLY , S_IRWXU);
