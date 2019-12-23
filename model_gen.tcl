@@ -384,6 +384,7 @@ proc generate_code { models } {
           append defines "$define\n"
         }
 	append SAVE($classname) ""
+	append RESTORE($classname) ""
 	
         # Builtin "Parent pointer and Parent type" method and field
         append methods [printMethods BaseClass vpiParent 1] 
@@ -399,6 +400,8 @@ proc generate_code { models } {
 	incr capnpRootSchemaIndex
 	append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(getId(obj->get_vpiParent()));\n"
 	append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->get_uhdmParentType());\n"
+	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_uhdmParentType(obj.getUhdmParentType());\n"
+#	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiParent(${type}Factory::objects_\[obj.getVpiParent()-1\]);\n"
 
 	
 	dict for {key val} $data {
@@ -420,6 +423,7 @@ proc generate_code { models } {
 		    set Vpi [string toupper $vpi 0 0]
 		    regsub -all  {_} $Vpi "" Vpi
 		    append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->get_${vpi}());\n"
+		    append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->set_${vpi}(obj.get${Vpi}());\n"
 		}
 
 	    }
@@ -443,11 +447,34 @@ proc generate_code { models } {
                     append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]
 
 		    set Type [string toupper $type 0 0]
-		    regsub -all  {_} $Type "" Type
+		    regsub -all  {_} $Type "" Type		    
 		    regsub -all  {_} $name "" Name
 		    # all types are reduced to index
 		    append capnp_schema [printCapnpSchema UInt64 $Name $card $capnpIndex]
 		    incr capnpIndex
+		    if {$card == 1} {
+			append SAVE($classname) "    ${Classname}s\[index\].set[string toupper ${Name} 0 0](getId(obj->get_${name}()));\n"
+			append RESTORE($classname) "   if (obj.get[string toupper ${Name} 0 0]()) 
+     ${classname}Factory::objects_\[index\]->set_${name}(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()-1\]);\n"
+		    } else {
+			append SAVE($classname) " 
+    if (obj->get_${name}()) {  
+      ::capnp::List<::uint64_t>::Builder [string toupper ${Name} 0 0]s = ${Classname}s\[index\].init[string toupper ${Name} 0 0](obj->get_${name}()->size());
+      for (unsigned int ind = 0; ind < obj->get_${name}()->size(); ind++) {
+        [string toupper ${Name} 0 0]s.set(ind, getId((*obj->get_${name}())\[ind\]));
+      }
+    }
+"
+			append RESTORE($classname) "    
+    if (obj.get[string toupper ${Name} 0 0]().size()) { 
+      VectorOf${type}* vect = VectorOf${type}Factory::make();
+      for (unsigned int ind = 0; ind < obj.get[string toupper ${Name} 0 0]().size(); ind++) {
+         vect->push_back(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()\[ind\]-1\]);
+      }
+      ${classname}Factory::objects_\[index\]->set_${name}(vect);
+    }
+"
+		    }
 		}
 	    
 	    }
@@ -523,23 +550,36 @@ proc generate_code { models } {
 $SAVE($class)
    index++;
  }"
+	   append capnp_init_factories "
+ ::capnp::List<$Class>::Reader ${Class}s = cap_root.getFactory${Class}();
+ for (unsigned ind = 0; ind < ${Class}s.size(); ind++) {
+   setId(${class}Factory::make(), ind);
+ }
+" 
+	   append capnp_restore_factories "
+ index = 0;
+ for (${Class}::Reader obj : ${Class}s) {
+$RESTORE($class)
+   index++;
+ }
+"
 	}
     }
     set capnp_id ""
     foreach class $classes {
   	append capnp_id "
-  index = 0;
+  index = 1;
   for (auto obj : ${class}Factory::objects_) {
     setId(obj, index);
     index++;
-  }"       
+  }"
     }
-
-
     
     regsub {<FACTORIES>} $serializer_content $factories serializer_content
     regsub {<CAPNP_ID>} $serializer_content $capnp_id serializer_content
     regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content
+    regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
+    regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
     regsub {<CAPNP_RESTORE>} $serializer_content $capnp_restore serializer_content
     set serializerId [open "src/Serializer.cpp" "w"]
     puts $serializerId $serializer_content
