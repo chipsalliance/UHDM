@@ -88,15 +88,21 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
   int fileid = open(file.c_str(), O_RDONLY);
   ::capnp::PackedFdMessageReader message(fileid);
   UhdmRoot::Reader cap_root = message.getRoot<UhdmRoot>();
+  unsigned long index = 0;
+
+<CAPNP_INIT_FACTORIES>  
+  
+<CAPNP_RESTORE_FACTORIES>  
   
   for (Design::Reader d : cap_root.getDesigns()) {
     design* uhdm_design = designFactory::make(); 
     uhdm_design->set_vpiName(d.getVpiName());
     vpiHandle designH = uhdm_handleFactory::make(uhdmdesign, uhdm_design);
     designs.push_back(designH);
+  }
   
-     <CAPNP_RESTORE>
-  } 
+<CAPNP_RESTORE>
+   
   close(fileid); 
   return designs;
 }
