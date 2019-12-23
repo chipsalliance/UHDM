@@ -27,36 +27,37 @@ int main (int argc, char** argv) {
   v2->push_back(m2);
   v2->push_back(m3);
   m1->set_modules(v2);
-  vpiHandle design1 = uhdm_handleFactory::make(uhdmdesign, d);
+  //vpiHandle design1 = uhdm_handleFactory::make(uhdmdesign, d);
 
   std::cout << "Save design" << std::endl;
   Serializer::save("design.uhdmap");
   std::cout << "Restore design" << std::endl;
   std::vector<vpiHandle> restoredDesigns = Serializer::restore("design.uhdmap");
+  
   for (auto restoredDesign : restoredDesigns) {
     std::cout << "Restored design name: " << vpi_get_str(vpiName, restoredDesign) << std::endl;
-  }
   
-  // VPI test
-  vpiHandle modItr = vpi_iterate(uhdmallModules,design1); 
-  while (vpiHandle obj_h = vpi_scan(modItr) ) {
-    std::cout << "mod:" << vpi_get_str(vpiName, obj_h)
-	      << ", top:" 
-              << vpi_get(vpiTopModule, obj_h)
-              << ", parent:" << vpi_get_str(vpiName, vpi_handle(vpiParent, obj_h));
-    vpiHandle submodItr = vpi_iterate(vpiModule, obj_h); 
-    while (vpiHandle sub_h = vpi_scan(submodItr) ) {
-      std::cout << "\n  \\_ mod:" << vpi_get_str(vpiName, sub_h) 
-		<< ", top:" << vpi_get(vpiTopModule, sub_h)
-		<< ", parent:" << vpi_get_str(vpiName, vpi_handle(vpiParent, sub_h));
-      vpi_release_handle (sub_h);
-    }
+    // VPI test
+    vpiHandle modItr = vpi_iterate(uhdmallModules,restoredDesign); 
+    while (vpiHandle obj_h = vpi_scan(modItr) ) {
+      std::cout << "mod:" << vpi_get_str(vpiName, obj_h)
+		<< ", top:" 
+		<< vpi_get(vpiTopModule, obj_h)
+		<< ", parent:" << vpi_get_str(vpiName, vpi_handle(vpiParent, obj_h));
+      vpiHandle submodItr = vpi_iterate(vpiModule, obj_h); 
+      while (vpiHandle sub_h = vpi_scan(submodItr) ) {
+	std::cout << "\n  \\_ mod:" << vpi_get_str(vpiName, sub_h) 
+		  << ", top:" << vpi_get(vpiTopModule, sub_h)
+		  << ", parent:" << vpi_get_str(vpiName, vpi_handle(vpiParent, sub_h));
+	vpi_release_handle (sub_h);
+      }
     vpi_release_handle (submodItr);
     
     std::cout << std::endl;
     vpi_release_handle (obj_h);
+    }
+    vpi_release_handle(modItr);
   }
-  vpi_release_handle(modItr);
-
+  
   return 0;
 };

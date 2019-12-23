@@ -14,7 +14,10 @@ namespace UHDM {
   class Serializer {
   public:
     static void save(std::string file);
+    static void purge();
     static const std::vector<vpiHandle> restore(std::string file);
+  private:
+    static BaseClass* getObject(unsigned int objectType, unsigned int index);
   };
 
 };
