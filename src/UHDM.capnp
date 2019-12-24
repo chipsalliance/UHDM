@@ -2,24 +2,25 @@
 
 struct UhdmRoot {
   designs @0 : List(Design);
-  factoryProcess @1 :List(Process);
-  factoryScope @2 :List(Scope);
-  factoryInterface @3 :List(Interface);
-  factoryInterfacearray @4 :List(Interfacearray);
-  factoryContassign @5 :List(Contassign);
-  factoryPort @6 :List(Port);
-  factoryModulearray @7 :List(Modulearray);
-  factoryPrimitive @8 :List(Primitive);
-  factoryPrimitivearray @9 :List(Primitivearray);
-  factoryModpath @10 :List(Modpath);
-  factoryTchk @11 :List(Tchk);
-  factoryDefparam @12 :List(Defparam);
-  factoryIodecl @13 :List(Iodecl);
-  factoryAliasstmt @14 :List(Aliasstmt);
-  factoryClockingblock @15 :List(Clockingblock);
-  factoryInstancearray @16 :List(Instancearray);
-  factoryModule @17 :List(Module);
-  factoryDesign @18 :List(Design);
+  symbols @1 : List(Text);
+  factoryProcess @2 :List(Process);
+  factoryScope @3 :List(Scope);
+  factoryInterface @4 :List(Interface);
+  factoryInterfacearray @5 :List(Interfacearray);
+  factoryContassign @6 :List(Contassign);
+  factoryPort @7 :List(Port);
+  factoryModulearray @8 :List(Modulearray);
+  factoryPrimitive @9 :List(Primitive);
+  factoryPrimitivearray @10 :List(Primitivearray);
+  factoryModpath @11 :List(Modpath);
+  factoryTchk @12 :List(Tchk);
+  factoryDefparam @13 :List(Defparam);
+  factoryIodecl @14 :List(Iodecl);
+  factoryAliasstmt @15 :List(Aliasstmt);
+  factoryClockingblock @16 :List(Clockingblock);
+  factoryInstancearray @17 :List(Instancearray);
+  factoryModule @18 :List(Module);
+  factoryDesign @19 :List(Design);
 
 }
 

@@ -353,7 +353,7 @@ proc generate_code { models } {
     set capnp_save ""
     set capnp_schema ""
     set capnp_root_schema ""
-    set capnpRootSchemaIndex 1
+    set capnpRootSchemaIndex 2
     set classes ""
     set factory_object_type_map ""
     set factory_purge ""
