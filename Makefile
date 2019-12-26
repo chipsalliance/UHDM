@@ -9,6 +9,7 @@ test:
 	$(MAKE) -C build test
 
 clean:
+	rm src/UHDM.capnp.c++
 	rm -rf build
 
 install:
