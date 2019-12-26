@@ -1,19 +1,20 @@
-CXXFLAGS=-Wall -Wextra -W -Wno-unused-parameter
-GENERATED_HEADERS=headers/module.h headers/design.h
-GENERATED_SOURCE=src/vpi_user.cpp
+# UHDM top Makefile (Wrapper to cmake)
 
-all: generate-api run-test
+release:
+	mkdir -p build
+	cd build; cmake ../ -DCMAKE_BUILD_TYPE=Release
+	$(MAKE) -C build
 
-generate-api: $(GENERATED_SOURCE)
-
-$(GENERATED_SOURCE): model_gen.tcl model/uhdm.yaml templates/vpi_user.cpp
-	tclsh ./model_gen.tcl model/models.lst
-
-unittest: src/vpi_user.cpp
-	$(CXX) $(CXXFLAGS) -std=c++14 -g -Iinclude src/main.cpp src/vpi_user.cpp src/Serializer.cpp src/UHDM.capnp.c++ -I. -lcapnp -lkj -o $@
-
-run-test: unittest
-	./unittest
+test:
+	$(MAKE) -C build test
 
 clean:
-	rm -f $(GENERATED_SOURCE) $(GENERATED_HEADERS) unittest
+	rm src/UHDM.capnp.c++
+	rm -rf build
+
+install:
+	$(MAKE) -C build install
+
+uninstall:
+	rm -rf /usr/local/lib/uhdm
+	rm -rf /usr/local/include/uhdm

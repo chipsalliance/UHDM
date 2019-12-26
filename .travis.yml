@@ -37,4 +37,5 @@ install:
 script:
   - make clean
   - make
+  - make test
   
