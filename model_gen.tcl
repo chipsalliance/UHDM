@@ -171,8 +171,13 @@ proc printMethods { type vpi card } {
 	if {($type != "int") && ($type != "bool") && ($type != "std::string")} {
 	    set pointer "*"
 	}
-	append methods "\n    ${type}${pointer} get_${vpi}() const { return ${vpi}_; }\n"
-	append methods "\n    void set_${vpi}(${type}${pointer} data) { ${vpi}_ = data; }\n"
+	if {$type == "std::string"} {
+	    append methods "\n    ${type}${pointer} get_${vpi}() const { return SymbolFactory::getSymbol(${vpi}_); }\n"
+	    append methods "\n    void set_${vpi}(${type}${pointer} data) { ${vpi}_ = SymbolFactory::make(data); }\n"	    
+	} else {
+	    append methods "\n    ${type}${pointer} get_${vpi}() const { return ${vpi}_; }\n"
+	    append methods "\n    void set_${vpi}(${type}${pointer} data) { ${vpi}_ = data; }\n"
+	}
     } elseif {$card == "any"} {
 	append methods "\n    const VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
 	append methods "\n    void set_${vpi}(VectorOf${type}* data) { ${vpi}_ = data; }\n"
@@ -212,7 +217,11 @@ proc printMembers { type vpi card } {
 	if {($type != "int") && ($type != "bool") && ($type != "std::string")} {
 	    set pointer "*"
 	}
-	append members "\n    ${type}${pointer} ${vpi}_;\n"
+	if {$type == "std::string"} {
+	    append members "\n    unsigned int ${vpi}_;\n"
+	} else {
+	    append members "\n    ${type}${pointer} ${vpi}_;\n"	    
+	}
     } elseif {$card == "any"} {
 	append members "\n    VectorOf${type}* ${vpi}_;\n"
     }

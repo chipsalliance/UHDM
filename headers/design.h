@@ -41,9 +41,9 @@ namespace UHDM {
 
     void set_uhdmParentType(int data) { uhdmParentType_ = data; }
 
-    std::string get_vpiName() const { return vpiName_; }
+    std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
 
-    void set_vpiName(std::string data) { vpiName_ = data; }
+    void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
 
     const VectorOfmodule* get_allModules() const { return allModules_; }
 
@@ -59,7 +59,7 @@ namespace UHDM {
 
     int uhdmParentType_;
 
-    std::string vpiName_;
+    unsigned int vpiName_;
 
     VectorOfmodule* allModules_;
 

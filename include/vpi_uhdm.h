@@ -46,11 +46,11 @@ namespace UHDM {
 
   class SymbolFactory {
   public:
-    static unsigned long make(const std::string& symbol);
-    static const std::string& getSymbol(unsigned long);
-    static unsigned long getId(const std::string& symbol);
+    static unsigned int make(const std::string& symbol);
+    static const std::string& getSymbol(unsigned int id);
+    static unsigned int getId(const std::string& symbol);
   private:
-    static unsigned long idCounter_;
+    static unsigned int idCounter_;
   };
   
 };
