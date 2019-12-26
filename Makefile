@@ -9,7 +9,6 @@ test:
 	$(MAKE) -C build test
 
 clean:
-	$(MAKE) -C build clean
 	rm -rf build
 
 install:
