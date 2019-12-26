@@ -23,11 +23,16 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
+#include <vector>
+#include <unordered_map>
 
 #ifndef CONTAINERS_H
 #define CONTAINERS_H
 
 namespace UHDM {
+  typedef std::vector<std::string> Id2SymbolMap;
+  typedef std::unordered_map<std::string, unsigned long> Symbol2IdMap;
+
   <CONTAINERS>
 };
 

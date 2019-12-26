@@ -42,6 +42,44 @@ std::vector<uhdm_handle*> uhdm_handleFactory::objects_;
 
 std::map<BaseClass*, unsigned long> allIds;
 
+Id2SymbolMap id2SymbolMap;
+
+Symbol2IdMap symbol2IdMap;
+
+unsigned int SymbolFactory::idCounter_ = 0;
+
+unsigned int SymbolFactory::make(const std::string& symbol) {
+  Symbol2IdMap::iterator itr = symbol2IdMap.find(symbol);
+  if (itr == symbol2IdMap.end()) {
+    symbol2IdMap.insert(std::make_pair(symbol, idCounter_));
+    id2SymbolMap.push_back(symbol);
+    idCounter_++;
+    unsigned int tmp = idCounter_ - 1;
+    return (tmp);
+  } else {
+    unsigned int tmp = (*itr).second;
+    return tmp;
+  }
+}
+
+static std::string bad_symbol = "@@BAD_SYMBOL@@";
+const std::string& SymbolFactory::getSymbol(unsigned int id) {
+   if (id >= id2SymbolMap.size())
+    return bad_symbol;
+  return id2SymbolMap[id];
+}
+
+unsigned int SymbolFactory::getId(const std::string& symbol) {
+   Symbol2IdMap::iterator itr = symbol2IdMap.find(symbol);
+  if (itr == symbol2IdMap.end()) {
+    return 0;
+  } else {
+    unsigned int tmp = (*itr).second;
+    return tmp;
+  }
+}
+ 
+
 void setId(BaseClass* p, unsigned long id) {
   allIds.insert(std::make_pair(p, id));
 }
@@ -88,7 +126,14 @@ void Serializer::save(std::string file) {
     designs[index].setVpiName(design->get_vpiName());
     index++;
   }
-  
+
+  ::capnp::List<::capnp::Text>::Builder symbols = cap_root.initSymbols(id2SymbolMap.size());
+  index = 0;
+  for (auto symbol : id2SymbolMap) {
+    symbols.set(index, symbol);
+    index++;
+  }
+
 <CAPNP_SAVE>
   
   writePackedMessageToFd(fileid, message);   
@@ -103,6 +148,11 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
   UhdmRoot::Reader cap_root = message.getRoot<UhdmRoot>();
   unsigned long index = 0;
 
+  ::capnp::List<::capnp::Text>::Reader symbols = cap_root.getSymbols();
+  for (auto symbol : symbols) {
+    SymbolFactory::make(symbol);
+  }
+ 
 <CAPNP_INIT_FACTORIES>  
   
 <CAPNP_RESTORE_FACTORIES>  
