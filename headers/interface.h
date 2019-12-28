@@ -37,27 +37,53 @@ namespace UHDM {
 
     void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
 
-    int get_uhdmParentType() const { return uhdmParentType_; }
+    unsigned int get_uhdmParentType() const { return uhdmParentType_; }
 
-    void set_uhdmParentType(int data) { uhdmParentType_ = data; }
+    void set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; }
 
     std::string get_vpiFile() const { return SymbolFactory::getSymbol(vpiFile_); }
 
     void set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); }
 
-    int get_vpiLineNo() const { return vpiLineNo_; }
+    unsigned int get_vpiLineNo() const { return vpiLineNo_; }
 
-    void set_vpiLineNo(int data) { vpiLineNo_ = data; }
+    void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
+
+    unsigned int get_vpiType() { return vpiInterface; }
+
+    const VectorOfinterface_tf_decl* get_interface_tf_decl() const { return interface_tf_decl_; }
+
+    void set_interface_tf_decl(VectorOfinterface_tf_decl* data) { interface_tf_decl_ = data; }
+
+    const VectorOfmodport* get_modport() const { return modport_; }
+
+    void set_modport(VectorOfmodport* data) { modport_ = data; }
+
+    clocking_block* get_global_clocking() const { return global_clocking_; }
+
+    void set_global_clocking(clocking_block* data) { global_clocking_ = data; }
+
+    clocking_block* get_default_clocking() const { return default_clocking_; }
+
+    void set_default_clocking(clocking_block* data) { default_clocking_ = data; }
 
   private:
     
     BaseClass* vpiParent_;
 
-    int uhdmParentType_;
+    unsigned int uhdmParentType_;
 
     unsigned int vpiFile_;
 
-    int vpiLineNo_;
+    unsigned int vpiLineNo_;
+
+    VectorOfinterface_tf_decl* interface_tf_decl_;
+
+    VectorOfmodport* modport_;
+
+    clocking_block* global_clocking_;
+
+    clocking_block* default_clocking_;
 
   };
 

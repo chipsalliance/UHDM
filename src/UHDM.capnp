@@ -5,22 +5,24 @@ struct UhdmRoot {
   symbols @1 : List(Text);
   factoryProcess @2 :List(Process);
   factoryScope @3 :List(Scope);
-  factoryInterface @4 :List(Interface);
-  factoryInterfacearray @5 :List(Interfacearray);
-  factoryContassign @6 :List(Contassign);
-  factoryPort @7 :List(Port);
-  factoryModulearray @8 :List(Modulearray);
-  factoryPrimitive @9 :List(Primitive);
-  factoryPrimitivearray @10 :List(Primitivearray);
-  factoryModpath @11 :List(Modpath);
-  factoryTchk @12 :List(Tchk);
-  factoryDefparam @13 :List(Defparam);
-  factoryIodecl @14 :List(Iodecl);
-  factoryAliasstmt @15 :List(Aliasstmt);
-  factoryClockingblock @16 :List(Clockingblock);
-  factoryInstancearray @17 :List(Instancearray);
-  factoryModule @18 :List(Module);
-  factoryDesign @19 :List(Design);
+  factoryModport @4 :List(Modport);
+  factoryInterfacetfdecl @5 :List(Interfacetfdecl);
+  factoryInterface @6 :List(Interface);
+  factoryInterfacearray @7 :List(Interfacearray);
+  factoryContassign @8 :List(Contassign);
+  factoryPort @9 :List(Port);
+  factoryModulearray @10 :List(Modulearray);
+  factoryPrimitive @11 :List(Primitive);
+  factoryPrimitivearray @12 :List(Primitivearray);
+  factoryModpath @13 :List(Modpath);
+  factoryTchk @14 :List(Tchk);
+  factoryDefparam @15 :List(Defparam);
+  factoryIodecl @16 :List(Iodecl);
+  factoryAliasstmt @17 :List(Aliasstmt);
+  factoryClockingblock @18 :List(Clockingblock);
+  factoryInstancearray @19 :List(Instancearray);
+  factoryModule @20 :List(Module);
+  factoryDesign @21 :List(Design);
 
 }
 
@@ -39,11 +41,29 @@ struct Scope {
   vpiLineNo @3 :UInt32;
 
 }
+struct Modport {
+  vpiParent @0 :UInt64;
+  uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
+
+}
+struct Interfacetfdecl {
+  vpiParent @0 :UInt64;
+  uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
+
+}
 struct Interface {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
   vpiFile @2 :UInt64;
   vpiLineNo @3 :UInt32;
+  interfacetfdecl @4 :List(UInt64);
+  modport @5 :List(UInt64);
+  globalclocking @6 :UInt64;
+  defaultclocking @7 :UInt64;
 
 }
 struct Interfacearray {

@@ -32,49 +32,57 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 
-#define uhdmprocess 2023
-#define uhdmscope 2024
-#define uhdminterface 2025
-#define uhdminterface_array 2026
-#define uhdmcont_assign 2027
-#define uhdmport 2028
-#define uhdmmodule_array 2029
-#define uhdmprimitive 2030
-#define uhdmprimitive_array 2031
-#define uhdmmod_path 2032
-#define uhdmtchk 2033
-#define uhdmdef_param 2034
-#define uhdmio_decl 2035
-#define uhdmalias_stmt 2036
-#define uhdmclocking_block 2037
-#define uhdminstance_array 2038
-#define uhdmmodule 2039
-#define uhdminstance_array 2038
-#define uhdmscope 2024
-#define uhdmprocess 2023
-#define uhdmprimitive 2030
-#define uhdmprimitive_array 2031
-#define uhdmglobal_clocking 2040
-#define uhdmdefault_clocking 2041
-#define uhdmports 2042
-#define uhdminterfaces 2043
-#define uhdminterface_arrays 2044
-#define uhdmcont_assigns 2045
-#define uhdmmodules 2046
-#define uhdmmodule_array 2029
-#define uhdmmod_path 2032
-#define uhdmtchk 2033
-#define uhdmdef_param 2034
-#define uhdmio_decl 2035
-#define uhdmalias_stmt 2036
-#define uhdmclocking_block 2037
-#define uhdmdesign 2047
-#define uhdmallModules 2048
-#define uhdmtopModules 2049
+#define uhdmprocess 2026
+#define uhdmscope 2027
+#define uhdmmodport 2028
+#define uhdminterface_tf_decl 2029
+#define uhdminterface 2030
+#define uhdminterface_tf_decl 2029
+#define uhdmmodport 2028
+#define uhdmglobal_clocking 2031
+#define uhdmdefault_clocking 2032
+#define uhdminterface_array 2033
+#define uhdmcont_assign 2034
+#define uhdmport 2035
+#define uhdmmodule_array 2036
+#define uhdmprimitive 2037
+#define uhdmprimitive_array 2038
+#define uhdmmod_path 2039
+#define uhdmtchk 2040
+#define uhdmdef_param 2041
+#define uhdmio_decl 2042
+#define uhdmalias_stmt 2043
+#define uhdmclocking_block 2044
+#define uhdminstance_array 2045
+#define uhdmmodule 2046
+#define uhdminstance_array 2045
+#define uhdmscope 2027
+#define uhdmprocess 2026
+#define uhdmprimitive 2037
+#define uhdmprimitive_array 2038
+#define uhdmglobal_clocking 2031
+#define uhdmdefault_clocking 2032
+#define uhdmports 2047
+#define uhdminterfaces 2048
+#define uhdminterface_arrays 2049
+#define uhdmcont_assigns 2050
+#define uhdmmodules 2051
+#define uhdmmodule_array 2036
+#define uhdmmod_path 2039
+#define uhdmtchk 2040
+#define uhdmdef_param 2041
+#define uhdmio_decl 2042
+#define uhdmalias_stmt 2043
+#define uhdmclocking_block 2044
+#define uhdmdesign 2052
+#define uhdmallModules 2053
+#define uhdmtopModules 2054
 
 
 #include "headers/process.h"
 #include "headers/scope.h"
+#include "headers/modport.h"
+#include "headers/interface_tf_decl.h"
 #include "headers/interface.h"
 #include "headers/interface_array.h"
 #include "headers/cont_assign.h"

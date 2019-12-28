@@ -168,7 +168,7 @@ proc printMethods { type vpi card } {
     }
     if {$card == "1"} {
 	set pointer ""
-	if {($type != "int") && ($type != "bool") && ($type != "std::string")} {
+	if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string")} {
 	    set pointer "*"
 	}
 	if {$type == "std::string"} {
@@ -214,7 +214,7 @@ proc printMembers { type vpi card } {
     }
     if {$card == "1"} {
 	set pointer ""
-	if {($type != "int") && ($type != "bool") && ($type != "std::string")} {
+	if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string")} {
 	    set pointer "*"
 	}
 	if {$type == "std::string"} {
@@ -399,15 +399,15 @@ proc generate_code { models } {
 
 	# Builtin properties do not need to be specified in each models
         # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo" method and field
-        append methods [printMethods BaseClass vpiParent 1] 
+        append methods [printMethods BaseClass vpiParent 1]
 	append members [printMembers BaseClass vpiParent 1]
-        append methods [printMethods int uhdmParentType 1] 
-	append members [printMembers int uhdmParentType 1]
+        append methods [printMethods "unsigned int" uhdmParentType 1] 
+	append members [printMembers "unsigned int" uhdmParentType 1]
 	append methods [printMethods string vpiFile 1] 
 	append members [printMembers string vpiFile 1]
 	append vpi_get_str_body [printGetStrBody $classname string vpiFile 1]
-        append methods [printMethods int vpiLineNo 1] 
-	append members [printMembers int vpiLineNo 1]
+        append methods [printMethods "unsigned int" vpiLineNo 1] 
+	append members [printMembers "unsigned int" vpiLineNo 1]
 	append vpi_get_body [printGetBody $classname int vpiLineNo 1]
         append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
         append capnp_schema "  vpiParent @${capnpIndex} :UInt64;\n"
@@ -436,6 +436,11 @@ proc generate_code { models } {
 		    set vpi  [dict get $conf vpi]
 		    set type [dict get $conf type]
 		    set card [dict get $conf card]
+		    if {$prop == "type"} {
+			append methods "\n    $type get_${vpi}() { return $name; }\n"
+			append vpi_get_body [printGetBody $classname $type $vpi $card]
+			continue
+		    }
 		    append containers [printTypeDefs $type $card]
                     # properties are already defined in vpi_user.h, no need to redefine them
 		    append methods [printMethods $type $vpi $card] 

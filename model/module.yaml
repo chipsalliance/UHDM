@@ -20,6 +20,11 @@
     vpi: vpiName
     type: string
     card: 1
+  - property: type
+    name: vpiModule
+    vpi: vpiType
+    type: unsigned int
+    card: 1
   - property: top_module
     name: top module
     type: bool
@@ -45,11 +50,6 @@
     vpi: vpiInstanceArray
     type: instance_array
     card: 1
-#  - class_ref: module_array
-#    name: module_array
-#    vpi: vpiModuleArray
-#    type: module_array
-#    card: 1
   - class_ref: scope
     name: scope
     vpi: vpiInternalScope
@@ -85,6 +85,7 @@
     type: module
     card: any
   - obj_ref: module_array
+    name: module array
     vpi: vpiModuleArray
     type: module_array
     card: any
@@ -94,7 +95,7 @@
     type: primitive
     card: any
   - class_ref: primitive_array
-    name: primitive_array
+    name: primitive array
     vpi: vpiPrimitiveArray
     type: primitive_array
     card: any

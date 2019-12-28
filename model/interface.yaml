@@ -15,3 +15,28 @@
 # Universal Hardware Data Model (UHDM) "interface" formal description
  
 - obj_def: interface
+  - property: type
+    name: vpiInterface
+    vpi: vpiType
+    type: unsigned int
+    card: 1
+  - obj_ref: interface_tf_decl
+    name: interface tf decl
+    vpi: vpiInterfaceTfDecl
+    type: interface_tf_decl
+    card: any
+  - obj_ref: modport
+    name: modport
+    vpi: vpiModport
+    type: modport
+    card: any
+  - obj_ref: global_clocking
+    name: global clocking
+    vpi: vpiGlobalClocking
+    type: clocking_block
+    card: 1
+  - obj_ref: default_clocking
+    name: default clocking
+    vpi: vpiDefaultClocking
+    type: clocking_block
+    card: 1

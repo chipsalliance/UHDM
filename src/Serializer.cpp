@@ -101,6 +101,10 @@ std::vector<process*> processFactory::objects_;
 std::vector<std::vector<process*>*> VectorOfprocessFactory::objects_;
 std::vector<scope*> scopeFactory::objects_;
 std::vector<std::vector<scope*>*> VectorOfscopeFactory::objects_;
+std::vector<modport*> modportFactory::objects_;
+std::vector<std::vector<modport*>*> VectorOfmodportFactory::objects_;
+std::vector<interface_tf_decl*> interface_tf_declFactory::objects_;
+std::vector<std::vector<interface_tf_decl*>*> VectorOfinterface_tf_declFactory::objects_;
 std::vector<interface*> interfaceFactory::objects_;
 std::vector<std::vector<interface*>*> VectorOfinterfaceFactory::objects_;
 std::vector<interface_array*> interface_arrayFactory::objects_;
@@ -139,6 +143,8 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   switch (objectType) {
   case uhdmprocess: return processFactory::objects_[index];
   case uhdmscope: return scopeFactory::objects_[index];
+  case uhdmmodport: return modportFactory::objects_[index];
+  case uhdminterface_tf_decl: return interface_tf_declFactory::objects_[index];
   case uhdminterface: return interfaceFactory::objects_[index];
   case uhdminterface_array: return interface_arrayFactory::objects_[index];
   case uhdmcont_assign: return cont_assignFactory::objects_[index];
@@ -173,6 +179,16 @@ void Serializer::purge() {
     delete obj;
   }
   scopeFactory::objects_.clear();
+
+  for (auto obj : modportFactory::objects_) {
+    delete obj;
+  }
+  modportFactory::objects_.clear();
+
+  for (auto obj : interface_tf_declFactory::objects_) {
+    delete obj;
+  }
+  interface_tf_declFactory::objects_.clear();
 
   for (auto obj : interfaceFactory::objects_) {
     delete obj;
@@ -270,6 +286,16 @@ void Serializer::save(std::string file) {
   }
   index = 1;
   for (auto obj : scopeFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : modportFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : interface_tf_declFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -389,6 +415,26 @@ void Serializer::save(std::string file) {
 
    index++;
  }
+ ::capnp::List<Modport>::Builder Modports = cap_root.initFactoryModport(modportFactory::objects_.size());
+ index = 0;
+ for (auto obj : modportFactory::objects_) {
+    Modports[index].setVpiParent(getId(obj->get_vpiParent()));
+    Modports[index].setUhdmParentType(obj->get_uhdmParentType());
+    Modports[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Modports[index].setVpiLineNo(obj->get_vpiLineNo());
+
+   index++;
+ }
+ ::capnp::List<Interfacetfdecl>::Builder Interfacetfdecls = cap_root.initFactoryInterfacetfdecl(interface_tf_declFactory::objects_.size());
+ index = 0;
+ for (auto obj : interface_tf_declFactory::objects_) {
+    Interfacetfdecls[index].setVpiParent(getId(obj->get_vpiParent()));
+    Interfacetfdecls[index].setUhdmParentType(obj->get_uhdmParentType());
+    Interfacetfdecls[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Interfacetfdecls[index].setVpiLineNo(obj->get_vpiLineNo());
+
+   index++;
+ }
  ::capnp::List<Interface>::Builder Interfaces = cap_root.initFactoryInterface(interfaceFactory::objects_.size());
  index = 0;
  for (auto obj : interfaceFactory::objects_) {
@@ -396,6 +442,22 @@ void Serializer::save(std::string file) {
     Interfaces[index].setUhdmParentType(obj->get_uhdmParentType());
     Interfaces[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Interfaces[index].setVpiLineNo(obj->get_vpiLineNo());
+ 
+    if (obj->get_interface_tf_decl()) {  
+      ::capnp::List<::uint64_t>::Builder Interfacetfdecls = Interfaces[index].initInterfacetfdecl(obj->get_interface_tf_decl()->size());
+      for (unsigned int ind = 0; ind < obj->get_interface_tf_decl()->size(); ind++) {
+        Interfacetfdecls.set(ind, getId((*obj->get_interface_tf_decl())[ind]));
+      }
+    }
+ 
+    if (obj->get_modport()) {  
+      ::capnp::List<::uint64_t>::Builder Modports = Interfaces[index].initModport(obj->get_modport()->size());
+      for (unsigned int ind = 0; ind < obj->get_modport()->size(); ind++) {
+        Modports.set(ind, getId((*obj->get_modport())[ind]));
+      }
+    }
+    Interfaces[index].setGlobalclocking(getId(obj->get_global_clocking()));
+    Interfaces[index].setDefaultclocking(getId(obj->get_default_clocking()));
 
    index++;
  }
@@ -711,6 +773,16 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(scopeFactory::make(), ind);
  }
 
+ ::capnp::List<Modport>::Reader Modports = cap_root.getFactoryModport();
+ for (unsigned ind = 0; ind < Modports.size(); ind++) {
+   setId(modportFactory::make(), ind);
+ }
+
+ ::capnp::List<Interfacetfdecl>::Reader Interfacetfdecls = cap_root.getFactoryInterfacetfdecl();
+ for (unsigned ind = 0; ind < Interfacetfdecls.size(); ind++) {
+   setId(interface_tf_declFactory::make(), ind);
+ }
+
  ::capnp::List<Interface>::Reader Interfaces = cap_root.getFactoryInterface();
  for (unsigned ind = 0; ind < Interfaces.size(); ind++) {
    setId(interfaceFactory::make(), ind);
@@ -814,11 +886,51 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
+ for (Modport::Reader obj : Modports) {
+   modportFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   modportFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   modportFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   modportFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
+ for (Interfacetfdecl::Reader obj : Interfacetfdecls) {
+   interface_tf_declFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   interface_tf_declFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   interface_tf_declFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   interface_tf_declFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
  for (Interface::Reader obj : Interfaces) {
    interfaceFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    interfaceFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    interfaceFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    interfaceFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    
+    if (obj.getInterfacetfdecl().size()) { 
+      VectorOfinterface_tf_decl* vect = VectorOfinterface_tf_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInterfacetfdecl().size(); ind++) {
+         vect->push_back(interface_tf_declFactory::objects_[obj.getInterfacetfdecl()[ind]-1]);
+      }
+      interfaceFactory::objects_[index]->set_interface_tf_decl(vect);
+    }
+    
+    if (obj.getModport().size()) { 
+      VectorOfmodport* vect = VectorOfmodportFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModport().size(); ind++) {
+         vect->push_back(modportFactory::objects_[obj.getModport()[ind]-1]);
+      }
+      interfaceFactory::objects_[index]->set_modport(vect);
+    }
+   if (obj.getGlobalclocking()) 
+     interfaceFactory::objects_[index]->set_global_clocking(clocking_blockFactory::objects_[obj.getGlobalclocking()-1]);
+   if (obj.getDefaultclocking()) 
+     interfaceFactory::objects_[index]->set_default_clocking(clocking_blockFactory::objects_[obj.getDefaultclocking()-1]);
 
    index++;
  }

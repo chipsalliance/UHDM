@@ -33,7 +33,13 @@ namespace UHDM {
   typedef std::vector<std::string> Id2SymbolMap;
   typedef std::unordered_map<std::string, unsigned long> Symbol2IdMap;
 
-  class scope;
+  class interface_tf_decl;
+typedef std::vector<interface_tf_decl*> VectorOfinterface_tf_decl;
+typedef std::vector<interface_tf_decl*>::iterator VectorOfinterface_tf_declItr;
+class modport;
+typedef std::vector<modport*> VectorOfmodport;
+typedef std::vector<modport*>::iterator VectorOfmodportItr;
+class scope;
 typedef std::vector<scope*> VectorOfscope;
 typedef std::vector<scope*>::iterator VectorOfscopeItr;
 class process;
