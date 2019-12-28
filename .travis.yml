@@ -38,7 +38,7 @@ script:
   - make clean
   - make
   - make test
-  - make install
+  - sudo make install
   - make test_install
   
   
