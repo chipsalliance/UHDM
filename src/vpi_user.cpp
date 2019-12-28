@@ -34,6 +34,8 @@
 
 #include "headers/process.h"
 #include "headers/scope.h"
+#include "headers/modport.h"
+#include "headers/interface_tf_decl.h"
 #include "headers/interface.h"
 #include "headers/interface_array.h"
 #include "headers/cont_assign.h"
@@ -83,9 +85,33 @@ vpiHandle vpi_handle (PLI_INT32 type,
  } 
 }
 
+ if (handle->type == uhdmmodport) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((modport*)(object))->get_uhdmParentType(), ((modport*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdminterface_tf_decl) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((interface_tf_decl*)(object))->get_uhdmParentType(), ((interface_tf_decl*)(object))->get_vpiParent());
+ } 
+}
+
  if (handle->type == uhdminterface) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((interface*)(object))->get_uhdmParentType(), ((interface*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdminterface) {
+     if (type == vpiGlobalClocking) {
+       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((interface*)(object))->get_global_clocking());
+ } 
+}
+
+ if (handle->type == uhdminterface) {
+     if (type == vpiDefaultClocking) {
+       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((interface*)(object))->get_default_clocking());
  } 
 }
 
@@ -212,6 +238,24 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   const uhdm_handle* const handle = (uhdm_handle*) refHandle;
   const BaseClass*  object = (BaseClass*) handle->object;
   
+    
+ if (handle->type == uhdminterface) {
+ if (type == vpiInterfaceTfDecl) {
+ if (((interface*)(object))->get_interface_tf_decl())
+ return (vpiHandle) new uhdm_handle(uhdminterface_tf_decl, ((interface*)(object))->get_interface_tf_decl());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface) {
+ if (type == vpiModport) {
+ if (((interface*)(object))->get_modport())
+ return (vpiHandle) new uhdm_handle(uhdmmodport, ((interface*)(object))->get_modport());
+ else return 0;
+  }
+ }
+
     
  if (handle->type == uhdmmodule) {
  if (type == vpiInternalScope) {
@@ -383,6 +427,24 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   uhdm_handle* handle = (uhdm_handle*) iterator;
   const void* vect = handle->object;
   
+
+  if (handle->type == uhdminterface_tf_decl) {
+ VectorOfinterface_tf_decl* the_vec = (VectorOfinterface_tf_decl*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdminterface_tf_decl, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmmodport) {
+ VectorOfmodport* the_vec = (VectorOfmodport*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmmodport, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
 
   if (handle->type == uhdmscope) {
  VectorOfscope* the_vec = (VectorOfscope*)vect;
@@ -580,9 +642,27 @@ PLI_INT32 vpi_get (PLI_INT32   property,
      } 
 }
 
+ if (handle->type == uhdmmodport) {
+     if (property == vpiLineNo) {
+       return ((modport*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdminterface_tf_decl) {
+     if (property == vpiLineNo) {
+       return ((interface_tf_decl*)(obj))->get_vpiLineNo();
+     } 
+}
+
  if (handle->type == uhdminterface) {
      if (property == vpiLineNo) {
        return ((interface*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdminterface) {
+     if (property == vpiType) {
+       return ((interface*)(obj))->get_vpiType();
      } 
 }
 
@@ -667,6 +747,12 @@ PLI_INT32 vpi_get (PLI_INT32   property,
  if (handle->type == uhdmmodule) {
      if (property == vpiLineNo) {
        return ((module*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (property == vpiType) {
+       return ((module*)(obj))->get_vpiType();
      } 
 }
 
@@ -712,9 +798,27 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmmodport) {
+     if (property == vpiLineNo) {
+       return ((modport*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdminterface_tf_decl) {
+     if (property == vpiLineNo) {
+       return ((interface_tf_decl*)(obj))->get_vpiLineNo();
+     } 
+}
+
  if (handle->type == uhdminterface) {
      if (property == vpiLineNo) {
        return ((interface*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdminterface) {
+     if (property == vpiType) {
+       return ((interface*)(obj))->get_vpiType();
      } 
 }
 
@@ -803,6 +907,12 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
 }
 
  if (handle->type == uhdmmodule) {
+     if (property == vpiType) {
+       return ((module*)(obj))->get_vpiType();
+     } 
+}
+
+ if (handle->type == uhdmmodule) {
      if (property == vpiTopModule) {
        return ((module*)(obj))->get_vpiTopModule();
      } 
@@ -841,6 +951,18 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
  if (handle->type == uhdmscope) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((scope*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmmodport) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((modport*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdminterface_tf_decl) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((interface_tf_decl*)(obj))->get_vpiFile().c_str());
      } 
 }
 

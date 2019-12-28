@@ -8,6 +8,9 @@ std::string print_designs (std::vector<vpiHandle> designs) {
     // VPI test
     vpiHandle modItr = vpi_iterate(uhdmallModules,restoredDesign); 
     while (vpiHandle obj_h = vpi_scan(modItr) ) {
+      if (vpi_get(vpiType, obj_h) != vpiModule) {
+	exit (1);
+      }
       result +=  "mod:" + std::string(vpi_get_str(vpiName, obj_h))
 	+ ", top:" 
 	+ std::to_string(vpi_get(vpiTopModule, obj_h))
@@ -23,7 +26,7 @@ std::string print_designs (std::vector<vpiHandle> designs) {
 	  + ", line:" + std::to_string(vpi_get(vpiLineNo, sub_h));
 	vpi_release_handle (sub_h);
       }
-    vpi_release_handle (submodItr);
+      vpi_release_handle (submodItr);
     
     result += "\n";
     vpi_release_handle (obj_h);
