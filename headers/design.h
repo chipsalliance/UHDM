@@ -41,6 +41,14 @@ namespace UHDM {
 
     void set_uhdmParentType(int data) { uhdmParentType_ = data; }
 
+    std::string get_vpiFile() const { return SymbolFactory::getSymbol(vpiFile_); }
+
+    void set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); }
+
+    int get_vpiLineNo() const { return vpiLineNo_; }
+
+    void set_vpiLineNo(int data) { vpiLineNo_ = data; }
+
     std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
 
     void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
@@ -58,6 +66,10 @@ namespace UHDM {
     BaseClass* vpiParent_;
 
     int uhdmParentType_;
+
+    unsigned int vpiFile_;
+
+    int vpiLineNo_;
 
     unsigned int vpiName_;
 

@@ -59,23 +59,12 @@ file(GLOB uhdm_SRC
   )
 
 set (UHDM_PUBLIC_HEADERS
-  ${PROJECT_SOURCE_DIR}/include/sv_vpi_user.h
-  ${PROJECT_SOURCE_DIR}/include/vhpi_user.h
-  ${PROJECT_SOURCE_DIR}/include/vpi_uhdm.h
-  ${PROJECT_SOURCE_DIR}/include/vpi_user.h
-  ${PROJECT_SOURCE_DIR}/headers/*.h
+  ${PROJECT_SOURCE_DIR}/headers/uhdm.h
 ) 
   
 add_library(uhdm STATIC ${uhdm_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER "${UHDM_PUBLIC_HEADERS}")
 
-add_executable(uhdm-test ${PROJECT_SOURCE_DIR}/src/main.cpp
-)
-set_target_properties(uhdm-test
-  PROPERTIES OUTPUT_NAME uhdm-test
-)
-
-add_dependencies(uhdm-test uhdm)
 add_dependencies(uhdm GenerateCode)
 
 set (ALL_LIBRARIES_FOR_UHDM
@@ -83,28 +72,37 @@ set (ALL_LIBRARIES_FOR_UHDM
   dl util m rt pthread
 )
 
-# Linkage instructions
-target_link_libraries(
-  uhdm-test ${ALL_LIBRARIES_FOR_UHDM} 
-)
-
 ENABLE_TESTING()
 
-ADD_TEST(NAME uhdm-test
-         COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test
+add_executable(uhdm-test1 ${PROJECT_SOURCE_DIR}/tests/test1.cpp )
+set_target_properties(uhdm-test1 PROPERTIES OUTPUT_NAME uhdm-test1 )
+add_dependencies(uhdm-test1 uhdm)
+target_link_libraries( uhdm-test1 ${ALL_LIBRARIES_FOR_UHDM} )
+ADD_TEST(NAME uhdm-test1
+         COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test1
          WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+       
+add_executable(uhdm-test2 ${PROJECT_SOURCE_DIR}/tests/test2.cpp )
+set_target_properties(uhdm-test2 PROPERTIES OUTPUT_NAME uhdm-test2 )
+add_dependencies(uhdm-test2 uhdm)
+target_link_libraries( uhdm-test2 ${ALL_LIBRARIES_FOR_UHDM} )
+ADD_TEST(NAME uhdm-test2
+         COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test2
+         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+       
 
 # Installation target     
 INSTALL(
   TARGETS uhdm
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
-  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/uhdm
+  ARCHIVE DESTINATION /usr/local/lib/uhdm
+  PUBLIC_HEADER DESTINATION /usr/local/include/uhdm
 )
 INSTALL(
   DIRECTORY ${PROJECT_SOURCE_DIR}/include/
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/uhdm/
+  DESTINATION /usr/local/include/uhdm/include
 )
 INSTALL(
   DIRECTORY  ${PROJECT_SOURCE_DIR}/headers/
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/uhdm/
+  DESTINATION /usr/local/include/uhdm/headers/
   )

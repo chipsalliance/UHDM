@@ -123,7 +123,7 @@ void Serializer::save(std::string file) {
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designFactory::objects_.size());
   index = 0;
   for (auto design : designFactory::objects_) {
-    designs[index].setVpiName(design->get_vpiName());
+    designs[index].setVpiName(SymbolFactory::make(design->get_vpiName()));
     index++;
   }
 
