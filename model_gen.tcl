@@ -188,7 +188,7 @@ proc printMethods { type vpi card } {
 proc printCapnpSchema {type vpi card capnpIndex} {
     set members ""
     if {$type == "string"} {
-	set type "Text"
+	set type "UInt64"
     }
     if {$type == "unsigned int"} {
         set type "UInt64"
@@ -396,23 +396,38 @@ proc generate_code { models } {
         }
 	append SAVE($classname) ""
 	append RESTORE($classname) ""
-	
-        # Builtin "Parent pointer and Parent type" method and field
+
+	# Builtin properties do not need to be specified in each models
+        # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo" method and field
         append methods [printMethods BaseClass vpiParent 1] 
 	append members [printMembers BaseClass vpiParent 1]
         append methods [printMethods int uhdmParentType 1] 
 	append members [printMembers int uhdmParentType 1]
+	append methods [printMethods string vpiFile 1] 
+	append members [printMembers string vpiFile 1]
+	append vpi_get_str_body [printGetStrBody $classname string vpiFile 1]
+        append methods [printMethods int vpiLineNo 1] 
+	append members [printMembers int vpiLineNo 1]
+	append vpi_get_body [printGetBody $classname int vpiLineNo 1]
         append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
         append capnp_schema "  vpiParent @${capnpIndex} :UInt64;\n"
         incr capnpIndex
 	append capnp_schema "  uhdmParentType @${capnpIndex} :UInt64;\n"
         incr capnpIndex
+	append capnp_schema "  vpiFile @${capnpIndex} :UInt64;\n"
+        incr capnpIndex
+	append capnp_schema "  vpiLineNo @${capnpIndex} :UInt32;\n"
+        incr capnpIndex
 	append capnp_root_schema "  factory${Classname} @${capnpRootSchemaIndex} :List($Classname);\n"
 	incr capnpRootSchemaIndex
 	append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(getId(obj->get_vpiParent()));\n"
 	append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->get_uhdmParentType());\n"
+	append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));\n"
+	append SAVE($classname) "    ${Classname}s\[index\].setVpiLineNo(obj->get_vpiLineNo());\n"
 	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_uhdmParentType(obj.getUhdmParentType());\n"
 	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
+	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));\n"
+	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiLineNo(obj.getVpiLineNo());\n"
 	
 	dict for {key val} $data {
 	    if {$key == "properties"} {
@@ -432,8 +447,13 @@ proc generate_code { models } {
 		
 		    set Vpi [string toupper $vpi 0 0]
 		    regsub -all  {_} $Vpi "" Vpi
-		    append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->get_${vpi}());\n"
-		    append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->set_${vpi}(obj.get${Vpi}());\n"
+		    if {$type == "string"} {
+			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(SymbolFactory::make(obj->get_${vpi}()));\n"
+			append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->set_${vpi}(SymbolFactory::getSymbol(obj.get${Vpi}()));\n"
+		    } else {
+			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->get_${vpi}());\n"
+			append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->set_${vpi}(obj.get${Vpi}());\n"
+		    }
 		}
 
 	    }

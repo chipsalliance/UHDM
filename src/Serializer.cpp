@@ -357,7 +357,7 @@ void Serializer::save(std::string file) {
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designFactory::objects_.size());
   index = 0;
   for (auto design : designFactory::objects_) {
-    designs[index].setVpiName(design->get_vpiName());
+    designs[index].setVpiName(SymbolFactory::make(design->get_vpiName()));
     index++;
   }
 
@@ -374,6 +374,8 @@ void Serializer::save(std::string file) {
  for (auto obj : processFactory::objects_) {
     Processs[index].setVpiParent(getId(obj->get_vpiParent()));
     Processs[index].setUhdmParentType(obj->get_uhdmParentType());
+    Processs[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Processs[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -382,6 +384,8 @@ void Serializer::save(std::string file) {
  for (auto obj : scopeFactory::objects_) {
     Scopes[index].setVpiParent(getId(obj->get_vpiParent()));
     Scopes[index].setUhdmParentType(obj->get_uhdmParentType());
+    Scopes[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Scopes[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -390,6 +394,8 @@ void Serializer::save(std::string file) {
  for (auto obj : interfaceFactory::objects_) {
     Interfaces[index].setVpiParent(getId(obj->get_vpiParent()));
     Interfaces[index].setUhdmParentType(obj->get_uhdmParentType());
+    Interfaces[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Interfaces[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -398,6 +404,8 @@ void Serializer::save(std::string file) {
  for (auto obj : interface_arrayFactory::objects_) {
     Interfacearrays[index].setVpiParent(getId(obj->get_vpiParent()));
     Interfacearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Interfacearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Interfacearrays[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -406,6 +414,8 @@ void Serializer::save(std::string file) {
  for (auto obj : cont_assignFactory::objects_) {
     Contassigns[index].setVpiParent(getId(obj->get_vpiParent()));
     Contassigns[index].setUhdmParentType(obj->get_uhdmParentType());
+    Contassigns[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Contassigns[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -414,6 +424,8 @@ void Serializer::save(std::string file) {
  for (auto obj : portFactory::objects_) {
     Ports[index].setVpiParent(getId(obj->get_vpiParent()));
     Ports[index].setUhdmParentType(obj->get_uhdmParentType());
+    Ports[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Ports[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -422,6 +434,8 @@ void Serializer::save(std::string file) {
  for (auto obj : module_arrayFactory::objects_) {
     Modulearrays[index].setVpiParent(getId(obj->get_vpiParent()));
     Modulearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Modulearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Modulearrays[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -430,6 +444,8 @@ void Serializer::save(std::string file) {
  for (auto obj : primitiveFactory::objects_) {
     Primitives[index].setVpiParent(getId(obj->get_vpiParent()));
     Primitives[index].setUhdmParentType(obj->get_uhdmParentType());
+    Primitives[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Primitives[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -438,6 +454,8 @@ void Serializer::save(std::string file) {
  for (auto obj : primitive_arrayFactory::objects_) {
     Primitivearrays[index].setVpiParent(getId(obj->get_vpiParent()));
     Primitivearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Primitivearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Primitivearrays[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -446,6 +464,8 @@ void Serializer::save(std::string file) {
  for (auto obj : mod_pathFactory::objects_) {
     Modpaths[index].setVpiParent(getId(obj->get_vpiParent()));
     Modpaths[index].setUhdmParentType(obj->get_uhdmParentType());
+    Modpaths[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Modpaths[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -454,6 +474,8 @@ void Serializer::save(std::string file) {
  for (auto obj : tchkFactory::objects_) {
     Tchks[index].setVpiParent(getId(obj->get_vpiParent()));
     Tchks[index].setUhdmParentType(obj->get_uhdmParentType());
+    Tchks[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Tchks[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -462,6 +484,8 @@ void Serializer::save(std::string file) {
  for (auto obj : def_paramFactory::objects_) {
     Defparams[index].setVpiParent(getId(obj->get_vpiParent()));
     Defparams[index].setUhdmParentType(obj->get_uhdmParentType());
+    Defparams[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Defparams[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -470,6 +494,8 @@ void Serializer::save(std::string file) {
  for (auto obj : io_declFactory::objects_) {
     Iodecls[index].setVpiParent(getId(obj->get_vpiParent()));
     Iodecls[index].setUhdmParentType(obj->get_uhdmParentType());
+    Iodecls[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Iodecls[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -478,6 +504,8 @@ void Serializer::save(std::string file) {
  for (auto obj : alias_stmtFactory::objects_) {
     Aliasstmts[index].setVpiParent(getId(obj->get_vpiParent()));
     Aliasstmts[index].setUhdmParentType(obj->get_uhdmParentType());
+    Aliasstmts[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Aliasstmts[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -486,6 +514,8 @@ void Serializer::save(std::string file) {
  for (auto obj : clocking_blockFactory::objects_) {
     Clockingblocks[index].setVpiParent(getId(obj->get_vpiParent()));
     Clockingblocks[index].setUhdmParentType(obj->get_uhdmParentType());
+    Clockingblocks[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Clockingblocks[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -494,6 +524,8 @@ void Serializer::save(std::string file) {
  for (auto obj : instance_arrayFactory::objects_) {
     Instancearrays[index].setVpiParent(getId(obj->get_vpiParent()));
     Instancearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Instancearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Instancearrays[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -502,7 +534,9 @@ void Serializer::save(std::string file) {
  for (auto obj : moduleFactory::objects_) {
     Modules[index].setVpiParent(getId(obj->get_vpiParent()));
     Modules[index].setUhdmParentType(obj->get_uhdmParentType());
-    Modules[index].setVpiName(obj->get_vpiName());
+    Modules[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Modules[index].setVpiLineNo(obj->get_vpiLineNo());
+    Modules[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Modules[index].setVpiTopModule(obj->get_vpiTopModule());
     Modules[index].setVpiDefDecayTime(obj->get_vpiDefDecayTime());
     Modules[index].setInstancearray(getId(obj->get_instance_array()));
@@ -628,7 +662,9 @@ void Serializer::save(std::string file) {
  for (auto obj : designFactory::objects_) {
     Designs[index].setVpiParent(getId(obj->get_vpiParent()));
     Designs[index].setUhdmParentType(obj->get_uhdmParentType());
-    Designs[index].setVpiName(obj->get_vpiName());
+    Designs[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Designs[index].setVpiLineNo(obj->get_vpiLineNo());
+    Designs[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
  
     if (obj->get_allModules()) {  
       ::capnp::List<::uint64_t>::Builder AllModuless = Designs[index].initAllModules(obj->get_allModules()->size());
@@ -761,6 +797,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Process::Reader obj : Processs) {
    processFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    processFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   processFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   processFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -769,6 +807,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Scope::Reader obj : Scopes) {
    scopeFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    scopeFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   scopeFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   scopeFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -777,6 +817,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Interface::Reader obj : Interfaces) {
    interfaceFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    interfaceFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   interfaceFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   interfaceFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -785,6 +827,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Interfacearray::Reader obj : Interfacearrays) {
    interface_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    interface_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   interface_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   interface_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -793,6 +837,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Contassign::Reader obj : Contassigns) {
    cont_assignFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    cont_assignFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   cont_assignFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   cont_assignFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -801,6 +847,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Port::Reader obj : Ports) {
    portFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    portFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   portFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   portFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -809,6 +857,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Modulearray::Reader obj : Modulearrays) {
    module_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    module_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   module_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   module_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -817,6 +867,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Primitive::Reader obj : Primitives) {
    primitiveFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    primitiveFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   primitiveFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   primitiveFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -825,6 +877,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Primitivearray::Reader obj : Primitivearrays) {
    primitive_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    primitive_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   primitive_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   primitive_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -833,6 +887,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Modpath::Reader obj : Modpaths) {
    mod_pathFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    mod_pathFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   mod_pathFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   mod_pathFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -841,6 +897,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Tchk::Reader obj : Tchks) {
    tchkFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    tchkFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   tchkFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   tchkFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -849,6 +907,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Defparam::Reader obj : Defparams) {
    def_paramFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    def_paramFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   def_paramFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   def_paramFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -857,6 +917,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Iodecl::Reader obj : Iodecls) {
    io_declFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    io_declFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   io_declFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   io_declFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -865,6 +927,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Aliasstmt::Reader obj : Aliasstmts) {
    alias_stmtFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    alias_stmtFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   alias_stmtFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   alias_stmtFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -873,6 +937,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Clockingblock::Reader obj : Clockingblocks) {
    clocking_blockFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    clocking_blockFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   clocking_blockFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   clocking_blockFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -881,6 +947,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Instancearray::Reader obj : Instancearrays) {
    instance_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    instance_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   instance_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   instance_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -889,7 +957,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Module::Reader obj : Modules) {
    moduleFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    moduleFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
-    moduleFactory::objects_[index]->set_vpiName(obj.getVpiName());
+   moduleFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   moduleFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    moduleFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     moduleFactory::objects_[index]->set_vpiTopModule(obj.getVpiTopModule());
     moduleFactory::objects_[index]->set_vpiDefDecayTime(obj.getVpiDefDecayTime());
    if (obj.getInstancearray()) 
@@ -1034,7 +1104,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  for (Design::Reader obj : Designs) {
    designFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    designFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
-    designFactory::objects_[index]->set_vpiName(obj.getVpiName());
+   designFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   designFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    designFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     
     if (obj.getAllModules().size()) { 
       VectorOfmodule* vect = VectorOfmoduleFactory::make();

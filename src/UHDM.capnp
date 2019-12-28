@@ -28,116 +28,152 @@ struct UhdmRoot {
 struct Process {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Scope {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Interface {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Interfacearray {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Contassign {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Port {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Modulearray {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Primitive {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Primitivearray {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Modpath {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Tchk {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Defparam {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Iodecl {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Aliasstmt {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Clockingblock {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Instancearray {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
 
 }
 struct Module {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
-  vpiName @2 :Text;
-  vpiTopModule @3 :Bool;
-  vpiDefDecayTime @4 :Int64;
-  instancearray @5 :UInt64;
-  scope @6 :List(UInt64);
-  process @7 :List(UInt64);
-  primitive @8 :List(UInt64);
-  primitivearray @9 :List(UInt64);
-  globalclocking @10 :UInt64;
-  defaultclocking @11 :UInt64;
-  ports @12 :List(UInt64);
-  interfaces @13 :List(UInt64);
-  interfacearrays @14 :List(UInt64);
-  contassigns @15 :List(UInt64);
-  modules @16 :List(UInt64);
-  modulearray @17 :List(UInt64);
-  modpath @18 :List(UInt64);
-  tchk @19 :List(UInt64);
-  defparam @20 :List(UInt64);
-  iodecl @21 :List(UInt64);
-  aliasstmt @22 :List(UInt64);
-  clockingblock @23 :List(UInt64);
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
+  vpiName @4 :UInt64;
+  vpiTopModule @5 :Bool;
+  vpiDefDecayTime @6 :Int64;
+  instancearray @7 :UInt64;
+  scope @8 :List(UInt64);
+  process @9 :List(UInt64);
+  primitive @10 :List(UInt64);
+  primitivearray @11 :List(UInt64);
+  globalclocking @12 :UInt64;
+  defaultclocking @13 :UInt64;
+  ports @14 :List(UInt64);
+  interfaces @15 :List(UInt64);
+  interfacearrays @16 :List(UInt64);
+  contassigns @17 :List(UInt64);
+  modules @18 :List(UInt64);
+  modulearray @19 :List(UInt64);
+  modpath @20 :List(UInt64);
+  tchk @21 :List(UInt64);
+  defparam @22 :List(UInt64);
+  iodecl @23 :List(UInt64);
+  aliasstmt @24 :List(UInt64);
+  clockingblock @25 :List(UInt64);
 
 }
 struct Design {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
-  vpiName @2 :Text;
-  allModules @3 :List(UInt64);
-  topModules @4 :List(UInt64);
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
+  vpiName @4 :UInt64;
+  allModules @5 :List(UInt64);
+  topModules @6 :List(UInt64);
 
 }
 
