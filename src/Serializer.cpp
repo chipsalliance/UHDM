@@ -139,6 +139,8 @@ std::vector<instance_array*> instance_arrayFactory::objects_;
 std::vector<std::vector<instance_array*>*> VectorOfinstance_arrayFactory::objects_;
 std::vector<module*> moduleFactory::objects_;
 std::vector<std::vector<module*>*> VectorOfmoduleFactory::objects_;
+std::vector<program*> programFactory::objects_;
+std::vector<std::vector<program*>*> VectorOfprogramFactory::objects_;
 std::vector<design*> designFactory::objects_;
 std::vector<std::vector<design*>*> VectorOfdesignFactory::objects_;
 
@@ -166,6 +168,7 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdmclocking_block: return clocking_blockFactory::objects_[index];
   case uhdminstance_array: return instance_arrayFactory::objects_[index];
   case uhdmmodule: return moduleFactory::objects_[index];
+  case uhdmprogram: return programFactory::objects_[index];
   case uhdmdesign: return designFactory::objects_[index];
 
   default:
@@ -280,6 +283,11 @@ void Serializer::purge() {
     delete obj;
   }
   moduleFactory::objects_.clear();
+
+  for (auto obj : programFactory::objects_) {
+    delete obj;
+  }
+  programFactory::objects_.clear();
 
   for (auto obj : designFactory::objects_) {
     delete obj;
@@ -397,6 +405,11 @@ void Serializer::save(std::string file) {
   }
   index = 1;
   for (auto obj : moduleFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : programFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -824,6 +837,54 @@ void Serializer::save(std::string file) {
 
    index++;
  }
+ ::capnp::List<Program>::Builder Programs = cap_root.initFactoryProgram(programFactory::objects_.size());
+ index = 0;
+ for (auto obj : programFactory::objects_) {
+    Programs[index].setVpiParent(getId(obj->get_vpiParent()));
+    Programs[index].setUhdmParentType(obj->get_uhdmParentType());
+    Programs[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Programs[index].setVpiLineNo(obj->get_vpiLineNo());
+    Programs[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Programs[index].setInstancearray(getId(obj->get_instance_array()));
+ 
+    if (obj->get_process()) {  
+      ::capnp::List<::uint64_t>::Builder Processs = Programs[index].initProcess(obj->get_process()->size());
+      for (unsigned int ind = 0; ind < obj->get_process()->size(); ind++) {
+        Processs.set(ind, getId((*obj->get_process())[ind]));
+      }
+    }
+    Programs[index].setDefaultclocking(getId(obj->get_default_clocking()));
+ 
+    if (obj->get_interfaces()) {  
+      ::capnp::List<::uint64_t>::Builder Interfacess = Programs[index].initInterfaces(obj->get_interfaces()->size());
+      for (unsigned int ind = 0; ind < obj->get_interfaces()->size(); ind++) {
+        Interfacess.set(ind, getId((*obj->get_interfaces())[ind]));
+      }
+    }
+ 
+    if (obj->get_interface_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Interfacearrayss = Programs[index].initInterfacearrays(obj->get_interface_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_interface_arrays()->size(); ind++) {
+        Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Programs[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_clocking_blocks()) {  
+      ::capnp::List<::uint64_t>::Builder Clockingblockss = Programs[index].initClockingblocks(obj->get_clocking_blocks()->size());
+      for (unsigned int ind = 0; ind < obj->get_clocking_blocks()->size(); ind++) {
+        Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
+      }
+    }
+
+   index++;
+ }
  ::capnp::List<Design>::Builder Designs = cap_root.initFactoryDesign(designFactory::objects_.size());
  index = 0;
  for (auto obj : designFactory::objects_) {
@@ -844,6 +905,13 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder TopModuless = Designs[index].initTopModules(obj->get_topModules()->size());
       for (unsigned int ind = 0; ind < obj->get_topModules()->size(); ind++) {
         TopModuless.set(ind, getId((*obj->get_topModules())[ind]));
+      }
+    }
+ 
+    if (obj->get_allPrograms()) {  
+      ::capnp::List<::uint64_t>::Builder AllProgramss = Designs[index].initAllPrograms(obj->get_allPrograms()->size());
+      for (unsigned int ind = 0; ind < obj->get_allPrograms()->size(); ind++) {
+        AllProgramss.set(ind, getId((*obj->get_allPrograms())[ind]));
       }
     }
 
@@ -971,6 +1039,11 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  ::capnp::List<Module>::Reader Modules = cap_root.getFactoryModule();
  for (unsigned ind = 0; ind < Modules.size(); ind++) {
    setId(moduleFactory::make(), ind);
+ }
+
+ ::capnp::List<Program>::Reader Programs = cap_root.getFactoryProgram();
+ for (unsigned ind = 0; ind < Programs.size(); ind++) {
+   setId(programFactory::make(), ind);
  }
 
  ::capnp::List<Design>::Reader Designs = cap_root.getFactoryDesign();
@@ -1416,6 +1489,61 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
+ for (Program::Reader obj : Programs) {
+   programFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   programFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   programFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   programFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    programFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+   if (obj.getInstancearray()) 
+     programFactory::objects_[index]->set_instance_array(instance_arrayFactory::objects_[obj.getInstancearray()-1]);
+    
+    if (obj.getProcess().size()) { 
+      VectorOfprocess* vect = VectorOfprocessFactory::make();
+      for (unsigned int ind = 0; ind < obj.getProcess().size(); ind++) {
+         vect->push_back(processFactory::objects_[obj.getProcess()[ind]-1]);
+      }
+      programFactory::objects_[index]->set_process(vect);
+    }
+   if (obj.getDefaultclocking()) 
+     programFactory::objects_[index]->set_default_clocking(clocking_blockFactory::objects_[obj.getDefaultclocking()-1]);
+    
+    if (obj.getInterfaces().size()) { 
+      VectorOfinterface* vect = VectorOfinterfaceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInterfaces().size(); ind++) {
+         vect->push_back(interfaceFactory::objects_[obj.getInterfaces()[ind]-1]);
+      }
+      programFactory::objects_[index]->set_interfaces(vect);
+    }
+    
+    if (obj.getInterfacearrays().size()) { 
+      VectorOfinterface_array* vect = VectorOfinterface_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInterfacearrays().size(); ind++) {
+         vect->push_back(interface_arrayFactory::objects_[obj.getInterfacearrays()[ind]-1]);
+      }
+      programFactory::objects_[index]->set_interface_arrays(vect);
+    }
+    
+    if (obj.getContassigns().size()) { 
+      VectorOfcont_assign* vect = VectorOfcont_assignFactory::make();
+      for (unsigned int ind = 0; ind < obj.getContassigns().size(); ind++) {
+         vect->push_back(cont_assignFactory::objects_[obj.getContassigns()[ind]-1]);
+      }
+      programFactory::objects_[index]->set_cont_assigns(vect);
+    }
+    
+    if (obj.getClockingblocks().size()) { 
+      VectorOfclocking_block* vect = VectorOfclocking_blockFactory::make();
+      for (unsigned int ind = 0; ind < obj.getClockingblocks().size(); ind++) {
+         vect->push_back(clocking_blockFactory::objects_[obj.getClockingblocks()[ind]-1]);
+      }
+      programFactory::objects_[index]->set_clocking_blocks(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
  for (Design::Reader obj : Designs) {
    designFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    designFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
@@ -1437,6 +1565,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
          vect->push_back(moduleFactory::objects_[obj.getTopModules()[ind]-1]);
       }
       designFactory::objects_[index]->set_topModules(vect);
+    }
+    
+    if (obj.getAllPrograms().size()) { 
+      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      for (unsigned int ind = 0; ind < obj.getAllPrograms().size(); ind++) {
+         vect->push_back(programFactory::objects_[obj.getAllPrograms()[ind]-1]);
+      }
+      designFactory::objects_[index]->set_allPrograms(vect);
     }
 
    index++;

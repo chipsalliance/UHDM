@@ -1,0 +1,61 @@
+# Copyright 2019 Alain Dargelas
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Universal Hardware Data Model (UHDM) "program" formal description
+ 
+- obj_def: program
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: type
+    name: vpiProgram
+    vpi: vpiType
+    type: unsigned int
+    card: 1
+  - obj_ref: default_clocking
+    name: default clocking
+    vpi: vpiDefaultClocking
+    type: clocking_block
+    card: 1
+  - class_ref: instance_array
+    name: instance_array
+    vpi: vpiInstanceArray
+    type: instance_array
+    card: 1
+  - obj_ref: interfaces
+    name: interface
+    vpi: uhdminterface
+    type: interface
+    card: any
+  - obj_ref: interface_arrays
+    vpi: uhdminterface_array
+    name: interface array
+    type: interface_array
+    card: any
+  - class_ref: process
+    name: process
+    vpi: vpiProcess
+    type: process
+    card: any
+  - obj_ref: cont_assigns
+    name: cont assign
+    vpi: vpiContAssign
+    type: cont_assign
+    card: any
+  - obj_ref: clocking_blocks
+    vpi: uhdmclocking_block
+    type: clocking_block
+    card: any

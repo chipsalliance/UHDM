@@ -30,3 +30,10 @@
     vpi_obj: vpiModule
     vpi: uhdmtopModules
     card: any
+  - class: allPrograms
+    type: program
+    vpi_obj: vpiProgram
+    vpi: uhdmallPrograms
+    card: any
+
+    

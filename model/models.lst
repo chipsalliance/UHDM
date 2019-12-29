@@ -19,4 +19,5 @@ alias_stmt.yaml
 clocking_block.yaml
 instance_array.yaml
 module.yaml
+program.yaml
 uhdm.yaml
