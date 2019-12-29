@@ -12,22 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "interface tf decl" formal description
+# Universal Hardware Data Model (UHDM) "function" formal description
  
-- obj_def: interface_tf_decl
-  - property: access_type
-    name: access type
-    vpi: vpiAccessType
-    type: unsigned int
-    card: 1
-  - obj_ref: tasks
-    name: task
-    vpi: vpiTask
-    type: task
-    card: any
-  - obj_ref: functions
-    name: function
-    vpi: vpiFunction
-    type: function
-    card: any
+- obj_def: function
+
+
     

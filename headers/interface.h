@@ -51,13 +51,17 @@ namespace UHDM {
 
     unsigned int get_vpiType() { return vpiInterface; }
 
-    const VectorOfinterface_tf_decl* get_interface_tf_decl() const { return interface_tf_decl_; }
+    const VectorOfprocess* get_process() const { return process_; }
 
-    void set_interface_tf_decl(VectorOfinterface_tf_decl* data) { interface_tf_decl_ = data; }
+    void set_process(VectorOfprocess* data) { process_ = data; }
 
-    const VectorOfmodport* get_modport() const { return modport_; }
+    const VectorOfinterface_tf_decl* get_interface_tf_decls() const { return interface_tf_decls_; }
 
-    void set_modport(VectorOfmodport* data) { modport_ = data; }
+    void set_interface_tf_decls(VectorOfinterface_tf_decl* data) { interface_tf_decls_ = data; }
+
+    const VectorOfmodport* get_modports() const { return modports_; }
+
+    void set_modports(VectorOfmodport* data) { modports_ = data; }
 
     clocking_block* get_global_clocking() const { return global_clocking_; }
 
@@ -66,6 +70,22 @@ namespace UHDM {
     clocking_block* get_default_clocking() const { return default_clocking_; }
 
     void set_default_clocking(clocking_block* data) { default_clocking_ = data; }
+
+    const VectorOfmod_path* get_mod_paths() const { return mod_paths_; }
+
+    void set_mod_paths(VectorOfmod_path* data) { mod_paths_ = data; }
+
+    const VectorOfcont_assign* get_cont_assigns() const { return cont_assigns_; }
+
+    void set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; }
+
+    const VectorOfinterface* get_interfaces() const { return interfaces_; }
+
+    void set_interfaces(VectorOfinterface* data) { interfaces_ = data; }
+
+    const VectorOfinterface_array* get_interface_arrays() const { return interface_arrays_; }
+
+    void set_interface_arrays(VectorOfinterface_array* data) { interface_arrays_ = data; }
 
   private:
     
@@ -77,13 +97,23 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
-    VectorOfinterface_tf_decl* interface_tf_decl_;
+    VectorOfprocess* process_;
 
-    VectorOfmodport* modport_;
+    VectorOfinterface_tf_decl* interface_tf_decls_;
+
+    VectorOfmodport* modports_;
 
     clocking_block* global_clocking_;
 
     clocking_block* default_clocking_;
+
+    VectorOfmod_path* mod_paths_;
+
+    VectorOfcont_assign* cont_assigns_;
+
+    VectorOfinterface* interfaces_;
+
+    VectorOfinterface_array* interface_arrays_;
 
   };
 

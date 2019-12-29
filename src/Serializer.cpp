@@ -101,6 +101,10 @@ std::vector<process*> processFactory::objects_;
 std::vector<std::vector<process*>*> VectorOfprocessFactory::objects_;
 std::vector<scope*> scopeFactory::objects_;
 std::vector<std::vector<scope*>*> VectorOfscopeFactory::objects_;
+std::vector<task*> taskFactory::objects_;
+std::vector<std::vector<task*>*> VectorOftaskFactory::objects_;
+std::vector<function*> functionFactory::objects_;
+std::vector<std::vector<function*>*> VectorOffunctionFactory::objects_;
 std::vector<modport*> modportFactory::objects_;
 std::vector<std::vector<modport*>*> VectorOfmodportFactory::objects_;
 std::vector<interface_tf_decl*> interface_tf_declFactory::objects_;
@@ -143,6 +147,8 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   switch (objectType) {
   case uhdmprocess: return processFactory::objects_[index];
   case uhdmscope: return scopeFactory::objects_[index];
+  case uhdmtask: return taskFactory::objects_[index];
+  case uhdmfunction: return functionFactory::objects_[index];
   case uhdmmodport: return modportFactory::objects_[index];
   case uhdminterface_tf_decl: return interface_tf_declFactory::objects_[index];
   case uhdminterface: return interfaceFactory::objects_[index];
@@ -179,6 +185,16 @@ void Serializer::purge() {
     delete obj;
   }
   scopeFactory::objects_.clear();
+
+  for (auto obj : taskFactory::objects_) {
+    delete obj;
+  }
+  taskFactory::objects_.clear();
+
+  for (auto obj : functionFactory::objects_) {
+    delete obj;
+  }
+  functionFactory::objects_.clear();
 
   for (auto obj : modportFactory::objects_) {
     delete obj;
@@ -286,6 +302,16 @@ void Serializer::save(std::string file) {
   }
   index = 1;
   for (auto obj : scopeFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : taskFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : functionFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -415,6 +441,26 @@ void Serializer::save(std::string file) {
 
    index++;
  }
+ ::capnp::List<Task>::Builder Tasks = cap_root.initFactoryTask(taskFactory::objects_.size());
+ index = 0;
+ for (auto obj : taskFactory::objects_) {
+    Tasks[index].setVpiParent(getId(obj->get_vpiParent()));
+    Tasks[index].setUhdmParentType(obj->get_uhdmParentType());
+    Tasks[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Tasks[index].setVpiLineNo(obj->get_vpiLineNo());
+
+   index++;
+ }
+ ::capnp::List<Function>::Builder Functions = cap_root.initFactoryFunction(functionFactory::objects_.size());
+ index = 0;
+ for (auto obj : functionFactory::objects_) {
+    Functions[index].setVpiParent(getId(obj->get_vpiParent()));
+    Functions[index].setUhdmParentType(obj->get_uhdmParentType());
+    Functions[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Functions[index].setVpiLineNo(obj->get_vpiLineNo());
+
+   index++;
+ }
  ::capnp::List<Modport>::Builder Modports = cap_root.initFactoryModport(modportFactory::objects_.size());
  index = 0;
  for (auto obj : modportFactory::objects_) {
@@ -422,6 +468,15 @@ void Serializer::save(std::string file) {
     Modports[index].setUhdmParentType(obj->get_uhdmParentType());
     Modports[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Modports[index].setVpiLineNo(obj->get_vpiLineNo());
+    Modports[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+ 
+    if (obj->get_io_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Iodeclss = Modports[index].initIodecls(obj->get_io_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_io_decls()->size(); ind++) {
+        Iodeclss.set(ind, getId((*obj->get_io_decls())[ind]));
+      }
+    }
+    Modports[index].setInterface(getId(obj->get_interface()));
 
    index++;
  }
@@ -432,6 +487,21 @@ void Serializer::save(std::string file) {
     Interfacetfdecls[index].setUhdmParentType(obj->get_uhdmParentType());
     Interfacetfdecls[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Interfacetfdecls[index].setVpiLineNo(obj->get_vpiLineNo());
+    Interfacetfdecls[index].setVpiAccessType(obj->get_vpiAccessType());
+ 
+    if (obj->get_tasks()) {  
+      ::capnp::List<::uint64_t>::Builder Taskss = Interfacetfdecls[index].initTasks(obj->get_tasks()->size());
+      for (unsigned int ind = 0; ind < obj->get_tasks()->size(); ind++) {
+        Taskss.set(ind, getId((*obj->get_tasks())[ind]));
+      }
+    }
+ 
+    if (obj->get_functions()) {  
+      ::capnp::List<::uint64_t>::Builder Functionss = Interfacetfdecls[index].initFunctions(obj->get_functions()->size());
+      for (unsigned int ind = 0; ind < obj->get_functions()->size(); ind++) {
+        Functionss.set(ind, getId((*obj->get_functions())[ind]));
+      }
+    }
 
    index++;
  }
@@ -443,21 +513,56 @@ void Serializer::save(std::string file) {
     Interfaces[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Interfaces[index].setVpiLineNo(obj->get_vpiLineNo());
  
-    if (obj->get_interface_tf_decl()) {  
-      ::capnp::List<::uint64_t>::Builder Interfacetfdecls = Interfaces[index].initInterfacetfdecl(obj->get_interface_tf_decl()->size());
-      for (unsigned int ind = 0; ind < obj->get_interface_tf_decl()->size(); ind++) {
-        Interfacetfdecls.set(ind, getId((*obj->get_interface_tf_decl())[ind]));
+    if (obj->get_process()) {  
+      ::capnp::List<::uint64_t>::Builder Processs = Interfaces[index].initProcess(obj->get_process()->size());
+      for (unsigned int ind = 0; ind < obj->get_process()->size(); ind++) {
+        Processs.set(ind, getId((*obj->get_process())[ind]));
       }
     }
  
-    if (obj->get_modport()) {  
-      ::capnp::List<::uint64_t>::Builder Modports = Interfaces[index].initModport(obj->get_modport()->size());
-      for (unsigned int ind = 0; ind < obj->get_modport()->size(); ind++) {
-        Modports.set(ind, getId((*obj->get_modport())[ind]));
+    if (obj->get_interface_tf_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Interfacetfdeclss = Interfaces[index].initInterfacetfdecls(obj->get_interface_tf_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_interface_tf_decls()->size(); ind++) {
+        Interfacetfdeclss.set(ind, getId((*obj->get_interface_tf_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_modports()) {  
+      ::capnp::List<::uint64_t>::Builder Modportss = Interfaces[index].initModports(obj->get_modports()->size());
+      for (unsigned int ind = 0; ind < obj->get_modports()->size(); ind++) {
+        Modportss.set(ind, getId((*obj->get_modports())[ind]));
       }
     }
     Interfaces[index].setGlobalclocking(getId(obj->get_global_clocking()));
     Interfaces[index].setDefaultclocking(getId(obj->get_default_clocking()));
+ 
+    if (obj->get_mod_paths()) {  
+      ::capnp::List<::uint64_t>::Builder Modpathss = Interfaces[index].initModpaths(obj->get_mod_paths()->size());
+      for (unsigned int ind = 0; ind < obj->get_mod_paths()->size(); ind++) {
+        Modpathss.set(ind, getId((*obj->get_mod_paths())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Interfaces[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_interfaces()) {  
+      ::capnp::List<::uint64_t>::Builder Interfacess = Interfaces[index].initInterfaces(obj->get_interfaces()->size());
+      for (unsigned int ind = 0; ind < obj->get_interfaces()->size(); ind++) {
+        Interfacess.set(ind, getId((*obj->get_interfaces())[ind]));
+      }
+    }
+ 
+    if (obj->get_interface_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Interfacearrayss = Interfaces[index].initInterfacearrays(obj->get_interface_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_interface_arrays()->size(); ind++) {
+        Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
+      }
+    }
 
    index++;
  }
@@ -617,17 +722,17 @@ void Serializer::save(std::string file) {
       }
     }
  
-    if (obj->get_primitive()) {  
-      ::capnp::List<::uint64_t>::Builder Primitives = Modules[index].initPrimitive(obj->get_primitive()->size());
-      for (unsigned int ind = 0; ind < obj->get_primitive()->size(); ind++) {
-        Primitives.set(ind, getId((*obj->get_primitive())[ind]));
+    if (obj->get_primitives()) {  
+      ::capnp::List<::uint64_t>::Builder Primitivess = Modules[index].initPrimitives(obj->get_primitives()->size());
+      for (unsigned int ind = 0; ind < obj->get_primitives()->size(); ind++) {
+        Primitivess.set(ind, getId((*obj->get_primitives())[ind]));
       }
     }
  
-    if (obj->get_primitive_array()) {  
-      ::capnp::List<::uint64_t>::Builder Primitivearrays = Modules[index].initPrimitivearray(obj->get_primitive_array()->size());
-      for (unsigned int ind = 0; ind < obj->get_primitive_array()->size(); ind++) {
-        Primitivearrays.set(ind, getId((*obj->get_primitive_array())[ind]));
+    if (obj->get_primitive_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Primitivearrayss = Modules[index].initPrimitivearrays(obj->get_primitive_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_primitive_arrays()->size(); ind++) {
+        Primitivearrayss.set(ind, getId((*obj->get_primitive_arrays())[ind]));
       }
     }
     Modules[index].setGlobalclocking(getId(obj->get_global_clocking()));
@@ -668,52 +773,52 @@ void Serializer::save(std::string file) {
       }
     }
  
-    if (obj->get_module_array()) {  
-      ::capnp::List<::uint64_t>::Builder Modulearrays = Modules[index].initModulearray(obj->get_module_array()->size());
-      for (unsigned int ind = 0; ind < obj->get_module_array()->size(); ind++) {
-        Modulearrays.set(ind, getId((*obj->get_module_array())[ind]));
+    if (obj->get_module_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Modulearrayss = Modules[index].initModulearrays(obj->get_module_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_module_arrays()->size(); ind++) {
+        Modulearrayss.set(ind, getId((*obj->get_module_arrays())[ind]));
       }
     }
  
-    if (obj->get_mod_path()) {  
-      ::capnp::List<::uint64_t>::Builder Modpaths = Modules[index].initModpath(obj->get_mod_path()->size());
-      for (unsigned int ind = 0; ind < obj->get_mod_path()->size(); ind++) {
-        Modpaths.set(ind, getId((*obj->get_mod_path())[ind]));
+    if (obj->get_mod_paths()) {  
+      ::capnp::List<::uint64_t>::Builder Modpathss = Modules[index].initModpaths(obj->get_mod_paths()->size());
+      for (unsigned int ind = 0; ind < obj->get_mod_paths()->size(); ind++) {
+        Modpathss.set(ind, getId((*obj->get_mod_paths())[ind]));
       }
     }
  
-    if (obj->get_tchk()) {  
-      ::capnp::List<::uint64_t>::Builder Tchks = Modules[index].initTchk(obj->get_tchk()->size());
-      for (unsigned int ind = 0; ind < obj->get_tchk()->size(); ind++) {
-        Tchks.set(ind, getId((*obj->get_tchk())[ind]));
+    if (obj->get_tchks()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkss = Modules[index].initTchks(obj->get_tchks()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchks()->size(); ind++) {
+        Tchkss.set(ind, getId((*obj->get_tchks())[ind]));
       }
     }
  
-    if (obj->get_def_param()) {  
-      ::capnp::List<::uint64_t>::Builder Defparams = Modules[index].initDefparam(obj->get_def_param()->size());
-      for (unsigned int ind = 0; ind < obj->get_def_param()->size(); ind++) {
-        Defparams.set(ind, getId((*obj->get_def_param())[ind]));
+    if (obj->get_def_params()) {  
+      ::capnp::List<::uint64_t>::Builder Defparamss = Modules[index].initDefparams(obj->get_def_params()->size());
+      for (unsigned int ind = 0; ind < obj->get_def_params()->size(); ind++) {
+        Defparamss.set(ind, getId((*obj->get_def_params())[ind]));
       }
     }
  
-    if (obj->get_io_decl()) {  
-      ::capnp::List<::uint64_t>::Builder Iodecls = Modules[index].initIodecl(obj->get_io_decl()->size());
-      for (unsigned int ind = 0; ind < obj->get_io_decl()->size(); ind++) {
-        Iodecls.set(ind, getId((*obj->get_io_decl())[ind]));
+    if (obj->get_io_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Iodeclss = Modules[index].initIodecls(obj->get_io_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_io_decls()->size(); ind++) {
+        Iodeclss.set(ind, getId((*obj->get_io_decls())[ind]));
       }
     }
  
-    if (obj->get_alias_stmt()) {  
-      ::capnp::List<::uint64_t>::Builder Aliasstmts = Modules[index].initAliasstmt(obj->get_alias_stmt()->size());
-      for (unsigned int ind = 0; ind < obj->get_alias_stmt()->size(); ind++) {
-        Aliasstmts.set(ind, getId((*obj->get_alias_stmt())[ind]));
+    if (obj->get_alias_stmts()) {  
+      ::capnp::List<::uint64_t>::Builder Aliasstmtss = Modules[index].initAliasstmts(obj->get_alias_stmts()->size());
+      for (unsigned int ind = 0; ind < obj->get_alias_stmts()->size(); ind++) {
+        Aliasstmtss.set(ind, getId((*obj->get_alias_stmts())[ind]));
       }
     }
  
-    if (obj->get_clocking_block()) {  
-      ::capnp::List<::uint64_t>::Builder Clockingblocks = Modules[index].initClockingblock(obj->get_clocking_block()->size());
-      for (unsigned int ind = 0; ind < obj->get_clocking_block()->size(); ind++) {
-        Clockingblocks.set(ind, getId((*obj->get_clocking_block())[ind]));
+    if (obj->get_clocking_blocks()) {  
+      ::capnp::List<::uint64_t>::Builder Clockingblockss = Modules[index].initClockingblocks(obj->get_clocking_blocks()->size());
+      for (unsigned int ind = 0; ind < obj->get_clocking_blocks()->size(); ind++) {
+        Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
       }
     }
 
@@ -771,6 +876,16 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  ::capnp::List<Scope>::Reader Scopes = cap_root.getFactoryScope();
  for (unsigned ind = 0; ind < Scopes.size(); ind++) {
    setId(scopeFactory::make(), ind);
+ }
+
+ ::capnp::List<Task>::Reader Tasks = cap_root.getFactoryTask();
+ for (unsigned ind = 0; ind < Tasks.size(); ind++) {
+   setId(taskFactory::make(), ind);
+ }
+
+ ::capnp::List<Function>::Reader Functions = cap_root.getFactoryFunction();
+ for (unsigned ind = 0; ind < Functions.size(); ind++) {
+   setId(functionFactory::make(), ind);
  }
 
  ::capnp::List<Modport>::Reader Modports = cap_root.getFactoryModport();
@@ -886,11 +1001,42 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
+ for (Task::Reader obj : Tasks) {
+   taskFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   taskFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   taskFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   taskFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
+ for (Function::Reader obj : Functions) {
+   functionFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   functionFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   functionFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   functionFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
  for (Modport::Reader obj : Modports) {
    modportFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    modportFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    modportFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    modportFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    modportFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    
+    if (obj.getIodecls().size()) { 
+      VectorOfio_decl* vect = VectorOfio_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getIodecls().size(); ind++) {
+         vect->push_back(io_declFactory::objects_[obj.getIodecls()[ind]-1]);
+      }
+      modportFactory::objects_[index]->set_io_decls(vect);
+    }
+   if (obj.getInterface()) 
+     modportFactory::objects_[index]->set_interface(interfaceFactory::objects_[obj.getInterface()-1]);
 
    index++;
  }
@@ -901,6 +1047,23 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    interface_tf_declFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    interface_tf_declFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    interface_tf_declFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    interface_tf_declFactory::objects_[index]->set_vpiAccessType(obj.getVpiAccessType());
+    
+    if (obj.getTasks().size()) { 
+      VectorOftask* vect = VectorOftaskFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTasks().size(); ind++) {
+         vect->push_back(taskFactory::objects_[obj.getTasks()[ind]-1]);
+      }
+      interface_tf_declFactory::objects_[index]->set_tasks(vect);
+    }
+    
+    if (obj.getFunctions().size()) { 
+      VectorOffunction* vect = VectorOffunctionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getFunctions().size(); ind++) {
+         vect->push_back(functionFactory::objects_[obj.getFunctions()[ind]-1]);
+      }
+      interface_tf_declFactory::objects_[index]->set_functions(vect);
+    }
 
    index++;
  }
@@ -912,25 +1075,65 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    interfaceFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    interfaceFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
     
-    if (obj.getInterfacetfdecl().size()) { 
-      VectorOfinterface_tf_decl* vect = VectorOfinterface_tf_declFactory::make();
-      for (unsigned int ind = 0; ind < obj.getInterfacetfdecl().size(); ind++) {
-         vect->push_back(interface_tf_declFactory::objects_[obj.getInterfacetfdecl()[ind]-1]);
+    if (obj.getProcess().size()) { 
+      VectorOfprocess* vect = VectorOfprocessFactory::make();
+      for (unsigned int ind = 0; ind < obj.getProcess().size(); ind++) {
+         vect->push_back(processFactory::objects_[obj.getProcess()[ind]-1]);
       }
-      interfaceFactory::objects_[index]->set_interface_tf_decl(vect);
+      interfaceFactory::objects_[index]->set_process(vect);
     }
     
-    if (obj.getModport().size()) { 
-      VectorOfmodport* vect = VectorOfmodportFactory::make();
-      for (unsigned int ind = 0; ind < obj.getModport().size(); ind++) {
-         vect->push_back(modportFactory::objects_[obj.getModport()[ind]-1]);
+    if (obj.getInterfacetfdecls().size()) { 
+      VectorOfinterface_tf_decl* vect = VectorOfinterface_tf_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInterfacetfdecls().size(); ind++) {
+         vect->push_back(interface_tf_declFactory::objects_[obj.getInterfacetfdecls()[ind]-1]);
       }
-      interfaceFactory::objects_[index]->set_modport(vect);
+      interfaceFactory::objects_[index]->set_interface_tf_decls(vect);
+    }
+    
+    if (obj.getModports().size()) { 
+      VectorOfmodport* vect = VectorOfmodportFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModports().size(); ind++) {
+         vect->push_back(modportFactory::objects_[obj.getModports()[ind]-1]);
+      }
+      interfaceFactory::objects_[index]->set_modports(vect);
     }
    if (obj.getGlobalclocking()) 
      interfaceFactory::objects_[index]->set_global_clocking(clocking_blockFactory::objects_[obj.getGlobalclocking()-1]);
    if (obj.getDefaultclocking()) 
      interfaceFactory::objects_[index]->set_default_clocking(clocking_blockFactory::objects_[obj.getDefaultclocking()-1]);
+    
+    if (obj.getModpaths().size()) { 
+      VectorOfmod_path* vect = VectorOfmod_pathFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModpaths().size(); ind++) {
+         vect->push_back(mod_pathFactory::objects_[obj.getModpaths()[ind]-1]);
+      }
+      interfaceFactory::objects_[index]->set_mod_paths(vect);
+    }
+    
+    if (obj.getContassigns().size()) { 
+      VectorOfcont_assign* vect = VectorOfcont_assignFactory::make();
+      for (unsigned int ind = 0; ind < obj.getContassigns().size(); ind++) {
+         vect->push_back(cont_assignFactory::objects_[obj.getContassigns()[ind]-1]);
+      }
+      interfaceFactory::objects_[index]->set_cont_assigns(vect);
+    }
+    
+    if (obj.getInterfaces().size()) { 
+      VectorOfinterface* vect = VectorOfinterfaceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInterfaces().size(); ind++) {
+         vect->push_back(interfaceFactory::objects_[obj.getInterfaces()[ind]-1]);
+      }
+      interfaceFactory::objects_[index]->set_interfaces(vect);
+    }
+    
+    if (obj.getInterfacearrays().size()) { 
+      VectorOfinterface_array* vect = VectorOfinterface_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInterfacearrays().size(); ind++) {
+         vect->push_back(interface_arrayFactory::objects_[obj.getInterfacearrays()[ind]-1]);
+      }
+      interfaceFactory::objects_[index]->set_interface_arrays(vect);
+    }
 
    index++;
  }
@@ -1093,20 +1296,20 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
       moduleFactory::objects_[index]->set_process(vect);
     }
     
-    if (obj.getPrimitive().size()) { 
+    if (obj.getPrimitives().size()) { 
       VectorOfprimitive* vect = VectorOfprimitiveFactory::make();
-      for (unsigned int ind = 0; ind < obj.getPrimitive().size(); ind++) {
-         vect->push_back(primitiveFactory::objects_[obj.getPrimitive()[ind]-1]);
+      for (unsigned int ind = 0; ind < obj.getPrimitives().size(); ind++) {
+         vect->push_back(primitiveFactory::objects_[obj.getPrimitives()[ind]-1]);
       }
-      moduleFactory::objects_[index]->set_primitive(vect);
+      moduleFactory::objects_[index]->set_primitives(vect);
     }
     
-    if (obj.getPrimitivearray().size()) { 
+    if (obj.getPrimitivearrays().size()) { 
       VectorOfprimitive_array* vect = VectorOfprimitive_arrayFactory::make();
-      for (unsigned int ind = 0; ind < obj.getPrimitivearray().size(); ind++) {
-         vect->push_back(primitive_arrayFactory::objects_[obj.getPrimitivearray()[ind]-1]);
+      for (unsigned int ind = 0; ind < obj.getPrimitivearrays().size(); ind++) {
+         vect->push_back(primitive_arrayFactory::objects_[obj.getPrimitivearrays()[ind]-1]);
       }
-      moduleFactory::objects_[index]->set_primitive_array(vect);
+      moduleFactory::objects_[index]->set_primitive_arrays(vect);
     }
    if (obj.getGlobalclocking()) 
      moduleFactory::objects_[index]->set_global_clocking(clocking_blockFactory::objects_[obj.getGlobalclocking()-1]);
@@ -1153,60 +1356,60 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
       moduleFactory::objects_[index]->set_modules(vect);
     }
     
-    if (obj.getModulearray().size()) { 
+    if (obj.getModulearrays().size()) { 
       VectorOfmodule_array* vect = VectorOfmodule_arrayFactory::make();
-      for (unsigned int ind = 0; ind < obj.getModulearray().size(); ind++) {
-         vect->push_back(module_arrayFactory::objects_[obj.getModulearray()[ind]-1]);
+      for (unsigned int ind = 0; ind < obj.getModulearrays().size(); ind++) {
+         vect->push_back(module_arrayFactory::objects_[obj.getModulearrays()[ind]-1]);
       }
-      moduleFactory::objects_[index]->set_module_array(vect);
+      moduleFactory::objects_[index]->set_module_arrays(vect);
     }
     
-    if (obj.getModpath().size()) { 
+    if (obj.getModpaths().size()) { 
       VectorOfmod_path* vect = VectorOfmod_pathFactory::make();
-      for (unsigned int ind = 0; ind < obj.getModpath().size(); ind++) {
-         vect->push_back(mod_pathFactory::objects_[obj.getModpath()[ind]-1]);
+      for (unsigned int ind = 0; ind < obj.getModpaths().size(); ind++) {
+         vect->push_back(mod_pathFactory::objects_[obj.getModpaths()[ind]-1]);
       }
-      moduleFactory::objects_[index]->set_mod_path(vect);
+      moduleFactory::objects_[index]->set_mod_paths(vect);
     }
     
-    if (obj.getTchk().size()) { 
+    if (obj.getTchks().size()) { 
       VectorOftchk* vect = VectorOftchkFactory::make();
-      for (unsigned int ind = 0; ind < obj.getTchk().size(); ind++) {
-         vect->push_back(tchkFactory::objects_[obj.getTchk()[ind]-1]);
+      for (unsigned int ind = 0; ind < obj.getTchks().size(); ind++) {
+         vect->push_back(tchkFactory::objects_[obj.getTchks()[ind]-1]);
       }
-      moduleFactory::objects_[index]->set_tchk(vect);
+      moduleFactory::objects_[index]->set_tchks(vect);
     }
     
-    if (obj.getDefparam().size()) { 
+    if (obj.getDefparams().size()) { 
       VectorOfdef_param* vect = VectorOfdef_paramFactory::make();
-      for (unsigned int ind = 0; ind < obj.getDefparam().size(); ind++) {
-         vect->push_back(def_paramFactory::objects_[obj.getDefparam()[ind]-1]);
+      for (unsigned int ind = 0; ind < obj.getDefparams().size(); ind++) {
+         vect->push_back(def_paramFactory::objects_[obj.getDefparams()[ind]-1]);
       }
-      moduleFactory::objects_[index]->set_def_param(vect);
+      moduleFactory::objects_[index]->set_def_params(vect);
     }
     
-    if (obj.getIodecl().size()) { 
+    if (obj.getIodecls().size()) { 
       VectorOfio_decl* vect = VectorOfio_declFactory::make();
-      for (unsigned int ind = 0; ind < obj.getIodecl().size(); ind++) {
-         vect->push_back(io_declFactory::objects_[obj.getIodecl()[ind]-1]);
+      for (unsigned int ind = 0; ind < obj.getIodecls().size(); ind++) {
+         vect->push_back(io_declFactory::objects_[obj.getIodecls()[ind]-1]);
       }
-      moduleFactory::objects_[index]->set_io_decl(vect);
+      moduleFactory::objects_[index]->set_io_decls(vect);
     }
     
-    if (obj.getAliasstmt().size()) { 
+    if (obj.getAliasstmts().size()) { 
       VectorOfalias_stmt* vect = VectorOfalias_stmtFactory::make();
-      for (unsigned int ind = 0; ind < obj.getAliasstmt().size(); ind++) {
-         vect->push_back(alias_stmtFactory::objects_[obj.getAliasstmt()[ind]-1]);
+      for (unsigned int ind = 0; ind < obj.getAliasstmts().size(); ind++) {
+         vect->push_back(alias_stmtFactory::objects_[obj.getAliasstmts()[ind]-1]);
       }
-      moduleFactory::objects_[index]->set_alias_stmt(vect);
+      moduleFactory::objects_[index]->set_alias_stmts(vect);
     }
     
-    if (obj.getClockingblock().size()) { 
+    if (obj.getClockingblocks().size()) { 
       VectorOfclocking_block* vect = VectorOfclocking_blockFactory::make();
-      for (unsigned int ind = 0; ind < obj.getClockingblock().size(); ind++) {
-         vect->push_back(clocking_blockFactory::objects_[obj.getClockingblock()[ind]-1]);
+      for (unsigned int ind = 0; ind < obj.getClockingblocks().size(); ind++) {
+         vect->push_back(clocking_blockFactory::objects_[obj.getClockingblocks()[ind]-1]);
       }
-      moduleFactory::objects_[index]->set_clocking_block(vect);
+      moduleFactory::objects_[index]->set_clocking_blocks(vect);
     }
 
    index++;
