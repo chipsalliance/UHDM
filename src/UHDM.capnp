@@ -24,7 +24,8 @@ struct UhdmRoot {
   factoryClockingblock @20 :List(Clockingblock);
   factoryInstancearray @21 :List(Instancearray);
   factoryModule @22 :List(Module);
-  factoryDesign @23 :List(Design);
+  factoryProgram @23 :List(Program);
+  factoryDesign @24 :List(Design);
 
 }
 
@@ -213,6 +214,21 @@ struct Module {
   clockingblocks @25 :List(UInt64);
 
 }
+struct Program {
+  vpiParent @0 :UInt64;
+  uhdmParentType @1 :UInt64;
+  vpiFile @2 :UInt64;
+  vpiLineNo @3 :UInt32;
+  vpiName @4 :UInt64;
+  instancearray @5 :UInt64;
+  process @6 :List(UInt64);
+  defaultclocking @7 :UInt64;
+  interfaces @8 :List(UInt64);
+  interfacearrays @9 :List(UInt64);
+  contassigns @10 :List(UInt64);
+  clockingblocks @11 :List(UInt64);
+
+}
 struct Design {
   vpiParent @0 :UInt64;
   uhdmParentType @1 :UInt64;
@@ -221,6 +237,7 @@ struct Design {
   vpiName @4 :UInt64;
   allModules @5 :List(UInt64);
   topModules @6 :List(UInt64);
+  allPrograms @7 :List(UInt64);
 
 }
 

@@ -93,6 +93,9 @@ typedef std::vector<alias_stmt*>::iterator VectorOfalias_stmtItr;
 class clocking_block;
 typedef std::vector<clocking_block*> VectorOfclocking_block;
 typedef std::vector<clocking_block*>::iterator VectorOfclocking_blockItr;
+class program;
+typedef std::vector<program*> VectorOfprogram;
+typedef std::vector<program*>::iterator VectorOfprogramItr;
 
 };
 

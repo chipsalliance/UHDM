@@ -32,62 +32,71 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 
-#define uhdmprocess 2031
-#define uhdmscope 2032
-#define uhdmtask 2033
-#define uhdmfunction 2034
-#define uhdmmodport 2035
-#define uhdmio_decls 2036
-#define uhdminterface 2037
-#define uhdminterface_tf_decl 2038
-#define uhdmtasks 2039
-#define uhdmfunctions 2040
-#define uhdminterface 2037
-#define uhdmprocess 2031
-#define uhdminterface_tf_decls 2041
-#define uhdmmodports 2042
-#define uhdmglobal_clocking 2043
-#define uhdmdefault_clocking 2044
-#define uhdmmod_paths 2045
-#define uhdmcont_assigns 2046
-#define uhdminterfaces 2047
-#define uhdminterface_arrays 2048
-#define uhdminterface_array 2049
-#define uhdmcont_assign 2050
-#define uhdmport 2051
-#define uhdmmodule_array 2052
-#define uhdmprimitive 2053
-#define uhdmprimitive_array 2054
-#define uhdmmod_path 2055
-#define uhdmtchk 2056
-#define uhdmdef_param 2057
-#define uhdmio_decl 2058
-#define uhdmalias_stmt 2059
-#define uhdmclocking_block 2060
-#define uhdminstance_array 2061
-#define uhdmmodule 2062
-#define uhdminstance_array 2061
-#define uhdmscope 2032
-#define uhdmprocess 2031
-#define uhdmprimitives 2063
-#define uhdmprimitive_arrays 2064
-#define uhdmglobal_clocking 2043
-#define uhdmdefault_clocking 2044
-#define uhdmports 2065
-#define uhdminterfaces 2047
-#define uhdminterface_arrays 2048
-#define uhdmcont_assigns 2046
-#define uhdmmodules 2066
-#define uhdmmodule_arrays 2067
-#define uhdmmod_paths 2045
-#define uhdmtchks 2068
-#define uhdmdef_params 2069
-#define uhdmio_decls 2036
-#define uhdmalias_stmts 2070
-#define uhdmclocking_blocks 2071
-#define uhdmdesign 2072
-#define uhdmallModules 2073
-#define uhdmtopModules 2074
+#define uhdmprocess 2033
+#define uhdmscope 2034
+#define uhdmtask 2035
+#define uhdmfunction 2036
+#define uhdmmodport 2037
+#define uhdmio_decls 2038
+#define uhdminterface 2039
+#define uhdminterface_tf_decl 2040
+#define uhdmtasks 2041
+#define uhdmfunctions 2042
+#define uhdminterface 2039
+#define uhdmprocess 2033
+#define uhdminterface_tf_decls 2043
+#define uhdmmodports 2044
+#define uhdmglobal_clocking 2045
+#define uhdmdefault_clocking 2046
+#define uhdmmod_paths 2047
+#define uhdmcont_assigns 2048
+#define uhdminterfaces 2049
+#define uhdminterface_arrays 2050
+#define uhdminterface_array 2051
+#define uhdmcont_assign 2052
+#define uhdmport 2053
+#define uhdmmodule_array 2054
+#define uhdmprimitive 2055
+#define uhdmprimitive_array 2056
+#define uhdmmod_path 2057
+#define uhdmtchk 2058
+#define uhdmdef_param 2059
+#define uhdmio_decl 2060
+#define uhdmalias_stmt 2061
+#define uhdmclocking_block 2062
+#define uhdminstance_array 2063
+#define uhdmmodule 2064
+#define uhdminstance_array 2063
+#define uhdmscope 2034
+#define uhdmprocess 2033
+#define uhdmprimitives 2065
+#define uhdmprimitive_arrays 2066
+#define uhdmglobal_clocking 2045
+#define uhdmdefault_clocking 2046
+#define uhdmports 2067
+#define uhdminterfaces 2049
+#define uhdminterface_arrays 2050
+#define uhdmcont_assigns 2048
+#define uhdmmodules 2068
+#define uhdmmodule_arrays 2069
+#define uhdmmod_paths 2047
+#define uhdmtchks 2070
+#define uhdmdef_params 2071
+#define uhdmio_decls 2038
+#define uhdmalias_stmts 2072
+#define uhdmclocking_blocks 2073
+#define uhdmprogram 2074
+#define uhdminstance_array 2063
+#define uhdmprocess 2033
+#define uhdmdefault_clocking 2046
+#define uhdminterfaces 2049
+#define uhdminterface_arrays 2050
+#define uhdmcont_assigns 2048
+#define uhdmclocking_blocks 2073
+#define uhdmdesign 2075
+#define uhdmallModules 2076
+#define uhdmtopModules 2077
+#define uhdmallPrograms 2078
 
 
 #include "headers/process.h"
@@ -111,6 +120,7 @@
 #include "headers/clocking_block.h"
 #include "headers/instance_array.h"
 #include "headers/module.h"
+#include "headers/program.h"
 #include "headers/design.h"
 
 

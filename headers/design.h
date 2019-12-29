@@ -61,6 +61,10 @@ namespace UHDM {
 
     void set_topModules(VectorOfmodule* data) { topModules_ = data; }
 
+    const VectorOfprogram* get_allPrograms() const { return allPrograms_; }
+
+    void set_allPrograms(VectorOfprogram* data) { allPrograms_ = data; }
+
   private:
     
     BaseClass* vpiParent_;
@@ -76,6 +80,8 @@ namespace UHDM {
     VectorOfmodule* allModules_;
 
     VectorOfmodule* topModules_;
+
+    VectorOfprogram* allPrograms_;
 
   };
 
