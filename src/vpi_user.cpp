@@ -34,6 +34,8 @@
 
 #include "headers/process.h"
 #include "headers/scope.h"
+#include "headers/task.h"
+#include "headers/function.h"
 #include "headers/modport.h"
 #include "headers/interface_tf_decl.h"
 #include "headers/interface.h"
@@ -85,9 +87,27 @@ vpiHandle vpi_handle (PLI_INT32 type,
  } 
 }
 
+ if (handle->type == uhdmtask) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((task*)(object))->get_uhdmParentType(), ((task*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((function*)(object))->get_uhdmParentType(), ((function*)(object))->get_vpiParent());
+ } 
+}
+
  if (handle->type == uhdmmodport) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((modport*)(object))->get_uhdmParentType(), ((modport*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmmodport) {
+     if (type == vpiInterface) {
+       return (vpiHandle) new uhdm_handle(uhdminterface, ((modport*)(object))->get_interface());
  } 
 }
 
@@ -239,10 +259,46 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   const BaseClass*  object = (BaseClass*) handle->object;
   
     
+ if (handle->type == uhdmmodport) {
+ if (type == vpiIODecl) {
+ if (((modport*)(object))->get_io_decls())
+ return (vpiHandle) new uhdm_handle(uhdmio_decls, ((modport*)(object))->get_io_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface_tf_decl) {
+ if (type == vpiTask) {
+ if (((interface_tf_decl*)(object))->get_tasks())
+ return (vpiHandle) new uhdm_handle(uhdmtasks, ((interface_tf_decl*)(object))->get_tasks());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface_tf_decl) {
+ if (type == vpiFunction) {
+ if (((interface_tf_decl*)(object))->get_functions())
+ return (vpiHandle) new uhdm_handle(uhdmfunctions, ((interface_tf_decl*)(object))->get_functions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface) {
+ if (type == vpiProcess) {
+ if (((interface*)(object))->get_process())
+ return (vpiHandle) new uhdm_handle(uhdmprocess, ((interface*)(object))->get_process());
+ else return 0;
+  }
+ }
+
+    
  if (handle->type == uhdminterface) {
  if (type == vpiInterfaceTfDecl) {
- if (((interface*)(object))->get_interface_tf_decl())
- return (vpiHandle) new uhdm_handle(uhdminterface_tf_decl, ((interface*)(object))->get_interface_tf_decl());
+ if (((interface*)(object))->get_interface_tf_decls())
+ return (vpiHandle) new uhdm_handle(uhdminterface_tf_decls, ((interface*)(object))->get_interface_tf_decls());
  else return 0;
   }
  }
@@ -250,8 +306,44 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdminterface) {
  if (type == vpiModport) {
- if (((interface*)(object))->get_modport())
- return (vpiHandle) new uhdm_handle(uhdmmodport, ((interface*)(object))->get_modport());
+ if (((interface*)(object))->get_modports())
+ return (vpiHandle) new uhdm_handle(uhdmmodports, ((interface*)(object))->get_modports());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface) {
+ if (type == vpiModPath) {
+ if (((interface*)(object))->get_mod_paths())
+ return (vpiHandle) new uhdm_handle(uhdmmod_paths, ((interface*)(object))->get_mod_paths());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface) {
+ if (type == vpiContAssign) {
+ if (((interface*)(object))->get_cont_assigns())
+ return (vpiHandle) new uhdm_handle(uhdmcont_assigns, ((interface*)(object))->get_cont_assigns());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface) {
+ if (type == uhdminterface) {
+ if (((interface*)(object))->get_interfaces())
+ return (vpiHandle) new uhdm_handle(uhdminterfaces, ((interface*)(object))->get_interfaces());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface) {
+ if (type == uhdminterface_array) {
+ if (((interface*)(object))->get_interface_arrays())
+ return (vpiHandle) new uhdm_handle(uhdminterface_arrays, ((interface*)(object))->get_interface_arrays());
  else return 0;
   }
  }
@@ -277,8 +369,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdmmodule) {
  if (type == vpiPrimitive) {
- if (((module*)(object))->get_primitive())
- return (vpiHandle) new uhdm_handle(uhdmprimitive, ((module*)(object))->get_primitive());
+ if (((module*)(object))->get_primitives())
+ return (vpiHandle) new uhdm_handle(uhdmprimitives, ((module*)(object))->get_primitives());
  else return 0;
   }
  }
@@ -286,8 +378,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdmmodule) {
  if (type == vpiPrimitiveArray) {
- if (((module*)(object))->get_primitive_array())
- return (vpiHandle) new uhdm_handle(uhdmprimitive_array, ((module*)(object))->get_primitive_array());
+ if (((module*)(object))->get_primitive_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmprimitive_arrays, ((module*)(object))->get_primitive_arrays());
  else return 0;
   }
  }
@@ -340,8 +432,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdmmodule) {
  if (type == vpiModuleArray) {
- if (((module*)(object))->get_module_array())
- return (vpiHandle) new uhdm_handle(uhdmmodule_array, ((module*)(object))->get_module_array());
+ if (((module*)(object))->get_module_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmmodule_arrays, ((module*)(object))->get_module_arrays());
  else return 0;
   }
  }
@@ -349,8 +441,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdmmodule) {
  if (type == vpiModPath) {
- if (((module*)(object))->get_mod_path())
- return (vpiHandle) new uhdm_handle(uhdmmod_path, ((module*)(object))->get_mod_path());
+ if (((module*)(object))->get_mod_paths())
+ return (vpiHandle) new uhdm_handle(uhdmmod_paths, ((module*)(object))->get_mod_paths());
  else return 0;
   }
  }
@@ -358,8 +450,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdmmodule) {
  if (type == vpiTchk) {
- if (((module*)(object))->get_tchk())
- return (vpiHandle) new uhdm_handle(uhdmtchk, ((module*)(object))->get_tchk());
+ if (((module*)(object))->get_tchks())
+ return (vpiHandle) new uhdm_handle(uhdmtchks, ((module*)(object))->get_tchks());
  else return 0;
   }
  }
@@ -367,8 +459,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdmmodule) {
  if (type == vpiDefParam) {
- if (((module*)(object))->get_def_param())
- return (vpiHandle) new uhdm_handle(uhdmdef_param, ((module*)(object))->get_def_param());
+ if (((module*)(object))->get_def_params())
+ return (vpiHandle) new uhdm_handle(uhdmdef_params, ((module*)(object))->get_def_params());
  else return 0;
   }
  }
@@ -376,8 +468,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdmmodule) {
  if (type == vpiIODecl) {
- if (((module*)(object))->get_io_decl())
- return (vpiHandle) new uhdm_handle(uhdmio_decl, ((module*)(object))->get_io_decl());
+ if (((module*)(object))->get_io_decls())
+ return (vpiHandle) new uhdm_handle(uhdmio_decls, ((module*)(object))->get_io_decls());
  else return 0;
   }
  }
@@ -385,8 +477,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdmmodule) {
  if (type == uhdmalias_stmt) {
- if (((module*)(object))->get_alias_stmt())
- return (vpiHandle) new uhdm_handle(uhdmalias_stmt, ((module*)(object))->get_alias_stmt());
+ if (((module*)(object))->get_alias_stmts())
+ return (vpiHandle) new uhdm_handle(uhdmalias_stmts, ((module*)(object))->get_alias_stmts());
  else return 0;
   }
  }
@@ -394,8 +486,8 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
     
  if (handle->type == uhdmmodule) {
  if (type == uhdmclocking_block) {
- if (((module*)(object))->get_clocking_block())
- return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_clocking_block());
+ if (((module*)(object))->get_clocking_blocks())
+ return (vpiHandle) new uhdm_handle(uhdmclocking_blocks, ((module*)(object))->get_clocking_blocks());
  else return 0;
   }
  }
@@ -428,7 +520,43 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   const void* vect = handle->object;
   
 
-  if (handle->type == uhdminterface_tf_decl) {
+  if (handle->type == uhdmio_decls) {
+ VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmio_decl, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmtasks) {
+ VectorOftask* the_vec = (VectorOftask*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmtask, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmfunctions) {
+ VectorOffunction* the_vec = (VectorOffunction*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmfunction, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmprocess) {
+ VectorOfprocess* the_vec = (VectorOfprocess*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmprocess, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdminterface_tf_decls) {
  VectorOfinterface_tf_decl* the_vec = (VectorOfinterface_tf_decl*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdminterface_tf_decl, the_vec->at(handle->index));
@@ -437,10 +565,46 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmmodport) {
+  if (handle->type == uhdmmodports) {
  VectorOfmodport* the_vec = (VectorOfmodport*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmmodport, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmmod_paths) {
+ VectorOfmod_path* the_vec = (VectorOfmod_path*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmmod_path, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmcont_assigns) {
+ VectorOfcont_assign* the_vec = (VectorOfcont_assign*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmcont_assign, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdminterfaces) {
+ VectorOfinterface* the_vec = (VectorOfinterface*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdminterface, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdminterface_arrays) {
+ VectorOfinterface_array* the_vec = (VectorOfinterface_array*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdminterface_array, the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -464,7 +628,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmprimitive) {
+  if (handle->type == uhdmprimitives) {
  VectorOfprimitive* the_vec = (VectorOfprimitive*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmprimitive, the_vec->at(handle->index));
@@ -473,7 +637,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmprimitive_array) {
+  if (handle->type == uhdmprimitive_arrays) {
  VectorOfprimitive_array* the_vec = (VectorOfprimitive_array*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmprimitive_array, the_vec->at(handle->index));
@@ -527,7 +691,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmmodule_array) {
+  if (handle->type == uhdmmodule_arrays) {
  VectorOfmodule_array* the_vec = (VectorOfmodule_array*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmmodule_array, the_vec->at(handle->index));
@@ -536,7 +700,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmmod_path) {
+  if (handle->type == uhdmmod_paths) {
  VectorOfmod_path* the_vec = (VectorOfmod_path*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmmod_path, the_vec->at(handle->index));
@@ -545,7 +709,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmtchk) {
+  if (handle->type == uhdmtchks) {
  VectorOftchk* the_vec = (VectorOftchk*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmtchk, the_vec->at(handle->index));
@@ -554,7 +718,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmdef_param) {
+  if (handle->type == uhdmdef_params) {
  VectorOfdef_param* the_vec = (VectorOfdef_param*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmdef_param, the_vec->at(handle->index));
@@ -563,7 +727,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmio_decl) {
+  if (handle->type == uhdmio_decls) {
  VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmio_decl, the_vec->at(handle->index));
@@ -572,7 +736,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmalias_stmt) {
+  if (handle->type == uhdmalias_stmts) {
  VectorOfalias_stmt* the_vec = (VectorOfalias_stmt*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmalias_stmt, the_vec->at(handle->index));
@@ -581,7 +745,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmclocking_block) {
+  if (handle->type == uhdmclocking_blocks) {
  VectorOfclocking_block* the_vec = (VectorOfclocking_block*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(uhdmclocking_block, the_vec->at(handle->index));
@@ -642,6 +806,18 @@ PLI_INT32 vpi_get (PLI_INT32   property,
      } 
 }
 
+ if (handle->type == uhdmtask) {
+     if (property == vpiLineNo) {
+       return ((task*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiLineNo) {
+       return ((function*)(obj))->get_vpiLineNo();
+     } 
+}
+
  if (handle->type == uhdmmodport) {
      if (property == vpiLineNo) {
        return ((modport*)(obj))->get_vpiLineNo();
@@ -651,6 +827,12 @@ PLI_INT32 vpi_get (PLI_INT32   property,
  if (handle->type == uhdminterface_tf_decl) {
      if (property == vpiLineNo) {
        return ((interface_tf_decl*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdminterface_tf_decl) {
+     if (property == vpiAccessType) {
+       return ((interface_tf_decl*)(obj))->get_vpiAccessType();
      } 
 }
 
@@ -798,6 +980,18 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmtask) {
+     if (property == vpiLineNo) {
+       return ((task*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiLineNo) {
+       return ((function*)(obj))->get_vpiLineNo();
+     } 
+}
+
  if (handle->type == uhdmmodport) {
      if (property == vpiLineNo) {
        return ((modport*)(obj))->get_vpiLineNo();
@@ -807,6 +1001,12 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
  if (handle->type == uhdminterface_tf_decl) {
      if (property == vpiLineNo) {
        return ((interface_tf_decl*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdminterface_tf_decl) {
+     if (property == vpiAccessType) {
+       return ((interface_tf_decl*)(obj))->get_vpiAccessType();
      } 
 }
 
@@ -954,9 +1154,27 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmtask) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((task*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((function*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
  if (handle->type == uhdmmodport) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((modport*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmmodport) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((modport*)(obj))->get_vpiName().c_str());
      } 
 }
 
