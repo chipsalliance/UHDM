@@ -1,5 +1,7 @@
 process.yaml
 scope.yaml
+task.yaml
+function.yaml
 modport.yaml
 interface_tf_decl.yaml
 interface.yaml

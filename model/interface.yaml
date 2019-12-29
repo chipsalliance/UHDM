@@ -20,12 +20,12 @@
     vpi: vpiType
     type: unsigned int
     card: 1
-  - obj_ref: interface_tf_decl
+  - obj_ref: interface_tf_decls
     name: interface tf decl
     vpi: vpiInterfaceTfDecl
     type: interface_tf_decl
     card: any
-  - obj_ref: modport
+  - obj_ref: modports
     name: modport
     vpi: vpiModport
     type: modport
@@ -40,3 +40,28 @@
     vpi: vpiDefaultClocking
     type: clocking_block
     card: 1
+  - obj_ref: mod_paths
+    name: mod path
+    vpi: vpiModPath
+    type: mod_path
+    card: any
+  - obj_ref: cont_assigns
+    name: cont assign
+    vpi: vpiContAssign
+    type: cont_assign
+    card: any
+  - obj_ref: interfaces
+    name: interface
+    vpi: uhdminterface
+    type: interface
+    card: any
+  - obj_ref: interface_arrays
+    vpi: uhdminterface_array
+    name: interface array
+    type: interface_array
+    card: any
+  - class_ref: process
+    name: process
+    vpi: vpiProcess
+    type: process
+    card: any

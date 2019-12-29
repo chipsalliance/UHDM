@@ -84,42 +84,42 @@
     vpi: vpiModule
     type: module
     card: any
-  - obj_ref: module_array
+  - obj_ref: module_arrays
     name: module array
     vpi: vpiModuleArray
     type: module_array
     card: any
-  - class_ref: primitive
+  - class_ref: primitives
     name: primitive
     vpi: vpiPrimitive
     type: primitive
     card: any
-  - class_ref: primitive_array
+  - class_ref: primitive_arrays
     name: primitive array
     vpi: vpiPrimitiveArray
     type: primitive_array
     card: any
-  - obj_ref: mod_path
+  - obj_ref: mod_paths
     vpi: vpiModPath
     type: mod_path
     card: any
-  - obj_ref: tchk
+  - obj_ref: tchks
     vpi: vpiTchk
     type: tchk
     card: any
-  - obj_ref: def_param
+  - obj_ref: def_params
     vpi: vpiDefParam
     type: def_param
     card: any
-  - obj_ref: io_decl
+  - obj_ref: io_decls
     vpi: vpiIODecl
     type: io_decl
     card: any
-  - obj_ref: alias_stmt
+  - obj_ref: alias_stmts
     vpi: uhdmalias_stmt
     type: alias_stmt
     card: any
-  - obj_ref: clocking_block
+  - obj_ref: clocking_blocks
     vpi: uhdmclocking_block
     type: clocking_block
     card: any

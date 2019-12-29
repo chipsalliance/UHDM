@@ -75,13 +75,13 @@ namespace UHDM {
 
     void set_process(VectorOfprocess* data) { process_ = data; }
 
-    const VectorOfprimitive* get_primitive() const { return primitive_; }
+    const VectorOfprimitive* get_primitives() const { return primitives_; }
 
-    void set_primitive(VectorOfprimitive* data) { primitive_ = data; }
+    void set_primitives(VectorOfprimitive* data) { primitives_ = data; }
 
-    const VectorOfprimitive_array* get_primitive_array() const { return primitive_array_; }
+    const VectorOfprimitive_array* get_primitive_arrays() const { return primitive_arrays_; }
 
-    void set_primitive_array(VectorOfprimitive_array* data) { primitive_array_ = data; }
+    void set_primitive_arrays(VectorOfprimitive_array* data) { primitive_arrays_ = data; }
 
     clocking_block* get_global_clocking() const { return global_clocking_; }
 
@@ -111,33 +111,33 @@ namespace UHDM {
 
     void set_modules(VectorOfmodule* data) { modules_ = data; }
 
-    const VectorOfmodule_array* get_module_array() const { return module_array_; }
+    const VectorOfmodule_array* get_module_arrays() const { return module_arrays_; }
 
-    void set_module_array(VectorOfmodule_array* data) { module_array_ = data; }
+    void set_module_arrays(VectorOfmodule_array* data) { module_arrays_ = data; }
 
-    const VectorOfmod_path* get_mod_path() const { return mod_path_; }
+    const VectorOfmod_path* get_mod_paths() const { return mod_paths_; }
 
-    void set_mod_path(VectorOfmod_path* data) { mod_path_ = data; }
+    void set_mod_paths(VectorOfmod_path* data) { mod_paths_ = data; }
 
-    const VectorOftchk* get_tchk() const { return tchk_; }
+    const VectorOftchk* get_tchks() const { return tchks_; }
 
-    void set_tchk(VectorOftchk* data) { tchk_ = data; }
+    void set_tchks(VectorOftchk* data) { tchks_ = data; }
 
-    const VectorOfdef_param* get_def_param() const { return def_param_; }
+    const VectorOfdef_param* get_def_params() const { return def_params_; }
 
-    void set_def_param(VectorOfdef_param* data) { def_param_ = data; }
+    void set_def_params(VectorOfdef_param* data) { def_params_ = data; }
 
-    const VectorOfio_decl* get_io_decl() const { return io_decl_; }
+    const VectorOfio_decl* get_io_decls() const { return io_decls_; }
 
-    void set_io_decl(VectorOfio_decl* data) { io_decl_ = data; }
+    void set_io_decls(VectorOfio_decl* data) { io_decls_ = data; }
 
-    const VectorOfalias_stmt* get_alias_stmt() const { return alias_stmt_; }
+    const VectorOfalias_stmt* get_alias_stmts() const { return alias_stmts_; }
 
-    void set_alias_stmt(VectorOfalias_stmt* data) { alias_stmt_ = data; }
+    void set_alias_stmts(VectorOfalias_stmt* data) { alias_stmts_ = data; }
 
-    const VectorOfclocking_block* get_clocking_block() const { return clocking_block_; }
+    const VectorOfclocking_block* get_clocking_blocks() const { return clocking_blocks_; }
 
-    void set_clocking_block(VectorOfclocking_block* data) { clocking_block_ = data; }
+    void set_clocking_blocks(VectorOfclocking_block* data) { clocking_blocks_ = data; }
 
   private:
     
@@ -161,9 +161,9 @@ namespace UHDM {
 
     VectorOfprocess* process_;
 
-    VectorOfprimitive* primitive_;
+    VectorOfprimitive* primitives_;
 
-    VectorOfprimitive_array* primitive_array_;
+    VectorOfprimitive_array* primitive_arrays_;
 
     clocking_block* global_clocking_;
 
@@ -179,19 +179,19 @@ namespace UHDM {
 
     VectorOfmodule* modules_;
 
-    VectorOfmodule_array* module_array_;
+    VectorOfmodule_array* module_arrays_;
 
-    VectorOfmod_path* mod_path_;
+    VectorOfmod_path* mod_paths_;
 
-    VectorOftchk* tchk_;
+    VectorOftchk* tchks_;
 
-    VectorOfdef_param* def_param_;
+    VectorOfdef_param* def_params_;
 
-    VectorOfio_decl* io_decl_;
+    VectorOfio_decl* io_decls_;
 
-    VectorOfalias_stmt* alias_stmt_;
+    VectorOfalias_stmt* alias_stmts_;
 
-    VectorOfclocking_block* clocking_block_;
+    VectorOfclocking_block* clocking_blocks_;
 
   };
 
