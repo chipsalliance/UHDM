@@ -13,7 +13,7 @@ Universal Hardware Data Model
  * make all
 
 # Features
- * All SystemVerilog models are expression in a Yaml type symtax (One file per Verilog Object Model)
+ * All SystemVerilog models are expression in a Yaml type syntax (One file per Verilog Object Model)
  * From this Yaml description, all the code (C++ headers, VPI Interface, Serialization) is automatically generated.
  * Model inheritance is supported (To follow the IEEE standard)
  * Supports the concept of "design" on top of the IEEE standard to support partitioning and multi-language (SystemVerilog - VHDL)
