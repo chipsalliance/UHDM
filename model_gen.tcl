@@ -573,7 +573,11 @@ proc generate_code { models } {
 		    incr capnpIndex
 		}
 	    }
-	    regsub -all [string toupper $baseclass 0 0] $SAVE($baseclass) [string toupper $classname 0 0] save
+	    set save ""
+	    foreach line [split $SAVE($baseclass) "\n"] {
+		regsub  [string toupper $baseclass 0 0] $line [string toupper $classname 0 0] tmp
+		append save "$tmp\n"
+	    }
 	    append SAVE($classname) $save
 	    regsub -all $baseclass $RESTORE($baseclass) $classname restore	    
 	    append RESTORE($classname) $restore

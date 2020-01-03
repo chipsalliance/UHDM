@@ -15,4 +15,14 @@
 # Universal Hardware Data Model (UHDM) "package" formal description
  
 - obj_def: package
-   - extends: instance
+  - extends: instance
+  - property: type
+    name: vpiPackage
+    vpi: vpiType
+    type: unsigned int
+    card: 1    
+  - property: compile_unit
+    name: compile unit
+    vpi: vpiUnit
+    type: bool
+    card: 1

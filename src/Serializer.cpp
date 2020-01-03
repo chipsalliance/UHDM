@@ -905,9 +905,25 @@ void Serializer::save(std::string file) {
     Packages[index].setUhdmParentType(obj->get_uhdmParentType());
     Packages[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Packages[index].setVpiLineNo(obj->get_vpiLineNo());
+    Packages[index].setVpiUnit(obj->get_vpiUnit());
     Packages[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Packages[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Packages[index].setVpiDefName(SymbolFactory::make(obj->get_vpiDefName()));
+    Packages[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Packages[index].setVpiCellInstance(obj->get_vpiCellInstance());
+    Packages[index].setVpiDefNetType(obj->get_vpiDefNetType());
+    Packages[index].setVpiDefFile(SymbolFactory::make(obj->get_vpiDefFile()));
+    Packages[index].setVpiDefDelayMode(obj->get_vpiDefDelayMode());
     Packages[index].setVpiProtected(obj->get_vpiProtected());
+    Packages[index].setVpiTimePrecision(obj->get_vpiTimePrecision());
+    Packages[index].setVpiTimeUnit(obj->get_vpiTimeUnit());
+    Packages[index].setVpiUnconnDrive(obj->get_vpiUnconnDrive());
+    Packages[index].setVpiLibrary(SymbolFactory::make(obj->get_vpiLibrary()));
+    Packages[index].setVpiCell(SymbolFactory::make(obj->get_vpiCell()));
+    Packages[index].setVpiConfig(SymbolFactory::make(obj->get_vpiConfig()));
+    Packages[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Packages[index].setVpiTop(obj->get_vpiTop());
+
 
    index++;
  }
@@ -938,6 +954,13 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder AllProgramss = Designs[index].initAllPrograms(obj->get_allPrograms()->size());
       for (unsigned int ind = 0; ind < obj->get_allPrograms()->size(); ind++) {
         AllProgramss.set(ind, getId((*obj->get_allPrograms())[ind]));
+      }
+    }
+ 
+    if (obj->get_allPackages()) {  
+      ::capnp::List<::uint64_t>::Builder AllPackagess = Designs[index].initAllPackages(obj->get_allPackages()->size());
+      for (unsigned int ind = 0; ind < obj->get_allPackages()->size(); ind++) {
+        AllPackagess.set(ind, getId((*obj->get_allPackages())[ind]));
       }
     }
 
@@ -1580,9 +1603,24 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    packageFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    packageFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    packageFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    packageFactory::objects_[index]->set_vpiUnit(obj.getVpiUnit());
     packageFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    packageFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     packageFactory::objects_[index]->set_vpiDefName(SymbolFactory::getSymbol(obj.getVpiDefName()));
+    packageFactory::objects_[index]->set_vpiArrayMember(obj.getVpiArrayMember());
+    packageFactory::objects_[index]->set_vpiCellInstance(obj.getVpiCellInstance());
+    packageFactory::objects_[index]->set_vpiDefNetType(obj.getVpiDefNetType());
+    packageFactory::objects_[index]->set_vpiDefFile(SymbolFactory::getSymbol(obj.getVpiDefFile()));
+    packageFactory::objects_[index]->set_vpiDefDelayMode(obj.getVpiDefDelayMode());
     packageFactory::objects_[index]->set_vpiProtected(obj.getVpiProtected());
+    packageFactory::objects_[index]->set_vpiTimePrecision(obj.getVpiTimePrecision());
+    packageFactory::objects_[index]->set_vpiTimeUnit(obj.getVpiTimeUnit());
+    packageFactory::objects_[index]->set_vpiUnconnDrive(obj.getVpiUnconnDrive());
+    packageFactory::objects_[index]->set_vpiLibrary(SymbolFactory::getSymbol(obj.getVpiLibrary()));
+    packageFactory::objects_[index]->set_vpiCell(SymbolFactory::getSymbol(obj.getVpiCell()));
+    packageFactory::objects_[index]->set_vpiConfig(SymbolFactory::getSymbol(obj.getVpiConfig()));
+    packageFactory::objects_[index]->set_vpiAutomatic(obj.getVpiAutomatic());
+    packageFactory::objects_[index]->set_vpiTop(obj.getVpiTop());
 
    index++;
  }
@@ -1617,6 +1655,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
          vect->push_back(programFactory::objects_[obj.getAllPrograms()[ind]-1]);
       }
       designFactory::objects_[index]->set_allPrograms(vect);
+    }
+    
+    if (obj.getAllPackages().size()) { 
+      VectorOfpackage* vect = VectorOfpackageFactory::make();
+      for (unsigned int ind = 0; ind < obj.getAllPackages().size(); ind++) {
+         vect->push_back(packageFactory::objects_[obj.getAllPackages()[ind]-1]);
+      }
+      designFactory::objects_[index]->set_allPackages(vect);
     }
 
    index++;

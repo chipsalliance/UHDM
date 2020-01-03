@@ -213,9 +213,24 @@ vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
-vpiName @4 :UInt64;
-vpiDefName @5 :UInt64;
-vpiProtected @6 :Bool;
+vpiUnit @4 :Bool;
+vpiName @5 :UInt64;
+vpiFullName @6 :UInt64;
+vpiDefName @7 :UInt64;
+vpiArrayMember @8 :Bool;
+vpiCellInstance @9 :Bool;
+vpiDefNetType @10 :Int64;
+vpiDefFile @11 :UInt64;
+vpiDefDelayMode @12 :Int64;
+vpiProtected @13 :Bool;
+vpiTimePrecision @14 :Int64;
+vpiTimeUnit @15 :Int64;
+vpiUnconnDrive @16 :Int64;
+vpiLibrary @17 :UInt64;
+vpiCell @18 :UInt64;
+vpiConfig @19 :UInt64;
+vpiAutomatic @20 :Bool;
+vpiTop @21 :Bool;
 }
 struct Design {
 vpiParent @0 :UInt64;
@@ -226,6 +241,7 @@ vpiName @4 :UInt64;
 allModules @5 :List(UInt64);
 topModules @6 :List(UInt64);
 allPrograms @7 :List(UInt64);
+allPackages @8 :List(UInt64);
 }
 
 

@@ -96,6 +96,9 @@ typedef std::vector<clocking_block*>::iterator VectorOfclocking_blockItr;
 class program;
 typedef std::vector<program*> VectorOfprogram;
 typedef std::vector<program*>::iterator VectorOfprogramItr;
+class package;
+typedef std::vector<package*> VectorOfpackage;
+typedef std::vector<package*>::iterator VectorOfpackageItr;
 
 };
 

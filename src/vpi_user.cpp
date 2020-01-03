@@ -591,6 +591,15 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   }
  }
 
+    
+ if (handle->type == uhdmdesign) {
+ if (type == uhdmallPackages) {
+ if (((design*)(object))->get_allPackages())
+ return (vpiHandle) new uhdm_handle(uhdmallPackages, ((design*)(object))->get_allPackages());
+ else return 0;
+  }
+ }
+
   std::cout << "VPI ERROR: Bad usage of vpi_iterate" << std::endl;    
   return 0;   
 }
@@ -906,6 +915,15 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  return (vpiHandle) h;
  }
  }
+
+  if (handle->type == uhdmallPackages) {
+ VectorOfpackage* the_vec = (VectorOfpackage*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmpackage, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
   return 0;
 }
 
@@ -1098,8 +1116,62 @@ PLI_INT32 vpi_get (PLI_INT32   property,
 }
 
  if (handle->type == uhdminstance) {
+     if (property == vpiArrayMember) {
+       return ((instance*)(obj))->get_vpiArrayMember();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiCellInstance) {
+       return ((instance*)(obj))->get_vpiCellInstance();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiDefNetType) {
+       return ((instance*)(obj))->get_vpiDefNetType();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiDefDelayMode) {
+       return ((instance*)(obj))->get_vpiDefDelayMode();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
      if (property == vpiProtected) {
        return ((instance*)(obj))->get_vpiProtected();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiTimePrecision) {
+       return ((instance*)(obj))->get_vpiTimePrecision();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiTimeUnit) {
+       return ((instance*)(obj))->get_vpiTimeUnit();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiUnconnDrive) {
+       return ((instance*)(obj))->get_vpiUnconnDrive();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiAutomatic) {
+       return ((instance*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiTop) {
+       return ((instance*)(obj))->get_vpiTop();
      } 
 }
 
@@ -1110,8 +1182,74 @@ PLI_INT32 vpi_get (PLI_INT32   property,
 }
 
  if (handle->type == uhdmpackage) {
+     if (property == vpiType) {
+       return ((package*)(obj))->get_vpiType();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiUnit) {
+       return ((package*)(obj))->get_vpiUnit();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiArrayMember) {
+       return ((package*)(obj))->get_vpiArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiCellInstance) {
+       return ((package*)(obj))->get_vpiCellInstance();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiDefNetType) {
+       return ((package*)(obj))->get_vpiDefNetType();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiDefDelayMode) {
+       return ((package*)(obj))->get_vpiDefDelayMode();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
      if (property == vpiProtected) {
        return ((package*)(obj))->get_vpiProtected();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiTimePrecision) {
+       return ((package*)(obj))->get_vpiTimePrecision();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiTimeUnit) {
+       return ((package*)(obj))->get_vpiTimeUnit();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiUnconnDrive) {
+       return ((package*)(obj))->get_vpiUnconnDrive();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiAutomatic) {
+       return ((package*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiTop) {
+       return ((package*)(obj))->get_vpiTop();
      } 
 }
 
@@ -1302,8 +1440,62 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
 }
 
  if (handle->type == uhdminstance) {
+     if (property == vpiArrayMember) {
+       return ((instance*)(obj))->get_vpiArrayMember();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiCellInstance) {
+       return ((instance*)(obj))->get_vpiCellInstance();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiDefNetType) {
+       return ((instance*)(obj))->get_vpiDefNetType();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiDefDelayMode) {
+       return ((instance*)(obj))->get_vpiDefDelayMode();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
      if (property == vpiProtected) {
        return ((instance*)(obj))->get_vpiProtected();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiTimePrecision) {
+       return ((instance*)(obj))->get_vpiTimePrecision();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiTimeUnit) {
+       return ((instance*)(obj))->get_vpiTimeUnit();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiUnconnDrive) {
+       return ((instance*)(obj))->get_vpiUnconnDrive();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiAutomatic) {
+       return ((instance*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiTop) {
+       return ((instance*)(obj))->get_vpiTop();
      } 
 }
 
@@ -1314,8 +1506,74 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
 }
 
  if (handle->type == uhdmpackage) {
+     if (property == vpiType) {
+       return ((package*)(obj))->get_vpiType();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiUnit) {
+       return ((package*)(obj))->get_vpiUnit();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiArrayMember) {
+       return ((package*)(obj))->get_vpiArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiCellInstance) {
+       return ((package*)(obj))->get_vpiCellInstance();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiDefNetType) {
+       return ((package*)(obj))->get_vpiDefNetType();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiDefDelayMode) {
+       return ((package*)(obj))->get_vpiDefDelayMode();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
      if (property == vpiProtected) {
        return ((package*)(obj))->get_vpiProtected();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiTimePrecision) {
+       return ((package*)(obj))->get_vpiTimePrecision();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiTimeUnit) {
+       return ((package*)(obj))->get_vpiTimeUnit();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiUnconnDrive) {
+       return ((package*)(obj))->get_vpiUnconnDrive();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiAutomatic) {
+       return ((package*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiTop) {
+       return ((package*)(obj))->get_vpiTop();
      } 
 }
 
@@ -1494,8 +1752,38 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
 }
 
  if (handle->type == uhdminstance) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
+ if (handle->type == uhdminstance) {
      if (property == vpiDefName) {
        return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiDefName().c_str());
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiDefFile) {
+       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiDefFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiLibrary) {
+       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiLibrary().c_str());
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiCell) {
+       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiCell().c_str());
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiConfig) {
+       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiConfig().c_str());
      } 
 }
 
@@ -1512,8 +1800,38 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
 }
 
  if (handle->type == uhdmpackage) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
      if (property == vpiDefName) {
        return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiDefName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiDefFile) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiDefFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiLibrary) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiLibrary().c_str());
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiCell) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiCell().c_str());
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiConfig) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiConfig().c_str());
      } 
 }
 

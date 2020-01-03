@@ -65,6 +65,10 @@ namespace UHDM {
 
     void set_allPrograms(VectorOfprogram* data) { allPrograms_ = data; }
 
+    const VectorOfpackage* get_allPackages() const { return allPackages_; }
+
+    void set_allPackages(VectorOfpackage* data) { allPackages_ = data; }
+
   private:
     
     BaseClass* vpiParent_;
@@ -82,6 +86,8 @@ namespace UHDM {
     VectorOfmodule* topModules_;
 
     VectorOfprogram* allPrograms_;
+
+    VectorOfpackage* allPackages_;
 
   };
 
