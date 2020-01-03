@@ -28,10 +28,10 @@
 
 namespace UHDM {
 
-  class <CLASSNAME> : public BaseClass {
+  class <CLASSNAME> : public <EXTENDS> {
   public:
     <CLASSNAME>(){}
-    ~<CLASSNAME>() final {}
+    ~<CLASSNAME>() <FINAL_DESTRUCTOR> {}
     <METHODS>
   private:
     <MEMBERS>

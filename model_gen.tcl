@@ -117,6 +117,18 @@ proc parse_model { file } {
 	    set OBJ(curr) obj_def$modelId
 	    incr modelId
 	}
+	if [regexp {\- class_def: (.*)} $line tmp name] {
+	    set vpiType ""
+	    set vpiObj  ""
+	    global obj_def$modelId
+
+	    foreach {id define} [defineType 0 $name $vpiType] {}
+
+	    set obj_def$modelId [dict create "name" $name "type" class_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]	   
+	    lappend models obj_def$modelId 
+	    set OBJ(curr) obj_def$modelId
+	    incr modelId
+	}
 	if [regexp {property: (.*)} $line tmp name] {
 	    dict set $OBJ(curr) "properties" $name {}
 	    set obj_name $name
@@ -124,6 +136,11 @@ proc parse_model { file } {
 	}
 	if [regexp {class_ref: (.*)} $line tmp name] {
 	    dict set $OBJ(curr) "class_ref" $name {}
+	    set obj_name $name
+	    set obj_type "class_ref"
+	}
+	if [regexp {extends: (.*)} $line tmp name] {
+	    dict set $OBJ(curr) "extends" class_def $name 
 	    set obj_name $name
 	    set obj_type "class_ref"
 	}
@@ -185,8 +202,7 @@ proc printMethods { type vpi card } {
     return $methods
 }
 
-proc printCapnpSchema {type vpi card capnpIndex} {
-    set members ""
+proc printCapnpSchema {type vpi card} {
     if {$type == "string"} {
 	set type "UInt64"
     }
@@ -200,11 +216,10 @@ proc printCapnpSchema {type vpi card capnpIndex} {
         set type "Bool"
     }
     if {$card == "1"} {
-	append members "  ${vpi} @$capnpIndex :${type};\n"
+	return [list ${vpi} ${type}]
     } elseif {$card == "any"} {
-	append members "  ${vpi} @$capnpIndex :List(${type});\n"
+	return [list ${vpi} List(${type})]
     }
-    return $members
 }
 
 proc printMembers { type vpi card } {
@@ -360,36 +375,41 @@ proc generate_code { models } {
     set typedefs ""
     set containers ""
     set capnp_save ""
-    set capnp_schema ""
-    set capnp_root_schema ""
     set capnpRootSchemaIndex 2
     set classes ""
     set factory_object_type_map ""
     set factory_purge ""
+    set capnp_schema_all ""
+    set capnp_root_schema ""
     foreach model $models {
 	global $model
 	puts "** $model **"
-	set data [subst $$model] 
+	set data [subst $$model]
 	set classname [dict get $data name]
 	set template $template_content
-
+	set modeltype [dict get $data type]
+	set MODEL_TYPE($classname) $modeltype
+	set baseclass ""
+	if {$modeltype == "class_def"} {
+	    regsub -all {<FINAL_DESTRUCTOR>} $template "" template
+	}
 	set Classname [string toupper $classname 0 0]
 	regsub -all  {_} $Classname "" Classname
 	
 	puts "Generating headers/$classname.h"
 	append headers "#include \"headers/$classname.h\"\n"
-	append factories "std::vector<${classname}*> ${classname}Factory::objects_;\n"
-	append factories "std::vector<std::vector<${classname}*>*> VectorOf${classname}Factory::objects_;\n"
-	append factory_object_type_map "  case uhdm${classname}: return ${classname}Factory::objects_\[index\];\n"
+	if {$modeltype != "class_def"} {
+	    append factories "std::vector<${classname}*> ${classname}Factory::objects_;\n"
+	    append factories "std::vector<std::vector<${classname}*>*> VectorOf${classname}Factory::objects_;\n"	
+	    append factory_object_type_map "  case uhdm${classname}: return ${classname}Factory::objects_\[index\];\n"
+	}
         lappend classes $classname
-	set capnpIndex 0
-        append capnp_schema "struct $Classname \{\n"
 	
 	set oid [open "headers/$classname.h" "w"]
 	regsub -all {<CLASSNAME>} $template $classname template
 	regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
-	set methods ""
-	set members ""
+	set methods($classname) ""
+	set members($classname) ""
 	foreach {id define} [defineType 1 uhdm${classname} ""] {}
         if {$define != ""} {
           append defines "$define\n"
@@ -397,37 +417,35 @@ proc generate_code { models } {
 	append SAVE($classname) ""
 	append RESTORE($classname) ""
 
-	# Builtin properties do not need to be specified in each models
-        # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo" method and field
-        append methods [printMethods BaseClass vpiParent 1]
-	append members [printMembers BaseClass vpiParent 1]
-        append methods [printMethods "unsigned int" uhdmParentType 1] 
-	append members [printMembers "unsigned int" uhdmParentType 1]
-	append methods [printMethods string vpiFile 1] 
-	append members [printMembers string vpiFile 1]
-	append vpi_get_str_body [printGetStrBody $classname string vpiFile 1]
-        append methods [printMethods "unsigned int" vpiLineNo 1] 
-	append members [printMembers "unsigned int" vpiLineNo 1]
-	append vpi_get_body [printGetBody $classname int vpiLineNo 1]
-        append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
-        append capnp_schema "  vpiParent @${capnpIndex} :UInt64;\n"
-        incr capnpIndex
-	append capnp_schema "  uhdmParentType @${capnpIndex} :UInt64;\n"
-        incr capnpIndex
-	append capnp_schema "  vpiFile @${capnpIndex} :UInt64;\n"
-        incr capnpIndex
-	append capnp_schema "  vpiLineNo @${capnpIndex} :UInt32;\n"
-        incr capnpIndex
-	append capnp_root_schema "  factory${Classname} @${capnpRootSchemaIndex} :List($Classname);\n"
-	incr capnpRootSchemaIndex
-	append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(getId(obj->get_vpiParent()));\n"
-	append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->get_uhdmParentType());\n"
-	append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));\n"
-	append SAVE($classname) "    ${Classname}s\[index\].setVpiLineNo(obj->get_vpiLineNo());\n"
-	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_uhdmParentType(obj.getUhdmParentType());\n"
-	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
-	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));\n"
-	append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiLineNo(obj.getVpiLineNo());\n"
+	if {$modeltype != "class_def"} {
+	    # Builtin properties do not need to be specified in each models
+	    # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo" method and field
+	    append methods($classname) [printMethods BaseClass vpiParent 1]
+	    append members($classname) [printMembers BaseClass vpiParent 1]
+	    append methods($classname) [printMethods "unsigned int" uhdmParentType 1] 
+	    append members($classname) [printMembers "unsigned int" uhdmParentType 1]
+	    append methods($classname) [printMethods string vpiFile 1] 
+	    append members($classname) [printMembers string vpiFile 1]
+	    lappend vpi_get_str_body_inst($classname) [list $classname string vpiFile 1]
+	    append methods($classname) [printMethods "unsigned int" vpiLineNo 1] 
+	    append members($classname) [printMembers "unsigned int" vpiLineNo 1]
+	    lappend vpi_get_body_inst($classname) [list $classname int vpiLineNo 1]
+	    append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
+	    lappend capnp_schema($classname) [list vpiParent UInt64]
+	    lappend capnp_schema($classname) [list uhdmParentType UInt64]
+	    lappend capnp_schema($classname) [list vpiFile UInt64]
+	    lappend capnp_schema($classname) [list vpiLineNo UInt32]
+	    append capnp_root_schema "  factory${Classname} @${capnpRootSchemaIndex} :List($Classname);\n"
+	    incr capnpRootSchemaIndex
+	    append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(getId(obj->get_vpiParent()));\n"
+	    append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->get_uhdmParentType());\n"
+	    append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));\n"
+	    append SAVE($classname) "    ${Classname}s\[index\].setVpiLineNo(obj->get_vpiLineNo());\n"
+	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_uhdmParentType(obj.getUhdmParentType());\n"
+	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
+	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));\n"
+	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiLineNo(obj.getVpiLineNo());\n"
+	}
 	
 	dict for {key val} $data {
 	    if {$key == "properties"} {
@@ -437,18 +455,17 @@ proc generate_code { models } {
 		    set type [dict get $conf type]
 		    set card [dict get $conf card]
 		    if {$prop == "type"} {
-			append methods "\n    $type get_${vpi}() { return $name; }\n"
-			append vpi_get_body [printGetBody $classname $type $vpi $card]
+			append methods($classname) "\n    $type get_${vpi}() { return $name; }\n"
+			lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
 			continue
 		    }
 		    append containers [printTypeDefs $type $card]
                     # properties are already defined in vpi_user.h, no need to redefine them
-		    append methods [printMethods $type $vpi $card] 
-		    append members [printMembers $type $vpi $card]
-                    append vpi_get_body [printGetBody $classname $type $vpi $card]
-                    append vpi_get_str_body [printGetStrBody $classname $type $vpi $card]
-		    append capnp_schema [printCapnpSchema $type $vpi $card $capnpIndex]
-		    incr capnpIndex
+		    append methods($classname) [printMethods $type $vpi $card] 
+		    append members($classname) [printMembers $type $vpi $card]
+                    lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
+                    lappend vpi_get_str_body_inst($classname) [list $classname $type $vpi $card]
+		    lappend capnp_schema($classname) [printCapnpSchema $type $vpi $card]
 		
 		    set Vpi [string toupper $vpi 0 0]
 		    regsub -all  {_} $Vpi "" Vpi
@@ -461,6 +478,12 @@ proc generate_code { models } {
 		    }
 		}
 
+	    }
+	    if {$key == "extends"} {
+		dict for {base_type baseclass} $val {
+		    regsub -all {<EXTENDS>} $template $baseclass template
+		    set BASECLASS($classname) $baseclass
+		}		
 	    }
 	    if {($key == "class") || ($key == "obj_ref") || ($key == "class_ref")} {
 		dict for {iter content} $val {
@@ -475,8 +498,8 @@ proc generate_code { models } {
                     if {$define != ""} {
                       append defines "$define\n"
                     }
-		    append methods [printMethods $type $name $card] 
-		    append members [printMembers $type $name $card]
+		    append methods($classname) [printMethods $type $name $card] 
+		    append members($classname) [printMembers $type $name $card]
 		    append vpi_iterate_body [printIterateBody $name $classname $vpi $card]
                     append vpi_scan_body [printScanBody $name $classname $type $card]
                     append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]
@@ -484,9 +507,8 @@ proc generate_code { models } {
 		    set Type [string toupper $type 0 0]
 		    regsub -all  {_} $Type "" Type		    
 		    regsub -all  {_} $name "" Name
-		    # all types are reduced to index
-		    append capnp_schema [printCapnpSchema UInt64 $Name $card $capnpIndex]
-		    incr capnpIndex
+		    lappend capnp_schema($classname) [printCapnpSchema UInt64 $Name $card]
+		    
 		    if {$card == 1} {
 			append SAVE($classname) "    ${Classname}s\[index\].set[string toupper ${Name} 0 0](getId(obj->get_${name}()));\n"
 			append RESTORE($classname) "   if (obj.get[string toupper ${Name} 0 0]()) 
@@ -514,14 +536,66 @@ proc generate_code { models } {
 	    
 	    }
 	}
-	regsub -all {<METHODS>} $template $methods template
-	regsub -all {<MEMBERS>} $template $members template
-
-	append capnp_schema "\n\}\n"
+	regsub -all {<METHODS>} $template $methods($classname) template
+	regsub -all {<MEMBERS>} $template $members($classname) template
+	regsub -all {<EXTENDS>} $template BaseClass template
+	regsub -all {<FINAL_DESTRUCTOR>} $template "final" template
 	
 	puts $oid $template
 	close $oid
+
+	if [info exist vpi_get_str_body_inst($classname)] {
+	    foreach inst $vpi_get_str_body_inst($classname) {
+		append vpi_get_str_body [printGetStrBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+	    }
+	}
+	if [info exist vpi_get_body_inst($classname)] {
+	    foreach inst $vpi_get_body_inst($classname) {
+		append vpi_get_body [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+	    }
+	}
+
+	set capnpIndex 0    
+	if {$modeltype != "class_def"} {
+	    append capnp_schema_all "struct $Classname \{\n"
+	    foreach member $capnp_schema($classname) {
+		foreach {name type} $member {}
+		append capnp_schema_all "$name @$capnpIndex :$type;\n"
+		incr capnpIndex
+	    }
+	}
 	
+	while {$baseclass != ""} {
+	    if {$modeltype != "class_def"} {
+		foreach member $capnp_schema($baseclass) {
+		    foreach {name type} $member {}
+		    append capnp_schema_all "$name @$capnpIndex :$type;\n"
+		    incr capnpIndex
+		}
+	    }
+	    regsub -all [string toupper $baseclass 0 0] $SAVE($baseclass) [string toupper $classname 0 0] save
+	    append SAVE($classname) $save
+	    regsub -all $baseclass $RESTORE($baseclass) $classname restore	    
+	    append RESTORE($classname) $restore
+	    if [info exist vpi_get_str_body_inst($baseclass)] {
+		foreach inst $vpi_get_str_body_inst($baseclass) {
+		    append vpi_get_str_body [printGetStrBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		}
+	    }
+	    if [info exist vpi_get_body_inst($baseclass)] {
+		foreach inst $vpi_get_body_inst($baseclass) {
+		    append vpi_get_body [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		}
+	    }
+	    set baseclass ""
+	    if [info exist BASECLASS($baseclass)] {
+		set baseclass $BASECLASS($baseclass)
+	    }
+	}
+
+	if {$modeltype != "class_def"} {
+	    append capnp_schema_all "\}\n"
+	}
     }
 
     # uhdm.h
@@ -553,6 +627,7 @@ proc generate_code { models } {
     regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body vpi_user
     regsub -all {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
     regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
+    
     set vpi_userId [open "src/vpi_user.cpp" "w"]
     puts $vpi_userId $vpi_user
     close $vpi_userId
@@ -561,7 +636,7 @@ proc generate_code { models } {
     set fid [open "templates/UHDM.capnp"]
     set capnp_content [read $fid]
     close $fid
-    regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema capnp_content
+    regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema_all capnp_content
     regsub {<CAPNP_ROOT_SCHEMA>} $capnp_content $capnp_root_schema capnp_content
     set capnpId [open "src/UHDM.capnp" "w"]
     puts $capnpId $capnp_content
@@ -575,6 +650,9 @@ proc generate_code { models } {
     set serializer_content [read $fid]
     close $fid
     foreach class $classes {
+	if {$MODEL_TYPE($class) == "class_def"} {
+	    continue
+	}
 	set Class [string toupper $class 0 0]
 	regsub -all  {_} $Class "" Class
 	if {$SAVE($class) != ""} {
@@ -600,8 +678,12 @@ $RESTORE($class)
 "
 	}
     }
+    
     set capnp_id ""
     foreach class $classes {
+	if {$MODEL_TYPE($class) == "class_def"} {
+	    continue
+	}
   	append capnp_id "
   index = 1;
   for (auto obj : ${class}Factory::objects_) {
@@ -615,8 +697,6 @@ $RESTORE($class)
   }
   ${class}Factory::objects_.clear();
 "
-
-	
     }
     
     regsub {<FACTORIES>} $serializer_content $factories serializer_content

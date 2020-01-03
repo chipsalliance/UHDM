@@ -20,4 +20,6 @@ clocking_block.yaml
 instance_array.yaml
 module.yaml
 program.yaml
+instance.yaml
+package.yaml
 uhdm.yaml

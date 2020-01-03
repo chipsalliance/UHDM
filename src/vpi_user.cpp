@@ -54,6 +54,8 @@
 #include "headers/instance_array.h"
 #include "headers/module.h"
 #include "headers/program.h"
+#include "headers/instance.h"
+#include "headers/package.h"
 #include "headers/design.h"
 
 
@@ -253,6 +255,12 @@ vpiHandle vpi_handle (PLI_INT32 type,
  if (handle->type == uhdmprogram) {
      if (type == vpiDefaultClocking) {
        return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((program*)(object))->get_default_clocking());
+ } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((package*)(object))->get_uhdmParentType(), ((package*)(object))->get_vpiParent());
  } 
 }
 
@@ -1089,6 +1097,24 @@ PLI_INT32 vpi_get (PLI_INT32   property,
      } 
 }
 
+ if (handle->type == uhdminstance) {
+     if (property == vpiProtected) {
+       return ((instance*)(obj))->get_vpiProtected();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiLineNo) {
+       return ((package*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiProtected) {
+       return ((package*)(obj))->get_vpiProtected();
+     } 
+}
+
  if (handle->type == uhdmdesign) {
      if (property == vpiLineNo) {
        return ((design*)(obj))->get_vpiLineNo();
@@ -1275,6 +1301,24 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdminstance) {
+     if (property == vpiProtected) {
+       return ((instance*)(obj))->get_vpiProtected();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiLineNo) {
+       return ((package*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiProtected) {
+       return ((package*)(obj))->get_vpiProtected();
+     } 
+}
+
  if (handle->type == uhdmdesign) {
      if (property == vpiLineNo) {
        return ((design*)(obj))->get_vpiLineNo();
@@ -1440,6 +1484,36 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
  if (handle->type == uhdmprogram) {
      if (property == vpiName) {
        return (PLI_BYTE8*) strdup(((program*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiDefName) {
+       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiDefName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiDefName) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiDefName().c_str());
      } 
 }
 
