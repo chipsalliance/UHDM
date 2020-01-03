@@ -35,5 +35,10 @@
     vpi_obj: vpiProgram
     vpi: uhdmallPrograms
     card: any
+  - class: allPackages
+    type: package
+    vpi_obj: vpiPackage
+    vpi: uhdmallPackages
+    card: any
 
     

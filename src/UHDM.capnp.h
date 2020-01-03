@@ -397,7 +397,7 @@ struct Package {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(dfd588e26996d1a6, 6, 0)
+    CAPNP_DECLARE_STRUCT_HEADER(dfd588e26996d1a6, 16, 0)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -412,7 +412,7 @@ struct Design {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(bcba8efb52090304, 5, 3)
+    CAPNP_DECLARE_STRUCT_HEADER(bcba8efb52090304, 5, 4)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -3191,11 +3191,41 @@ public:
 
   inline  ::uint32_t getVpiLineNo() const;
 
+  inline bool getVpiUnit() const;
+
   inline  ::uint64_t getVpiName() const;
+
+  inline  ::uint64_t getVpiFullName() const;
 
   inline  ::uint64_t getVpiDefName() const;
 
+  inline bool getVpiArrayMember() const;
+
+  inline bool getVpiCellInstance() const;
+
+  inline  ::int64_t getVpiDefNetType() const;
+
+  inline  ::uint64_t getVpiDefFile() const;
+
+  inline  ::int64_t getVpiDefDelayMode() const;
+
   inline bool getVpiProtected() const;
+
+  inline  ::int64_t getVpiTimePrecision() const;
+
+  inline  ::int64_t getVpiTimeUnit() const;
+
+  inline  ::int64_t getVpiUnconnDrive() const;
+
+  inline  ::uint64_t getVpiLibrary() const;
+
+  inline  ::uint64_t getVpiCell() const;
+
+  inline  ::uint64_t getVpiConfig() const;
+
+  inline bool getVpiAutomatic() const;
+
+  inline bool getVpiTop() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -3237,14 +3267,59 @@ public:
   inline  ::uint32_t getVpiLineNo();
   inline void setVpiLineNo( ::uint32_t value);
 
+  inline bool getVpiUnit();
+  inline void setVpiUnit(bool value);
+
   inline  ::uint64_t getVpiName();
   inline void setVpiName( ::uint64_t value);
+
+  inline  ::uint64_t getVpiFullName();
+  inline void setVpiFullName( ::uint64_t value);
 
   inline  ::uint64_t getVpiDefName();
   inline void setVpiDefName( ::uint64_t value);
 
+  inline bool getVpiArrayMember();
+  inline void setVpiArrayMember(bool value);
+
+  inline bool getVpiCellInstance();
+  inline void setVpiCellInstance(bool value);
+
+  inline  ::int64_t getVpiDefNetType();
+  inline void setVpiDefNetType( ::int64_t value);
+
+  inline  ::uint64_t getVpiDefFile();
+  inline void setVpiDefFile( ::uint64_t value);
+
+  inline  ::int64_t getVpiDefDelayMode();
+  inline void setVpiDefDelayMode( ::int64_t value);
+
   inline bool getVpiProtected();
   inline void setVpiProtected(bool value);
+
+  inline  ::int64_t getVpiTimePrecision();
+  inline void setVpiTimePrecision( ::int64_t value);
+
+  inline  ::int64_t getVpiTimeUnit();
+  inline void setVpiTimeUnit( ::int64_t value);
+
+  inline  ::int64_t getVpiUnconnDrive();
+  inline void setVpiUnconnDrive( ::int64_t value);
+
+  inline  ::uint64_t getVpiLibrary();
+  inline void setVpiLibrary( ::uint64_t value);
+
+  inline  ::uint64_t getVpiCell();
+  inline void setVpiCell( ::uint64_t value);
+
+  inline  ::uint64_t getVpiConfig();
+  inline void setVpiConfig( ::uint64_t value);
+
+  inline bool getVpiAutomatic();
+  inline void setVpiAutomatic(bool value);
+
+  inline bool getVpiTop();
+  inline void setVpiTop(bool value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -3307,6 +3382,9 @@ public:
 
   inline bool hasAllPrograms() const;
   inline  ::capnp::List< ::uint64_t>::Reader getAllPrograms() const;
+
+  inline bool hasAllPackages() const;
+  inline  ::capnp::List< ::uint64_t>::Reader getAllPackages() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -3374,6 +3452,14 @@ public:
   inline  ::capnp::List< ::uint64_t>::Builder initAllPrograms(unsigned int size);
   inline void adoptAllPrograms(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownAllPrograms();
+
+  inline bool hasAllPackages();
+  inline  ::capnp::List< ::uint64_t>::Builder getAllPackages();
+  inline void setAllPackages( ::capnp::List< ::uint64_t>::Reader value);
+  inline void setAllPackages(::kj::ArrayPtr<const  ::uint64_t> value);
+  inline  ::capnp::List< ::uint64_t>::Builder initAllPackages(unsigned int size);
+  inline void adoptAllPackages(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownAllPackages();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -6839,6 +6925,20 @@ inline void Package::Builder::setVpiLineNo( ::uint32_t value) {
       6 * ::capnp::ELEMENTS, value);
 }
 
+inline bool Package::Reader::getVpiUnit() const {
+  return _reader.getDataField<bool>(
+      224 * ::capnp::ELEMENTS);
+}
+
+inline bool Package::Builder::getVpiUnit() {
+  return _builder.getDataField<bool>(
+      224 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiUnit(bool value) {
+  _builder.setDataField<bool>(
+      224 * ::capnp::ELEMENTS, value);
+}
+
 inline  ::uint64_t Package::Reader::getVpiName() const {
   return _reader.getDataField< ::uint64_t>(
       4 * ::capnp::ELEMENTS);
@@ -6853,32 +6953,228 @@ inline void Package::Builder::setVpiName( ::uint64_t value) {
       4 * ::capnp::ELEMENTS, value);
 }
 
-inline  ::uint64_t Package::Reader::getVpiDefName() const {
+inline  ::uint64_t Package::Reader::getVpiFullName() const {
   return _reader.getDataField< ::uint64_t>(
       5 * ::capnp::ELEMENTS);
 }
 
-inline  ::uint64_t Package::Builder::getVpiDefName() {
+inline  ::uint64_t Package::Builder::getVpiFullName() {
   return _builder.getDataField< ::uint64_t>(
       5 * ::capnp::ELEMENTS);
 }
-inline void Package::Builder::setVpiDefName( ::uint64_t value) {
+inline void Package::Builder::setVpiFullName( ::uint64_t value) {
   _builder.setDataField< ::uint64_t>(
       5 * ::capnp::ELEMENTS, value);
 }
 
+inline  ::uint64_t Package::Reader::getVpiDefName() const {
+  return _reader.getDataField< ::uint64_t>(
+      6 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getVpiDefName() {
+  return _builder.getDataField< ::uint64_t>(
+      6 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiDefName( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      6 * ::capnp::ELEMENTS, value);
+}
+
+inline bool Package::Reader::getVpiArrayMember() const {
+  return _reader.getDataField<bool>(
+      225 * ::capnp::ELEMENTS);
+}
+
+inline bool Package::Builder::getVpiArrayMember() {
+  return _builder.getDataField<bool>(
+      225 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiArrayMember(bool value) {
+  _builder.setDataField<bool>(
+      225 * ::capnp::ELEMENTS, value);
+}
+
+inline bool Package::Reader::getVpiCellInstance() const {
+  return _reader.getDataField<bool>(
+      226 * ::capnp::ELEMENTS);
+}
+
+inline bool Package::Builder::getVpiCellInstance() {
+  return _builder.getDataField<bool>(
+      226 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiCellInstance(bool value) {
+  _builder.setDataField<bool>(
+      226 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int64_t Package::Reader::getVpiDefNetType() const {
+  return _reader.getDataField< ::int64_t>(
+      7 * ::capnp::ELEMENTS);
+}
+
+inline  ::int64_t Package::Builder::getVpiDefNetType() {
+  return _builder.getDataField< ::int64_t>(
+      7 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiDefNetType( ::int64_t value) {
+  _builder.setDataField< ::int64_t>(
+      7 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint64_t Package::Reader::getVpiDefFile() const {
+  return _reader.getDataField< ::uint64_t>(
+      8 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getVpiDefFile() {
+  return _builder.getDataField< ::uint64_t>(
+      8 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiDefFile( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      8 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int64_t Package::Reader::getVpiDefDelayMode() const {
+  return _reader.getDataField< ::int64_t>(
+      9 * ::capnp::ELEMENTS);
+}
+
+inline  ::int64_t Package::Builder::getVpiDefDelayMode() {
+  return _builder.getDataField< ::int64_t>(
+      9 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiDefDelayMode( ::int64_t value) {
+  _builder.setDataField< ::int64_t>(
+      9 * ::capnp::ELEMENTS, value);
+}
+
 inline bool Package::Reader::getVpiProtected() const {
   return _reader.getDataField<bool>(
-      224 * ::capnp::ELEMENTS);
+      227 * ::capnp::ELEMENTS);
 }
 
 inline bool Package::Builder::getVpiProtected() {
   return _builder.getDataField<bool>(
-      224 * ::capnp::ELEMENTS);
+      227 * ::capnp::ELEMENTS);
 }
 inline void Package::Builder::setVpiProtected(bool value) {
   _builder.setDataField<bool>(
-      224 * ::capnp::ELEMENTS, value);
+      227 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int64_t Package::Reader::getVpiTimePrecision() const {
+  return _reader.getDataField< ::int64_t>(
+      10 * ::capnp::ELEMENTS);
+}
+
+inline  ::int64_t Package::Builder::getVpiTimePrecision() {
+  return _builder.getDataField< ::int64_t>(
+      10 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiTimePrecision( ::int64_t value) {
+  _builder.setDataField< ::int64_t>(
+      10 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int64_t Package::Reader::getVpiTimeUnit() const {
+  return _reader.getDataField< ::int64_t>(
+      11 * ::capnp::ELEMENTS);
+}
+
+inline  ::int64_t Package::Builder::getVpiTimeUnit() {
+  return _builder.getDataField< ::int64_t>(
+      11 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiTimeUnit( ::int64_t value) {
+  _builder.setDataField< ::int64_t>(
+      11 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int64_t Package::Reader::getVpiUnconnDrive() const {
+  return _reader.getDataField< ::int64_t>(
+      12 * ::capnp::ELEMENTS);
+}
+
+inline  ::int64_t Package::Builder::getVpiUnconnDrive() {
+  return _builder.getDataField< ::int64_t>(
+      12 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiUnconnDrive( ::int64_t value) {
+  _builder.setDataField< ::int64_t>(
+      12 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint64_t Package::Reader::getVpiLibrary() const {
+  return _reader.getDataField< ::uint64_t>(
+      13 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getVpiLibrary() {
+  return _builder.getDataField< ::uint64_t>(
+      13 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiLibrary( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      13 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint64_t Package::Reader::getVpiCell() const {
+  return _reader.getDataField< ::uint64_t>(
+      14 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getVpiCell() {
+  return _builder.getDataField< ::uint64_t>(
+      14 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiCell( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      14 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint64_t Package::Reader::getVpiConfig() const {
+  return _reader.getDataField< ::uint64_t>(
+      15 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getVpiConfig() {
+  return _builder.getDataField< ::uint64_t>(
+      15 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiConfig( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      15 * ::capnp::ELEMENTS, value);
+}
+
+inline bool Package::Reader::getVpiAutomatic() const {
+  return _reader.getDataField<bool>(
+      228 * ::capnp::ELEMENTS);
+}
+
+inline bool Package::Builder::getVpiAutomatic() {
+  return _builder.getDataField<bool>(
+      228 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiAutomatic(bool value) {
+  _builder.setDataField<bool>(
+      228 * ::capnp::ELEMENTS, value);
+}
+
+inline bool Package::Reader::getVpiTop() const {
+  return _reader.getDataField<bool>(
+      229 * ::capnp::ELEMENTS);
+}
+
+inline bool Package::Builder::getVpiTop() {
+  return _builder.getDataField<bool>(
+      229 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiTop(bool value) {
+  _builder.setDataField<bool>(
+      229 * ::capnp::ELEMENTS, value);
 }
 
 inline  ::uint64_t Design::Reader::getVpiParent() const {
@@ -7057,6 +7353,42 @@ inline void Design::Builder::adoptAllPrograms(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Design::Builder::disownAllPrograms() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(2 * ::capnp::POINTERS));
+}
+
+inline bool Design::Reader::hasAllPackages() const {
+  return !_reader.getPointerField(3 * ::capnp::POINTERS).isNull();
+}
+inline bool Design::Builder::hasAllPackages() {
+  return !_builder.getPointerField(3 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::uint64_t>::Reader Design::Reader::getAllPackages() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::get(
+      _reader.getPointerField(3 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::uint64_t>::Builder Design::Builder::getAllPackages() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::get(
+      _builder.getPointerField(3 * ::capnp::POINTERS));
+}
+inline void Design::Builder::setAllPackages( ::capnp::List< ::uint64_t>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::set(
+      _builder.getPointerField(3 * ::capnp::POINTERS), value);
+}
+inline void Design::Builder::setAllPackages(::kj::ArrayPtr<const  ::uint64_t> value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::set(
+      _builder.getPointerField(3 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::uint64_t>::Builder Design::Builder::initAllPackages(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::init(
+      _builder.getPointerField(3 * ::capnp::POINTERS), size);
+}
+inline void Design::Builder::adoptAllPackages(
+    ::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::adopt(
+      _builder.getPointerField(3 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Design::Builder::disownAllPackages() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
+      _builder.getPointerField(3 * ::capnp::POINTERS));
 }
 
 

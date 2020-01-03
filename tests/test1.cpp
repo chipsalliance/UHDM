@@ -36,6 +36,12 @@ std::vector<vpiHandle> build_designs () {
   v2->push_back(m2);
   v2->push_back(m3);
   m1->set_modules(v2);
+  package* p1 = packageFactory::make();
+  p1->set_vpiName("P1");
+  p1->set_vpiDefName("P0");
+  VectorOfpackage* v3 = VectorOfpackageFactory::make();
+  v3->push_back(p1);
+  d->set_allPackages(v3);
   designs.push_back(uhdm_handleFactory::make(uhdmdesign, d));
   return designs;
 }
