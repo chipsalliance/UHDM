@@ -141,6 +141,8 @@ std::vector<module*> moduleFactory::objects_;
 std::vector<std::vector<module*>*> VectorOfmoduleFactory::objects_;
 std::vector<program*> programFactory::objects_;
 std::vector<std::vector<program*>*> VectorOfprogramFactory::objects_;
+std::vector<package*> packageFactory::objects_;
+std::vector<std::vector<package*>*> VectorOfpackageFactory::objects_;
 std::vector<design*> designFactory::objects_;
 std::vector<std::vector<design*>*> VectorOfdesignFactory::objects_;
 
@@ -169,6 +171,7 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdminstance_array: return instance_arrayFactory::objects_[index];
   case uhdmmodule: return moduleFactory::objects_[index];
   case uhdmprogram: return programFactory::objects_[index];
+  case uhdmpackage: return packageFactory::objects_[index];
   case uhdmdesign: return designFactory::objects_[index];
 
   default:
@@ -288,6 +291,11 @@ void Serializer::purge() {
     delete obj;
   }
   programFactory::objects_.clear();
+
+  for (auto obj : packageFactory::objects_) {
+    delete obj;
+  }
+  packageFactory::objects_.clear();
 
   for (auto obj : designFactory::objects_) {
     delete obj;
@@ -410,6 +418,11 @@ void Serializer::save(std::string file) {
   }
   index = 1;
   for (auto obj : programFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : packageFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -885,6 +898,19 @@ void Serializer::save(std::string file) {
 
    index++;
  }
+ ::capnp::List<Package>::Builder Packages = cap_root.initFactoryPackage(packageFactory::objects_.size());
+ index = 0;
+ for (auto obj : packageFactory::objects_) {
+    Packages[index].setVpiParent(getId(obj->get_vpiParent()));
+    Packages[index].setUhdmParentType(obj->get_uhdmParentType());
+    Packages[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Packages[index].setVpiLineNo(obj->get_vpiLineNo());
+    Packages[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Packages[index].setVpiDefName(SymbolFactory::make(obj->get_vpiDefName()));
+    Packages[index].setVpiProtected(obj->get_vpiProtected());
+
+   index++;
+ }
  ::capnp::List<Design>::Builder Designs = cap_root.initFactoryDesign(designFactory::objects_.size());
  index = 0;
  for (auto obj : designFactory::objects_) {
@@ -1044,6 +1070,11 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  ::capnp::List<Program>::Reader Programs = cap_root.getFactoryProgram();
  for (unsigned ind = 0; ind < Programs.size(); ind++) {
    setId(programFactory::make(), ind);
+ }
+
+ ::capnp::List<Package>::Reader Packages = cap_root.getFactoryPackage();
+ for (unsigned ind = 0; ind < Packages.size(); ind++) {
+   setId(packageFactory::make(), ind);
  }
 
  ::capnp::List<Design>::Reader Designs = cap_root.getFactoryDesign();
@@ -1539,6 +1570,19 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
       }
       programFactory::objects_[index]->set_clocking_blocks(vect);
     }
+
+   index++;
+ }
+
+ index = 0;
+ for (Package::Reader obj : Packages) {
+   packageFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   packageFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   packageFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   packageFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    packageFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    packageFactory::objects_[index]->set_vpiDefName(SymbolFactory::getSymbol(obj.getVpiDefName()));
+    packageFactory::objects_[index]->set_vpiProtected(obj.getVpiProtected());
 
    index++;
  }

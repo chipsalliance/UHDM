@@ -32,71 +32,73 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 
-#define uhdmprocess 2033
-#define uhdmscope 2034
-#define uhdmtask 2035
-#define uhdmfunction 2036
-#define uhdmmodport 2037
-#define uhdmio_decls 2038
-#define uhdminterface 2039
-#define uhdminterface_tf_decl 2040
-#define uhdmtasks 2041
-#define uhdmfunctions 2042
-#define uhdminterface 2039
-#define uhdmprocess 2033
-#define uhdminterface_tf_decls 2043
-#define uhdmmodports 2044
-#define uhdmglobal_clocking 2045
-#define uhdmdefault_clocking 2046
-#define uhdmmod_paths 2047
-#define uhdmcont_assigns 2048
-#define uhdminterfaces 2049
-#define uhdminterface_arrays 2050
-#define uhdminterface_array 2051
-#define uhdmcont_assign 2052
-#define uhdmport 2053
-#define uhdmmodule_array 2054
-#define uhdmprimitive 2055
-#define uhdmprimitive_array 2056
-#define uhdmmod_path 2057
-#define uhdmtchk 2058
-#define uhdmdef_param 2059
-#define uhdmio_decl 2060
-#define uhdmalias_stmt 2061
-#define uhdmclocking_block 2062
-#define uhdminstance_array 2063
-#define uhdmmodule 2064
-#define uhdminstance_array 2063
-#define uhdmscope 2034
-#define uhdmprocess 2033
-#define uhdmprimitives 2065
-#define uhdmprimitive_arrays 2066
-#define uhdmglobal_clocking 2045
-#define uhdmdefault_clocking 2046
-#define uhdmports 2067
-#define uhdminterfaces 2049
-#define uhdminterface_arrays 2050
-#define uhdmcont_assigns 2048
-#define uhdmmodules 2068
-#define uhdmmodule_arrays 2069
-#define uhdmmod_paths 2047
-#define uhdmtchks 2070
-#define uhdmdef_params 2071
-#define uhdmio_decls 2038
-#define uhdmalias_stmts 2072
-#define uhdmclocking_blocks 2073
-#define uhdmprogram 2074
-#define uhdminstance_array 2063
-#define uhdmprocess 2033
-#define uhdmdefault_clocking 2046
-#define uhdminterfaces 2049
-#define uhdminterface_arrays 2050
-#define uhdmcont_assigns 2048
-#define uhdmclocking_blocks 2073
-#define uhdmdesign 2075
-#define uhdmallModules 2076
-#define uhdmtopModules 2077
-#define uhdmallPrograms 2078
+#define uhdmprocess 2035
+#define uhdmscope 2036
+#define uhdmtask 2037
+#define uhdmfunction 2038
+#define uhdmmodport 2039
+#define uhdmio_decls 2040
+#define uhdminterface 2041
+#define uhdminterface_tf_decl 2042
+#define uhdmtasks 2043
+#define uhdmfunctions 2044
+#define uhdminterface 2041
+#define uhdmprocess 2035
+#define uhdminterface_tf_decls 2045
+#define uhdmmodports 2046
+#define uhdmglobal_clocking 2047
+#define uhdmdefault_clocking 2048
+#define uhdmmod_paths 2049
+#define uhdmcont_assigns 2050
+#define uhdminterfaces 2051
+#define uhdminterface_arrays 2052
+#define uhdminterface_array 2053
+#define uhdmcont_assign 2054
+#define uhdmport 2055
+#define uhdmmodule_array 2056
+#define uhdmprimitive 2057
+#define uhdmprimitive_array 2058
+#define uhdmmod_path 2059
+#define uhdmtchk 2060
+#define uhdmdef_param 2061
+#define uhdmio_decl 2062
+#define uhdmalias_stmt 2063
+#define uhdmclocking_block 2064
+#define uhdminstance_array 2065
+#define uhdmmodule 2066
+#define uhdminstance_array 2065
+#define uhdmscope 2036
+#define uhdmprocess 2035
+#define uhdmprimitives 2067
+#define uhdmprimitive_arrays 2068
+#define uhdmglobal_clocking 2047
+#define uhdmdefault_clocking 2048
+#define uhdmports 2069
+#define uhdminterfaces 2051
+#define uhdminterface_arrays 2052
+#define uhdmcont_assigns 2050
+#define uhdmmodules 2070
+#define uhdmmodule_arrays 2071
+#define uhdmmod_paths 2049
+#define uhdmtchks 2072
+#define uhdmdef_params 2073
+#define uhdmio_decls 2040
+#define uhdmalias_stmts 2074
+#define uhdmclocking_blocks 2075
+#define uhdmprogram 2076
+#define uhdminstance_array 2065
+#define uhdmprocess 2035
+#define uhdmdefault_clocking 2048
+#define uhdminterfaces 2051
+#define uhdminterface_arrays 2052
+#define uhdmcont_assigns 2050
+#define uhdmclocking_blocks 2075
+#define uhdminstance 2077
+#define uhdmpackage 2078
+#define uhdmdesign 2079
+#define uhdmallModules 2080
+#define uhdmtopModules 2081
+#define uhdmallPrograms 2082
 
 
 #include "headers/process.h"
@@ -121,6 +123,8 @@
 #include "headers/instance_array.h"
 #include "headers/module.h"
 #include "headers/program.h"
+#include "headers/instance.h"
+#include "headers/package.h"
 #include "headers/design.h"
 
 

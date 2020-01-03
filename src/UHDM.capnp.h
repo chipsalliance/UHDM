@@ -37,6 +37,7 @@ CAPNP_DECLARE_SCHEMA(cfa270b7ddc80a04);
 CAPNP_DECLARE_SCHEMA(b56a367f43dc01de);
 CAPNP_DECLARE_SCHEMA(ff343c185370b513);
 CAPNP_DECLARE_SCHEMA(b8a08b2787e1997f);
+CAPNP_DECLARE_SCHEMA(dfd588e26996d1a6);
 CAPNP_DECLARE_SCHEMA(bcba8efb52090304);
 
 }  // namespace schemas
@@ -51,7 +52,7 @@ struct UhdmRoot {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(b2bce98887da19bc, 0, 25)
+    CAPNP_DECLARE_STRUCT_HEADER(b2bce98887da19bc, 0, 26)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -388,6 +389,21 @@ struct Program {
   };
 };
 
+struct Package {
+  Package() = delete;
+
+  class Reader;
+  class Builder;
+  class Pipeline;
+
+  struct _capnpPrivate {
+    CAPNP_DECLARE_STRUCT_HEADER(dfd588e26996d1a6, 6, 0)
+    #if !CAPNP_LITE
+    static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
+    #endif  // !CAPNP_LITE
+  };
+};
+
 struct Design {
   Design() = delete;
 
@@ -493,6 +509,9 @@ public:
 
   inline bool hasFactoryProgram() const;
   inline  ::capnp::List< ::Program>::Reader getFactoryProgram() const;
+
+  inline bool hasFactoryPackage() const;
+  inline  ::capnp::List< ::Package>::Reader getFactoryPackage() const;
 
   inline bool hasFactoryDesign() const;
   inline  ::capnp::List< ::Design>::Reader getFactoryDesign() const;
@@ -693,6 +712,13 @@ public:
   inline  ::capnp::List< ::Program>::Builder initFactoryProgram(unsigned int size);
   inline void adoptFactoryProgram(::capnp::Orphan< ::capnp::List< ::Program>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::Program>> disownFactoryProgram();
+
+  inline bool hasFactoryPackage();
+  inline  ::capnp::List< ::Package>::Builder getFactoryPackage();
+  inline void setFactoryPackage( ::capnp::List< ::Package>::Reader value);
+  inline  ::capnp::List< ::Package>::Builder initFactoryPackage(unsigned int size);
+  inline void adoptFactoryPackage(::capnp::Orphan< ::capnp::List< ::Package>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::Package>> disownFactoryPackage();
 
   inline bool hasFactoryDesign();
   inline  ::capnp::List< ::Design>::Builder getFactoryDesign();
@@ -3140,6 +3166,112 @@ private:
 };
 #endif  // !CAPNP_LITE
 
+class Package::Reader {
+public:
+  typedef Package Reads;
+
+  Reader() = default;
+  inline explicit Reader(::capnp::_::StructReader base): _reader(base) {}
+
+  inline ::capnp::MessageSize totalSize() const {
+    return _reader.totalSize().asPublic();
+  }
+
+#if !CAPNP_LITE
+  inline ::kj::StringTree toString() const {
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand);
+  }
+#endif  // !CAPNP_LITE
+
+  inline  ::uint64_t getVpiParent() const;
+
+  inline  ::uint64_t getUhdmParentType() const;
+
+  inline  ::uint64_t getVpiFile() const;
+
+  inline  ::uint32_t getVpiLineNo() const;
+
+  inline  ::uint64_t getVpiName() const;
+
+  inline  ::uint64_t getVpiDefName() const;
+
+  inline bool getVpiProtected() const;
+
+private:
+  ::capnp::_::StructReader _reader;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::_::PointerHelpers;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::List;
+  friend class ::capnp::MessageBuilder;
+  friend class ::capnp::Orphanage;
+};
+
+class Package::Builder {
+public:
+  typedef Package Builds;
+
+  Builder() = delete;  // Deleted to discourage incorrect usage.
+                       // You can explicitly initialize to nullptr instead.
+  inline Builder(decltype(nullptr)) {}
+  inline explicit Builder(::capnp::_::StructBuilder base): _builder(base) {}
+  inline operator Reader() const { return Reader(_builder.asReader()); }
+  inline Reader asReader() const { return *this; }
+
+  inline ::capnp::MessageSize totalSize() const { return asReader().totalSize(); }
+#if !CAPNP_LITE
+  inline ::kj::StringTree toString() const { return asReader().toString(); }
+#endif  // !CAPNP_LITE
+
+  inline  ::uint64_t getVpiParent();
+  inline void setVpiParent( ::uint64_t value);
+
+  inline  ::uint64_t getUhdmParentType();
+  inline void setUhdmParentType( ::uint64_t value);
+
+  inline  ::uint64_t getVpiFile();
+  inline void setVpiFile( ::uint64_t value);
+
+  inline  ::uint32_t getVpiLineNo();
+  inline void setVpiLineNo( ::uint32_t value);
+
+  inline  ::uint64_t getVpiName();
+  inline void setVpiName( ::uint64_t value);
+
+  inline  ::uint64_t getVpiDefName();
+  inline void setVpiDefName( ::uint64_t value);
+
+  inline bool getVpiProtected();
+  inline void setVpiProtected(bool value);
+
+private:
+  ::capnp::_::StructBuilder _builder;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+  friend class ::capnp::Orphanage;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::_::PointerHelpers;
+};
+
+#if !CAPNP_LITE
+class Package::Pipeline {
+public:
+  typedef Package Pipelines;
+
+  inline Pipeline(decltype(nullptr)): _typeless(nullptr) {}
+  inline explicit Pipeline(::capnp::AnyPointer::Pipeline&& typeless)
+      : _typeless(kj::mv(typeless)) {}
+
+private:
+  ::capnp::AnyPointer::Pipeline _typeless;
+  friend class ::capnp::PipelineHook;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+};
+#endif  // !CAPNP_LITE
+
 class Design::Reader {
 public:
   typedef Design Reads;
@@ -4043,36 +4175,68 @@ inline ::capnp::Orphan< ::capnp::List< ::Program>> UhdmRoot::Builder::disownFact
       _builder.getPointerField(23 * ::capnp::POINTERS));
 }
 
-inline bool UhdmRoot::Reader::hasFactoryDesign() const {
+inline bool UhdmRoot::Reader::hasFactoryPackage() const {
   return !_reader.getPointerField(24 * ::capnp::POINTERS).isNull();
 }
-inline bool UhdmRoot::Builder::hasFactoryDesign() {
+inline bool UhdmRoot::Builder::hasFactoryPackage() {
   return !_builder.getPointerField(24 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::Package>::Reader UhdmRoot::Reader::getFactoryPackage() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::Package>>::get(
+      _reader.getPointerField(24 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::Package>::Builder UhdmRoot::Builder::getFactoryPackage() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::Package>>::get(
+      _builder.getPointerField(24 * ::capnp::POINTERS));
+}
+inline void UhdmRoot::Builder::setFactoryPackage( ::capnp::List< ::Package>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::Package>>::set(
+      _builder.getPointerField(24 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::Package>::Builder UhdmRoot::Builder::initFactoryPackage(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::Package>>::init(
+      _builder.getPointerField(24 * ::capnp::POINTERS), size);
+}
+inline void UhdmRoot::Builder::adoptFactoryPackage(
+    ::capnp::Orphan< ::capnp::List< ::Package>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::Package>>::adopt(
+      _builder.getPointerField(24 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::Package>> UhdmRoot::Builder::disownFactoryPackage() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::Package>>::disown(
+      _builder.getPointerField(24 * ::capnp::POINTERS));
+}
+
+inline bool UhdmRoot::Reader::hasFactoryDesign() const {
+  return !_reader.getPointerField(25 * ::capnp::POINTERS).isNull();
+}
+inline bool UhdmRoot::Builder::hasFactoryDesign() {
+  return !_builder.getPointerField(25 * ::capnp::POINTERS).isNull();
 }
 inline  ::capnp::List< ::Design>::Reader UhdmRoot::Reader::getFactoryDesign() const {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::Design>>::get(
-      _reader.getPointerField(24 * ::capnp::POINTERS));
+      _reader.getPointerField(25 * ::capnp::POINTERS));
 }
 inline  ::capnp::List< ::Design>::Builder UhdmRoot::Builder::getFactoryDesign() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::Design>>::get(
-      _builder.getPointerField(24 * ::capnp::POINTERS));
+      _builder.getPointerField(25 * ::capnp::POINTERS));
 }
 inline void UhdmRoot::Builder::setFactoryDesign( ::capnp::List< ::Design>::Reader value) {
   ::capnp::_::PointerHelpers< ::capnp::List< ::Design>>::set(
-      _builder.getPointerField(24 * ::capnp::POINTERS), value);
+      _builder.getPointerField(25 * ::capnp::POINTERS), value);
 }
 inline  ::capnp::List< ::Design>::Builder UhdmRoot::Builder::initFactoryDesign(unsigned int size) {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::Design>>::init(
-      _builder.getPointerField(24 * ::capnp::POINTERS), size);
+      _builder.getPointerField(25 * ::capnp::POINTERS), size);
 }
 inline void UhdmRoot::Builder::adoptFactoryDesign(
     ::capnp::Orphan< ::capnp::List< ::Design>>&& value) {
   ::capnp::_::PointerHelpers< ::capnp::List< ::Design>>::adopt(
-      _builder.getPointerField(24 * ::capnp::POINTERS), kj::mv(value));
+      _builder.getPointerField(25 * ::capnp::POINTERS), kj::mv(value));
 }
 inline ::capnp::Orphan< ::capnp::List< ::Design>> UhdmRoot::Builder::disownFactoryDesign() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::Design>>::disown(
-      _builder.getPointerField(24 * ::capnp::POINTERS));
+      _builder.getPointerField(25 * ::capnp::POINTERS));
 }
 
 inline  ::uint64_t Process::Reader::getVpiParent() const {
@@ -6617,6 +6781,104 @@ inline void Program::Builder::adoptClockingblocks(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Program::Builder::disownClockingblocks() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(4 * ::capnp::POINTERS));
+}
+
+inline  ::uint64_t Package::Reader::getVpiParent() const {
+  return _reader.getDataField< ::uint64_t>(
+      0 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getVpiParent() {
+  return _builder.getDataField< ::uint64_t>(
+      0 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiParent( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      0 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint64_t Package::Reader::getUhdmParentType() const {
+  return _reader.getDataField< ::uint64_t>(
+      1 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getUhdmParentType() {
+  return _builder.getDataField< ::uint64_t>(
+      1 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setUhdmParentType( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      1 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint64_t Package::Reader::getVpiFile() const {
+  return _reader.getDataField< ::uint64_t>(
+      2 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getVpiFile() {
+  return _builder.getDataField< ::uint64_t>(
+      2 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiFile( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      2 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint32_t Package::Reader::getVpiLineNo() const {
+  return _reader.getDataField< ::uint32_t>(
+      6 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint32_t Package::Builder::getVpiLineNo() {
+  return _builder.getDataField< ::uint32_t>(
+      6 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiLineNo( ::uint32_t value) {
+  _builder.setDataField< ::uint32_t>(
+      6 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint64_t Package::Reader::getVpiName() const {
+  return _reader.getDataField< ::uint64_t>(
+      4 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getVpiName() {
+  return _builder.getDataField< ::uint64_t>(
+      4 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiName( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      4 * ::capnp::ELEMENTS, value);
+}
+
+inline  ::uint64_t Package::Reader::getVpiDefName() const {
+  return _reader.getDataField< ::uint64_t>(
+      5 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getVpiDefName() {
+  return _builder.getDataField< ::uint64_t>(
+      5 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiDefName( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      5 * ::capnp::ELEMENTS, value);
+}
+
+inline bool Package::Reader::getVpiProtected() const {
+  return _reader.getDataField<bool>(
+      224 * ::capnp::ELEMENTS);
+}
+
+inline bool Package::Builder::getVpiProtected() {
+  return _builder.getDataField<bool>(
+      224 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setVpiProtected(bool value) {
+  _builder.setDataField<bool>(
+      224 * ::capnp::ELEMENTS, value);
 }
 
 inline  ::uint64_t Design::Reader::getVpiParent() const {
