@@ -589,7 +589,7 @@ struct Package {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(dfd588e26996d1a6, 16, 16)
+    CAPNP_DECLARE_STRUCT_HEADER(dfd588e26996d1a6, 17, 16)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -4985,6 +4985,8 @@ public:
   inline bool hasSpecparam() const;
   inline  ::capnp::List< ::uint64_t>::Reader getSpecparam() const;
 
+  inline  ::uint64_t getModule() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -5198,6 +5200,9 @@ public:
   inline  ::capnp::List< ::uint64_t>::Builder initSpecparam(unsigned int size);
   inline void adoptSpecparam(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownSpecparam();
+
+  inline  ::uint64_t getModule();
+  inline void setModule( ::uint64_t value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -11577,6 +11582,20 @@ inline void Package::Builder::adoptSpecparam(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Package::Builder::disownSpecparam() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(15 * ::capnp::POINTERS));
+}
+
+inline  ::uint64_t Package::Reader::getModule() const {
+  return _reader.getDataField< ::uint64_t>(
+      16 * ::capnp::ELEMENTS);
+}
+
+inline  ::uint64_t Package::Builder::getModule() {
+  return _builder.getDataField< ::uint64_t>(
+      16 * ::capnp::ELEMENTS);
+}
+inline void Package::Builder::setModule( ::uint64_t value) {
+  _builder.setDataField< ::uint64_t>(
+      16 * ::capnp::ELEMENTS, value);
 }
 
 inline  ::uint64_t Design::Reader::getVpiParent() const {

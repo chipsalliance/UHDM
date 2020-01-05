@@ -380,6 +380,7 @@ arrayvarmem @34 :List(UInt64);
 namedevent @35 :List(UInt64);
 namedeventarray @36 :List(UInt64);
 specparam @37 :List(UInt64);
+module @38 :UInt64;
 }
 struct Design {
 vpiParent @0 :UInt64;

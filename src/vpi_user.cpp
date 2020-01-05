@@ -411,6 +411,12 @@ vpiHandle vpi_handle (PLI_INT32 type,
  } 
 }
 
+ if (handle->type == uhdminstance) {
+     if (type == vpiModule) {
+       return (vpiHandle) new uhdm_handle(((instance*)(object))->get_module()->getUhdmType(), ((instance*)(object))->get_module());
+ } 
+}
+
  if (handle->type == uhdmpackage) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((package*)(object))->get_vpiParent()->getUhdmType(), ((package*)(object))->get_vpiParent());
@@ -782,7 +788,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiTypespec) {
+ if (type == vpiTypedef) {
  if (((instance*)(object))->get_typespec())
  return (vpiHandle) new uhdm_handle(uhdmtypespec, ((instance*)(object))->get_typespec());
  else return 0;
@@ -926,7 +932,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiTypespec) {
+ if (type == vpiTypedef) {
  if (((instance*)(object))->get_typespec())
  return (vpiHandle) new uhdm_handle(uhdmtypespec, ((instance*)(object))->get_typespec());
  else return 0;

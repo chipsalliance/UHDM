@@ -143,6 +143,7 @@
 #define uhdmnamed_event 2131
 #define uhdmnamed_event_array 2132
 #define uhdmspec_param 2134
+#define uhdmmodule 2108
 #define uhdmpackage 2141
 #define uhdmdesign 2142
 #define uhdmallModules 2143

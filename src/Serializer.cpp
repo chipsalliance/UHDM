@@ -1415,6 +1415,7 @@ Namedeventarrays.set(ind, getId((*obj->get_named_event_array())[ind]));
 Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
       }
     }
+    Packages[index].setModule(getId(obj->get_module()));
 
 
    index++;
@@ -2469,6 +2470,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
       packageFactory::objects_[index]->set_spec_param(vect);
     }
+   if (obj.getModule()) 
+     packageFactory::objects_[index]->set_module(moduleFactory::objects_[obj.getModule()-1]);
 
    index++;
  }

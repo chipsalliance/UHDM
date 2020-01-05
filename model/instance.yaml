@@ -177,7 +177,7 @@
     card: any
   - class_ref: typespec
     name: typespec
-    vpi: vpiTypespec
+    vpi: vpiTypedef
     type: typespec
     card: any
   - class_ref: class_defn
@@ -185,3 +185,14 @@
     vpi: vpiClassDefn
     type: class_defn
     card: any
+  - obj_ref: module
+    name: module
+    vpi: vpiModule
+    type: module
+    card: 1
+#  - class_ref: instance
+#    name: instance
+#    vpi: vpiInstance
+#    type: instance
+#    card: 1
+
