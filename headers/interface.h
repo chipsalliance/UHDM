@@ -50,7 +50,19 @@ namespace UHDM {
 
     void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
 
+    unsigned int get_vpiIndex() const { return vpiIndex_; }
+
+    void set_vpiIndex(unsigned int data) { vpiIndex_ = data; }
+
     unsigned int get_vpiType() { return vpiInterface; }
+
+    expr_dist* get_expr_dist() const { return expr_dist_; }
+
+    void set_expr_dist(expr_dist* data) { expr_dist_ = data; }
+
+    instance_array* get_instance_array() const { return instance_array_; }
+
+    void set_instance_array(instance_array* data) { instance_array_ = data; }
 
     VectorOfprocess* get_process() const { return process_; }
 
@@ -98,6 +110,12 @@ namespace UHDM {
     unsigned int vpiFile_;
 
     unsigned int vpiLineNo_;
+
+    unsigned int vpiIndex_;
+
+    expr_dist* expr_dist_;
+
+    instance_array* instance_array_;
 
     VectorOfprocess* process_;
 

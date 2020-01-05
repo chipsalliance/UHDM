@@ -15,6 +15,11 @@
 # Universal Hardware Data Model (UHDM) "module" formal description
  
 - obj_def: module
+  - property: index
+    name: index
+    vpi: vpiIndex
+    type: unsigned int
+    card: 1
   - property: name
     name: name
     vpi: vpiName
@@ -45,8 +50,18 @@
     vpi: vpiDefaultClocking
     type: clocking_block
     card: 1
+  - class_ref: expr_dist
+    name: expr distribution
+    vpi: vpiDefaultDisableIff
+    type: expr_dist
+    card: 1
+  - obj_ref: module_array
+    name: module array
+    vpi: vpiModuleArray
+    type: module_array
+    card: 1
   - class_ref: instance_array
-    name: instance_array
+    name: instance array
     vpi: vpiInstanceArray
     type: instance_array
     card: 1

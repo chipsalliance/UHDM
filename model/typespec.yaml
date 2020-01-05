@@ -12,17 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "expr" formal description
+# Universal Hardware Data Model (UHDM) "typespec" formal description
  
-- class_def: expr
-  - extends: expr_dist
-  - property: decompile
-    name: decompile
-    vpi: vpiDecompile
-    type: string
-    card: 1
-  - property: size
-    name: size
-    vpi: vpiSize
-    type: int
-    card: 1
+- class_def: typespec

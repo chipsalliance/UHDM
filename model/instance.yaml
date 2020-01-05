@@ -120,3 +120,79 @@
     vpi: vpiTaskFunc
     type: task_func
     card: any
+  - class_ref: net
+    name: net
+    vpi: vpiNet
+    type: net
+    card: any
+  - class_ref: array_net
+    name: array net
+    vpi: vpiArrayNet
+    type: array_net
+    card: any
+  - class_ref: variables
+    name: variables
+    vpi: vpiVariables
+    type: variables
+    card: any
+  - obj_ref: logic_var
+    name: logic var
+    vpi: vpiReg
+    type: logic_var
+    card: any
+  - obj_ref: array_var
+    name: array var
+    vpi: vpiRegArray
+    type: array_var
+    card: any
+  - obj_ref: array_var_mem
+    name: mem var
+    vpi: vpiMemory
+    type: array_var
+    card: any
+  - obj_ref: named_event
+    name: named event
+    vpi: vpiNamedEvent
+    type: named_event
+    card: any
+  - obj_ref: named_event_array
+    name: named event
+    vpi: vpiNamedEvent
+    type: named_event
+    card: any
+  - class_ref: parameters
+    name: parameters
+    vpi: vpiParameter
+    type: parameters
+    card: any
+  - obj_ref: spec_param
+    name: spec param
+    vpi: vpiSpecParam
+    type: spec_param
+    card: any
+  - class_ref: assertion
+    name: assertion
+    vpi: vpiAssertion
+    type: assertion
+    card: any
+  - class_ref: typespec
+    name: typespec
+    vpi: vpiTypedef
+    type: typespec
+    card: any
+  - class_ref: class_defn
+    name: class defn
+    vpi: vpiClassDefn
+    type: class_defn
+    card: any
+  - obj_ref: module
+    name: module
+    vpi: vpiModule
+    type: module
+    card: 1
+#  - class_ref: instance
+#    name: instance
+#    vpi: vpiInstance
+#    type: instance
+#    card: 1
+

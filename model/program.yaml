@@ -15,6 +15,11 @@
 # Universal Hardware Data Model (UHDM) "program" formal description
  
 - obj_def: program
+  - property: index
+    name: index
+    vpi: vpiIndex
+    type: unsigned int
+    card: 1
   - property: name
     name: name
     vpi: vpiName
@@ -40,6 +45,11 @@
     vpi: uhdminterface
     type: interface
     card: any
+  - class_ref: expr_dist
+    name: expr distribution
+    vpi: vpiDefaultDisableIff
+    type: expr_dist
+    card: 1
   - obj_ref: interface_arrays
     vpi: uhdminterface_array
     name: interface array
