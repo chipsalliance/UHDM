@@ -27,9 +27,6 @@ io_decl.yaml
 alias_stmt.yaml
 clocking_block.yaml
 instance_array.yaml
-module.yaml
-interface.yaml
-program.yaml
 net.yaml
 array_net.yaml
 logic_var.yaml
@@ -42,5 +39,8 @@ assertion.yaml
 typespec.yaml
 class_defn.yaml
 instance.yaml
+interface.yaml
+program.yaml
 package.yaml
+module.yaml
 uhdm.yaml

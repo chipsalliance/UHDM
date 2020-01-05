@@ -15,6 +15,7 @@
 # Universal Hardware Data Model (UHDM) "interface" formal description
  
 - obj_def: interface
+  - extends: instance
   - property: index
     name: index
     vpi: vpiIndex

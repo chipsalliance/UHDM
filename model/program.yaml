@@ -15,15 +15,11 @@
 # Universal Hardware Data Model (UHDM) "program" formal description
  
 - obj_def: program
+  - extends: instance
   - property: index
     name: index
     vpi: vpiIndex
     type: unsigned int
-    card: 1
-  - property: name
-    name: name
-    vpi: vpiName
-    type: string
     card: 1
   - property: type
     name: vpiProgram

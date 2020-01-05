@@ -621,7 +621,8 @@ proc generate_code { models } {
 		append save "$tmp\n"
 	    }
 	    append SAVE($classname) $save
-	    regsub -all $baseclass $RESTORE($baseclass) $classname restore	    
+	    set restore $RESTORE($baseclass)
+	    regsub -all ${baseclass}Factory $RESTORE($baseclass) ${classname}Factory restore	    
 	    append RESTORE($classname) $restore
 	    if [info exist vpi_get_str_body_inst($baseclass)] {
 		foreach inst $vpi_get_str_body_inst($baseclass) {
