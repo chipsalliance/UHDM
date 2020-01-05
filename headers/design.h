@@ -30,7 +30,8 @@ namespace UHDM {
 
   class design : public BaseClass {
   public:
-    design(){}
+    // Implicit constructor used to initialize all members,
+    // comment: design();
     ~design() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

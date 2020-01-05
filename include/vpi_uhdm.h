@@ -31,7 +31,8 @@ namespace UHDM {
 
   class BaseClass {
   public: 
-    BaseClass(){}
+    //BaseClass(){}
+    virtual unsigned int getUhdmType() { return 0; }   
     virtual ~BaseClass(){}
   };
 

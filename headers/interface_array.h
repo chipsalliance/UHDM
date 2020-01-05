@@ -30,7 +30,8 @@ namespace UHDM {
 
   class interface_array : public BaseClass {
   public:
-    interface_array(){}
+    // Implicit constructor used to initialize all members,
+    // comment: interface_array();
     ~interface_array() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

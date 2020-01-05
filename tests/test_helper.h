@@ -39,9 +39,12 @@ std::string print_designs (std::vector<vpiHandle> designs) {
       }
       result +=  "+ package: " + std::string(vpi_get_str(vpiName, obj_h)) + ", ";
       result +=  "def: " + std::string(vpi_get_str(vpiDefName, obj_h));
-      
       result += "\n";
-      
+      vpiHandle funcItr = vpi_iterate(vpiTaskFunc, obj_h); 
+      while (vpiHandle func_h = vpi_scan(funcItr) ) {
+	result +=  "  func: " + std::string(vpi_get_str(vpiName, func_h)) + std::string(", size:") + std::to_string(vpi_get(vpiSize, func_h));
+	result += "\n";
+      }
     }
   }
   return result;

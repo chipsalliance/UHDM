@@ -30,7 +30,8 @@ namespace UHDM {
 
   class primitive : public BaseClass {
   public:
-    primitive(){}
+    // Implicit constructor used to initialize all members,
+    // comment: primitive();
     ~primitive() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

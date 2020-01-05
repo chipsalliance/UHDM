@@ -30,7 +30,8 @@ namespace UHDM {
 
   class def_param : public BaseClass {
   public:
-    def_param(){}
+    // Implicit constructor used to initialize all members,
+    // comment: def_param();
     ~def_param() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

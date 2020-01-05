@@ -30,7 +30,8 @@ namespace UHDM {
 
   class tchk : public BaseClass {
   public:
-    tchk(){}
+    // Implicit constructor used to initialize all members,
+    // comment: tchk();
     ~tchk() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
