@@ -15,15 +15,11 @@
 # Universal Hardware Data Model (UHDM) "module" formal description
  
 - obj_def: module
+  - extends: instance
   - property: index
     name: index
     vpi: vpiIndex
     type: unsigned int
-    card: 1
-  - property: name
-    name: name
-    vpi: vpiName
-    type: string
     card: 1
   - property: type
     name: vpiModule

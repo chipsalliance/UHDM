@@ -28,7 +28,7 @@
 
 namespace UHDM {
 
-  class module : public BaseClass {
+  class module : public instance {
   public:
     // Implicit constructor used to initialize all members,
     // comment: module();
@@ -53,10 +53,6 @@ namespace UHDM {
     unsigned int get_vpiIndex() const { return vpiIndex_; }
 
     void set_vpiIndex(unsigned int data) { vpiIndex_ = data; }
-
-    std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
-
-    void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
 
     unsigned int get_vpiType() { return vpiModule; }
 
@@ -164,8 +160,6 @@ namespace UHDM {
     unsigned int vpiLineNo_;
 
     unsigned int vpiIndex_;
-
-    unsigned int vpiName_;
 
     bool vpiTopModule_;
 

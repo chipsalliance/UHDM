@@ -28,7 +28,7 @@
 
 namespace UHDM {
 
-  class interface : public BaseClass {
+  class interface : public instance {
   public:
     // Implicit constructor used to initialize all members,
     // comment: interface();
