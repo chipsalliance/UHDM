@@ -105,3 +105,13 @@
     vpi: vpiTop
     type: bool
     card: 1
+  - obj_ref: programs
+    name: program
+    vpi: vpiProgram
+    type: program
+    card: any
+  - obj_ref: program_arrays
+    name: program array
+    vpi: vpiProgramArray
+    type: program
+    card: any

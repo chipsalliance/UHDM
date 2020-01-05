@@ -53,22 +53,23 @@ namespace UHDM {
 
     void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
 
-    const VectorOfmodule* get_allModules() const { return allModules_; }
+    VectorOfmodule* get_allModules() const { return allModules_; }
 
     void set_allModules(VectorOfmodule* data) { allModules_ = data; }
 
-    const VectorOfmodule* get_topModules() const { return topModules_; }
+    VectorOfmodule* get_topModules() const { return topModules_; }
 
     void set_topModules(VectorOfmodule* data) { topModules_ = data; }
 
-    const VectorOfprogram* get_allPrograms() const { return allPrograms_; }
+    VectorOfprogram* get_allPrograms() const { return allPrograms_; }
 
     void set_allPrograms(VectorOfprogram* data) { allPrograms_ = data; }
 
-    const VectorOfpackage* get_allPackages() const { return allPackages_; }
+    VectorOfpackage* get_allPackages() const { return allPackages_; }
 
     void set_allPackages(VectorOfpackage* data) { allPackages_ = data; }
 
+    virtual unsigned int getUhdmType() { return uhdmdesign; }   
   private:
     
     BaseClass* vpiParent_;

@@ -1,5 +1,13 @@
 process.yaml
 scope.yaml
+begin.yaml
+named_begin.yaml
+expr.yaml
+operand_group.yaml
+operation.yaml
+ref_obj.yaml
+variables.yaml
+task_func.yaml
 task.yaml
 function.yaml
 modport.yaml

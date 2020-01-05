@@ -33,7 +33,10 @@ namespace UHDM {
   typedef std::vector<std::string> Id2SymbolMap;
   typedef std::unordered_map<std::string, unsigned long> Symbol2IdMap;
 
-  class io_decl;
+  class operand_group;
+typedef std::vector<operand_group*> VectorOfoperand_group;
+typedef std::vector<operand_group*>::iterator VectorOfoperand_groupItr;
+class io_decl;
 typedef std::vector<io_decl*> VectorOfio_decl;
 typedef std::vector<io_decl*>::iterator VectorOfio_declItr;
 class task;

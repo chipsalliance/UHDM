@@ -196,7 +196,7 @@ proc printMethods { type vpi card } {
 	    append methods "\n    void set_${vpi}(${type}${pointer} data) { ${vpi}_ = data; }\n"
 	}
     } elseif {$card == "any"} {
-	append methods "\n    const VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
+	append methods "\n    VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
 	append methods "\n    void set_${vpi}(VectorOf${type}* data) { ${vpi}_ = data; }\n"
     }
     return $methods
@@ -400,7 +400,9 @@ proc generate_code { models } {
 	append headers "#include \"headers/$classname.h\"\n"
 	if {$modeltype != "class_def"} {
 	    append factories "std::vector<${classname}*> ${classname}Factory::objects_;\n"
-	    append factories "std::vector<std::vector<${classname}*>*> VectorOf${classname}Factory::objects_;\n"	
+	}
+	append factories "std::vector<std::vector<${classname}*>*> VectorOf${classname}Factory::objects_;\n"
+	if {$modeltype != "class_def"} {
 	    append factory_object_type_map "  case uhdm${classname}: return ${classname}Factory::objects_\[index\];\n"
 	}
         lappend classes $classname
@@ -446,7 +448,8 @@ proc generate_code { models } {
 	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));\n"
 	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiLineNo(obj.getVpiLineNo());\n"
 	}
-	
+
+	set indTmp 0
 	dict for {key val} $data {
 	    if {$key == "properties"} {
 		dict for {prop conf} $val {
@@ -507,27 +510,61 @@ proc generate_code { models } {
 		    set Type [string toupper $type 0 0]
 		    regsub -all  {_} $Type "" Type		    
 		    regsub -all  {_} $name "" Name
-		    lappend capnp_schema($classname) [printCapnpSchema UInt64 $Name $card]
-		    
-		    if {$card == 1} {
-			append SAVE($classname) "    ${Classname}s\[index\].set[string toupper ${Name} 0 0](getId(obj->get_${name}()));\n"
-			append RESTORE($classname) "   if (obj.get[string toupper ${Name} 0 0]()) 
-     ${classname}Factory::objects_\[index\]->set_${name}(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()-1\]);\n"
+
+		    if {$key == "class_ref"} {
+			set obj_key ObjIndexType
 		    } else {
+			set obj_key UInt64 
+		    }
+		    lappend capnp_schema($classname) [printCapnpSchema $obj_key $Name $card]
+		    if {$card == 1} {
+			if {$key == "class_ref"} {
+			    append SAVE($classname) "  if (obj->get_${name}()) {"
+			    append SAVE($classname) "    ::ObjIndexType::Builder tmp$indTmp = ${Classname}s\[index\].get[string toupper ${Name} 0 0]();\n"
+			    append SAVE($classname) "    tmp${indTmp}.setIndex(getId((obj->get_${name}())));\n"
+			    append SAVE($classname) "    tmp${indTmp}.setType(obj->get_${name}()->getUhdmType());\n  }"			    
+			    
+			    incr indTmp
+			} else {
+			    append SAVE($classname) "    ${Classname}s\[index\].set[string toupper ${Name} 0 0](getId(obj->get_${name}()));\n"
+			}
+			if {$key == "class_ref"} {
+			    append RESTORE($classname) "     ${classname}Factory::objects_\[index\]->set_${name}((${type}*)getObject(obj.get[string toupper ${Name} 0 0]().getType(),obj.get[string toupper ${Name} 0 0]().getIndex()-1));\n"
+			} else {
+			    append RESTORE($classname) "   if (obj.get[string toupper ${Name} 0 0]()) 
+     ${classname}Factory::objects_\[index\]->set_${name}(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()-1\]);\n"
+			}
+		    } else {
+
+			if {$key == "class_ref"} {
+			    set obj_key ::ObjIndexType
+			} else {
+			    set obj_key ::uint64_t
+			}
 			append SAVE($classname) " 
     if (obj->get_${name}()) {  
-      ::capnp::List<::uint64_t>::Builder [string toupper ${Name} 0 0]s = ${Classname}s\[index\].init[string toupper ${Name} 0 0](obj->get_${name}()->size());
-      for (unsigned int ind = 0; ind < obj->get_${name}()->size(); ind++) {
-        [string toupper ${Name} 0 0]s.set(ind, getId((*obj->get_${name}())\[ind\]));
-      }
+      ::capnp::List<$obj_key>::Builder [string toupper ${Name} 0 0]s = ${Classname}s\[index\].init[string toupper ${Name} 0 0](obj->get_${name}()->size());
+      for (unsigned int ind = 0; ind < obj->get_${name}()->size(); ind++) {\n"
+			if {$key == "class_ref"} {
+			    append SAVE($classname) "        ::ObjIndexType::Builder tmp = [string toupper ${Name} 0 0]s\[ind\];\n"
+			    append SAVE($classname) "        tmp.setIndex(getId((*obj->get_${name}())\[ind\]));\n"
+			    append SAVE($classname) "        tmp.setType(((*obj->get_${name}())\[ind\])->getUhdmType());"
+			} else {
+			    append SAVE($classname) "[string toupper ${Name} 0 0]s.set(ind, getId((*obj->get_${name}())\[ind\]));"
+			}
+			append SAVE($classname) "\n      }
     }
 "
 			append RESTORE($classname) "    
     if (obj.get[string toupper ${Name} 0 0]().size()) { 
       VectorOf${type}* vect = VectorOf${type}Factory::make();
-      for (unsigned int ind = 0; ind < obj.get[string toupper ${Name} 0 0]().size(); ind++) {
-         vect->push_back(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()\[ind\]-1\]);
-      }
+      for (unsigned int ind = 0; ind < obj.get[string toupper ${Name} 0 0]().size(); ind++) {\n"
+			if {$key == "class_ref"} {
+			    append RESTORE($classname) " 	vect->push_back((${type}*)getObject(obj.get[string toupper ${Name} 0 0]()\[ind\].getType(),obj.get[string toupper ${Name} 0 0]()\[ind\].getIndex()-1));\n"
+			} else {
+			    append RESTORE($classname) " 	vect->push_back(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()\[ind\]-1\]);\n"
+			}			
+			append RESTORE($classname) "    }
       ${classname}Factory::objects_\[index\]->set_${name}(vect);
     }
 "
@@ -575,7 +612,9 @@ proc generate_code { models } {
 	    }
 	    set save ""
 	    foreach line [split $SAVE($baseclass) "\n"] {
-		regsub  [string toupper $baseclass 0 0] $line [string toupper $classname 0 0] tmp
+		set base $baseclass
+		regsub -all  {_} $baseclass "" base		
+		regsub  [string toupper $base 0 0] $line $Classname tmp
 		append save "$tmp\n"
 	    }
 	    append SAVE($classname) $save

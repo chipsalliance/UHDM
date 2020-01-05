@@ -33,6 +33,7 @@ namespace UHDM {
     <CLASSNAME>(){}
     ~<CLASSNAME>() <FINAL_DESTRUCTOR> {}
     <METHODS>
+    virtual unsigned int getUhdmType() { return uhdm<CLASSNAME>; }   
   private:
     <MEMBERS>
   };

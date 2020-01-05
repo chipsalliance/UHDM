@@ -12,23 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "function" formal description
+# Universal Hardware Data Model (UHDM) "variables" formal description
  
-- obj_def: function
-  - extends: task_func
-  - property: sign
-    name: sign
-    vpi: vpiSigned
-    type: bool
-    card: 1
-  - property: size
-    name: size
-    vpi: vpiSize
-    type: int
-    card: 1
-  - property: func_type
-    name: type
-    vpi: vpiFuncType
-    type: int
-    card: 1
-
+- class_def: variables
