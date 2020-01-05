@@ -30,7 +30,8 @@ namespace UHDM {
 
   class io_decl : public BaseClass {
   public:
-    io_decl(){}
+    // Implicit constructor used to initialize all members,
+    // comment: io_decl();
     ~io_decl() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

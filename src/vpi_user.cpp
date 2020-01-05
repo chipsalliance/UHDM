@@ -88,247 +88,247 @@ vpiHandle vpi_handle (PLI_INT32 type,
   
  if (handle->type == uhdmprocess) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((process*)(object))->get_uhdmParentType(), ((process*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((process*)(object))->get_vpiParent()->getUhdmType(), ((process*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmbegin) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((begin*)(object))->get_uhdmParentType(), ((begin*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((begin*)(object))->get_vpiParent()->getUhdmType(), ((begin*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmnamed_begin) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((named_begin*)(object))->get_uhdmParentType(), ((named_begin*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((named_begin*)(object))->get_vpiParent()->getUhdmType(), ((named_begin*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmoperation) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((operation*)(object))->get_uhdmParentType(), ((operation*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((operation*)(object))->get_vpiParent()->getUhdmType(), ((operation*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmref_obj) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((ref_obj*)(object))->get_uhdmParentType(), ((ref_obj*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((ref_obj*)(object))->get_vpiParent()->getUhdmType(), ((ref_obj*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmtask_func) {
      if (type == vpiLeftRange) {
-       return (vpiHandle) new uhdm_handle(uhdmexpr, ((task_func*)(object))->get_left_expr());
+       return (vpiHandle) new uhdm_handle(((task_func*)(object))->get_left_expr()->getUhdmType(), ((task_func*)(object))->get_left_expr());
  } 
 }
 
  if (handle->type == uhdmtask_func) {
      if (type == vpiRightRange) {
-       return (vpiHandle) new uhdm_handle(uhdmexpr, ((task_func*)(object))->get_right_expr());
+       return (vpiHandle) new uhdm_handle(((task_func*)(object))->get_right_expr()->getUhdmType(), ((task_func*)(object))->get_right_expr());
  } 
 }
 
  if (handle->type == uhdmtask_func) {
      if (type == vpiReturn) {
-       return (vpiHandle) new uhdm_handle(uhdmvariables, ((task_func*)(object))->get_variables());
+       return (vpiHandle) new uhdm_handle(((task_func*)(object))->get_variables()->getUhdmType(), ((task_func*)(object))->get_variables());
  } 
 }
 
  if (handle->type == uhdmtask_func) {
      if (type == vpiClassDefn) {
-       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((task_func*)(object))->get_class_defn());
+       return (vpiHandle) new uhdm_handle(((task_func*)(object))->get_class_defn()->getUhdmType(), ((task_func*)(object))->get_class_defn());
  } 
 }
 
  if (handle->type == uhdmtask_func) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(uhdmref_obj, ((task_func*)(object))->get_ref_obj());
+       return (vpiHandle) new uhdm_handle(((task_func*)(object))->get_ref_obj()->getUhdmType(), ((task_func*)(object))->get_ref_obj());
  } 
 }
 
  if (handle->type == uhdmtask_func) {
      if (type == vpiIODecl) {
-       return (vpiHandle) new uhdm_handle(uhdmio_decl, ((task_func*)(object))->get_io_decl());
+       return (vpiHandle) new uhdm_handle(((task_func*)(object))->get_io_decl()->getUhdmType(), ((task_func*)(object))->get_io_decl());
  } 
 }
 
  if (handle->type == uhdmtask) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((task*)(object))->get_uhdmParentType(), ((task*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((task*)(object))->get_vpiParent()->getUhdmType(), ((task*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmfunction) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((function*)(object))->get_uhdmParentType(), ((function*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((function*)(object))->get_vpiParent()->getUhdmType(), ((function*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmmodport) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((modport*)(object))->get_uhdmParentType(), ((modport*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((modport*)(object))->get_vpiParent()->getUhdmType(), ((modport*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmmodport) {
      if (type == vpiInterface) {
-       return (vpiHandle) new uhdm_handle(uhdminterface, ((modport*)(object))->get_interface());
+       return (vpiHandle) new uhdm_handle(((modport*)(object))->get_interface()->getUhdmType(), ((modport*)(object))->get_interface());
  } 
 }
 
  if (handle->type == uhdminterface_tf_decl) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((interface_tf_decl*)(object))->get_uhdmParentType(), ((interface_tf_decl*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((interface_tf_decl*)(object))->get_vpiParent()->getUhdmType(), ((interface_tf_decl*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdminterface) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((interface*)(object))->get_uhdmParentType(), ((interface*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((interface*)(object))->get_vpiParent()->getUhdmType(), ((interface*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdminterface) {
      if (type == vpiGlobalClocking) {
-       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((interface*)(object))->get_global_clocking());
+       return (vpiHandle) new uhdm_handle(((interface*)(object))->get_global_clocking()->getUhdmType(), ((interface*)(object))->get_global_clocking());
  } 
 }
 
  if (handle->type == uhdminterface) {
      if (type == vpiDefaultClocking) {
-       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((interface*)(object))->get_default_clocking());
+       return (vpiHandle) new uhdm_handle(((interface*)(object))->get_default_clocking()->getUhdmType(), ((interface*)(object))->get_default_clocking());
  } 
 }
 
  if (handle->type == uhdminterface_array) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((interface_array*)(object))->get_uhdmParentType(), ((interface_array*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((interface_array*)(object))->get_vpiParent()->getUhdmType(), ((interface_array*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmcont_assign) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((cont_assign*)(object))->get_uhdmParentType(), ((cont_assign*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((cont_assign*)(object))->get_vpiParent()->getUhdmType(), ((cont_assign*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmport) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((port*)(object))->get_uhdmParentType(), ((port*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((port*)(object))->get_vpiParent()->getUhdmType(), ((port*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmmodule_array) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((module_array*)(object))->get_uhdmParentType(), ((module_array*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((module_array*)(object))->get_vpiParent()->getUhdmType(), ((module_array*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmprimitive) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((primitive*)(object))->get_uhdmParentType(), ((primitive*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((primitive*)(object))->get_vpiParent()->getUhdmType(), ((primitive*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmprimitive_array) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((primitive_array*)(object))->get_uhdmParentType(), ((primitive_array*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((primitive_array*)(object))->get_vpiParent()->getUhdmType(), ((primitive_array*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmmod_path) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((mod_path*)(object))->get_uhdmParentType(), ((mod_path*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((mod_path*)(object))->get_vpiParent()->getUhdmType(), ((mod_path*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmtchk) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((tchk*)(object))->get_uhdmParentType(), ((tchk*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((tchk*)(object))->get_vpiParent()->getUhdmType(), ((tchk*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmdef_param) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((def_param*)(object))->get_uhdmParentType(), ((def_param*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((def_param*)(object))->get_vpiParent()->getUhdmType(), ((def_param*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmio_decl) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((io_decl*)(object))->get_uhdmParentType(), ((io_decl*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((io_decl*)(object))->get_vpiParent()->getUhdmType(), ((io_decl*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmalias_stmt) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((alias_stmt*)(object))->get_uhdmParentType(), ((alias_stmt*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((alias_stmt*)(object))->get_vpiParent()->getUhdmType(), ((alias_stmt*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmclocking_block) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((clocking_block*)(object))->get_uhdmParentType(), ((clocking_block*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((clocking_block*)(object))->get_vpiParent()->getUhdmType(), ((clocking_block*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdminstance_array) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((instance_array*)(object))->get_uhdmParentType(), ((instance_array*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((instance_array*)(object))->get_vpiParent()->getUhdmType(), ((instance_array*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmmodule) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((module*)(object))->get_uhdmParentType(), ((module*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((module*)(object))->get_vpiParent()->getUhdmType(), ((module*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmmodule) {
      if (type == vpiInstanceArray) {
-       return (vpiHandle) new uhdm_handle(uhdminstance_array, ((module*)(object))->get_instance_array());
+       return (vpiHandle) new uhdm_handle(((module*)(object))->get_instance_array()->getUhdmType(), ((module*)(object))->get_instance_array());
  } 
 }
 
  if (handle->type == uhdmmodule) {
      if (type == vpiGlobalClocking) {
-       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_global_clocking());
+       return (vpiHandle) new uhdm_handle(((module*)(object))->get_global_clocking()->getUhdmType(), ((module*)(object))->get_global_clocking());
  } 
 }
 
  if (handle->type == uhdmmodule) {
      if (type == vpiDefaultClocking) {
-       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((module*)(object))->get_default_clocking());
+       return (vpiHandle) new uhdm_handle(((module*)(object))->get_default_clocking()->getUhdmType(), ((module*)(object))->get_default_clocking());
  } 
 }
 
  if (handle->type == uhdmprogram) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((program*)(object))->get_uhdmParentType(), ((program*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((program*)(object))->get_vpiParent()->getUhdmType(), ((program*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmprogram) {
      if (type == vpiInstanceArray) {
-       return (vpiHandle) new uhdm_handle(uhdminstance_array, ((program*)(object))->get_instance_array());
+       return (vpiHandle) new uhdm_handle(((program*)(object))->get_instance_array()->getUhdmType(), ((program*)(object))->get_instance_array());
  } 
 }
 
  if (handle->type == uhdmprogram) {
      if (type == vpiDefaultClocking) {
-       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((program*)(object))->get_default_clocking());
+       return (vpiHandle) new uhdm_handle(((program*)(object))->get_default_clocking()->getUhdmType(), ((program*)(object))->get_default_clocking());
  } 
 }
 
  if (handle->type == uhdmpackage) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((package*)(object))->get_uhdmParentType(), ((package*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((package*)(object))->get_vpiParent()->getUhdmType(), ((package*)(object))->get_vpiParent());
  } 
 }
 
  if (handle->type == uhdmdesign) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((design*)(object))->get_uhdmParentType(), ((design*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((design*)(object))->get_vpiParent()->getUhdmType(), ((design*)(object))->get_vpiParent());
  } 
 }
 
@@ -637,6 +637,42 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
+ if (type == vpiTaskFunc) {
+ if (((instance*)(object))->get_task_func())
+ return (vpiHandle) new uhdm_handle(uhdmtask_func, ((instance*)(object))->get_task_func());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminstance) {
+ if (type == vpiProgram) {
+ if (((instance*)(object))->get_programs())
+ return (vpiHandle) new uhdm_handle(uhdmprograms, ((instance*)(object))->get_programs());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminstance) {
+ if (type == vpiProgramArray) {
+ if (((instance*)(object))->get_program_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmprogram_arrays, ((instance*)(object))->get_program_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmpackage) {
+ if (type == vpiTaskFunc) {
+ if (((instance*)(object))->get_task_func())
+ return (vpiHandle) new uhdm_handle(uhdmtask_func, ((instance*)(object))->get_task_func());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminstance) {
  if (type == vpiProgram) {
  if (((instance*)(object))->get_programs())
  return (vpiHandle) new uhdm_handle(uhdmprograms, ((instance*)(object))->get_programs());
@@ -702,7 +738,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmoperands) {
  VectorOfoperand_group* the_vec = (VectorOfoperand_group*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmoperand_group, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -711,7 +747,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmio_decls) {
  VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmio_decl, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -720,7 +756,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtasks) {
  VectorOftask* the_vec = (VectorOftask*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmtask, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -729,7 +765,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmfunctions) {
  VectorOffunction* the_vec = (VectorOffunction*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmfunction, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -738,7 +774,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprocess) {
  VectorOfprocess* the_vec = (VectorOfprocess*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmprocess, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -747,7 +783,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterface_tf_decls) {
  VectorOfinterface_tf_decl* the_vec = (VectorOfinterface_tf_decl*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdminterface_tf_decl, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -756,7 +792,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmodports) {
  VectorOfmodport* the_vec = (VectorOfmodport*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmmodport, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -765,7 +801,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmod_paths) {
  VectorOfmod_path* the_vec = (VectorOfmod_path*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmmod_path, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -774,7 +810,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmcont_assigns) {
  VectorOfcont_assign* the_vec = (VectorOfcont_assign*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmcont_assign, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -783,7 +819,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterfaces) {
  VectorOfinterface* the_vec = (VectorOfinterface*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdminterface, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -792,7 +828,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterface_arrays) {
  VectorOfinterface_array* the_vec = (VectorOfinterface_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdminterface_array, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -801,7 +837,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmscope) {
  VectorOfscope* the_vec = (VectorOfscope*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmscope, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -810,7 +846,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprocess) {
  VectorOfprocess* the_vec = (VectorOfprocess*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmprocess, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -819,7 +855,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprimitives) {
  VectorOfprimitive* the_vec = (VectorOfprimitive*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmprimitive, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -828,7 +864,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprimitive_arrays) {
  VectorOfprimitive_array* the_vec = (VectorOfprimitive_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmprimitive_array, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -837,7 +873,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmports) {
  VectorOfport* the_vec = (VectorOfport*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmport, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -846,7 +882,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterfaces) {
  VectorOfinterface* the_vec = (VectorOfinterface*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdminterface, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -855,7 +891,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterface_arrays) {
  VectorOfinterface_array* the_vec = (VectorOfinterface_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdminterface_array, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -864,7 +900,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmcont_assigns) {
  VectorOfcont_assign* the_vec = (VectorOfcont_assign*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmcont_assign, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -873,7 +909,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmodules) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmmodule, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -882,7 +918,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmodule_arrays) {
  VectorOfmodule_array* the_vec = (VectorOfmodule_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmmodule_array, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -891,7 +927,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmod_paths) {
  VectorOfmod_path* the_vec = (VectorOfmod_path*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmmod_path, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -900,7 +936,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtchks) {
  VectorOftchk* the_vec = (VectorOftchk*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmtchk, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -909,7 +945,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmdef_params) {
  VectorOfdef_param* the_vec = (VectorOfdef_param*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmdef_param, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -918,7 +954,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmio_decls) {
  VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmio_decl, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -927,7 +963,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmalias_stmts) {
  VectorOfalias_stmt* the_vec = (VectorOfalias_stmt*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmalias_stmt, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -936,7 +972,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmclocking_blocks) {
  VectorOfclocking_block* the_vec = (VectorOfclocking_block*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmclocking_block, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -945,7 +981,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprocess) {
  VectorOfprocess* the_vec = (VectorOfprocess*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmprocess, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -954,7 +990,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterfaces) {
  VectorOfinterface* the_vec = (VectorOfinterface*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdminterface, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -963,7 +999,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterface_arrays) {
  VectorOfinterface_array* the_vec = (VectorOfinterface_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdminterface_array, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -972,7 +1008,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmcont_assigns) {
  VectorOfcont_assign* the_vec = (VectorOfcont_assign*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmcont_assign, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -981,7 +1017,16 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmclocking_blocks) {
  VectorOfclocking_block* the_vec = (VectorOfclocking_block*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmclocking_block, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmtask_func) {
+ VectorOftask_func* the_vec = (VectorOftask_func*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -990,7 +1035,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprograms) {
  VectorOfprogram* the_vec = (VectorOfprogram*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmprogram, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -999,7 +1044,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprogram_arrays) {
  VectorOfprogram* the_vec = (VectorOfprogram*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmprogram, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -1008,7 +1053,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmallModules) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmmodule, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -1017,7 +1062,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtopModules) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmmodule, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -1026,7 +1071,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmallPrograms) {
  VectorOfprogram* the_vec = (VectorOfprogram*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmprogram, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -1035,7 +1080,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmallPackages) {
  VectorOfpackage* the_vec = (VectorOfpackage*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(uhdmpackage, the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -2150,6 +2195,18 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
 }
 
  if (handle->type == uhdmtask_func) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((task_func*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((task_func*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
      if (property == vpiDPICIdentifier) {
        return (PLI_BYTE8*) strdup(((task_func*)(obj))->get_vpiDPICIdentifier().c_str());
      } 
@@ -2162,6 +2219,18 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
 }
 
  if (handle->type == uhdmtask) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((task*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((task*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmtask) {
      if (property == vpiDPICIdentifier) {
        return (PLI_BYTE8*) strdup(((task*)(obj))->get_vpiDPICIdentifier().c_str());
      } 
@@ -2170,6 +2239,18 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
  if (handle->type == uhdmfunction) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((function*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((function*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((function*)(obj))->get_vpiFullName().c_str());
      } 
 }
 

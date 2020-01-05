@@ -30,7 +30,8 @@ namespace UHDM {
 
   class <CLASSNAME> : public <EXTENDS> {
   public:
-    <CLASSNAME>(){}
+    // Implicit constructor used to initialize all members,
+    // comment: <CLASSNAME>();
     ~<CLASSNAME>() <FINAL_DESTRUCTOR> {}
     <METHODS>
     virtual unsigned int getUhdmType() { return uhdm<CLASSNAME>; }   

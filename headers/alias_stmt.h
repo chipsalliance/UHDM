@@ -30,7 +30,8 @@ namespace UHDM {
 
   class alias_stmt : public BaseClass {
   public:
-    alias_stmt(){}
+    // Implicit constructor used to initialize all members,
+    // comment: alias_stmt();
     ~alias_stmt() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

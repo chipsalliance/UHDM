@@ -109,6 +109,7 @@
 #define uhdmcont_assigns 2084
 #define uhdmclocking_blocks 2108
 #define uhdminstance 2110
+#define uhdmtask_func 2066
 #define uhdmprograms 2111
 #define uhdmprogram_arrays 2112
 #define uhdmpackage 2113

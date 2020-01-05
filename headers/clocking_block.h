@@ -30,7 +30,8 @@ namespace UHDM {
 
   class clocking_block : public BaseClass {
   public:
-    clocking_block(){}
+    // Implicit constructor used to initialize all members,
+    // comment: clocking_block();
     ~clocking_block() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

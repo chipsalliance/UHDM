@@ -30,7 +30,8 @@ namespace UHDM {
 
   class cont_assign : public BaseClass {
   public:
-    cont_assign(){}
+    // Implicit constructor used to initialize all members,
+    // comment: cont_assign();
     ~cont_assign() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

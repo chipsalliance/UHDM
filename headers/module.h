@@ -30,7 +30,8 @@ namespace UHDM {
 
   class module : public BaseClass {
   public:
-    module(){}
+    // Implicit constructor used to initialize all members,
+    // comment: module();
     ~module() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

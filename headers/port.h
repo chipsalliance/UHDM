@@ -30,7 +30,8 @@ namespace UHDM {
 
   class port : public BaseClass {
   public:
-    port(){}
+    // Implicit constructor used to initialize all members,
+    // comment: port();
     ~port() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

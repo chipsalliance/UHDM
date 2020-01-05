@@ -30,7 +30,8 @@ namespace UHDM {
 
   class process : public BaseClass {
   public:
-    process(){}
+    // Implicit constructor used to initialize all members,
+    // comment: process();
     ~process() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

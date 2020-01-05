@@ -30,7 +30,8 @@ namespace UHDM {
 
   class scope : public BaseClass {
   public:
-    scope(){}
+    // Implicit constructor used to initialize all members,
+    // comment: scope();
     ~scope()  {}
     
     std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }

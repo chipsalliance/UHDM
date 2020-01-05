@@ -30,7 +30,8 @@ namespace UHDM {
 
   class mod_path : public BaseClass {
   public:
-    mod_path(){}
+    // Implicit constructor used to initialize all members,
+    // comment: mod_path();
     ~mod_path() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }

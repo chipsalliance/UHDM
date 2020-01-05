@@ -568,6 +568,8 @@ void Serializer::save(std::string file) {
     Tasks[index].setUhdmParentType(obj->get_uhdmParentType());
     Tasks[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Tasks[index].setVpiLineNo(obj->get_vpiLineNo());
+    Tasks[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Tasks[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Tasks[index].setVpiMethod(obj->get_vpiMethod());
     Tasks[index].setVpiAccessType(obj->get_vpiAccessType());
     Tasks[index].setVpiVisibility(obj->get_vpiVisibility());
@@ -602,6 +604,8 @@ void Serializer::save(std::string file) {
     Functions[index].setVpiSigned(obj->get_vpiSigned());
     Functions[index].setVpiSize(obj->get_vpiSize());
     Functions[index].setVpiFuncType(obj->get_vpiFuncType());
+    Functions[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Functions[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Functions[index].setVpiMethod(obj->get_vpiMethod());
     Functions[index].setVpiAccessType(obj->get_vpiAccessType());
     Functions[index].setVpiVisibility(obj->get_vpiVisibility());
@@ -1079,6 +1083,15 @@ Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
     Packages[index].setVpiAutomatic(obj->get_vpiAutomatic());
     Packages[index].setVpiTop(obj->get_vpiTop());
  
+    if (obj->get_task_func()) {  
+      ::capnp::List<::ObjIndexType>::Builder Taskfuncs = Packages[index].initTaskfunc(obj->get_task_func()->size());
+      for (unsigned int ind = 0; ind < obj->get_task_func()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Taskfuncs[ind];
+        tmp.setIndex(getId((*obj->get_task_func())[ind]));
+        tmp.setType(((*obj->get_task_func())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_programs()) {  
       ::capnp::List<::uint64_t>::Builder Programss = Packages[index].initPrograms(obj->get_programs()->size());
       for (unsigned int ind = 0; ind < obj->get_programs()->size(); ind++) {
@@ -1362,6 +1375,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    taskFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    taskFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    taskFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    taskFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    taskFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     taskFactory::objects_[index]->set_vpiMethod(obj.getVpiMethod());
     taskFactory::objects_[index]->set_vpiAccessType(obj.getVpiAccessType());
     taskFactory::objects_[index]->set_vpiVisibility(obj.getVpiVisibility());
@@ -1392,6 +1407,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     functionFactory::objects_[index]->set_vpiSigned(obj.getVpiSigned());
     functionFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
     functionFactory::objects_[index]->set_vpiFuncType(obj.getVpiFuncType());
+    functionFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    functionFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     functionFactory::objects_[index]->set_vpiMethod(obj.getVpiMethod());
     functionFactory::objects_[index]->set_vpiAccessType(obj.getVpiAccessType());
     functionFactory::objects_[index]->set_vpiVisibility(obj.getVpiVisibility());
@@ -1885,6 +1902,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     packageFactory::objects_[index]->set_vpiConfig(SymbolFactory::getSymbol(obj.getVpiConfig()));
     packageFactory::objects_[index]->set_vpiAutomatic(obj.getVpiAutomatic());
     packageFactory::objects_[index]->set_vpiTop(obj.getVpiTop());
+    
+    if (obj.getTaskfunc().size()) { 
+      VectorOftask_func* vect = VectorOftask_funcFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTaskfunc().size(); ind++) {
+ 	vect->push_back((task_func*)getObject(obj.getTaskfunc()[ind].getType(),obj.getTaskfunc()[ind].getIndex()-1));
+    }
+      packageFactory::objects_[index]->set_task_func(vect);
+    }
     
     if (obj.getPrograms().size()) { 
       VectorOfprogram* vect = VectorOfprogramFactory::make();

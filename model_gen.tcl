@@ -296,7 +296,7 @@ proc printGetHandleBody { classname type vpi object card } {
 	append vpi_get_handle_body "\n\
  if (handle->type == uhdm${classname}) {
      if (type == $vpi) {
-       return (vpiHandle) new uhdm_handle($type, (($classname*)(object))->get_${object}());\n\
+       return (vpiHandle) new uhdm_handle((($classname*)(object))->get_${object}()->getUhdmType(), (($classname*)(object))->get_${object}());\n\
      } 
 }
 "
@@ -325,7 +325,7 @@ proc printScanBody { name classname type card } {
   if (handle->type == uhdm${name}) {\n\
     VectorOf${type}* the_vec = (VectorOf${type}*)vect;\n\
       if (handle->index < the_vec->size()) {\n\
-          uhdm_handle* h = new uhdm_handle(uhdm${type}, the_vec->at(handle->index));\n\
+          uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));\n\
 	  handle->index++;\n\
           return (vpiHandle) h;\n\
       }\n\
@@ -365,7 +365,7 @@ proc generate_code { models } {
     set template_content [read $fid]
     close $fid
 
-    set vpi_iterate_body ""
+    set vpi_iterate_body_all ""
     set vpi_scan_body ""
     set vpi_handle_body ""
     set vpi_get_body ""
@@ -503,7 +503,7 @@ proc generate_code { models } {
                     }
 		    append methods($classname) [printMethods $type $name $card] 
 		    append members($classname) [printMembers $type $name $card]
-		    append vpi_iterate_body [printIterateBody $name $classname $vpi $card]
+		    append vpi_iterate_body($classname) [printIterateBody $name $classname $vpi $card]
                     append vpi_scan_body [printScanBody $name $classname $type $card]
                     append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]
 
@@ -601,7 +601,10 @@ proc generate_code { models } {
 		incr capnpIndex
 	    }
 	}
-	
+
+	if [info exist vpi_iterate_body($classname)] {
+	    append vpi_iterate_body_all $vpi_iterate_body($classname)
+	}
 	while {$baseclass != ""} {
 	    if {$modeltype != "class_def"} {
 		foreach member $capnp_schema($baseclass) {
@@ -630,6 +633,13 @@ proc generate_code { models } {
 		    append vpi_get_body [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 		}
 	    }
+
+	    if [info exist vpi_iterate_body($baseclass)] {
+		set vpi_iterate $vpi_iterate_body($baseclass)
+		regsub uhdm$baseclass $vpi_iterate uhdm$classname vpi_iterate
+		append vpi_iterate_body_all $vpi_iterate
+	    }
+	    
 	    set baseclass ""
 	    if [info exist BASECLASS($baseclass)] {
 		set baseclass $BASECLASS($baseclass)
@@ -638,7 +648,7 @@ proc generate_code { models } {
 
 	if {$modeltype != "class_def"} {
 	    append capnp_schema_all "\}\n"
-	}
+	}	
     }
 
     # uhdm.h
@@ -665,7 +675,7 @@ proc generate_code { models } {
     set vpi_user [read $fid]
     close $fid
     regsub {<HEADERS>} $vpi_user $headers vpi_user
-    regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body vpi_user
+    regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body_all vpi_user
     regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
     regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body vpi_user
     regsub -all {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
