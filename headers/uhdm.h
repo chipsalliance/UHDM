@@ -32,99 +32,132 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 
-#define uhdmprocess 2056
-#define uhdmscope 2057
-#define uhdmbegin 2058
-#define uhdmnamed_begin 2059
-#define uhdmexpr 2060
-#define uhdmoperand_group 2061
-#define uhdmoperation 2062
-#define uhdmoperands 2063
-#define uhdmref_obj 2064
-#define uhdmvariables 2065
-#define uhdmtask_func 2066
-#define uhdmleft_expr 2067
-#define uhdmright_expr 2068
-#define uhdmvariables 2065
-#define uhdmclass_defn 2069
-#define uhdmref_obj 2064
-#define uhdmio_decl 2070
-#define uhdmtask 2071
-#define uhdmfunction 2072
-#define uhdmmodport 2073
-#define uhdmio_decls 2074
-#define uhdminterface 2075
-#define uhdminterface_tf_decl 2076
-#define uhdmtasks 2077
-#define uhdmfunctions 2078
-#define uhdminterface 2075
-#define uhdmprocess 2056
-#define uhdminterface_tf_decls 2079
-#define uhdmmodports 2080
-#define uhdmglobal_clocking 2081
-#define uhdmdefault_clocking 2082
-#define uhdmmod_paths 2083
-#define uhdmcont_assigns 2084
-#define uhdminterfaces 2085
-#define uhdminterface_arrays 2086
-#define uhdminterface_array 2087
-#define uhdmcont_assign 2088
-#define uhdmport 2089
-#define uhdmmodule_array 2090
-#define uhdmprimitive 2091
-#define uhdmprimitive_array 2092
-#define uhdmmod_path 2093
-#define uhdmtchk 2094
-#define uhdmdef_param 2095
-#define uhdmio_decl 2070
-#define uhdmalias_stmt 2096
-#define uhdmclocking_block 2097
-#define uhdminstance_array 2098
-#define uhdmmodule 2099
-#define uhdminstance_array 2098
-#define uhdmscope 2057
-#define uhdmprocess 2056
-#define uhdmprimitives 2100
-#define uhdmprimitive_arrays 2101
-#define uhdmglobal_clocking 2081
-#define uhdmdefault_clocking 2082
-#define uhdmports 2102
-#define uhdminterfaces 2085
-#define uhdminterface_arrays 2086
-#define uhdmcont_assigns 2084
-#define uhdmmodules 2103
-#define uhdmmodule_arrays 2104
-#define uhdmmod_paths 2083
-#define uhdmtchks 2105
-#define uhdmdef_params 2106
-#define uhdmio_decls 2074
-#define uhdmalias_stmts 2107
-#define uhdmclocking_blocks 2108
-#define uhdmprogram 2109
-#define uhdminstance_array 2098
-#define uhdmprocess 2056
-#define uhdmdefault_clocking 2082
-#define uhdminterfaces 2085
-#define uhdminterface_arrays 2086
-#define uhdmcont_assigns 2084
-#define uhdmclocking_blocks 2108
-#define uhdminstance 2110
-#define uhdmtask_func 2066
-#define uhdmprograms 2111
-#define uhdmprogram_arrays 2112
-#define uhdmpackage 2113
-#define uhdmdesign 2114
-#define uhdmallModules 2115
-#define uhdmtopModules 2116
-#define uhdmallPrograms 2117
-#define uhdmallPackages 2118
+#define uhdmprocess 2071
+#define uhdmscope 2072
+#define uhdmbegin 2073
+#define uhdmnamed_begin 2074
+#define uhdmexpr_dist 2075
+#define uhdmexpr 2076
+#define uhdmdistribution 2077
+#define uhdmoperand_group 2078
+#define uhdmoperation 2079
+#define uhdmoperands 2080
+#define uhdmref_obj 2081
+#define uhdmvariables 2082
+#define uhdmtask_func 2083
+#define uhdmleft_expr 2084
+#define uhdmright_expr 2085
+#define uhdmvariables 2082
+#define uhdmclass_defn 2086
+#define uhdmref_obj 2081
+#define uhdmio_decl 2087
+#define uhdmtask 2088
+#define uhdmfunction 2089
+#define uhdmmodport 2090
+#define uhdmio_decls 2091
+#define uhdminterface 2092
+#define uhdminterface_tf_decl 2093
+#define uhdmtasks 2094
+#define uhdmfunctions 2095
+#define uhdminterface_array 2096
+#define uhdmcont_assign 2097
+#define uhdmport 2098
+#define uhdmmodule_array 2099
+#define uhdmprimitive 2100
+#define uhdmprimitive_array 2101
+#define uhdmmod_path 2102
+#define uhdmtchk 2103
+#define uhdmdef_param 2104
+#define uhdmio_decl 2087
+#define uhdmalias_stmt 2105
+#define uhdmclocking_block 2106
+#define uhdminstance_array 2107
+#define uhdmmodule 2108
+#define uhdmexpr_dist 2075
+#define uhdminstance_array 2107
+#define uhdmscope 2072
+#define uhdmprocess 2071
+#define uhdmprimitives 2109
+#define uhdmprimitive_arrays 2110
+#define uhdmglobal_clocking 2111
+#define uhdmdefault_clocking 2112
+#define uhdmmodule_array 2099
+#define uhdmports 2113
+#define uhdminterfaces 2114
+#define uhdminterface_arrays 2115
+#define uhdmcont_assigns 2116
+#define uhdmmodules 2117
+#define uhdmmodule_arrays 2118
+#define uhdmmod_paths 2119
+#define uhdmtchks 2120
+#define uhdmdef_params 2121
+#define uhdmio_decls 2091
+#define uhdmalias_stmts 2122
+#define uhdmclocking_blocks 2123
+#define uhdminterface 2092
+#define uhdmexpr_dist 2075
+#define uhdminstance_array 2107
+#define uhdmprocess 2071
+#define uhdminterface_tf_decls 2124
+#define uhdmmodports 2125
+#define uhdmglobal_clocking 2111
+#define uhdmdefault_clocking 2112
+#define uhdmmod_paths 2119
+#define uhdmcont_assigns 2116
+#define uhdminterfaces 2114
+#define uhdminterface_arrays 2115
+#define uhdmprogram 2126
+#define uhdminstance_array 2107
+#define uhdmexpr_dist 2075
+#define uhdmprocess 2071
+#define uhdmdefault_clocking 2112
+#define uhdminterfaces 2114
+#define uhdminterface_arrays 2115
+#define uhdmcont_assigns 2116
+#define uhdmclocking_blocks 2123
+#define uhdmnet 2127
+#define uhdmarray_net 2128
+#define uhdmlogic_var 2129
+#define uhdmarray_var 2130
+#define uhdmnamed_event 2131
+#define uhdmnamed_event_array 2132
+#define uhdmparameters 2133
+#define uhdmspec_param 2134
+#define uhdmassertion 2135
+#define uhdmtypespec 2136
+#define uhdmclass_defn 2086
+#define uhdminstance 2137
+#define uhdmtask_func 2083
+#define uhdmnet 2127
+#define uhdmarray_net 2128
+#define uhdmvariables 2082
+#define uhdmparameters 2133
+#define uhdmassertion 2135
+#define uhdmtypespec 2136
+#define uhdmclass_defn 2086
+#define uhdmprograms 2138
+#define uhdmprogram_arrays 2139
+#define uhdmlogic_var 2129
+#define uhdmarray_var 2130
+#define uhdmarray_var_mem 2140
+#define uhdmnamed_event 2131
+#define uhdmnamed_event_array 2132
+#define uhdmspec_param 2134
+#define uhdmpackage 2141
+#define uhdmdesign 2142
+#define uhdmallModules 2143
+#define uhdmtopModules 2144
+#define uhdmallPrograms 2145
+#define uhdmallPackages 2146
 
 
 #include "headers/process.h"
 #include "headers/scope.h"
 #include "headers/begin.h"
 #include "headers/named_begin.h"
+#include "headers/expr_dist.h"
 #include "headers/expr.h"
+#include "headers/distribution.h"
 #include "headers/operand_group.h"
 #include "headers/operation.h"
 #include "headers/ref_obj.h"
@@ -134,7 +167,6 @@
 #include "headers/function.h"
 #include "headers/modport.h"
 #include "headers/interface_tf_decl.h"
-#include "headers/interface.h"
 #include "headers/interface_array.h"
 #include "headers/cont_assign.h"
 #include "headers/port.h"
@@ -149,7 +181,19 @@
 #include "headers/clocking_block.h"
 #include "headers/instance_array.h"
 #include "headers/module.h"
+#include "headers/interface.h"
 #include "headers/program.h"
+#include "headers/net.h"
+#include "headers/array_net.h"
+#include "headers/logic_var.h"
+#include "headers/array_var.h"
+#include "headers/named_event.h"
+#include "headers/named_event_array.h"
+#include "headers/parameters.h"
+#include "headers/spec_param.h"
+#include "headers/assertion.h"
+#include "headers/typespec.h"
+#include "headers/class_defn.h"
 #include "headers/instance.h"
 #include "headers/package.h"
 #include "headers/design.h"

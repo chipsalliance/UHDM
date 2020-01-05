@@ -11,13 +11,13 @@ struct UhdmRoot {
   factoryProcess @2 :List(Process);
   factoryBegin @3 :List(Begin);
   factoryNamedbegin @4 :List(Namedbegin);
-  factoryOperation @5 :List(Operation);
-  factoryRefobj @6 :List(Refobj);
-  factoryTask @7 :List(Task);
-  factoryFunction @8 :List(Function);
-  factoryModport @9 :List(Modport);
-  factoryInterfacetfdecl @10 :List(Interfacetfdecl);
-  factoryInterface @11 :List(Interface);
+  factoryDistribution @5 :List(Distribution);
+  factoryOperation @6 :List(Operation);
+  factoryRefobj @7 :List(Refobj);
+  factoryTask @8 :List(Task);
+  factoryFunction @9 :List(Function);
+  factoryModport @10 :List(Modport);
+  factoryInterfacetfdecl @11 :List(Interfacetfdecl);
   factoryInterfacearray @12 :List(Interfacearray);
   factoryContassign @13 :List(Contassign);
   factoryPort @14 :List(Port);
@@ -32,9 +32,17 @@ struct UhdmRoot {
   factoryClockingblock @23 :List(Clockingblock);
   factoryInstancearray @24 :List(Instancearray);
   factoryModule @25 :List(Module);
-  factoryProgram @26 :List(Program);
-  factoryPackage @27 :List(Package);
-  factoryDesign @28 :List(Design);
+  factoryInterface @26 :List(Interface);
+  factoryProgram @27 :List(Program);
+  factoryArraynet @28 :List(Arraynet);
+  factoryLogicvar @29 :List(Logicvar);
+  factoryArrayvar @30 :List(Arrayvar);
+  factoryNamedevent @31 :List(Namedevent);
+  factoryNamedeventarray @32 :List(Namedeventarray);
+  factorySpecparam @33 :List(Specparam);
+  factoryClassdefn @34 :List(Classdefn);
+  factoryPackage @35 :List(Package);
+  factoryDesign @36 :List(Design);
 
 }
 
@@ -60,6 +68,12 @@ vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
 vpiName @4 :UInt64;
 vpiFullName @5 :UInt64;
+}
+struct Distribution {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
 }
 struct Operation {
 vpiParent @0 :UInt64;
@@ -141,21 +155,6 @@ vpiLineNo @3 :UInt32;
 vpiAccessType @4 :UInt64;
 tasks @5 :List(UInt64);
 functions @6 :List(UInt64);
-}
-struct Interface {
-vpiParent @0 :UInt64;
-uhdmParentType @1 :UInt64;
-vpiFile @2 :UInt64;
-vpiLineNo @3 :UInt32;
-process @4 :List(ObjIndexType);
-interfacetfdecls @5 :List(UInt64);
-modports @6 :List(UInt64);
-globalclocking @7 :UInt64;
-defaultclocking @8 :UInt64;
-modpaths @9 :List(UInt64);
-contassigns @10 :List(UInt64);
-interfaces @11 :List(UInt64);
-interfacearrays @12 :List(UInt64);
 }
 struct Interfacearray {
 vpiParent @0 :UInt64;
@@ -240,42 +239,107 @@ vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
-vpiName @4 :UInt64;
-vpiTopModule @5 :Bool;
-vpiDefDecayTime @6 :Int64;
-instancearray @7 :ObjIndexType;
-scope @8 :List(ObjIndexType);
-process @9 :List(ObjIndexType);
-primitives @10 :List(ObjIndexType);
-primitivearrays @11 :List(ObjIndexType);
-globalclocking @12 :UInt64;
-defaultclocking @13 :UInt64;
-ports @14 :List(UInt64);
-interfaces @15 :List(UInt64);
-interfacearrays @16 :List(UInt64);
-contassigns @17 :List(UInt64);
-modules @18 :List(UInt64);
-modulearrays @19 :List(UInt64);
-modpaths @20 :List(UInt64);
-tchks @21 :List(UInt64);
-defparams @22 :List(UInt64);
-iodecls @23 :List(UInt64);
-aliasstmts @24 :List(UInt64);
-clockingblocks @25 :List(UInt64);
+vpiIndex @4 :UInt64;
+vpiName @5 :UInt64;
+vpiTopModule @6 :Bool;
+vpiDefDecayTime @7 :Int64;
+exprdist @8 :ObjIndexType;
+instancearray @9 :ObjIndexType;
+scope @10 :List(ObjIndexType);
+process @11 :List(ObjIndexType);
+primitives @12 :List(ObjIndexType);
+primitivearrays @13 :List(ObjIndexType);
+globalclocking @14 :UInt64;
+defaultclocking @15 :UInt64;
+modulearray @16 :UInt64;
+ports @17 :List(UInt64);
+interfaces @18 :List(UInt64);
+interfacearrays @19 :List(UInt64);
+contassigns @20 :List(UInt64);
+modules @21 :List(UInt64);
+modulearrays @22 :List(UInt64);
+modpaths @23 :List(UInt64);
+tchks @24 :List(UInt64);
+defparams @25 :List(UInt64);
+iodecls @26 :List(UInt64);
+aliasstmts @27 :List(UInt64);
+clockingblocks @28 :List(UInt64);
+}
+struct Interface {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+vpiIndex @4 :UInt64;
+exprdist @5 :ObjIndexType;
+instancearray @6 :ObjIndexType;
+process @7 :List(ObjIndexType);
+interfacetfdecls @8 :List(UInt64);
+modports @9 :List(UInt64);
+globalclocking @10 :UInt64;
+defaultclocking @11 :UInt64;
+modpaths @12 :List(UInt64);
+contassigns @13 :List(UInt64);
+interfaces @14 :List(UInt64);
+interfacearrays @15 :List(UInt64);
 }
 struct Program {
 vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
-vpiName @4 :UInt64;
-instancearray @5 :ObjIndexType;
-process @6 :List(ObjIndexType);
-defaultclocking @7 :UInt64;
-interfaces @8 :List(UInt64);
-interfacearrays @9 :List(UInt64);
-contassigns @10 :List(UInt64);
-clockingblocks @11 :List(UInt64);
+vpiIndex @4 :UInt64;
+vpiName @5 :UInt64;
+instancearray @6 :ObjIndexType;
+exprdist @7 :ObjIndexType;
+process @8 :List(ObjIndexType);
+defaultclocking @9 :UInt64;
+interfaces @10 :List(UInt64);
+interfacearrays @11 :List(UInt64);
+contassigns @12 :List(UInt64);
+clockingblocks @13 :List(UInt64);
+}
+struct Arraynet {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
+struct Logicvar {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
+struct Arrayvar {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
+struct Namedevent {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
+struct Namedeventarray {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
+struct Specparam {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
+struct Classdefn {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
 }
 struct Package {
 vpiParent @0 :UInt64;
@@ -301,8 +365,21 @@ vpiConfig @19 :UInt64;
 vpiAutomatic @20 :Bool;
 vpiTop @21 :Bool;
 taskfunc @22 :List(ObjIndexType);
-programs @23 :List(UInt64);
-programarrays @24 :List(UInt64);
+net @23 :List(ObjIndexType);
+arraynet @24 :List(ObjIndexType);
+variables @25 :List(ObjIndexType);
+parameters @26 :List(ObjIndexType);
+assertion @27 :List(ObjIndexType);
+typespec @28 :List(ObjIndexType);
+classdefn @29 :List(ObjIndexType);
+programs @30 :List(UInt64);
+programarrays @31 :List(UInt64);
+logicvar @32 :List(UInt64);
+arrayvar @33 :List(UInt64);
+arrayvarmem @34 :List(UInt64);
+namedevent @35 :List(UInt64);
+namedeventarray @36 :List(UInt64);
+specparam @37 :List(UInt64);
 }
 struct Design {
 vpiParent @0 :UInt64;

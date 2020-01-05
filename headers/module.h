@@ -50,6 +50,10 @@ namespace UHDM {
 
     void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
 
+    unsigned int get_vpiIndex() const { return vpiIndex_; }
+
+    void set_vpiIndex(unsigned int data) { vpiIndex_ = data; }
+
     std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
 
     void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
@@ -63,6 +67,10 @@ namespace UHDM {
     int get_vpiDefDecayTime() const { return vpiDefDecayTime_; }
 
     void set_vpiDefDecayTime(int data) { vpiDefDecayTime_ = data; }
+
+    expr_dist* get_expr_dist() const { return expr_dist_; }
+
+    void set_expr_dist(expr_dist* data) { expr_dist_ = data; }
 
     instance_array* get_instance_array() const { return instance_array_; }
 
@@ -91,6 +99,10 @@ namespace UHDM {
     clocking_block* get_default_clocking() const { return default_clocking_; }
 
     void set_default_clocking(clocking_block* data) { default_clocking_ = data; }
+
+    module_array* get_module_array() const { return module_array_; }
+
+    void set_module_array(module_array* data) { module_array_ = data; }
 
     VectorOfport* get_ports() const { return ports_; }
 
@@ -151,11 +163,15 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
+    unsigned int vpiIndex_;
+
     unsigned int vpiName_;
 
     bool vpiTopModule_;
 
     int vpiDefDecayTime_;
+
+    expr_dist* expr_dist_;
 
     instance_array* instance_array_;
 
@@ -170,6 +186,8 @@ namespace UHDM {
     clocking_block* global_clocking_;
 
     clocking_block* default_clocking_;
+
+    module_array* module_array_;
 
     VectorOfport* ports_;
 

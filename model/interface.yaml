@@ -15,6 +15,11 @@
 # Universal Hardware Data Model (UHDM) "interface" formal description
  
 - obj_def: interface
+  - property: index
+    name: index
+    vpi: vpiIndex
+    type: unsigned int
+    card: 1
   - property: type
     name: vpiInterface
     vpi: vpiType
@@ -39,6 +44,16 @@
     name: default clocking
     vpi: vpiDefaultClocking
     type: clocking_block
+    card: 1
+  - class_ref: expr_dist
+    name: expr distribution
+    vpi: vpiDefaultDisableIff
+    type: expr_dist
+    card: 1
+  - class_ref: instance_array
+    name: instance array
+    vpi: vpiInstanceArray
+    type: instance_array
     card: 1
   - obj_ref: mod_paths
     name: mod path
