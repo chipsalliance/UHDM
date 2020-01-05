@@ -1,0 +1,87 @@
+# Copyright 2019 Alain Dargelas
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Universal Hardware Data Model (UHDM) "task func" formal description
+ 
+- class_def: task_func
+  - property: method
+    name: method
+    vpi: vpiMethod
+    type: bool
+    card: 1
+  - property: access
+    name: access
+    vpi: vpiAccessType
+    type: int
+    card: 1
+  - property: visibility
+    name: visibility
+    vpi: vpiVisibility
+    type: int
+    card: 1
+  - property: virtual
+    name: virtual
+    vpi: vpiVirtual
+    type: bool
+    card: 1
+  - property: default_lifetime
+    name: default lifetime
+    vpi: vpiAutomatic
+    type: bool
+    card: 1
+  - property: pure_dpi
+    name: pure DPI
+    vpi: vpiDPIContext
+    type: bool
+    card: 1
+  - property: dpi_qualifier
+    name: DPI qualifier
+    vpi: vpiDPICStr
+    type: int
+    card: 1
+  - property: identifier
+    name: identifier
+    vpi: vpiDPICIdentifier
+    type: string
+    card: 1
+  - class_ref: left_expr
+    name: left range
+    vpi: vpiLeftRange
+    type: expr
+    card: 1
+  - class_ref: right_expr
+    name: right range
+    vpi: vpiRightRange
+    type: expr
+    card: 1
+  - class_ref: variables
+    name: variables
+    vpi: vpiReturn
+    type: variables
+    card: 1    
+  - obj_ref: class_defn
+    name: class defn
+    vpi: vpiClassDefn
+    type: clocking_block
+    card: 1
+  - obj_ref: ref_obj
+    name: ref obj
+    vpi: vpiParent
+    type: ref_obj
+    card: 1
+  - obj_ref: io_decl
+    name: io decl
+    vpi: vpiIODecl
+    type: io_decl
+    card: 1

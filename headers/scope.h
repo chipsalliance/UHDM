@@ -31,33 +31,22 @@ namespace UHDM {
   class scope : public BaseClass {
   public:
     scope(){}
-    ~scope() final {}
+    ~scope()  {}
     
-    BaseClass* get_vpiParent() const { return vpiParent_; }
+    std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
 
-    void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
+    void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
 
-    unsigned int get_uhdmParentType() const { return uhdmParentType_; }
+    std::string get_vpiFullName() const { return SymbolFactory::getSymbol(vpiFullName_); }
 
-    void set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; }
+    void set_vpiFullName(std::string data) { vpiFullName_ = SymbolFactory::make(data); }
 
-    std::string get_vpiFile() const { return SymbolFactory::getSymbol(vpiFile_); }
-
-    void set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); }
-
-    unsigned int get_vpiLineNo() const { return vpiLineNo_; }
-
-    void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
-
+    virtual unsigned int getUhdmType() { return uhdmscope; }   
   private:
     
-    BaseClass* vpiParent_;
+    unsigned int vpiName_;
 
-    unsigned int uhdmParentType_;
-
-    unsigned int vpiFile_;
-
-    unsigned int vpiLineNo_;
+    unsigned int vpiFullName_;
 
   };
 

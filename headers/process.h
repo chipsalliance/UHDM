@@ -49,6 +49,7 @@ namespace UHDM {
 
     void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
 
+    virtual unsigned int getUhdmType() { return uhdmprocess; }   
   private:
     
     BaseClass* vpiParent_;

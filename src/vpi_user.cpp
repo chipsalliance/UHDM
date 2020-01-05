@@ -34,6 +34,14 @@
 
 #include "headers/process.h"
 #include "headers/scope.h"
+#include "headers/begin.h"
+#include "headers/named_begin.h"
+#include "headers/expr.h"
+#include "headers/operand_group.h"
+#include "headers/operation.h"
+#include "headers/ref_obj.h"
+#include "headers/variables.h"
+#include "headers/task_func.h"
 #include "headers/task.h"
 #include "headers/function.h"
 #include "headers/modport.h"
@@ -84,9 +92,63 @@ vpiHandle vpi_handle (PLI_INT32 type,
  } 
 }
 
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
      if (type == vpiParent) {
-       return (vpiHandle) new uhdm_handle(((scope*)(object))->get_uhdmParentType(), ((scope*)(object))->get_vpiParent());
+       return (vpiHandle) new uhdm_handle(((begin*)(object))->get_uhdmParentType(), ((begin*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmnamed_begin) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((named_begin*)(object))->get_uhdmParentType(), ((named_begin*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmoperation) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((operation*)(object))->get_uhdmParentType(), ((operation*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((ref_obj*)(object))->get_uhdmParentType(), ((ref_obj*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (type == vpiLeftRange) {
+       return (vpiHandle) new uhdm_handle(uhdmexpr, ((task_func*)(object))->get_left_expr());
+ } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (type == vpiRightRange) {
+       return (vpiHandle) new uhdm_handle(uhdmexpr, ((task_func*)(object))->get_right_expr());
+ } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (type == vpiReturn) {
+       return (vpiHandle) new uhdm_handle(uhdmvariables, ((task_func*)(object))->get_variables());
+ } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (type == vpiClassDefn) {
+       return (vpiHandle) new uhdm_handle(uhdmclocking_block, ((task_func*)(object))->get_class_defn());
+ } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(uhdmref_obj, ((task_func*)(object))->get_ref_obj());
+ } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (type == vpiIODecl) {
+       return (vpiHandle) new uhdm_handle(uhdmio_decl, ((task_func*)(object))->get_io_decl());
  } 
 }
 
@@ -285,6 +347,15 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   const uhdm_handle* const handle = (uhdm_handle*) refHandle;
   const BaseClass*  object = (BaseClass*) handle->object;
   
+    
+ if (handle->type == uhdmoperation) {
+ if (type == vpiOperand) {
+ if (((operation*)(object))->get_operands())
+ return (vpiHandle) new uhdm_handle(uhdmoperands, ((operation*)(object))->get_operands());
+ else return 0;
+  }
+ }
+
     
  if (handle->type == uhdmmodport) {
  if (type == vpiIODecl) {
@@ -565,6 +636,24 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
+ if (handle->type == uhdminstance) {
+ if (type == vpiProgram) {
+ if (((instance*)(object))->get_programs())
+ return (vpiHandle) new uhdm_handle(uhdmprograms, ((instance*)(object))->get_programs());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminstance) {
+ if (type == vpiProgramArray) {
+ if (((instance*)(object))->get_program_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmprogram_arrays, ((instance*)(object))->get_program_arrays());
+ else return 0;
+  }
+ }
+
+    
  if (handle->type == uhdmdesign) {
  if (type == uhdmallModules) {
  if (((design*)(object))->get_allModules())
@@ -609,6 +698,15 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   uhdm_handle* handle = (uhdm_handle*) iterator;
   const void* vect = handle->object;
   
+
+  if (handle->type == uhdmoperands) {
+ VectorOfoperand_group* the_vec = (VectorOfoperand_group*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmoperand_group, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
 
   if (handle->type == uhdmio_decls) {
  VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
@@ -889,6 +987,24 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
+  if (handle->type == uhdmprograms) {
+ VectorOfprogram* the_vec = (VectorOfprogram*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmprogram, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmprogram_arrays) {
+ VectorOfprogram* the_vec = (VectorOfprogram*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(uhdmprogram, the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
   if (handle->type == uhdmallModules) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
@@ -953,9 +1069,87 @@ PLI_INT32 vpi_get (PLI_INT32   property,
      } 
 }
 
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
      if (property == vpiLineNo) {
-       return ((scope*)(obj))->get_vpiLineNo();
+       return ((begin*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmnamed_begin) {
+     if (property == vpiLineNo) {
+       return ((named_begin*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmexpr) {
+     if (property == vpiSize) {
+       return ((expr*)(obj))->get_vpiSize();
+     } 
+}
+
+ if (handle->type == uhdmoperation) {
+     if (property == vpiLineNo) {
+       return ((operation*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmoperation) {
+     if (property == vpiOpType) {
+       return ((operation*)(obj))->get_vpiOpType();
+     } 
+}
+
+ if (handle->type == uhdmoperation) {
+     if (property == vpiSize) {
+       return ((operation*)(obj))->get_vpiSize();
+     } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (property == vpiLineNo) {
+       return ((ref_obj*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiMethod) {
+       return ((task_func*)(obj))->get_vpiMethod();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiAccessType) {
+       return ((task_func*)(obj))->get_vpiAccessType();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiVisibility) {
+       return ((task_func*)(obj))->get_vpiVisibility();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiVirtual) {
+       return ((task_func*)(obj))->get_vpiVirtual();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiAutomatic) {
+       return ((task_func*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiDPIContext) {
+       return ((task_func*)(obj))->get_vpiDPIContext();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiDPICStr) {
+       return ((task_func*)(obj))->get_vpiDPICStr();
      } 
 }
 
@@ -965,9 +1159,111 @@ PLI_INT32 vpi_get (PLI_INT32   property,
      } 
 }
 
+ if (handle->type == uhdmtask) {
+     if (property == vpiMethod) {
+       return ((task*)(obj))->get_vpiMethod();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiAccessType) {
+       return ((task*)(obj))->get_vpiAccessType();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiVisibility) {
+       return ((task*)(obj))->get_vpiVisibility();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiVirtual) {
+       return ((task*)(obj))->get_vpiVirtual();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiAutomatic) {
+       return ((task*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiDPIContext) {
+       return ((task*)(obj))->get_vpiDPIContext();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiDPICStr) {
+       return ((task*)(obj))->get_vpiDPICStr();
+     } 
+}
+
  if (handle->type == uhdmfunction) {
      if (property == vpiLineNo) {
        return ((function*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiSigned) {
+       return ((function*)(obj))->get_vpiSigned();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiSize) {
+       return ((function*)(obj))->get_vpiSize();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiFuncType) {
+       return ((function*)(obj))->get_vpiFuncType();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiMethod) {
+       return ((function*)(obj))->get_vpiMethod();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiAccessType) {
+       return ((function*)(obj))->get_vpiAccessType();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiVisibility) {
+       return ((function*)(obj))->get_vpiVisibility();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiVirtual) {
+       return ((function*)(obj))->get_vpiVirtual();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiAutomatic) {
+       return ((function*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiDPIContext) {
+       return ((function*)(obj))->get_vpiDPIContext();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiDPICStr) {
+       return ((function*)(obj))->get_vpiDPICStr();
      } 
 }
 
@@ -1277,9 +1573,87 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
      if (property == vpiLineNo) {
-       return ((scope*)(obj))->get_vpiLineNo();
+       return ((begin*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmnamed_begin) {
+     if (property == vpiLineNo) {
+       return ((named_begin*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmexpr) {
+     if (property == vpiSize) {
+       return ((expr*)(obj))->get_vpiSize();
+     } 
+}
+
+ if (handle->type == uhdmoperation) {
+     if (property == vpiLineNo) {
+       return ((operation*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmoperation) {
+     if (property == vpiOpType) {
+       return ((operation*)(obj))->get_vpiOpType();
+     } 
+}
+
+ if (handle->type == uhdmoperation) {
+     if (property == vpiSize) {
+       return ((operation*)(obj))->get_vpiSize();
+     } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (property == vpiLineNo) {
+       return ((ref_obj*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiMethod) {
+       return ((task_func*)(obj))->get_vpiMethod();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiAccessType) {
+       return ((task_func*)(obj))->get_vpiAccessType();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiVisibility) {
+       return ((task_func*)(obj))->get_vpiVisibility();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiVirtual) {
+       return ((task_func*)(obj))->get_vpiVirtual();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiAutomatic) {
+       return ((task_func*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiDPIContext) {
+       return ((task_func*)(obj))->get_vpiDPIContext();
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiDPICStr) {
+       return ((task_func*)(obj))->get_vpiDPICStr();
      } 
 }
 
@@ -1289,9 +1663,111 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmtask) {
+     if (property == vpiMethod) {
+       return ((task*)(obj))->get_vpiMethod();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiAccessType) {
+       return ((task*)(obj))->get_vpiAccessType();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiVisibility) {
+       return ((task*)(obj))->get_vpiVisibility();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiVirtual) {
+       return ((task*)(obj))->get_vpiVirtual();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiAutomatic) {
+       return ((task*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiDPIContext) {
+       return ((task*)(obj))->get_vpiDPIContext();
+     } 
+}
+
+ if (handle->type == uhdmtask) {
+     if (property == vpiDPICStr) {
+       return ((task*)(obj))->get_vpiDPICStr();
+     } 
+}
+
  if (handle->type == uhdmfunction) {
      if (property == vpiLineNo) {
        return ((function*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiSigned) {
+       return ((function*)(obj))->get_vpiSigned();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiSize) {
+       return ((function*)(obj))->get_vpiSize();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiFuncType) {
+       return ((function*)(obj))->get_vpiFuncType();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiMethod) {
+       return ((function*)(obj))->get_vpiMethod();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiAccessType) {
+       return ((function*)(obj))->get_vpiAccessType();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiVisibility) {
+       return ((function*)(obj))->get_vpiVisibility();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiVirtual) {
+       return ((function*)(obj))->get_vpiVirtual();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiAutomatic) {
+       return ((function*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiDPIContext) {
+       return ((function*)(obj))->get_vpiDPIContext();
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiDPICStr) {
+       return ((function*)(obj))->get_vpiDPICStr();
      } 
 }
 
@@ -1602,8 +2078,80 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
 }
 
  if (handle->type == uhdmscope) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((scope*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmscope) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((scope*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmbegin) {
      if (property == vpiFile) {
-       return (PLI_BYTE8*) strdup(((scope*)(obj))->get_vpiFile().c_str());
+       return (PLI_BYTE8*) strdup(((begin*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmbegin) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((begin*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmbegin) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((begin*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmnamed_begin) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((named_begin*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmnamed_begin) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((named_begin*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmnamed_begin) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((named_begin*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmexpr) {
+     if (property == vpiDecompile) {
+       return (PLI_BYTE8*) strdup(((expr*)(obj))->get_vpiDecompile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmoperation) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((operation*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmoperation) {
+     if (property == vpiDecompile) {
+       return (PLI_BYTE8*) strdup(((operation*)(obj))->get_vpiDecompile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((ref_obj*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmtask_func) {
+     if (property == vpiDPICIdentifier) {
+       return (PLI_BYTE8*) strdup(((task_func*)(obj))->get_vpiDPICIdentifier().c_str());
      } 
 }
 
@@ -1613,9 +2161,21 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmtask) {
+     if (property == vpiDPICIdentifier) {
+       return (PLI_BYTE8*) strdup(((task*)(obj))->get_vpiDPICIdentifier().c_str());
+     } 
+}
+
  if (handle->type == uhdmfunction) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((function*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmfunction) {
+     if (property == vpiDPICIdentifier) {
+       return (PLI_BYTE8*) strdup(((function*)(obj))->get_vpiDPICIdentifier().c_str());
      } 
 }
 
