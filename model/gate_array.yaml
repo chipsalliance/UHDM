@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "module_array.yaml" formal description
+# Universal Hardware Data Model (UHDM) "gate array" formal description
  
-- obj_def: module_array
-  - extends: instance_array
+- obj_def: gate_array
+  - extends: primitive_array
 

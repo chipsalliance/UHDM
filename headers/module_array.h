@@ -28,7 +28,7 @@
 
 namespace UHDM {
 
-  class module_array : public BaseClass {
+  class module_array : public instance_array {
   public:
     // Implicit constructor used to initialize all members,
     // comment: module_array();

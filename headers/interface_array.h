@@ -28,7 +28,7 @@
 
 namespace UHDM {
 
-  class interface_array : public BaseClass {
+  class interface_array : public instance_array {
   public:
     // Implicit constructor used to initialize all members,
     // comment: interface_array();

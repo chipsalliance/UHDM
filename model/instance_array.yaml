@@ -12,9 +12,51 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "instance_array" formal description
+# Universal Hardware Data Model (UHDM) "instance array" formal description
  
-- obj_def: instance_array
-
-
-
+- class_def: instance_array
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+  - property: size
+    name: size
+    vpi: vpiSize
+    type: int
+    card: 1
+  - class_ref: expr
+    name: expr
+    vpi: vpiExpr
+    type: expr
+    card: 1
+  - obj_ref: range
+    name: range
+    vpi: vpiRange
+    type: range
+    card: 1
+  - class_ref: left_expr
+    name: left range
+    vpi: vpiLeftRange
+    type: expr
+    card: 1
+  - class_ref: right_expr
+    name: right range
+    vpi: vpiRightRange
+    type: expr
+    card: 1
+  - class_ref: instances
+    name: instances
+    vpi: vpiInstance
+    type: instance
+    card: any
+  - obj_ref: modules
+    name: modules
+    vpi: vpiModule
+    type: module
+    card: any
