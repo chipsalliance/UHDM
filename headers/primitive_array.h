@@ -28,38 +28,26 @@
 
 namespace UHDM {
 
-  class primitive_array : public BaseClass {
+  class primitive_array : public instance_array {
   public:
     // Implicit constructor used to initialize all members,
     // comment: primitive_array();
-    ~primitive_array() final {}
+    ~primitive_array()  {}
     
-    BaseClass* get_vpiParent() const { return vpiParent_; }
+    expr* get_delay() const { return delay_; }
 
-    void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
+    void set_delay(expr* data) { delay_ = data; }
 
-    unsigned int get_uhdmParentType() const { return uhdmParentType_; }
+    VectorOfprimitive* get_primitives() const { return primitives_; }
 
-    void set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; }
-
-    std::string get_vpiFile() const { return SymbolFactory::getSymbol(vpiFile_); }
-
-    void set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); }
-
-    unsigned int get_vpiLineNo() const { return vpiLineNo_; }
-
-    void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
+    void set_primitives(VectorOfprimitive* data) { primitives_ = data; }
 
     virtual unsigned int getUhdmType() { return uhdmprimitive_array; }   
   private:
     
-    BaseClass* vpiParent_;
+    expr* delay_;
 
-    unsigned int uhdmParentType_;
-
-    unsigned int vpiFile_;
-
-    unsigned int vpiLineNo_;
+    VectorOfprimitive* primitives_;
 
   };
 

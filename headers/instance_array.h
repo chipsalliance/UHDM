@@ -32,34 +32,64 @@ namespace UHDM {
   public:
     // Implicit constructor used to initialize all members,
     // comment: instance_array();
-    ~instance_array() final {}
+    ~instance_array()  {}
     
-    BaseClass* get_vpiParent() const { return vpiParent_; }
+    std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
 
-    void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
+    void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
 
-    unsigned int get_uhdmParentType() const { return uhdmParentType_; }
+    std::string get_vpiFullName() const { return SymbolFactory::getSymbol(vpiFullName_); }
 
-    void set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; }
+    void set_vpiFullName(std::string data) { vpiFullName_ = SymbolFactory::make(data); }
 
-    std::string get_vpiFile() const { return SymbolFactory::getSymbol(vpiFile_); }
+    int get_vpiSize() const { return vpiSize_; }
 
-    void set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); }
+    void set_vpiSize(int data) { vpiSize_ = data; }
 
-    unsigned int get_vpiLineNo() const { return vpiLineNo_; }
+    expr* get_expr() const { return expr_; }
 
-    void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
+    void set_expr(expr* data) { expr_ = data; }
+
+    expr* get_left_expr() const { return left_expr_; }
+
+    void set_left_expr(expr* data) { left_expr_ = data; }
+
+    expr* get_right_expr() const { return right_expr_; }
+
+    void set_right_expr(expr* data) { right_expr_ = data; }
+
+    VectorOfinstance* get_instances() const { return instances_; }
+
+    void set_instances(VectorOfinstance* data) { instances_ = data; }
+
+    range* get_range() const { return range_; }
+
+    void set_range(range* data) { range_ = data; }
+
+    VectorOfmodule* get_modules() const { return modules_; }
+
+    void set_modules(VectorOfmodule* data) { modules_ = data; }
 
     virtual unsigned int getUhdmType() { return uhdminstance_array; }   
   private:
     
-    BaseClass* vpiParent_;
+    unsigned int vpiName_;
 
-    unsigned int uhdmParentType_;
+    unsigned int vpiFullName_;
 
-    unsigned int vpiFile_;
+    int vpiSize_;
 
-    unsigned int vpiLineNo_;
+    expr* expr_;
+
+    expr* left_expr_;
+
+    expr* right_expr_;
+
+    VectorOfinstance* instances_;
+
+    range* range_;
+
+    VectorOfmodule* modules_;
 
   };
 

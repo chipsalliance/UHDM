@@ -78,6 +78,9 @@ proc parse_model { file } {
 
     set lines [split $modellist "\n"]
     foreach line $lines {
+	if [regexp {^\#} $line] {
+	    continue
+	}
 	if {$line != ""} {
 	    set fid [open model/$line]
 	    set model [read $fid]
@@ -390,6 +393,7 @@ proc generate_code { models } {
 	set modeltype [dict get $data type]
 	set MODEL_TYPE($classname) $modeltype
 	set baseclass ""
+	set capnp_schema($classname) ""
 	if {$modeltype == "class_def"} {
 	    regsub -all {<FINAL_DESTRUCTOR>} $template "" template
 	}
@@ -640,10 +644,11 @@ proc generate_code { models } {
 		regsub uhdm$baseclass $vpi_iterate uhdm$classname vpi_iterate
 		append vpi_iterate_body_all $vpi_iterate
 	    }
-	    
-	    set baseclass ""
+	    	
 	    if [info exist BASECLASS($baseclass)] {
 		set baseclass $BASECLASS($baseclass)
+	    } else {
+		set baseclass ""
 	    }
 	}
 

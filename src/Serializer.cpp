@@ -123,18 +123,12 @@ std::vector<modport*> modportFactory::objects_;
 std::vector<std::vector<modport*>*> VectorOfmodportFactory::objects_;
 std::vector<interface_tf_decl*> interface_tf_declFactory::objects_;
 std::vector<std::vector<interface_tf_decl*>*> VectorOfinterface_tf_declFactory::objects_;
-std::vector<interface_array*> interface_arrayFactory::objects_;
-std::vector<std::vector<interface_array*>*> VectorOfinterface_arrayFactory::objects_;
 std::vector<cont_assign*> cont_assignFactory::objects_;
 std::vector<std::vector<cont_assign*>*> VectorOfcont_assignFactory::objects_;
 std::vector<port*> portFactory::objects_;
 std::vector<std::vector<port*>*> VectorOfportFactory::objects_;
-std::vector<module_array*> module_arrayFactory::objects_;
-std::vector<std::vector<module_array*>*> VectorOfmodule_arrayFactory::objects_;
 std::vector<primitive*> primitiveFactory::objects_;
 std::vector<std::vector<primitive*>*> VectorOfprimitiveFactory::objects_;
-std::vector<primitive_array*> primitive_arrayFactory::objects_;
-std::vector<std::vector<primitive_array*>*> VectorOfprimitive_arrayFactory::objects_;
 std::vector<mod_path*> mod_pathFactory::objects_;
 std::vector<std::vector<mod_path*>*> VectorOfmod_pathFactory::objects_;
 std::vector<tchk*> tchkFactory::objects_;
@@ -147,8 +141,22 @@ std::vector<alias_stmt*> alias_stmtFactory::objects_;
 std::vector<std::vector<alias_stmt*>*> VectorOfalias_stmtFactory::objects_;
 std::vector<clocking_block*> clocking_blockFactory::objects_;
 std::vector<std::vector<clocking_block*>*> VectorOfclocking_blockFactory::objects_;
-std::vector<instance_array*> instance_arrayFactory::objects_;
+std::vector<range*> rangeFactory::objects_;
+std::vector<std::vector<range*>*> VectorOfrangeFactory::objects_;
 std::vector<std::vector<instance_array*>*> VectorOfinstance_arrayFactory::objects_;
+std::vector<interface_array*> interface_arrayFactory::objects_;
+std::vector<std::vector<interface_array*>*> VectorOfinterface_arrayFactory::objects_;
+std::vector<program_array*> program_arrayFactory::objects_;
+std::vector<std::vector<program_array*>*> VectorOfprogram_arrayFactory::objects_;
+std::vector<module_array*> module_arrayFactory::objects_;
+std::vector<std::vector<module_array*>*> VectorOfmodule_arrayFactory::objects_;
+std::vector<std::vector<primitive_array*>*> VectorOfprimitive_arrayFactory::objects_;
+std::vector<gate_array*> gate_arrayFactory::objects_;
+std::vector<std::vector<gate_array*>*> VectorOfgate_arrayFactory::objects_;
+std::vector<switch_array*> switch_arrayFactory::objects_;
+std::vector<std::vector<switch_array*>*> VectorOfswitch_arrayFactory::objects_;
+std::vector<udp_array*> udp_arrayFactory::objects_;
+std::vector<std::vector<udp_array*>*> VectorOfudp_arrayFactory::objects_;
 std::vector<std::vector<net*>*> VectorOfnetFactory::objects_;
 std::vector<array_net*> array_netFactory::objects_;
 std::vector<std::vector<array_net*>*> VectorOfarray_netFactory::objects_;
@@ -192,19 +200,22 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdmfunction: return functionFactory::objects_[index];
   case uhdmmodport: return modportFactory::objects_[index];
   case uhdminterface_tf_decl: return interface_tf_declFactory::objects_[index];
-  case uhdminterface_array: return interface_arrayFactory::objects_[index];
   case uhdmcont_assign: return cont_assignFactory::objects_[index];
   case uhdmport: return portFactory::objects_[index];
-  case uhdmmodule_array: return module_arrayFactory::objects_[index];
   case uhdmprimitive: return primitiveFactory::objects_[index];
-  case uhdmprimitive_array: return primitive_arrayFactory::objects_[index];
   case uhdmmod_path: return mod_pathFactory::objects_[index];
   case uhdmtchk: return tchkFactory::objects_[index];
   case uhdmdef_param: return def_paramFactory::objects_[index];
   case uhdmio_decl: return io_declFactory::objects_[index];
   case uhdmalias_stmt: return alias_stmtFactory::objects_[index];
   case uhdmclocking_block: return clocking_blockFactory::objects_[index];
-  case uhdminstance_array: return instance_arrayFactory::objects_[index];
+  case uhdmrange: return rangeFactory::objects_[index];
+  case uhdminterface_array: return interface_arrayFactory::objects_[index];
+  case uhdmprogram_array: return program_arrayFactory::objects_[index];
+  case uhdmmodule_array: return module_arrayFactory::objects_[index];
+  case uhdmgate_array: return gate_arrayFactory::objects_[index];
+  case uhdmswitch_array: return switch_arrayFactory::objects_[index];
+  case uhdmudp_array: return udp_arrayFactory::objects_[index];
   case uhdmarray_net: return array_netFactory::objects_[index];
   case uhdmlogic_var: return logic_varFactory::objects_[index];
   case uhdmarray_var: return array_varFactory::objects_[index];
@@ -276,11 +287,6 @@ void Serializer::purge() {
   }
   interface_tf_declFactory::objects_.clear();
 
-  for (auto obj : interface_arrayFactory::objects_) {
-    delete obj;
-  }
-  interface_arrayFactory::objects_.clear();
-
   for (auto obj : cont_assignFactory::objects_) {
     delete obj;
   }
@@ -291,20 +297,10 @@ void Serializer::purge() {
   }
   portFactory::objects_.clear();
 
-  for (auto obj : module_arrayFactory::objects_) {
-    delete obj;
-  }
-  module_arrayFactory::objects_.clear();
-
   for (auto obj : primitiveFactory::objects_) {
     delete obj;
   }
   primitiveFactory::objects_.clear();
-
-  for (auto obj : primitive_arrayFactory::objects_) {
-    delete obj;
-  }
-  primitive_arrayFactory::objects_.clear();
 
   for (auto obj : mod_pathFactory::objects_) {
     delete obj;
@@ -336,10 +332,40 @@ void Serializer::purge() {
   }
   clocking_blockFactory::objects_.clear();
 
-  for (auto obj : instance_arrayFactory::objects_) {
+  for (auto obj : rangeFactory::objects_) {
     delete obj;
   }
-  instance_arrayFactory::objects_.clear();
+  rangeFactory::objects_.clear();
+
+  for (auto obj : interface_arrayFactory::objects_) {
+    delete obj;
+  }
+  interface_arrayFactory::objects_.clear();
+
+  for (auto obj : program_arrayFactory::objects_) {
+    delete obj;
+  }
+  program_arrayFactory::objects_.clear();
+
+  for (auto obj : module_arrayFactory::objects_) {
+    delete obj;
+  }
+  module_arrayFactory::objects_.clear();
+
+  for (auto obj : gate_arrayFactory::objects_) {
+    delete obj;
+  }
+  gate_arrayFactory::objects_.clear();
+
+  for (auto obj : switch_arrayFactory::objects_) {
+    delete obj;
+  }
+  switch_arrayFactory::objects_.clear();
+
+  for (auto obj : udp_arrayFactory::objects_) {
+    delete obj;
+  }
+  udp_arrayFactory::objects_.clear();
 
   for (auto obj : array_netFactory::objects_) {
     delete obj;
@@ -461,11 +487,6 @@ void Serializer::save(std::string file) {
     index++;
   }
   index = 1;
-  for (auto obj : interface_arrayFactory::objects_) {
-    setId(obj, index);
-    index++;
-  }
-  index = 1;
   for (auto obj : cont_assignFactory::objects_) {
     setId(obj, index);
     index++;
@@ -476,17 +497,7 @@ void Serializer::save(std::string file) {
     index++;
   }
   index = 1;
-  for (auto obj : module_arrayFactory::objects_) {
-    setId(obj, index);
-    index++;
-  }
-  index = 1;
   for (auto obj : primitiveFactory::objects_) {
-    setId(obj, index);
-    index++;
-  }
-  index = 1;
-  for (auto obj : primitive_arrayFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -521,7 +532,37 @@ void Serializer::save(std::string file) {
     index++;
   }
   index = 1;
-  for (auto obj : instance_arrayFactory::objects_) {
+  for (auto obj : rangeFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : interface_arrayFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : program_arrayFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : module_arrayFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : gate_arrayFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : switch_arrayFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : udp_arrayFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -793,16 +834,6 @@ Functionss.set(ind, getId((*obj->get_functions())[ind]));
 
    index++;
  }
- ::capnp::List<Interfacearray>::Builder Interfacearrays = cap_root.initFactoryInterfacearray(interface_arrayFactory::objects_.size());
- index = 0;
- for (auto obj : interface_arrayFactory::objects_) {
-    Interfacearrays[index].setVpiParent(getId(obj->get_vpiParent()));
-    Interfacearrays[index].setUhdmParentType(obj->get_uhdmParentType());
-    Interfacearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
-    Interfacearrays[index].setVpiLineNo(obj->get_vpiLineNo());
-
-   index++;
- }
  ::capnp::List<Contassign>::Builder Contassigns = cap_root.initFactoryContassign(cont_assignFactory::objects_.size());
  index = 0;
  for (auto obj : cont_assignFactory::objects_) {
@@ -823,16 +854,6 @@ Functionss.set(ind, getId((*obj->get_functions())[ind]));
 
    index++;
  }
- ::capnp::List<Modulearray>::Builder Modulearrays = cap_root.initFactoryModulearray(module_arrayFactory::objects_.size());
- index = 0;
- for (auto obj : module_arrayFactory::objects_) {
-    Modulearrays[index].setVpiParent(getId(obj->get_vpiParent()));
-    Modulearrays[index].setUhdmParentType(obj->get_uhdmParentType());
-    Modulearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
-    Modulearrays[index].setVpiLineNo(obj->get_vpiLineNo());
-
-   index++;
- }
  ::capnp::List<Primitive>::Builder Primitives = cap_root.initFactoryPrimitive(primitiveFactory::objects_.size());
  index = 0;
  for (auto obj : primitiveFactory::objects_) {
@@ -840,16 +861,6 @@ Functionss.set(ind, getId((*obj->get_functions())[ind]));
     Primitives[index].setUhdmParentType(obj->get_uhdmParentType());
     Primitives[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Primitives[index].setVpiLineNo(obj->get_vpiLineNo());
-
-   index++;
- }
- ::capnp::List<Primitivearray>::Builder Primitivearrays = cap_root.initFactoryPrimitivearray(primitive_arrayFactory::objects_.size());
- index = 0;
- for (auto obj : primitive_arrayFactory::objects_) {
-    Primitivearrays[index].setVpiParent(getId(obj->get_vpiParent()));
-    Primitivearrays[index].setUhdmParentType(obj->get_uhdmParentType());
-    Primitivearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
-    Primitivearrays[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
@@ -913,13 +924,382 @@ Functionss.set(ind, getId((*obj->get_functions())[ind]));
 
    index++;
  }
- ::capnp::List<Instancearray>::Builder Instancearrays = cap_root.initFactoryInstancearray(instance_arrayFactory::objects_.size());
+ ::capnp::List<Range>::Builder Ranges = cap_root.initFactoryRange(rangeFactory::objects_.size());
  index = 0;
- for (auto obj : instance_arrayFactory::objects_) {
-    Instancearrays[index].setVpiParent(getId(obj->get_vpiParent()));
-    Instancearrays[index].setUhdmParentType(obj->get_uhdmParentType());
-    Instancearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
-    Instancearrays[index].setVpiLineNo(obj->get_vpiLineNo());
+ for (auto obj : rangeFactory::objects_) {
+    Ranges[index].setVpiParent(getId(obj->get_vpiParent()));
+    Ranges[index].setUhdmParentType(obj->get_uhdmParentType());
+    Ranges[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Ranges[index].setVpiLineNo(obj->get_vpiLineNo());
+
+   index++;
+ }
+ ::capnp::List<Interfacearray>::Builder Interfacearrays = cap_root.initFactoryInterfacearray(interface_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : interface_arrayFactory::objects_) {
+    Interfacearrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Interfacearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Interfacearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Interfacearrays[index].setVpiLineNo(obj->get_vpiLineNo());
+    Interfacearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Interfacearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Interfacearrays[index].setVpiSize(obj->get_vpiSize());
+  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Interfacearrays[index].getExpr();
+    tmp0.setIndex(getId((obj->get_expr())));
+    tmp0.setType(obj->get_expr()->getUhdmType());
+  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Interfacearrays[index].getLeftexpr();
+    tmp1.setIndex(getId((obj->get_left_expr())));
+    tmp1.setType(obj->get_left_expr()->getUhdmType());
+  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Interfacearrays[index].getRightexpr();
+    tmp2.setIndex(getId((obj->get_right_expr())));
+    tmp2.setType(obj->get_right_expr()->getUhdmType());
+  } 
+    if (obj->get_instances()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instancess = Interfacearrays[index].initInstances(obj->get_instances()->size());
+      for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instancess[ind];
+        tmp.setIndex(getId((*obj->get_instances())[ind]));
+        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+      }
+    }
+    Interfacearrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_modules()) {  
+      ::capnp::List<::uint64_t>::Builder Moduless = Interfacearrays[index].initModules(obj->get_modules()->size());
+      for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
+Moduless.set(ind, getId((*obj->get_modules())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Programarray>::Builder Programarrays = cap_root.initFactoryProgramarray(program_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : program_arrayFactory::objects_) {
+    Programarrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Programarrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Programarrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Programarrays[index].setVpiLineNo(obj->get_vpiLineNo());
+    Programarrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Programarrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Programarrays[index].setVpiSize(obj->get_vpiSize());
+  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Programarrays[index].getExpr();
+    tmp0.setIndex(getId((obj->get_expr())));
+    tmp0.setType(obj->get_expr()->getUhdmType());
+  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Programarrays[index].getLeftexpr();
+    tmp1.setIndex(getId((obj->get_left_expr())));
+    tmp1.setType(obj->get_left_expr()->getUhdmType());
+  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Programarrays[index].getRightexpr();
+    tmp2.setIndex(getId((obj->get_right_expr())));
+    tmp2.setType(obj->get_right_expr()->getUhdmType());
+  } 
+    if (obj->get_instances()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instancess = Programarrays[index].initInstances(obj->get_instances()->size());
+      for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instancess[ind];
+        tmp.setIndex(getId((*obj->get_instances())[ind]));
+        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+      }
+    }
+    Programarrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_modules()) {  
+      ::capnp::List<::uint64_t>::Builder Moduless = Programarrays[index].initModules(obj->get_modules()->size());
+      for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
+Moduless.set(ind, getId((*obj->get_modules())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Modulearray>::Builder Modulearrays = cap_root.initFactoryModulearray(module_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : module_arrayFactory::objects_) {
+    Modulearrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Modulearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Modulearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Modulearrays[index].setVpiLineNo(obj->get_vpiLineNo());
+    Modulearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Modulearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Modulearrays[index].setVpiSize(obj->get_vpiSize());
+  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Modulearrays[index].getExpr();
+    tmp0.setIndex(getId((obj->get_expr())));
+    tmp0.setType(obj->get_expr()->getUhdmType());
+  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Modulearrays[index].getLeftexpr();
+    tmp1.setIndex(getId((obj->get_left_expr())));
+    tmp1.setType(obj->get_left_expr()->getUhdmType());
+  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Modulearrays[index].getRightexpr();
+    tmp2.setIndex(getId((obj->get_right_expr())));
+    tmp2.setType(obj->get_right_expr()->getUhdmType());
+  } 
+    if (obj->get_instances()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instancess = Modulearrays[index].initInstances(obj->get_instances()->size());
+      for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instancess[ind];
+        tmp.setIndex(getId((*obj->get_instances())[ind]));
+        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+      }
+    }
+    Modulearrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_modules()) {  
+      ::capnp::List<::uint64_t>::Builder Moduless = Modulearrays[index].initModules(obj->get_modules()->size());
+      for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
+Moduless.set(ind, getId((*obj->get_modules())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Gatearray>::Builder Gatearrays = cap_root.initFactoryGatearray(gate_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : gate_arrayFactory::objects_) {
+    Gatearrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Gatearrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Gatearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Gatearrays[index].setVpiLineNo(obj->get_vpiLineNo());
+  if (obj->get_delay()) {    ::ObjIndexType::Builder tmp0 = Gatearrays[index].getDelay();
+    tmp0.setIndex(getId((obj->get_delay())));
+    tmp0.setType(obj->get_delay()->getUhdmType());
+  } 
+    if (obj->get_primitives()) {  
+      ::capnp::List<::ObjIndexType>::Builder Primitivess = Gatearrays[index].initPrimitives(obj->get_primitives()->size());
+      for (unsigned int ind = 0; ind < obj->get_primitives()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Primitivess[ind];
+        tmp.setIndex(getId((*obj->get_primitives())[ind]));
+        tmp.setType(((*obj->get_primitives())[ind])->getUhdmType());
+      }
+    }
+    Gatearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Gatearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Gatearrays[index].setVpiSize(obj->get_vpiSize());
+  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Gatearrays[index].getExpr();
+    tmp0.setIndex(getId((obj->get_expr())));
+    tmp0.setType(obj->get_expr()->getUhdmType());
+  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Gatearrays[index].getLeftexpr();
+    tmp1.setIndex(getId((obj->get_left_expr())));
+    tmp1.setType(obj->get_left_expr()->getUhdmType());
+  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Gatearrays[index].getRightexpr();
+    tmp2.setIndex(getId((obj->get_right_expr())));
+    tmp2.setType(obj->get_right_expr()->getUhdmType());
+  } 
+    if (obj->get_instances()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instancess = Gatearrays[index].initInstances(obj->get_instances()->size());
+      for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instancess[ind];
+        tmp.setIndex(getId((*obj->get_instances())[ind]));
+        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+      }
+    }
+    Gatearrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_modules()) {  
+      ::capnp::List<::uint64_t>::Builder Moduless = Gatearrays[index].initModules(obj->get_modules()->size());
+      for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
+Moduless.set(ind, getId((*obj->get_modules())[ind]));
+      }
+    }
+
+
+    Gatearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Gatearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Gatearrays[index].setVpiSize(obj->get_vpiSize());
+  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Gatearrays[index].getExpr();
+    tmp0.setIndex(getId((obj->get_expr())));
+    tmp0.setType(obj->get_expr()->getUhdmType());
+  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Gatearrays[index].getLeftexpr();
+    tmp1.setIndex(getId((obj->get_left_expr())));
+    tmp1.setType(obj->get_left_expr()->getUhdmType());
+  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Gatearrays[index].getRightexpr();
+    tmp2.setIndex(getId((obj->get_right_expr())));
+    tmp2.setType(obj->get_right_expr()->getUhdmType());
+  } 
+    if (obj->get_instances()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instancess = Gatearrays[index].initInstances(obj->get_instances()->size());
+      for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instancess[ind];
+        tmp.setIndex(getId((*obj->get_instances())[ind]));
+        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+      }
+    }
+    Gatearrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_modules()) {  
+      ::capnp::List<::uint64_t>::Builder Moduless = Gatearrays[index].initModules(obj->get_modules()->size());
+      for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
+Moduless.set(ind, getId((*obj->get_modules())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Switcharray>::Builder Switcharrays = cap_root.initFactorySwitcharray(switch_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : switch_arrayFactory::objects_) {
+    Switcharrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Switcharrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Switcharrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Switcharrays[index].setVpiLineNo(obj->get_vpiLineNo());
+  if (obj->get_delay()) {    ::ObjIndexType::Builder tmp0 = Switcharrays[index].getDelay();
+    tmp0.setIndex(getId((obj->get_delay())));
+    tmp0.setType(obj->get_delay()->getUhdmType());
+  } 
+    if (obj->get_primitives()) {  
+      ::capnp::List<::ObjIndexType>::Builder Primitivess = Switcharrays[index].initPrimitives(obj->get_primitives()->size());
+      for (unsigned int ind = 0; ind < obj->get_primitives()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Primitivess[ind];
+        tmp.setIndex(getId((*obj->get_primitives())[ind]));
+        tmp.setType(((*obj->get_primitives())[ind])->getUhdmType());
+      }
+    }
+    Switcharrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Switcharrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Switcharrays[index].setVpiSize(obj->get_vpiSize());
+  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Switcharrays[index].getExpr();
+    tmp0.setIndex(getId((obj->get_expr())));
+    tmp0.setType(obj->get_expr()->getUhdmType());
+  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Switcharrays[index].getLeftexpr();
+    tmp1.setIndex(getId((obj->get_left_expr())));
+    tmp1.setType(obj->get_left_expr()->getUhdmType());
+  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Switcharrays[index].getRightexpr();
+    tmp2.setIndex(getId((obj->get_right_expr())));
+    tmp2.setType(obj->get_right_expr()->getUhdmType());
+  } 
+    if (obj->get_instances()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instancess = Switcharrays[index].initInstances(obj->get_instances()->size());
+      for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instancess[ind];
+        tmp.setIndex(getId((*obj->get_instances())[ind]));
+        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+      }
+    }
+    Switcharrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_modules()) {  
+      ::capnp::List<::uint64_t>::Builder Moduless = Switcharrays[index].initModules(obj->get_modules()->size());
+      for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
+Moduless.set(ind, getId((*obj->get_modules())[ind]));
+      }
+    }
+
+
+    Switcharrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Switcharrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Switcharrays[index].setVpiSize(obj->get_vpiSize());
+  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Switcharrays[index].getExpr();
+    tmp0.setIndex(getId((obj->get_expr())));
+    tmp0.setType(obj->get_expr()->getUhdmType());
+  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Switcharrays[index].getLeftexpr();
+    tmp1.setIndex(getId((obj->get_left_expr())));
+    tmp1.setType(obj->get_left_expr()->getUhdmType());
+  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Switcharrays[index].getRightexpr();
+    tmp2.setIndex(getId((obj->get_right_expr())));
+    tmp2.setType(obj->get_right_expr()->getUhdmType());
+  } 
+    if (obj->get_instances()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instancess = Switcharrays[index].initInstances(obj->get_instances()->size());
+      for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instancess[ind];
+        tmp.setIndex(getId((*obj->get_instances())[ind]));
+        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+      }
+    }
+    Switcharrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_modules()) {  
+      ::capnp::List<::uint64_t>::Builder Moduless = Switcharrays[index].initModules(obj->get_modules()->size());
+      for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
+Moduless.set(ind, getId((*obj->get_modules())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Udparray>::Builder Udparrays = cap_root.initFactoryUdparray(udp_arrayFactory::objects_.size());
+ index = 0;
+ for (auto obj : udp_arrayFactory::objects_) {
+    Udparrays[index].setVpiParent(getId(obj->get_vpiParent()));
+    Udparrays[index].setUhdmParentType(obj->get_uhdmParentType());
+    Udparrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Udparrays[index].setVpiLineNo(obj->get_vpiLineNo());
+  if (obj->get_delay()) {    ::ObjIndexType::Builder tmp0 = Udparrays[index].getDelay();
+    tmp0.setIndex(getId((obj->get_delay())));
+    tmp0.setType(obj->get_delay()->getUhdmType());
+  } 
+    if (obj->get_primitives()) {  
+      ::capnp::List<::ObjIndexType>::Builder Primitivess = Udparrays[index].initPrimitives(obj->get_primitives()->size());
+      for (unsigned int ind = 0; ind < obj->get_primitives()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Primitivess[ind];
+        tmp.setIndex(getId((*obj->get_primitives())[ind]));
+        tmp.setType(((*obj->get_primitives())[ind])->getUhdmType());
+      }
+    }
+    Udparrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Udparrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Udparrays[index].setVpiSize(obj->get_vpiSize());
+  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Udparrays[index].getExpr();
+    tmp0.setIndex(getId((obj->get_expr())));
+    tmp0.setType(obj->get_expr()->getUhdmType());
+  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Udparrays[index].getLeftexpr();
+    tmp1.setIndex(getId((obj->get_left_expr())));
+    tmp1.setType(obj->get_left_expr()->getUhdmType());
+  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Udparrays[index].getRightexpr();
+    tmp2.setIndex(getId((obj->get_right_expr())));
+    tmp2.setType(obj->get_right_expr()->getUhdmType());
+  } 
+    if (obj->get_instances()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instancess = Udparrays[index].initInstances(obj->get_instances()->size());
+      for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instancess[ind];
+        tmp.setIndex(getId((*obj->get_instances())[ind]));
+        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+      }
+    }
+    Udparrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_modules()) {  
+      ::capnp::List<::uint64_t>::Builder Moduless = Udparrays[index].initModules(obj->get_modules()->size());
+      for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
+Moduless.set(ind, getId((*obj->get_modules())[ind]));
+      }
+    }
+
+
+    Udparrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Udparrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Udparrays[index].setVpiSize(obj->get_vpiSize());
+  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Udparrays[index].getExpr();
+    tmp0.setIndex(getId((obj->get_expr())));
+    tmp0.setType(obj->get_expr()->getUhdmType());
+  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Udparrays[index].getLeftexpr();
+    tmp1.setIndex(getId((obj->get_left_expr())));
+    tmp1.setType(obj->get_left_expr()->getUhdmType());
+  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Udparrays[index].getRightexpr();
+    tmp2.setIndex(getId((obj->get_right_expr())));
+    tmp2.setType(obj->get_right_expr()->getUhdmType());
+  } 
+    if (obj->get_instances()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instancess = Udparrays[index].initInstances(obj->get_instances()->size());
+      for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instancess[ind];
+        tmp.setIndex(getId((*obj->get_instances())[ind]));
+        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+      }
+    }
+    Udparrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_modules()) {  
+      ::capnp::List<::uint64_t>::Builder Moduless = Udparrays[index].initModules(obj->get_modules()->size());
+      for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
+Moduless.set(ind, getId((*obj->get_modules())[ind]));
+      }
+    }
+
 
    index++;
  }
@@ -1979,11 +2359,6 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(interface_tf_declFactory::make(), ind);
  }
 
- ::capnp::List<Interfacearray>::Reader Interfacearrays = cap_root.getFactoryInterfacearray();
- for (unsigned ind = 0; ind < Interfacearrays.size(); ind++) {
-   setId(interface_arrayFactory::make(), ind);
- }
-
  ::capnp::List<Contassign>::Reader Contassigns = cap_root.getFactoryContassign();
  for (unsigned ind = 0; ind < Contassigns.size(); ind++) {
    setId(cont_assignFactory::make(), ind);
@@ -1994,19 +2369,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(portFactory::make(), ind);
  }
 
- ::capnp::List<Modulearray>::Reader Modulearrays = cap_root.getFactoryModulearray();
- for (unsigned ind = 0; ind < Modulearrays.size(); ind++) {
-   setId(module_arrayFactory::make(), ind);
- }
-
  ::capnp::List<Primitive>::Reader Primitives = cap_root.getFactoryPrimitive();
  for (unsigned ind = 0; ind < Primitives.size(); ind++) {
    setId(primitiveFactory::make(), ind);
- }
-
- ::capnp::List<Primitivearray>::Reader Primitivearrays = cap_root.getFactoryPrimitivearray();
- for (unsigned ind = 0; ind < Primitivearrays.size(); ind++) {
-   setId(primitive_arrayFactory::make(), ind);
  }
 
  ::capnp::List<Modpath>::Reader Modpaths = cap_root.getFactoryModpath();
@@ -2039,9 +2404,39 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(clocking_blockFactory::make(), ind);
  }
 
- ::capnp::List<Instancearray>::Reader Instancearrays = cap_root.getFactoryInstancearray();
- for (unsigned ind = 0; ind < Instancearrays.size(); ind++) {
-   setId(instance_arrayFactory::make(), ind);
+ ::capnp::List<Range>::Reader Ranges = cap_root.getFactoryRange();
+ for (unsigned ind = 0; ind < Ranges.size(); ind++) {
+   setId(rangeFactory::make(), ind);
+ }
+
+ ::capnp::List<Interfacearray>::Reader Interfacearrays = cap_root.getFactoryInterfacearray();
+ for (unsigned ind = 0; ind < Interfacearrays.size(); ind++) {
+   setId(interface_arrayFactory::make(), ind);
+ }
+
+ ::capnp::List<Programarray>::Reader Programarrays = cap_root.getFactoryProgramarray();
+ for (unsigned ind = 0; ind < Programarrays.size(); ind++) {
+   setId(program_arrayFactory::make(), ind);
+ }
+
+ ::capnp::List<Modulearray>::Reader Modulearrays = cap_root.getFactoryModulearray();
+ for (unsigned ind = 0; ind < Modulearrays.size(); ind++) {
+   setId(module_arrayFactory::make(), ind);
+ }
+
+ ::capnp::List<Gatearray>::Reader Gatearrays = cap_root.getFactoryGatearray();
+ for (unsigned ind = 0; ind < Gatearrays.size(); ind++) {
+   setId(gate_arrayFactory::make(), ind);
+ }
+
+ ::capnp::List<Switcharray>::Reader Switcharrays = cap_root.getFactorySwitcharray();
+ for (unsigned ind = 0; ind < Switcharrays.size(); ind++) {
+   setId(switch_arrayFactory::make(), ind);
+ }
+
+ ::capnp::List<Udparray>::Reader Udparrays = cap_root.getFactoryUdparray();
+ for (unsigned ind = 0; ind < Udparrays.size(); ind++) {
+   setId(udp_arrayFactory::make(), ind);
  }
 
  ::capnp::List<Arraynet>::Reader Arraynets = cap_root.getFactoryArraynet();
@@ -2291,16 +2686,6 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
- for (Interfacearray::Reader obj : Interfacearrays) {
-   interface_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
-   interface_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
-   interface_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
-   interface_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
-
-   index++;
- }
-
- index = 0;
  for (Contassign::Reader obj : Contassigns) {
    cont_assignFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    cont_assignFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
@@ -2321,31 +2706,11 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
- for (Modulearray::Reader obj : Modulearrays) {
-   module_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
-   module_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
-   module_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
-   module_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
-
-   index++;
- }
-
- index = 0;
  for (Primitive::Reader obj : Primitives) {
    primitiveFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    primitiveFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    primitiveFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    primitiveFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
-
-   index++;
- }
-
- index = 0;
- for (Primitivearray::Reader obj : Primitivearrays) {
-   primitive_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
-   primitive_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
-   primitive_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
-   primitive_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }
@@ -2411,11 +2776,314 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
- for (Instancearray::Reader obj : Instancearrays) {
-   instance_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
-   instance_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
-   instance_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
-   instance_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+ for (Range::Reader obj : Ranges) {
+   rangeFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   rangeFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   rangeFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   rangeFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
+ for (Interfacearray::Reader obj : Interfacearrays) {
+   interface_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   interface_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   interface_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   interface_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    interface_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    interface_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    interface_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+     interface_arrayFactory::objects_[index]->set_expr((expr*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
+     interface_arrayFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     interface_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+    
+    if (obj.getInstances().size()) { 
+      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
+ 	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
+    }
+      interface_arrayFactory::objects_[index]->set_instances(vect);
+    }
+   if (obj.getRange()) 
+     interface_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
+    
+    if (obj.getModules().size()) { 
+      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
+ 	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
+    }
+      interface_arrayFactory::objects_[index]->set_modules(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Programarray::Reader obj : Programarrays) {
+   program_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   program_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   program_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   program_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    program_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    program_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    program_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+     program_arrayFactory::objects_[index]->set_expr((expr*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
+     program_arrayFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     program_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+    
+    if (obj.getInstances().size()) { 
+      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
+ 	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
+    }
+      program_arrayFactory::objects_[index]->set_instances(vect);
+    }
+   if (obj.getRange()) 
+     program_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
+    
+    if (obj.getModules().size()) { 
+      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
+ 	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
+    }
+      program_arrayFactory::objects_[index]->set_modules(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Modulearray::Reader obj : Modulearrays) {
+   module_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   module_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   module_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   module_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    module_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    module_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    module_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+     module_arrayFactory::objects_[index]->set_expr((expr*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
+     module_arrayFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     module_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+    
+    if (obj.getInstances().size()) { 
+      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
+ 	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
+    }
+      module_arrayFactory::objects_[index]->set_instances(vect);
+    }
+   if (obj.getRange()) 
+     module_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
+    
+    if (obj.getModules().size()) { 
+      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
+ 	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
+    }
+      module_arrayFactory::objects_[index]->set_modules(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Gatearray::Reader obj : Gatearrays) {
+   gate_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   gate_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   gate_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   gate_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+     gate_arrayFactory::objects_[index]->set_delay((expr*)getObject(obj.getDelay().getType(),obj.getDelay().getIndex()-1));
+    
+    if (obj.getPrimitives().size()) { 
+      VectorOfprimitive* vect = VectorOfprimitiveFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPrimitives().size(); ind++) {
+ 	vect->push_back((primitive*)getObject(obj.getPrimitives()[ind].getType(),obj.getPrimitives()[ind].getIndex()-1));
+    }
+      gate_arrayFactory::objects_[index]->set_primitives(vect);
+    }
+    gate_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    gate_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    gate_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+     gate_arrayFactory::objects_[index]->set_expr((expr*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
+     gate_arrayFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     gate_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+    
+    if (obj.getInstances().size()) { 
+      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
+ 	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
+    }
+      gate_arrayFactory::objects_[index]->set_instances(vect);
+    }
+   if (obj.getRange()) 
+     gate_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
+    
+    if (obj.getModules().size()) { 
+      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
+ 	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
+    }
+      gate_arrayFactory::objects_[index]->set_modules(vect);
+    }
+    gate_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    gate_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    gate_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+     gate_arrayFactory::objects_[index]->set_expr((expr*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
+     gate_arrayFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     gate_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+    
+    if (obj.getInstances().size()) { 
+      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
+ 	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
+    }
+      gate_arrayFactory::objects_[index]->set_instances(vect);
+    }
+   if (obj.getRange()) 
+     gate_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
+    
+    if (obj.getModules().size()) { 
+      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
+ 	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
+    }
+      gate_arrayFactory::objects_[index]->set_modules(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Switcharray::Reader obj : Switcharrays) {
+   switch_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   switch_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   switch_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   switch_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+     switch_arrayFactory::objects_[index]->set_delay((expr*)getObject(obj.getDelay().getType(),obj.getDelay().getIndex()-1));
+    
+    if (obj.getPrimitives().size()) { 
+      VectorOfprimitive* vect = VectorOfprimitiveFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPrimitives().size(); ind++) {
+ 	vect->push_back((primitive*)getObject(obj.getPrimitives()[ind].getType(),obj.getPrimitives()[ind].getIndex()-1));
+    }
+      switch_arrayFactory::objects_[index]->set_primitives(vect);
+    }
+    switch_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    switch_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    switch_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+     switch_arrayFactory::objects_[index]->set_expr((expr*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
+     switch_arrayFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     switch_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+    
+    if (obj.getInstances().size()) { 
+      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
+ 	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
+    }
+      switch_arrayFactory::objects_[index]->set_instances(vect);
+    }
+   if (obj.getRange()) 
+     switch_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
+    
+    if (obj.getModules().size()) { 
+      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
+ 	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
+    }
+      switch_arrayFactory::objects_[index]->set_modules(vect);
+    }
+    switch_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    switch_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    switch_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+     switch_arrayFactory::objects_[index]->set_expr((expr*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
+     switch_arrayFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     switch_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+    
+    if (obj.getInstances().size()) { 
+      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
+ 	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
+    }
+      switch_arrayFactory::objects_[index]->set_instances(vect);
+    }
+   if (obj.getRange()) 
+     switch_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
+    
+    if (obj.getModules().size()) { 
+      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
+ 	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
+    }
+      switch_arrayFactory::objects_[index]->set_modules(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Udparray::Reader obj : Udparrays) {
+   udp_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   udp_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   udp_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   udp_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+     udp_arrayFactory::objects_[index]->set_delay((expr*)getObject(obj.getDelay().getType(),obj.getDelay().getIndex()-1));
+    
+    if (obj.getPrimitives().size()) { 
+      VectorOfprimitive* vect = VectorOfprimitiveFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPrimitives().size(); ind++) {
+ 	vect->push_back((primitive*)getObject(obj.getPrimitives()[ind].getType(),obj.getPrimitives()[ind].getIndex()-1));
+    }
+      udp_arrayFactory::objects_[index]->set_primitives(vect);
+    }
+    udp_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    udp_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    udp_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+     udp_arrayFactory::objects_[index]->set_expr((expr*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
+     udp_arrayFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     udp_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+    
+    if (obj.getInstances().size()) { 
+      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
+ 	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
+    }
+      udp_arrayFactory::objects_[index]->set_instances(vect);
+    }
+   if (obj.getRange()) 
+     udp_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
+    
+    if (obj.getModules().size()) { 
+      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
+ 	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
+    }
+      udp_arrayFactory::objects_[index]->set_modules(vect);
+    }
+    udp_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    udp_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    udp_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+     udp_arrayFactory::objects_[index]->set_expr((expr*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
+     udp_arrayFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     udp_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+    
+    if (obj.getInstances().size()) { 
+      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
+ 	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
+    }
+      udp_arrayFactory::objects_[index]->set_instances(vect);
+    }
+   if (obj.getRange()) 
+     udp_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
+    
+    if (obj.getModules().size()) { 
+      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
+ 	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
+    }
+      udp_arrayFactory::objects_[index]->set_modules(vect);
+    }
 
    index++;
  }

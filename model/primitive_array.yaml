@@ -12,7 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "primitive_array.yaml" formal description
+# Universal Hardware Data Model (UHDM) "primitive array" formal description
  
-- obj_def: primitive_array
-
+- class_def: primitive_array
+  - extends: instance_array
+  - class_ref: delay
+    name: delay
+    vpi: vpiDelay
+    type: expr
+    card: 1
+  - class_ref: primitives
+    name: primitives
+    vpi: vpiPrimitive
+    type: primitive
+    card: any

@@ -32,125 +32,138 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 
-#define uhdmprocess 2071
-#define uhdmscope 2072
-#define uhdmbegin 2073
-#define uhdmnamed_begin 2074
-#define uhdmexpr_dist 2075
-#define uhdmexpr 2076
-#define uhdmdistribution 2077
-#define uhdmoperand_group 2078
-#define uhdmoperation 2079
-#define uhdmoperands 2080
-#define uhdmref_obj 2081
-#define uhdmvariables 2082
-#define uhdmtask_func 2083
-#define uhdmleft_expr 2084
-#define uhdmright_expr 2085
-#define uhdmvariables 2082
-#define uhdmclass_defn 2086
-#define uhdmref_obj 2081
-#define uhdmio_decl 2087
-#define uhdmtask 2088
-#define uhdmfunction 2089
-#define uhdmmodport 2090
-#define uhdmio_decls 2091
-#define uhdminterface 2092
-#define uhdminterface_tf_decl 2093
-#define uhdmtasks 2094
-#define uhdmfunctions 2095
-#define uhdminterface_array 2096
-#define uhdmcont_assign 2097
-#define uhdmport 2098
-#define uhdmmodule_array 2099
-#define uhdmprimitive 2100
-#define uhdmprimitive_array 2101
-#define uhdmmod_path 2102
-#define uhdmtchk 2103
-#define uhdmdef_param 2104
-#define uhdmio_decl 2087
-#define uhdmalias_stmt 2105
-#define uhdmclocking_block 2106
-#define uhdminstance_array 2107
-#define uhdmnet 2108
-#define uhdmarray_net 2109
-#define uhdmlogic_var 2110
-#define uhdmarray_var 2111
-#define uhdmnamed_event 2112
-#define uhdmnamed_event_array 2113
-#define uhdmparameters 2114
-#define uhdmspec_param 2115
-#define uhdmassertion 2116
-#define uhdmtypespec 2117
-#define uhdmclass_defn 2086
-#define uhdminstance 2118
-#define uhdmtask_func 2083
-#define uhdmnet 2108
-#define uhdmarray_net 2109
-#define uhdmvariables 2082
-#define uhdmparameters 2114
-#define uhdmassertion 2116
-#define uhdmtypespec 2117
-#define uhdmclass_defn 2086
-#define uhdminstance 2118
-#define uhdmprograms 2119
-#define uhdmprogram_arrays 2120
-#define uhdmlogic_var 2110
-#define uhdmarray_var 2111
-#define uhdmarray_var_mem 2121
-#define uhdmnamed_event 2112
-#define uhdmnamed_event_array 2113
-#define uhdmspec_param 2115
-#define uhdmmodule 2122
-#define uhdminterface 2092
-#define uhdmexpr_dist 2075
-#define uhdminstance_array 2107
-#define uhdmprocess 2071
-#define uhdminterface_tf_decls 2123
-#define uhdmmodports 2124
-#define uhdmglobal_clocking 2125
-#define uhdmdefault_clocking 2126
-#define uhdmmod_paths 2127
-#define uhdmcont_assigns 2128
-#define uhdminterfaces 2129
-#define uhdminterface_arrays 2130
-#define uhdmprogram 2131
-#define uhdminstance_array 2107
-#define uhdmexpr_dist 2075
-#define uhdmprocess 2071
-#define uhdmdefault_clocking 2126
-#define uhdminterfaces 2129
-#define uhdminterface_arrays 2130
-#define uhdmcont_assigns 2128
-#define uhdmclocking_blocks 2132
-#define uhdmpackage 2133
-#define uhdmmodule 2122
-#define uhdmexpr_dist 2075
-#define uhdminstance_array 2107
-#define uhdmscope 2072
-#define uhdmprocess 2071
-#define uhdmprimitives 2134
-#define uhdmprimitive_arrays 2135
-#define uhdmglobal_clocking 2125
-#define uhdmdefault_clocking 2126
-#define uhdmmodule_array 2099
-#define uhdmports 2136
-#define uhdminterfaces 2129
-#define uhdminterface_arrays 2130
-#define uhdmcont_assigns 2128
-#define uhdmmodules 2137
-#define uhdmmodule_arrays 2138
-#define uhdmmod_paths 2127
-#define uhdmtchks 2139
-#define uhdmdef_params 2140
-#define uhdmio_decls 2091
-#define uhdmalias_stmts 2141
-#define uhdmclocking_blocks 2132
-#define uhdmdesign 2142
-#define uhdmallModules 2143
-#define uhdmtopModules 2144
-#define uhdmallPrograms 2145
-#define uhdmallPackages 2146
+#define uhdmprocess 2077
+#define uhdmscope 2078
+#define uhdmbegin 2079
+#define uhdmnamed_begin 2080
+#define uhdmexpr_dist 2081
+#define uhdmexpr 2082
+#define uhdmdistribution 2083
+#define uhdmoperand_group 2084
+#define uhdmoperation 2085
+#define uhdmoperands 2086
+#define uhdmref_obj 2087
+#define uhdmvariables 2088
+#define uhdmtask_func 2089
+#define uhdmleft_expr 2090
+#define uhdmright_expr 2091
+#define uhdmvariables 2088
+#define uhdmclass_defn 2092
+#define uhdmref_obj 2087
+#define uhdmio_decl 2093
+#define uhdmtask 2094
+#define uhdmfunction 2095
+#define uhdmmodport 2096
+#define uhdmio_decls 2097
+#define uhdminterface 2098
+#define uhdminterface_tf_decl 2099
+#define uhdmtasks 2100
+#define uhdmfunctions 2101
+#define uhdmcont_assign 2102
+#define uhdmport 2103
+#define uhdmprimitive 2104
+#define uhdmmod_path 2105
+#define uhdmtchk 2106
+#define uhdmdef_param 2107
+#define uhdmio_decl 2093
+#define uhdmalias_stmt 2108
+#define uhdmclocking_block 2109
+#define uhdmrange 2110
+#define uhdminstance_array 2111
+#define uhdmexpr 2082
+#define uhdmleft_expr 2090
+#define uhdmright_expr 2091
+#define uhdminstances 2112
+#define uhdmrange 2110
+#define uhdmmodules 2113
+#define uhdminterface_array 2114
+#define uhdmprogram_array 2115
+#define uhdmmodule_array 2116
+#define uhdmprimitive_array 2117
+#define uhdmdelay 2118
+#define uhdmprimitives 2119
+#define uhdmgate_array 2120
+#define uhdmswitch_array 2121
+#define uhdmudp_array 2122
+#define uhdmnet 2123
+#define uhdmarray_net 2124
+#define uhdmlogic_var 2125
+#define uhdmarray_var 2126
+#define uhdmnamed_event 2127
+#define uhdmnamed_event_array 2128
+#define uhdmparameters 2129
+#define uhdmspec_param 2130
+#define uhdmassertion 2131
+#define uhdmtypespec 2132
+#define uhdmclass_defn 2092
+#define uhdminstance 2133
+#define uhdmtask_func 2089
+#define uhdmnet 2123
+#define uhdmarray_net 2124
+#define uhdmvariables 2088
+#define uhdmparameters 2129
+#define uhdmassertion 2131
+#define uhdmtypespec 2132
+#define uhdmclass_defn 2092
+#define uhdminstance 2133
+#define uhdmprograms 2134
+#define uhdmprogram_arrays 2135
+#define uhdmlogic_var 2125
+#define uhdmarray_var 2126
+#define uhdmarray_var_mem 2136
+#define uhdmnamed_event 2127
+#define uhdmnamed_event_array 2128
+#define uhdmspec_param 2130
+#define uhdmmodule 2137
+#define uhdminterface 2098
+#define uhdmexpr_dist 2081
+#define uhdminstance_array 2111
+#define uhdmprocess 2077
+#define uhdminterface_tf_decls 2138
+#define uhdmmodports 2139
+#define uhdmglobal_clocking 2140
+#define uhdmdefault_clocking 2141
+#define uhdmmod_paths 2142
+#define uhdmcont_assigns 2143
+#define uhdminterfaces 2144
+#define uhdminterface_arrays 2145
+#define uhdmprogram 2146
+#define uhdminstance_array 2111
+#define uhdmexpr_dist 2081
+#define uhdmprocess 2077
+#define uhdmdefault_clocking 2141
+#define uhdminterfaces 2144
+#define uhdminterface_arrays 2145
+#define uhdmcont_assigns 2143
+#define uhdmclocking_blocks 2147
+#define uhdmpackage 2148
+#define uhdmmodule 2137
+#define uhdmexpr_dist 2081
+#define uhdminstance_array 2111
+#define uhdmscope 2078
+#define uhdmprocess 2077
+#define uhdmprimitives 2119
+#define uhdmprimitive_arrays 2149
+#define uhdmglobal_clocking 2140
+#define uhdmdefault_clocking 2141
+#define uhdmmodule_array 2116
+#define uhdmports 2150
+#define uhdminterfaces 2144
+#define uhdminterface_arrays 2145
+#define uhdmcont_assigns 2143
+#define uhdmmodules 2113
+#define uhdmmodule_arrays 2151
+#define uhdmmod_paths 2142
+#define uhdmtchks 2152
+#define uhdmdef_params 2153
+#define uhdmio_decls 2097
+#define uhdmalias_stmts 2154
+#define uhdmclocking_blocks 2147
+#define uhdmdesign 2155
+#define uhdmallModules 2156
+#define uhdmtopModules 2157
+#define uhdmallPrograms 2158
+#define uhdmallPackages 2159
 
 
 #include "headers/process.h"
@@ -169,19 +182,24 @@
 #include "headers/function.h"
 #include "headers/modport.h"
 #include "headers/interface_tf_decl.h"
-#include "headers/interface_array.h"
 #include "headers/cont_assign.h"
 #include "headers/port.h"
-#include "headers/module_array.h"
 #include "headers/primitive.h"
-#include "headers/primitive_array.h"
 #include "headers/mod_path.h"
 #include "headers/tchk.h"
 #include "headers/def_param.h"
 #include "headers/io_decl.h"
 #include "headers/alias_stmt.h"
 #include "headers/clocking_block.h"
+#include "headers/range.h"
 #include "headers/instance_array.h"
+#include "headers/interface_array.h"
+#include "headers/program_array.h"
+#include "headers/module_array.h"
+#include "headers/primitive_array.h"
+#include "headers/gate_array.h"
+#include "headers/switch_array.h"
+#include "headers/udp_array.h"
 #include "headers/net.h"
 #include "headers/array_net.h"
 #include "headers/logic_var.h"

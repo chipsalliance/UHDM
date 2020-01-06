@@ -15,3 +15,4 @@
 # Universal Hardware Data Model (UHDM) "interface_array" formal description
  
 - obj_def: interface_array
+  - extends: instance_array
