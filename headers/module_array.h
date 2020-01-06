@@ -50,6 +50,10 @@ namespace UHDM {
 
     void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
 
+    VectorOfparam_assign* get_param_assigns() const { return param_assigns_; }
+
+    void set_param_assigns(VectorOfparam_assign* data) { param_assigns_ = data; }
+
     virtual unsigned int getUhdmType() { return uhdmmodule_array; }   
   private:
     
@@ -60,6 +64,8 @@ namespace UHDM {
     unsigned int vpiFile_;
 
     unsigned int vpiLineNo_;
+
+    VectorOfparam_assign* param_assigns_;
 
   };
 

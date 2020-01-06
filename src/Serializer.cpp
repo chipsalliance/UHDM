@@ -143,6 +143,8 @@ std::vector<clocking_block*> clocking_blockFactory::objects_;
 std::vector<std::vector<clocking_block*>*> VectorOfclocking_blockFactory::objects_;
 std::vector<range*> rangeFactory::objects_;
 std::vector<std::vector<range*>*> VectorOfrangeFactory::objects_;
+std::vector<param_assign*> param_assignFactory::objects_;
+std::vector<std::vector<param_assign*>*> VectorOfparam_assignFactory::objects_;
 std::vector<std::vector<instance_array*>*> VectorOfinstance_arrayFactory::objects_;
 std::vector<interface_array*> interface_arrayFactory::objects_;
 std::vector<std::vector<interface_array*>*> VectorOfinterface_arrayFactory::objects_;
@@ -210,6 +212,7 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdmalias_stmt: return alias_stmtFactory::objects_[index];
   case uhdmclocking_block: return clocking_blockFactory::objects_[index];
   case uhdmrange: return rangeFactory::objects_[index];
+  case uhdmparam_assign: return param_assignFactory::objects_[index];
   case uhdminterface_array: return interface_arrayFactory::objects_[index];
   case uhdmprogram_array: return program_arrayFactory::objects_[index];
   case uhdmmodule_array: return module_arrayFactory::objects_[index];
@@ -336,6 +339,11 @@ void Serializer::purge() {
     delete obj;
   }
   rangeFactory::objects_.clear();
+
+  for (auto obj : param_assignFactory::objects_) {
+    delete obj;
+  }
+  param_assignFactory::objects_.clear();
 
   for (auto obj : interface_arrayFactory::objects_) {
     delete obj;
@@ -533,6 +541,11 @@ void Serializer::save(std::string file) {
   }
   index = 1;
   for (auto obj : rangeFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : param_assignFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -934,6 +947,16 @@ Functionss.set(ind, getId((*obj->get_functions())[ind]));
 
    index++;
  }
+ ::capnp::List<Paramassign>::Builder Paramassigns = cap_root.initFactoryParamassign(param_assignFactory::objects_.size());
+ index = 0;
+ for (auto obj : param_assignFactory::objects_) {
+    Paramassigns[index].setVpiParent(getId(obj->get_vpiParent()));
+    Paramassigns[index].setUhdmParentType(obj->get_uhdmParentType());
+    Paramassigns[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Paramassigns[index].setVpiLineNo(obj->get_vpiLineNo());
+
+   index++;
+ }
  ::capnp::List<Interfacearray>::Builder Interfacearrays = cap_root.initFactoryInterfacearray(interface_arrayFactory::objects_.size());
  index = 0;
  for (auto obj : interface_arrayFactory::objects_) {
@@ -941,6 +964,13 @@ Functionss.set(ind, getId((*obj->get_functions())[ind]));
     Interfacearrays[index].setUhdmParentType(obj->get_uhdmParentType());
     Interfacearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Interfacearrays[index].setVpiLineNo(obj->get_vpiLineNo());
+ 
+    if (obj->get_param_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Paramassignss = Interfacearrays[index].initParamassigns(obj->get_param_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_param_assigns()->size(); ind++) {
+Paramassignss.set(ind, getId((*obj->get_param_assigns())[ind]));
+      }
+    }
     Interfacearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Interfacearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Interfacearrays[index].setVpiSize(obj->get_vpiSize());
@@ -1021,6 +1051,13 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Modulearrays[index].setUhdmParentType(obj->get_uhdmParentType());
     Modulearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Modulearrays[index].setVpiLineNo(obj->get_vpiLineNo());
+ 
+    if (obj->get_param_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Paramassignss = Modulearrays[index].initParamassigns(obj->get_param_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_param_assigns()->size(); ind++) {
+Paramassignss.set(ind, getId((*obj->get_param_assigns())[ind]));
+      }
+    }
     Modulearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Modulearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Modulearrays[index].setVpiSize(obj->get_vpiSize());
@@ -2409,6 +2446,11 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(rangeFactory::make(), ind);
  }
 
+ ::capnp::List<Paramassign>::Reader Paramassigns = cap_root.getFactoryParamassign();
+ for (unsigned ind = 0; ind < Paramassigns.size(); ind++) {
+   setId(param_assignFactory::make(), ind);
+ }
+
  ::capnp::List<Interfacearray>::Reader Interfacearrays = cap_root.getFactoryInterfacearray();
  for (unsigned ind = 0; ind < Interfacearrays.size(); ind++) {
    setId(interface_arrayFactory::make(), ind);
@@ -2786,11 +2828,29 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
+ for (Paramassign::Reader obj : Paramassigns) {
+   param_assignFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   param_assignFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   param_assignFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   param_assignFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
  for (Interfacearray::Reader obj : Interfacearrays) {
    interface_arrayFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    interface_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    interface_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    interface_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    
+    if (obj.getParamassigns().size()) { 
+      VectorOfparam_assign* vect = VectorOfparam_assignFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParamassigns().size(); ind++) {
+ 	vect->push_back(param_assignFactory::objects_[obj.getParamassigns()[ind]-1]);
+    }
+      interface_arrayFactory::objects_[index]->set_param_assigns(vect);
+    }
     interface_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     interface_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     interface_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
@@ -2859,6 +2919,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    module_arrayFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    module_arrayFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    module_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    
+    if (obj.getParamassigns().size()) { 
+      VectorOfparam_assign* vect = VectorOfparam_assignFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParamassigns().size(); ind++) {
+ 	vect->push_back(param_assignFactory::objects_[obj.getParamassigns()[ind]-1]);
+    }
+      module_arrayFactory::objects_[index]->set_param_assigns(vect);
+    }
     module_arrayFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     module_arrayFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     module_arrayFactory::objects_[index]->set_vpiSize(obj.getVpiSize());

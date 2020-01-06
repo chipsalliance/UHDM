@@ -58,6 +58,7 @@
 #include "headers/alias_stmt.h"
 #include "headers/clocking_block.h"
 #include "headers/range.h"
+#include "headers/param_assign.h"
 #include "headers/instance_array.h"
 #include "headers/interface_array.h"
 #include "headers/program_array.h"
@@ -263,6 +264,12 @@ vpiHandle vpi_handle (PLI_INT32 type,
  if (handle->type == uhdmrange) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((range*)(object))->get_vpiParent()->getUhdmType(), ((range*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmparam_assign) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((param_assign*)(object))->get_vpiParent()->getUhdmType(), ((param_assign*)(object))->get_vpiParent());
  } 
 }
 
@@ -559,6 +566,15 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminterface_array) {
+ if (type == vpiParamAssign) {
+ if (((interface_array*)(object))->get_param_assigns())
+ return (vpiHandle) new uhdm_handle(uhdmparam_assigns, ((interface_array*)(object))->get_param_assigns());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface_array) {
  if (type == vpiInstance) {
  if (((instance_array*)(object))->get_instances())
  return (vpiHandle) new uhdm_handle(uhdminstances, ((instance_array*)(object))->get_instances());
@@ -589,6 +605,15 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  if (type == vpiModule) {
  if (((instance_array*)(object))->get_modules())
  return (vpiHandle) new uhdm_handle(uhdmmodules, ((instance_array*)(object))->get_modules());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule_array) {
+ if (type == vpiParamAssign) {
+ if (((module_array*)(object))->get_param_assigns())
+ return (vpiHandle) new uhdm_handle(uhdmparam_assigns, ((module_array*)(object))->get_param_assigns());
  else return 0;
   }
  }
@@ -1791,6 +1816,24 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
+  if (handle->type == uhdmparam_assigns) {
+ VectorOfparam_assign* the_vec = (VectorOfparam_assign*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmparam_assigns) {
+ VectorOfparam_assign* the_vec = (VectorOfparam_assign*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
   if (handle->type == uhdmprimitives) {
  VectorOfprimitive* the_vec = (VectorOfprimitive*)vect;
  if (handle->index < the_vec->size()) {
@@ -2539,6 +2582,12 @@ PLI_INT32 vpi_get (PLI_INT32   property,
  if (handle->type == uhdmrange) {
      if (property == vpiLineNo) {
        return ((range*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmparam_assign) {
+     if (property == vpiLineNo) {
+       return ((param_assign*)(obj))->get_vpiLineNo();
      } 
 }
 
@@ -3358,6 +3407,12 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmparam_assign) {
+     if (property == vpiLineNo) {
+       return ((param_assign*)(obj))->get_vpiLineNo();
+     } 
+}
+
  if (handle->type == uhdminstance_array) {
      if (property == vpiSize) {
        return ((instance_array*)(obj))->get_vpiSize();
@@ -4111,6 +4166,12 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
  if (handle->type == uhdmrange) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((range*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmparam_assign) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((param_assign*)(obj))->get_vpiFile().c_str());
      } 
 }
 

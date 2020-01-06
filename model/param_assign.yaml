@@ -12,13 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "module_array.yaml" formal description
+# Universal Hardware Data Model (UHDM) "param assign" formal description
  
-- obj_def: module_array
-  - extends: instance_array
-  - obj_ref: param_assigns
-    name: param assign
-    vpi: vpiParamAssign
-    type: param_assign
-    card: any
-
+- obj_def: param_assign
