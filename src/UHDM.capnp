@@ -28,24 +28,25 @@ struct UhdmRoot {
   factoryAliasstmt @19 :List(Aliasstmt);
   factoryClockingblock @20 :List(Clockingblock);
   factoryRange @21 :List(Range);
-  factoryInterfacearray @22 :List(Interfacearray);
-  factoryProgramarray @23 :List(Programarray);
-  factoryModulearray @24 :List(Modulearray);
-  factoryGatearray @25 :List(Gatearray);
-  factorySwitcharray @26 :List(Switcharray);
-  factoryUdparray @27 :List(Udparray);
-  factoryArraynet @28 :List(Arraynet);
-  factoryLogicvar @29 :List(Logicvar);
-  factoryArrayvar @30 :List(Arrayvar);
-  factoryNamedevent @31 :List(Namedevent);
-  factoryNamedeventarray @32 :List(Namedeventarray);
-  factorySpecparam @33 :List(Specparam);
-  factoryClassdefn @34 :List(Classdefn);
-  factoryInterface @35 :List(Interface);
-  factoryProgram @36 :List(Program);
-  factoryPackage @37 :List(Package);
-  factoryModule @38 :List(Module);
-  factoryDesign @39 :List(Design);
+  factoryParamassign @22 :List(Paramassign);
+  factoryInterfacearray @23 :List(Interfacearray);
+  factoryProgramarray @24 :List(Programarray);
+  factoryModulearray @25 :List(Modulearray);
+  factoryGatearray @26 :List(Gatearray);
+  factorySwitcharray @27 :List(Switcharray);
+  factoryUdparray @28 :List(Udparray);
+  factoryArraynet @29 :List(Arraynet);
+  factoryLogicvar @30 :List(Logicvar);
+  factoryArrayvar @31 :List(Arrayvar);
+  factoryNamedevent @32 :List(Namedevent);
+  factoryNamedeventarray @33 :List(Namedeventarray);
+  factorySpecparam @34 :List(Specparam);
+  factoryClassdefn @35 :List(Classdefn);
+  factoryInterface @36 :List(Interface);
+  factoryProgram @37 :List(Program);
+  factoryPackage @38 :List(Package);
+  factoryModule @39 :List(Module);
+  factoryDesign @40 :List(Design);
 
 }
 
@@ -219,20 +220,27 @@ uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
 }
+struct Paramassign {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
 struct Interfacearray {
 vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
-vpiName @4 :UInt64;
-vpiFullName @5 :UInt64;
-vpiSize @6 :Int64;
-expr @7 :ObjIndexType;
-leftexpr @8 :ObjIndexType;
-rightexpr @9 :ObjIndexType;
-instances @10 :List(ObjIndexType);
-range @11 :UInt64;
-modules @12 :List(UInt64);
+paramassigns @4 :List(UInt64);
+vpiName @5 :UInt64;
+vpiFullName @6 :UInt64;
+vpiSize @7 :Int64;
+expr @8 :ObjIndexType;
+leftexpr @9 :ObjIndexType;
+rightexpr @10 :ObjIndexType;
+instances @11 :List(ObjIndexType);
+range @12 :UInt64;
+modules @13 :List(UInt64);
 }
 struct Programarray {
 vpiParent @0 :UInt64;
@@ -254,15 +262,16 @@ vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
-vpiName @4 :UInt64;
-vpiFullName @5 :UInt64;
-vpiSize @6 :Int64;
-expr @7 :ObjIndexType;
-leftexpr @8 :ObjIndexType;
-rightexpr @9 :ObjIndexType;
-instances @10 :List(ObjIndexType);
-range @11 :UInt64;
-modules @12 :List(UInt64);
+paramassigns @4 :List(UInt64);
+vpiName @5 :UInt64;
+vpiFullName @6 :UInt64;
+vpiSize @7 :Int64;
+expr @8 :ObjIndexType;
+leftexpr @9 :ObjIndexType;
+rightexpr @10 :ObjIndexType;
+instances @11 :List(ObjIndexType);
+range @12 :UInt64;
+modules @13 :List(UInt64);
 }
 struct Gatearray {
 vpiParent @0 :UInt64;

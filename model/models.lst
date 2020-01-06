@@ -24,6 +24,7 @@ io_decl.yaml
 alias_stmt.yaml
 clocking_block.yaml
 range.yaml
+param_assign.yaml
 instance_array.yaml
 interface_array.yaml
 program_array.yaml

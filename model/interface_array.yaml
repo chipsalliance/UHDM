@@ -16,3 +16,8 @@
  
 - obj_def: interface_array
   - extends: instance_array
+  - obj_ref: param_assigns
+    name: param assign
+    vpi: vpiParamAssign
+    type: param_assign
+    card: any
