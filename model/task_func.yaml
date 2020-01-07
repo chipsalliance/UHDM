@@ -15,16 +15,7 @@
 # Universal Hardware Data Model (UHDM) "task func" formal description
  
 - class_def: task_func
-  - property: name
-    name: name
-    vpi: vpiName
-    type: string
-    card: 1
-  - property: full_name
-    name: full name
-    vpi: vpiFullName
-    type: string
-    card: 1
+  - extends: scope
   - property: method
     name: method
     vpi: vpiMethod
@@ -74,12 +65,7 @@
     name: right range
     vpi: vpiRightRange
     type: expr
-    card: 1
-  - class_ref: variables
-    name: variables
-    vpi: vpiReturn
-    type: variables
-    card: 1    
+    card: 1   
   - obj_ref: class_defn
     name: class defn
     vpi: vpiClassDefn

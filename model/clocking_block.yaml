@@ -15,6 +15,7 @@
 # Universal Hardware Data Model (UHDM) "clocking_block" formal description
  
 - obj_def: clocking_block
+  - extends: scope
 
 
 

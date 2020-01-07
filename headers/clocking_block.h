@@ -28,7 +28,7 @@
 
 namespace UHDM {
 
-  class clocking_block : public BaseClass {
+  class clocking_block : public scope {
   public:
     // Implicit constructor used to initialize all members,
     // comment: clocking_block();

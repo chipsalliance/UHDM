@@ -80,8 +80,18 @@
     vpi: vpiParameter
     type: parameters
     card: any
-#  - class_ref: scope
-#    name: scopes
-#    vpi: vpiInternalScope
-#    type: scope
-#    card: any
+  - class_ref: scopes
+    name: scopes
+    vpi: vpiInternalScope
+    type: scope
+    card: any
+  - class_ref: typespecs
+    name: typespecs
+    vpi: vpiTypedef
+    type: typespec
+    card: any
+  - obj_ref: let_decls
+    name: let decls
+    vpi: vpiLetDecl
+    type: let_decl
+    card: any

@@ -523,7 +523,7 @@ proc generate_code { models } {
 		    lappend capnp_schema($classname) [printCapnpSchema $obj_key $Name $card]
 		    if {$card == 1} {
 			if {$key == "class_ref"} {
-			    append SAVE($classname) "  if (obj->get_${name}()) {"
+			    append SAVE($classname) "  if (obj->get_${name}()) {\n"
 			    append SAVE($classname) "    ::ObjIndexType::Builder tmp$indTmp = ${Classname}s\[index\].get[string toupper ${Name} 0 0]();\n"
 			    append SAVE($classname) "    tmp${indTmp}.setIndex(getId((obj->get_${name}())));\n"
 			    append SAVE($classname) "    tmp${indTmp}.setType(obj->get_${name}()->getUhdmType());\n  }"			    
@@ -554,14 +554,14 @@ proc generate_code { models } {
 			    append SAVE($classname) "        tmp.setIndex(getId((*obj->get_${name}())\[ind\]));\n"
 			    append SAVE($classname) "        tmp.setType(((*obj->get_${name}())\[ind\])->getUhdmType());"
 			} else {
-			    append SAVE($classname) "[string toupper ${Name} 0 0]s.set(ind, getId((*obj->get_${name}())\[ind\]));"
+			    append SAVE($classname) "        [string toupper ${Name} 0 0]s.set(ind, getId((*obj->get_${name}())\[ind\]));"
 			}
 			append SAVE($classname) "\n      }
     }
 "
 			append RESTORE($classname) "    
     if (obj.get[string toupper ${Name} 0 0]().size()) { 
-      VectorOf${type}* vect = VectorOf${type}Factory::make();
+      std::vector<${type}*>* vect = VectorOf${type}Factory::make();
       for (unsigned int ind = 0; ind < obj.get[string toupper ${Name} 0 0]().size(); ind++) {\n"
 			if {$key == "class_ref"} {
 			    append RESTORE($classname) " 	vect->push_back((${type}*)getObject(obj.get[string toupper ${Name} 0 0]()\[ind\].getType(),obj.get[string toupper ${Name} 0 0]()\[ind\].getIndex()-1));\n"
@@ -610,6 +610,8 @@ proc generate_code { models } {
 	    append vpi_iterate_body_all $vpi_iterate_body($classname)
 	}
 	while {$baseclass != ""} {
+	    
+	    # Capnp schema
 	    if {$modeltype != "class_def"} {
 		foreach member $capnp_schema($baseclass) {
 		    foreach {name type} $member {}
@@ -617,17 +619,25 @@ proc generate_code { models } {
 		    incr capnpIndex
 		}
 	    }
+
+	    # Save
 	    set save ""
 	    foreach line [split $SAVE($baseclass) "\n"] {
 		set base $baseclass
 		regsub -all  {_} $baseclass "" base		
-		regsub  [string toupper $base 0 0] $line $Classname tmp
+		regsub [string toupper $base 0 0]s $line ${Classname}s tmp
+		regsub [string toupper $base 0 0]s $tmp ${Classname}s tmp
 		append save "$tmp\n"
 	    }
 	    append SAVE($classname) $save
+
+	    # Restore
 	    set restore $RESTORE($baseclass)
-	    regsub -all ${baseclass}Factory $RESTORE($baseclass) ${classname}Factory restore	    
+	    regsub -all " ${baseclass}Factory" $RESTORE($baseclass) " ${classname}Factory" restore
+
 	    append RESTORE($classname) $restore
+
+	    # VPI
 	    if [info exist vpi_get_str_body_inst($baseclass)] {
 		foreach inst $vpi_get_str_body_inst($baseclass) {
 		    append vpi_get_str_body [printGetStrBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
@@ -644,7 +654,8 @@ proc generate_code { models } {
 		regsub uhdm$baseclass $vpi_iterate uhdm$classname vpi_iterate
 		append vpi_iterate_body_all $vpi_iterate
 	    }
-	    	
+
+	    # Parent class
 	    if [info exist BASECLASS($baseclass)] {
 		set baseclass $BASECLASS($baseclass)
 	    } else {
