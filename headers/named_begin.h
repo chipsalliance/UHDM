@@ -50,6 +50,10 @@ namespace UHDM {
 
     void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
 
+    VectorOfstmt* get_stmts() const { return stmts_; }
+
+    void set_stmts(VectorOfstmt* data) { stmts_ = data; }
+
     virtual unsigned int getUhdmType() { return uhdmnamed_begin; }   
   private:
     
@@ -60,6 +64,8 @@ namespace UHDM {
     unsigned int vpiFile_;
 
     unsigned int vpiLineNo_;
+
+    VectorOfstmt* stmts_;
 
   };
 

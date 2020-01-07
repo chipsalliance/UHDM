@@ -74,6 +74,10 @@ namespace UHDM {
 
     void set_right_expr(expr* data) { right_expr_ = data; }
 
+    stmt* get_stmt() const { return stmt_; }
+
+    void set_stmt(stmt* data) { stmt_ = data; }
+
     clocking_block* get_class_defn() const { return class_defn_; }
 
     void set_class_defn(clocking_block* data) { class_defn_ = data; }
@@ -108,6 +112,8 @@ namespace UHDM {
     expr* left_expr_;
 
     expr* right_expr_;
+
+    stmt* stmt_;
 
     clocking_block* class_defn_;
 

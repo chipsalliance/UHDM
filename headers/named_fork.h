@@ -54,6 +54,10 @@ namespace UHDM {
 
     void set_vpiJoinType(int data) { vpiJoinType_ = data; }
 
+    VectorOfstmt* get_stmts() const { return stmts_; }
+
+    void set_stmts(VectorOfstmt* data) { stmts_ = data; }
+
     virtual unsigned int getUhdmType() { return uhdmnamed_fork; }   
   private:
     
@@ -66,6 +70,8 @@ namespace UHDM {
     unsigned int vpiLineNo_;
 
     int vpiJoinType_;
+
+    VectorOfstmt* stmts_;
 
   };
 
