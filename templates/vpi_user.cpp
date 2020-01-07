@@ -24,11 +24,12 @@
  */
 #include <string>
 #include <vector>
+#include <map>
 #include <iostream>
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
-#include "include/vpi_uhdm.h"
 #include "headers/containers.h"
+#include "include/vpi_uhdm.h"
 #include "headers/uhdm.h"
 #include <string.h>
 

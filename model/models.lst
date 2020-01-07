@@ -1,4 +1,8 @@
 process.yaml
+property_decl.yaml
+sequence_decl.yaml
+concurrent_assertion.yaml
+virtual_interface_var.yaml
 scope.yaml
 begin.yaml
 named_begin.yaml

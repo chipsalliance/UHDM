@@ -15,16 +15,7 @@
 # Universal Hardware Data Model (UHDM) "instance" formal description
  
 - class_def: instance
-  - property: name
-    name: name
-    vpi: vpiName
-    type: string
-    card: 1
-  - property: full_name
-    name: full name
-    vpi: vpiFullName
-    type: string
-    card: 1
+  - extends: scope
   - property: definition_name
     name: definition name
     vpi: vpiDefName
@@ -130,26 +121,6 @@
     vpi: vpiArrayNet
     type: array_net
     card: any
-  - class_ref: variables
-    name: variables
-    vpi: vpiVariables
-    type: variables
-    card: any
-  - obj_ref: logic_var
-    name: logic var
-    vpi: vpiReg
-    type: logic_var
-    card: any
-  - obj_ref: array_var
-    name: array var
-    vpi: vpiRegArray
-    type: array_var
-    card: any
-  - obj_ref: array_var_mem
-    name: mem var
-    vpi: vpiMemory
-    type: array_var
-    card: any
   - obj_ref: named_event
     name: named event
     vpi: vpiNamedEvent
@@ -159,11 +130,6 @@
     name: named event
     vpi: vpiNamedEvent
     type: named_event
-    card: any
-  - class_ref: parameters
-    name: parameters
-    vpi: vpiParameter
-    type: parameters
     card: any
   - obj_ref: spec_param
     name: spec param

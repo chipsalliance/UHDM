@@ -27,7 +27,11 @@
 #ifndef VPI_UHDM_H
 #define VPI_UHDM_H
 
+#include <unordered_map>
+
 namespace UHDM {
+  typedef std::vector<std::string> Id2SymbolMap;
+  typedef std::unordered_map<std::string, unsigned long> Symbol2IdMap;
 
   class BaseClass {
   public: 
@@ -43,15 +47,23 @@ namespace UHDM {
     static const std::vector<vpiHandle> restore(std::string file);
   private:
     static BaseClass* getObject(unsigned int objectType, unsigned int index);
+    static void setId(BaseClass* p, unsigned long id);
+    static unsigned long getId(BaseClass* p) ;
+    static std::unordered_map<BaseClass*, unsigned long> allIds_;
   };
 
   class SymbolFactory {
+    friend Serializer;
   public:
     static unsigned int make(const std::string& symbol);
     static const std::string& getSymbol(unsigned int id);
     static unsigned int getId(const std::string& symbol);
   private:
     static unsigned int idCounter_;
+    static std::string bad_symbol_;
+    static Id2SymbolMap id2SymbolMap_;
+    static Symbol2IdMap symbol2IdMap_;
+
   };
   
 };
