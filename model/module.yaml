@@ -61,11 +61,6 @@
     vpi: vpiInstanceArray
     type: instance_array
     card: 1
-  - class_ref: scope
-    name: scope
-    vpi: vpiInternalScope
-    type: scope
-    card: any
   - obj_ref: ports
     vpi: vpiPort
     name: port

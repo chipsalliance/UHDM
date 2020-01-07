@@ -54,6 +54,14 @@ namespace UHDM {
 
     void set_parameters(VectorOfparameters* data) { parameters_ = data; }
 
+    VectorOfscope* get_scopes() const { return scopes_; }
+
+    void set_scopes(VectorOfscope* data) { scopes_ = data; }
+
+    VectorOftypespec* get_typespecs() const { return typespecs_; }
+
+    void set_typespecs(VectorOftypespec* data) { typespecs_ = data; }
+
     VectorOfproperty_decl* get_property_decls() const { return property_decls_; }
 
     void set_property_decls(VectorOfproperty_decl* data) { property_decls_ = data; }
@@ -86,6 +94,10 @@ namespace UHDM {
 
     void set_array_var_mem(VectorOfarray_var* data) { array_var_mem_ = data; }
 
+    VectorOflet_decl* get_let_decls() const { return let_decls_; }
+
+    void set_let_decls(VectorOflet_decl* data) { let_decls_ = data; }
+
     virtual unsigned int getUhdmType() { return uhdmscope; }   
   private:
     
@@ -98,6 +110,10 @@ namespace UHDM {
     VectorOfvariables* variables_;
 
     VectorOfparameters* parameters_;
+
+    VectorOfscope* scopes_;
+
+    VectorOftypespec* typespecs_;
 
     VectorOfproperty_decl* property_decls_;
 
@@ -114,6 +130,8 @@ namespace UHDM {
     VectorOfarray_var* array_var_;
 
     VectorOfarray_var* array_var_mem_;
+
+    VectorOflet_decl* let_decls_;
 
   };
 

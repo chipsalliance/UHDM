@@ -72,6 +72,11 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(virtual_interface_varFactory::make(), ind);
  }
 
+ ::capnp::List<Letdecl>::Reader Letdecls = cap_root.getFactoryLetdecl();
+ for (unsigned ind = 0; ind < Letdecls.size(); ind++) {
+   setId(let_declFactory::make(), ind);
+ }
+
  ::capnp::List<Begin>::Reader Begins = cap_root.getFactoryBegin();
  for (unsigned ind = 0; ind < Begins.size(); ind++) {
    setId(beginFactory::make(), ind);
@@ -80,6 +85,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  ::capnp::List<Namedbegin>::Reader Namedbegins = cap_root.getFactoryNamedbegin();
  for (unsigned ind = 0; ind < Namedbegins.size(); ind++) {
    setId(named_beginFactory::make(), ind);
+ }
+
+ ::capnp::List<Namedfork>::Reader Namedforks = cap_root.getFactoryNamedfork();
+ for (unsigned ind = 0; ind < Namedforks.size(); ind++) {
+   setId(named_forkFactory::make(), ind);
+ }
+
+ ::capnp::List<Forkstmt>::Reader Forkstmts = cap_root.getFactoryForkstmt();
+ for (unsigned ind = 0; ind < Forkstmts.size(); ind++) {
+   setId(fork_stmtFactory::make(), ind);
+ }
+
+ ::capnp::List<Forstmt>::Reader Forstmts = cap_root.getFactoryForstmt();
+ for (unsigned ind = 0; ind < Forstmts.size(); ind++) {
+   setId(for_stmtFactory::make(), ind);
+ }
+
+ ::capnp::List<Foreachstmt>::Reader Foreachstmts = cap_root.getFactoryForeachstmt();
+ for (unsigned ind = 0; ind < Foreachstmts.size(); ind++) {
+   setId(foreach_stmtFactory::make(), ind);
+ }
+
+ ::capnp::List<Genscope>::Reader Genscopes = cap_root.getFactoryGenscope();
+ for (unsigned ind = 0; ind < Genscopes.size(); ind++) {
+   setId(gen_scopeFactory::make(), ind);
  }
 
  ::capnp::List<Distribution>::Reader Distributions = cap_root.getFactoryDistribution();
@@ -237,6 +267,16 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(class_defnFactory::make(), ind);
  }
 
+ ::capnp::List<Classtypespec>::Reader Classtypespecs = cap_root.getFactoryClasstypespec();
+ for (unsigned ind = 0; ind < Classtypespecs.size(); ind++) {
+   setId(class_typespecFactory::make(), ind);
+ }
+
+ ::capnp::List<Classobj>::Reader Classobjs = cap_root.getFactoryClassobj();
+ for (unsigned ind = 0; ind < Classobjs.size(); ind++) {
+   setId(class_objFactory::make(), ind);
+ }
+
  ::capnp::List<Interface>::Reader Interfaces = cap_root.getFactoryInterface();
  for (unsigned ind = 0; ind < Interfaces.size(); ind++) {
    setId(interfaceFactory::make(), ind);
@@ -305,6 +345,16 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
+ for (Letdecl::Reader obj : Letdecls) {
+   let_declFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   let_declFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   let_declFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   let_declFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
  for (Begin::Reader obj : Begins) {
    beginFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    beginFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
@@ -314,7 +364,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     beginFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -322,7 +372,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -330,15 +380,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       beginFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      beginFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      beginFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -346,7 +412,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -354,7 +420,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -362,7 +428,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -370,7 +436,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -378,7 +444,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -386,7 +452,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -394,11 +460,19 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       beginFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      beginFactory::objects_[index]->set_let_decls(vect);
     }
 
    index++;
@@ -414,7 +488,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     named_beginFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -422,7 +496,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -430,15 +504,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       named_beginFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      named_beginFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      named_beginFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -446,7 +536,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -454,7 +544,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -462,7 +552,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -470,7 +560,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -478,7 +568,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -486,7 +576,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -494,11 +584,641 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       named_beginFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      named_beginFactory::objects_[index]->set_let_decls(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Namedfork::Reader obj : Namedforks) {
+   named_forkFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   named_forkFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   named_forkFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   named_forkFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    named_forkFactory::objects_[index]->set_vpiJoinType(obj.getVpiJoinType());
+    named_forkFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    named_forkFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      named_forkFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      named_forkFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      named_forkFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      named_forkFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      named_forkFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      named_forkFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      named_forkFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      named_forkFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      named_forkFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      named_forkFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      named_forkFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      named_forkFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      named_forkFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      named_forkFactory::objects_[index]->set_let_decls(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Forkstmt::Reader obj : Forkstmts) {
+   fork_stmtFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   fork_stmtFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   fork_stmtFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   fork_stmtFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    fork_stmtFactory::objects_[index]->set_vpiJoinType(obj.getVpiJoinType());
+    fork_stmtFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    fork_stmtFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      fork_stmtFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      fork_stmtFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      fork_stmtFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      fork_stmtFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      fork_stmtFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      fork_stmtFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      fork_stmtFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      fork_stmtFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      fork_stmtFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      fork_stmtFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      fork_stmtFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      fork_stmtFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      fork_stmtFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      fork_stmtFactory::objects_[index]->set_let_decls(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Forstmt::Reader obj : Forstmts) {
+   for_stmtFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   for_stmtFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   for_stmtFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   for_stmtFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    for_stmtFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    for_stmtFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      for_stmtFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      for_stmtFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      for_stmtFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      for_stmtFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      for_stmtFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      for_stmtFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      for_stmtFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      for_stmtFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      for_stmtFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      for_stmtFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      for_stmtFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      for_stmtFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      for_stmtFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      for_stmtFactory::objects_[index]->set_let_decls(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Foreachstmt::Reader obj : Foreachstmts) {
+   foreach_stmtFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   foreach_stmtFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   foreach_stmtFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   foreach_stmtFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    foreach_stmtFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    foreach_stmtFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      foreach_stmtFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      foreach_stmtFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      foreach_stmtFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      foreach_stmtFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      foreach_stmtFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      foreach_stmtFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      foreach_stmtFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      foreach_stmtFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      foreach_stmtFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      foreach_stmtFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      foreach_stmtFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      foreach_stmtFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      foreach_stmtFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      foreach_stmtFactory::objects_[index]->set_let_decls(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Genscope::Reader obj : Genscopes) {
+   gen_scopeFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   gen_scopeFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   gen_scopeFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   gen_scopeFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    gen_scopeFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    gen_scopeFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      gen_scopeFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      gen_scopeFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      gen_scopeFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      gen_scopeFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      gen_scopeFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      gen_scopeFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      gen_scopeFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      gen_scopeFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      gen_scopeFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      gen_scopeFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      gen_scopeFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      gen_scopeFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      gen_scopeFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      gen_scopeFactory::objects_[index]->set_let_decls(vect);
     }
 
    index++;
@@ -523,7 +1243,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     operationFactory::objects_[index]->set_vpiOpType(obj.getVpiOpType());
     
     if (obj.getOperands().size()) { 
-      VectorOfoperand_group* vect = VectorOfoperand_groupFactory::make();
+      std::vector<operand_group*>* vect = VectorOfoperand_groupFactory::make();
       for (unsigned int ind = 0; ind < obj.getOperands().size(); ind++) {
  	vect->push_back((operand_group*)getObject(obj.getOperands()[ind].getType(),obj.getOperands()[ind].getIndex()-1));
     }
@@ -551,8 +1271,6 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    taskFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    taskFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    taskFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
-    taskFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
-    taskFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     taskFactory::objects_[index]->set_vpiMethod(obj.getVpiMethod());
     taskFactory::objects_[index]->set_vpiAccessType(obj.getVpiAccessType());
     taskFactory::objects_[index]->set_vpiVisibility(obj.getVpiVisibility());
@@ -563,13 +1281,240 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     taskFactory::objects_[index]->set_vpiDPICIdentifier(SymbolFactory::getSymbol(obj.getVpiDPICIdentifier()));
      taskFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
      taskFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
-     taskFactory::objects_[index]->set_variables((variables*)getObject(obj.getVariables().getType(),obj.getVariables().getIndex()-1));
    if (obj.getClassdefn()) 
      taskFactory::objects_[index]->set_class_defn(clocking_blockFactory::objects_[obj.getClassdefn()-1]);
    if (obj.getRefobj()) 
      taskFactory::objects_[index]->set_ref_obj(ref_objFactory::objects_[obj.getRefobj()-1]);
    if (obj.getIodecl()) 
      taskFactory::objects_[index]->set_io_decl(io_declFactory::objects_[obj.getIodecl()-1]);
+    taskFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    taskFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_let_decls(vect);
+    }
+    taskFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    taskFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      taskFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      taskFactory::objects_[index]->set_let_decls(vect);
+    }
 
    index++;
  }
@@ -583,8 +1528,6 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     functionFactory::objects_[index]->set_vpiSigned(obj.getVpiSigned());
     functionFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
     functionFactory::objects_[index]->set_vpiFuncType(obj.getVpiFuncType());
-    functionFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
-    functionFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     functionFactory::objects_[index]->set_vpiMethod(obj.getVpiMethod());
     functionFactory::objects_[index]->set_vpiAccessType(obj.getVpiAccessType());
     functionFactory::objects_[index]->set_vpiVisibility(obj.getVpiVisibility());
@@ -595,13 +1538,240 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     functionFactory::objects_[index]->set_vpiDPICIdentifier(SymbolFactory::getSymbol(obj.getVpiDPICIdentifier()));
      functionFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
      functionFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
-     functionFactory::objects_[index]->set_variables((variables*)getObject(obj.getVariables().getType(),obj.getVariables().getIndex()-1));
    if (obj.getClassdefn()) 
      functionFactory::objects_[index]->set_class_defn(clocking_blockFactory::objects_[obj.getClassdefn()-1]);
    if (obj.getRefobj()) 
      functionFactory::objects_[index]->set_ref_obj(ref_objFactory::objects_[obj.getRefobj()-1]);
    if (obj.getIodecl()) 
      functionFactory::objects_[index]->set_io_decl(io_declFactory::objects_[obj.getIodecl()-1]);
+    functionFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    functionFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_let_decls(vect);
+    }
+    functionFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    functionFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      functionFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      functionFactory::objects_[index]->set_let_decls(vect);
+    }
 
    index++;
  }
@@ -615,7 +1785,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     modportFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     
     if (obj.getIodecls().size()) { 
-      VectorOfio_decl* vect = VectorOfio_declFactory::make();
+      std::vector<io_decl*>* vect = VectorOfio_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getIodecls().size(); ind++) {
  	vect->push_back(io_declFactory::objects_[obj.getIodecls()[ind]-1]);
     }
@@ -636,7 +1806,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     interface_tf_declFactory::objects_[index]->set_vpiAccessType(obj.getVpiAccessType());
     
     if (obj.getTasks().size()) { 
-      VectorOftask* vect = VectorOftaskFactory::make();
+      std::vector<task*>* vect = VectorOftaskFactory::make();
       for (unsigned int ind = 0; ind < obj.getTasks().size(); ind++) {
  	vect->push_back(taskFactory::objects_[obj.getTasks()[ind]-1]);
     }
@@ -644,7 +1814,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getFunctions().size()) { 
-      VectorOffunction* vect = VectorOffunctionFactory::make();
+      std::vector<function*>* vect = VectorOffunctionFactory::make();
       for (unsigned int ind = 0; ind < obj.getFunctions().size(); ind++) {
  	vect->push_back(functionFactory::objects_[obj.getFunctions()[ind]-1]);
     }
@@ -740,6 +1910,120 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    clocking_blockFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    clocking_blockFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    clocking_blockFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    clocking_blockFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    clocking_blockFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      clocking_blockFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      clocking_blockFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      clocking_blockFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      clocking_blockFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      clocking_blockFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      clocking_blockFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      clocking_blockFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      clocking_blockFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      clocking_blockFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      clocking_blockFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      clocking_blockFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      clocking_blockFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      clocking_blockFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      clocking_blockFactory::objects_[index]->set_let_decls(vect);
+    }
 
    index++;
  }
@@ -772,7 +2056,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    interface_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
     
     if (obj.getParamassigns().size()) { 
-      VectorOfparam_assign* vect = VectorOfparam_assignFactory::make();
+      std::vector<param_assign*>* vect = VectorOfparam_assignFactory::make();
       for (unsigned int ind = 0; ind < obj.getParamassigns().size(); ind++) {
  	vect->push_back(param_assignFactory::objects_[obj.getParamassigns()[ind]-1]);
     }
@@ -786,7 +2070,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      interface_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
     
     if (obj.getInstances().size()) { 
-      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      std::vector<instance*>* vect = VectorOfinstanceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
  	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
     }
@@ -796,7 +2080,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      interface_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -820,7 +2104,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      program_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
     
     if (obj.getInstances().size()) { 
-      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      std::vector<instance*>* vect = VectorOfinstanceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
  	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
     }
@@ -830,7 +2114,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      program_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -848,7 +2132,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    module_arrayFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
     
     if (obj.getParamassigns().size()) { 
-      VectorOfparam_assign* vect = VectorOfparam_assignFactory::make();
+      std::vector<param_assign*>* vect = VectorOfparam_assignFactory::make();
       for (unsigned int ind = 0; ind < obj.getParamassigns().size(); ind++) {
  	vect->push_back(param_assignFactory::objects_[obj.getParamassigns()[ind]-1]);
     }
@@ -862,7 +2146,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      module_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
     
     if (obj.getInstances().size()) { 
-      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      std::vector<instance*>* vect = VectorOfinstanceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
  	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
     }
@@ -872,7 +2156,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      module_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -891,7 +2175,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      gate_arrayFactory::objects_[index]->set_delay((expr*)getObject(obj.getDelay().getType(),obj.getDelay().getIndex()-1));
     
     if (obj.getPrimitives().size()) { 
-      VectorOfprimitive* vect = VectorOfprimitiveFactory::make();
+      std::vector<primitive*>* vect = VectorOfprimitiveFactory::make();
       for (unsigned int ind = 0; ind < obj.getPrimitives().size(); ind++) {
  	vect->push_back((primitive*)getObject(obj.getPrimitives()[ind].getType(),obj.getPrimitives()[ind].getIndex()-1));
     }
@@ -905,7 +2189,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      gate_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
     
     if (obj.getInstances().size()) { 
-      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      std::vector<instance*>* vect = VectorOfinstanceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
  	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
     }
@@ -915,7 +2199,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      gate_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -929,7 +2213,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      gate_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
     
     if (obj.getInstances().size()) { 
-      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      std::vector<instance*>* vect = VectorOfinstanceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
  	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
     }
@@ -939,7 +2223,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      gate_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -958,7 +2242,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      switch_arrayFactory::objects_[index]->set_delay((expr*)getObject(obj.getDelay().getType(),obj.getDelay().getIndex()-1));
     
     if (obj.getPrimitives().size()) { 
-      VectorOfprimitive* vect = VectorOfprimitiveFactory::make();
+      std::vector<primitive*>* vect = VectorOfprimitiveFactory::make();
       for (unsigned int ind = 0; ind < obj.getPrimitives().size(); ind++) {
  	vect->push_back((primitive*)getObject(obj.getPrimitives()[ind].getType(),obj.getPrimitives()[ind].getIndex()-1));
     }
@@ -972,7 +2256,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      switch_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
     
     if (obj.getInstances().size()) { 
-      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      std::vector<instance*>* vect = VectorOfinstanceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
  	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
     }
@@ -982,7 +2266,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      switch_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -996,7 +2280,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      switch_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
     
     if (obj.getInstances().size()) { 
-      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      std::vector<instance*>* vect = VectorOfinstanceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
  	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
     }
@@ -1006,7 +2290,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      switch_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -1025,7 +2309,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      udp_arrayFactory::objects_[index]->set_delay((expr*)getObject(obj.getDelay().getType(),obj.getDelay().getIndex()-1));
     
     if (obj.getPrimitives().size()) { 
-      VectorOfprimitive* vect = VectorOfprimitiveFactory::make();
+      std::vector<primitive*>* vect = VectorOfprimitiveFactory::make();
       for (unsigned int ind = 0; ind < obj.getPrimitives().size(); ind++) {
  	vect->push_back((primitive*)getObject(obj.getPrimitives()[ind].getType(),obj.getPrimitives()[ind].getIndex()-1));
     }
@@ -1039,7 +2323,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      udp_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
     
     if (obj.getInstances().size()) { 
-      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      std::vector<instance*>* vect = VectorOfinstanceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
  	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
     }
@@ -1049,7 +2333,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      udp_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -1063,7 +2347,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      udp_arrayFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
     
     if (obj.getInstances().size()) { 
-      VectorOfinstance* vect = VectorOfinstanceFactory::make();
+      std::vector<instance*>* vect = VectorOfinstanceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstances().size(); ind++) {
  	vect->push_back((instance*)getObject(obj.getInstances()[ind].getType(),obj.getInstances()[ind].getIndex()-1));
     }
@@ -1073,7 +2357,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      udp_arrayFactory::objects_[index]->set_range(rangeFactory::objects_[obj.getRange()-1]);
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -1149,6 +2433,368 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    class_defnFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    class_defnFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    class_defnFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    class_defnFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    class_defnFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      class_defnFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      class_defnFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      class_defnFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      class_defnFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      class_defnFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      class_defnFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      class_defnFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      class_defnFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      class_defnFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      class_defnFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      class_defnFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      class_defnFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      class_defnFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      class_defnFactory::objects_[index]->set_let_decls(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Classtypespec::Reader obj : Classtypespecs) {
+   class_typespecFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   class_typespecFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   class_typespecFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   class_typespecFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    class_typespecFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    class_typespecFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      class_typespecFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      class_typespecFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      class_typespecFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      class_typespecFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      class_typespecFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      class_typespecFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      class_typespecFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      class_typespecFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      class_typespecFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      class_typespecFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      class_typespecFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      class_typespecFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      class_typespecFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      class_typespecFactory::objects_[index]->set_let_decls(vect);
+    }
+
+   index++;
+ }
+
+ index = 0;
+ for (Classobj::Reader obj : Classobjs) {
+   class_objFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   class_objFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   class_objFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   class_objFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    class_objFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    class_objFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    
+    if (obj.getConcurrentassertions().size()) { 
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
+      for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
+ 	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
+    }
+      class_objFactory::objects_[index]->set_concurrent_assertions(vect);
+    }
+    
+    if (obj.getVariables().size()) { 
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
+ 	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
+    }
+      class_objFactory::objects_[index]->set_variables(vect);
+    }
+    
+    if (obj.getParameters().size()) { 
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
+      for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
+ 	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
+    }
+      class_objFactory::objects_[index]->set_parameters(vect);
+    }
+    
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      class_objFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      class_objFactory::objects_[index]->set_typespecs(vect);
+    }
+    
+    if (obj.getPropertydecls().size()) { 
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
+ 	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
+    }
+      class_objFactory::objects_[index]->set_property_decls(vect);
+    }
+    
+    if (obj.getSequencedecls().size()) { 
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
+ 	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
+    }
+      class_objFactory::objects_[index]->set_sequence_decls(vect);
+    }
+    
+    if (obj.getNamedevents().size()) { 
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
+ 	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
+    }
+      class_objFactory::objects_[index]->set_named_events(vect);
+    }
+    
+    if (obj.getNamedeventarrays().size()) { 
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
+ 	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
+    }
+      class_objFactory::objects_[index]->set_named_event_arrays(vect);
+    }
+    
+    if (obj.getVirtualinterfacevars().size()) { 
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
+ 	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
+    }
+      class_objFactory::objects_[index]->set_virtual_interface_vars(vect);
+    }
+    
+    if (obj.getLogicvar().size()) { 
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
+ 	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
+    }
+      class_objFactory::objects_[index]->set_logic_var(vect);
+    }
+    
+    if (obj.getArrayvar().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
+    }
+      class_objFactory::objects_[index]->set_array_var(vect);
+    }
+    
+    if (obj.getArrayvarmem().size()) { 
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
+      for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
+ 	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
+    }
+      class_objFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      class_objFactory::objects_[index]->set_let_decls(vect);
+    }
 
    index++;
  }
@@ -1164,7 +2810,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      interfaceFactory::objects_[index]->set_instance_array((instance_array*)getObject(obj.getInstancearray().getType(),obj.getInstancearray().getIndex()-1));
     
     if (obj.getProcess().size()) { 
-      VectorOfprocess* vect = VectorOfprocessFactory::make();
+      std::vector<process*>* vect = VectorOfprocessFactory::make();
       for (unsigned int ind = 0; ind < obj.getProcess().size(); ind++) {
  	vect->push_back((process*)getObject(obj.getProcess()[ind].getType(),obj.getProcess()[ind].getIndex()-1));
     }
@@ -1172,7 +2818,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInterfacetfdecls().size()) { 
-      VectorOfinterface_tf_decl* vect = VectorOfinterface_tf_declFactory::make();
+      std::vector<interface_tf_decl*>* vect = VectorOfinterface_tf_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getInterfacetfdecls().size(); ind++) {
  	vect->push_back(interface_tf_declFactory::objects_[obj.getInterfacetfdecls()[ind]-1]);
     }
@@ -1180,7 +2826,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getModports().size()) { 
-      VectorOfmodport* vect = VectorOfmodportFactory::make();
+      std::vector<modport*>* vect = VectorOfmodportFactory::make();
       for (unsigned int ind = 0; ind < obj.getModports().size(); ind++) {
  	vect->push_back(modportFactory::objects_[obj.getModports()[ind]-1]);
     }
@@ -1192,7 +2838,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      interfaceFactory::objects_[index]->set_default_clocking(clocking_blockFactory::objects_[obj.getDefaultclocking()-1]);
     
     if (obj.getModpaths().size()) { 
-      VectorOfmod_path* vect = VectorOfmod_pathFactory::make();
+      std::vector<mod_path*>* vect = VectorOfmod_pathFactory::make();
       for (unsigned int ind = 0; ind < obj.getModpaths().size(); ind++) {
  	vect->push_back(mod_pathFactory::objects_[obj.getModpaths()[ind]-1]);
     }
@@ -1200,7 +2846,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getContassigns().size()) { 
-      VectorOfcont_assign* vect = VectorOfcont_assignFactory::make();
+      std::vector<cont_assign*>* vect = VectorOfcont_assignFactory::make();
       for (unsigned int ind = 0; ind < obj.getContassigns().size(); ind++) {
  	vect->push_back(cont_assignFactory::objects_[obj.getContassigns()[ind]-1]);
     }
@@ -1208,7 +2854,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInterfaces().size()) { 
-      VectorOfinterface* vect = VectorOfinterfaceFactory::make();
+      std::vector<interface*>* vect = VectorOfinterfaceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInterfaces().size(); ind++) {
  	vect->push_back(interfaceFactory::objects_[obj.getInterfaces()[ind]-1]);
     }
@@ -1216,7 +2862,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInterfacearrays().size()) { 
-      VectorOfinterface_array* vect = VectorOfinterface_arrayFactory::make();
+      std::vector<interface_array*>* vect = VectorOfinterface_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getInterfacearrays().size(); ind++) {
  	vect->push_back(interface_arrayFactory::objects_[obj.getInterfacearrays()[ind]-1]);
     }
@@ -1239,7 +2885,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     interfaceFactory::objects_[index]->set_vpiTop(obj.getVpiTop());
     
     if (obj.getTaskfunc().size()) { 
-      VectorOftask_func* vect = VectorOftask_funcFactory::make();
+      std::vector<task_func*>* vect = VectorOftask_funcFactory::make();
       for (unsigned int ind = 0; ind < obj.getTaskfunc().size(); ind++) {
  	vect->push_back((task_func*)getObject(obj.getTaskfunc()[ind].getType(),obj.getTaskfunc()[ind].getIndex()-1));
     }
@@ -1247,7 +2893,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNet().size()) { 
-      VectorOfnet* vect = VectorOfnetFactory::make();
+      std::vector<net*>* vect = VectorOfnetFactory::make();
       for (unsigned int ind = 0; ind < obj.getNet().size(); ind++) {
  	vect->push_back((net*)getObject(obj.getNet()[ind].getType(),obj.getNet()[ind].getIndex()-1));
     }
@@ -1255,7 +2901,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArraynet().size()) { 
-      VectorOfarray_net* vect = VectorOfarray_netFactory::make();
+      std::vector<array_net*>* vect = VectorOfarray_netFactory::make();
       for (unsigned int ind = 0; ind < obj.getArraynet().size(); ind++) {
  	vect->push_back((array_net*)getObject(obj.getArraynet()[ind].getType(),obj.getArraynet()[ind].getIndex()-1));
     }
@@ -1263,23 +2909,15 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getAssertion().size()) { 
-      VectorOfassertion* vect = VectorOfassertionFactory::make();
+      std::vector<assertion*>* vect = VectorOfassertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getAssertion().size(); ind++) {
  	vect->push_back((assertion*)getObject(obj.getAssertion()[ind].getType(),obj.getAssertion()[ind].getIndex()-1));
     }
       interfaceFactory::objects_[index]->set_assertion(vect);
     }
     
-    if (obj.getTypespec().size()) { 
-      VectorOftypespec* vect = VectorOftypespecFactory::make();
-      for (unsigned int ind = 0; ind < obj.getTypespec().size(); ind++) {
- 	vect->push_back((typespec*)getObject(obj.getTypespec()[ind].getType(),obj.getTypespec()[ind].getIndex()-1));
-    }
-      interfaceFactory::objects_[index]->set_typespec(vect);
-    }
-    
     if (obj.getClassdefn().size()) { 
-      VectorOfclass_defn* vect = VectorOfclass_defnFactory::make();
+      std::vector<class_defn*>* vect = VectorOfclass_defnFactory::make();
       for (unsigned int ind = 0; ind < obj.getClassdefn().size(); ind++) {
  	vect->push_back((class_defn*)getObject(obj.getClassdefn()[ind].getType(),obj.getClassdefn()[ind].getIndex()-1));
     }
@@ -1288,7 +2926,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      interfaceFactory::objects_[index]->set_instance((instance*)getObject(obj.getInstance().getType(),obj.getInstance().getIndex()-1));
     
     if (obj.getPrograms().size()) { 
-      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      std::vector<program*>* vect = VectorOfprogramFactory::make();
       for (unsigned int ind = 0; ind < obj.getPrograms().size(); ind++) {
  	vect->push_back(programFactory::objects_[obj.getPrograms()[ind]-1]);
     }
@@ -1296,7 +2934,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getProgramarrays().size()) { 
-      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      std::vector<program*>* vect = VectorOfprogramFactory::make();
       for (unsigned int ind = 0; ind < obj.getProgramarrays().size(); ind++) {
  	vect->push_back(programFactory::objects_[obj.getProgramarrays()[ind]-1]);
     }
@@ -1304,7 +2942,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevent().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevent().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevent()[ind]-1]);
     }
@@ -1312,7 +2950,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarray().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarray().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedeventarray()[ind]-1]);
     }
@@ -1320,7 +2958,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSpecparam().size()) { 
-      VectorOfspec_param* vect = VectorOfspec_paramFactory::make();
+      std::vector<spec_param*>* vect = VectorOfspec_paramFactory::make();
       for (unsigned int ind = 0; ind < obj.getSpecparam().size(); ind++) {
  	vect->push_back(spec_paramFactory::objects_[obj.getSpecparam()[ind]-1]);
     }
@@ -1332,7 +2970,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     interfaceFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -1340,7 +2978,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -1348,15 +2986,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       interfaceFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      interfaceFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      interfaceFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -1364,7 +3018,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -1372,7 +3026,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -1380,7 +3034,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -1388,7 +3042,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -1396,7 +3050,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -1404,7 +3058,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -1412,17 +3066,25 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       interfaceFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      interfaceFactory::objects_[index]->set_let_decls(vect);
     }
     interfaceFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     interfaceFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -1430,7 +3092,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -1438,15 +3100,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       interfaceFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      interfaceFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      interfaceFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -1454,7 +3132,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -1462,7 +3140,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -1470,7 +3148,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -1478,7 +3156,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -1486,7 +3164,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -1494,7 +3172,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -1502,11 +3180,19 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       interfaceFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      interfaceFactory::objects_[index]->set_let_decls(vect);
     }
 
    index++;
@@ -1523,7 +3209,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      programFactory::objects_[index]->set_expr_dist((expr_dist*)getObject(obj.getExprdist().getType(),obj.getExprdist().getIndex()-1));
     
     if (obj.getProcess().size()) { 
-      VectorOfprocess* vect = VectorOfprocessFactory::make();
+      std::vector<process*>* vect = VectorOfprocessFactory::make();
       for (unsigned int ind = 0; ind < obj.getProcess().size(); ind++) {
  	vect->push_back((process*)getObject(obj.getProcess()[ind].getType(),obj.getProcess()[ind].getIndex()-1));
     }
@@ -1533,7 +3219,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      programFactory::objects_[index]->set_default_clocking(clocking_blockFactory::objects_[obj.getDefaultclocking()-1]);
     
     if (obj.getInterfaces().size()) { 
-      VectorOfinterface* vect = VectorOfinterfaceFactory::make();
+      std::vector<interface*>* vect = VectorOfinterfaceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInterfaces().size(); ind++) {
  	vect->push_back(interfaceFactory::objects_[obj.getInterfaces()[ind]-1]);
     }
@@ -1541,7 +3227,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInterfacearrays().size()) { 
-      VectorOfinterface_array* vect = VectorOfinterface_arrayFactory::make();
+      std::vector<interface_array*>* vect = VectorOfinterface_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getInterfacearrays().size(); ind++) {
  	vect->push_back(interface_arrayFactory::objects_[obj.getInterfacearrays()[ind]-1]);
     }
@@ -1549,7 +3235,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getContassigns().size()) { 
-      VectorOfcont_assign* vect = VectorOfcont_assignFactory::make();
+      std::vector<cont_assign*>* vect = VectorOfcont_assignFactory::make();
       for (unsigned int ind = 0; ind < obj.getContassigns().size(); ind++) {
  	vect->push_back(cont_assignFactory::objects_[obj.getContassigns()[ind]-1]);
     }
@@ -1557,7 +3243,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getClockingblocks().size()) { 
-      VectorOfclocking_block* vect = VectorOfclocking_blockFactory::make();
+      std::vector<clocking_block*>* vect = VectorOfclocking_blockFactory::make();
       for (unsigned int ind = 0; ind < obj.getClockingblocks().size(); ind++) {
  	vect->push_back(clocking_blockFactory::objects_[obj.getClockingblocks()[ind]-1]);
     }
@@ -1580,7 +3266,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     programFactory::objects_[index]->set_vpiTop(obj.getVpiTop());
     
     if (obj.getTaskfunc().size()) { 
-      VectorOftask_func* vect = VectorOftask_funcFactory::make();
+      std::vector<task_func*>* vect = VectorOftask_funcFactory::make();
       for (unsigned int ind = 0; ind < obj.getTaskfunc().size(); ind++) {
  	vect->push_back((task_func*)getObject(obj.getTaskfunc()[ind].getType(),obj.getTaskfunc()[ind].getIndex()-1));
     }
@@ -1588,7 +3274,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNet().size()) { 
-      VectorOfnet* vect = VectorOfnetFactory::make();
+      std::vector<net*>* vect = VectorOfnetFactory::make();
       for (unsigned int ind = 0; ind < obj.getNet().size(); ind++) {
  	vect->push_back((net*)getObject(obj.getNet()[ind].getType(),obj.getNet()[ind].getIndex()-1));
     }
@@ -1596,7 +3282,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArraynet().size()) { 
-      VectorOfarray_net* vect = VectorOfarray_netFactory::make();
+      std::vector<array_net*>* vect = VectorOfarray_netFactory::make();
       for (unsigned int ind = 0; ind < obj.getArraynet().size(); ind++) {
  	vect->push_back((array_net*)getObject(obj.getArraynet()[ind].getType(),obj.getArraynet()[ind].getIndex()-1));
     }
@@ -1604,23 +3290,15 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getAssertion().size()) { 
-      VectorOfassertion* vect = VectorOfassertionFactory::make();
+      std::vector<assertion*>* vect = VectorOfassertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getAssertion().size(); ind++) {
  	vect->push_back((assertion*)getObject(obj.getAssertion()[ind].getType(),obj.getAssertion()[ind].getIndex()-1));
     }
       programFactory::objects_[index]->set_assertion(vect);
     }
     
-    if (obj.getTypespec().size()) { 
-      VectorOftypespec* vect = VectorOftypespecFactory::make();
-      for (unsigned int ind = 0; ind < obj.getTypespec().size(); ind++) {
- 	vect->push_back((typespec*)getObject(obj.getTypespec()[ind].getType(),obj.getTypespec()[ind].getIndex()-1));
-    }
-      programFactory::objects_[index]->set_typespec(vect);
-    }
-    
     if (obj.getClassdefn().size()) { 
-      VectorOfclass_defn* vect = VectorOfclass_defnFactory::make();
+      std::vector<class_defn*>* vect = VectorOfclass_defnFactory::make();
       for (unsigned int ind = 0; ind < obj.getClassdefn().size(); ind++) {
  	vect->push_back((class_defn*)getObject(obj.getClassdefn()[ind].getType(),obj.getClassdefn()[ind].getIndex()-1));
     }
@@ -1629,7 +3307,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      programFactory::objects_[index]->set_instance((instance*)getObject(obj.getInstance().getType(),obj.getInstance().getIndex()-1));
     
     if (obj.getPrograms().size()) { 
-      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      std::vector<program*>* vect = VectorOfprogramFactory::make();
       for (unsigned int ind = 0; ind < obj.getPrograms().size(); ind++) {
  	vect->push_back(programFactory::objects_[obj.getPrograms()[ind]-1]);
     }
@@ -1637,7 +3315,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getProgramarrays().size()) { 
-      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      std::vector<program*>* vect = VectorOfprogramFactory::make();
       for (unsigned int ind = 0; ind < obj.getProgramarrays().size(); ind++) {
  	vect->push_back(programFactory::objects_[obj.getProgramarrays()[ind]-1]);
     }
@@ -1645,7 +3323,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevent().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevent().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevent()[ind]-1]);
     }
@@ -1653,7 +3331,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarray().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarray().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedeventarray()[ind]-1]);
     }
@@ -1661,7 +3339,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSpecparam().size()) { 
-      VectorOfspec_param* vect = VectorOfspec_paramFactory::make();
+      std::vector<spec_param*>* vect = VectorOfspec_paramFactory::make();
       for (unsigned int ind = 0; ind < obj.getSpecparam().size(); ind++) {
  	vect->push_back(spec_paramFactory::objects_[obj.getSpecparam()[ind]-1]);
     }
@@ -1673,7 +3351,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     programFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -1681,7 +3359,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -1689,15 +3367,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       programFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      programFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      programFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -1705,7 +3399,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -1713,7 +3407,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -1721,7 +3415,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -1729,7 +3423,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -1737,7 +3431,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -1745,7 +3439,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -1753,17 +3447,25 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       programFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      programFactory::objects_[index]->set_let_decls(vect);
     }
     programFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     programFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -1771,7 +3473,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -1779,15 +3481,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       programFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      programFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      programFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -1795,7 +3513,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -1803,7 +3521,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -1811,7 +3529,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -1819,7 +3537,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -1827,7 +3545,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -1835,7 +3553,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -1843,11 +3561,19 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       programFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      programFactory::objects_[index]->set_let_decls(vect);
     }
 
    index++;
@@ -1877,7 +3603,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     packageFactory::objects_[index]->set_vpiTop(obj.getVpiTop());
     
     if (obj.getTaskfunc().size()) { 
-      VectorOftask_func* vect = VectorOftask_funcFactory::make();
+      std::vector<task_func*>* vect = VectorOftask_funcFactory::make();
       for (unsigned int ind = 0; ind < obj.getTaskfunc().size(); ind++) {
  	vect->push_back((task_func*)getObject(obj.getTaskfunc()[ind].getType(),obj.getTaskfunc()[ind].getIndex()-1));
     }
@@ -1885,7 +3611,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNet().size()) { 
-      VectorOfnet* vect = VectorOfnetFactory::make();
+      std::vector<net*>* vect = VectorOfnetFactory::make();
       for (unsigned int ind = 0; ind < obj.getNet().size(); ind++) {
  	vect->push_back((net*)getObject(obj.getNet()[ind].getType(),obj.getNet()[ind].getIndex()-1));
     }
@@ -1893,7 +3619,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArraynet().size()) { 
-      VectorOfarray_net* vect = VectorOfarray_netFactory::make();
+      std::vector<array_net*>* vect = VectorOfarray_netFactory::make();
       for (unsigned int ind = 0; ind < obj.getArraynet().size(); ind++) {
  	vect->push_back((array_net*)getObject(obj.getArraynet()[ind].getType(),obj.getArraynet()[ind].getIndex()-1));
     }
@@ -1901,23 +3627,15 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getAssertion().size()) { 
-      VectorOfassertion* vect = VectorOfassertionFactory::make();
+      std::vector<assertion*>* vect = VectorOfassertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getAssertion().size(); ind++) {
  	vect->push_back((assertion*)getObject(obj.getAssertion()[ind].getType(),obj.getAssertion()[ind].getIndex()-1));
     }
       packageFactory::objects_[index]->set_assertion(vect);
     }
     
-    if (obj.getTypespec().size()) { 
-      VectorOftypespec* vect = VectorOftypespecFactory::make();
-      for (unsigned int ind = 0; ind < obj.getTypespec().size(); ind++) {
- 	vect->push_back((typespec*)getObject(obj.getTypespec()[ind].getType(),obj.getTypespec()[ind].getIndex()-1));
-    }
-      packageFactory::objects_[index]->set_typespec(vect);
-    }
-    
     if (obj.getClassdefn().size()) { 
-      VectorOfclass_defn* vect = VectorOfclass_defnFactory::make();
+      std::vector<class_defn*>* vect = VectorOfclass_defnFactory::make();
       for (unsigned int ind = 0; ind < obj.getClassdefn().size(); ind++) {
  	vect->push_back((class_defn*)getObject(obj.getClassdefn()[ind].getType(),obj.getClassdefn()[ind].getIndex()-1));
     }
@@ -1926,7 +3644,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      packageFactory::objects_[index]->set_instance((instance*)getObject(obj.getInstance().getType(),obj.getInstance().getIndex()-1));
     
     if (obj.getPrograms().size()) { 
-      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      std::vector<program*>* vect = VectorOfprogramFactory::make();
       for (unsigned int ind = 0; ind < obj.getPrograms().size(); ind++) {
  	vect->push_back(programFactory::objects_[obj.getPrograms()[ind]-1]);
     }
@@ -1934,7 +3652,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getProgramarrays().size()) { 
-      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      std::vector<program*>* vect = VectorOfprogramFactory::make();
       for (unsigned int ind = 0; ind < obj.getProgramarrays().size(); ind++) {
  	vect->push_back(programFactory::objects_[obj.getProgramarrays()[ind]-1]);
     }
@@ -1942,7 +3660,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevent().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevent().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevent()[ind]-1]);
     }
@@ -1950,7 +3668,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarray().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarray().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedeventarray()[ind]-1]);
     }
@@ -1958,7 +3676,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSpecparam().size()) { 
-      VectorOfspec_param* vect = VectorOfspec_paramFactory::make();
+      std::vector<spec_param*>* vect = VectorOfspec_paramFactory::make();
       for (unsigned int ind = 0; ind < obj.getSpecparam().size(); ind++) {
  	vect->push_back(spec_paramFactory::objects_[obj.getSpecparam()[ind]-1]);
     }
@@ -1970,7 +3688,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     packageFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -1978,7 +3696,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -1986,15 +3704,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       packageFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      packageFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      packageFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -2002,7 +3736,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -2010,7 +3744,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -2018,7 +3752,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -2026,7 +3760,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -2034,7 +3768,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -2042,7 +3776,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -2050,17 +3784,25 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       packageFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      packageFactory::objects_[index]->set_let_decls(vect);
     }
     packageFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     packageFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -2068,7 +3810,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -2076,15 +3818,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       packageFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      packageFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      packageFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -2092,7 +3850,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -2100,7 +3858,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -2108,7 +3866,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -2116,7 +3874,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -2124,7 +3882,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -2132,7 +3890,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -2140,11 +3898,19 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       packageFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      packageFactory::objects_[index]->set_let_decls(vect);
     }
 
    index++;
@@ -2162,16 +3928,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      moduleFactory::objects_[index]->set_expr_dist((expr_dist*)getObject(obj.getExprdist().getType(),obj.getExprdist().getIndex()-1));
      moduleFactory::objects_[index]->set_instance_array((instance_array*)getObject(obj.getInstancearray().getType(),obj.getInstancearray().getIndex()-1));
     
-    if (obj.getScope().size()) { 
-      VectorOfscope* vect = VectorOfscopeFactory::make();
-      for (unsigned int ind = 0; ind < obj.getScope().size(); ind++) {
- 	vect->push_back((scope*)getObject(obj.getScope()[ind].getType(),obj.getScope()[ind].getIndex()-1));
-    }
-      moduleFactory::objects_[index]->set_scope(vect);
-    }
-    
     if (obj.getProcess().size()) { 
-      VectorOfprocess* vect = VectorOfprocessFactory::make();
+      std::vector<process*>* vect = VectorOfprocessFactory::make();
       for (unsigned int ind = 0; ind < obj.getProcess().size(); ind++) {
  	vect->push_back((process*)getObject(obj.getProcess()[ind].getType(),obj.getProcess()[ind].getIndex()-1));
     }
@@ -2179,7 +3937,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getPrimitives().size()) { 
-      VectorOfprimitive* vect = VectorOfprimitiveFactory::make();
+      std::vector<primitive*>* vect = VectorOfprimitiveFactory::make();
       for (unsigned int ind = 0; ind < obj.getPrimitives().size(); ind++) {
  	vect->push_back((primitive*)getObject(obj.getPrimitives()[ind].getType(),obj.getPrimitives()[ind].getIndex()-1));
     }
@@ -2187,7 +3945,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getPrimitivearrays().size()) { 
-      VectorOfprimitive_array* vect = VectorOfprimitive_arrayFactory::make();
+      std::vector<primitive_array*>* vect = VectorOfprimitive_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getPrimitivearrays().size(); ind++) {
  	vect->push_back((primitive_array*)getObject(obj.getPrimitivearrays()[ind].getType(),obj.getPrimitivearrays()[ind].getIndex()-1));
     }
@@ -2201,7 +3959,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      moduleFactory::objects_[index]->set_module_array(module_arrayFactory::objects_[obj.getModulearray()-1]);
     
     if (obj.getPorts().size()) { 
-      VectorOfport* vect = VectorOfportFactory::make();
+      std::vector<port*>* vect = VectorOfportFactory::make();
       for (unsigned int ind = 0; ind < obj.getPorts().size(); ind++) {
  	vect->push_back(portFactory::objects_[obj.getPorts()[ind]-1]);
     }
@@ -2209,7 +3967,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInterfaces().size()) { 
-      VectorOfinterface* vect = VectorOfinterfaceFactory::make();
+      std::vector<interface*>* vect = VectorOfinterfaceFactory::make();
       for (unsigned int ind = 0; ind < obj.getInterfaces().size(); ind++) {
  	vect->push_back(interfaceFactory::objects_[obj.getInterfaces()[ind]-1]);
     }
@@ -2217,7 +3975,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInterfacearrays().size()) { 
-      VectorOfinterface_array* vect = VectorOfinterface_arrayFactory::make();
+      std::vector<interface_array*>* vect = VectorOfinterface_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getInterfacearrays().size(); ind++) {
  	vect->push_back(interface_arrayFactory::objects_[obj.getInterfacearrays()[ind]-1]);
     }
@@ -2225,7 +3983,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getContassigns().size()) { 
-      VectorOfcont_assign* vect = VectorOfcont_assignFactory::make();
+      std::vector<cont_assign*>* vect = VectorOfcont_assignFactory::make();
       for (unsigned int ind = 0; ind < obj.getContassigns().size(); ind++) {
  	vect->push_back(cont_assignFactory::objects_[obj.getContassigns()[ind]-1]);
     }
@@ -2233,7 +3991,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getModules()[ind]-1]);
     }
@@ -2241,7 +3999,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getModulearrays().size()) { 
-      VectorOfmodule_array* vect = VectorOfmodule_arrayFactory::make();
+      std::vector<module_array*>* vect = VectorOfmodule_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getModulearrays().size(); ind++) {
  	vect->push_back(module_arrayFactory::objects_[obj.getModulearrays()[ind]-1]);
     }
@@ -2249,7 +4007,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getModpaths().size()) { 
-      VectorOfmod_path* vect = VectorOfmod_pathFactory::make();
+      std::vector<mod_path*>* vect = VectorOfmod_pathFactory::make();
       for (unsigned int ind = 0; ind < obj.getModpaths().size(); ind++) {
  	vect->push_back(mod_pathFactory::objects_[obj.getModpaths()[ind]-1]);
     }
@@ -2257,7 +4015,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getTchks().size()) { 
-      VectorOftchk* vect = VectorOftchkFactory::make();
+      std::vector<tchk*>* vect = VectorOftchkFactory::make();
       for (unsigned int ind = 0; ind < obj.getTchks().size(); ind++) {
  	vect->push_back(tchkFactory::objects_[obj.getTchks()[ind]-1]);
     }
@@ -2265,7 +4023,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getDefparams().size()) { 
-      VectorOfdef_param* vect = VectorOfdef_paramFactory::make();
+      std::vector<def_param*>* vect = VectorOfdef_paramFactory::make();
       for (unsigned int ind = 0; ind < obj.getDefparams().size(); ind++) {
  	vect->push_back(def_paramFactory::objects_[obj.getDefparams()[ind]-1]);
     }
@@ -2273,7 +4031,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getIodecls().size()) { 
-      VectorOfio_decl* vect = VectorOfio_declFactory::make();
+      std::vector<io_decl*>* vect = VectorOfio_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getIodecls().size(); ind++) {
  	vect->push_back(io_declFactory::objects_[obj.getIodecls()[ind]-1]);
     }
@@ -2281,7 +4039,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getAliasstmts().size()) { 
-      VectorOfalias_stmt* vect = VectorOfalias_stmtFactory::make();
+      std::vector<alias_stmt*>* vect = VectorOfalias_stmtFactory::make();
       for (unsigned int ind = 0; ind < obj.getAliasstmts().size(); ind++) {
  	vect->push_back(alias_stmtFactory::objects_[obj.getAliasstmts()[ind]-1]);
     }
@@ -2289,7 +4047,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getClockingblocks().size()) { 
-      VectorOfclocking_block* vect = VectorOfclocking_blockFactory::make();
+      std::vector<clocking_block*>* vect = VectorOfclocking_blockFactory::make();
       for (unsigned int ind = 0; ind < obj.getClockingblocks().size(); ind++) {
  	vect->push_back(clocking_blockFactory::objects_[obj.getClockingblocks()[ind]-1]);
     }
@@ -2312,7 +4070,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     moduleFactory::objects_[index]->set_vpiTop(obj.getVpiTop());
     
     if (obj.getTaskfunc().size()) { 
-      VectorOftask_func* vect = VectorOftask_funcFactory::make();
+      std::vector<task_func*>* vect = VectorOftask_funcFactory::make();
       for (unsigned int ind = 0; ind < obj.getTaskfunc().size(); ind++) {
  	vect->push_back((task_func*)getObject(obj.getTaskfunc()[ind].getType(),obj.getTaskfunc()[ind].getIndex()-1));
     }
@@ -2320,7 +4078,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNet().size()) { 
-      VectorOfnet* vect = VectorOfnetFactory::make();
+      std::vector<net*>* vect = VectorOfnetFactory::make();
       for (unsigned int ind = 0; ind < obj.getNet().size(); ind++) {
  	vect->push_back((net*)getObject(obj.getNet()[ind].getType(),obj.getNet()[ind].getIndex()-1));
     }
@@ -2328,7 +4086,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArraynet().size()) { 
-      VectorOfarray_net* vect = VectorOfarray_netFactory::make();
+      std::vector<array_net*>* vect = VectorOfarray_netFactory::make();
       for (unsigned int ind = 0; ind < obj.getArraynet().size(); ind++) {
  	vect->push_back((array_net*)getObject(obj.getArraynet()[ind].getType(),obj.getArraynet()[ind].getIndex()-1));
     }
@@ -2336,23 +4094,15 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getAssertion().size()) { 
-      VectorOfassertion* vect = VectorOfassertionFactory::make();
+      std::vector<assertion*>* vect = VectorOfassertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getAssertion().size(); ind++) {
  	vect->push_back((assertion*)getObject(obj.getAssertion()[ind].getType(),obj.getAssertion()[ind].getIndex()-1));
     }
       moduleFactory::objects_[index]->set_assertion(vect);
     }
     
-    if (obj.getTypespec().size()) { 
-      VectorOftypespec* vect = VectorOftypespecFactory::make();
-      for (unsigned int ind = 0; ind < obj.getTypespec().size(); ind++) {
- 	vect->push_back((typespec*)getObject(obj.getTypespec()[ind].getType(),obj.getTypespec()[ind].getIndex()-1));
-    }
-      moduleFactory::objects_[index]->set_typespec(vect);
-    }
-    
     if (obj.getClassdefn().size()) { 
-      VectorOfclass_defn* vect = VectorOfclass_defnFactory::make();
+      std::vector<class_defn*>* vect = VectorOfclass_defnFactory::make();
       for (unsigned int ind = 0; ind < obj.getClassdefn().size(); ind++) {
  	vect->push_back((class_defn*)getObject(obj.getClassdefn()[ind].getType(),obj.getClassdefn()[ind].getIndex()-1));
     }
@@ -2361,7 +4111,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      moduleFactory::objects_[index]->set_instance((instance*)getObject(obj.getInstance().getType(),obj.getInstance().getIndex()-1));
     
     if (obj.getPrograms().size()) { 
-      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      std::vector<program*>* vect = VectorOfprogramFactory::make();
       for (unsigned int ind = 0; ind < obj.getPrograms().size(); ind++) {
  	vect->push_back(programFactory::objects_[obj.getPrograms()[ind]-1]);
     }
@@ -2369,7 +4119,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getProgramarrays().size()) { 
-      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      std::vector<program*>* vect = VectorOfprogramFactory::make();
       for (unsigned int ind = 0; ind < obj.getProgramarrays().size(); ind++) {
  	vect->push_back(programFactory::objects_[obj.getProgramarrays()[ind]-1]);
     }
@@ -2377,7 +4127,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevent().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevent().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevent()[ind]-1]);
     }
@@ -2385,7 +4135,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarray().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarray().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedeventarray()[ind]-1]);
     }
@@ -2393,7 +4143,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSpecparam().size()) { 
-      VectorOfspec_param* vect = VectorOfspec_paramFactory::make();
+      std::vector<spec_param*>* vect = VectorOfspec_paramFactory::make();
       for (unsigned int ind = 0; ind < obj.getSpecparam().size(); ind++) {
  	vect->push_back(spec_paramFactory::objects_[obj.getSpecparam()[ind]-1]);
     }
@@ -2405,7 +4155,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     moduleFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -2413,7 +4163,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -2421,15 +4171,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       moduleFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      moduleFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      moduleFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -2437,7 +4203,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -2445,7 +4211,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -2453,7 +4219,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -2461,7 +4227,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -2469,7 +4235,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -2477,7 +4243,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -2485,17 +4251,25 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       moduleFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      moduleFactory::objects_[index]->set_let_decls(vect);
     }
     moduleFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     moduleFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
     if (obj.getConcurrentassertions().size()) { 
-      VectorOfconcurrent_assertion* vect = VectorOfconcurrent_assertionFactory::make();
+      std::vector<concurrent_assertion*>* vect = VectorOfconcurrent_assertionFactory::make();
       for (unsigned int ind = 0; ind < obj.getConcurrentassertions().size(); ind++) {
  	vect->push_back((concurrent_assertion*)getObject(obj.getConcurrentassertions()[ind].getType(),obj.getConcurrentassertions()[ind].getIndex()-1));
     }
@@ -2503,7 +4277,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVariables().size()) { 
-      VectorOfvariables* vect = VectorOfvariablesFactory::make();
+      std::vector<variables*>* vect = VectorOfvariablesFactory::make();
       for (unsigned int ind = 0; ind < obj.getVariables().size(); ind++) {
  	vect->push_back((variables*)getObject(obj.getVariables()[ind].getType(),obj.getVariables()[ind].getIndex()-1));
     }
@@ -2511,15 +4285,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getParameters().size()) { 
-      VectorOfparameters* vect = VectorOfparametersFactory::make();
+      std::vector<parameters*>* vect = VectorOfparametersFactory::make();
       for (unsigned int ind = 0; ind < obj.getParameters().size(); ind++) {
  	vect->push_back((parameters*)getObject(obj.getParameters()[ind].getType(),obj.getParameters()[ind].getIndex()-1));
     }
       moduleFactory::objects_[index]->set_parameters(vect);
     }
     
+    if (obj.getScopes().size()) { 
+      std::vector<scope*>* vect = VectorOfscopeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getScopes().size(); ind++) {
+ 	vect->push_back((scope*)getObject(obj.getScopes()[ind].getType(),obj.getScopes()[ind].getIndex()-1));
+    }
+      moduleFactory::objects_[index]->set_scopes(vect);
+    }
+    
+    if (obj.getTypespecs().size()) { 
+      std::vector<typespec*>* vect = VectorOftypespecFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTypespecs().size(); ind++) {
+ 	vect->push_back((typespec*)getObject(obj.getTypespecs()[ind].getType(),obj.getTypespecs()[ind].getIndex()-1));
+    }
+      moduleFactory::objects_[index]->set_typespecs(vect);
+    }
+    
     if (obj.getPropertydecls().size()) { 
-      VectorOfproperty_decl* vect = VectorOfproperty_declFactory::make();
+      std::vector<property_decl*>* vect = VectorOfproperty_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getPropertydecls().size(); ind++) {
  	vect->push_back(property_declFactory::objects_[obj.getPropertydecls()[ind]-1]);
     }
@@ -2527,7 +4317,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getSequencedecls().size()) { 
-      VectorOfsequence_decl* vect = VectorOfsequence_declFactory::make();
+      std::vector<sequence_decl*>* vect = VectorOfsequence_declFactory::make();
       for (unsigned int ind = 0; ind < obj.getSequencedecls().size(); ind++) {
  	vect->push_back(sequence_declFactory::objects_[obj.getSequencedecls()[ind]-1]);
     }
@@ -2535,7 +4325,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedevents().size()) { 
-      VectorOfnamed_event* vect = VectorOfnamed_eventFactory::make();
+      std::vector<named_event*>* vect = VectorOfnamed_eventFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedevents().size(); ind++) {
  	vect->push_back(named_eventFactory::objects_[obj.getNamedevents()[ind]-1]);
     }
@@ -2543,7 +4333,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getNamedeventarrays().size()) { 
-      VectorOfnamed_event_array* vect = VectorOfnamed_event_arrayFactory::make();
+      std::vector<named_event_array*>* vect = VectorOfnamed_event_arrayFactory::make();
       for (unsigned int ind = 0; ind < obj.getNamedeventarrays().size(); ind++) {
  	vect->push_back(named_event_arrayFactory::objects_[obj.getNamedeventarrays()[ind]-1]);
     }
@@ -2551,7 +4341,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getVirtualinterfacevars().size()) { 
-      VectorOfvirtual_interface_var* vect = VectorOfvirtual_interface_varFactory::make();
+      std::vector<virtual_interface_var*>* vect = VectorOfvirtual_interface_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getVirtualinterfacevars().size(); ind++) {
  	vect->push_back(virtual_interface_varFactory::objects_[obj.getVirtualinterfacevars()[ind]-1]);
     }
@@ -2559,7 +4349,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getLogicvar().size()) { 
-      VectorOflogic_var* vect = VectorOflogic_varFactory::make();
+      std::vector<logic_var*>* vect = VectorOflogic_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getLogicvar().size(); ind++) {
  	vect->push_back(logic_varFactory::objects_[obj.getLogicvar()[ind]-1]);
     }
@@ -2567,7 +4357,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvar().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvar().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvar()[ind]-1]);
     }
@@ -2575,11 +4365,19 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getArrayvarmem().size()) { 
-      VectorOfarray_var* vect = VectorOfarray_varFactory::make();
+      std::vector<array_var*>* vect = VectorOfarray_varFactory::make();
       for (unsigned int ind = 0; ind < obj.getArrayvarmem().size(); ind++) {
  	vect->push_back(array_varFactory::objects_[obj.getArrayvarmem()[ind]-1]);
     }
       moduleFactory::objects_[index]->set_array_var_mem(vect);
+    }
+    
+    if (obj.getLetdecls().size()) { 
+      std::vector<let_decl*>* vect = VectorOflet_declFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLetdecls().size(); ind++) {
+ 	vect->push_back(let_declFactory::objects_[obj.getLetdecls()[ind]-1]);
+    }
+      moduleFactory::objects_[index]->set_let_decls(vect);
     }
 
    index++;
@@ -2594,7 +4392,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     designFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     
     if (obj.getAllModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getAllModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getAllModules()[ind]-1]);
     }
@@ -2602,7 +4400,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getTopModules().size()) { 
-      VectorOfmodule* vect = VectorOfmoduleFactory::make();
+      std::vector<module*>* vect = VectorOfmoduleFactory::make();
       for (unsigned int ind = 0; ind < obj.getTopModules().size(); ind++) {
  	vect->push_back(moduleFactory::objects_[obj.getTopModules()[ind]-1]);
     }
@@ -2610,7 +4408,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getAllPrograms().size()) { 
-      VectorOfprogram* vect = VectorOfprogramFactory::make();
+      std::vector<program*>* vect = VectorOfprogramFactory::make();
       for (unsigned int ind = 0; ind < obj.getAllPrograms().size(); ind++) {
  	vect->push_back(programFactory::objects_[obj.getAllPrograms()[ind]-1]);
     }
@@ -2618,7 +4416,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getAllPackages().size()) { 
-      VectorOfpackage* vect = VectorOfpackageFactory::make();
+      std::vector<package*>* vect = VectorOfpackageFactory::make();
       for (unsigned int ind = 0; ind < obj.getAllPackages().size(); ind++) {
  	vect->push_back(packageFactory::objects_[obj.getAllPackages()[ind]-1]);
     }

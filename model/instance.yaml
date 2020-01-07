@@ -141,11 +141,6 @@
     vpi: vpiAssertion
     type: assertion
     card: any
-  - class_ref: typespec
-    name: typespec
-    vpi: vpiTypedef
-    type: typespec
-    card: any
   - class_ref: class_defn
     name: class defn
     vpi: vpiClassDefn

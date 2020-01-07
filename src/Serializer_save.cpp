@@ -67,11 +67,23 @@ std::vector<std::vector<sequence_decl*>*> VectorOfsequence_declFactory::objects_
 std::vector<std::vector<concurrent_assertion*>*> VectorOfconcurrent_assertionFactory::objects_;
 std::vector<virtual_interface_var*> virtual_interface_varFactory::objects_;
 std::vector<std::vector<virtual_interface_var*>*> VectorOfvirtual_interface_varFactory::objects_;
+std::vector<let_decl*> let_declFactory::objects_;
+std::vector<std::vector<let_decl*>*> VectorOflet_declFactory::objects_;
 std::vector<std::vector<scope*>*> VectorOfscopeFactory::objects_;
 std::vector<begin*> beginFactory::objects_;
 std::vector<std::vector<begin*>*> VectorOfbeginFactory::objects_;
 std::vector<named_begin*> named_beginFactory::objects_;
 std::vector<std::vector<named_begin*>*> VectorOfnamed_beginFactory::objects_;
+std::vector<named_fork*> named_forkFactory::objects_;
+std::vector<std::vector<named_fork*>*> VectorOfnamed_forkFactory::objects_;
+std::vector<fork_stmt*> fork_stmtFactory::objects_;
+std::vector<std::vector<fork_stmt*>*> VectorOffork_stmtFactory::objects_;
+std::vector<for_stmt*> for_stmtFactory::objects_;
+std::vector<std::vector<for_stmt*>*> VectorOffor_stmtFactory::objects_;
+std::vector<foreach_stmt*> foreach_stmtFactory::objects_;
+std::vector<std::vector<foreach_stmt*>*> VectorOfforeach_stmtFactory::objects_;
+std::vector<gen_scope*> gen_scopeFactory::objects_;
+std::vector<std::vector<gen_scope*>*> VectorOfgen_scopeFactory::objects_;
 std::vector<std::vector<expr_dist*>*> VectorOfexpr_distFactory::objects_;
 std::vector<std::vector<expr*>*> VectorOfexprFactory::objects_;
 std::vector<distribution*> distributionFactory::objects_;
@@ -145,6 +157,10 @@ std::vector<std::vector<assertion*>*> VectorOfassertionFactory::objects_;
 std::vector<std::vector<typespec*>*> VectorOftypespecFactory::objects_;
 std::vector<class_defn*> class_defnFactory::objects_;
 std::vector<std::vector<class_defn*>*> VectorOfclass_defnFactory::objects_;
+std::vector<class_typespec*> class_typespecFactory::objects_;
+std::vector<std::vector<class_typespec*>*> VectorOfclass_typespecFactory::objects_;
+std::vector<class_obj*> class_objFactory::objects_;
+std::vector<std::vector<class_obj*>*> VectorOfclass_objFactory::objects_;
 std::vector<std::vector<instance*>*> VectorOfinstanceFactory::objects_;
 std::vector<interface*> interfaceFactory::objects_;
 std::vector<std::vector<interface*>*> VectorOfinterfaceFactory::objects_;
@@ -164,8 +180,14 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdmproperty_decl: return property_declFactory::objects_[index];
   case uhdmsequence_decl: return sequence_declFactory::objects_[index];
   case uhdmvirtual_interface_var: return virtual_interface_varFactory::objects_[index];
+  case uhdmlet_decl: return let_declFactory::objects_[index];
   case uhdmbegin: return beginFactory::objects_[index];
   case uhdmnamed_begin: return named_beginFactory::objects_[index];
+  case uhdmnamed_fork: return named_forkFactory::objects_[index];
+  case uhdmfork_stmt: return fork_stmtFactory::objects_[index];
+  case uhdmfor_stmt: return for_stmtFactory::objects_[index];
+  case uhdmforeach_stmt: return foreach_stmtFactory::objects_[index];
+  case uhdmgen_scope: return gen_scopeFactory::objects_[index];
   case uhdmdistribution: return distributionFactory::objects_[index];
   case uhdmoperation: return operationFactory::objects_[index];
   case uhdmref_obj: return ref_objFactory::objects_[index];
@@ -197,6 +219,8 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdmnamed_event_array: return named_event_arrayFactory::objects_[index];
   case uhdmspec_param: return spec_paramFactory::objects_[index];
   case uhdmclass_defn: return class_defnFactory::objects_[index];
+  case uhdmclass_typespec: return class_typespecFactory::objects_[index];
+  case uhdmclass_obj: return class_objFactory::objects_[index];
   case uhdminterface: return interfaceFactory::objects_[index];
   case uhdmprogram: return programFactory::objects_[index];
   case uhdmpackage: return packageFactory::objects_[index];
@@ -231,6 +255,11 @@ void Serializer::purge() {
   }
   virtual_interface_varFactory::objects_.clear();
 
+  for (auto obj : let_declFactory::objects_) {
+    delete obj;
+  }
+  let_declFactory::objects_.clear();
+
   for (auto obj : beginFactory::objects_) {
     delete obj;
   }
@@ -240,6 +269,31 @@ void Serializer::purge() {
     delete obj;
   }
   named_beginFactory::objects_.clear();
+
+  for (auto obj : named_forkFactory::objects_) {
+    delete obj;
+  }
+  named_forkFactory::objects_.clear();
+
+  for (auto obj : fork_stmtFactory::objects_) {
+    delete obj;
+  }
+  fork_stmtFactory::objects_.clear();
+
+  for (auto obj : for_stmtFactory::objects_) {
+    delete obj;
+  }
+  for_stmtFactory::objects_.clear();
+
+  for (auto obj : foreach_stmtFactory::objects_) {
+    delete obj;
+  }
+  foreach_stmtFactory::objects_.clear();
+
+  for (auto obj : gen_scopeFactory::objects_) {
+    delete obj;
+  }
+  gen_scopeFactory::objects_.clear();
 
   for (auto obj : distributionFactory::objects_) {
     delete obj;
@@ -396,6 +450,16 @@ void Serializer::purge() {
   }
   class_defnFactory::objects_.clear();
 
+  for (auto obj : class_typespecFactory::objects_) {
+    delete obj;
+  }
+  class_typespecFactory::objects_.clear();
+
+  for (auto obj : class_objFactory::objects_) {
+    delete obj;
+  }
+  class_objFactory::objects_.clear();
+
   for (auto obj : interfaceFactory::objects_) {
     delete obj;
   }
@@ -451,12 +515,42 @@ void Serializer::save(std::string file) {
     index++;
   }
   index = 1;
+  for (auto obj : let_declFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
   for (auto obj : beginFactory::objects_) {
     setId(obj, index);
     index++;
   }
   index = 1;
   for (auto obj : named_beginFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : named_forkFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : fork_stmtFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : for_stmtFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : foreach_stmtFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : gen_scopeFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -616,6 +710,16 @@ void Serializer::save(std::string file) {
     index++;
   }
   index = 1;
+  for (auto obj : class_typespecFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : class_objFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
   for (auto obj : interfaceFactory::objects_) {
     setId(obj, index);
     index++;
@@ -696,6 +800,16 @@ void Serializer::save(std::string file) {
 
    index++;
  }
+ ::capnp::List<Letdecl>::Builder Letdecls = cap_root.initFactoryLetdecl(let_declFactory::objects_.size());
+ index = 0;
+ for (auto obj : let_declFactory::objects_) {
+    Letdecls[index].setVpiParent(getId(obj->get_vpiParent()));
+    Letdecls[index].setUhdmParentType(obj->get_uhdmParentType());
+    Letdecls[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Letdecls[index].setVpiLineNo(obj->get_vpiLineNo());
+
+   index++;
+ }
  ::capnp::List<Begin>::Builder Begins = cap_root.initFactoryBegin(beginFactory::objects_.size());
  index = 0;
  for (auto obj : beginFactory::objects_) {
@@ -733,59 +847,84 @@ void Serializer::save(std::string file) {
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Beginss = Begins[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Beginss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Begins[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Begins[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Begins[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Begins[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Begins[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Begins[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Begins[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Begins[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Begins[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Begins[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -829,59 +968,691 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Namedbeginss = Namedbegins[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Namedbeginss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Namedbegins[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Namedbegins[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Namedbegins[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Namedbegins[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Namedbegins[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Namedbegins[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Namedbegins[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Namedbegins[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Namedbegins[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Namedbegins[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Namedfork>::Builder Namedforks = cap_root.initFactoryNamedfork(named_forkFactory::objects_.size());
+ index = 0;
+ for (auto obj : named_forkFactory::objects_) {
+    Namedforks[index].setVpiParent(getId(obj->get_vpiParent()));
+    Namedforks[index].setUhdmParentType(obj->get_uhdmParentType());
+    Namedforks[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Namedforks[index].setVpiLineNo(obj->get_vpiLineNo());
+    Namedforks[index].setVpiJoinType(obj->get_vpiJoinType());
+    Namedforks[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Namedforks[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Namedforks[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Namedforks[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Namedforks[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Namedforkss = Namedforks[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Namedforkss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Namedforks[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Namedforks[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Namedforks[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Namedforks[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Namedforks[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Namedforks[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Namedforks[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Namedforks[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Namedforks[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Namedforks[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Forkstmt>::Builder Forkstmts = cap_root.initFactoryForkstmt(fork_stmtFactory::objects_.size());
+ index = 0;
+ for (auto obj : fork_stmtFactory::objects_) {
+    Forkstmts[index].setVpiParent(getId(obj->get_vpiParent()));
+    Forkstmts[index].setUhdmParentType(obj->get_uhdmParentType());
+    Forkstmts[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Forkstmts[index].setVpiLineNo(obj->get_vpiLineNo());
+    Forkstmts[index].setVpiJoinType(obj->get_vpiJoinType());
+    Forkstmts[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Forkstmts[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Forkstmts[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Forkstmts[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Forkstmts[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Forkstmtss = Forkstmts[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Forkstmtss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Forkstmts[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Forkstmts[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Forkstmts[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Forkstmts[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Forkstmts[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Forkstmts[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Forkstmts[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Forkstmts[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Forkstmts[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Forkstmts[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Forstmt>::Builder Forstmts = cap_root.initFactoryForstmt(for_stmtFactory::objects_.size());
+ index = 0;
+ for (auto obj : for_stmtFactory::objects_) {
+    Forstmts[index].setVpiParent(getId(obj->get_vpiParent()));
+    Forstmts[index].setUhdmParentType(obj->get_uhdmParentType());
+    Forstmts[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Forstmts[index].setVpiLineNo(obj->get_vpiLineNo());
+    Forstmts[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Forstmts[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Forstmts[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Forstmts[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Forstmts[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Forstmtss = Forstmts[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Forstmtss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Forstmts[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Forstmts[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Forstmts[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Forstmts[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Forstmts[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Forstmts[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Forstmts[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Forstmts[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Forstmts[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Forstmts[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Foreachstmt>::Builder Foreachstmts = cap_root.initFactoryForeachstmt(foreach_stmtFactory::objects_.size());
+ index = 0;
+ for (auto obj : foreach_stmtFactory::objects_) {
+    Foreachstmts[index].setVpiParent(getId(obj->get_vpiParent()));
+    Foreachstmts[index].setUhdmParentType(obj->get_uhdmParentType());
+    Foreachstmts[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Foreachstmts[index].setVpiLineNo(obj->get_vpiLineNo());
+    Foreachstmts[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Foreachstmts[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Foreachstmts[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Foreachstmts[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Foreachstmts[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Foreachstmtss = Foreachstmts[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Foreachstmtss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Foreachstmts[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Foreachstmts[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Foreachstmts[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Foreachstmts[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Foreachstmts[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Foreachstmts[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Foreachstmts[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Foreachstmts[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Foreachstmts[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Foreachstmts[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Genscope>::Builder Genscopes = cap_root.initFactoryGenscope(gen_scopeFactory::objects_.size());
+ index = 0;
+ for (auto obj : gen_scopeFactory::objects_) {
+    Genscopes[index].setVpiParent(getId(obj->get_vpiParent()));
+    Genscopes[index].setUhdmParentType(obj->get_uhdmParentType());
+    Genscopes[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Genscopes[index].setVpiLineNo(obj->get_vpiLineNo());
+    Genscopes[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Genscopes[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Genscopes[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Genscopes[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Genscopes[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Genscopess = Genscopes[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Genscopess[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Genscopes[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Genscopes[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Genscopes[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Genscopes[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Genscopes[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Genscopes[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Genscopes[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Genscopes[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Genscopes[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Genscopes[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -938,8 +1709,6 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     Tasks[index].setUhdmParentType(obj->get_uhdmParentType());
     Tasks[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Tasks[index].setVpiLineNo(obj->get_vpiLineNo());
-    Tasks[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
-    Tasks[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Tasks[index].setVpiMethod(obj->get_vpiMethod());
     Tasks[index].setVpiAccessType(obj->get_vpiAccessType());
     Tasks[index].setVpiVisibility(obj->get_vpiVisibility());
@@ -948,18 +1717,239 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     Tasks[index].setVpiDPIContext(obj->get_vpiDPIContext());
     Tasks[index].setVpiDPICStr(obj->get_vpiDPICStr());
     Tasks[index].setVpiDPICIdentifier(SymbolFactory::make(obj->get_vpiDPICIdentifier()));
-  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp0 = Tasks[index].getLeftexpr();
+  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp0 = Tasks[index].getLeftexpr();
     tmp0.setIndex(getId((obj->get_left_expr())));
     tmp0.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp1 = Tasks[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp1 = Tasks[index].getRightexpr();
     tmp1.setIndex(getId((obj->get_right_expr())));
     tmp1.setType(obj->get_right_expr()->getUhdmType());
-  }  if (obj->get_variables()) {    ::ObjIndexType::Builder tmp2 = Tasks[index].getVariables();
-    tmp2.setIndex(getId((obj->get_variables())));
-    tmp2.setType(obj->get_variables()->getUhdmType());
   }    Tasks[index].setClassdefn(getId(obj->get_class_defn()));
     Tasks[index].setRefobj(getId(obj->get_ref_obj()));
     Tasks[index].setIodecl(getId(obj->get_io_decl()));
+    Tasks[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Tasks[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Tasks[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Tasks[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Tasks[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Taskss = Tasks[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Taskss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Tasks[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Tasks[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Tasks[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Tasks[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Tasks[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Tasks[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Tasks[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Tasks[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Tasks[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Tasks[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
+
+    Tasks[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Tasks[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Tasks[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Tasks[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Tasks[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Taskss = Tasks[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Taskss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Tasks[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Tasks[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Tasks[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Tasks[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Tasks[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Tasks[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Tasks[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Tasks[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Tasks[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Tasks[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
 
 
    index++;
@@ -974,8 +1964,6 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     Functions[index].setVpiSigned(obj->get_vpiSigned());
     Functions[index].setVpiSize(obj->get_vpiSize());
     Functions[index].setVpiFuncType(obj->get_vpiFuncType());
-    Functions[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
-    Functions[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Functions[index].setVpiMethod(obj->get_vpiMethod());
     Functions[index].setVpiAccessType(obj->get_vpiAccessType());
     Functions[index].setVpiVisibility(obj->get_vpiVisibility());
@@ -984,18 +1972,239 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     Functions[index].setVpiDPIContext(obj->get_vpiDPIContext());
     Functions[index].setVpiDPICStr(obj->get_vpiDPICStr());
     Functions[index].setVpiDPICIdentifier(SymbolFactory::make(obj->get_vpiDPICIdentifier()));
-  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp0 = Functions[index].getLeftexpr();
+  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp0 = Functions[index].getLeftexpr();
     tmp0.setIndex(getId((obj->get_left_expr())));
     tmp0.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp1 = Functions[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp1 = Functions[index].getRightexpr();
     tmp1.setIndex(getId((obj->get_right_expr())));
     tmp1.setType(obj->get_right_expr()->getUhdmType());
-  }  if (obj->get_variables()) {    ::ObjIndexType::Builder tmp2 = Functions[index].getVariables();
-    tmp2.setIndex(getId((obj->get_variables())));
-    tmp2.setType(obj->get_variables()->getUhdmType());
   }    Functions[index].setClassdefn(getId(obj->get_class_defn()));
     Functions[index].setRefobj(getId(obj->get_ref_obj()));
     Functions[index].setIodecl(getId(obj->get_io_decl()));
+    Functions[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Functions[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Functions[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Functions[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Functions[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Functionss = Functions[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Functionss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Functions[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Functions[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Functions[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Functions[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Functions[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Functions[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Functions[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Functions[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Functions[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Functions[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
+
+    Functions[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Functions[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Functions[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Functions[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Functions[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Functionss = Functions[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Functionss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Functions[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Functions[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Functions[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Functions[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Functions[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Functions[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Functions[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Functions[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Functions[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Functions[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
 
 
    index++;
@@ -1012,7 +2221,7 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     if (obj->get_io_decls()) {  
       ::capnp::List<::uint64_t>::Builder Iodeclss = Modports[index].initIodecls(obj->get_io_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_io_decls()->size(); ind++) {
-Iodeclss.set(ind, getId((*obj->get_io_decls())[ind]));
+        Iodeclss.set(ind, getId((*obj->get_io_decls())[ind]));
       }
     }
     Modports[index].setInterface(getId(obj->get_interface()));
@@ -1031,14 +2240,14 @@ Iodeclss.set(ind, getId((*obj->get_io_decls())[ind]));
     if (obj->get_tasks()) {  
       ::capnp::List<::uint64_t>::Builder Taskss = Interfacetfdecls[index].initTasks(obj->get_tasks()->size());
       for (unsigned int ind = 0; ind < obj->get_tasks()->size(); ind++) {
-Taskss.set(ind, getId((*obj->get_tasks())[ind]));
+        Taskss.set(ind, getId((*obj->get_tasks())[ind]));
       }
     }
  
     if (obj->get_functions()) {  
       ::capnp::List<::uint64_t>::Builder Functionss = Interfacetfdecls[index].initFunctions(obj->get_functions()->size());
       for (unsigned int ind = 0; ind < obj->get_functions()->size(); ind++) {
-Functionss.set(ind, getId((*obj->get_functions())[ind]));
+        Functionss.set(ind, getId((*obj->get_functions())[ind]));
       }
     }
 
@@ -1131,6 +2340,117 @@ Functionss.set(ind, getId((*obj->get_functions())[ind]));
     Clockingblocks[index].setUhdmParentType(obj->get_uhdmParentType());
     Clockingblocks[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Clockingblocks[index].setVpiLineNo(obj->get_vpiLineNo());
+    Clockingblocks[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Clockingblocks[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Clockingblocks[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Clockingblocks[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Clockingblocks[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Clockingblockss = Clockingblocks[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Clockingblockss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Clockingblocks[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Clockingblocks[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Clockingblocks[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Clockingblocks[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Clockingblocks[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Clockingblocks[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Clockingblocks[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Clockingblocks[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Clockingblocks[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Clockingblocks[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
 
    index++;
  }
@@ -1165,19 +2485,22 @@ Functionss.set(ind, getId((*obj->get_functions())[ind]));
     if (obj->get_param_assigns()) {  
       ::capnp::List<::uint64_t>::Builder Paramassignss = Interfacearrays[index].initParamassigns(obj->get_param_assigns()->size());
       for (unsigned int ind = 0; ind < obj->get_param_assigns()->size(); ind++) {
-Paramassignss.set(ind, getId((*obj->get_param_assigns())[ind]));
+        Paramassignss.set(ind, getId((*obj->get_param_assigns())[ind]));
       }
     }
     Interfacearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Interfacearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Interfacearrays[index].setVpiSize(obj->get_vpiSize());
-  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Interfacearrays[index].getExpr();
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp0 = Interfacearrays[index].getExpr();
     tmp0.setIndex(getId((obj->get_expr())));
     tmp0.setType(obj->get_expr()->getUhdmType());
-  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Interfacearrays[index].getLeftexpr();
+  }  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp1 = Interfacearrays[index].getLeftexpr();
     tmp1.setIndex(getId((obj->get_left_expr())));
     tmp1.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Interfacearrays[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp2 = Interfacearrays[index].getRightexpr();
     tmp2.setIndex(getId((obj->get_right_expr())));
     tmp2.setType(obj->get_right_expr()->getUhdmType());
   } 
@@ -1194,7 +2517,7 @@ Paramassignss.set(ind, getId((*obj->get_param_assigns())[ind]));
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Interfacearrays[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
 
@@ -1211,13 +2534,16 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Programarrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Programarrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Programarrays[index].setVpiSize(obj->get_vpiSize());
-  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Programarrays[index].getExpr();
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp0 = Programarrays[index].getExpr();
     tmp0.setIndex(getId((obj->get_expr())));
     tmp0.setType(obj->get_expr()->getUhdmType());
-  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Programarrays[index].getLeftexpr();
+  }  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp1 = Programarrays[index].getLeftexpr();
     tmp1.setIndex(getId((obj->get_left_expr())));
     tmp1.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Programarrays[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp2 = Programarrays[index].getRightexpr();
     tmp2.setIndex(getId((obj->get_right_expr())));
     tmp2.setType(obj->get_right_expr()->getUhdmType());
   } 
@@ -1234,7 +2560,7 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Programarrays[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
 
@@ -1252,19 +2578,22 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     if (obj->get_param_assigns()) {  
       ::capnp::List<::uint64_t>::Builder Paramassignss = Modulearrays[index].initParamassigns(obj->get_param_assigns()->size());
       for (unsigned int ind = 0; ind < obj->get_param_assigns()->size(); ind++) {
-Paramassignss.set(ind, getId((*obj->get_param_assigns())[ind]));
+        Paramassignss.set(ind, getId((*obj->get_param_assigns())[ind]));
       }
     }
     Modulearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Modulearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Modulearrays[index].setVpiSize(obj->get_vpiSize());
-  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Modulearrays[index].getExpr();
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp0 = Modulearrays[index].getExpr();
     tmp0.setIndex(getId((obj->get_expr())));
     tmp0.setType(obj->get_expr()->getUhdmType());
-  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Modulearrays[index].getLeftexpr();
+  }  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp1 = Modulearrays[index].getLeftexpr();
     tmp1.setIndex(getId((obj->get_left_expr())));
     tmp1.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Modulearrays[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp2 = Modulearrays[index].getRightexpr();
     tmp2.setIndex(getId((obj->get_right_expr())));
     tmp2.setType(obj->get_right_expr()->getUhdmType());
   } 
@@ -1281,7 +2610,7 @@ Paramassignss.set(ind, getId((*obj->get_param_assigns())[ind]));
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Modulearrays[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
 
@@ -1295,7 +2624,8 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Gatearrays[index].setUhdmParentType(obj->get_uhdmParentType());
     Gatearrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Gatearrays[index].setVpiLineNo(obj->get_vpiLineNo());
-  if (obj->get_delay()) {    ::ObjIndexType::Builder tmp0 = Gatearrays[index].getDelay();
+  if (obj->get_delay()) {
+    ::ObjIndexType::Builder tmp0 = Gatearrays[index].getDelay();
     tmp0.setIndex(getId((obj->get_delay())));
     tmp0.setType(obj->get_delay()->getUhdmType());
   } 
@@ -1310,13 +2640,16 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Gatearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Gatearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Gatearrays[index].setVpiSize(obj->get_vpiSize());
-  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Gatearrays[index].getExpr();
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp0 = Gatearrays[index].getExpr();
     tmp0.setIndex(getId((obj->get_expr())));
     tmp0.setType(obj->get_expr()->getUhdmType());
-  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Gatearrays[index].getLeftexpr();
+  }  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp1 = Gatearrays[index].getLeftexpr();
     tmp1.setIndex(getId((obj->get_left_expr())));
     tmp1.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Gatearrays[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp2 = Gatearrays[index].getRightexpr();
     tmp2.setIndex(getId((obj->get_right_expr())));
     tmp2.setType(obj->get_right_expr()->getUhdmType());
   } 
@@ -1333,7 +2666,7 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Gatearrays[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
 
@@ -1341,13 +2674,16 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Gatearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Gatearrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Gatearrays[index].setVpiSize(obj->get_vpiSize());
-  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Gatearrays[index].getExpr();
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp0 = Gatearrays[index].getExpr();
     tmp0.setIndex(getId((obj->get_expr())));
     tmp0.setType(obj->get_expr()->getUhdmType());
-  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Gatearrays[index].getLeftexpr();
+  }  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp1 = Gatearrays[index].getLeftexpr();
     tmp1.setIndex(getId((obj->get_left_expr())));
     tmp1.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Gatearrays[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp2 = Gatearrays[index].getRightexpr();
     tmp2.setIndex(getId((obj->get_right_expr())));
     tmp2.setType(obj->get_right_expr()->getUhdmType());
   } 
@@ -1364,7 +2700,7 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Gatearrays[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
 
@@ -1378,7 +2714,8 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Switcharrays[index].setUhdmParentType(obj->get_uhdmParentType());
     Switcharrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Switcharrays[index].setVpiLineNo(obj->get_vpiLineNo());
-  if (obj->get_delay()) {    ::ObjIndexType::Builder tmp0 = Switcharrays[index].getDelay();
+  if (obj->get_delay()) {
+    ::ObjIndexType::Builder tmp0 = Switcharrays[index].getDelay();
     tmp0.setIndex(getId((obj->get_delay())));
     tmp0.setType(obj->get_delay()->getUhdmType());
   } 
@@ -1393,13 +2730,16 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Switcharrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Switcharrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Switcharrays[index].setVpiSize(obj->get_vpiSize());
-  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Switcharrays[index].getExpr();
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp0 = Switcharrays[index].getExpr();
     tmp0.setIndex(getId((obj->get_expr())));
     tmp0.setType(obj->get_expr()->getUhdmType());
-  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Switcharrays[index].getLeftexpr();
+  }  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp1 = Switcharrays[index].getLeftexpr();
     tmp1.setIndex(getId((obj->get_left_expr())));
     tmp1.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Switcharrays[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp2 = Switcharrays[index].getRightexpr();
     tmp2.setIndex(getId((obj->get_right_expr())));
     tmp2.setType(obj->get_right_expr()->getUhdmType());
   } 
@@ -1416,7 +2756,7 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Switcharrays[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
 
@@ -1424,13 +2764,16 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Switcharrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Switcharrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Switcharrays[index].setVpiSize(obj->get_vpiSize());
-  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Switcharrays[index].getExpr();
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp0 = Switcharrays[index].getExpr();
     tmp0.setIndex(getId((obj->get_expr())));
     tmp0.setType(obj->get_expr()->getUhdmType());
-  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Switcharrays[index].getLeftexpr();
+  }  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp1 = Switcharrays[index].getLeftexpr();
     tmp1.setIndex(getId((obj->get_left_expr())));
     tmp1.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Switcharrays[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp2 = Switcharrays[index].getRightexpr();
     tmp2.setIndex(getId((obj->get_right_expr())));
     tmp2.setType(obj->get_right_expr()->getUhdmType());
   } 
@@ -1447,7 +2790,7 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Switcharrays[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
 
@@ -1461,7 +2804,8 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Udparrays[index].setUhdmParentType(obj->get_uhdmParentType());
     Udparrays[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Udparrays[index].setVpiLineNo(obj->get_vpiLineNo());
-  if (obj->get_delay()) {    ::ObjIndexType::Builder tmp0 = Udparrays[index].getDelay();
+  if (obj->get_delay()) {
+    ::ObjIndexType::Builder tmp0 = Udparrays[index].getDelay();
     tmp0.setIndex(getId((obj->get_delay())));
     tmp0.setType(obj->get_delay()->getUhdmType());
   } 
@@ -1476,13 +2820,16 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Udparrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Udparrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Udparrays[index].setVpiSize(obj->get_vpiSize());
-  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Udparrays[index].getExpr();
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp0 = Udparrays[index].getExpr();
     tmp0.setIndex(getId((obj->get_expr())));
     tmp0.setType(obj->get_expr()->getUhdmType());
-  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Udparrays[index].getLeftexpr();
+  }  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp1 = Udparrays[index].getLeftexpr();
     tmp1.setIndex(getId((obj->get_left_expr())));
     tmp1.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Udparrays[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp2 = Udparrays[index].getRightexpr();
     tmp2.setIndex(getId((obj->get_right_expr())));
     tmp2.setType(obj->get_right_expr()->getUhdmType());
   } 
@@ -1499,7 +2846,7 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Udparrays[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
 
@@ -1507,13 +2854,16 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Udparrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Udparrays[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Udparrays[index].setVpiSize(obj->get_vpiSize());
-  if (obj->get_expr()) {    ::ObjIndexType::Builder tmp0 = Udparrays[index].getExpr();
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp0 = Udparrays[index].getExpr();
     tmp0.setIndex(getId((obj->get_expr())));
     tmp0.setType(obj->get_expr()->getUhdmType());
-  }  if (obj->get_left_expr()) {    ::ObjIndexType::Builder tmp1 = Udparrays[index].getLeftexpr();
+  }  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp1 = Udparrays[index].getLeftexpr();
     tmp1.setIndex(getId((obj->get_left_expr())));
     tmp1.setType(obj->get_left_expr()->getUhdmType());
-  }  if (obj->get_right_expr()) {    ::ObjIndexType::Builder tmp2 = Udparrays[index].getRightexpr();
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp2 = Udparrays[index].getRightexpr();
     tmp2.setIndex(getId((obj->get_right_expr())));
     tmp2.setType(obj->get_right_expr()->getUhdmType());
   } 
@@ -1530,7 +2880,7 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Udparrays[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
 
@@ -1604,6 +2954,359 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Classdefns[index].setUhdmParentType(obj->get_uhdmParentType());
     Classdefns[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Classdefns[index].setVpiLineNo(obj->get_vpiLineNo());
+    Classdefns[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Classdefns[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Classdefns[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Classdefns[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Classdefns[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Classdefnss = Classdefns[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Classdefnss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Classdefns[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Classdefns[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Classdefns[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Classdefns[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Classdefns[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Classdefns[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Classdefns[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Classdefns[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Classdefns[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Classdefns[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Classtypespec>::Builder Classtypespecs = cap_root.initFactoryClasstypespec(class_typespecFactory::objects_.size());
+ index = 0;
+ for (auto obj : class_typespecFactory::objects_) {
+    Classtypespecs[index].setVpiParent(getId(obj->get_vpiParent()));
+    Classtypespecs[index].setUhdmParentType(obj->get_uhdmParentType());
+    Classtypespecs[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Classtypespecs[index].setVpiLineNo(obj->get_vpiLineNo());
+    Classtypespecs[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Classtypespecs[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Classtypespecs[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Classtypespecs[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Classtypespecs[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Classtypespecss = Classtypespecs[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Classtypespecss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Classtypespecs[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Classtypespecs[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Classtypespecs[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Classtypespecs[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Classtypespecs[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Classtypespecs[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Classtypespecs[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Classtypespecs[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Classtypespecs[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Classtypespecs[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
+
+   index++;
+ }
+ ::capnp::List<Classobj>::Builder Classobjs = cap_root.initFactoryClassobj(class_objFactory::objects_.size());
+ index = 0;
+ for (auto obj : class_objFactory::objects_) {
+    Classobjs[index].setVpiParent(getId(obj->get_vpiParent()));
+    Classobjs[index].setUhdmParentType(obj->get_uhdmParentType());
+    Classobjs[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Classobjs[index].setVpiLineNo(obj->get_vpiLineNo());
+    Classobjs[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Classobjs[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+ 
+    if (obj->get_concurrent_assertions()) {  
+      ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Classobjs[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
+      for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
+        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
+        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Classobjs[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId((*obj->get_variables())[ind]));
+        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_parameters()) {  
+      ::capnp::List<::ObjIndexType>::Builder Parameterss = Classobjs[index].initParameters(obj->get_parameters()->size());
+      for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Parameterss[ind];
+        tmp.setIndex(getId((*obj->get_parameters())[ind]));
+        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Classobjss = Classobjs[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Classobjss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Classobjs[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_property_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Propertydeclss = Classobjs[index].initPropertydecls(obj->get_property_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_sequence_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Sequencedeclss = Classobjs[index].initSequencedecls(obj->get_sequence_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_events()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventss = Classobjs[index].initNamedevents(obj->get_named_events()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+      }
+    }
+ 
+    if (obj->get_named_event_arrays()) {  
+      ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Classobjs[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
+      for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+      }
+    }
+ 
+    if (obj->get_virtual_interface_vars()) {  
+      ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Classobjs[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
+      for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+      }
+    }
+ 
+    if (obj->get_logic_var()) {  
+      ::capnp::List<::uint64_t>::Builder Logicvars = Classobjs[index].initLogicvar(obj->get_logic_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvars = Classobjs[index].initArrayvar(obj->get_array_var()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+      }
+    }
+ 
+    if (obj->get_array_var_mem()) {  
+      ::capnp::List<::uint64_t>::Builder Arrayvarmems = Classobjs[index].initArrayvarmem(obj->get_array_var_mem()->size());
+      for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Classobjs[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+
 
    index++;
  }
@@ -1615,10 +3318,12 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     Interfaces[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Interfaces[index].setVpiLineNo(obj->get_vpiLineNo());
     Interfaces[index].setVpiIndex(obj->get_vpiIndex());
-  if (obj->get_expr_dist()) {    ::ObjIndexType::Builder tmp0 = Interfaces[index].getExprdist();
+  if (obj->get_expr_dist()) {
+    ::ObjIndexType::Builder tmp0 = Interfaces[index].getExprdist();
     tmp0.setIndex(getId((obj->get_expr_dist())));
     tmp0.setType(obj->get_expr_dist()->getUhdmType());
-  }  if (obj->get_instance_array()) {    ::ObjIndexType::Builder tmp1 = Interfaces[index].getInstancearray();
+  }  if (obj->get_instance_array()) {
+    ::ObjIndexType::Builder tmp1 = Interfaces[index].getInstancearray();
     tmp1.setIndex(getId((obj->get_instance_array())));
     tmp1.setType(obj->get_instance_array()->getUhdmType());
   } 
@@ -1634,14 +3339,14 @@ Moduless.set(ind, getId((*obj->get_modules())[ind]));
     if (obj->get_interface_tf_decls()) {  
       ::capnp::List<::uint64_t>::Builder Interfacetfdeclss = Interfaces[index].initInterfacetfdecls(obj->get_interface_tf_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_interface_tf_decls()->size(); ind++) {
-Interfacetfdeclss.set(ind, getId((*obj->get_interface_tf_decls())[ind]));
+        Interfacetfdeclss.set(ind, getId((*obj->get_interface_tf_decls())[ind]));
       }
     }
  
     if (obj->get_modports()) {  
       ::capnp::List<::uint64_t>::Builder Modportss = Interfaces[index].initModports(obj->get_modports()->size());
       for (unsigned int ind = 0; ind < obj->get_modports()->size(); ind++) {
-Modportss.set(ind, getId((*obj->get_modports())[ind]));
+        Modportss.set(ind, getId((*obj->get_modports())[ind]));
       }
     }
     Interfaces[index].setGlobalclocking(getId(obj->get_global_clocking()));
@@ -1650,28 +3355,28 @@ Modportss.set(ind, getId((*obj->get_modports())[ind]));
     if (obj->get_mod_paths()) {  
       ::capnp::List<::uint64_t>::Builder Modpathss = Interfaces[index].initModpaths(obj->get_mod_paths()->size());
       for (unsigned int ind = 0; ind < obj->get_mod_paths()->size(); ind++) {
-Modpathss.set(ind, getId((*obj->get_mod_paths())[ind]));
+        Modpathss.set(ind, getId((*obj->get_mod_paths())[ind]));
       }
     }
  
     if (obj->get_cont_assigns()) {  
       ::capnp::List<::uint64_t>::Builder Contassignss = Interfaces[index].initContassigns(obj->get_cont_assigns()->size());
       for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
-Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
       }
     }
  
     if (obj->get_interfaces()) {  
       ::capnp::List<::uint64_t>::Builder Interfacess = Interfaces[index].initInterfaces(obj->get_interfaces()->size());
       for (unsigned int ind = 0; ind < obj->get_interfaces()->size(); ind++) {
-Interfacess.set(ind, getId((*obj->get_interfaces())[ind]));
+        Interfacess.set(ind, getId((*obj->get_interfaces())[ind]));
       }
     }
  
     if (obj->get_interface_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Interfacearrayss = Interfaces[index].initInterfacearrays(obj->get_interface_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_interface_arrays()->size(); ind++) {
-Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
+        Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
       }
     }
     Interfaces[index].setVpiDefName(SymbolFactory::make(obj->get_vpiDefName()));
@@ -1726,15 +3431,6 @@ Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
       }
     }
  
-    if (obj->get_typespec()) {  
-      ::capnp::List<::ObjIndexType>::Builder Typespecs = Interfaces[index].initTypespec(obj->get_typespec()->size());
-      for (unsigned int ind = 0; ind < obj->get_typespec()->size(); ind++) {
-        ::ObjIndexType::Builder tmp = Typespecs[ind];
-        tmp.setIndex(getId((*obj->get_typespec())[ind]));
-        tmp.setType(((*obj->get_typespec())[ind])->getUhdmType());
-      }
-    }
- 
     if (obj->get_class_defn()) {  
       ::capnp::List<::ObjIndexType>::Builder Classdefns = Interfaces[index].initClassdefn(obj->get_class_defn()->size());
       for (unsigned int ind = 0; ind < obj->get_class_defn()->size(); ind++) {
@@ -1743,42 +3439,43 @@ Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
         tmp.setType(((*obj->get_class_defn())[ind])->getUhdmType());
       }
     }
-  if (obj->get_instance()) {    ::ObjIndexType::Builder tmp0 = Interfaces[index].getInstance();
+  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp0 = Interfaces[index].getInstance();
     tmp0.setIndex(getId((obj->get_instance())));
     tmp0.setType(obj->get_instance()->getUhdmType());
   } 
     if (obj->get_programs()) {  
       ::capnp::List<::uint64_t>::Builder Programss = Interfaces[index].initPrograms(obj->get_programs()->size());
       for (unsigned int ind = 0; ind < obj->get_programs()->size(); ind++) {
-Programss.set(ind, getId((*obj->get_programs())[ind]));
+        Programss.set(ind, getId((*obj->get_programs())[ind]));
       }
     }
  
     if (obj->get_program_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Programarrayss = Interfaces[index].initProgramarrays(obj->get_program_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_program_arrays()->size(); ind++) {
-Programarrayss.set(ind, getId((*obj->get_program_arrays())[ind]));
+        Programarrayss.set(ind, getId((*obj->get_program_arrays())[ind]));
       }
     }
  
     if (obj->get_named_event()) {  
       ::capnp::List<::uint64_t>::Builder Namedevents = Interfaces[index].initNamedevent(obj->get_named_event()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event()->size(); ind++) {
-Namedevents.set(ind, getId((*obj->get_named_event())[ind]));
+        Namedevents.set(ind, getId((*obj->get_named_event())[ind]));
       }
     }
  
     if (obj->get_named_event_array()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrays = Interfaces[index].initNamedeventarray(obj->get_named_event_array()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_array()->size(); ind++) {
-Namedeventarrays.set(ind, getId((*obj->get_named_event_array())[ind]));
+        Namedeventarrays.set(ind, getId((*obj->get_named_event_array())[ind]));
       }
     }
  
     if (obj->get_spec_param()) {  
       ::capnp::List<::uint64_t>::Builder Specparams = Interfaces[index].initSpecparam(obj->get_spec_param()->size());
       for (unsigned int ind = 0; ind < obj->get_spec_param()->size(); ind++) {
-Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
+        Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
       }
     }
     Interfaces[index].setModule(getId(obj->get_module()));
@@ -1812,59 +3509,84 @@ Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Interfacess = Interfaces[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Interfacess[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Interfaces[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Interfaces[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Interfaces[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Interfaces[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Interfaces[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Interfaces[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Interfaces[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Interfaces[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Interfaces[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Interfaces[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -1899,59 +3621,84 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Interfacess = Interfaces[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Interfacess[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Interfaces[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Interfaces[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Interfaces[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Interfaces[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Interfaces[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Interfaces[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Interfaces[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Interfaces[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Interfaces[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Interfaces[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -1966,10 +3713,12 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     Programs[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Programs[index].setVpiLineNo(obj->get_vpiLineNo());
     Programs[index].setVpiIndex(obj->get_vpiIndex());
-  if (obj->get_instance_array()) {    ::ObjIndexType::Builder tmp0 = Programs[index].getInstancearray();
+  if (obj->get_instance_array()) {
+    ::ObjIndexType::Builder tmp0 = Programs[index].getInstancearray();
     tmp0.setIndex(getId((obj->get_instance_array())));
     tmp0.setType(obj->get_instance_array()->getUhdmType());
-  }  if (obj->get_expr_dist()) {    ::ObjIndexType::Builder tmp1 = Programs[index].getExprdist();
+  }  if (obj->get_expr_dist()) {
+    ::ObjIndexType::Builder tmp1 = Programs[index].getExprdist();
     tmp1.setIndex(getId((obj->get_expr_dist())));
     tmp1.setType(obj->get_expr_dist()->getUhdmType());
   } 
@@ -1986,28 +3735,28 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     if (obj->get_interfaces()) {  
       ::capnp::List<::uint64_t>::Builder Interfacess = Programs[index].initInterfaces(obj->get_interfaces()->size());
       for (unsigned int ind = 0; ind < obj->get_interfaces()->size(); ind++) {
-Interfacess.set(ind, getId((*obj->get_interfaces())[ind]));
+        Interfacess.set(ind, getId((*obj->get_interfaces())[ind]));
       }
     }
  
     if (obj->get_interface_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Interfacearrayss = Programs[index].initInterfacearrays(obj->get_interface_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_interface_arrays()->size(); ind++) {
-Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
+        Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
       }
     }
  
     if (obj->get_cont_assigns()) {  
       ::capnp::List<::uint64_t>::Builder Contassignss = Programs[index].initContassigns(obj->get_cont_assigns()->size());
       for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
-Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
       }
     }
  
     if (obj->get_clocking_blocks()) {  
       ::capnp::List<::uint64_t>::Builder Clockingblockss = Programs[index].initClockingblocks(obj->get_clocking_blocks()->size());
       for (unsigned int ind = 0; ind < obj->get_clocking_blocks()->size(); ind++) {
-Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
+        Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
       }
     }
     Programs[index].setVpiDefName(SymbolFactory::make(obj->get_vpiDefName()));
@@ -2062,15 +3811,6 @@ Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
       }
     }
  
-    if (obj->get_typespec()) {  
-      ::capnp::List<::ObjIndexType>::Builder Typespecs = Programs[index].initTypespec(obj->get_typespec()->size());
-      for (unsigned int ind = 0; ind < obj->get_typespec()->size(); ind++) {
-        ::ObjIndexType::Builder tmp = Typespecs[ind];
-        tmp.setIndex(getId((*obj->get_typespec())[ind]));
-        tmp.setType(((*obj->get_typespec())[ind])->getUhdmType());
-      }
-    }
- 
     if (obj->get_class_defn()) {  
       ::capnp::List<::ObjIndexType>::Builder Classdefns = Programs[index].initClassdefn(obj->get_class_defn()->size());
       for (unsigned int ind = 0; ind < obj->get_class_defn()->size(); ind++) {
@@ -2079,42 +3819,43 @@ Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
         tmp.setType(((*obj->get_class_defn())[ind])->getUhdmType());
       }
     }
-  if (obj->get_instance()) {    ::ObjIndexType::Builder tmp0 = Programs[index].getInstance();
+  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp0 = Programs[index].getInstance();
     tmp0.setIndex(getId((obj->get_instance())));
     tmp0.setType(obj->get_instance()->getUhdmType());
   } 
     if (obj->get_programs()) {  
       ::capnp::List<::uint64_t>::Builder Programss = Programs[index].initPrograms(obj->get_programs()->size());
       for (unsigned int ind = 0; ind < obj->get_programs()->size(); ind++) {
-Programss.set(ind, getId((*obj->get_programs())[ind]));
+        Programss.set(ind, getId((*obj->get_programs())[ind]));
       }
     }
  
     if (obj->get_program_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Programarrayss = Programs[index].initProgramarrays(obj->get_program_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_program_arrays()->size(); ind++) {
-Programarrayss.set(ind, getId((*obj->get_program_arrays())[ind]));
+        Programarrayss.set(ind, getId((*obj->get_program_arrays())[ind]));
       }
     }
  
     if (obj->get_named_event()) {  
       ::capnp::List<::uint64_t>::Builder Namedevents = Programs[index].initNamedevent(obj->get_named_event()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event()->size(); ind++) {
-Namedevents.set(ind, getId((*obj->get_named_event())[ind]));
+        Namedevents.set(ind, getId((*obj->get_named_event())[ind]));
       }
     }
  
     if (obj->get_named_event_array()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrays = Programs[index].initNamedeventarray(obj->get_named_event_array()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_array()->size(); ind++) {
-Namedeventarrays.set(ind, getId((*obj->get_named_event_array())[ind]));
+        Namedeventarrays.set(ind, getId((*obj->get_named_event_array())[ind]));
       }
     }
  
     if (obj->get_spec_param()) {  
       ::capnp::List<::uint64_t>::Builder Specparams = Programs[index].initSpecparam(obj->get_spec_param()->size());
       for (unsigned int ind = 0; ind < obj->get_spec_param()->size(); ind++) {
-Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
+        Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
       }
     }
     Programs[index].setModule(getId(obj->get_module()));
@@ -2148,59 +3889,84 @@ Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Programss = Programs[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Programss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Programs[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Programs[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Programs[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Programs[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Programs[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Programs[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Programs[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Programs[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Programs[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Programs[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -2235,59 +4001,84 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Programss = Programs[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Programss[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Programs[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Programs[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Programs[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Programs[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Programs[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Programs[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Programs[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Programs[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Programs[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Programs[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -2354,15 +4145,6 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
       }
     }
  
-    if (obj->get_typespec()) {  
-      ::capnp::List<::ObjIndexType>::Builder Typespecs = Packages[index].initTypespec(obj->get_typespec()->size());
-      for (unsigned int ind = 0; ind < obj->get_typespec()->size(); ind++) {
-        ::ObjIndexType::Builder tmp = Typespecs[ind];
-        tmp.setIndex(getId((*obj->get_typespec())[ind]));
-        tmp.setType(((*obj->get_typespec())[ind])->getUhdmType());
-      }
-    }
- 
     if (obj->get_class_defn()) {  
       ::capnp::List<::ObjIndexType>::Builder Classdefns = Packages[index].initClassdefn(obj->get_class_defn()->size());
       for (unsigned int ind = 0; ind < obj->get_class_defn()->size(); ind++) {
@@ -2371,42 +4153,43 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
         tmp.setType(((*obj->get_class_defn())[ind])->getUhdmType());
       }
     }
-  if (obj->get_instance()) {    ::ObjIndexType::Builder tmp0 = Packages[index].getInstance();
+  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp0 = Packages[index].getInstance();
     tmp0.setIndex(getId((obj->get_instance())));
     tmp0.setType(obj->get_instance()->getUhdmType());
   } 
     if (obj->get_programs()) {  
       ::capnp::List<::uint64_t>::Builder Programss = Packages[index].initPrograms(obj->get_programs()->size());
       for (unsigned int ind = 0; ind < obj->get_programs()->size(); ind++) {
-Programss.set(ind, getId((*obj->get_programs())[ind]));
+        Programss.set(ind, getId((*obj->get_programs())[ind]));
       }
     }
  
     if (obj->get_program_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Programarrayss = Packages[index].initProgramarrays(obj->get_program_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_program_arrays()->size(); ind++) {
-Programarrayss.set(ind, getId((*obj->get_program_arrays())[ind]));
+        Programarrayss.set(ind, getId((*obj->get_program_arrays())[ind]));
       }
     }
  
     if (obj->get_named_event()) {  
       ::capnp::List<::uint64_t>::Builder Namedevents = Packages[index].initNamedevent(obj->get_named_event()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event()->size(); ind++) {
-Namedevents.set(ind, getId((*obj->get_named_event())[ind]));
+        Namedevents.set(ind, getId((*obj->get_named_event())[ind]));
       }
     }
  
     if (obj->get_named_event_array()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrays = Packages[index].initNamedeventarray(obj->get_named_event_array()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_array()->size(); ind++) {
-Namedeventarrays.set(ind, getId((*obj->get_named_event_array())[ind]));
+        Namedeventarrays.set(ind, getId((*obj->get_named_event_array())[ind]));
       }
     }
  
     if (obj->get_spec_param()) {  
       ::capnp::List<::uint64_t>::Builder Specparams = Packages[index].initSpecparam(obj->get_spec_param()->size());
       for (unsigned int ind = 0; ind < obj->get_spec_param()->size(); ind++) {
-Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
+        Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
       }
     }
     Packages[index].setModule(getId(obj->get_module()));
@@ -2440,59 +4223,84 @@ Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Packagess = Packages[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Packagess[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Packages[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Packages[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Packages[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Packages[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Packages[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Packages[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Packages[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Packages[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Packages[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Packages[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -2527,59 +4335,84 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Packagess = Packages[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Packagess[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Packages[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Packages[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Packages[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Packages[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Packages[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Packages[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Packages[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Packages[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Packages[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Packages[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -2596,22 +4429,15 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     Modules[index].setVpiIndex(obj->get_vpiIndex());
     Modules[index].setVpiTopModule(obj->get_vpiTopModule());
     Modules[index].setVpiDefDecayTime(obj->get_vpiDefDecayTime());
-  if (obj->get_expr_dist()) {    ::ObjIndexType::Builder tmp0 = Modules[index].getExprdist();
+  if (obj->get_expr_dist()) {
+    ::ObjIndexType::Builder tmp0 = Modules[index].getExprdist();
     tmp0.setIndex(getId((obj->get_expr_dist())));
     tmp0.setType(obj->get_expr_dist()->getUhdmType());
-  }  if (obj->get_instance_array()) {    ::ObjIndexType::Builder tmp1 = Modules[index].getInstancearray();
+  }  if (obj->get_instance_array()) {
+    ::ObjIndexType::Builder tmp1 = Modules[index].getInstancearray();
     tmp1.setIndex(getId((obj->get_instance_array())));
     tmp1.setType(obj->get_instance_array()->getUhdmType());
   } 
-    if (obj->get_scope()) {  
-      ::capnp::List<::ObjIndexType>::Builder Scopes = Modules[index].initScope(obj->get_scope()->size());
-      for (unsigned int ind = 0; ind < obj->get_scope()->size(); ind++) {
-        ::ObjIndexType::Builder tmp = Scopes[ind];
-        tmp.setIndex(getId((*obj->get_scope())[ind]));
-        tmp.setType(((*obj->get_scope())[ind])->getUhdmType());
-      }
-    }
- 
     if (obj->get_process()) {  
       ::capnp::List<::ObjIndexType>::Builder Processs = Modules[index].initProcess(obj->get_process()->size());
       for (unsigned int ind = 0; ind < obj->get_process()->size(); ind++) {
@@ -2645,84 +4471,84 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     if (obj->get_ports()) {  
       ::capnp::List<::uint64_t>::Builder Portss = Modules[index].initPorts(obj->get_ports()->size());
       for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
-Portss.set(ind, getId((*obj->get_ports())[ind]));
+        Portss.set(ind, getId((*obj->get_ports())[ind]));
       }
     }
  
     if (obj->get_interfaces()) {  
       ::capnp::List<::uint64_t>::Builder Interfacess = Modules[index].initInterfaces(obj->get_interfaces()->size());
       for (unsigned int ind = 0; ind < obj->get_interfaces()->size(); ind++) {
-Interfacess.set(ind, getId((*obj->get_interfaces())[ind]));
+        Interfacess.set(ind, getId((*obj->get_interfaces())[ind]));
       }
     }
  
     if (obj->get_interface_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Interfacearrayss = Modules[index].initInterfacearrays(obj->get_interface_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_interface_arrays()->size(); ind++) {
-Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
+        Interfacearrayss.set(ind, getId((*obj->get_interface_arrays())[ind]));
       }
     }
  
     if (obj->get_cont_assigns()) {  
       ::capnp::List<::uint64_t>::Builder Contassignss = Modules[index].initContassigns(obj->get_cont_assigns()->size());
       for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
-Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
       }
     }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Modules[index].initModules(obj->get_modules()->size());
       for (unsigned int ind = 0; ind < obj->get_modules()->size(); ind++) {
-Moduless.set(ind, getId((*obj->get_modules())[ind]));
+        Moduless.set(ind, getId((*obj->get_modules())[ind]));
       }
     }
  
     if (obj->get_module_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Modulearrayss = Modules[index].initModulearrays(obj->get_module_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_module_arrays()->size(); ind++) {
-Modulearrayss.set(ind, getId((*obj->get_module_arrays())[ind]));
+        Modulearrayss.set(ind, getId((*obj->get_module_arrays())[ind]));
       }
     }
  
     if (obj->get_mod_paths()) {  
       ::capnp::List<::uint64_t>::Builder Modpathss = Modules[index].initModpaths(obj->get_mod_paths()->size());
       for (unsigned int ind = 0; ind < obj->get_mod_paths()->size(); ind++) {
-Modpathss.set(ind, getId((*obj->get_mod_paths())[ind]));
+        Modpathss.set(ind, getId((*obj->get_mod_paths())[ind]));
       }
     }
  
     if (obj->get_tchks()) {  
       ::capnp::List<::uint64_t>::Builder Tchkss = Modules[index].initTchks(obj->get_tchks()->size());
       for (unsigned int ind = 0; ind < obj->get_tchks()->size(); ind++) {
-Tchkss.set(ind, getId((*obj->get_tchks())[ind]));
+        Tchkss.set(ind, getId((*obj->get_tchks())[ind]));
       }
     }
  
     if (obj->get_def_params()) {  
       ::capnp::List<::uint64_t>::Builder Defparamss = Modules[index].initDefparams(obj->get_def_params()->size());
       for (unsigned int ind = 0; ind < obj->get_def_params()->size(); ind++) {
-Defparamss.set(ind, getId((*obj->get_def_params())[ind]));
+        Defparamss.set(ind, getId((*obj->get_def_params())[ind]));
       }
     }
  
     if (obj->get_io_decls()) {  
       ::capnp::List<::uint64_t>::Builder Iodeclss = Modules[index].initIodecls(obj->get_io_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_io_decls()->size(); ind++) {
-Iodeclss.set(ind, getId((*obj->get_io_decls())[ind]));
+        Iodeclss.set(ind, getId((*obj->get_io_decls())[ind]));
       }
     }
  
     if (obj->get_alias_stmts()) {  
       ::capnp::List<::uint64_t>::Builder Aliasstmtss = Modules[index].initAliasstmts(obj->get_alias_stmts()->size());
       for (unsigned int ind = 0; ind < obj->get_alias_stmts()->size(); ind++) {
-Aliasstmtss.set(ind, getId((*obj->get_alias_stmts())[ind]));
+        Aliasstmtss.set(ind, getId((*obj->get_alias_stmts())[ind]));
       }
     }
  
     if (obj->get_clocking_blocks()) {  
       ::capnp::List<::uint64_t>::Builder Clockingblockss = Modules[index].initClockingblocks(obj->get_clocking_blocks()->size());
       for (unsigned int ind = 0; ind < obj->get_clocking_blocks()->size(); ind++) {
-Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
+        Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
       }
     }
     Modules[index].setVpiDefName(SymbolFactory::make(obj->get_vpiDefName()));
@@ -2777,15 +4603,6 @@ Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
       }
     }
  
-    if (obj->get_typespec()) {  
-      ::capnp::List<::ObjIndexType>::Builder Typespecs = Modules[index].initTypespec(obj->get_typespec()->size());
-      for (unsigned int ind = 0; ind < obj->get_typespec()->size(); ind++) {
-        ::ObjIndexType::Builder tmp = Typespecs[ind];
-        tmp.setIndex(getId((*obj->get_typespec())[ind]));
-        tmp.setType(((*obj->get_typespec())[ind])->getUhdmType());
-      }
-    }
- 
     if (obj->get_class_defn()) {  
       ::capnp::List<::ObjIndexType>::Builder Classdefns = Modules[index].initClassdefn(obj->get_class_defn()->size());
       for (unsigned int ind = 0; ind < obj->get_class_defn()->size(); ind++) {
@@ -2794,42 +4611,43 @@ Clockingblockss.set(ind, getId((*obj->get_clocking_blocks())[ind]));
         tmp.setType(((*obj->get_class_defn())[ind])->getUhdmType());
       }
     }
-  if (obj->get_instance()) {    ::ObjIndexType::Builder tmp0 = Modules[index].getInstance();
+  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp0 = Modules[index].getInstance();
     tmp0.setIndex(getId((obj->get_instance())));
     tmp0.setType(obj->get_instance()->getUhdmType());
   } 
     if (obj->get_programs()) {  
       ::capnp::List<::uint64_t>::Builder Programss = Modules[index].initPrograms(obj->get_programs()->size());
       for (unsigned int ind = 0; ind < obj->get_programs()->size(); ind++) {
-Programss.set(ind, getId((*obj->get_programs())[ind]));
+        Programss.set(ind, getId((*obj->get_programs())[ind]));
       }
     }
  
     if (obj->get_program_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Programarrayss = Modules[index].initProgramarrays(obj->get_program_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_program_arrays()->size(); ind++) {
-Programarrayss.set(ind, getId((*obj->get_program_arrays())[ind]));
+        Programarrayss.set(ind, getId((*obj->get_program_arrays())[ind]));
       }
     }
  
     if (obj->get_named_event()) {  
       ::capnp::List<::uint64_t>::Builder Namedevents = Modules[index].initNamedevent(obj->get_named_event()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event()->size(); ind++) {
-Namedevents.set(ind, getId((*obj->get_named_event())[ind]));
+        Namedevents.set(ind, getId((*obj->get_named_event())[ind]));
       }
     }
  
     if (obj->get_named_event_array()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrays = Modules[index].initNamedeventarray(obj->get_named_event_array()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_array()->size(); ind++) {
-Namedeventarrays.set(ind, getId((*obj->get_named_event_array())[ind]));
+        Namedeventarrays.set(ind, getId((*obj->get_named_event_array())[ind]));
       }
     }
  
     if (obj->get_spec_param()) {  
       ::capnp::List<::uint64_t>::Builder Specparams = Modules[index].initSpecparam(obj->get_spec_param()->size());
       for (unsigned int ind = 0; ind < obj->get_spec_param()->size(); ind++) {
-Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
+        Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
       }
     }
     Modules[index].setModule(getId(obj->get_module()));
@@ -2863,59 +4681,84 @@ Specparams.set(ind, getId((*obj->get_spec_param())[ind]));
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Moduless = Modules[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Moduless[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Modules[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Modules[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Modules[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Modules[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Modules[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Modules[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Modules[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Modules[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Modules[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Modules[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -2950,59 +4793,84 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
       }
     }
  
+    if (obj->get_scopes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Moduless = Modules[index].initScopes(obj->get_scopes()->size());
+      for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Moduless[ind];
+        tmp.setIndex(getId((*obj->get_scopes())[ind]));
+        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_typespecs()) {  
+      ::capnp::List<::ObjIndexType>::Builder Typespecss = Modules[index].initTypespecs(obj->get_typespecs()->size());
+      for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Typespecss[ind];
+        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
+        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+      }
+    }
+ 
     if (obj->get_property_decls()) {  
       ::capnp::List<::uint64_t>::Builder Propertydeclss = Modules[index].initPropertydecls(obj->get_property_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_property_decls()->size(); ind++) {
-Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
+        Propertydeclss.set(ind, getId((*obj->get_property_decls())[ind]));
       }
     }
  
     if (obj->get_sequence_decls()) {  
       ::capnp::List<::uint64_t>::Builder Sequencedeclss = Modules[index].initSequencedecls(obj->get_sequence_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_sequence_decls()->size(); ind++) {
-Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
+        Sequencedeclss.set(ind, getId((*obj->get_sequence_decls())[ind]));
       }
     }
  
     if (obj->get_named_events()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventss = Modules[index].initNamedevents(obj->get_named_events()->size());
       for (unsigned int ind = 0; ind < obj->get_named_events()->size(); ind++) {
-Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
+        Namedeventss.set(ind, getId((*obj->get_named_events())[ind]));
       }
     }
  
     if (obj->get_named_event_arrays()) {  
       ::capnp::List<::uint64_t>::Builder Namedeventarrayss = Modules[index].initNamedeventarrays(obj->get_named_event_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_named_event_arrays()->size(); ind++) {
-Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
+        Namedeventarrayss.set(ind, getId((*obj->get_named_event_arrays())[ind]));
       }
     }
  
     if (obj->get_virtual_interface_vars()) {  
       ::capnp::List<::uint64_t>::Builder Virtualinterfacevarss = Modules[index].initVirtualinterfacevars(obj->get_virtual_interface_vars()->size());
       for (unsigned int ind = 0; ind < obj->get_virtual_interface_vars()->size(); ind++) {
-Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
+        Virtualinterfacevarss.set(ind, getId((*obj->get_virtual_interface_vars())[ind]));
       }
     }
  
     if (obj->get_logic_var()) {  
       ::capnp::List<::uint64_t>::Builder Logicvars = Modules[index].initLogicvar(obj->get_logic_var()->size());
       for (unsigned int ind = 0; ind < obj->get_logic_var()->size(); ind++) {
-Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
+        Logicvars.set(ind, getId((*obj->get_logic_var())[ind]));
       }
     }
  
     if (obj->get_array_var()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvars = Modules[index].initArrayvar(obj->get_array_var()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var()->size(); ind++) {
-Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
+        Arrayvars.set(ind, getId((*obj->get_array_var())[ind]));
       }
     }
  
     if (obj->get_array_var_mem()) {  
       ::capnp::List<::uint64_t>::Builder Arrayvarmems = Modules[index].initArrayvarmem(obj->get_array_var_mem()->size());
       for (unsigned int ind = 0; ind < obj->get_array_var_mem()->size(); ind++) {
-Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+        Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
+      }
+    }
+ 
+    if (obj->get_let_decls()) {  
+      ::capnp::List<::uint64_t>::Builder Letdeclss = Modules[index].initLetdecls(obj->get_let_decls()->size());
+      for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
+        Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
 
@@ -3021,28 +4889,28 @@ Arrayvarmems.set(ind, getId((*obj->get_array_var_mem())[ind]));
     if (obj->get_allModules()) {  
       ::capnp::List<::uint64_t>::Builder AllModuless = Designs[index].initAllModules(obj->get_allModules()->size());
       for (unsigned int ind = 0; ind < obj->get_allModules()->size(); ind++) {
-AllModuless.set(ind, getId((*obj->get_allModules())[ind]));
+        AllModuless.set(ind, getId((*obj->get_allModules())[ind]));
       }
     }
  
     if (obj->get_topModules()) {  
       ::capnp::List<::uint64_t>::Builder TopModuless = Designs[index].initTopModules(obj->get_topModules()->size());
       for (unsigned int ind = 0; ind < obj->get_topModules()->size(); ind++) {
-TopModuless.set(ind, getId((*obj->get_topModules())[ind]));
+        TopModuless.set(ind, getId((*obj->get_topModules())[ind]));
       }
     }
  
     if (obj->get_allPrograms()) {  
       ::capnp::List<::uint64_t>::Builder AllProgramss = Designs[index].initAllPrograms(obj->get_allPrograms()->size());
       for (unsigned int ind = 0; ind < obj->get_allPrograms()->size(); ind++) {
-AllProgramss.set(ind, getId((*obj->get_allPrograms())[ind]));
+        AllProgramss.set(ind, getId((*obj->get_allPrograms())[ind]));
       }
     }
  
     if (obj->get_allPackages()) {  
       ::capnp::List<::uint64_t>::Builder AllPackagess = Designs[index].initAllPackages(obj->get_allPackages()->size());
       for (unsigned int ind = 0; ind < obj->get_allPackages()->size(); ind++) {
-AllPackagess.set(ind, getId((*obj->get_allPackages())[ind]));
+        AllPackagess.set(ind, getId((*obj->get_allPackages())[ind]));
       }
     }
 

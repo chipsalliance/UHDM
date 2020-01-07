@@ -15,7 +15,7 @@
 # Universal Hardware Data Model (UHDM) "class defn" formal description
  
 - obj_def: class_defn
-
+  - extends: scope
 
 
 

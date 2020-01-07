@@ -72,10 +72,6 @@ namespace UHDM {
 
     void set_instance_array(instance_array* data) { instance_array_ = data; }
 
-    VectorOfscope* get_scope() const { return scope_; }
-
-    void set_scope(VectorOfscope* data) { scope_ = data; }
-
     VectorOfprocess* get_process() const { return process_; }
 
     void set_process(VectorOfprocess* data) { process_ = data; }
@@ -168,8 +164,6 @@ namespace UHDM {
     expr_dist* expr_dist_;
 
     instance_array* instance_array_;
-
-    VectorOfscope* scope_;
 
     VectorOfprocess* process_;
 

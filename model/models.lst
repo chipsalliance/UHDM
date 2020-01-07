@@ -3,9 +3,15 @@ property_decl.yaml
 sequence_decl.yaml
 concurrent_assertion.yaml
 virtual_interface_var.yaml
+let_decl.yaml
 scope.yaml
 begin.yaml
 named_begin.yaml
+named_fork.yaml
+fork.yaml
+for.yaml
+foreach_stmt.yaml
+gen_scope.yaml
 expr_dist_group.yaml
 expr.yaml
 distribution.yaml
@@ -48,6 +54,8 @@ spec_param.yaml
 assertion.yaml
 typespec.yaml
 class_defn.yaml
+class_typespec.yaml
+class_obj.yaml
 instance.yaml
 interface.yaml
 program.yaml
