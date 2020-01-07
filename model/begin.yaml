@@ -15,4 +15,10 @@
 # Universal Hardware Data Model (UHDM) "begin" formal description
  
 - obj_def: begin
-    - extends: scope
+  - extends: scope
+  - class_ref: stmts
+    name: stmts
+    vpi: vpiStmt
+    type: stmt
+    card: any
+    

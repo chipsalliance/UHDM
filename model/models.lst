@@ -4,6 +4,7 @@ sequence_decl.yaml
 concurrent_assertion.yaml
 virtual_interface_var.yaml
 let_decl.yaml
+stmt.yaml
 scope.yaml
 begin.yaml
 named_begin.yaml
@@ -56,6 +57,7 @@ typespec.yaml
 class_defn.yaml
 class_typespec.yaml
 class_obj.yaml
+instance_item.yaml
 instance.yaml
 interface.yaml
 program.yaml

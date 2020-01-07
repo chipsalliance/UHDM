@@ -90,6 +90,11 @@
     vpi: vpiTypedef
     type: typespec
     card: any
+#  - class_ref: instance_items
+#    name: instance_items
+#    vpi: vpiImport
+#    type: instance_item
+#    card: any   
   - obj_ref: let_decls
     name: let decls
     vpi: vpiLetDecl

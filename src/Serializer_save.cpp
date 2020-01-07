@@ -69,6 +69,7 @@ std::vector<virtual_interface_var*> virtual_interface_varFactory::objects_;
 std::vector<std::vector<virtual_interface_var*>*> VectorOfvirtual_interface_varFactory::objects_;
 std::vector<let_decl*> let_declFactory::objects_;
 std::vector<std::vector<let_decl*>*> VectorOflet_declFactory::objects_;
+std::vector<std::vector<stmt*>*> VectorOfstmtFactory::objects_;
 std::vector<std::vector<scope*>*> VectorOfscopeFactory::objects_;
 std::vector<begin*> beginFactory::objects_;
 std::vector<std::vector<begin*>*> VectorOfbeginFactory::objects_;
@@ -161,6 +162,7 @@ std::vector<class_typespec*> class_typespecFactory::objects_;
 std::vector<std::vector<class_typespec*>*> VectorOfclass_typespecFactory::objects_;
 std::vector<class_obj*> class_objFactory::objects_;
 std::vector<std::vector<class_obj*>*> VectorOfclass_objFactory::objects_;
+std::vector<std::vector<instance_item*>*> VectorOfinstance_itemFactory::objects_;
 std::vector<std::vector<instance*>*> VectorOfinstanceFactory::objects_;
 std::vector<interface*> interfaceFactory::objects_;
 std::vector<std::vector<interface*>*> VectorOfinterfaceFactory::objects_;
@@ -817,6 +819,15 @@ void Serializer::save(std::string file) {
     Begins[index].setUhdmParentType(obj->get_uhdmParentType());
     Begins[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Begins[index].setVpiLineNo(obj->get_vpiLineNo());
+ 
+    if (obj->get_stmts()) {  
+      ::capnp::List<::ObjIndexType>::Builder Stmtss = Begins[index].initStmts(obj->get_stmts()->size());
+      for (unsigned int ind = 0; ind < obj->get_stmts()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Stmtss[ind];
+        tmp.setIndex(getId((*obj->get_stmts())[ind]));
+        tmp.setType(((*obj->get_stmts())[ind])->getUhdmType());
+      }
+    }
     Begins[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Begins[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
  
@@ -938,6 +949,15 @@ void Serializer::save(std::string file) {
     Namedbegins[index].setUhdmParentType(obj->get_uhdmParentType());
     Namedbegins[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Namedbegins[index].setVpiLineNo(obj->get_vpiLineNo());
+ 
+    if (obj->get_stmts()) {  
+      ::capnp::List<::ObjIndexType>::Builder Stmtss = Namedbegins[index].initStmts(obj->get_stmts()->size());
+      for (unsigned int ind = 0; ind < obj->get_stmts()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Stmtss[ind];
+        tmp.setIndex(getId((*obj->get_stmts())[ind]));
+        tmp.setType(((*obj->get_stmts())[ind])->getUhdmType());
+      }
+    }
     Namedbegins[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Namedbegins[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
  
@@ -1060,6 +1080,15 @@ void Serializer::save(std::string file) {
     Namedforks[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Namedforks[index].setVpiLineNo(obj->get_vpiLineNo());
     Namedforks[index].setVpiJoinType(obj->get_vpiJoinType());
+ 
+    if (obj->get_stmts()) {  
+      ::capnp::List<::ObjIndexType>::Builder Stmtss = Namedforks[index].initStmts(obj->get_stmts()->size());
+      for (unsigned int ind = 0; ind < obj->get_stmts()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Stmtss[ind];
+        tmp.setIndex(getId((*obj->get_stmts())[ind]));
+        tmp.setType(((*obj->get_stmts())[ind])->getUhdmType());
+      }
+    }
     Namedforks[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Namedforks[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
  
@@ -1182,6 +1211,15 @@ void Serializer::save(std::string file) {
     Forkstmts[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Forkstmts[index].setVpiLineNo(obj->get_vpiLineNo());
     Forkstmts[index].setVpiJoinType(obj->get_vpiJoinType());
+ 
+    if (obj->get_stmts()) {  
+      ::capnp::List<::ObjIndexType>::Builder Stmtss = Forkstmts[index].initStmts(obj->get_stmts()->size());
+      for (unsigned int ind = 0; ind < obj->get_stmts()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Stmtss[ind];
+        tmp.setIndex(getId((*obj->get_stmts())[ind]));
+        tmp.setType(((*obj->get_stmts())[ind])->getUhdmType());
+      }
+    }
     Forkstmts[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Forkstmts[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
  
@@ -1725,6 +1763,10 @@ void Serializer::save(std::string file) {
     ::ObjIndexType::Builder tmp1 = Tasks[index].getRightexpr();
     tmp1.setIndex(getId((obj->get_right_expr())));
     tmp1.setType(obj->get_right_expr()->getUhdmType());
+  }  if (obj->get_stmt()) {
+    ::ObjIndexType::Builder tmp2 = Tasks[index].getStmt();
+    tmp2.setIndex(getId((obj->get_stmt())));
+    tmp2.setType(obj->get_stmt()->getUhdmType());
   }    Tasks[index].setClassdefn(getId(obj->get_class_defn()));
     Tasks[index].setRefobj(getId(obj->get_ref_obj()));
     Tasks[index].setIodecl(getId(obj->get_io_decl()));
@@ -1980,6 +2022,10 @@ void Serializer::save(std::string file) {
     ::ObjIndexType::Builder tmp1 = Functions[index].getRightexpr();
     tmp1.setIndex(getId((obj->get_right_expr())));
     tmp1.setType(obj->get_right_expr()->getUhdmType());
+  }  if (obj->get_stmt()) {
+    ::ObjIndexType::Builder tmp2 = Functions[index].getStmt();
+    tmp2.setIndex(getId((obj->get_stmt())));
+    tmp2.setType(obj->get_stmt()->getUhdmType());
   }    Functions[index].setClassdefn(getId(obj->get_class_defn()));
     Functions[index].setRefobj(getId(obj->get_ref_obj()));
     Functions[index].setIodecl(getId(obj->get_io_decl()));

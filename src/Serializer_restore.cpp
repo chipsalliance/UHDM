@@ -360,6 +360,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    beginFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    beginFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    beginFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    
+    if (obj.getStmts().size()) { 
+      std::vector<stmt*>* vect = VectorOfstmtFactory::make();
+      for (unsigned int ind = 0; ind < obj.getStmts().size(); ind++) {
+ 	vect->push_back((stmt*)getObject(obj.getStmts()[ind].getType(),obj.getStmts()[ind].getIndex()-1));
+    }
+      beginFactory::objects_[index]->set_stmts(vect);
+    }
     beginFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     beginFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
@@ -484,6 +492,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    named_beginFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    named_beginFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    named_beginFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    
+    if (obj.getStmts().size()) { 
+      std::vector<stmt*>* vect = VectorOfstmtFactory::make();
+      for (unsigned int ind = 0; ind < obj.getStmts().size(); ind++) {
+ 	vect->push_back((stmt*)getObject(obj.getStmts()[ind].getType(),obj.getStmts()[ind].getIndex()-1));
+    }
+      named_beginFactory::objects_[index]->set_stmts(vect);
+    }
     named_beginFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     named_beginFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
@@ -609,6 +625,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    named_forkFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    named_forkFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
     named_forkFactory::objects_[index]->set_vpiJoinType(obj.getVpiJoinType());
+    
+    if (obj.getStmts().size()) { 
+      std::vector<stmt*>* vect = VectorOfstmtFactory::make();
+      for (unsigned int ind = 0; ind < obj.getStmts().size(); ind++) {
+ 	vect->push_back((stmt*)getObject(obj.getStmts()[ind].getType(),obj.getStmts()[ind].getIndex()-1));
+    }
+      named_forkFactory::objects_[index]->set_stmts(vect);
+    }
     named_forkFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     named_forkFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
@@ -734,6 +758,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    fork_stmtFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    fork_stmtFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
     fork_stmtFactory::objects_[index]->set_vpiJoinType(obj.getVpiJoinType());
+    
+    if (obj.getStmts().size()) { 
+      std::vector<stmt*>* vect = VectorOfstmtFactory::make();
+      for (unsigned int ind = 0; ind < obj.getStmts().size(); ind++) {
+ 	vect->push_back((stmt*)getObject(obj.getStmts()[ind].getType(),obj.getStmts()[ind].getIndex()-1));
+    }
+      fork_stmtFactory::objects_[index]->set_stmts(vect);
+    }
     fork_stmtFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     fork_stmtFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
     
@@ -1281,6 +1313,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     taskFactory::objects_[index]->set_vpiDPICIdentifier(SymbolFactory::getSymbol(obj.getVpiDPICIdentifier()));
      taskFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
      taskFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+     taskFactory::objects_[index]->set_stmt((stmt*)getObject(obj.getStmt().getType(),obj.getStmt().getIndex()-1));
    if (obj.getClassdefn()) 
      taskFactory::objects_[index]->set_class_defn(clocking_blockFactory::objects_[obj.getClassdefn()-1]);
    if (obj.getRefobj()) 
@@ -1538,6 +1571,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     functionFactory::objects_[index]->set_vpiDPICIdentifier(SymbolFactory::getSymbol(obj.getVpiDPICIdentifier()));
      functionFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
      functionFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+     functionFactory::objects_[index]->set_stmt((stmt*)getObject(obj.getStmt().getType(),obj.getStmt().getIndex()-1));
    if (obj.getClassdefn()) 
      functionFactory::objects_[index]->set_class_defn(clocking_blockFactory::objects_[obj.getClassdefn()-1]);
    if (obj.getRefobj()) 
