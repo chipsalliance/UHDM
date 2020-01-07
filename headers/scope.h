@@ -42,12 +42,78 @@ namespace UHDM {
 
     void set_vpiFullName(std::string data) { vpiFullName_ = SymbolFactory::make(data); }
 
+    VectorOfconcurrent_assertion* get_concurrent_assertions() const { return concurrent_assertions_; }
+
+    void set_concurrent_assertions(VectorOfconcurrent_assertion* data) { concurrent_assertions_ = data; }
+
+    VectorOfvariables* get_variables() const { return variables_; }
+
+    void set_variables(VectorOfvariables* data) { variables_ = data; }
+
+    VectorOfparameters* get_parameters() const { return parameters_; }
+
+    void set_parameters(VectorOfparameters* data) { parameters_ = data; }
+
+    VectorOfproperty_decl* get_property_decls() const { return property_decls_; }
+
+    void set_property_decls(VectorOfproperty_decl* data) { property_decls_ = data; }
+
+    VectorOfsequence_decl* get_sequence_decls() const { return sequence_decls_; }
+
+    void set_sequence_decls(VectorOfsequence_decl* data) { sequence_decls_ = data; }
+
+    VectorOfnamed_event* get_named_events() const { return named_events_; }
+
+    void set_named_events(VectorOfnamed_event* data) { named_events_ = data; }
+
+    VectorOfnamed_event_array* get_named_event_arrays() const { return named_event_arrays_; }
+
+    void set_named_event_arrays(VectorOfnamed_event_array* data) { named_event_arrays_ = data; }
+
+    VectorOfvirtual_interface_var* get_virtual_interface_vars() const { return virtual_interface_vars_; }
+
+    void set_virtual_interface_vars(VectorOfvirtual_interface_var* data) { virtual_interface_vars_ = data; }
+
+    VectorOflogic_var* get_logic_var() const { return logic_var_; }
+
+    void set_logic_var(VectorOflogic_var* data) { logic_var_ = data; }
+
+    VectorOfarray_var* get_array_var() const { return array_var_; }
+
+    void set_array_var(VectorOfarray_var* data) { array_var_ = data; }
+
+    VectorOfarray_var* get_array_var_mem() const { return array_var_mem_; }
+
+    void set_array_var_mem(VectorOfarray_var* data) { array_var_mem_ = data; }
+
     virtual unsigned int getUhdmType() { return uhdmscope; }   
   private:
     
     unsigned int vpiName_;
 
     unsigned int vpiFullName_;
+
+    VectorOfconcurrent_assertion* concurrent_assertions_;
+
+    VectorOfvariables* variables_;
+
+    VectorOfparameters* parameters_;
+
+    VectorOfproperty_decl* property_decls_;
+
+    VectorOfsequence_decl* sequence_decls_;
+
+    VectorOfnamed_event* named_events_;
+
+    VectorOfnamed_event_array* named_event_arrays_;
+
+    VectorOfvirtual_interface_var* virtual_interface_vars_;
+
+    VectorOflogic_var* logic_var_;
+
+    VectorOfarray_var* array_var_;
+
+    VectorOfarray_var* array_var_mem_;
 
   };
 

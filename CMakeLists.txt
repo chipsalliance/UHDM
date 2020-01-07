@@ -54,7 +54,9 @@ add_custom_command(
 
 file(GLOB uhdm_SRC
   ${PROJECT_SOURCE_DIR}/src/vpi_user.cpp
-  ${PROJECT_SOURCE_DIR}/src/Serializer.cpp
+  ${PROJECT_SOURCE_DIR}/src/SymbolFactory.cpp
+  ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp
+  ${PROJECT_SOURCE_DIR}/src/Serializer_restore.cpp  
   ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.c++
   )
 

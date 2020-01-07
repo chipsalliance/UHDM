@@ -24,15 +24,20 @@
  */
 #include <string>
 #include <vector>
+#include <map>
 #include <iostream>
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
-#include "include/vpi_uhdm.h"
 #include "headers/containers.h"
+#include "include/vpi_uhdm.h"
 #include "headers/uhdm.h"
 #include <string.h>
 
 #include "headers/process.h"
+#include "headers/property_decl.h"
+#include "headers/sequence_decl.h"
+#include "headers/concurrent_assertion.h"
+#include "headers/virtual_interface_var.h"
 #include "headers/scope.h"
 #include "headers/begin.h"
 #include "headers/named_begin.h"
@@ -108,6 +113,24 @@ vpiHandle vpi_handle (PLI_INT32 type,
  if (handle->type == uhdmprocess) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((process*)(object))->get_vpiParent()->getUhdmType(), ((process*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmproperty_decl) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((property_decl*)(object))->get_vpiParent()->getUhdmType(), ((property_decl*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmsequence_decl) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((sequence_decl*)(object))->get_vpiParent()->getUhdmType(), ((sequence_decl*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmvirtual_interface_var) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((virtual_interface_var*)(object))->get_vpiParent()->getUhdmType(), ((virtual_interface_var*)(object))->get_vpiParent());
  } 
 }
 
@@ -511,6 +534,303 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   const BaseClass*  object = (BaseClass*) handle->object;
   
     
+ if (handle->type == uhdmscope) {
+ if (type == vpiConcurrentAssertions) {
+ if (((scope*)(object))->get_concurrent_assertions())
+ return (vpiHandle) new uhdm_handle(uhdmconcurrent_assertions, ((scope*)(object))->get_concurrent_assertions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVariables) {
+ if (((scope*)(object))->get_variables())
+ return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiParameter) {
+ if (((scope*)(object))->get_parameters())
+ return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiPropertyDecl) {
+ if (((scope*)(object))->get_property_decls())
+ return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiSequenceDecl) {
+ if (((scope*)(object))->get_sequence_decls())
+ return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEvent) {
+ if (((scope*)(object))->get_named_events())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEventArray) {
+ if (((scope*)(object))->get_named_event_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVirtualInterfaceVar) {
+ if (((scope*)(object))->get_virtual_interface_vars())
+ return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiReg) {
+ if (((scope*)(object))->get_logic_var())
+ return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiRegArray) {
+ if (((scope*)(object))->get_array_var())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiMemory) {
+ if (((scope*)(object))->get_array_var_mem())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmbegin) {
+ if (type == vpiConcurrentAssertions) {
+ if (((scope*)(object))->get_concurrent_assertions())
+ return (vpiHandle) new uhdm_handle(uhdmconcurrent_assertions, ((scope*)(object))->get_concurrent_assertions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVariables) {
+ if (((scope*)(object))->get_variables())
+ return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiParameter) {
+ if (((scope*)(object))->get_parameters())
+ return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiPropertyDecl) {
+ if (((scope*)(object))->get_property_decls())
+ return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiSequenceDecl) {
+ if (((scope*)(object))->get_sequence_decls())
+ return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEvent) {
+ if (((scope*)(object))->get_named_events())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEventArray) {
+ if (((scope*)(object))->get_named_event_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVirtualInterfaceVar) {
+ if (((scope*)(object))->get_virtual_interface_vars())
+ return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiReg) {
+ if (((scope*)(object))->get_logic_var())
+ return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiRegArray) {
+ if (((scope*)(object))->get_array_var())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiMemory) {
+ if (((scope*)(object))->get_array_var_mem())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmnamed_begin) {
+ if (type == vpiConcurrentAssertions) {
+ if (((scope*)(object))->get_concurrent_assertions())
+ return (vpiHandle) new uhdm_handle(uhdmconcurrent_assertions, ((scope*)(object))->get_concurrent_assertions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVariables) {
+ if (((scope*)(object))->get_variables())
+ return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiParameter) {
+ if (((scope*)(object))->get_parameters())
+ return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiPropertyDecl) {
+ if (((scope*)(object))->get_property_decls())
+ return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiSequenceDecl) {
+ if (((scope*)(object))->get_sequence_decls())
+ return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEvent) {
+ if (((scope*)(object))->get_named_events())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEventArray) {
+ if (((scope*)(object))->get_named_event_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVirtualInterfaceVar) {
+ if (((scope*)(object))->get_virtual_interface_vars())
+ return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiReg) {
+ if (((scope*)(object))->get_logic_var())
+ return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiRegArray) {
+ if (((scope*)(object))->get_array_var())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiMemory) {
+ if (((scope*)(object))->get_array_var_mem())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
+ else return 0;
+  }
+ }
+
+    
  if (handle->type == uhdmoperation) {
  if (type == vpiOperand) {
  if (((operation*)(object))->get_operands())
@@ -773,24 +1093,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiVariables) {
- if (((instance*)(object))->get_variables())
- return (vpiHandle) new uhdm_handle(uhdmvariables, ((instance*)(object))->get_variables());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiParameter) {
- if (((instance*)(object))->get_parameters())
- return (vpiHandle) new uhdm_handle(uhdmparameters, ((instance*)(object))->get_parameters());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiAssertion) {
  if (((instance*)(object))->get_assertion())
  return (vpiHandle) new uhdm_handle(uhdmassertion, ((instance*)(object))->get_assertion());
@@ -836,33 +1138,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiReg) {
- if (((instance*)(object))->get_logic_var())
- return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((instance*)(object))->get_logic_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiRegArray) {
- if (((instance*)(object))->get_array_var())
- return (vpiHandle) new uhdm_handle(uhdmarray_var, ((instance*)(object))->get_array_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiMemory) {
- if (((instance*)(object))->get_array_var_mem())
- return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((instance*)(object))->get_array_var_mem());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event, ((instance*)(object))->get_named_event());
@@ -884,6 +1159,105 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  if (type == vpiSpecParam) {
  if (((instance*)(object))->get_spec_param())
  return (vpiHandle) new uhdm_handle(uhdmspec_param, ((instance*)(object))->get_spec_param());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminstance) {
+ if (type == vpiConcurrentAssertions) {
+ if (((scope*)(object))->get_concurrent_assertions())
+ return (vpiHandle) new uhdm_handle(uhdmconcurrent_assertions, ((scope*)(object))->get_concurrent_assertions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVariables) {
+ if (((scope*)(object))->get_variables())
+ return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiParameter) {
+ if (((scope*)(object))->get_parameters())
+ return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiPropertyDecl) {
+ if (((scope*)(object))->get_property_decls())
+ return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiSequenceDecl) {
+ if (((scope*)(object))->get_sequence_decls())
+ return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEvent) {
+ if (((scope*)(object))->get_named_events())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEventArray) {
+ if (((scope*)(object))->get_named_event_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVirtualInterfaceVar) {
+ if (((scope*)(object))->get_virtual_interface_vars())
+ return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiReg) {
+ if (((scope*)(object))->get_logic_var())
+ return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiRegArray) {
+ if (((scope*)(object))->get_array_var())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiMemory) {
+ if (((scope*)(object))->get_array_var_mem())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
  else return 0;
   }
  }
@@ -980,24 +1354,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiVariables) {
- if (((instance*)(object))->get_variables())
- return (vpiHandle) new uhdm_handle(uhdmvariables, ((instance*)(object))->get_variables());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiParameter) {
- if (((instance*)(object))->get_parameters())
- return (vpiHandle) new uhdm_handle(uhdmparameters, ((instance*)(object))->get_parameters());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiAssertion) {
  if (((instance*)(object))->get_assertion())
  return (vpiHandle) new uhdm_handle(uhdmassertion, ((instance*)(object))->get_assertion());
@@ -1043,33 +1399,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiReg) {
- if (((instance*)(object))->get_logic_var())
- return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((instance*)(object))->get_logic_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiRegArray) {
- if (((instance*)(object))->get_array_var())
- return (vpiHandle) new uhdm_handle(uhdmarray_var, ((instance*)(object))->get_array_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiMemory) {
- if (((instance*)(object))->get_array_var_mem())
- return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((instance*)(object))->get_array_var_mem());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event, ((instance*)(object))->get_named_event());
@@ -1091,6 +1420,105 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  if (type == vpiSpecParam) {
  if (((instance*)(object))->get_spec_param())
  return (vpiHandle) new uhdm_handle(uhdmspec_param, ((instance*)(object))->get_spec_param());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdminterface) {
+ if (type == vpiConcurrentAssertions) {
+ if (((scope*)(object))->get_concurrent_assertions())
+ return (vpiHandle) new uhdm_handle(uhdmconcurrent_assertions, ((scope*)(object))->get_concurrent_assertions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVariables) {
+ if (((scope*)(object))->get_variables())
+ return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiParameter) {
+ if (((scope*)(object))->get_parameters())
+ return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiPropertyDecl) {
+ if (((scope*)(object))->get_property_decls())
+ return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiSequenceDecl) {
+ if (((scope*)(object))->get_sequence_decls())
+ return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEvent) {
+ if (((scope*)(object))->get_named_events())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEventArray) {
+ if (((scope*)(object))->get_named_event_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVirtualInterfaceVar) {
+ if (((scope*)(object))->get_virtual_interface_vars())
+ return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiReg) {
+ if (((scope*)(object))->get_logic_var())
+ return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiRegArray) {
+ if (((scope*)(object))->get_array_var())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiMemory) {
+ if (((scope*)(object))->get_array_var_mem())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
  else return 0;
   }
  }
@@ -1169,24 +1597,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiVariables) {
- if (((instance*)(object))->get_variables())
- return (vpiHandle) new uhdm_handle(uhdmvariables, ((instance*)(object))->get_variables());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiParameter) {
- if (((instance*)(object))->get_parameters())
- return (vpiHandle) new uhdm_handle(uhdmparameters, ((instance*)(object))->get_parameters());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiAssertion) {
  if (((instance*)(object))->get_assertion())
  return (vpiHandle) new uhdm_handle(uhdmassertion, ((instance*)(object))->get_assertion());
@@ -1232,33 +1642,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiReg) {
- if (((instance*)(object))->get_logic_var())
- return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((instance*)(object))->get_logic_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiRegArray) {
- if (((instance*)(object))->get_array_var())
- return (vpiHandle) new uhdm_handle(uhdmarray_var, ((instance*)(object))->get_array_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiMemory) {
- if (((instance*)(object))->get_array_var_mem())
- return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((instance*)(object))->get_array_var_mem());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event, ((instance*)(object))->get_named_event());
@@ -1280,6 +1663,105 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  if (type == vpiSpecParam) {
  if (((instance*)(object))->get_spec_param())
  return (vpiHandle) new uhdm_handle(uhdmspec_param, ((instance*)(object))->get_spec_param());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmprogram) {
+ if (type == vpiConcurrentAssertions) {
+ if (((scope*)(object))->get_concurrent_assertions())
+ return (vpiHandle) new uhdm_handle(uhdmconcurrent_assertions, ((scope*)(object))->get_concurrent_assertions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVariables) {
+ if (((scope*)(object))->get_variables())
+ return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiParameter) {
+ if (((scope*)(object))->get_parameters())
+ return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiPropertyDecl) {
+ if (((scope*)(object))->get_property_decls())
+ return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiSequenceDecl) {
+ if (((scope*)(object))->get_sequence_decls())
+ return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEvent) {
+ if (((scope*)(object))->get_named_events())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEventArray) {
+ if (((scope*)(object))->get_named_event_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVirtualInterfaceVar) {
+ if (((scope*)(object))->get_virtual_interface_vars())
+ return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiReg) {
+ if (((scope*)(object))->get_logic_var())
+ return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiRegArray) {
+ if (((scope*)(object))->get_array_var())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiMemory) {
+ if (((scope*)(object))->get_array_var_mem())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
  else return 0;
   }
  }
@@ -1313,24 +1795,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiVariables) {
- if (((instance*)(object))->get_variables())
- return (vpiHandle) new uhdm_handle(uhdmvariables, ((instance*)(object))->get_variables());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiParameter) {
- if (((instance*)(object))->get_parameters())
- return (vpiHandle) new uhdm_handle(uhdmparameters, ((instance*)(object))->get_parameters());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiAssertion) {
  if (((instance*)(object))->get_assertion())
  return (vpiHandle) new uhdm_handle(uhdmassertion, ((instance*)(object))->get_assertion());
@@ -1376,33 +1840,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiReg) {
- if (((instance*)(object))->get_logic_var())
- return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((instance*)(object))->get_logic_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiRegArray) {
- if (((instance*)(object))->get_array_var())
- return (vpiHandle) new uhdm_handle(uhdmarray_var, ((instance*)(object))->get_array_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiMemory) {
- if (((instance*)(object))->get_array_var_mem())
- return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((instance*)(object))->get_array_var_mem());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event, ((instance*)(object))->get_named_event());
@@ -1424,6 +1861,105 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  if (type == vpiSpecParam) {
  if (((instance*)(object))->get_spec_param())
  return (vpiHandle) new uhdm_handle(uhdmspec_param, ((instance*)(object))->get_spec_param());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmpackage) {
+ if (type == vpiConcurrentAssertions) {
+ if (((scope*)(object))->get_concurrent_assertions())
+ return (vpiHandle) new uhdm_handle(uhdmconcurrent_assertions, ((scope*)(object))->get_concurrent_assertions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVariables) {
+ if (((scope*)(object))->get_variables())
+ return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiParameter) {
+ if (((scope*)(object))->get_parameters())
+ return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiPropertyDecl) {
+ if (((scope*)(object))->get_property_decls())
+ return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiSequenceDecl) {
+ if (((scope*)(object))->get_sequence_decls())
+ return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEvent) {
+ if (((scope*)(object))->get_named_events())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEventArray) {
+ if (((scope*)(object))->get_named_event_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVirtualInterfaceVar) {
+ if (((scope*)(object))->get_virtual_interface_vars())
+ return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiReg) {
+ if (((scope*)(object))->get_logic_var())
+ return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiRegArray) {
+ if (((scope*)(object))->get_array_var())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiMemory) {
+ if (((scope*)(object))->get_array_var_mem())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
  else return 0;
   }
  }
@@ -1601,24 +2137,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiVariables) {
- if (((instance*)(object))->get_variables())
- return (vpiHandle) new uhdm_handle(uhdmvariables, ((instance*)(object))->get_variables());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiParameter) {
- if (((instance*)(object))->get_parameters())
- return (vpiHandle) new uhdm_handle(uhdmparameters, ((instance*)(object))->get_parameters());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiAssertion) {
  if (((instance*)(object))->get_assertion())
  return (vpiHandle) new uhdm_handle(uhdmassertion, ((instance*)(object))->get_assertion());
@@ -1664,33 +2182,6 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
 
     
  if (handle->type == uhdminstance) {
- if (type == vpiReg) {
- if (((instance*)(object))->get_logic_var())
- return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((instance*)(object))->get_logic_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiRegArray) {
- if (((instance*)(object))->get_array_var())
- return (vpiHandle) new uhdm_handle(uhdmarray_var, ((instance*)(object))->get_array_var());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
- if (type == vpiMemory) {
- if (((instance*)(object))->get_array_var_mem())
- return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((instance*)(object))->get_array_var_mem());
- else return 0;
-  }
- }
-
-    
- if (handle->type == uhdminstance) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event, ((instance*)(object))->get_named_event());
@@ -1712,6 +2203,105 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  if (type == vpiSpecParam) {
  if (((instance*)(object))->get_spec_param())
  return (vpiHandle) new uhdm_handle(uhdmspec_param, ((instance*)(object))->get_spec_param());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmmodule) {
+ if (type == vpiConcurrentAssertions) {
+ if (((scope*)(object))->get_concurrent_assertions())
+ return (vpiHandle) new uhdm_handle(uhdmconcurrent_assertions, ((scope*)(object))->get_concurrent_assertions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVariables) {
+ if (((scope*)(object))->get_variables())
+ return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiParameter) {
+ if (((scope*)(object))->get_parameters())
+ return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiPropertyDecl) {
+ if (((scope*)(object))->get_property_decls())
+ return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiSequenceDecl) {
+ if (((scope*)(object))->get_sequence_decls())
+ return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEvent) {
+ if (((scope*)(object))->get_named_events())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiNamedEventArray) {
+ if (((scope*)(object))->get_named_event_arrays())
+ return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiVirtualInterfaceVar) {
+ if (((scope*)(object))->get_virtual_interface_vars())
+ return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiReg) {
+ if (((scope*)(object))->get_logic_var())
+ return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiRegArray) {
+ if (((scope*)(object))->get_array_var())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmscope) {
+ if (type == vpiMemory) {
+ if (((scope*)(object))->get_array_var_mem())
+ return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
  else return 0;
   }
  }
@@ -1761,6 +2351,105 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   uhdm_handle* handle = (uhdm_handle*) iterator;
   const void* vect = handle->object;
   
+
+  if (handle->type == uhdmconcurrent_assertions) {
+ VectorOfconcurrent_assertion* the_vec = (VectorOfconcurrent_assertion*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmvariables) {
+ VectorOfvariables* the_vec = (VectorOfvariables*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmparameters) {
+ VectorOfparameters* the_vec = (VectorOfparameters*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmproperty_decls) {
+ VectorOfproperty_decl* the_vec = (VectorOfproperty_decl*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmsequence_decls) {
+ VectorOfsequence_decl* the_vec = (VectorOfsequence_decl*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmnamed_events) {
+ VectorOfnamed_event* the_vec = (VectorOfnamed_event*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmnamed_event_arrays) {
+ VectorOfnamed_event_array* the_vec = (VectorOfnamed_event_array*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmvirtual_interface_vars) {
+ VectorOfvirtual_interface_var* the_vec = (VectorOfvirtual_interface_var*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmlogic_var) {
+ VectorOflogic_var* the_vec = (VectorOflogic_var*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmarray_var) {
+ VectorOfarray_var* the_vec = (VectorOfarray_var*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmarray_var_mem) {
+ VectorOfarray_var* the_vec = (VectorOfarray_var*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
 
   if (handle->type == uhdmoperands) {
  VectorOfoperand_group* the_vec = (VectorOfoperand_group*)vect;
@@ -1870,24 +2559,6 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
-  if (handle->type == uhdmvariables) {
- VectorOfvariables* the_vec = (VectorOfvariables*)vect;
- if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
- handle->index++;
- return (vpiHandle) h;
- }
- }
-
-  if (handle->type == uhdmparameters) {
- VectorOfparameters* the_vec = (VectorOfparameters*)vect;
- if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
- handle->index++;
- return (vpiHandle) h;
- }
- }
-
   if (handle->type == uhdmassertion) {
  VectorOfassertion* the_vec = (VectorOfassertion*)vect;
  if (handle->index < the_vec->size()) {
@@ -1926,33 +2597,6 @@ vpiHandle vpi_scan (vpiHandle iterator) {
 
   if (handle->type == uhdmprogram_arrays) {
  VectorOfprogram* the_vec = (VectorOfprogram*)vect;
- if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
- handle->index++;
- return (vpiHandle) h;
- }
- }
-
-  if (handle->type == uhdmlogic_var) {
- VectorOflogic_var* the_vec = (VectorOflogic_var*)vect;
- if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
- handle->index++;
- return (vpiHandle) h;
- }
- }
-
-  if (handle->type == uhdmarray_var) {
- VectorOfarray_var* the_vec = (VectorOfarray_var*)vect;
- if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
- handle->index++;
- return (vpiHandle) h;
- }
- }
-
-  if (handle->type == uhdmarray_var_mem) {
- VectorOfarray_var* the_vec = (VectorOfarray_var*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
@@ -2300,6 +2944,24 @@ PLI_INT32 vpi_get (PLI_INT32   property,
  if (handle->type == uhdmprocess) {
      if (property == vpiLineNo) {
        return ((process*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmproperty_decl) {
+     if (property == vpiLineNo) {
+       return ((property_decl*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmsequence_decl) {
+     if (property == vpiLineNo) {
+       return ((sequence_decl*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmvirtual_interface_var) {
+     if (property == vpiLineNo) {
+       return ((virtual_interface_var*)(obj))->get_vpiLineNo();
      } 
 }
 
@@ -3125,6 +3787,24 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmproperty_decl) {
+     if (property == vpiLineNo) {
+       return ((property_decl*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmsequence_decl) {
+     if (property == vpiLineNo) {
+       return ((sequence_decl*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmvirtual_interface_var) {
+     if (property == vpiLineNo) {
+       return ((virtual_interface_var*)(obj))->get_vpiLineNo();
+     } 
+}
+
  if (handle->type == uhdmbegin) {
      if (property == vpiLineNo) {
        return ((begin*)(obj))->get_vpiLineNo();
@@ -3947,6 +4627,24 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmproperty_decl) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((property_decl*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmsequence_decl) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((sequence_decl*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmvirtual_interface_var) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((virtual_interface_var*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
  if (handle->type == uhdmscope) {
      if (property == vpiName) {
        return (PLI_BYTE8*) strdup(((scope*)(obj))->get_vpiName().c_str());
@@ -4350,18 +5048,6 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
 }
 
  if (handle->type == uhdminstance) {
-     if (property == vpiName) {
-       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiName().c_str());
-     } 
-}
-
- if (handle->type == uhdminstance) {
-     if (property == vpiFullName) {
-       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiFullName().c_str());
-     } 
-}
-
- if (handle->type == uhdminstance) {
      if (property == vpiDefName) {
        return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiDefName().c_str());
      } 
@@ -4391,21 +5077,21 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdminstance) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdminstance) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((instance*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
  if (handle->type == uhdminterface) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((interface*)(obj))->get_vpiFile().c_str());
-     } 
-}
-
- if (handle->type == uhdminterface) {
-     if (property == vpiName) {
-       return (PLI_BYTE8*) strdup(((interface*)(obj))->get_vpiName().c_str());
-     } 
-}
-
- if (handle->type == uhdminterface) {
-     if (property == vpiFullName) {
-       return (PLI_BYTE8*) strdup(((interface*)(obj))->get_vpiFullName().c_str());
      } 
 }
 
@@ -4439,21 +5125,21 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdminterface) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((interface*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdminterface) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((interface*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
  if (handle->type == uhdmprogram) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((program*)(obj))->get_vpiFile().c_str());
-     } 
-}
-
- if (handle->type == uhdmprogram) {
-     if (property == vpiName) {
-       return (PLI_BYTE8*) strdup(((program*)(obj))->get_vpiName().c_str());
-     } 
-}
-
- if (handle->type == uhdmprogram) {
-     if (property == vpiFullName) {
-       return (PLI_BYTE8*) strdup(((program*)(obj))->get_vpiFullName().c_str());
      } 
 }
 
@@ -4487,21 +5173,21 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmprogram) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((program*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmprogram) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((program*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
  if (handle->type == uhdmpackage) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiFile().c_str());
-     } 
-}
-
- if (handle->type == uhdmpackage) {
-     if (property == vpiName) {
-       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiName().c_str());
-     } 
-}
-
- if (handle->type == uhdmpackage) {
-     if (property == vpiFullName) {
-       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiFullName().c_str());
      } 
 }
 
@@ -4535,21 +5221,21 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmpackage) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmpackage) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((package*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
  if (handle->type == uhdmmodule) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiFile().c_str());
-     } 
-}
-
- if (handle->type == uhdmmodule) {
-     if (property == vpiName) {
-       return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiName().c_str());
-     } 
-}
-
- if (handle->type == uhdmmodule) {
-     if (property == vpiFullName) {
-       return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiFullName().c_str());
      } 
 }
 
@@ -4580,6 +5266,18 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
  if (handle->type == uhdmmodule) {
      if (property == vpiConfig) {
        return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiConfig().c_str());
+     } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmmodule) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((module*)(obj))->get_vpiFullName().c_str());
      } 
 }
 

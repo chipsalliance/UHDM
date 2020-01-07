@@ -703,72 +703,83 @@ proc generate_code { models } {
     puts "Generating Capnp schema..."
     exec sh -c "rm -rf src/UHDM.capnp.*"
     exec sh -c "capnp compile -oc++:. src/UHDM.capnp"
+
+    # SymbolFactory.cpp
+    exec sh -c "cp -rf templates/SymbolFactory.cpp src/SymbolFactory.cpp"
     
     # Serializer.cpp
-    set fid [open "templates/Serializer.cpp" ]
-    set serializer_content [read $fid]
-    close $fid
-    foreach class $classes {
-	if {$MODEL_TYPE($class) == "class_def"} {
-	    continue
-	}
-	set Class [string toupper $class 0 0]
-	regsub -all  {_} $Class "" Class
-	if {$SAVE($class) != ""} {
-	    append capnp_save "
+    set files "Serializer_save.cpp Serializer_restore.cpp"
+    foreach file $files {
+	set capnp_init_factories ""
+	set capnp_restore_factories ""
+	set capnp_save ""
+	set capnp_id ""
+	set factory_purge ""
+	
+	set fid [open templates/$file]
+	set serializer_content [read $fid]
+	close $fid
+	foreach class $classes {
+	    if {$MODEL_TYPE($class) == "class_def"} {
+		continue
+	    }
+	    set Class [string toupper $class 0 0]
+	    regsub -all  {_} $Class "" Class
+	    if {$SAVE($class) != ""} {
+		append capnp_save "
  ::capnp::List<$Class>::Builder ${Class}s = cap_root.initFactory${Class}(${class}Factory::objects_.size());
  index = 0;
  for (auto obj : ${class}Factory::objects_) {
 $SAVE($class)
    index++;
  }"
-	   append capnp_init_factories "
+		append capnp_init_factories "
  ::capnp::List<$Class>::Reader ${Class}s = cap_root.getFactory${Class}();
  for (unsigned ind = 0; ind < ${Class}s.size(); ind++) {
    setId(${class}Factory::make(), ind);
  }
 " 
-	   append capnp_restore_factories "
+		append capnp_restore_factories "
  index = 0;
  for (${Class}::Reader obj : ${Class}s) {
 $RESTORE($class)
    index++;
  }
 "
+	    }
 	}
-    }
-    
-    set capnp_id ""
-    foreach class $classes {
-	if {$MODEL_TYPE($class) == "class_def"} {
-	    continue
-	}
-  	append capnp_id "
+	
+	set capnp_id ""
+	foreach class $classes {
+	    if {$MODEL_TYPE($class) == "class_def"} {
+		continue
+	    }
+	    append capnp_id "
   index = 1;
   for (auto obj : ${class}Factory::objects_) {
     setId(obj, index);
     index++;
   }"
 
-	append factory_purge "
+	    append factory_purge "
   for (auto obj : ${class}Factory::objects_) {
     delete obj;
   }
   ${class}Factory::objects_.clear();
 "
+	}
+	
+	regsub {<FACTORIES>} $serializer_content $factories serializer_content
+	regsub {<FACTORY_PURGE>} $serializer_content $factory_purge serializer_content
+	regsub {<FACTORY_OBJECT_TYPE_MAP>} $serializer_content $factory_object_type_map serializer_content
+	regsub {<CAPNP_ID>} $serializer_content $capnp_id serializer_content
+	regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content
+	regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
+	regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
+	set serializerId [open "src/$file" "w"]
+	puts $serializerId $serializer_content
+	close $serializerId
     }
-    
-    regsub {<FACTORIES>} $serializer_content $factories serializer_content
-    regsub {<FACTORY_PURGE>} $serializer_content $factory_purge serializer_content
-    regsub {<FACTORY_OBJECT_TYPE_MAP>} $serializer_content $factory_object_type_map serializer_content
-    regsub {<CAPNP_ID>} $serializer_content $capnp_id serializer_content
-    regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content
-    regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
-    regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
-    set serializerId [open "src/Serializer.cpp" "w"]
-    puts $serializerId $serializer_content
-    close $serializerId
-    
 }
 
 proc debug_models { models } {

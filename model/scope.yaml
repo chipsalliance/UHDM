@@ -25,3 +25,63 @@
     vpi: vpiFullName
     type: string
     card: 1
+  - obj_ref: property_decls
+    name: property decl
+    vpi: vpiPropertyDecl
+    type: property_decl
+    card: any
+  - obj_ref: sequence_decls
+    name: sequence decl
+    vpi: vpiSequenceDecl
+    type: sequence_decl
+    card: any
+  - class_ref: concurrent_assertions
+    name: concurrent assertion
+    vpi: vpiConcurrentAssertions
+    type: concurrent_assertion
+    card: any
+  - obj_ref: named_events
+    name: named event
+    vpi: vpiNamedEvent
+    type: named_event
+    card: any
+  - obj_ref: named_event_arrays
+    name: named event arrays
+    vpi: vpiNamedEventArray
+    type: named_event_array
+    card: any
+  - class_ref: variables
+    name: variables
+    vpi: vpiVariables
+    type: variables
+    card: any
+  - obj_ref: virtual_interface_vars
+    name: virtual interface vars
+    vpi: vpiVirtualInterfaceVar
+    type: virtual_interface_var
+    card: any
+  - obj_ref: logic_var
+    name: logic var
+    vpi: vpiReg
+    type: logic_var
+    card: any
+  - obj_ref: array_var
+    name: array var
+    vpi: vpiRegArray
+    type: array_var
+    card: any
+  - obj_ref: array_var_mem
+    name: mem var
+    vpi: vpiMemory
+    type: array_var
+    card: any
+  - class_ref: parameters
+    name: parameters
+    vpi: vpiParameter
+    type: parameters
+    card: any
+#  - class_ref: scope
+#    name: scopes
+#    vpi: vpiInternalScope
+#    type: scope
+#    card: any

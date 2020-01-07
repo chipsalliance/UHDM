@@ -30,9 +30,6 @@
 #define CONTAINERS_H
 
 namespace UHDM {
-  typedef std::vector<std::string> Id2SymbolMap;
-  typedef std::unordered_map<std::string, unsigned long> Symbol2IdMap;
-
   <CONTAINERS>
 };
 
