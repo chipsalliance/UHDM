@@ -62,6 +62,10 @@ namespace UHDM {
 
     void set_typespecs(VectorOftypespec* data) { typespecs_ = data; }
 
+    VectorOfinstance_item* get_instance_items() const { return instance_items_; }
+
+    void set_instance_items(VectorOfinstance_item* data) { instance_items_ = data; }
+
     VectorOfproperty_decl* get_property_decls() const { return property_decls_; }
 
     void set_property_decls(VectorOfproperty_decl* data) { property_decls_ = data; }
@@ -114,6 +118,8 @@ namespace UHDM {
     VectorOfscope* scopes_;
 
     VectorOftypespec* typespecs_;
+
+    VectorOfinstance_item* instance_items_;
 
     VectorOfproperty_decl* property_decls_;
 
