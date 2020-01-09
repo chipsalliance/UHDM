@@ -93,7 +93,7 @@
   - class_ref: instance_items
     name: instance_items
     vpi: vpiImport
-    type: instance_item
+    type: any
     card: any
   - obj_ref: let_decls
     name: let decls

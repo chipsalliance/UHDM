@@ -32,7 +32,7 @@
 namespace UHDM {
   typedef std::vector<std::string> Id2SymbolMap;
   typedef std::unordered_map<std::string, unsigned long> Symbol2IdMap;
-
+  typedef void any;
   class BaseClass {
   public: 
     //BaseClass(){}
@@ -64,6 +64,18 @@ namespace UHDM {
     static Id2SymbolMap id2SymbolMap_;
     static Symbol2IdMap symbol2IdMap_;
 
+  };
+
+  class VectorOfanyFactory {
+  friend Serializer;
+  public:
+    static std::vector<UHDM::any*>* make() {
+      std::vector<UHDM::any*>* obj = new std::vector<UHDM::any*>();
+    objects_.push_back(obj);
+    return obj;
+  }
+  private:
+    static std::vector<std::vector<UHDM::any*>*> objects_;
   };
   
 };

@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <unordered_map>
+typedef void any;
 #include "headers/containers.h"
 #include "headers/uhdm.h"
 #include <sys/types.h>
@@ -58,6 +59,7 @@ unsigned long Serializer::getId(BaseClass* p) {
   }
 }
 
+std::vector<std::vector<any*>*> VectorOfanyFactory::objects_;
 <FACTORIES>
 
 BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {

@@ -218,6 +218,9 @@ proc printCapnpSchema {type vpi card} {
     if {$type == "bool"} {
         set type "Bool"
     }
+    if {$type == "any"} {
+        set type "Int64"
+    }
     if {$card == "1"} {
 	return [list ${vpi} ${type}]
     } elseif {$card == "any"} {
@@ -252,7 +255,9 @@ proc printTypeDefs { type card } {
     if {$card == "any"} {
 	if ![info exist CONTAINER($type)] {
 	    set CONTAINER($type) 1
-	    append typedefs "class $type;\n"
+	    if {$type != "any"} {
+		append typedefs "class $type;\n"
+	    }
 	    append typedefs "typedef std::vector<${type}*> VectorOf${type};\n"
 	    append typedefs "typedef std::vector<${type}*>::iterator VectorOf${type}Itr;\n"
 	}
@@ -328,7 +333,7 @@ proc printScanBody { name classname type card } {
   if (handle->type == uhdm${name}) {\n\
     VectorOf${type}* the_vec = (VectorOf${type}*)vect;\n\
       if (handle->index < the_vec->size()) {\n\
-          uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));\n\
+          uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));\n\
 	  handle->index++;\n\
           return (vpiHandle) h;\n\
       }\n\
@@ -466,7 +471,10 @@ proc generate_code { models } {
 			lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
 			continue
 		    }
-		    append containers [printTypeDefs $type $card]
+		    if {$type != "any"} {
+			append containers [printTypeDefs $type $card]
+		    }
+		    
                     # properties are already defined in vpi_user.h, no need to redefine them
 		    append methods($classname) [printMethods $type $vpi $card] 
 		    append members($classname) [printMembers $type $vpi $card]
@@ -551,8 +559,8 @@ proc generate_code { models } {
       for (unsigned int ind = 0; ind < obj->get_${name}()->size(); ind++) {\n"
 			if {$key == "class_ref"} {
 			    append SAVE($classname) "        ::ObjIndexType::Builder tmp = [string toupper ${Name} 0 0]s\[ind\];\n"
-			    append SAVE($classname) "        tmp.setIndex(getId((*obj->get_${name}())\[ind\]));\n"
-			    append SAVE($classname) "        tmp.setType(((*obj->get_${name}())\[ind\])->getUhdmType());"
+			    append SAVE($classname) "        tmp.setIndex(getId(((BaseClass*) (*obj->get_${name}())\[ind\])));\n"
+			    append SAVE($classname) "        tmp.setType(((BaseClass*)((*obj->get_${name}())\[ind\]))->getUhdmType());"
 			} else {
 			    append SAVE($classname) "        [string toupper ${Name} 0 0]s.set(ind, getId((*obj->get_${name}())\[ind\]));"
 			}
@@ -651,7 +659,7 @@ proc generate_code { models } {
 
 	    if [info exist vpi_iterate_body($baseclass)] {
 		set vpi_iterate $vpi_iterate_body($baseclass)
-		regsub uhdm$baseclass $vpi_iterate uhdm$classname vpi_iterate
+		regsub -all "= uhdm$baseclass" $vpi_iterate "= uhdm$classname" vpi_iterate
 		append vpi_iterate_body_all $vpi_iterate
 	    }
 

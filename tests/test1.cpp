@@ -42,6 +42,7 @@ std::vector<vpiHandle> build_designs () {
   VectorOfpackage* v3 = VectorOfpackageFactory::make();
   v3->push_back(p1);
   d->set_allPackages(v3);
+  // Function
   function* f1 = functionFactory::make();
   f1->set_vpiName("MyFunc1");
   f1->set_vpiSize(100);
@@ -52,6 +53,17 @@ std::vector<vpiHandle> build_designs () {
   v4->push_back(f1);
   v4->push_back(f2);
   p1->set_task_func(v4);
+  // Instance items
+  program* pr1 = programFactory::make();
+  pr1->set_vpiName("PR1");
+  VectorOfany* inst_items = VectorOfanyFactory::make();
+  inst_items->push_back(pr1);
+  function* f3 = functionFactory::make();
+  f3->set_vpiName("MyFunc3");
+  f3->set_vpiSize(300);
+  inst_items->push_back(f3);
+  
+  m1->set_instance_items(inst_items);
   designs.push_back(uhdm_handleFactory::make(uhdmdesign, d));
   return designs;
 }

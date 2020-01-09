@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <map>
+typedef void any;
 #include "headers/containers.h"
 #include "headers/uhdm.h"
 #include <sys/types.h>
@@ -412,9 +413,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       beginFactory::objects_[index]->set_instance_items(vect);
     }
@@ -552,9 +553,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       named_beginFactory::objects_[index]->set_instance_items(vect);
     }
@@ -693,9 +694,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       named_forkFactory::objects_[index]->set_instance_items(vect);
     }
@@ -834,9 +835,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       fork_stmtFactory::objects_[index]->set_instance_items(vect);
     }
@@ -966,9 +967,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       for_stmtFactory::objects_[index]->set_instance_items(vect);
     }
@@ -1098,9 +1099,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       foreach_stmtFactory::objects_[index]->set_instance_items(vect);
     }
@@ -1230,9 +1231,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       gen_scopeFactory::objects_[index]->set_instance_items(vect);
     }
@@ -1420,9 +1421,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       taskFactory::objects_[index]->set_instance_items(vect);
     }
@@ -1542,9 +1543,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       taskFactory::objects_[index]->set_instance_items(vect);
     }
@@ -1694,9 +1695,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       functionFactory::objects_[index]->set_instance_items(vect);
     }
@@ -1816,9 +1817,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       functionFactory::objects_[index]->set_instance_items(vect);
     }
@@ -2076,9 +2077,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       clocking_blockFactory::objects_[index]->set_instance_items(vect);
     }
@@ -2607,9 +2608,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       class_defnFactory::objects_[index]->set_instance_items(vect);
     }
@@ -2739,9 +2740,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       class_typespecFactory::objects_[index]->set_instance_items(vect);
     }
@@ -2871,9 +2872,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       class_objFactory::objects_[index]->set_instance_items(vect);
     }
@@ -3164,9 +3165,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       interfaceFactory::objects_[index]->set_instance_items(vect);
     }
@@ -3286,9 +3287,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       interfaceFactory::objects_[index]->set_instance_items(vect);
     }
@@ -3561,9 +3562,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       programFactory::objects_[index]->set_instance_items(vect);
     }
@@ -3683,9 +3684,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       programFactory::objects_[index]->set_instance_items(vect);
     }
@@ -3914,9 +3915,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       packageFactory::objects_[index]->set_instance_items(vect);
     }
@@ -4036,9 +4037,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       packageFactory::objects_[index]->set_instance_items(vect);
     }
@@ -4397,9 +4398,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       moduleFactory::objects_[index]->set_instance_items(vect);
     }
@@ -4519,9 +4520,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
     
     if (obj.getInstanceitems().size()) { 
-      std::vector<instance_item*>* vect = VectorOfinstance_itemFactory::make();
+      std::vector<any*>* vect = VectorOfanyFactory::make();
       for (unsigned int ind = 0; ind < obj.getInstanceitems().size(); ind++) {
- 	vect->push_back((instance_item*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
+ 	vect->push_back((any*)getObject(obj.getInstanceitems()[ind].getType(),obj.getInstanceitems()[ind].getIndex()-1));
     }
       moduleFactory::objects_[index]->set_instance_items(vect);
     }
