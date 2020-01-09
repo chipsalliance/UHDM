@@ -28,6 +28,7 @@
 #include <iostream>
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
+typedef void any;
 #include "headers/containers.h"
 #include "include/vpi_uhdm.h"
 #include "headers/uhdm.h"

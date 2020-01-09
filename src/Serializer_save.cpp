@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <unordered_map>
+typedef void any;
 #include "headers/containers.h"
 #include "headers/uhdm.h"
 #include <sys/types.h>
@@ -58,6 +59,7 @@ unsigned long Serializer::getId(BaseClass* p) {
   }
 }
 
+std::vector<std::vector<any*>*> VectorOfanyFactory::objects_;
 std::vector<process*> processFactory::objects_;
 std::vector<std::vector<process*>*> VectorOfprocessFactory::objects_;
 std::vector<property_decl*> property_declFactory::objects_;
@@ -824,8 +826,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Stmtss = Begins[index].initStmts(obj->get_stmts()->size());
       for (unsigned int ind = 0; ind < obj->get_stmts()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Stmtss[ind];
-        tmp.setIndex(getId((*obj->get_stmts())[ind]));
-        tmp.setType(((*obj->get_stmts())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_stmts())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_stmts())[ind]))->getUhdmType());
       }
     }
     Begins[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -835,8 +837,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Begins[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -844,8 +846,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Begins[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -853,8 +855,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Begins[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -862,8 +864,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Beginss = Begins[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Beginss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -871,8 +873,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Begins[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -880,8 +882,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Begins[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -963,8 +965,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Stmtss = Namedbegins[index].initStmts(obj->get_stmts()->size());
       for (unsigned int ind = 0; ind < obj->get_stmts()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Stmtss[ind];
-        tmp.setIndex(getId((*obj->get_stmts())[ind]));
-        tmp.setType(((*obj->get_stmts())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_stmts())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_stmts())[ind]))->getUhdmType());
       }
     }
     Namedbegins[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -974,8 +976,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Namedbegins[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -983,8 +985,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Namedbegins[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -992,8 +994,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Namedbegins[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -1001,8 +1003,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Namedbeginss = Namedbegins[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Namedbeginss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -1010,8 +1012,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Namedbegins[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -1019,8 +1021,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Namedbegins[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -1103,8 +1105,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Stmtss = Namedforks[index].initStmts(obj->get_stmts()->size());
       for (unsigned int ind = 0; ind < obj->get_stmts()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Stmtss[ind];
-        tmp.setIndex(getId((*obj->get_stmts())[ind]));
-        tmp.setType(((*obj->get_stmts())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_stmts())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_stmts())[ind]))->getUhdmType());
       }
     }
     Namedforks[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -1114,8 +1116,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Namedforks[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -1123,8 +1125,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Namedforks[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -1132,8 +1134,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Namedforks[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -1141,8 +1143,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Namedforkss = Namedforks[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Namedforkss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -1150,8 +1152,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Namedforks[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -1159,8 +1161,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Namedforks[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -1243,8 +1245,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Stmtss = Forkstmts[index].initStmts(obj->get_stmts()->size());
       for (unsigned int ind = 0; ind < obj->get_stmts()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Stmtss[ind];
-        tmp.setIndex(getId((*obj->get_stmts())[ind]));
-        tmp.setType(((*obj->get_stmts())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_stmts())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_stmts())[ind]))->getUhdmType());
       }
     }
     Forkstmts[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -1254,8 +1256,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Forkstmts[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -1263,8 +1265,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Forkstmts[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -1272,8 +1274,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Forkstmts[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -1281,8 +1283,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Forkstmtss = Forkstmts[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Forkstmtss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -1290,8 +1292,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Forkstmts[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -1299,8 +1301,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Forkstmts[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -1384,8 +1386,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Forstmts[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -1393,8 +1395,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Forstmts[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -1402,8 +1404,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Forstmts[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -1411,8 +1413,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Forstmtss = Forstmts[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Forstmtss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -1420,8 +1422,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Forstmts[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -1429,8 +1431,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Forstmts[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -1514,8 +1516,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Foreachstmts[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -1523,8 +1525,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Foreachstmts[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -1532,8 +1534,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Foreachstmts[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -1541,8 +1543,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Foreachstmtss = Foreachstmts[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Foreachstmtss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -1550,8 +1552,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Foreachstmts[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -1559,8 +1561,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Foreachstmts[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -1644,8 +1646,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Genscopes[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -1653,8 +1655,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Genscopes[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -1662,8 +1664,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Genscopes[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -1671,8 +1673,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Genscopess = Genscopes[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Genscopess[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -1680,8 +1682,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Genscopes[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -1689,8 +1691,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Genscopes[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -1783,8 +1785,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Operandss = Operations[index].initOperands(obj->get_operands()->size());
       for (unsigned int ind = 0; ind < obj->get_operands()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Operandss[ind];
-        tmp.setIndex(getId((*obj->get_operands())[ind]));
-        tmp.setType(((*obj->get_operands())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_operands())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_operands())[ind]))->getUhdmType());
       }
     }
     Operations[index].setVpiDecompile(SymbolFactory::make(obj->get_vpiDecompile()));
@@ -1840,8 +1842,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Tasks[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -1849,8 +1851,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Tasks[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -1858,8 +1860,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Tasks[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -1867,8 +1869,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Taskss = Tasks[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Taskss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -1876,8 +1878,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Tasks[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -1885,8 +1887,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Tasks[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -1961,8 +1963,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Tasks[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -1970,8 +1972,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Tasks[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -1979,8 +1981,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Tasks[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -1988,8 +1990,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Taskss = Tasks[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Taskss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -1997,8 +1999,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Tasks[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -2006,8 +2008,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Tasks[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -2117,8 +2119,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Functions[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -2126,8 +2128,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Functions[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -2135,8 +2137,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Functions[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -2144,8 +2146,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Functionss = Functions[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Functionss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -2153,8 +2155,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Functions[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -2162,8 +2164,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Functions[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -2238,8 +2240,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Functions[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -2247,8 +2249,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Functions[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -2256,8 +2258,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Functions[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -2265,8 +2267,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Functionss = Functions[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Functionss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -2274,8 +2276,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Functions[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -2283,8 +2285,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Functions[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -2492,8 +2494,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Clockingblocks[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -2501,8 +2503,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Clockingblocks[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -2510,8 +2512,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Clockingblocks[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -2519,8 +2521,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Clockingblockss = Clockingblocks[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Clockingblockss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -2528,8 +2530,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Clockingblocks[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -2537,8 +2539,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Clockingblocks[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -2662,8 +2664,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instancess = Interfacearrays[index].initInstances(obj->get_instances()->size());
       for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instancess[ind];
-        tmp.setIndex(getId((*obj->get_instances())[ind]));
-        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instances())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
     Interfacearrays[index].setRange(getId(obj->get_range()));
@@ -2705,8 +2707,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instancess = Programarrays[index].initInstances(obj->get_instances()->size());
       for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instancess[ind];
-        tmp.setIndex(getId((*obj->get_instances())[ind]));
-        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instances())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
     Programarrays[index].setRange(getId(obj->get_range()));
@@ -2755,8 +2757,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instancess = Modulearrays[index].initInstances(obj->get_instances()->size());
       for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instancess[ind];
-        tmp.setIndex(getId((*obj->get_instances())[ind]));
-        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instances())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
     Modulearrays[index].setRange(getId(obj->get_range()));
@@ -2787,8 +2789,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Primitivess = Gatearrays[index].initPrimitives(obj->get_primitives()->size());
       for (unsigned int ind = 0; ind < obj->get_primitives()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Primitivess[ind];
-        tmp.setIndex(getId((*obj->get_primitives())[ind]));
-        tmp.setType(((*obj->get_primitives())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_primitives())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_primitives())[ind]))->getUhdmType());
       }
     }
     Gatearrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -2811,8 +2813,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instancess = Gatearrays[index].initInstances(obj->get_instances()->size());
       for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instancess[ind];
-        tmp.setIndex(getId((*obj->get_instances())[ind]));
-        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instances())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
     Gatearrays[index].setRange(getId(obj->get_range()));
@@ -2845,8 +2847,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instancess = Gatearrays[index].initInstances(obj->get_instances()->size());
       for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instancess[ind];
-        tmp.setIndex(getId((*obj->get_instances())[ind]));
-        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instances())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
     Gatearrays[index].setRange(getId(obj->get_range()));
@@ -2877,8 +2879,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Primitivess = Switcharrays[index].initPrimitives(obj->get_primitives()->size());
       for (unsigned int ind = 0; ind < obj->get_primitives()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Primitivess[ind];
-        tmp.setIndex(getId((*obj->get_primitives())[ind]));
-        tmp.setType(((*obj->get_primitives())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_primitives())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_primitives())[ind]))->getUhdmType());
       }
     }
     Switcharrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -2901,8 +2903,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instancess = Switcharrays[index].initInstances(obj->get_instances()->size());
       for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instancess[ind];
-        tmp.setIndex(getId((*obj->get_instances())[ind]));
-        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instances())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
     Switcharrays[index].setRange(getId(obj->get_range()));
@@ -2935,8 +2937,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instancess = Switcharrays[index].initInstances(obj->get_instances()->size());
       for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instancess[ind];
-        tmp.setIndex(getId((*obj->get_instances())[ind]));
-        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instances())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
     Switcharrays[index].setRange(getId(obj->get_range()));
@@ -2967,8 +2969,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Primitivess = Udparrays[index].initPrimitives(obj->get_primitives()->size());
       for (unsigned int ind = 0; ind < obj->get_primitives()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Primitivess[ind];
-        tmp.setIndex(getId((*obj->get_primitives())[ind]));
-        tmp.setType(((*obj->get_primitives())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_primitives())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_primitives())[ind]))->getUhdmType());
       }
     }
     Udparrays[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -2991,8 +2993,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instancess = Udparrays[index].initInstances(obj->get_instances()->size());
       for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instancess[ind];
-        tmp.setIndex(getId((*obj->get_instances())[ind]));
-        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instances())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
     Udparrays[index].setRange(getId(obj->get_range()));
@@ -3025,8 +3027,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instancess = Udparrays[index].initInstances(obj->get_instances()->size());
       for (unsigned int ind = 0; ind < obj->get_instances()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instancess[ind];
-        tmp.setIndex(getId((*obj->get_instances())[ind]));
-        tmp.setType(((*obj->get_instances())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instances())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
     Udparrays[index].setRange(getId(obj->get_range()));
@@ -3115,8 +3117,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Classdefns[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -3124,8 +3126,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Classdefns[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -3133,8 +3135,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Classdefns[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -3142,8 +3144,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Classdefnss = Classdefns[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Classdefnss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -3151,8 +3153,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Classdefns[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -3160,8 +3162,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Classdefns[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -3245,8 +3247,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Classtypespecs[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -3254,8 +3256,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Classtypespecs[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -3263,8 +3265,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Classtypespecs[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -3272,8 +3274,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Classtypespecss = Classtypespecs[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Classtypespecss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -3281,8 +3283,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Classtypespecs[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -3290,8 +3292,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Classtypespecs[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -3375,8 +3377,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Classobjs[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -3384,8 +3386,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Classobjs[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -3393,8 +3395,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Classobjs[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -3402,8 +3404,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Classobjss = Classobjs[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Classobjss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -3411,8 +3413,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Classobjs[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -3420,8 +3422,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Classobjs[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -3512,8 +3514,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Processs = Interfaces[index].initProcess(obj->get_process()->size());
       for (unsigned int ind = 0; ind < obj->get_process()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Processs[ind];
-        tmp.setIndex(getId((*obj->get_process())[ind]));
-        tmp.setType(((*obj->get_process())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_process())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_process())[ind]))->getUhdmType());
       }
     }
  
@@ -3580,8 +3582,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Taskfuncs = Interfaces[index].initTaskfunc(obj->get_task_func()->size());
       for (unsigned int ind = 0; ind < obj->get_task_func()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Taskfuncs[ind];
-        tmp.setIndex(getId((*obj->get_task_func())[ind]));
-        tmp.setType(((*obj->get_task_func())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_task_func())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_task_func())[ind]))->getUhdmType());
       }
     }
  
@@ -3589,8 +3591,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Nets = Interfaces[index].initNet(obj->get_net()->size());
       for (unsigned int ind = 0; ind < obj->get_net()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Nets[ind];
-        tmp.setIndex(getId((*obj->get_net())[ind]));
-        tmp.setType(((*obj->get_net())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_net())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_net())[ind]))->getUhdmType());
       }
     }
  
@@ -3598,8 +3600,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Arraynets = Interfaces[index].initArraynet(obj->get_array_net()->size());
       for (unsigned int ind = 0; ind < obj->get_array_net()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Arraynets[ind];
-        tmp.setIndex(getId((*obj->get_array_net())[ind]));
-        tmp.setType(((*obj->get_array_net())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_array_net())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_array_net())[ind]))->getUhdmType());
       }
     }
  
@@ -3607,8 +3609,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Assertions = Interfaces[index].initAssertion(obj->get_assertion()->size());
       for (unsigned int ind = 0; ind < obj->get_assertion()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Assertions[ind];
-        tmp.setIndex(getId((*obj->get_assertion())[ind]));
-        tmp.setType(((*obj->get_assertion())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_assertion())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_assertion())[ind]))->getUhdmType());
       }
     }
  
@@ -3616,8 +3618,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Classdefns = Interfaces[index].initClassdefn(obj->get_class_defn()->size());
       for (unsigned int ind = 0; ind < obj->get_class_defn()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Classdefns[ind];
-        tmp.setIndex(getId((*obj->get_class_defn())[ind]));
-        tmp.setType(((*obj->get_class_defn())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_class_defn())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_class_defn())[ind]))->getUhdmType());
       }
     }
   if (obj->get_instance()) {
@@ -3667,8 +3669,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Interfaces[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -3676,8 +3678,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Interfaces[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -3685,8 +3687,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Interfaces[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -3694,8 +3696,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Interfacess = Interfaces[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Interfacess[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -3703,8 +3705,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Interfaces[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -3712,8 +3714,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Interfaces[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -3788,8 +3790,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Interfaces[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -3797,8 +3799,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Interfaces[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -3806,8 +3808,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Interfaces[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -3815,8 +3817,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Interfacess = Interfaces[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Interfacess[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -3824,8 +3826,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Interfaces[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -3833,8 +3835,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Interfaces[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -3925,8 +3927,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Processs = Programs[index].initProcess(obj->get_process()->size());
       for (unsigned int ind = 0; ind < obj->get_process()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Processs[ind];
-        tmp.setIndex(getId((*obj->get_process())[ind]));
-        tmp.setType(((*obj->get_process())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_process())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_process())[ind]))->getUhdmType());
       }
     }
     Programs[index].setDefaultclocking(getId(obj->get_default_clocking()));
@@ -3978,8 +3980,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Taskfuncs = Programs[index].initTaskfunc(obj->get_task_func()->size());
       for (unsigned int ind = 0; ind < obj->get_task_func()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Taskfuncs[ind];
-        tmp.setIndex(getId((*obj->get_task_func())[ind]));
-        tmp.setType(((*obj->get_task_func())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_task_func())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_task_func())[ind]))->getUhdmType());
       }
     }
  
@@ -3987,8 +3989,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Nets = Programs[index].initNet(obj->get_net()->size());
       for (unsigned int ind = 0; ind < obj->get_net()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Nets[ind];
-        tmp.setIndex(getId((*obj->get_net())[ind]));
-        tmp.setType(((*obj->get_net())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_net())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_net())[ind]))->getUhdmType());
       }
     }
  
@@ -3996,8 +3998,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Arraynets = Programs[index].initArraynet(obj->get_array_net()->size());
       for (unsigned int ind = 0; ind < obj->get_array_net()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Arraynets[ind];
-        tmp.setIndex(getId((*obj->get_array_net())[ind]));
-        tmp.setType(((*obj->get_array_net())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_array_net())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_array_net())[ind]))->getUhdmType());
       }
     }
  
@@ -4005,8 +4007,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Assertions = Programs[index].initAssertion(obj->get_assertion()->size());
       for (unsigned int ind = 0; ind < obj->get_assertion()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Assertions[ind];
-        tmp.setIndex(getId((*obj->get_assertion())[ind]));
-        tmp.setType(((*obj->get_assertion())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_assertion())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_assertion())[ind]))->getUhdmType());
       }
     }
  
@@ -4014,8 +4016,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Classdefns = Programs[index].initClassdefn(obj->get_class_defn()->size());
       for (unsigned int ind = 0; ind < obj->get_class_defn()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Classdefns[ind];
-        tmp.setIndex(getId((*obj->get_class_defn())[ind]));
-        tmp.setType(((*obj->get_class_defn())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_class_defn())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_class_defn())[ind]))->getUhdmType());
       }
     }
   if (obj->get_instance()) {
@@ -4065,8 +4067,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Programs[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -4074,8 +4076,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Programs[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -4083,8 +4085,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Programs[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -4092,8 +4094,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Programss = Programs[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Programss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -4101,8 +4103,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Programs[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -4110,8 +4112,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Programs[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -4186,8 +4188,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Programs[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -4195,8 +4197,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Programs[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -4204,8 +4206,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Programs[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -4213,8 +4215,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Programss = Programs[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Programss[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -4222,8 +4224,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Programs[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -4231,8 +4233,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Programs[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -4330,8 +4332,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Taskfuncs = Packages[index].initTaskfunc(obj->get_task_func()->size());
       for (unsigned int ind = 0; ind < obj->get_task_func()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Taskfuncs[ind];
-        tmp.setIndex(getId((*obj->get_task_func())[ind]));
-        tmp.setType(((*obj->get_task_func())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_task_func())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_task_func())[ind]))->getUhdmType());
       }
     }
  
@@ -4339,8 +4341,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Nets = Packages[index].initNet(obj->get_net()->size());
       for (unsigned int ind = 0; ind < obj->get_net()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Nets[ind];
-        tmp.setIndex(getId((*obj->get_net())[ind]));
-        tmp.setType(((*obj->get_net())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_net())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_net())[ind]))->getUhdmType());
       }
     }
  
@@ -4348,8 +4350,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Arraynets = Packages[index].initArraynet(obj->get_array_net()->size());
       for (unsigned int ind = 0; ind < obj->get_array_net()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Arraynets[ind];
-        tmp.setIndex(getId((*obj->get_array_net())[ind]));
-        tmp.setType(((*obj->get_array_net())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_array_net())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_array_net())[ind]))->getUhdmType());
       }
     }
  
@@ -4357,8 +4359,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Assertions = Packages[index].initAssertion(obj->get_assertion()->size());
       for (unsigned int ind = 0; ind < obj->get_assertion()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Assertions[ind];
-        tmp.setIndex(getId((*obj->get_assertion())[ind]));
-        tmp.setType(((*obj->get_assertion())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_assertion())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_assertion())[ind]))->getUhdmType());
       }
     }
  
@@ -4366,8 +4368,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Classdefns = Packages[index].initClassdefn(obj->get_class_defn()->size());
       for (unsigned int ind = 0; ind < obj->get_class_defn()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Classdefns[ind];
-        tmp.setIndex(getId((*obj->get_class_defn())[ind]));
-        tmp.setType(((*obj->get_class_defn())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_class_defn())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_class_defn())[ind]))->getUhdmType());
       }
     }
   if (obj->get_instance()) {
@@ -4417,8 +4419,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Packages[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -4426,8 +4428,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Packages[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -4435,8 +4437,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Packages[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -4444,8 +4446,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Packagess = Packages[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Packagess[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -4453,8 +4455,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Packages[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -4462,8 +4464,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Packages[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -4538,8 +4540,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Packages[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -4547,8 +4549,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Packages[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -4556,8 +4558,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Packages[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -4565,8 +4567,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Packagess = Packages[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Packagess[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -4574,8 +4576,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Packages[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -4583,8 +4585,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Packages[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -4677,8 +4679,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Processs = Modules[index].initProcess(obj->get_process()->size());
       for (unsigned int ind = 0; ind < obj->get_process()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Processs[ind];
-        tmp.setIndex(getId((*obj->get_process())[ind]));
-        tmp.setType(((*obj->get_process())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_process())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_process())[ind]))->getUhdmType());
       }
     }
  
@@ -4686,8 +4688,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Primitivess = Modules[index].initPrimitives(obj->get_primitives()->size());
       for (unsigned int ind = 0; ind < obj->get_primitives()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Primitivess[ind];
-        tmp.setIndex(getId((*obj->get_primitives())[ind]));
-        tmp.setType(((*obj->get_primitives())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_primitives())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_primitives())[ind]))->getUhdmType());
       }
     }
  
@@ -4695,8 +4697,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Primitivearrayss = Modules[index].initPrimitivearrays(obj->get_primitive_arrays()->size());
       for (unsigned int ind = 0; ind < obj->get_primitive_arrays()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Primitivearrayss[ind];
-        tmp.setIndex(getId((*obj->get_primitive_arrays())[ind]));
-        tmp.setType(((*obj->get_primitive_arrays())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_primitive_arrays())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_primitive_arrays())[ind]))->getUhdmType());
       }
     }
     Modules[index].setGlobalclocking(getId(obj->get_global_clocking()));
@@ -4806,8 +4808,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Taskfuncs = Modules[index].initTaskfunc(obj->get_task_func()->size());
       for (unsigned int ind = 0; ind < obj->get_task_func()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Taskfuncs[ind];
-        tmp.setIndex(getId((*obj->get_task_func())[ind]));
-        tmp.setType(((*obj->get_task_func())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_task_func())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_task_func())[ind]))->getUhdmType());
       }
     }
  
@@ -4815,8 +4817,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Nets = Modules[index].initNet(obj->get_net()->size());
       for (unsigned int ind = 0; ind < obj->get_net()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Nets[ind];
-        tmp.setIndex(getId((*obj->get_net())[ind]));
-        tmp.setType(((*obj->get_net())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_net())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_net())[ind]))->getUhdmType());
       }
     }
  
@@ -4824,8 +4826,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Arraynets = Modules[index].initArraynet(obj->get_array_net()->size());
       for (unsigned int ind = 0; ind < obj->get_array_net()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Arraynets[ind];
-        tmp.setIndex(getId((*obj->get_array_net())[ind]));
-        tmp.setType(((*obj->get_array_net())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_array_net())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_array_net())[ind]))->getUhdmType());
       }
     }
  
@@ -4833,8 +4835,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Assertions = Modules[index].initAssertion(obj->get_assertion()->size());
       for (unsigned int ind = 0; ind < obj->get_assertion()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Assertions[ind];
-        tmp.setIndex(getId((*obj->get_assertion())[ind]));
-        tmp.setType(((*obj->get_assertion())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_assertion())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_assertion())[ind]))->getUhdmType());
       }
     }
  
@@ -4842,8 +4844,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Classdefns = Modules[index].initClassdefn(obj->get_class_defn()->size());
       for (unsigned int ind = 0; ind < obj->get_class_defn()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Classdefns[ind];
-        tmp.setIndex(getId((*obj->get_class_defn())[ind]));
-        tmp.setType(((*obj->get_class_defn())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_class_defn())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_class_defn())[ind]))->getUhdmType());
       }
     }
   if (obj->get_instance()) {
@@ -4893,8 +4895,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Modules[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -4902,8 +4904,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Modules[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -4911,8 +4913,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Modules[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -4920,8 +4922,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Moduless = Modules[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Moduless[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -4929,8 +4931,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Modules[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -4938,8 +4940,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Modules[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  
@@ -5014,8 +5016,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Concurrentassertionss = Modules[index].initConcurrentassertions(obj->get_concurrent_assertions()->size());
       for (unsigned int ind = 0; ind < obj->get_concurrent_assertions()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Concurrentassertionss[ind];
-        tmp.setIndex(getId((*obj->get_concurrent_assertions())[ind]));
-        tmp.setType(((*obj->get_concurrent_assertions())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_concurrent_assertions())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_concurrent_assertions())[ind]))->getUhdmType());
       }
     }
  
@@ -5023,8 +5025,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Variabless = Modules[index].initVariables(obj->get_variables()->size());
       for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Variabless[ind];
-        tmp.setIndex(getId((*obj->get_variables())[ind]));
-        tmp.setType(((*obj->get_variables())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
  
@@ -5032,8 +5034,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Parameterss = Modules[index].initParameters(obj->get_parameters()->size());
       for (unsigned int ind = 0; ind < obj->get_parameters()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Parameterss[ind];
-        tmp.setIndex(getId((*obj->get_parameters())[ind]));
-        tmp.setType(((*obj->get_parameters())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_parameters())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_parameters())[ind]))->getUhdmType());
       }
     }
  
@@ -5041,8 +5043,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Moduless = Modules[index].initScopes(obj->get_scopes()->size());
       for (unsigned int ind = 0; ind < obj->get_scopes()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Moduless[ind];
-        tmp.setIndex(getId((*obj->get_scopes())[ind]));
-        tmp.setType(((*obj->get_scopes())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_scopes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_scopes())[ind]))->getUhdmType());
       }
     }
  
@@ -5050,8 +5052,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Typespecss = Modules[index].initTypespecs(obj->get_typespecs()->size());
       for (unsigned int ind = 0; ind < obj->get_typespecs()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Typespecss[ind];
-        tmp.setIndex(getId((*obj->get_typespecs())[ind]));
-        tmp.setType(((*obj->get_typespecs())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_typespecs())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_typespecs())[ind]))->getUhdmType());
       }
     }
  
@@ -5059,8 +5061,8 @@ void Serializer::save(std::string file) {
       ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Modules[index].initInstanceitems(obj->get_instance_items()->size());
       for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
         ::ObjIndexType::Builder tmp = Instanceitemss[ind];
-        tmp.setIndex(getId((*obj->get_instance_items())[ind]));
-        tmp.setType(((*obj->get_instance_items())[ind])->getUhdmType());
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
  

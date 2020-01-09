@@ -28,6 +28,7 @@
 #include <iostream>
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
+typedef void any;
 #include "headers/containers.h"
 #include "include/vpi_uhdm.h"
 #include "headers/uhdm.h"
@@ -745,7 +746,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -754,7 +755,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -763,7 +764,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -772,7 +773,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -781,7 +782,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -790,7 +791,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -799,7 +800,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -808,7 +809,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -817,7 +818,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -826,7 +827,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -835,7 +836,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -844,7 +845,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -853,7 +854,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -862,7 +863,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmbegin) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -889,7 +890,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -898,7 +899,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -907,7 +908,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -916,7 +917,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -925,7 +926,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -934,7 +935,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -943,7 +944,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -952,7 +953,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -961,7 +962,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -970,7 +971,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -979,7 +980,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -988,7 +989,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -997,7 +998,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -1006,7 +1007,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_begin) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -1033,7 +1034,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -1042,7 +1043,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -1051,7 +1052,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -1060,7 +1061,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -1069,7 +1070,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -1078,7 +1079,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -1087,7 +1088,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -1096,7 +1097,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -1105,7 +1106,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -1114,7 +1115,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -1123,7 +1124,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -1132,7 +1133,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -1141,7 +1142,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -1150,7 +1151,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmnamed_fork) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -1177,7 +1178,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -1186,7 +1187,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -1195,7 +1196,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -1204,7 +1205,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -1213,7 +1214,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -1222,7 +1223,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -1231,7 +1232,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -1240,7 +1241,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -1249,7 +1250,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -1258,7 +1259,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -1267,7 +1268,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -1276,7 +1277,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -1285,7 +1286,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -1294,7 +1295,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfork_stmt) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -1312,7 +1313,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -1321,7 +1322,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -1330,7 +1331,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -1339,7 +1340,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -1348,7 +1349,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -1357,7 +1358,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -1366,7 +1367,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -1375,7 +1376,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -1384,7 +1385,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -1393,7 +1394,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -1402,7 +1403,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -1411,7 +1412,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -1420,7 +1421,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -1429,7 +1430,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfor_stmt) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -1447,7 +1448,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -1456,7 +1457,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -1465,7 +1466,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -1474,7 +1475,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -1483,7 +1484,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -1492,7 +1493,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -1501,7 +1502,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -1510,7 +1511,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -1519,7 +1520,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -1528,7 +1529,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -1537,7 +1538,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -1546,7 +1547,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -1555,7 +1556,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -1564,7 +1565,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmforeach_stmt) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -1582,7 +1583,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -1591,7 +1592,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -1600,7 +1601,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -1609,7 +1610,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -1618,7 +1619,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -1627,7 +1628,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -1636,7 +1637,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -1645,7 +1646,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -1654,7 +1655,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -1663,7 +1664,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -1672,7 +1673,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -1681,7 +1682,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -1690,7 +1691,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -1699,7 +1700,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmgen_scope) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -1726,7 +1727,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -1735,7 +1736,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -1744,7 +1745,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -1753,7 +1754,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -1762,7 +1763,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -1771,7 +1772,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -1780,7 +1781,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -1789,7 +1790,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -1798,7 +1799,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -1807,7 +1808,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -1816,7 +1817,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -1825,7 +1826,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -1834,7 +1835,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -1843,7 +1844,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask_func) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -1861,7 +1862,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -1870,7 +1871,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -1879,7 +1880,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -1888,7 +1889,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -1897,7 +1898,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -1906,7 +1907,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -1915,7 +1916,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -1924,7 +1925,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -1933,7 +1934,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -1942,7 +1943,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -1951,7 +1952,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -1960,7 +1961,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -1969,7 +1970,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -1978,7 +1979,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmtask) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -1996,7 +1997,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -2005,7 +2006,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -2014,7 +2015,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -2023,7 +2024,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -2032,7 +2033,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -2041,7 +2042,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -2050,7 +2051,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -2059,7 +2060,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -2068,7 +2069,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -2077,7 +2078,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -2086,7 +2087,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -2095,7 +2096,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -2104,7 +2105,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -2113,7 +2114,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmfunction) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -2158,7 +2159,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -2167,7 +2168,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -2176,7 +2177,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -2185,7 +2186,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -2194,7 +2195,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -2203,7 +2204,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -2212,7 +2213,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -2221,7 +2222,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -2230,7 +2231,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -2239,7 +2240,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -2248,7 +2249,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -2257,7 +2258,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -2266,7 +2267,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -2275,7 +2276,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclocking_block) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -2320,7 +2321,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance_array) {
+ if (handle->type == uhdminterface_array) {
  if (type == vpiModule) {
  if (((instance_array*)(object))->get_modules())
  return (vpiHandle) new uhdm_handle(uhdmmodules, ((instance_array*)(object))->get_modules());
@@ -2338,7 +2339,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance_array) {
+ if (handle->type == uhdmprogram_array) {
  if (type == vpiModule) {
  if (((instance_array*)(object))->get_modules())
  return (vpiHandle) new uhdm_handle(uhdmmodules, ((instance_array*)(object))->get_modules());
@@ -2365,7 +2366,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance_array) {
+ if (handle->type == uhdmmodule_array) {
  if (type == vpiModule) {
  if (((instance_array*)(object))->get_modules())
  return (vpiHandle) new uhdm_handle(uhdmmodules, ((instance_array*)(object))->get_modules());
@@ -2392,7 +2393,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance_array) {
+ if (handle->type == uhdmprimitive_array) {
  if (type == vpiModule) {
  if (((instance_array*)(object))->get_modules())
  return (vpiHandle) new uhdm_handle(uhdmmodules, ((instance_array*)(object))->get_modules());
@@ -2419,7 +2420,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance_array) {
+ if (handle->type == uhdmgate_array) {
  if (type == vpiModule) {
  if (((instance_array*)(object))->get_modules())
  return (vpiHandle) new uhdm_handle(uhdmmodules, ((instance_array*)(object))->get_modules());
@@ -2446,7 +2447,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance_array) {
+ if (handle->type == uhdmswitch_array) {
  if (type == vpiModule) {
  if (((instance_array*)(object))->get_modules())
  return (vpiHandle) new uhdm_handle(uhdmmodules, ((instance_array*)(object))->get_modules());
@@ -2473,7 +2474,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance_array) {
+ if (handle->type == uhdmudp_array) {
  if (type == vpiModule) {
  if (((instance_array*)(object))->get_modules())
  return (vpiHandle) new uhdm_handle(uhdmmodules, ((instance_array*)(object))->get_modules());
@@ -2491,7 +2492,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -2500,7 +2501,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -2509,7 +2510,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -2518,7 +2519,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -2527,7 +2528,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -2536,7 +2537,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -2545,7 +2546,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -2554,7 +2555,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -2563,7 +2564,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -2572,7 +2573,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -2581,7 +2582,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -2590,7 +2591,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -2599,7 +2600,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -2608,7 +2609,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_defn) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -2626,7 +2627,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -2635,7 +2636,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -2644,7 +2645,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -2653,7 +2654,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -2662,7 +2663,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -2671,7 +2672,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -2680,7 +2681,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -2689,7 +2690,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -2698,7 +2699,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -2707,7 +2708,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -2716,7 +2717,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -2725,7 +2726,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -2734,7 +2735,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -2743,7 +2744,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_typespec) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -2761,7 +2762,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -2770,7 +2771,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -2779,7 +2780,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -2788,7 +2789,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -2797,7 +2798,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -2806,7 +2807,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -2815,7 +2816,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -2824,7 +2825,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -2833,7 +2834,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -2842,7 +2843,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -2851,7 +2852,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -2860,7 +2861,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -2869,7 +2870,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -2878,7 +2879,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmclass_obj) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -3121,7 +3122,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -3130,7 +3131,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -3139,7 +3140,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -3148,7 +3149,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -3157,7 +3158,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -3166,7 +3167,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -3175,7 +3176,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -3184,7 +3185,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -3193,7 +3194,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -3202,7 +3203,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -3211,7 +3212,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -3220,7 +3221,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -3229,7 +3230,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -3238,7 +3239,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminstance) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -3319,7 +3320,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdminterface) {
  if (type == vpiNet) {
  if (((instance*)(object))->get_net())
  return (vpiHandle) new uhdm_handle(uhdmnet, ((instance*)(object))->get_net());
@@ -3328,7 +3329,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdminterface) {
  if (type == vpiArrayNet) {
  if (((instance*)(object))->get_array_net())
  return (vpiHandle) new uhdm_handle(uhdmarray_net, ((instance*)(object))->get_array_net());
@@ -3337,7 +3338,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdminterface) {
  if (type == vpiAssertion) {
  if (((instance*)(object))->get_assertion())
  return (vpiHandle) new uhdm_handle(uhdmassertion, ((instance*)(object))->get_assertion());
@@ -3346,7 +3347,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdminterface) {
  if (type == vpiClassDefn) {
  if (((instance*)(object))->get_class_defn())
  return (vpiHandle) new uhdm_handle(uhdmclass_defn, ((instance*)(object))->get_class_defn());
@@ -3355,7 +3356,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdminterface) {
  if (type == vpiProgram) {
  if (((instance*)(object))->get_programs())
  return (vpiHandle) new uhdm_handle(uhdmprograms, ((instance*)(object))->get_programs());
@@ -3364,7 +3365,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdminterface) {
  if (type == vpiProgramArray) {
  if (((instance*)(object))->get_program_arrays())
  return (vpiHandle) new uhdm_handle(uhdmprogram_arrays, ((instance*)(object))->get_program_arrays());
@@ -3373,7 +3374,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdminterface) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event, ((instance*)(object))->get_named_event());
@@ -3382,7 +3383,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdminterface) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event_array())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_array, ((instance*)(object))->get_named_event_array());
@@ -3391,7 +3392,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdminterface) {
  if (type == vpiSpecParam) {
  if (((instance*)(object))->get_spec_param())
  return (vpiHandle) new uhdm_handle(uhdmspec_param, ((instance*)(object))->get_spec_param());
@@ -3409,7 +3410,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -3418,7 +3419,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -3427,7 +3428,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -3436,7 +3437,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -3445,7 +3446,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -3454,7 +3455,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -3463,7 +3464,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -3472,7 +3473,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -3481,7 +3482,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -3490,7 +3491,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -3499,7 +3500,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -3508,7 +3509,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -3517,7 +3518,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -3526,7 +3527,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdminterface) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -3589,7 +3590,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiNet) {
  if (((instance*)(object))->get_net())
  return (vpiHandle) new uhdm_handle(uhdmnet, ((instance*)(object))->get_net());
@@ -3598,7 +3599,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiArrayNet) {
  if (((instance*)(object))->get_array_net())
  return (vpiHandle) new uhdm_handle(uhdmarray_net, ((instance*)(object))->get_array_net());
@@ -3607,7 +3608,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiAssertion) {
  if (((instance*)(object))->get_assertion())
  return (vpiHandle) new uhdm_handle(uhdmassertion, ((instance*)(object))->get_assertion());
@@ -3616,7 +3617,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiClassDefn) {
  if (((instance*)(object))->get_class_defn())
  return (vpiHandle) new uhdm_handle(uhdmclass_defn, ((instance*)(object))->get_class_defn());
@@ -3625,7 +3626,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiProgram) {
  if (((instance*)(object))->get_programs())
  return (vpiHandle) new uhdm_handle(uhdmprograms, ((instance*)(object))->get_programs());
@@ -3634,7 +3635,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiProgramArray) {
  if (((instance*)(object))->get_program_arrays())
  return (vpiHandle) new uhdm_handle(uhdmprogram_arrays, ((instance*)(object))->get_program_arrays());
@@ -3643,7 +3644,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event, ((instance*)(object))->get_named_event());
@@ -3652,7 +3653,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event_array())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_array, ((instance*)(object))->get_named_event_array());
@@ -3661,7 +3662,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiSpecParam) {
  if (((instance*)(object))->get_spec_param())
  return (vpiHandle) new uhdm_handle(uhdmspec_param, ((instance*)(object))->get_spec_param());
@@ -3679,7 +3680,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -3688,7 +3689,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -3697,7 +3698,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -3706,7 +3707,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -3715,7 +3716,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -3724,7 +3725,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -3733,7 +3734,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -3742,7 +3743,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -3751,7 +3752,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -3760,7 +3761,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -3769,7 +3770,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -3778,7 +3779,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -3787,7 +3788,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -3796,7 +3797,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmprogram) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -3814,7 +3815,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiNet) {
  if (((instance*)(object))->get_net())
  return (vpiHandle) new uhdm_handle(uhdmnet, ((instance*)(object))->get_net());
@@ -3823,7 +3824,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiArrayNet) {
  if (((instance*)(object))->get_array_net())
  return (vpiHandle) new uhdm_handle(uhdmarray_net, ((instance*)(object))->get_array_net());
@@ -3832,7 +3833,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiAssertion) {
  if (((instance*)(object))->get_assertion())
  return (vpiHandle) new uhdm_handle(uhdmassertion, ((instance*)(object))->get_assertion());
@@ -3841,7 +3842,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiClassDefn) {
  if (((instance*)(object))->get_class_defn())
  return (vpiHandle) new uhdm_handle(uhdmclass_defn, ((instance*)(object))->get_class_defn());
@@ -3850,7 +3851,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiProgram) {
  if (((instance*)(object))->get_programs())
  return (vpiHandle) new uhdm_handle(uhdmprograms, ((instance*)(object))->get_programs());
@@ -3859,7 +3860,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiProgramArray) {
  if (((instance*)(object))->get_program_arrays())
  return (vpiHandle) new uhdm_handle(uhdmprogram_arrays, ((instance*)(object))->get_program_arrays());
@@ -3868,7 +3869,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event, ((instance*)(object))->get_named_event());
@@ -3877,7 +3878,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event_array())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_array, ((instance*)(object))->get_named_event_array());
@@ -3886,7 +3887,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiSpecParam) {
  if (((instance*)(object))->get_spec_param())
  return (vpiHandle) new uhdm_handle(uhdmspec_param, ((instance*)(object))->get_spec_param());
@@ -3904,7 +3905,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -3913,7 +3914,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -3922,7 +3923,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -3931,7 +3932,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -3940,7 +3941,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -3949,7 +3950,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -3958,7 +3959,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -3967,7 +3968,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -3976,7 +3977,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -3985,7 +3986,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -3994,7 +3995,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -4003,7 +4004,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -4012,7 +4013,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -4021,7 +4022,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmpackage) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -4174,7 +4175,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiNet) {
  if (((instance*)(object))->get_net())
  return (vpiHandle) new uhdm_handle(uhdmnet, ((instance*)(object))->get_net());
@@ -4183,7 +4184,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiArrayNet) {
  if (((instance*)(object))->get_array_net())
  return (vpiHandle) new uhdm_handle(uhdmarray_net, ((instance*)(object))->get_array_net());
@@ -4192,7 +4193,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiAssertion) {
  if (((instance*)(object))->get_assertion())
  return (vpiHandle) new uhdm_handle(uhdmassertion, ((instance*)(object))->get_assertion());
@@ -4201,7 +4202,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiClassDefn) {
  if (((instance*)(object))->get_class_defn())
  return (vpiHandle) new uhdm_handle(uhdmclass_defn, ((instance*)(object))->get_class_defn());
@@ -4210,7 +4211,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiProgram) {
  if (((instance*)(object))->get_programs())
  return (vpiHandle) new uhdm_handle(uhdmprograms, ((instance*)(object))->get_programs());
@@ -4219,7 +4220,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiProgramArray) {
  if (((instance*)(object))->get_program_arrays())
  return (vpiHandle) new uhdm_handle(uhdmprogram_arrays, ((instance*)(object))->get_program_arrays());
@@ -4228,7 +4229,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event, ((instance*)(object))->get_named_event());
@@ -4237,7 +4238,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiNamedEvent) {
  if (((instance*)(object))->get_named_event_array())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_array, ((instance*)(object))->get_named_event_array());
@@ -4246,7 +4247,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdminstance) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiSpecParam) {
  if (((instance*)(object))->get_spec_param())
  return (vpiHandle) new uhdm_handle(uhdmspec_param, ((instance*)(object))->get_spec_param());
@@ -4264,7 +4265,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiVariables) {
  if (((scope*)(object))->get_variables())
  return (vpiHandle) new uhdm_handle(uhdmvariables, ((scope*)(object))->get_variables());
@@ -4273,7 +4274,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiParameter) {
  if (((scope*)(object))->get_parameters())
  return (vpiHandle) new uhdm_handle(uhdmparameters, ((scope*)(object))->get_parameters());
@@ -4282,7 +4283,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiInternalScope) {
  if (((scope*)(object))->get_scopes())
  return (vpiHandle) new uhdm_handle(uhdmscopes, ((scope*)(object))->get_scopes());
@@ -4291,7 +4292,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiTypedef) {
  if (((scope*)(object))->get_typespecs())
  return (vpiHandle) new uhdm_handle(uhdmtypespecs, ((scope*)(object))->get_typespecs());
@@ -4300,7 +4301,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiImport) {
  if (((scope*)(object))->get_instance_items())
  return (vpiHandle) new uhdm_handle(uhdminstance_items, ((scope*)(object))->get_instance_items());
@@ -4309,7 +4310,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiPropertyDecl) {
  if (((scope*)(object))->get_property_decls())
  return (vpiHandle) new uhdm_handle(uhdmproperty_decls, ((scope*)(object))->get_property_decls());
@@ -4318,7 +4319,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiSequenceDecl) {
  if (((scope*)(object))->get_sequence_decls())
  return (vpiHandle) new uhdm_handle(uhdmsequence_decls, ((scope*)(object))->get_sequence_decls());
@@ -4327,7 +4328,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiNamedEvent) {
  if (((scope*)(object))->get_named_events())
  return (vpiHandle) new uhdm_handle(uhdmnamed_events, ((scope*)(object))->get_named_events());
@@ -4336,7 +4337,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiNamedEventArray) {
  if (((scope*)(object))->get_named_event_arrays())
  return (vpiHandle) new uhdm_handle(uhdmnamed_event_arrays, ((scope*)(object))->get_named_event_arrays());
@@ -4345,7 +4346,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiVirtualInterfaceVar) {
  if (((scope*)(object))->get_virtual_interface_vars())
  return (vpiHandle) new uhdm_handle(uhdmvirtual_interface_vars, ((scope*)(object))->get_virtual_interface_vars());
@@ -4354,7 +4355,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiReg) {
  if (((scope*)(object))->get_logic_var())
  return (vpiHandle) new uhdm_handle(uhdmlogic_var, ((scope*)(object))->get_logic_var());
@@ -4363,7 +4364,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiRegArray) {
  if (((scope*)(object))->get_array_var())
  return (vpiHandle) new uhdm_handle(uhdmarray_var, ((scope*)(object))->get_array_var());
@@ -4372,7 +4373,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiMemory) {
  if (((scope*)(object))->get_array_var_mem())
  return (vpiHandle) new uhdm_handle(uhdmarray_var_mem, ((scope*)(object))->get_array_var_mem());
@@ -4381,7 +4382,7 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
- if (handle->type == uhdmscope) {
+ if (handle->type == uhdmmodule) {
  if (type == vpiLetDecl) {
  if (((scope*)(object))->get_let_decls())
  return (vpiHandle) new uhdm_handle(uhdmlet_decls, ((scope*)(object))->get_let_decls());
@@ -4438,7 +4439,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmconcurrent_assertions) {
  VectorOfconcurrent_assertion* the_vec = (VectorOfconcurrent_assertion*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4447,7 +4448,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmvariables) {
  VectorOfvariables* the_vec = (VectorOfvariables*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4456,7 +4457,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmparameters) {
  VectorOfparameters* the_vec = (VectorOfparameters*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4465,7 +4466,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmscopes) {
  VectorOfscope* the_vec = (VectorOfscope*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4474,16 +4475,16 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtypespecs) {
  VectorOftypespec* the_vec = (VectorOftypespec*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
  }
 
   if (handle->type == uhdminstance_items) {
- VectorOfinstance_item* the_vec = (VectorOfinstance_item*)vect;
+ VectorOfany* the_vec = (VectorOfany*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4492,7 +4493,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmproperty_decls) {
  VectorOfproperty_decl* the_vec = (VectorOfproperty_decl*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4501,7 +4502,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmsequence_decls) {
  VectorOfsequence_decl* the_vec = (VectorOfsequence_decl*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4510,7 +4511,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmnamed_events) {
  VectorOfnamed_event* the_vec = (VectorOfnamed_event*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4519,7 +4520,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmnamed_event_arrays) {
  VectorOfnamed_event_array* the_vec = (VectorOfnamed_event_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4528,7 +4529,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmvirtual_interface_vars) {
  VectorOfvirtual_interface_var* the_vec = (VectorOfvirtual_interface_var*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4537,7 +4538,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmlogic_var) {
  VectorOflogic_var* the_vec = (VectorOflogic_var*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4546,7 +4547,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmarray_var) {
  VectorOfarray_var* the_vec = (VectorOfarray_var*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4555,7 +4556,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmarray_var_mem) {
  VectorOfarray_var* the_vec = (VectorOfarray_var*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4564,7 +4565,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmlet_decls) {
  VectorOflet_decl* the_vec = (VectorOflet_decl*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4573,7 +4574,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmstmts) {
  VectorOfstmt* the_vec = (VectorOfstmt*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4582,7 +4583,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmstmts) {
  VectorOfstmt* the_vec = (VectorOfstmt*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4591,7 +4592,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmstmts) {
  VectorOfstmt* the_vec = (VectorOfstmt*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4600,7 +4601,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmstmts) {
  VectorOfstmt* the_vec = (VectorOfstmt*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4609,7 +4610,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmoperands) {
  VectorOfoperand_group* the_vec = (VectorOfoperand_group*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4618,7 +4619,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmio_decls) {
  VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4627,7 +4628,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtasks) {
  VectorOftask* the_vec = (VectorOftask*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4636,7 +4637,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmfunctions) {
  VectorOffunction* the_vec = (VectorOffunction*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4645,7 +4646,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminstances) {
  VectorOfinstance* the_vec = (VectorOfinstance*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4654,7 +4655,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmodules) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4663,7 +4664,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmparam_assigns) {
  VectorOfparam_assign* the_vec = (VectorOfparam_assign*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4672,7 +4673,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmparam_assigns) {
  VectorOfparam_assign* the_vec = (VectorOfparam_assign*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4681,7 +4682,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprimitives) {
  VectorOfprimitive* the_vec = (VectorOfprimitive*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4690,7 +4691,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtask_func) {
  VectorOftask_func* the_vec = (VectorOftask_func*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4699,7 +4700,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmnet) {
  VectorOfnet* the_vec = (VectorOfnet*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4708,7 +4709,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmarray_net) {
  VectorOfarray_net* the_vec = (VectorOfarray_net*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4717,7 +4718,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmvariables) {
  VectorOfvariables* the_vec = (VectorOfvariables*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4726,7 +4727,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmparameters) {
  VectorOfparameters* the_vec = (VectorOfparameters*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4735,7 +4736,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmassertion) {
  VectorOfassertion* the_vec = (VectorOfassertion*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4744,7 +4745,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtypespecs) {
  VectorOftypespec* the_vec = (VectorOftypespec*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4753,7 +4754,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmclass_defn) {
  VectorOfclass_defn* the_vec = (VectorOfclass_defn*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4762,7 +4763,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprograms) {
  VectorOfprogram* the_vec = (VectorOfprogram*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4771,7 +4772,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprogram_arrays) {
  VectorOfprogram* the_vec = (VectorOfprogram*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4780,7 +4781,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmlogic_var) {
  VectorOflogic_var* the_vec = (VectorOflogic_var*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4789,7 +4790,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmarray_var) {
  VectorOfarray_var* the_vec = (VectorOfarray_var*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4798,7 +4799,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmnamed_event) {
  VectorOfnamed_event* the_vec = (VectorOfnamed_event*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4807,7 +4808,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmnamed_event_array) {
  VectorOfnamed_event* the_vec = (VectorOfnamed_event*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4816,7 +4817,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmspec_param) {
  VectorOfspec_param* the_vec = (VectorOfspec_param*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4825,7 +4826,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtask_func) {
  VectorOftask_func* the_vec = (VectorOftask_func*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4834,7 +4835,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmnet) {
  VectorOfnet* the_vec = (VectorOfnet*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4843,7 +4844,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmarray_net) {
  VectorOfarray_net* the_vec = (VectorOfarray_net*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4852,7 +4853,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmassertion) {
  VectorOfassertion* the_vec = (VectorOfassertion*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4861,7 +4862,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmclass_defn) {
  VectorOfclass_defn* the_vec = (VectorOfclass_defn*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4870,7 +4871,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprograms) {
  VectorOfprogram* the_vec = (VectorOfprogram*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4879,7 +4880,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprogram_arrays) {
  VectorOfprogram* the_vec = (VectorOfprogram*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4888,7 +4889,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmnamed_event) {
  VectorOfnamed_event* the_vec = (VectorOfnamed_event*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4897,7 +4898,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmnamed_event_array) {
  VectorOfnamed_event* the_vec = (VectorOfnamed_event*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4906,7 +4907,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmspec_param) {
  VectorOfspec_param* the_vec = (VectorOfspec_param*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4915,7 +4916,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprocess) {
  VectorOfprocess* the_vec = (VectorOfprocess*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4924,7 +4925,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterface_tf_decls) {
  VectorOfinterface_tf_decl* the_vec = (VectorOfinterface_tf_decl*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4933,7 +4934,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmodports) {
  VectorOfmodport* the_vec = (VectorOfmodport*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4942,7 +4943,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmod_paths) {
  VectorOfmod_path* the_vec = (VectorOfmod_path*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4951,7 +4952,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmcont_assigns) {
  VectorOfcont_assign* the_vec = (VectorOfcont_assign*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4960,7 +4961,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterfaces) {
  VectorOfinterface* the_vec = (VectorOfinterface*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4969,7 +4970,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterface_arrays) {
  VectorOfinterface_array* the_vec = (VectorOfinterface_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4978,7 +4979,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprocess) {
  VectorOfprocess* the_vec = (VectorOfprocess*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4987,7 +4988,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterfaces) {
  VectorOfinterface* the_vec = (VectorOfinterface*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -4996,7 +4997,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterface_arrays) {
  VectorOfinterface_array* the_vec = (VectorOfinterface_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5005,7 +5006,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmcont_assigns) {
  VectorOfcont_assign* the_vec = (VectorOfcont_assign*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5014,7 +5015,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmclocking_blocks) {
  VectorOfclocking_block* the_vec = (VectorOfclocking_block*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5023,7 +5024,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprocess) {
  VectorOfprocess* the_vec = (VectorOfprocess*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5032,7 +5033,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprimitives) {
  VectorOfprimitive* the_vec = (VectorOfprimitive*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5041,7 +5042,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmprimitive_arrays) {
  VectorOfprimitive_array* the_vec = (VectorOfprimitive_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5050,7 +5051,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmports) {
  VectorOfport* the_vec = (VectorOfport*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5059,7 +5060,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterfaces) {
  VectorOfinterface* the_vec = (VectorOfinterface*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5068,7 +5069,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdminterface_arrays) {
  VectorOfinterface_array* the_vec = (VectorOfinterface_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5077,7 +5078,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmcont_assigns) {
  VectorOfcont_assign* the_vec = (VectorOfcont_assign*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5086,7 +5087,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmodules) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5095,7 +5096,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmodule_arrays) {
  VectorOfmodule_array* the_vec = (VectorOfmodule_array*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5104,7 +5105,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmmod_paths) {
  VectorOfmod_path* the_vec = (VectorOfmod_path*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5113,7 +5114,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtchks) {
  VectorOftchk* the_vec = (VectorOftchk*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5122,7 +5123,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmdef_params) {
  VectorOfdef_param* the_vec = (VectorOfdef_param*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5131,7 +5132,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmio_decls) {
  VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5140,7 +5141,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmalias_stmts) {
  VectorOfalias_stmt* the_vec = (VectorOfalias_stmt*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5149,7 +5150,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmclocking_blocks) {
  VectorOfclocking_block* the_vec = (VectorOfclocking_block*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5158,7 +5159,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmallModules) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5167,7 +5168,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmtopModules) {
  VectorOfmodule* the_vec = (VectorOfmodule*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5176,7 +5177,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmallPrograms) {
  VectorOfprogram* the_vec = (VectorOfprogram*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
@@ -5185,7 +5186,7 @@ vpiHandle vpi_scan (vpiHandle iterator) {
   if (handle->type == uhdmallPackages) {
  VectorOfpackage* the_vec = (VectorOfpackage*)vect;
  if (handle->index < the_vec->size()) {
- uhdm_handle* h = new uhdm_handle(the_vec->at(handle->index)->getUhdmType(), the_vec->at(handle->index));
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
  return (vpiHandle) h;
  }
