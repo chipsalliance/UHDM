@@ -29,7 +29,8 @@ std::string print_designs (std::vector<vpiHandle> designs) {
       vpiHandle importItr = vpi_iterate(vpiImport, obj_h);
       while (vpiHandle sub_h = vpi_scan(importItr) ) {
 	result += "\n    \\_ inst_item:" + std::string(vpi_get_str(vpiName, sub_h));
-	result += std::string(", size:") + std::to_string(vpi_get(vpiSize, sub_h));
+	if (vpiFunction == vpi_get(vpiType, sub_h))
+	    result += std::string(", size:") + std::to_string(vpi_get(vpiSize, sub_h));
       }
       vpi_release_handle (submodItr);    
       result += "\n";

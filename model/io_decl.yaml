@@ -15,6 +15,10 @@
 # Universal Hardware Data Model (UHDM) "io_decl" formal description
  
 - obj_def: io_decl
-
+  - property: type
+    name: vpiIODecl
+    vpi: vpiType
+    type: unsigned int
+    card: 1
 
 

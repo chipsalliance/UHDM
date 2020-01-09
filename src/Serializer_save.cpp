@@ -164,7 +164,6 @@ std::vector<class_typespec*> class_typespecFactory::objects_;
 std::vector<std::vector<class_typespec*>*> VectorOfclass_typespecFactory::objects_;
 std::vector<class_obj*> class_objFactory::objects_;
 std::vector<std::vector<class_obj*>*> VectorOfclass_objFactory::objects_;
-std::vector<std::vector<instance_item*>*> VectorOfinstance_itemFactory::objects_;
 std::vector<std::vector<instance*>*> VectorOfinstanceFactory::objects_;
 std::vector<interface*> interfaceFactory::objects_;
 std::vector<std::vector<interface*>*> VectorOfinterfaceFactory::objects_;

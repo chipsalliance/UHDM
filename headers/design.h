@@ -54,6 +54,8 @@ namespace UHDM {
 
     void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
 
+    unsigned int get_uhdmdesign() { return vpiModule; }
+
     VectorOfmodule* get_allModules() const { return allModules_; }
 
     void set_allModules(VectorOfmodule* data) { allModules_ = data; }

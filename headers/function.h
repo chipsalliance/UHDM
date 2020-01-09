@@ -62,6 +62,8 @@ namespace UHDM {
 
     void set_vpiFuncType(int data) { vpiFuncType_ = data; }
 
+    unsigned int get_vpiType() { return vpiFunction; }
+
     virtual unsigned int getUhdmType() { return uhdmfunction; }   
   private:
     

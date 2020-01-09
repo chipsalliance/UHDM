@@ -54,6 +54,8 @@ namespace UHDM {
 
     void set_param_assigns(VectorOfparam_assign* data) { param_assigns_ = data; }
 
+    unsigned int get_vpiType() { return vpiInterfaceArray; }
+
     virtual unsigned int getUhdmType() { return uhdminterface_array; }   
   private:
     

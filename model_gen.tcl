@@ -459,6 +459,7 @@ proc generate_code { models } {
 	}
 
 	set indTmp 0
+	set type_specified 0
 	dict for {key val} $data {
 	    if {$key == "properties"} {
 		dict for {prop conf} $val {
@@ -467,6 +468,7 @@ proc generate_code { models } {
 		    set type [dict get $conf type]
 		    set card [dict get $conf card]
 		    if {$prop == "type"} {
+			set type_specified 1
 			append methods($classname) "\n    $type get_${vpi}() { return $name; }\n"
 			lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
 			continue
@@ -581,9 +583,22 @@ proc generate_code { models } {
     }
 "
 		    }
-		}
-	    
+		}	    
 	    }
+	}
+
+	if {($type_specified == 0) && ($modeltype == "obj_def")} {
+	    set vpiclasstype $classname
+	    set vpiclasstype vpi[string toupper $vpiclasstype 0 0]
+	    for {set i 0} {$i < [string length $vpiclasstype]} {incr i} {
+		if {[string index $vpiclasstype $i] == "_"} {
+		    set vpiclasstype [string toupper $vpiclasstype [expr $i +1] [expr $i +1]]
+		}
+	    }
+	    regsub -all "_" $vpiclasstype "" vpiclasstype
+	    append methods($classname) "\n    unsigned int get_vpiType() { return $vpiclasstype; }\n"
+	    lappend vpi_get_body_inst($classname) [list $classname "unsigned int" vpiType 1]
+
 	}
 	regsub -all {<METHODS>} $template $methods($classname) template
 	regsub -all {<MEMBERS>} $template $members($classname) template

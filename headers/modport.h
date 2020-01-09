@@ -62,6 +62,8 @@ namespace UHDM {
 
     void set_interface(interface* data) { interface_ = data; }
 
+    unsigned int get_vpiType() { return vpiModport; }
+
     virtual unsigned int getUhdmType() { return uhdmmodport; }   
   private:
     
