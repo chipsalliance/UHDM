@@ -58,6 +58,8 @@ namespace UHDM {
 
     void set_operands(VectorOfoperand_group* data) { operands_ = data; }
 
+    unsigned int get_vpiType() { return vpiOperation; }
+
     virtual unsigned int getUhdmType() { return uhdmoperation; }   
   private:
     

@@ -54,6 +54,8 @@ namespace UHDM {
 
     void set_stmts(VectorOfstmt* data) { stmts_ = data; }
 
+    unsigned int get_vpiType() { return vpiNamedBegin; }
+
     virtual unsigned int getUhdmType() { return uhdmnamed_begin; }   
   private:
     

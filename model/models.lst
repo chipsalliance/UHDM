@@ -57,7 +57,7 @@ typespec.yaml
 class_defn.yaml
 class_typespec.yaml
 class_obj.yaml
-instance_item.yaml
+#instance_item.yaml
 instance.yaml
 interface.yaml
 program.yaml

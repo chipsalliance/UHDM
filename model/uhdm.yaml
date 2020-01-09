@@ -20,6 +20,11 @@
     vpi: vpiName
     type: string
     card: 1
+  - property: type
+    name: vpiModule
+    vpi: uhdmdesign
+    type: unsigned int
+    card: 1
   - class: allModules
     type: module
     vpi_obj: vpiModule

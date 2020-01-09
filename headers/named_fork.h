@@ -58,6 +58,8 @@ namespace UHDM {
 
     void set_stmts(VectorOfstmt* data) { stmts_ = data; }
 
+    unsigned int get_vpiType() { return vpiNamedFork; }
+
     virtual unsigned int getUhdmType() { return uhdmnamed_fork; }   
   private:
     

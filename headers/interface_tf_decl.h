@@ -62,6 +62,8 @@ namespace UHDM {
 
     void set_functions(VectorOffunction* data) { functions_ = data; }
 
+    unsigned int get_vpiType() { return vpiInterfaceTfDecl; }
+
     virtual unsigned int getUhdmType() { return uhdminterface_tf_decl; }   
   private:
     

@@ -16,3 +16,8 @@
  
 - obj_def: for_stmt
   - extends: scope
+  - property: type
+    name: vpiFor
+    vpi: vpiType
+    type: unsigned int
+    card: 1

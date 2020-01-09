@@ -50,6 +50,8 @@ namespace UHDM {
 
     void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
 
+    unsigned int get_vpiType() { return vpiPropertyDecl; }
+
     virtual unsigned int getUhdmType() { return uhdmproperty_decl; }   
   private:
     

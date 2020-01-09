@@ -50,6 +50,8 @@ namespace UHDM {
 
     void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
 
+    unsigned int get_vpiType() { return vpiFork; }
+
     int get_vpiJoinType() const { return vpiJoinType_; }
 
     void set_vpiJoinType(int data) { vpiJoinType_ = data; }
