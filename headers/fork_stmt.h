@@ -58,7 +58,7 @@ namespace UHDM {
 
     VectorOfstmt* get_stmts() const { return stmts_; }
 
-    void set_stmts(VectorOfstmt* data) { stmts_ = data; }
+    bool set_stmts(VectorOfstmt* data) { stmts_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmfork_stmt; }   
   private:

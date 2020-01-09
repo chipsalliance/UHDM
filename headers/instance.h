@@ -96,23 +96,23 @@ namespace UHDM {
 
     VectorOftask_func* get_task_func() const { return task_func_; }
 
-    void set_task_func(VectorOftask_func* data) { task_func_ = data; }
+    bool set_task_func(VectorOftask_func* data) { task_func_ = data; return true;}
 
     VectorOfnet* get_net() const { return net_; }
 
-    void set_net(VectorOfnet* data) { net_ = data; }
+    bool set_net(VectorOfnet* data) { net_ = data; return true;}
 
     VectorOfarray_net* get_array_net() const { return array_net_; }
 
-    void set_array_net(VectorOfarray_net* data) { array_net_ = data; }
+    bool set_array_net(VectorOfarray_net* data) { array_net_ = data; return true;}
 
     VectorOfassertion* get_assertion() const { return assertion_; }
 
-    void set_assertion(VectorOfassertion* data) { assertion_ = data; }
+    bool set_assertion(VectorOfassertion* data) { assertion_ = data; return true;}
 
     VectorOfclass_defn* get_class_defn() const { return class_defn_; }
 
-    void set_class_defn(VectorOfclass_defn* data) { class_defn_ = data; }
+    bool set_class_defn(VectorOfclass_defn* data) { class_defn_ = data; return true;}
 
     instance* get_instance() const { return instance_; }
 
@@ -120,23 +120,23 @@ namespace UHDM {
 
     VectorOfprogram* get_programs() const { return programs_; }
 
-    void set_programs(VectorOfprogram* data) { programs_ = data; }
+    bool set_programs(VectorOfprogram* data) { programs_ = data; return true;}
 
     VectorOfprogram* get_program_arrays() const { return program_arrays_; }
 
-    void set_program_arrays(VectorOfprogram* data) { program_arrays_ = data; }
+    bool set_program_arrays(VectorOfprogram* data) { program_arrays_ = data; return true;}
 
     VectorOfnamed_event* get_named_event() const { return named_event_; }
 
-    void set_named_event(VectorOfnamed_event* data) { named_event_ = data; }
+    bool set_named_event(VectorOfnamed_event* data) { named_event_ = data; return true;}
 
     VectorOfnamed_event* get_named_event_array() const { return named_event_array_; }
 
-    void set_named_event_array(VectorOfnamed_event* data) { named_event_array_ = data; }
+    bool set_named_event_array(VectorOfnamed_event* data) { named_event_array_ = data; return true;}
 
     VectorOfspec_param* get_spec_param() const { return spec_param_; }
 
-    void set_spec_param(VectorOfspec_param* data) { spec_param_ = data; }
+    bool set_spec_param(VectorOfspec_param* data) { spec_param_ = data; return true;}
 
     module* get_module() const { return module_; }
 

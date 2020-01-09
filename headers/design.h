@@ -58,19 +58,19 @@ namespace UHDM {
 
     VectorOfmodule* get_allModules() const { return allModules_; }
 
-    void set_allModules(VectorOfmodule* data) { allModules_ = data; }
+    bool set_allModules(VectorOfmodule* data) { allModules_ = data; return true;}
 
     VectorOfmodule* get_topModules() const { return topModules_; }
 
-    void set_topModules(VectorOfmodule* data) { topModules_ = data; }
+    bool set_topModules(VectorOfmodule* data) { topModules_ = data; return true;}
 
     VectorOfprogram* get_allPrograms() const { return allPrograms_; }
 
-    void set_allPrograms(VectorOfprogram* data) { allPrograms_ = data; }
+    bool set_allPrograms(VectorOfprogram* data) { allPrograms_ = data; return true;}
 
     VectorOfpackage* get_allPackages() const { return allPackages_; }
 
-    void set_allPackages(VectorOfpackage* data) { allPackages_ = data; }
+    bool set_allPackages(VectorOfpackage* data) { allPackages_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmdesign; }   
   private:

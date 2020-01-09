@@ -30,6 +30,8 @@
 #define CONTAINERS_H
 
 namespace UHDM {
+  typedef void any;
+  typedef std::vector<any*> VectorOfany;
   class concurrent_assertion;
 typedef std::vector<concurrent_assertion*> VectorOfconcurrent_assertion;
 typedef std::vector<concurrent_assertion*>::iterator VectorOfconcurrent_assertionItr;
@@ -45,8 +47,6 @@ typedef std::vector<scope*>::iterator VectorOfscopeItr;
 class typespec;
 typedef std::vector<typespec*> VectorOftypespec;
 typedef std::vector<typespec*>::iterator VectorOftypespecItr;
-typedef std::vector<any*> VectorOfany;
-typedef std::vector<any*>::iterator VectorOfanyItr;
 class property_decl;
 typedef std::vector<property_decl*> VectorOfproperty_decl;
 typedef std::vector<property_decl*>::iterator VectorOfproperty_declItr;
@@ -71,6 +71,8 @@ typedef std::vector<array_var*>::iterator VectorOfarray_varItr;
 class let_decl;
 typedef std::vector<let_decl*> VectorOflet_decl;
 typedef std::vector<let_decl*>::iterator VectorOflet_declItr;
+typedef std::vector<any*> VectorOfany;
+typedef std::vector<any*>::iterator VectorOfanyItr;
 class stmt;
 typedef std::vector<stmt*> VectorOfstmt;
 typedef std::vector<stmt*>::iterator VectorOfstmtItr;

@@ -17,22 +17,30 @@
  */
 
 /*
- * File:   containers.h
+ * File:   <GROUPNAME>.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#include <vector>
-#include <unordered_map>
-
-#ifndef CONTAINERS_H
-#define CONTAINERS_H
+#ifndef <UPPER_GROUPNAME>_H
+#define <UPPER_GROUPNAME>_H
+#include <iostream>
 
 namespace UHDM {
-  typedef void any;
-  typedef std::vector<any*> VectorOfany;
-  <CONTAINERS>
+
+  static bool <GROUPNAME>GroupCompliant (VectorOfany* vec) {
+    for (auto item : *vec) {
+      BaseClass* the_item = (BaseClass*) item;
+      unsigned int uhdmtype = the_item->getUhdmType();
+      if (<CHECKTYPE>) {
+	std::cout << "Internal Error: adding wrong object type (" << getUhdmName(uhdmtype) << ") in a <GROUPNAME> vector!\n";   
+	return false;
+      }
+    }
+    return true;
+  }
+ 	     
 };
 
 #endif

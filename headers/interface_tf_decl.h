@@ -56,11 +56,11 @@ namespace UHDM {
 
     VectorOftask* get_tasks() const { return tasks_; }
 
-    void set_tasks(VectorOftask* data) { tasks_ = data; }
+    bool set_tasks(VectorOftask* data) { tasks_ = data; return true;}
 
     VectorOffunction* get_functions() const { return functions_; }
 
-    void set_functions(VectorOffunction* data) { functions_ = data; }
+    bool set_functions(VectorOffunction* data) { functions_ = data; return true;}
 
     unsigned int get_vpiType() { return vpiInterfaceTfDecl; }
 

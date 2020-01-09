@@ -1,6 +1,6 @@
 #!/usr/bin/tclsh
 
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ proc parse_vpi_user_defines { } {
 set OBJECTID 2000
 
 proc parse_model { file } {
-    global ID OBJECTID
+    global ID OBJECTID BASECLASS DIRECT_CHILDREN ALL_CHILDREN
     set models {}
     set fid [open $file]
     set modellist [read $fid]
@@ -132,6 +132,18 @@ proc parse_model { file } {
 	    set OBJ(curr) obj_def$modelId
 	    incr modelId
 	}
+	if [regexp {\- group_def: (.*)} $line tmp name] {
+	    set vpiType ""
+	    set vpiObj  ""
+	    global obj_def$modelId
+
+	    foreach {id define} [defineType 0 $name $vpiType] {}
+
+	    set obj_def$modelId [dict create "name" $name "type" group_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]	   
+	    lappend models obj_def$modelId 
+	    set OBJ(curr) obj_def$modelId
+	    incr modelId
+	}
 	if [regexp {property: (.*)} $line tmp name] {
 	    dict set $OBJ(curr) "properties" $name {}
 	    set obj_name $name
@@ -145,12 +157,20 @@ proc parse_model { file } {
 	if [regexp {extends: (.*)} $line tmp name] {
 	    dict set $OBJ(curr) "extends" class_def $name 
 	    set obj_name $name
-	    set obj_type "class_ref"
+	    set obj_type "class_ref"	    
+	    set data [subst $$OBJ(curr)]
+	    set classname [dict get $data name]
+	    set BASECLASS($classname) $name
 	}
 	if [regexp {obj_ref: (.*)} $line tmp name] {
 	    dict set $OBJ(curr) "obj_ref" $name {}
 	    set obj_name $name
 	    set obj_type "obj_ref"
+	}
+	if [regexp {group_ref: (.*)} $line tmp name] {
+	    dict set $OBJ(curr) "group_ref" $name {}
+	    set obj_name $name
+	    set obj_type "group_ref"
 	}
 	if [regexp {class: (.*)} $line tmp name] {
 	    dict set $OBJ(curr) "class" $name {}
@@ -178,10 +198,21 @@ proc parse_model { file } {
 	    dict set $OBJ(curr) $obj_type $obj_name name $name
 	}
     }
+
+    foreach classname [array names BASECLASS] {
+	set baseclass $BASECLASS($classname)
+	append DIRECT_CHILDREN($baseclass) "$classname "
+	append ALL_CHILDREN($baseclass) "$classname "
+	if [info exist BASECLASS($baseclass)] {
+	    append ALL_CHILDREN($BASECLASS($baseclass)) "$classname "
+	}
+	
+    }
+    
     return $models
 }
 
-proc printMethods { type vpi card } {
+proc printMethods { type vpi card {real_type ""} } {
     set methods ""
     if {$type == "string"} {
 	set type "std::string"
@@ -200,7 +231,11 @@ proc printMethods { type vpi card } {
 	}
     } elseif {$card == "any"} {
 	append methods "\n    VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
-	append methods "\n    void set_${vpi}(VectorOf${type}* data) { ${vpi}_ = data; }\n"
+	if {$type == "any"} {
+	    append methods "\n    bool set_${vpi}(VectorOf${type}* data) { if (!${real_type}GroupCompliant(data)) return false; ${vpi}_ = data; return true;}\n"
+	} else {
+	    append methods "\n    bool set_${vpi}(VectorOf${type}* data) { ${vpi}_ = data; return true;}\n"
+	}
     }
     return $methods
 }
@@ -326,6 +361,18 @@ proc printGetStrBody {classname type vpi card} {
     return $vpi_get_str_body
 }
 
+proc makeVpiName { classname } {
+    set vpiclasstype $classname
+    set vpiclasstype vpi[string toupper $vpiclasstype 0 0]
+    for {set i 0} {$i < [string length $vpiclasstype]} {incr i} {
+	if {[string index $vpiclasstype $i] == "_"} {
+	    set vpiclasstype [string toupper $vpiclasstype [expr $i +1] [expr $i +1]]
+	}
+    }
+    regsub -all "_" $vpiclasstype "" vpiclasstype
+    return $vpiclasstype
+}
+
 proc printScanBody { name classname type card } {
     set vpi_scan_body ""
     if {$card == "any"} {
@@ -343,13 +390,15 @@ proc printScanBody { name classname type card } {
 }
 
 proc defineType { def name vpiType } {
-    global ID OBJECTID
+    global ID OBJECTID DEFINE_ID DEFINE_NAME
     set id ""
     set define ""
     if [info exist ID($name)] {
 	set id $ID($name)
 	if {$def != 0} {
 	    set define "#define $name $id"
+	    set DEFINE_ID($id) $name
+	    set DEFINE_NAME($name) $id
 	}
     } elseif [info exist ID($vpiType)] {
 	set id $ID($vpiType)
@@ -359,13 +408,59 @@ proc defineType { def name vpiType } {
 	set ID($name) $id
 	if {$def != 0} {
 	    set define "#define $name $id"
+	    set DEFINE_ID($id) $name
+	    set DEFINE_NAME($name) $id
 	}
     }
     return [list $id $define]
 }
 
+proc generate_group_checker { model } {
+    global $model BASECLASS ALL_CHILDREN
+    set data [subst $$model]
+    set groupname [dict get $data name]
+    set modeltype [dict get $data type]
+    
+    set fid [open "templates/group_header.h"]
+    set template [read $fid]
+    close $fid
+    
+    regsub -all {<GROUPNAME>} $template $groupname template
+    regsub -all {<UPPER_GROUPNAME>} $template [string toupper $groupname] template
+
+    set oid [open "headers/${groupname}.h" "w"]
+    set checktype ""
+    dict for {key val} $data {
+	if {($key == "obj_ref") || ($key == "class_ref")} {
+	    dict for {iter content} $val {
+		set name $iter
+		if {$checktype != ""} {
+		    append checktype " \\&\\& "
+		}
+		set uhdmclasstype uhdm$name
+		append checktype "(uhdmtype != $uhdmclasstype)"
+		if {$key == "class_ref"} {
+		    if [info exist ALL_CHILDREN($name)] {
+			foreach child $ALL_CHILDREN($name) {
+			    set name $child
+			    if {$checktype != ""} {
+				append checktype " \\&\\& "
+			    }
+			    set uhdmclasstype uhdm$name
+			    append checktype "(uhdmtype != $uhdmclasstype)"
+			}
+		    }
+		}
+	    }
+	} 
+    }
+    regsub -all {<CHECKTYPE>} $template $checktype template 
+    puts $oid $template
+    close $oid
+}
+
 proc generate_code { models } {
-    global ID
+    global ID BASECLASS DEFINE_ID
     puts "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
@@ -404,9 +499,15 @@ proc generate_code { models } {
 	}
 	set Classname [string toupper $classname 0 0]
 	regsub -all  {_} $Classname "" Classname
+
+	append headers "#include \"headers/$classname.h\"\n"
+
+	if {$modeltype == "group_def"} {
+	    generate_group_checker $model
+	    continue
+	}
 	
 	puts "Generating headers/$classname.h"
-	append headers "#include \"headers/$classname.h\"\n"
 	if {$modeltype != "class_def"} {
 	    append factories "std::vector<${classname}*> ${classname}Factory::objects_;\n"
 	}
@@ -473,6 +574,7 @@ proc generate_code { models } {
 			lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
 			continue
 		    }
+		    
 		    if {$type != "any"} {
 			append containers [printTypeDefs $type $card]
 		    }
@@ -499,28 +601,37 @@ proc generate_code { models } {
 	    if {$key == "extends"} {
 		dict for {base_type baseclass} $val {
 		    regsub -all {<EXTENDS>} $template $baseclass template
-		    set BASECLASS($classname) $baseclass
 		}		
 	    }
-	    if {($key == "class") || ($key == "obj_ref") || ($key == "class_ref")} {
+	    if {($key == "class") || ($key == "obj_ref") || ($key == "class_ref") || ($key == "group_ref")} {
 		dict for {iter content} $val {
 		    set name $iter
 		    set vpi  [dict get $content vpi]
 		    set type [dict get $content type]
 		    set card [dict get $content card]
 		    set id   [dict get $content id]
+
+		    set real_type $type
+		    if {$key == "group_ref"} {
+			set type "any"
+		    }
+		    
 		    append containers [printTypeDefs $type $card]
                     # define access properties (allModules...)
 		    foreach {id define} [defineType 1 uhdm${name} ""] {}
                     if {$define != ""} {
                       append defines "$define\n"
                     }
-		    append methods($classname) [printMethods $type $name $card] 
+		    append methods($classname) [printMethods $type $name $card $real_type] 
 		    append members($classname) [printMembers $type $name $card]
 		    append vpi_iterate_body($classname) [printIterateBody $name $classname $vpi $card]
                     append vpi_scan_body [printScanBody $name $classname $type $card]
                     append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]
 
+		    if {$key == "group_ref"} {
+			continue
+		    }
+		    
 		    set Type [string toupper $type 0 0]
 		    regsub -all  {_} $Type "" Type		    
 		    regsub -all  {_} $name "" Name
@@ -588,14 +699,7 @@ proc generate_code { models } {
 	}
 
 	if {($type_specified == 0) && ($modeltype == "obj_def")} {
-	    set vpiclasstype $classname
-	    set vpiclasstype vpi[string toupper $vpiclasstype 0 0]
-	    for {set i 0} {$i < [string length $vpiclasstype]} {incr i} {
-		if {[string index $vpiclasstype $i] == "_"} {
-		    set vpiclasstype [string toupper $vpiclasstype [expr $i +1] [expr $i +1]]
-		}
-	    }
-	    regsub -all "_" $vpiclasstype "" vpiclasstype
+	    set vpiclasstype [makeVpiName $classname]
 	    append methods($classname) "\n    unsigned int get_vpiType() { return $vpiclasstype; }\n"
 	    lappend vpi_get_body_inst($classname) [list $classname "unsigned int" vpiType 1]
 
@@ -620,7 +724,7 @@ proc generate_code { models } {
 	}
 
 	set capnpIndex 0    
-	if {$modeltype != "class_def"} {
+	if {($modeltype != "class_def") && ($modeltype != "group_def")} {
 	    append capnp_schema_all "struct $Classname \{\n"
 	    foreach member $capnp_schema($classname) {
 		foreach {name type} $member {}
@@ -696,6 +800,18 @@ proc generate_code { models } {
     set uhdm_content [read $fid]
     close $fid 
     set uhdmId [open "headers/uhdm.h" "w"]
+
+    set name_id_map "\nstatic std::string getUhdmName(unsigned int type) \{
+      switch (type) \{
+"
+    foreach id [array names DEFINE_ID] {
+	append name_id_map "case $id: return \"$DEFINE_ID($id)\";\n"
+    }
+    append name_id_map "default: return \"NO TYPE\";
+\}
+\}\n"
+    append defines $name_id_map
+    
     regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
     regsub -all {<INCLUDE_FILES>} $uhdm_content $headers uhdm_content
     puts $uhdmId $uhdm_content
@@ -754,7 +870,7 @@ proc generate_code { models } {
 	set serializer_content [read $fid]
 	close $fid
 	foreach class $classes {
-	    if {$MODEL_TYPE($class) == "class_def"} {
+	    if {($MODEL_TYPE($class) == "class_def") || ($MODEL_TYPE($class) == "group_def")} {
 		continue
 	    }
 	    set Class [string toupper $class 0 0]

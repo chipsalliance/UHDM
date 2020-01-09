@@ -56,7 +56,7 @@ namespace UHDM {
 
     VectorOfoperand_group* get_operands() const { return operands_; }
 
-    void set_operands(VectorOfoperand_group* data) { operands_ = data; }
+    bool set_operands(VectorOfoperand_group* data) { operands_ = data; return true;}
 
     unsigned int get_vpiType() { return vpiOperation; }
 

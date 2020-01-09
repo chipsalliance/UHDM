@@ -74,15 +74,15 @@ namespace UHDM {
 
     VectorOfprocess* get_process() const { return process_; }
 
-    void set_process(VectorOfprocess* data) { process_ = data; }
+    bool set_process(VectorOfprocess* data) { process_ = data; return true;}
 
     VectorOfprimitive* get_primitives() const { return primitives_; }
 
-    void set_primitives(VectorOfprimitive* data) { primitives_ = data; }
+    bool set_primitives(VectorOfprimitive* data) { primitives_ = data; return true;}
 
     VectorOfprimitive_array* get_primitive_arrays() const { return primitive_arrays_; }
 
-    void set_primitive_arrays(VectorOfprimitive_array* data) { primitive_arrays_ = data; }
+    bool set_primitive_arrays(VectorOfprimitive_array* data) { primitive_arrays_ = data; return true;}
 
     clocking_block* get_global_clocking() const { return global_clocking_; }
 
@@ -98,51 +98,51 @@ namespace UHDM {
 
     VectorOfport* get_ports() const { return ports_; }
 
-    void set_ports(VectorOfport* data) { ports_ = data; }
+    bool set_ports(VectorOfport* data) { ports_ = data; return true;}
 
     VectorOfinterface* get_interfaces() const { return interfaces_; }
 
-    void set_interfaces(VectorOfinterface* data) { interfaces_ = data; }
+    bool set_interfaces(VectorOfinterface* data) { interfaces_ = data; return true;}
 
     VectorOfinterface_array* get_interface_arrays() const { return interface_arrays_; }
 
-    void set_interface_arrays(VectorOfinterface_array* data) { interface_arrays_ = data; }
+    bool set_interface_arrays(VectorOfinterface_array* data) { interface_arrays_ = data; return true;}
 
     VectorOfcont_assign* get_cont_assigns() const { return cont_assigns_; }
 
-    void set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; }
+    bool set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; return true;}
 
     VectorOfmodule* get_modules() const { return modules_; }
 
-    void set_modules(VectorOfmodule* data) { modules_ = data; }
+    bool set_modules(VectorOfmodule* data) { modules_ = data; return true;}
 
     VectorOfmodule_array* get_module_arrays() const { return module_arrays_; }
 
-    void set_module_arrays(VectorOfmodule_array* data) { module_arrays_ = data; }
+    bool set_module_arrays(VectorOfmodule_array* data) { module_arrays_ = data; return true;}
 
     VectorOfmod_path* get_mod_paths() const { return mod_paths_; }
 
-    void set_mod_paths(VectorOfmod_path* data) { mod_paths_ = data; }
+    bool set_mod_paths(VectorOfmod_path* data) { mod_paths_ = data; return true;}
 
     VectorOftchk* get_tchks() const { return tchks_; }
 
-    void set_tchks(VectorOftchk* data) { tchks_ = data; }
+    bool set_tchks(VectorOftchk* data) { tchks_ = data; return true;}
 
     VectorOfdef_param* get_def_params() const { return def_params_; }
 
-    void set_def_params(VectorOfdef_param* data) { def_params_ = data; }
+    bool set_def_params(VectorOfdef_param* data) { def_params_ = data; return true;}
 
     VectorOfio_decl* get_io_decls() const { return io_decls_; }
 
-    void set_io_decls(VectorOfio_decl* data) { io_decls_ = data; }
+    bool set_io_decls(VectorOfio_decl* data) { io_decls_ = data; return true;}
 
     VectorOfalias_stmt* get_alias_stmts() const { return alias_stmts_; }
 
-    void set_alias_stmts(VectorOfalias_stmt* data) { alias_stmts_ = data; }
+    bool set_alias_stmts(VectorOfalias_stmt* data) { alias_stmts_ = data; return true;}
 
     VectorOfclocking_block* get_clocking_blocks() const { return clocking_blocks_; }
 
-    void set_clocking_blocks(VectorOfclocking_block* data) { clocking_blocks_ = data; }
+    bool set_clocking_blocks(VectorOfclocking_block* data) { clocking_blocks_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmmodule; }   
   private:

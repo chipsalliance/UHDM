@@ -15,21 +15,20 @@
 # Universal Hardware Data Model (UHDM) "instance item" formal description
  
 - group_def: instance_item
-  - obj_ref: programs
-  - obj_ref: program_arrays
+  - obj_ref: program
+  - obj_ref: program_array
   - class_ref: task_func
   - class_ref: net
   - class_ref: array_net
   - class_ref: variables
   - obj_ref: logic_var
-  - obj_ref: array_var
-  - obj_ref: array_var_mem  
+  - obj_ref: array_var  
   - obj_ref: named_event
   - obj_ref: named_event_array
   - class_ref: parameters
   - obj_ref: spec_param
   - class_ref: assertion
-  - class_ref: typespecs
+  - class_ref: typespec
   - class_ref: class_defn
  
 

@@ -52,7 +52,7 @@ namespace UHDM {
 
     VectorOfparam_assign* get_param_assigns() const { return param_assigns_; }
 
-    void set_param_assigns(VectorOfparam_assign* data) { param_assigns_ = data; }
+    bool set_param_assigns(VectorOfparam_assign* data) { param_assigns_ = data; return true;}
 
     unsigned int get_vpiType() { return vpiInterfaceArray; }
 

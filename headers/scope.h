@@ -44,63 +44,63 @@ namespace UHDM {
 
     VectorOfconcurrent_assertion* get_concurrent_assertions() const { return concurrent_assertions_; }
 
-    void set_concurrent_assertions(VectorOfconcurrent_assertion* data) { concurrent_assertions_ = data; }
+    bool set_concurrent_assertions(VectorOfconcurrent_assertion* data) { concurrent_assertions_ = data; return true;}
 
     VectorOfvariables* get_variables() const { return variables_; }
 
-    void set_variables(VectorOfvariables* data) { variables_ = data; }
+    bool set_variables(VectorOfvariables* data) { variables_ = data; return true;}
 
     VectorOfparameters* get_parameters() const { return parameters_; }
 
-    void set_parameters(VectorOfparameters* data) { parameters_ = data; }
+    bool set_parameters(VectorOfparameters* data) { parameters_ = data; return true;}
 
     VectorOfscope* get_scopes() const { return scopes_; }
 
-    void set_scopes(VectorOfscope* data) { scopes_ = data; }
+    bool set_scopes(VectorOfscope* data) { scopes_ = data; return true;}
 
     VectorOftypespec* get_typespecs() const { return typespecs_; }
 
-    void set_typespecs(VectorOftypespec* data) { typespecs_ = data; }
-
-    VectorOfany* get_instance_items() const { return instance_items_; }
-
-    void set_instance_items(VectorOfany* data) { instance_items_ = data; }
+    bool set_typespecs(VectorOftypespec* data) { typespecs_ = data; return true;}
 
     VectorOfproperty_decl* get_property_decls() const { return property_decls_; }
 
-    void set_property_decls(VectorOfproperty_decl* data) { property_decls_ = data; }
+    bool set_property_decls(VectorOfproperty_decl* data) { property_decls_ = data; return true;}
 
     VectorOfsequence_decl* get_sequence_decls() const { return sequence_decls_; }
 
-    void set_sequence_decls(VectorOfsequence_decl* data) { sequence_decls_ = data; }
+    bool set_sequence_decls(VectorOfsequence_decl* data) { sequence_decls_ = data; return true;}
 
     VectorOfnamed_event* get_named_events() const { return named_events_; }
 
-    void set_named_events(VectorOfnamed_event* data) { named_events_ = data; }
+    bool set_named_events(VectorOfnamed_event* data) { named_events_ = data; return true;}
 
     VectorOfnamed_event_array* get_named_event_arrays() const { return named_event_arrays_; }
 
-    void set_named_event_arrays(VectorOfnamed_event_array* data) { named_event_arrays_ = data; }
+    bool set_named_event_arrays(VectorOfnamed_event_array* data) { named_event_arrays_ = data; return true;}
 
     VectorOfvirtual_interface_var* get_virtual_interface_vars() const { return virtual_interface_vars_; }
 
-    void set_virtual_interface_vars(VectorOfvirtual_interface_var* data) { virtual_interface_vars_ = data; }
+    bool set_virtual_interface_vars(VectorOfvirtual_interface_var* data) { virtual_interface_vars_ = data; return true;}
 
     VectorOflogic_var* get_logic_var() const { return logic_var_; }
 
-    void set_logic_var(VectorOflogic_var* data) { logic_var_ = data; }
+    bool set_logic_var(VectorOflogic_var* data) { logic_var_ = data; return true;}
 
     VectorOfarray_var* get_array_var() const { return array_var_; }
 
-    void set_array_var(VectorOfarray_var* data) { array_var_ = data; }
+    bool set_array_var(VectorOfarray_var* data) { array_var_ = data; return true;}
 
     VectorOfarray_var* get_array_var_mem() const { return array_var_mem_; }
 
-    void set_array_var_mem(VectorOfarray_var* data) { array_var_mem_ = data; }
+    bool set_array_var_mem(VectorOfarray_var* data) { array_var_mem_ = data; return true;}
 
     VectorOflet_decl* get_let_decls() const { return let_decls_; }
 
-    void set_let_decls(VectorOflet_decl* data) { let_decls_ = data; }
+    bool set_let_decls(VectorOflet_decl* data) { let_decls_ = data; return true;}
+
+    VectorOfany* get_instance_items() const { return instance_items_; }
+
+    bool set_instance_items(VectorOfany* data) { if (!instance_itemGroupCompliant(data)) return false; instance_items_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmscope; }   
   private:
@@ -119,8 +119,6 @@ namespace UHDM {
 
     VectorOftypespec* typespecs_;
 
-    VectorOfany* instance_items_;
-
     VectorOfproperty_decl* property_decls_;
 
     VectorOfsequence_decl* sequence_decls_;
@@ -138,6 +136,8 @@ namespace UHDM {
     VectorOfarray_var* array_var_mem_;
 
     VectorOflet_decl* let_decls_;
+
+    VectorOfany* instance_items_;
 
   };
 
