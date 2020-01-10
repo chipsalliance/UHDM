@@ -114,6 +114,7 @@ logicvar @17 :List(UInt64);
 arrayvar @18 :List(UInt64);
 arrayvarmem @19 :List(UInt64);
 letdecls @20 :List(UInt64);
+instanceitems @21 :List(ObjIndexType);
 }
 struct Namedbegin {
 vpiParent @0 :UInt64;
@@ -137,6 +138,7 @@ logicvar @17 :List(UInt64);
 arrayvar @18 :List(UInt64);
 arrayvarmem @19 :List(UInt64);
 letdecls @20 :List(UInt64);
+instanceitems @21 :List(ObjIndexType);
 }
 struct Namedfork {
 vpiParent @0 :UInt64;
@@ -161,6 +163,7 @@ logicvar @18 :List(UInt64);
 arrayvar @19 :List(UInt64);
 arrayvarmem @20 :List(UInt64);
 letdecls @21 :List(UInt64);
+instanceitems @22 :List(ObjIndexType);
 }
 struct Forkstmt {
 vpiParent @0 :UInt64;
@@ -185,6 +188,7 @@ logicvar @18 :List(UInt64);
 arrayvar @19 :List(UInt64);
 arrayvarmem @20 :List(UInt64);
 letdecls @21 :List(UInt64);
+instanceitems @22 :List(ObjIndexType);
 }
 struct Forstmt {
 vpiParent @0 :UInt64;
@@ -207,6 +211,7 @@ logicvar @16 :List(UInt64);
 arrayvar @17 :List(UInt64);
 arrayvarmem @18 :List(UInt64);
 letdecls @19 :List(UInt64);
+instanceitems @20 :List(ObjIndexType);
 }
 struct Foreachstmt {
 vpiParent @0 :UInt64;
@@ -229,6 +234,7 @@ logicvar @16 :List(UInt64);
 arrayvar @17 :List(UInt64);
 arrayvarmem @18 :List(UInt64);
 letdecls @19 :List(UInt64);
+instanceitems @20 :List(ObjIndexType);
 }
 struct Genscope {
 vpiParent @0 :UInt64;
@@ -251,6 +257,7 @@ logicvar @16 :List(UInt64);
 arrayvar @17 :List(UInt64);
 arrayvarmem @18 :List(UInt64);
 letdecls @19 :List(UInt64);
+instanceitems @20 :List(ObjIndexType);
 }
 struct Distribution {
 vpiParent @0 :UInt64;
@@ -309,6 +316,7 @@ logicvar @30 :List(UInt64);
 arrayvar @31 :List(UInt64);
 arrayvarmem @32 :List(UInt64);
 letdecls @33 :List(UInt64);
+instanceitems @34 :List(ObjIndexType);
 }
 struct Function {
 vpiParent @0 :UInt64;
@@ -348,6 +356,7 @@ logicvar @33 :List(UInt64);
 arrayvar @34 :List(UInt64);
 arrayvarmem @35 :List(UInt64);
 letdecls @36 :List(UInt64);
+instanceitems @37 :List(ObjIndexType);
 }
 struct Modport {
 vpiParent @0 :UInt64;
@@ -436,6 +445,7 @@ logicvar @16 :List(UInt64);
 arrayvar @17 :List(UInt64);
 arrayvarmem @18 :List(UInt64);
 letdecls @19 :List(UInt64);
+instanceitems @20 :List(ObjIndexType);
 }
 struct Range {
 vpiParent @0 :UInt64;
@@ -604,6 +614,7 @@ logicvar @16 :List(UInt64);
 arrayvar @17 :List(UInt64);
 arrayvarmem @18 :List(UInt64);
 letdecls @19 :List(UInt64);
+instanceitems @20 :List(ObjIndexType);
 }
 struct Classtypespec {
 vpiParent @0 :UInt64;
@@ -626,6 +637,7 @@ logicvar @16 :List(UInt64);
 arrayvar @17 :List(UInt64);
 arrayvarmem @18 :List(UInt64);
 letdecls @19 :List(UInt64);
+instanceitems @20 :List(ObjIndexType);
 }
 struct Classobj {
 vpiParent @0 :UInt64;
@@ -648,6 +660,7 @@ logicvar @16 :List(UInt64);
 arrayvar @17 :List(UInt64);
 arrayvarmem @18 :List(UInt64);
 letdecls @19 :List(UInt64);
+instanceitems @20 :List(ObjIndexType);
 }
 struct Interface {
 vpiParent @0 :UInt64;
@@ -709,6 +722,7 @@ logicvar @55 :List(UInt64);
 arrayvar @56 :List(UInt64);
 arrayvarmem @57 :List(UInt64);
 letdecls @58 :List(UInt64);
+instanceitems @59 :List(ObjIndexType);
 }
 struct Program {
 vpiParent @0 :UInt64;
@@ -767,6 +781,7 @@ logicvar @52 :List(UInt64);
 arrayvar @53 :List(UInt64);
 arrayvarmem @54 :List(UInt64);
 letdecls @55 :List(UInt64);
+instanceitems @56 :List(ObjIndexType);
 }
 struct Package {
 vpiParent @0 :UInt64;
@@ -817,6 +832,7 @@ logicvar @44 :List(UInt64);
 arrayvar @45 :List(UInt64);
 arrayvarmem @46 :List(UInt64);
 letdecls @47 :List(UInt64);
+instanceitems @48 :List(ObjIndexType);
 }
 struct Module {
 vpiParent @0 :UInt64;
@@ -889,6 +905,7 @@ logicvar @66 :List(UInt64);
 arrayvar @67 :List(UInt64);
 arrayvarmem @68 :List(UInt64);
 letdecls @69 :List(UInt64);
+instanceitems @70 :List(ObjIndexType);
 }
 struct Design {
 vpiParent @0 :UInt64;

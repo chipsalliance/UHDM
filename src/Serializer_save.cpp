@@ -939,6 +939,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Begins[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
    index++;
@@ -1067,6 +1076,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Namedbegins[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Namedbegins[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -1200,6 +1218,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Namedforks[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
    index++;
@@ -1331,6 +1358,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Forkstmts[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
    index++;
@@ -1450,6 +1486,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Forstmts[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Forstmts[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -1573,6 +1618,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Foreachstmts[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
    index++;
@@ -1692,6 +1746,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Genscopes[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Genscopes[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -1881,6 +1944,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Tasks[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
     Tasks[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -1991,6 +2063,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Tasks[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Tasks[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -2140,6 +2221,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Functions[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
     Functions[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -2250,6 +2340,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Functions[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Functions[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -2495,6 +2594,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Clockingblocks[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Clockingblocks[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -3111,6 +3219,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Classdefns[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
    index++;
@@ -3232,6 +3349,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Classtypespecs[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
    index++;
@@ -3351,6 +3477,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Classobjs[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Classobjs[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -3636,6 +3771,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Interfaces[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
     Interfaces[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -3746,6 +3890,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Interfaces[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Interfaces[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -4016,6 +4169,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Programs[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
     Programs[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -4126,6 +4288,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Programs[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Programs[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -4350,6 +4521,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Packages[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
     Packages[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -4460,6 +4640,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Packages[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Packages[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 
@@ -4808,6 +4997,15 @@ void Serializer::save(std::string file) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
       }
     }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Modules[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
+      }
+    }
 
 
     Modules[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
@@ -4918,6 +5116,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Letdeclss = Modules[index].initLetdecls(obj->get_let_decls()->size());
       for (unsigned int ind = 0; ind < obj->get_let_decls()->size(); ind++) {
         Letdeclss.set(ind, getId((*obj->get_let_decls())[ind]));
+      }
+    }
+ 
+    if (obj->get_instance_items()) {  
+      ::capnp::List<::ObjIndexType>::Builder Instanceitemss = Modules[index].initInstanceitems(obj->get_instance_items()->size());
+      for (unsigned int ind = 0; ind < obj->get_instance_items()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Instanceitemss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_instance_items())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_instance_items())[ind]))->getUhdmType());
       }
     }
 

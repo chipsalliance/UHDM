@@ -184,7 +184,7 @@ struct Begin {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(e4d908a186cb8c2b, 6, 15)
+    CAPNP_DECLARE_STRUCT_HEADER(e4d908a186cb8c2b, 6, 16)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -199,7 +199,7 @@ struct Namedbegin {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(b61d98ea52110eb2, 6, 15)
+    CAPNP_DECLARE_STRUCT_HEADER(b61d98ea52110eb2, 6, 16)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -214,7 +214,7 @@ struct Namedfork {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(ad9368ac08dc00e8, 7, 15)
+    CAPNP_DECLARE_STRUCT_HEADER(ad9368ac08dc00e8, 7, 16)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -229,7 +229,7 @@ struct Forkstmt {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(f701a1c7bc57f1d0, 7, 15)
+    CAPNP_DECLARE_STRUCT_HEADER(f701a1c7bc57f1d0, 7, 16)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -244,7 +244,7 @@ struct Forstmt {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(de0b57cfcd659c53, 6, 14)
+    CAPNP_DECLARE_STRUCT_HEADER(de0b57cfcd659c53, 6, 15)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -259,7 +259,7 @@ struct Foreachstmt {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(fa8dc6cb525b350d, 6, 14)
+    CAPNP_DECLARE_STRUCT_HEADER(fa8dc6cb525b350d, 6, 15)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -274,7 +274,7 @@ struct Genscope {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(8bbb58bf58277e5f, 6, 14)
+    CAPNP_DECLARE_STRUCT_HEADER(8bbb58bf58277e5f, 6, 15)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -334,7 +334,7 @@ struct Task {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(9f591135f29e5892, 13, 17)
+    CAPNP_DECLARE_STRUCT_HEADER(9f591135f29e5892, 13, 18)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -349,7 +349,7 @@ struct Function {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(d0a8f41c104ebf1c, 15, 17)
+    CAPNP_DECLARE_STRUCT_HEADER(d0a8f41c104ebf1c, 15, 18)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -514,7 +514,7 @@ struct Clockingblock {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(cfa270b7ddc80a04, 6, 14)
+    CAPNP_DECLARE_STRUCT_HEADER(cfa270b7ddc80a04, 6, 15)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -739,7 +739,7 @@ struct Classdefn {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(ba336cb57cb68222, 6, 14)
+    CAPNP_DECLARE_STRUCT_HEADER(ba336cb57cb68222, 6, 15)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -754,7 +754,7 @@ struct Classtypespec {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(bb8c12feb2e2fb5b, 6, 14)
+    CAPNP_DECLARE_STRUCT_HEADER(bb8c12feb2e2fb5b, 6, 15)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -769,7 +769,7 @@ struct Classobj {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(c12feda1e7935b61, 6, 14)
+    CAPNP_DECLARE_STRUCT_HEADER(c12feda1e7935b61, 6, 15)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -784,7 +784,7 @@ struct Interface {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(f204710c1a739934, 20, 34)
+    CAPNP_DECLARE_STRUCT_HEADER(f204710c1a739934, 20, 35)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -799,7 +799,7 @@ struct Program {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(b8a08b2787e1997f, 19, 32)
+    CAPNP_DECLARE_STRUCT_HEADER(b8a08b2787e1997f, 19, 33)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -814,7 +814,7 @@ struct Package {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(dfd588e26996d1a6, 17, 25)
+    CAPNP_DECLARE_STRUCT_HEADER(dfd588e26996d1a6, 17, 26)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -829,7 +829,7 @@ struct Module {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(ff343c185370b513, 22, 42)
+    CAPNP_DECLARE_STRUCT_HEADER(ff343c185370b513, 22, 43)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand = &schema->defaultBrand;
     #endif  // !CAPNP_LITE
@@ -2055,6 +2055,9 @@ public:
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
 
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -2215,6 +2218,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -2314,6 +2324,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -2475,6 +2488,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -2576,6 +2596,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -2740,6 +2763,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -2841,6 +2871,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -3005,6 +3038,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -3101,6 +3141,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -3255,6 +3298,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -3351,6 +3401,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -3505,6 +3558,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -3601,6 +3661,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -3754,6 +3817,13 @@ public:
   inline  ::capnp::List< ::uint64_t>::Builder initLetdecls(unsigned int size);
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
+
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -4181,6 +4251,9 @@ public:
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
 
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -4388,6 +4461,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -4524,6 +4604,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -4740,6 +4823,13 @@ public:
   inline  ::capnp::List< ::uint64_t>::Builder initLetdecls(unsigned int size);
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
+
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -5799,6 +5889,9 @@ public:
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
 
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -5951,6 +6044,13 @@ public:
   inline  ::capnp::List< ::uint64_t>::Builder initLetdecls(unsigned int size);
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
+
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -7852,6 +7952,9 @@ public:
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
 
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -8005,6 +8108,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -8101,6 +8211,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -8255,6 +8368,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -8351,6 +8471,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -8504,6 +8627,13 @@ public:
   inline  ::capnp::List< ::uint64_t>::Builder initLetdecls(unsigned int size);
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
+
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -8699,6 +8829,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -9061,6 +9194,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -9250,6 +9390,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -9593,6 +9736,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -9759,6 +9909,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -10046,6 +10199,13 @@ public:
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
 
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -10271,6 +10431,9 @@ public:
 
   inline bool hasLetdecls() const;
   inline  ::capnp::List< ::uint64_t>::Reader getLetdecls() const;
+
+  inline bool hasInstanceitems() const;
+  inline  ::capnp::List< ::ObjIndexType>::Reader getInstanceitems() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -10703,6 +10866,13 @@ public:
   inline  ::capnp::List< ::uint64_t>::Builder initLetdecls(unsigned int size);
   inline void adoptLetdecls(::capnp::Orphan< ::capnp::List< ::uint64_t>>&& value);
   inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> disownLetdecls();
+
+  inline bool hasInstanceitems();
+  inline  ::capnp::List< ::ObjIndexType>::Builder getInstanceitems();
+  inline void setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value);
+  inline  ::capnp::List< ::ObjIndexType>::Builder initInstanceitems(unsigned int size);
+  inline void adoptInstanceitems(::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> disownInstanceitems();
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -13451,6 +13621,38 @@ inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Begin::Builder::disownLetdec
       _builder.getPointerField(14 * ::capnp::POINTERS));
 }
 
+inline bool Begin::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(15 * ::capnp::POINTERS).isNull();
+}
+inline bool Begin::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(15 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Begin::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(15 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Begin::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(15 * ::capnp::POINTERS));
+}
+inline void Begin::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(15 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Begin::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(15 * ::capnp::POINTERS), size);
+}
+inline void Begin::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(15 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Begin::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(15 * ::capnp::POINTERS));
+}
+
 inline  ::uint64_t Namedbegin::Reader::getVpiParent() const {
   return _reader.getDataField< ::uint64_t>(
       0 * ::capnp::ELEMENTS);
@@ -14049,6 +14251,38 @@ inline void Namedbegin::Builder::adoptLetdecls(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Namedbegin::Builder::disownLetdecls() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+
+inline bool Namedbegin::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(15 * ::capnp::POINTERS).isNull();
+}
+inline bool Namedbegin::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(15 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Namedbegin::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(15 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Namedbegin::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(15 * ::capnp::POINTERS));
+}
+inline void Namedbegin::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(15 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Namedbegin::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(15 * ::capnp::POINTERS), size);
+}
+inline void Namedbegin::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(15 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Namedbegin::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(15 * ::capnp::POINTERS));
 }
 
 inline  ::uint64_t Namedfork::Reader::getVpiParent() const {
@@ -14665,6 +14899,38 @@ inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Namedfork::Builder::disownLe
       _builder.getPointerField(14 * ::capnp::POINTERS));
 }
 
+inline bool Namedfork::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(15 * ::capnp::POINTERS).isNull();
+}
+inline bool Namedfork::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(15 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Namedfork::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(15 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Namedfork::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(15 * ::capnp::POINTERS));
+}
+inline void Namedfork::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(15 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Namedfork::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(15 * ::capnp::POINTERS), size);
+}
+inline void Namedfork::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(15 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Namedfork::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(15 * ::capnp::POINTERS));
+}
+
 inline  ::uint64_t Forkstmt::Reader::getVpiParent() const {
   return _reader.getDataField< ::uint64_t>(
       0 * ::capnp::ELEMENTS);
@@ -15279,6 +15545,38 @@ inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Forkstmt::Builder::disownLet
       _builder.getPointerField(14 * ::capnp::POINTERS));
 }
 
+inline bool Forkstmt::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(15 * ::capnp::POINTERS).isNull();
+}
+inline bool Forkstmt::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(15 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Forkstmt::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(15 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Forkstmt::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(15 * ::capnp::POINTERS));
+}
+inline void Forkstmt::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(15 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Forkstmt::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(15 * ::capnp::POINTERS), size);
+}
+inline void Forkstmt::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(15 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Forkstmt::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(15 * ::capnp::POINTERS));
+}
+
 inline  ::uint64_t Forstmt::Reader::getVpiParent() const {
   return _reader.getDataField< ::uint64_t>(
       0 * ::capnp::ELEMENTS);
@@ -15845,6 +16143,38 @@ inline void Forstmt::Builder::adoptLetdecls(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Forstmt::Builder::disownLetdecls() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(13 * ::capnp::POINTERS));
+}
+
+inline bool Forstmt::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline bool Forstmt::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Forstmt::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(14 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Forstmt::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+inline void Forstmt::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(14 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Forstmt::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(14 * ::capnp::POINTERS), size);
+}
+inline void Forstmt::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(14 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Forstmt::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
 }
 
 inline  ::uint64_t Foreachstmt::Reader::getVpiParent() const {
@@ -16415,6 +16745,38 @@ inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Foreachstmt::Builder::disown
       _builder.getPointerField(13 * ::capnp::POINTERS));
 }
 
+inline bool Foreachstmt::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline bool Foreachstmt::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Foreachstmt::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(14 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Foreachstmt::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+inline void Foreachstmt::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(14 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Foreachstmt::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(14 * ::capnp::POINTERS), size);
+}
+inline void Foreachstmt::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(14 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Foreachstmt::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+
 inline  ::uint64_t Genscope::Reader::getVpiParent() const {
   return _reader.getDataField< ::uint64_t>(
       0 * ::capnp::ELEMENTS);
@@ -16981,6 +17343,38 @@ inline void Genscope::Builder::adoptLetdecls(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Genscope::Builder::disownLetdecls() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(13 * ::capnp::POINTERS));
+}
+
+inline bool Genscope::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline bool Genscope::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Genscope::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(14 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Genscope::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+inline void Genscope::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(14 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Genscope::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(14 * ::capnp::POINTERS), size);
+}
+inline void Genscope::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(14 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Genscope::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
 }
 
 inline  ::uint64_t Distribution::Reader::getVpiParent() const {
@@ -18058,6 +18452,38 @@ inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Task::Builder::disownLetdecl
       _builder.getPointerField(16 * ::capnp::POINTERS));
 }
 
+inline bool Task::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(17 * ::capnp::POINTERS).isNull();
+}
+inline bool Task::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(17 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Task::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(17 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Task::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(17 * ::capnp::POINTERS));
+}
+inline void Task::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(17 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Task::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(17 * ::capnp::POINTERS), size);
+}
+inline void Task::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(17 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Task::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(17 * ::capnp::POINTERS));
+}
+
 inline  ::uint64_t Function::Reader::getVpiParent() const {
   return _reader.getDataField< ::uint64_t>(
       0 * ::capnp::ELEMENTS);
@@ -18931,6 +19357,38 @@ inline void Function::Builder::adoptLetdecls(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Function::Builder::disownLetdecls() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(16 * ::capnp::POINTERS));
+}
+
+inline bool Function::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(17 * ::capnp::POINTERS).isNull();
+}
+inline bool Function::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(17 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Function::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(17 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Function::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(17 * ::capnp::POINTERS));
+}
+inline void Function::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(17 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Function::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(17 * ::capnp::POINTERS), size);
+}
+inline void Function::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(17 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Function::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(17 * ::capnp::POINTERS));
 }
 
 inline  ::uint64_t Modport::Reader::getVpiParent() const {
@@ -20209,6 +20667,38 @@ inline void Clockingblock::Builder::adoptLetdecls(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Clockingblock::Builder::disownLetdecls() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(13 * ::capnp::POINTERS));
+}
+
+inline bool Clockingblock::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline bool Clockingblock::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Clockingblock::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(14 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Clockingblock::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+inline void Clockingblock::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(14 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Clockingblock::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(14 * ::capnp::POINTERS), size);
+}
+inline void Clockingblock::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(14 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Clockingblock::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
 }
 
 inline  ::uint64_t Range::Reader::getVpiParent() const {
@@ -23252,6 +23742,38 @@ inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Classdefn::Builder::disownLe
       _builder.getPointerField(13 * ::capnp::POINTERS));
 }
 
+inline bool Classdefn::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline bool Classdefn::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Classdefn::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(14 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Classdefn::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+inline void Classdefn::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(14 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Classdefn::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(14 * ::capnp::POINTERS), size);
+}
+inline void Classdefn::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(14 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Classdefn::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+
 inline  ::uint64_t Classtypespec::Reader::getVpiParent() const {
   return _reader.getDataField< ::uint64_t>(
       0 * ::capnp::ELEMENTS);
@@ -23820,6 +24342,38 @@ inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Classtypespec::Builder::diso
       _builder.getPointerField(13 * ::capnp::POINTERS));
 }
 
+inline bool Classtypespec::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline bool Classtypespec::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Classtypespec::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(14 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Classtypespec::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+inline void Classtypespec::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(14 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Classtypespec::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(14 * ::capnp::POINTERS), size);
+}
+inline void Classtypespec::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(14 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Classtypespec::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+
 inline  ::uint64_t Classobj::Reader::getVpiParent() const {
   return _reader.getDataField< ::uint64_t>(
       0 * ::capnp::ELEMENTS);
@@ -24386,6 +24940,38 @@ inline void Classobj::Builder::adoptLetdecls(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Classobj::Builder::disownLetdecls() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(13 * ::capnp::POINTERS));
+}
+
+inline bool Classobj::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline bool Classobj::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(14 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Classobj::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(14 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Classobj::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
+}
+inline void Classobj::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(14 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Classobj::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(14 * ::capnp::POINTERS), size);
+}
+inline void Classobj::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(14 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Classobj::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(14 * ::capnp::POINTERS));
 }
 
 inline  ::uint64_t Interface::Reader::getVpiParent() const {
@@ -25921,6 +26507,38 @@ inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Interface::Builder::disownLe
       _builder.getPointerField(33 * ::capnp::POINTERS));
 }
 
+inline bool Interface::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(34 * ::capnp::POINTERS).isNull();
+}
+inline bool Interface::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(34 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Interface::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(34 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Interface::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(34 * ::capnp::POINTERS));
+}
+inline void Interface::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(34 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Interface::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(34 * ::capnp::POINTERS), size);
+}
+inline void Interface::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(34 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Interface::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(34 * ::capnp::POINTERS));
+}
+
 inline  ::uint64_t Program::Reader::getVpiParent() const {
   return _reader.getDataField< ::uint64_t>(
       0 * ::capnp::ELEMENTS);
@@ -27368,6 +27986,38 @@ inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Program::Builder::disownLetd
       _builder.getPointerField(31 * ::capnp::POINTERS));
 }
 
+inline bool Program::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(32 * ::capnp::POINTERS).isNull();
+}
+inline bool Program::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(32 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Program::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(32 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Program::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(32 * ::capnp::POINTERS));
+}
+inline void Program::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(32 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Program::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(32 * ::capnp::POINTERS), size);
+}
+inline void Program::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(32 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Program::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(32 * ::capnp::POINTERS));
+}
+
 inline  ::uint64_t Package::Reader::getVpiParent() const {
   return _reader.getDataField< ::uint64_t>(
       0 * ::capnp::ELEMENTS);
@@ -28549,6 +29199,38 @@ inline void Package::Builder::adoptLetdecls(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Package::Builder::disownLetdecls() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(24 * ::capnp::POINTERS));
+}
+
+inline bool Package::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(25 * ::capnp::POINTERS).isNull();
+}
+inline bool Package::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(25 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Package::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(25 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Package::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(25 * ::capnp::POINTERS));
+}
+inline void Package::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(25 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Package::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(25 * ::capnp::POINTERS), size);
+}
+inline void Package::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(25 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Package::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(25 * ::capnp::POINTERS));
 }
 
 inline  ::uint64_t Module::Reader::getVpiParent() const {
@@ -30404,6 +31086,38 @@ inline void Module::Builder::adoptLetdecls(
 inline ::capnp::Orphan< ::capnp::List< ::uint64_t>> Module::Builder::disownLetdecls() {
   return ::capnp::_::PointerHelpers< ::capnp::List< ::uint64_t>>::disown(
       _builder.getPointerField(41 * ::capnp::POINTERS));
+}
+
+inline bool Module::Reader::hasInstanceitems() const {
+  return !_reader.getPointerField(42 * ::capnp::POINTERS).isNull();
+}
+inline bool Module::Builder::hasInstanceitems() {
+  return !_builder.getPointerField(42 * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::ObjIndexType>::Reader Module::Reader::getInstanceitems() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _reader.getPointerField(42 * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Module::Builder::getInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::get(
+      _builder.getPointerField(42 * ::capnp::POINTERS));
+}
+inline void Module::Builder::setInstanceitems( ::capnp::List< ::ObjIndexType>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::set(
+      _builder.getPointerField(42 * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::ObjIndexType>::Builder Module::Builder::initInstanceitems(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::init(
+      _builder.getPointerField(42 * ::capnp::POINTERS), size);
+}
+inline void Module::Builder::adoptInstanceitems(
+    ::capnp::Orphan< ::capnp::List< ::ObjIndexType>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::adopt(
+      _builder.getPointerField(42 * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::ObjIndexType>> Module::Builder::disownInstanceitems() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::ObjIndexType>>::disown(
+      _builder.getPointerField(42 * ::capnp::POINTERS));
 }
 
 inline  ::uint64_t Design::Reader::getVpiParent() const {

@@ -627,16 +627,12 @@ proc generate_code { models } {
 		    append vpi_iterate_body($classname) [printIterateBody $name $classname $vpi $card]
                     append vpi_scan_body [printScanBody $name $classname $type $card]
                     append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]
-
-		    if {$key == "group_ref"} {
-			continue
-		    }
 		    
 		    set Type [string toupper $type 0 0]
 		    regsub -all  {_} $Type "" Type		    
 		    regsub -all  {_} $name "" Name
 
-		    if {$key == "class_ref"} {
+		    if {$key == "class_ref" || $key == "group_ref"} {
 			set obj_key ObjIndexType
 		    } else {
 			set obj_key UInt64 
@@ -661,7 +657,7 @@ proc generate_code { models } {
 			}
 		    } else {
 
-			if {$key == "class_ref"} {
+			if {$key == "class_ref" || $key == "group_ref"} {
 			    set obj_key ::ObjIndexType
 			} else {
 			    set obj_key ::uint64_t
@@ -670,7 +666,7 @@ proc generate_code { models } {
     if (obj->get_${name}()) {  
       ::capnp::List<$obj_key>::Builder [string toupper ${Name} 0 0]s = ${Classname}s\[index\].init[string toupper ${Name} 0 0](obj->get_${name}()->size());
       for (unsigned int ind = 0; ind < obj->get_${name}()->size(); ind++) {\n"
-			if {$key == "class_ref"} {
+			if {$key == "class_ref" || $key == "group_ref"} {
 			    append SAVE($classname) "        ::ObjIndexType::Builder tmp = [string toupper ${Name} 0 0]s\[ind\];\n"
 			    append SAVE($classname) "        tmp.setIndex(getId(((BaseClass*) (*obj->get_${name}())\[ind\])));\n"
 			    append SAVE($classname) "        tmp.setType(((BaseClass*)((*obj->get_${name}())\[ind\]))->getUhdmType());"
@@ -684,7 +680,7 @@ proc generate_code { models } {
     if (obj.get[string toupper ${Name} 0 0]().size()) { 
       std::vector<${type}*>* vect = VectorOf${type}Factory::make();
       for (unsigned int ind = 0; ind < obj.get[string toupper ${Name} 0 0]().size(); ind++) {\n"
-			if {$key == "class_ref"} {
+			if {$key == "class_ref" || $key == "group_ref"} {
 			    append RESTORE($classname) " 	vect->push_back((${type}*)getObject(obj.get[string toupper ${Name} 0 0]()\[ind\].getType(),obj.get[string toupper ${Name} 0 0]()\[ind\].getIndex()-1));\n"
 			} else {
 			    append RESTORE($classname) " 	vect->push_back(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()\[ind\]-1\]);\n"
