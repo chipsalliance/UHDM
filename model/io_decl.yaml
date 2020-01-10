@@ -20,5 +20,81 @@
     vpi: vpiType
     type: unsigned int
     card: 1
+  - property: direction
+    name: direction
+    vpi: vpiDirection
+    type: int
+    card: 1
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: scalar
+    name: scalar
+    vpi: vpiScalar
+    type: bool
+    card: 1
+  - property: sign
+    name: sign
+    vpi: vpiSigned
+    type: bool
+    card: 1
+  - property: size
+    name: size
+    vpi: vpiSize
+    type: int
+    card: 1
+  - property: vector
+    name: vector
+    vpi: vpiVector
+    type: bool
+    card: 1
+  - group_ref: ref_obj_interf_net_var_group
+    name: unnamed group
+    vpi: vpiExpr
+    type: ref_obj_interf_net_var_group
+    card: any
+  - class_ref: left_expr
+    name: left range
+    vpi: vpiLeftRange
+    type: expr
+    card: 1
+  - class_ref: right_expr
+    name: right range
+    vpi: vpiRightRange
+    type: expr
+    card: 1
+  - obj_ref: ranges
+    name: ranges
+    vpi: vpiRange
+    type: range
+    card: any
+  - class_ref: typespecs
+    name: typespecs
+    vpi: vpiTypedef
+    type: typespec
+    card: 1
+  - class_ref: instance
+    name: instance
+    vpi: vpiInstance
+    type: instance
+    card: 1
+  - obj_ref: udp_defn
+    name: udm_defn
+    vpi: vpiUdpDefn
+    type: udp_defn
+    card: 1
+  - class_ref: task_func
+    name: task func
+    vpi: vpiTaskFunc
+    type: task_func
+    card: 1
+  - obj_ref: module
+    name: module
+    vpi: vpiModule
+    type: module
+    card: 1
 
 
+ 

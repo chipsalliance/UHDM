@@ -33,31 +33,32 @@ struct UhdmRoot {
   factoryModpath @24 :List(Modpath);
   factoryTchk @25 :List(Tchk);
   factoryDefparam @26 :List(Defparam);
-  factoryIodecl @27 :List(Iodecl);
-  factoryAliasstmt @28 :List(Aliasstmt);
-  factoryClockingblock @29 :List(Clockingblock);
-  factoryRange @30 :List(Range);
-  factoryParamassign @31 :List(Paramassign);
-  factoryInterfacearray @32 :List(Interfacearray);
-  factoryProgramarray @33 :List(Programarray);
-  factoryModulearray @34 :List(Modulearray);
-  factoryGatearray @35 :List(Gatearray);
-  factorySwitcharray @36 :List(Switcharray);
-  factoryUdparray @37 :List(Udparray);
-  factoryArraynet @38 :List(Arraynet);
-  factoryLogicvar @39 :List(Logicvar);
-  factoryArrayvar @40 :List(Arrayvar);
-  factoryNamedevent @41 :List(Namedevent);
-  factoryNamedeventarray @42 :List(Namedeventarray);
-  factorySpecparam @43 :List(Specparam);
-  factoryClassdefn @44 :List(Classdefn);
-  factoryClasstypespec @45 :List(Classtypespec);
-  factoryClassobj @46 :List(Classobj);
-  factoryInterface @47 :List(Interface);
-  factoryProgram @48 :List(Program);
-  factoryPackage @49 :List(Package);
-  factoryModule @50 :List(Module);
-  factoryDesign @51 :List(Design);
+  factoryRange @27 :List(Range);
+  factoryUdpdefn @28 :List(Udpdefn);
+  factoryIodecl @29 :List(Iodecl);
+  factoryAliasstmt @30 :List(Aliasstmt);
+  factoryClockingblock @31 :List(Clockingblock);
+  factoryParamassign @32 :List(Paramassign);
+  factoryInterfacearray @33 :List(Interfacearray);
+  factoryProgramarray @34 :List(Programarray);
+  factoryModulearray @35 :List(Modulearray);
+  factoryGatearray @36 :List(Gatearray);
+  factorySwitcharray @37 :List(Switcharray);
+  factoryUdparray @38 :List(Udparray);
+  factoryArraynet @39 :List(Arraynet);
+  factoryLogicvar @40 :List(Logicvar);
+  factoryArrayvar @41 :List(Arrayvar);
+  factoryNamedevent @42 :List(Namedevent);
+  factoryNamedeventarray @43 :List(Namedeventarray);
+  factorySpecparam @44 :List(Specparam);
+  factoryClassdefn @45 :List(Classdefn);
+  factoryClasstypespec @46 :List(Classtypespec);
+  factoryClassobj @47 :List(Classobj);
+  factoryInterface @48 :List(Interface);
+  factoryProgram @49 :List(Program);
+  factoryPackage @50 :List(Package);
+  factoryModule @51 :List(Module);
+  factoryDesign @52 :List(Design);
 
 }
 
@@ -412,11 +413,38 @@ uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
 }
+struct Range {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
+struct Udpdefn {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
 struct Iodecl {
 vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
+vpiDirection @4 :Int64;
+vpiName @5 :UInt64;
+vpiScalar @6 :Bool;
+vpiSigned @7 :Bool;
+vpiSize @8 :Int64;
+vpiVector @9 :Bool;
+leftexpr @10 :ObjIndexType;
+rightexpr @11 :ObjIndexType;
+typespecs @12 :ObjIndexType;
+instance @13 :ObjIndexType;
+taskfunc @14 :ObjIndexType;
+ranges @15 :List(UInt64);
+udpdefn @16 :UInt64;
+module @17 :UInt64;
+refobjinterfnetvargroup @18 :List(ObjIndexType);
 }
 struct Aliasstmt {
 vpiParent @0 :UInt64;
@@ -446,12 +474,6 @@ arrayvar @17 :List(UInt64);
 arrayvarmem @18 :List(UInt64);
 letdecls @19 :List(UInt64);
 instanceitems @20 :List(ObjIndexType);
-}
-struct Range {
-vpiParent @0 :UInt64;
-uhdmParentType @1 :UInt64;
-vpiFile @2 :UInt64;
-vpiLineNo @3 :UInt32;
 }
 struct Paramassign {
 vpiParent @0 :UInt64;

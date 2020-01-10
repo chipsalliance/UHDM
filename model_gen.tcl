@@ -639,7 +639,7 @@ proc generate_code { models } {
 		    }
 		    lappend capnp_schema($classname) [printCapnpSchema $obj_key $Name $card]
 		    if {$card == 1} {
-			if {$key == "class_ref"} {
+			if {$key == "class_ref" || $key == "group_ref"} {
 			    append SAVE($classname) "  if (obj->get_${name}()) {\n"
 			    append SAVE($classname) "    ::ObjIndexType::Builder tmp$indTmp = ${Classname}s\[index\].get[string toupper ${Name} 0 0]();\n"
 			    append SAVE($classname) "    tmp${indTmp}.setIndex(getId((obj->get_${name}())));\n"
