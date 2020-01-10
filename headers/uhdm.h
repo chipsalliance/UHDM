@@ -32,296 +32,183 @@
 #include "include/vpi_uhdm.h"
 #include "headers/containers.h"
 
-#define uhdmprocess 2103
-#define uhdmproperty_decl 2104
-#define uhdmsequence_decl 2105
-#define uhdmconcurrent_assertion 2106
-#define uhdmvirtual_interface_var 2107
-#define uhdmlet_decl 2108
-#define uhdmstmt 2109
-#define uhdmscope 2110
-#define uhdmconcurrent_assertions 2111
-#define uhdmvariables 2112
-#define uhdmparameters 2113
-#define uhdmscopes 2114
-#define uhdmtypespecs 2115
-#define uhdmproperty_decls 2116
-#define uhdmsequence_decls 2117
-#define uhdmnamed_events 2118
-#define uhdmnamed_event_arrays 2119
-#define uhdmvirtual_interface_vars 2120
-#define uhdmlogic_var 2121
-#define uhdmarray_var 2122
-#define uhdmarray_var_mem 2123
-#define uhdmlet_decls 2124
-#define uhdminstance_items 2125
-#define uhdmbegin 2126
-#define uhdmstmts 2127
-#define uhdmnamed_begin 2128
-#define uhdmstmts 2127
-#define uhdmnamed_fork 2129
-#define uhdmstmts 2127
-#define uhdmfork_stmt 2130
-#define uhdmstmts 2127
-#define uhdmfor_stmt 2131
-#define uhdmforeach_stmt 2132
-#define uhdmgen_scope 2133
-#define uhdmexpr_dist 2134
-#define uhdmexpr 2135
-#define uhdmdistribution 2136
-#define uhdmoperand_group 2137
-#define uhdmoperation 2138
-#define uhdmoperands 2139
-#define uhdmref_obj 2140
-#define uhdmvariables 2112
-#define uhdmtask_func 2141
-#define uhdmleft_expr 2142
-#define uhdmright_expr 2143
-#define uhdmstmt 2109
-#define uhdmclass_defn 2144
-#define uhdmref_obj 2140
-#define uhdmio_decl 2145
-#define uhdmtask 2146
-#define uhdmfunction 2147
-#define uhdmmodport 2148
-#define uhdmio_decls 2149
-#define uhdminterface 2150
-#define uhdminterface_tf_decl 2151
-#define uhdmtasks 2152
-#define uhdmfunctions 2153
-#define uhdmcont_assign 2154
-#define uhdmport 2155
-#define uhdmprimitive 2156
-#define uhdmmod_path 2157
-#define uhdmtchk 2158
-#define uhdmdef_param 2159
-#define uhdmrange 2160
-#define uhdmudp_defn 2161
-#define uhdmio_decl 2145
-#define uhdmleft_expr 2142
-#define uhdmright_expr 2143
-#define uhdmtypespecs 2115
-#define uhdminstance 2162
-#define uhdmtask_func 2141
-#define uhdmranges 2163
-#define uhdmudp_defn 2161
-#define uhdmmodule 2164
-#define uhdmref_obj_interf_net_var_group 2165
-#define uhdmalias_stmt 2166
-#define uhdmclocking_block 2167
-#define uhdmparam_assign 2168
-#define uhdminstance_array 2169
-#define uhdmexpr 2135
-#define uhdmleft_expr 2142
-#define uhdmright_expr 2143
-#define uhdminstances 2170
-#define uhdmrange 2160
-#define uhdmmodules 2171
-#define uhdminterface_array 2172
-#define uhdmparam_assigns 2173
-#define uhdmprogram_array 2174
-#define uhdmmodule_array 2175
-#define uhdmparam_assigns 2173
-#define uhdmprimitive_array 2176
-#define uhdmdelay 2177
-#define uhdmprimitives 2178
-#define uhdmgate_array 2179
-#define uhdmswitch_array 2180
-#define uhdmudp_array 2181
-#define uhdmnet 2182
-#define uhdmnets 2183
-#define uhdmarray_net 2184
-#define uhdmlogic_var 2121
-#define uhdmarray_var 2122
-#define uhdmnamed_event 2185
-#define uhdmnamed_event_array 2186
-#define uhdmparameters 2113
-#define uhdmspec_param 2187
-#define uhdmassertion 2188
-#define uhdmtypespec 2189
-#define uhdmclass_defn 2144
-#define uhdmclass_typespec 2190
-#define uhdmclass_obj 2191
-#define uhdminstance 2162
-#define uhdmtask_func 2141
-#define uhdmnet 2182
-#define uhdmarray_net 2184
-#define uhdmassertion 2188
-#define uhdmclass_defn 2144
-#define uhdminstance 2162
-#define uhdmprograms 2192
-#define uhdmprogram_arrays 2193
-#define uhdmnamed_event 2185
-#define uhdmnamed_event_array 2186
-#define uhdmspec_param 2187
-#define uhdmmodule 2164
-#define uhdminterface 2150
-#define uhdmexpr_dist 2134
-#define uhdminstance_array 2169
-#define uhdmprocess 2103
-#define uhdminterface_tf_decls 2194
-#define uhdmmodports 2195
-#define uhdmglobal_clocking 2196
-#define uhdmdefault_clocking 2197
-#define uhdmmod_paths 2198
-#define uhdmcont_assigns 2199
-#define uhdminterfaces 2200
-#define uhdminterface_arrays 2201
-#define uhdmprogram 2202
-#define uhdminstance_array 2169
-#define uhdmexpr_dist 2134
-#define uhdmprocess 2103
-#define uhdmdefault_clocking 2197
-#define uhdminterfaces 2200
-#define uhdminterface_arrays 2201
-#define uhdmcont_assigns 2199
-#define uhdmclocking_blocks 2203
-#define uhdmpackage 2204
-#define uhdmmodule 2164
-#define uhdmexpr_dist 2134
-#define uhdminstance_array 2169
-#define uhdmprocess 2103
-#define uhdmprimitives 2178
-#define uhdmprimitive_arrays 2205
-#define uhdmglobal_clocking 2196
-#define uhdmdefault_clocking 2197
-#define uhdmmodule_array 2175
-#define uhdmports 2206
-#define uhdminterfaces 2200
-#define uhdminterface_arrays 2201
-#define uhdmcont_assigns 2199
-#define uhdmmodules 2171
-#define uhdmmodule_arrays 2207
-#define uhdmmod_paths 2198
-#define uhdmtchks 2208
-#define uhdmdef_params 2209
-#define uhdmio_decls 2149
-#define uhdmalias_stmts 2210
-#define uhdmclocking_blocks 2203
-#define uhdmdesign 2211
-#define uhdmallModules 2212
-#define uhdmtopModules 2213
-#define uhdmallPrograms 2214
-#define uhdmallPackages 2215
-
-static std::string getUhdmName(unsigned int type) {
-      switch (type) {
-case 2167: return "uhdmclocking_block";
-case 2168: return "uhdmparam_assign";
-case 2170: return "uhdminstances";
-case 2169: return "uhdminstance_array";
-case 2171: return "uhdmmodules";
-case 2172: return "uhdminterface_array";
-case 2173: return "uhdmparam_assigns";
-case 2174: return "uhdmprogram_array";
-case 2103: return "uhdmprocess";
-case 2175: return "uhdmmodule_array";
-case 2104: return "uhdmproperty_decl";
-case 2176: return "uhdmprimitive_array";
-case 2105: return "uhdmsequence_decl";
-case 2177: return "uhdmdelay";
-case 2106: return "uhdmconcurrent_assertion";
-case 2178: return "uhdmprimitives";
-case 2107: return "uhdmvirtual_interface_var";
-case 2180: return "uhdmswitch_array";
-case 2179: return "uhdmgate_array";
-case 2108: return "uhdmlet_decl";
-case 2181: return "uhdmudp_array";
-case 2110: return "uhdmscope";
-case 2109: return "uhdmstmt";
-case 2182: return "uhdmnet";
-case 2111: return "uhdmconcurrent_assertions";
-case 2183: return "uhdmnets";
-case 2112: return "uhdmvariables";
-case 2184: return "uhdmarray_net";
-case 2113: return "uhdmparameters";
-case 2185: return "uhdmnamed_event";
-case 2114: return "uhdmscopes";
-case 2186: return "uhdmnamed_event_array";
-case 2115: return "uhdmtypespecs";
-case 2187: return "uhdmspec_param";
-case 2116: return "uhdmproperty_decls";
-case 2188: return "uhdmassertion";
-case 2117: return "uhdmsequence_decls";
-case 2200: return "uhdminterfaces";
-case 2190: return "uhdmclass_typespec";
-case 2189: return "uhdmtypespec";
-case 2118: return "uhdmnamed_events";
-case 2201: return "uhdminterface_arrays";
-case 2191: return "uhdmclass_obj";
-case 2119: return "uhdmnamed_event_arrays";
-case 2120: return "uhdmvirtual_interface_vars";
-case 2202: return "uhdmprogram";
-case 2192: return "uhdmprograms";
-case 2121: return "uhdmlogic_var";
-case 2203: return "uhdmclocking_blocks";
-case 2193: return "uhdmprogram_arrays";
-case 2122: return "uhdmarray_var";
-case 2204: return "uhdmpackage";
-case 2194: return "uhdminterface_tf_decls";
-case 2123: return "uhdmarray_var_mem";
-case 2205: return "uhdmprimitive_arrays";
-case 2195: return "uhdmmodports";
-case 2124: return "uhdmlet_decls";
-case 2206: return "uhdmports";
-case 2196: return "uhdmglobal_clocking";
-case 2125: return "uhdminstance_items";
-case 2207: return "uhdmmodule_arrays";
-case 2197: return "uhdmdefault_clocking";
-case 2126: return "uhdmbegin";
-case 2208: return "uhdmtchks";
-case 2198: return "uhdmmod_paths";
-case 2127: return "uhdmstmts";
-case 2210: return "uhdmalias_stmts";
-case 2209: return "uhdmdef_params";
-case 2199: return "uhdmcont_assigns";
-case 2128: return "uhdmnamed_begin";
-case 2211: return "uhdmdesign";
-case 2129: return "uhdmnamed_fork";
-case 2130: return "uhdmfork_stmt";
-case 2212: return "uhdmallModules";
-case 2131: return "uhdmfor_stmt";
-case 2213: return "uhdmtopModules";
-case 2132: return "uhdmforeach_stmt";
-case 2214: return "uhdmallPrograms";
-case 2133: return "uhdmgen_scope";
-case 2215: return "uhdmallPackages";
-case 2134: return "uhdmexpr_dist";
-case 2135: return "uhdmexpr";
-case 2136: return "uhdmdistribution";
-case 2137: return "uhdmoperand_group";
-case 2138: return "uhdmoperation";
-case 2139: return "uhdmoperands";
-case 2140: return "uhdmref_obj";
-case 2141: return "uhdmtask_func";
-case 2142: return "uhdmleft_expr";
-case 2143: return "uhdmright_expr";
-case 2144: return "uhdmclass_defn";
-case 2145: return "uhdmio_decl";
-case 2146: return "uhdmtask";
-case 2147: return "uhdmfunction";
-case 2148: return "uhdmmodport";
-case 2149: return "uhdmio_decls";
-case 2150: return "uhdminterface";
-case 2151: return "uhdminterface_tf_decl";
-case 2152: return "uhdmtasks";
-case 2153: return "uhdmfunctions";
-case 2154: return "uhdmcont_assign";
-case 2155: return "uhdmport";
-case 2156: return "uhdmprimitive";
-case 2157: return "uhdmmod_path";
-case 2158: return "uhdmtchk";
-case 2160: return "uhdmrange";
-case 2159: return "uhdmdef_param";
-case 2161: return "uhdmudp_defn";
-case 2162: return "uhdminstance";
-case 2163: return "uhdmranges";
-case 2164: return "uhdmmodule";
-case 2165: return "uhdmref_obj_interf_net_var_group";
-case 2166: return "uhdmalias_stmt";
-default: return "NO TYPE";
-}
-}
+#define uhdmprocess 2106
+#define uhdmproperty_decl 2107
+#define uhdmsequence_decl 2108
+#define uhdmconcurrent_assertion 2109
+#define uhdmvirtual_interface_var 2110
+#define uhdmlet_decl 2111
+#define uhdmstmt 2112
+#define uhdmscope 2113
+#define uhdmconcurrent_assertions 2114
+#define uhdmvariables 2115
+#define uhdmparameters 2116
+#define uhdmscopes 2117
+#define uhdmtypespecs 2118
+#define uhdmproperty_decls 2119
+#define uhdmsequence_decls 2120
+#define uhdmnamed_events 2121
+#define uhdmnamed_event_arrays 2122
+#define uhdmvirtual_interface_vars 2123
+#define uhdmlogic_var 2124
+#define uhdmarray_var 2125
+#define uhdmarray_var_mem 2126
+#define uhdmlet_decls 2127
+#define uhdminstance_items 2128
+#define uhdmbegin 2129
+#define uhdmstmts 2130
+#define uhdmnamed_begin 2131
+#define uhdmstmts 2130
+#define uhdmnamed_fork 2132
+#define uhdmstmts 2130
+#define uhdmfork_stmt 2133
+#define uhdmstmts 2130
+#define uhdmfor_stmt 2134
+#define uhdmforeach_stmt 2135
+#define uhdmgen_scope 2136
+#define uhdmexpr_dist 2137
+#define uhdmexpr 2138
+#define uhdmdistribution 2139
+#define uhdmoperand_group 2140
+#define uhdmoperation 2141
+#define uhdmoperands 2142
+#define uhdmref_obj 2143
+#define uhdmvariables 2115
+#define uhdmtask_func 2144
+#define uhdmleft_expr 2145
+#define uhdmright_expr 2146
+#define uhdmstmt 2112
+#define uhdmclass_defn 2147
+#define uhdmref_obj 2143
+#define uhdmio_decl 2148
+#define uhdmtask 2149
+#define uhdmfunction 2150
+#define uhdmmodport 2151
+#define uhdmio_decls 2152
+#define uhdminterface 2153
+#define uhdminterface_tf_decl 2154
+#define uhdmtasks 2155
+#define uhdmfunctions 2156
+#define uhdmcont_assign 2157
+#define uhdmports 2158
+#define uhdmtypespecs 2118
+#define uhdminstance 2159
+#define uhdmmodule 2160
+#define uhdmhigh_conn 2161
+#define uhdmlow_conn 2162
+#define uhdmport 2163
+#define uhdmprimitive 2164
+#define uhdmmod_path 2165
+#define uhdmtchk 2166
+#define uhdmdef_param 2167
+#define uhdmrange 2168
+#define uhdmudp_defn 2169
+#define uhdmio_decl 2148
+#define uhdmleft_expr 2145
+#define uhdmright_expr 2146
+#define uhdmtypespecs 2118
+#define uhdminstance 2159
+#define uhdmtask_func 2144
+#define uhdmranges 2170
+#define uhdmudp_defn 2169
+#define uhdmmodule 2160
+#define uhdmexpr 2138
+#define uhdmalias_stmt 2171
+#define uhdmclocking_block 2172
+#define uhdmparam_assign 2173
+#define uhdminstance_array 2174
+#define uhdmexpr 2138
+#define uhdmleft_expr 2145
+#define uhdmright_expr 2146
+#define uhdminstances 2175
+#define uhdmrange 2168
+#define uhdmmodules 2176
+#define uhdminterface_array 2177
+#define uhdmparam_assigns 2178
+#define uhdmprogram_array 2179
+#define uhdmmodule_array 2180
+#define uhdmparam_assigns 2178
+#define uhdmprimitive_array 2181
+#define uhdmdelay 2182
+#define uhdmprimitives 2183
+#define uhdmgate_array 2184
+#define uhdmswitch_array 2185
+#define uhdmudp_array 2186
+#define uhdmnet 2187
+#define uhdmnets 2188
+#define uhdmarray_net 2189
+#define uhdmlogic_var 2124
+#define uhdmarray_var 2125
+#define uhdmnamed_event 2190
+#define uhdmnamed_event_array 2191
+#define uhdmparameters 2116
+#define uhdmspec_param 2192
+#define uhdmassertion 2193
+#define uhdmtypespec 2194
+#define uhdmclass_defn 2147
+#define uhdmclass_typespec 2195
+#define uhdmclass_obj 2196
+#define uhdminstance 2159
+#define uhdmtask_func 2144
+#define uhdmnet 2187
+#define uhdmarray_net 2189
+#define uhdmassertion 2193
+#define uhdmclass_defn 2147
+#define uhdminstance 2159
+#define uhdmprograms 2197
+#define uhdmprogram_arrays 2198
+#define uhdmnamed_event 2190
+#define uhdmnamed_event_array 2191
+#define uhdmspec_param 2192
+#define uhdmmodule 2160
+#define uhdminterface 2153
+#define uhdmexpr_dist 2137
+#define uhdminstance_array 2174
+#define uhdmprocess 2106
+#define uhdminterface_tf_decls 2199
+#define uhdmmodports 2200
+#define uhdmglobal_clocking 2201
+#define uhdmdefault_clocking 2202
+#define uhdmmod_paths 2203
+#define uhdmcont_assigns 2204
+#define uhdminterfaces 2205
+#define uhdminterface_arrays 2206
+#define uhdmprogram 2207
+#define uhdminstance_array 2174
+#define uhdmexpr_dist 2137
+#define uhdmprocess 2106
+#define uhdmdefault_clocking 2202
+#define uhdminterfaces 2205
+#define uhdminterface_arrays 2206
+#define uhdmcont_assigns 2204
+#define uhdmclocking_blocks 2208
+#define uhdmpackage 2209
+#define uhdmmodule 2160
+#define uhdmexpr_dist 2137
+#define uhdminstance_array 2174
+#define uhdmprocess 2106
+#define uhdmprimitives 2183
+#define uhdmprimitive_arrays 2210
+#define uhdmglobal_clocking 2201
+#define uhdmdefault_clocking 2202
+#define uhdmmodule_array 2180
+#define uhdmports 2158
+#define uhdminterfaces 2205
+#define uhdminterface_arrays 2206
+#define uhdmcont_assigns 2204
+#define uhdmmodules 2176
+#define uhdmmodule_arrays 2211
+#define uhdmmod_paths 2203
+#define uhdmtchks 2212
+#define uhdmdef_params 2213
+#define uhdmio_decls 2152
+#define uhdmalias_stmts 2214
+#define uhdmclocking_blocks 2208
+#define uhdmdesign 2215
+#define uhdmallModules 2216
+#define uhdmtopModules 2217
+#define uhdmallPrograms 2218
+#define uhdmallPackages 2219
 
 
 #include "headers/process.h"
@@ -353,6 +240,8 @@ default: return "NO TYPE";
 #include "headers/modport.h"
 #include "headers/interface_tf_decl.h"
 #include "headers/cont_assign.h"
+#include "headers/expr_ref_obj_group.h"
+#include "headers/ports.h"
 #include "headers/port.h"
 #include "headers/primitive.h"
 #include "headers/mod_path.h"

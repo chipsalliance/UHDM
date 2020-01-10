@@ -27,6 +27,8 @@ function.yaml
 modport.yaml
 interface_tf_decl.yaml
 cont_assign.yaml
+expr_ref_obj_group.yaml
+ports.yaml
 port.yaml
 primitive.yaml
 mod_path.yaml

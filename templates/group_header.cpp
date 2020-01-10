@@ -17,20 +17,36 @@
  */
 
 /*
- * File:   <GROUPNAME>.h
+ * File:   <GROUPNAME>.cpp
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef <UPPER_GROUPNAME>_H
-#define <UPPER_GROUPNAME>_H
+
+#include <iostream>
+#include "headers/uhdm.h"
+#include "<GROUPNAME>.h"
 
 namespace UHDM {
 
-  bool <GROUPNAME>GroupCompliant(any* item);
-  bool <GROUPNAME>GroupCompliant(VectorOfany* vec);
+  bool <GROUPNAME>GroupCompliant(any* item) {
+    BaseClass* the_item = (BaseClass*) item;
+    unsigned int uhdmtype = the_item->getUhdmType();
+    if (<CHECKTYPE>) {
+      std::cout << "Internal Error: adding wrong object type (" << getUhdmName(uhdmtype) << ") in a <GROUPNAME> group!\n";   
+      return false;
+    }
+    return true;
+  }
+
+  bool <GROUPNAME>GroupCompliant(VectorOfany* vec) {
+    for (auto item : *vec) {
+      if (!<GROUPNAME>GroupCompliant(item)) {
+	return false;
+      }
+    }
+    return true;
+  }
  	     
 };
-
-#endif

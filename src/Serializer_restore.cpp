@@ -1968,6 +1968,21 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    portFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    portFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    portFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    portFactory::objects_[index]->set_vpiPortIndex(obj.getVpiPortIndex());
+    portFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    portFactory::objects_[index]->set_vpiPortType(obj.getVpiPortType());
+    portFactory::objects_[index]->set_vpiScalar(obj.getVpiScalar());
+    portFactory::objects_[index]->set_vpiVector(obj.getVpiVector());
+    portFactory::objects_[index]->set_vpiConnByName(obj.getVpiConnByName());
+    portFactory::objects_[index]->set_vpiDirection(obj.getVpiDirection());
+    portFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+    portFactory::objects_[index]->set_vpiExplicitName(SymbolFactory::getSymbol(obj.getVpiExplicitName()));
+     portFactory::objects_[index]->set_typespecs((typespec*)getObject(obj.getTypespecs().getType(),obj.getTypespecs().getIndex()-1));
+     portFactory::objects_[index]->set_instance((instance*)getObject(obj.getInstance().getType(),obj.getInstance().getIndex()-1));
+   if (obj.getModule()) 
+     portFactory::objects_[index]->set_module(moduleFactory::objects_[obj.getModule()-1]);
+     portFactory::objects_[index]->set_high_conn((any*)getObject(obj.getHighconn().getType(),obj.getHighconn().getIndex()-1));
+     portFactory::objects_[index]->set_low_conn((any*)getObject(obj.getLowconn().getType(),obj.getLowconn().getIndex()-1));
 
    index++;
  }
@@ -2061,14 +2076,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      io_declFactory::objects_[index]->set_udp_defn(udp_defnFactory::objects_[obj.getUdpdefn()-1]);
    if (obj.getModule()) 
      io_declFactory::objects_[index]->set_module(moduleFactory::objects_[obj.getModule()-1]);
-    
-    if (obj.getRefobjinterfnetvargroup().size()) { 
-      std::vector<any*>* vect = VectorOfanyFactory::make();
-      for (unsigned int ind = 0; ind < obj.getRefobjinterfnetvargroup().size(); ind++) {
- 	vect->push_back((any*)getObject(obj.getRefobjinterfnetvargroup()[ind].getType(),obj.getRefobjinterfnetvargroup()[ind].getIndex()-1));
-    }
-      io_declFactory::objects_[index]->set_ref_obj_interf_net_var_group(vect);
-    }
+     io_declFactory::objects_[index]->set_expr((any*)getObject(obj.getExpr().getType(),obj.getExpr().getIndex()-1));
 
    index++;
  }

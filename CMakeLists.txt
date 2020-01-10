@@ -58,6 +58,7 @@ file(GLOB uhdm_SRC
   ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp
   ${PROJECT_SOURCE_DIR}/src/Serializer_restore.cpp  
   ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.c++
+  ${PROJECT_SOURCE_DIR}/src/*.cpp
   )
 
 set (UHDM_PUBLIC_HEADERS

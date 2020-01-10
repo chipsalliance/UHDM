@@ -12,64 +12,64 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "io_decl" formal description
+# Universal Hardware Data Model (UHDM) "ports" formal description
  
-- obj_def: io_decl
-  - property: type
-    name: vpiIODecl
-    vpi: vpiType
+- class_def: ports
+  - property: index
+    name: index
+    vpi: vpiPortIndex
     type: unsigned int
-    card: 1
-  - property: direction
-    name: direction
-    vpi: vpiDirection
-    type: int
     card: 1
   - property: name
     name: name
     vpi: vpiName
     type: string
     card: 1
+  - property: port_type
+    name: port_type
+    vpi: vpiPortType
+    type: unsigned int
+    card: 1
   - property: scalar
     name: scalar
     vpi: vpiScalar
     type: bool
-    card: 1
-  - property: sign
-    name: sign
-    vpi: vpiSigned
-    type: bool
-    card: 1
-  - property: size
-    name: size
-    vpi: vpiSize
-    type: int
     card: 1
   - property: vector
     name: vector
     vpi: vpiVector
     type: bool
     card: 1
-  - group_ref: expr
-    name: unnamed group
-    vpi: vpiExpr
-    type: ref_obj_interf_net_var_group
+  - property: connected_by_name
+    name: connected by name
+    vpi: vpiConnByName
+    type: bool
     card: 1
-  - class_ref: left_expr
-    name: left range
-    vpi: vpiLeftRange
-    type: expr
+  - property: direction
+    name: direction
+    vpi: vpiDirection
+    type: unsigned int
     card: 1
-  - class_ref: right_expr
-    name: right range
-    vpi: vpiRightRange
-    type: expr
+  - property: size
+    name: size
+    vpi: vpiSize
+    type: unsigned int
     card: 1
-  - obj_ref: ranges
-    name: ranges
-    vpi: vpiRange
-    type: range
-    card: any
+  - property: explicitly_named
+    name: name
+    vpi: vpiExplicitName
+    type: string
+    card: 1
+  - group_ref: high_conn
+    name: high conn
+    vpi: vpiHighConn
+    type: expr_ref_obj_group
+    card: 1
+  - group_ref: low_conn
+    name: low conn
+    vpi: vpiLowConn
+    type: expr_ref_obj_group
+    card: 1
   - class_ref: typespecs
     name: typespecs
     vpi: vpiTypedef
@@ -80,21 +80,8 @@
     vpi: vpiInstance
     type: instance
     card: 1
-  - obj_ref: udp_defn
-    name: udm_defn
-    vpi: vpiUdpDefn
-    type: udp_defn
-    card: 1
-  - class_ref: task_func
-    name: task func
-    vpi: vpiTaskFunc
-    type: task_func
-    card: 1
   - obj_ref: module
     name: module
     vpi: vpiModule
     type: module
     card: 1
-
-
- 

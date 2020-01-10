@@ -17,20 +17,21 @@
  */
 
 /*
- * File:   <GROUPNAME>.h
+ * File:   ref_obj_interf_net_var_group.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef <UPPER_GROUPNAME>_H
-#define <UPPER_GROUPNAME>_H
+#ifndef REF_OBJ_INTERF_NET_VAR_GROUP_H
+#define REF_OBJ_INTERF_NET_VAR_GROUP_H
 
 namespace UHDM {
 
-  bool <GROUPNAME>GroupCompliant(any* item);
-  bool <GROUPNAME>GroupCompliant(VectorOfany* vec);
+  bool ref_obj_interf_net_var_groupGroupCompliant(any* item);
+  bool ref_obj_interf_net_var_groupGroupCompliant(VectorOfany* vec);
  	     
 };
 
 #endif
+

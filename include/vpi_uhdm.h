@@ -28,6 +28,7 @@
 #define VPI_UHDM_H
 
 #include <unordered_map>
+std::string getUhdmName(unsigned int type);
 
 namespace UHDM {
   typedef std::vector<std::string> Id2SymbolMap;
@@ -39,7 +40,7 @@ namespace UHDM {
     virtual unsigned int getUhdmType() { return 0; }   
     virtual ~BaseClass(){}
   };
-
+  
   class Serializer {
   public:
     static void save(std::string file);

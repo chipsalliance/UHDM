@@ -36,41 +36,41 @@ namespace UHDM {
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
 
-    void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
+    bool set_vpiParent(BaseClass* data) { vpiParent_ = data; return true;}
 
     unsigned int get_uhdmParentType() const { return uhdmParentType_; }
 
-    void set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; }
+    bool set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; return true;}
 
     std::string get_vpiFile() const { return SymbolFactory::getSymbol(vpiFile_); }
 
-    void set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); }
+    bool set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); return true; }
 
     unsigned int get_vpiLineNo() const { return vpiLineNo_; }
 
-    void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
+    bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
     unsigned int get_vpiIndex() const { return vpiIndex_; }
 
-    void set_vpiIndex(unsigned int data) { vpiIndex_ = data; }
+    bool set_vpiIndex(unsigned int data) { vpiIndex_ = data; return true;}
 
     unsigned int get_vpiType() { return vpiModule; }
 
     bool get_vpiTopModule() const { return vpiTopModule_; }
 
-    void set_vpiTopModule(bool data) { vpiTopModule_ = data; }
+    bool set_vpiTopModule(bool data) { vpiTopModule_ = data; return true;}
 
     int get_vpiDefDecayTime() const { return vpiDefDecayTime_; }
 
-    void set_vpiDefDecayTime(int data) { vpiDefDecayTime_ = data; }
+    bool set_vpiDefDecayTime(int data) { vpiDefDecayTime_ = data; return true;}
 
     expr_dist* get_expr_dist() const { return expr_dist_; }
 
-    void set_expr_dist(expr_dist* data) { expr_dist_ = data; }
+    bool set_expr_dist(expr_dist* data) { expr_dist_ = data; return true;}
 
     instance_array* get_instance_array() const { return instance_array_; }
 
-    void set_instance_array(instance_array* data) { instance_array_ = data; }
+    bool set_instance_array(instance_array* data) { instance_array_ = data; return true;}
 
     VectorOfprocess* get_process() const { return process_; }
 
@@ -86,15 +86,15 @@ namespace UHDM {
 
     clocking_block* get_global_clocking() const { return global_clocking_; }
 
-    void set_global_clocking(clocking_block* data) { global_clocking_ = data; }
+    bool set_global_clocking(clocking_block* data) { global_clocking_ = data; return true;}
 
     clocking_block* get_default_clocking() const { return default_clocking_; }
 
-    void set_default_clocking(clocking_block* data) { default_clocking_ = data; }
+    bool set_default_clocking(clocking_block* data) { default_clocking_ = data; return true;}
 
     module_array* get_module_array() const { return module_array_; }
 
-    void set_module_array(module_array* data) { module_array_ = data; }
+    bool set_module_array(module_array* data) { module_array_ = data; return true;}
 
     VectorOfport* get_ports() const { return ports_; }
 
