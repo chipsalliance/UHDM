@@ -60,7 +60,7 @@ namespace UHDM {
 
     VectorOfinstance* get_instances() const { return instances_; }
 
-    void set_instances(VectorOfinstance* data) { instances_ = data; }
+    bool set_instances(VectorOfinstance* data) { instances_ = data; return true;}
 
     range* get_range() const { return range_; }
 
@@ -68,7 +68,7 @@ namespace UHDM {
 
     VectorOfmodule* get_modules() const { return modules_; }
 
-    void set_modules(VectorOfmodule* data) { modules_ = data; }
+    bool set_modules(VectorOfmodule* data) { modules_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdminstance_array; }   
   private:

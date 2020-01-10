@@ -66,7 +66,7 @@ namespace UHDM {
 
     VectorOfprocess* get_process() const { return process_; }
 
-    void set_process(VectorOfprocess* data) { process_ = data; }
+    bool set_process(VectorOfprocess* data) { process_ = data; return true;}
 
     clocking_block* get_default_clocking() const { return default_clocking_; }
 
@@ -74,19 +74,19 @@ namespace UHDM {
 
     VectorOfinterface* get_interfaces() const { return interfaces_; }
 
-    void set_interfaces(VectorOfinterface* data) { interfaces_ = data; }
+    bool set_interfaces(VectorOfinterface* data) { interfaces_ = data; return true;}
 
     VectorOfinterface_array* get_interface_arrays() const { return interface_arrays_; }
 
-    void set_interface_arrays(VectorOfinterface_array* data) { interface_arrays_ = data; }
+    bool set_interface_arrays(VectorOfinterface_array* data) { interface_arrays_ = data; return true;}
 
     VectorOfcont_assign* get_cont_assigns() const { return cont_assigns_; }
 
-    void set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; }
+    bool set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; return true;}
 
     VectorOfclocking_block* get_clocking_blocks() const { return clocking_blocks_; }
 
-    void set_clocking_blocks(VectorOfclocking_block* data) { clocking_blocks_ = data; }
+    bool set_clocking_blocks(VectorOfclocking_block* data) { clocking_blocks_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmprogram; }   
   private:

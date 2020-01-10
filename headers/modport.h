@@ -56,7 +56,7 @@ namespace UHDM {
 
     VectorOfio_decl* get_io_decls() const { return io_decls_; }
 
-    void set_io_decls(VectorOfio_decl* data) { io_decls_ = data; }
+    bool set_io_decls(VectorOfio_decl* data) { io_decls_ = data; return true;}
 
     interface* get_interface() const { return interface_; }
 

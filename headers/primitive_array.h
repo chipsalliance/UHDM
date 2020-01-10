@@ -40,7 +40,7 @@ namespace UHDM {
 
     VectorOfprimitive* get_primitives() const { return primitives_; }
 
-    void set_primitives(VectorOfprimitive* data) { primitives_ = data; }
+    bool set_primitives(VectorOfprimitive* data) { primitives_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmprimitive_array; }   
   private:

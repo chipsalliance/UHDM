@@ -66,15 +66,15 @@ namespace UHDM {
 
     VectorOfprocess* get_process() const { return process_; }
 
-    void set_process(VectorOfprocess* data) { process_ = data; }
+    bool set_process(VectorOfprocess* data) { process_ = data; return true;}
 
     VectorOfinterface_tf_decl* get_interface_tf_decls() const { return interface_tf_decls_; }
 
-    void set_interface_tf_decls(VectorOfinterface_tf_decl* data) { interface_tf_decls_ = data; }
+    bool set_interface_tf_decls(VectorOfinterface_tf_decl* data) { interface_tf_decls_ = data; return true;}
 
     VectorOfmodport* get_modports() const { return modports_; }
 
-    void set_modports(VectorOfmodport* data) { modports_ = data; }
+    bool set_modports(VectorOfmodport* data) { modports_ = data; return true;}
 
     clocking_block* get_global_clocking() const { return global_clocking_; }
 
@@ -86,19 +86,19 @@ namespace UHDM {
 
     VectorOfmod_path* get_mod_paths() const { return mod_paths_; }
 
-    void set_mod_paths(VectorOfmod_path* data) { mod_paths_ = data; }
+    bool set_mod_paths(VectorOfmod_path* data) { mod_paths_ = data; return true;}
 
     VectorOfcont_assign* get_cont_assigns() const { return cont_assigns_; }
 
-    void set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; }
+    bool set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; return true;}
 
     VectorOfinterface* get_interfaces() const { return interfaces_; }
 
-    void set_interfaces(VectorOfinterface* data) { interfaces_ = data; }
+    bool set_interfaces(VectorOfinterface* data) { interfaces_ = data; return true;}
 
     VectorOfinterface_array* get_interface_arrays() const { return interface_arrays_; }
 
-    void set_interface_arrays(VectorOfinterface_array* data) { interface_arrays_ = data; }
+    bool set_interface_arrays(VectorOfinterface_array* data) { interface_arrays_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdminterface; }   
   private:
