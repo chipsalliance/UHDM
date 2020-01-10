@@ -52,6 +52,66 @@ namespace UHDM {
 
     unsigned int get_vpiType() { return vpiIODecl; }
 
+    int get_vpiDirection() const { return vpiDirection_; }
+
+    void set_vpiDirection(int data) { vpiDirection_ = data; }
+
+    std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
+
+    void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
+
+    bool get_vpiScalar() const { return vpiScalar_; }
+
+    void set_vpiScalar(bool data) { vpiScalar_ = data; }
+
+    bool get_vpiSigned() const { return vpiSigned_; }
+
+    void set_vpiSigned(bool data) { vpiSigned_ = data; }
+
+    int get_vpiSize() const { return vpiSize_; }
+
+    void set_vpiSize(int data) { vpiSize_ = data; }
+
+    bool get_vpiVector() const { return vpiVector_; }
+
+    void set_vpiVector(bool data) { vpiVector_ = data; }
+
+    expr* get_left_expr() const { return left_expr_; }
+
+    void set_left_expr(expr* data) { left_expr_ = data; }
+
+    expr* get_right_expr() const { return right_expr_; }
+
+    void set_right_expr(expr* data) { right_expr_ = data; }
+
+    typespec* get_typespecs() const { return typespecs_; }
+
+    void set_typespecs(typespec* data) { typespecs_ = data; }
+
+    instance* get_instance() const { return instance_; }
+
+    void set_instance(instance* data) { instance_ = data; }
+
+    task_func* get_task_func() const { return task_func_; }
+
+    void set_task_func(task_func* data) { task_func_ = data; }
+
+    VectorOfrange* get_ranges() const { return ranges_; }
+
+    bool set_ranges(VectorOfrange* data) { ranges_ = data; return true;}
+
+    udp_defn* get_udp_defn() const { return udp_defn_; }
+
+    void set_udp_defn(udp_defn* data) { udp_defn_ = data; }
+
+    module* get_module() const { return module_; }
+
+    void set_module(module* data) { module_ = data; }
+
+    VectorOfany* get_ref_obj_interf_net_var_group() const { return ref_obj_interf_net_var_group_; }
+
+    bool set_ref_obj_interf_net_var_group(VectorOfany* data) { if (!ref_obj_interf_net_var_groupGroupCompliant(data)) return false; ref_obj_interf_net_var_group_ = data; return true;}
+
     virtual unsigned int getUhdmType() { return uhdmio_decl; }   
   private:
     
@@ -62,6 +122,36 @@ namespace UHDM {
     unsigned int vpiFile_;
 
     unsigned int vpiLineNo_;
+
+    int vpiDirection_;
+
+    unsigned int vpiName_;
+
+    bool vpiScalar_;
+
+    bool vpiSigned_;
+
+    int vpiSize_;
+
+    bool vpiVector_;
+
+    expr* left_expr_;
+
+    expr* right_expr_;
+
+    typespec* typespecs_;
+
+    instance* instance_;
+
+    task_func* task_func_;
+
+    VectorOfrange* ranges_;
+
+    udp_defn* udp_defn_;
+
+    module* module_;
+
+    VectorOfany* ref_obj_interf_net_var_group_;
 
   };
 

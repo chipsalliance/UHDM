@@ -178,6 +178,16 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(def_paramFactory::make(), ind);
  }
 
+ ::capnp::List<Range>::Reader Ranges = cap_root.getFactoryRange();
+ for (unsigned ind = 0; ind < Ranges.size(); ind++) {
+   setId(rangeFactory::make(), ind);
+ }
+
+ ::capnp::List<Udpdefn>::Reader Udpdefns = cap_root.getFactoryUdpdefn();
+ for (unsigned ind = 0; ind < Udpdefns.size(); ind++) {
+   setId(udp_defnFactory::make(), ind);
+ }
+
  ::capnp::List<Iodecl>::Reader Iodecls = cap_root.getFactoryIodecl();
  for (unsigned ind = 0; ind < Iodecls.size(); ind++) {
    setId(io_declFactory::make(), ind);
@@ -191,11 +201,6 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  ::capnp::List<Clockingblock>::Reader Clockingblocks = cap_root.getFactoryClockingblock();
  for (unsigned ind = 0; ind < Clockingblocks.size(); ind++) {
    setId(clocking_blockFactory::make(), ind);
- }
-
- ::capnp::List<Range>::Reader Ranges = cap_root.getFactoryRange();
- for (unsigned ind = 0; ind < Ranges.size(); ind++) {
-   setId(rangeFactory::make(), ind);
  }
 
  ::capnp::List<Paramassign>::Reader Paramassigns = cap_root.getFactoryParamassign();
@@ -2008,11 +2013,62 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
+ for (Range::Reader obj : Ranges) {
+   rangeFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   rangeFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   rangeFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   rangeFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
+ for (Udpdefn::Reader obj : Udpdefns) {
+   udp_defnFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   udp_defnFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   udp_defnFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   udp_defnFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
  for (Iodecl::Reader obj : Iodecls) {
    io_declFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    io_declFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    io_declFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    io_declFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    io_declFactory::objects_[index]->set_vpiDirection(obj.getVpiDirection());
+    io_declFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    io_declFactory::objects_[index]->set_vpiScalar(obj.getVpiScalar());
+    io_declFactory::objects_[index]->set_vpiSigned(obj.getVpiSigned());
+    io_declFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+    io_declFactory::objects_[index]->set_vpiVector(obj.getVpiVector());
+     io_declFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
+     io_declFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+     io_declFactory::objects_[index]->set_typespecs((typespec*)getObject(obj.getTypespecs().getType(),obj.getTypespecs().getIndex()-1));
+     io_declFactory::objects_[index]->set_instance((instance*)getObject(obj.getInstance().getType(),obj.getInstance().getIndex()-1));
+     io_declFactory::objects_[index]->set_task_func((task_func*)getObject(obj.getTaskfunc().getType(),obj.getTaskfunc().getIndex()-1));
+    
+    if (obj.getRanges().size()) { 
+      std::vector<range*>* vect = VectorOfrangeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getRanges().size(); ind++) {
+ 	vect->push_back(rangeFactory::objects_[obj.getRanges()[ind]-1]);
+    }
+      io_declFactory::objects_[index]->set_ranges(vect);
+    }
+   if (obj.getUdpdefn()) 
+     io_declFactory::objects_[index]->set_udp_defn(udp_defnFactory::objects_[obj.getUdpdefn()-1]);
+   if (obj.getModule()) 
+     io_declFactory::objects_[index]->set_module(moduleFactory::objects_[obj.getModule()-1]);
+    
+    if (obj.getRefobjinterfnetvargroup().size()) { 
+      std::vector<any*>* vect = VectorOfanyFactory::make();
+      for (unsigned int ind = 0; ind < obj.getRefobjinterfnetvargroup().size(); ind++) {
+ 	vect->push_back((any*)getObject(obj.getRefobjinterfnetvargroup()[ind].getType(),obj.getRefobjinterfnetvargroup()[ind].getIndex()-1));
+    }
+      io_declFactory::objects_[index]->set_ref_obj_interf_net_var_group(vect);
+    }
 
    index++;
  }
@@ -2155,16 +2211,6 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
     }
       clocking_blockFactory::objects_[index]->set_instance_items(vect);
     }
-
-   index++;
- }
-
- index = 0;
- for (Range::Reader obj : Ranges) {
-   rangeFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
-   rangeFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
-   rangeFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
-   rangeFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
 
    index++;
  }

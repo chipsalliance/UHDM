@@ -32,10 +32,12 @@ primitive.yaml
 mod_path.yaml
 tchk.yaml
 def_param.yaml
+range.yaml
+udp_defn.yaml
+ref_obj_interf_net_var_group.yaml
 io_decl.yaml
 alias_stmt.yaml
 clocking_block.yaml
-range.yaml
 param_assign.yaml
 instance_array.yaml
 interface_array.yaml
@@ -46,6 +48,7 @@ gate_array.yaml
 switch_array.yaml
 udp_array.yaml
 net.yaml
+nets.yaml
 array_net.yaml
 logic_var.yaml
 array_var.yaml
