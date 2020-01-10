@@ -17,20 +17,21 @@
  */
 
 /*
- * File:   <GROUPNAME>.h
+ * File:   expr_ref_obj_group.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef <UPPER_GROUPNAME>_H
-#define <UPPER_GROUPNAME>_H
+#ifndef EXPR_REF_OBJ_GROUP_H
+#define EXPR_REF_OBJ_GROUP_H
 
 namespace UHDM {
 
-  bool <GROUPNAME>GroupCompliant(any* item);
-  bool <GROUPNAME>GroupCompliant(VectorOfany* vec);
+  bool expr_ref_obj_groupGroupCompliant(any* item);
+  bool expr_ref_obj_groupGroupCompliant(VectorOfany* vec);
  	     
 };
 
 #endif
+

@@ -36,65 +36,65 @@ namespace UHDM {
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
 
-    void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
+    bool set_vpiParent(BaseClass* data) { vpiParent_ = data; return true;}
 
     unsigned int get_uhdmParentType() const { return uhdmParentType_; }
 
-    void set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; }
+    bool set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; return true;}
 
     std::string get_vpiFile() const { return SymbolFactory::getSymbol(vpiFile_); }
 
-    void set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); }
+    bool set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); return true; }
 
     unsigned int get_vpiLineNo() const { return vpiLineNo_; }
 
-    void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
+    bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
     unsigned int get_vpiType() { return vpiIODecl; }
 
     int get_vpiDirection() const { return vpiDirection_; }
 
-    void set_vpiDirection(int data) { vpiDirection_ = data; }
+    bool set_vpiDirection(int data) { vpiDirection_ = data; return true;}
 
     std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
 
-    void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
+    bool set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); return true; }
 
     bool get_vpiScalar() const { return vpiScalar_; }
 
-    void set_vpiScalar(bool data) { vpiScalar_ = data; }
+    bool set_vpiScalar(bool data) { vpiScalar_ = data; return true;}
 
     bool get_vpiSigned() const { return vpiSigned_; }
 
-    void set_vpiSigned(bool data) { vpiSigned_ = data; }
+    bool set_vpiSigned(bool data) { vpiSigned_ = data; return true;}
 
     int get_vpiSize() const { return vpiSize_; }
 
-    void set_vpiSize(int data) { vpiSize_ = data; }
+    bool set_vpiSize(int data) { vpiSize_ = data; return true;}
 
     bool get_vpiVector() const { return vpiVector_; }
 
-    void set_vpiVector(bool data) { vpiVector_ = data; }
+    bool set_vpiVector(bool data) { vpiVector_ = data; return true;}
 
     expr* get_left_expr() const { return left_expr_; }
 
-    void set_left_expr(expr* data) { left_expr_ = data; }
+    bool set_left_expr(expr* data) { left_expr_ = data; return true;}
 
     expr* get_right_expr() const { return right_expr_; }
 
-    void set_right_expr(expr* data) { right_expr_ = data; }
+    bool set_right_expr(expr* data) { right_expr_ = data; return true;}
 
     typespec* get_typespecs() const { return typespecs_; }
 
-    void set_typespecs(typespec* data) { typespecs_ = data; }
+    bool set_typespecs(typespec* data) { typespecs_ = data; return true;}
 
     instance* get_instance() const { return instance_; }
 
-    void set_instance(instance* data) { instance_ = data; }
+    bool set_instance(instance* data) { instance_ = data; return true;}
 
     task_func* get_task_func() const { return task_func_; }
 
-    void set_task_func(task_func* data) { task_func_ = data; }
+    bool set_task_func(task_func* data) { task_func_ = data; return true;}
 
     VectorOfrange* get_ranges() const { return ranges_; }
 
@@ -102,15 +102,15 @@ namespace UHDM {
 
     udp_defn* get_udp_defn() const { return udp_defn_; }
 
-    void set_udp_defn(udp_defn* data) { udp_defn_ = data; }
+    bool set_udp_defn(udp_defn* data) { udp_defn_ = data; return true;}
 
     module* get_module() const { return module_; }
 
-    void set_module(module* data) { module_ = data; }
+    bool set_module(module* data) { module_ = data; return true;}
 
-    VectorOfany* get_ref_obj_interf_net_var_group() const { return ref_obj_interf_net_var_group_; }
+    any* get_expr() const { return expr_; }
 
-    bool set_ref_obj_interf_net_var_group(VectorOfany* data) { if (!ref_obj_interf_net_var_groupGroupCompliant(data)) return false; ref_obj_interf_net_var_group_ = data; return true;}
+    bool set_expr(any* data) {if (!ref_obj_interf_net_var_groupGroupCompliant(data)) return false; expr_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmio_decl; }   
   private:
@@ -151,7 +151,7 @@ namespace UHDM {
 
     module* module_;
 
-    VectorOfany* ref_obj_interf_net_var_group_;
+    any* expr_;
 
   };
 

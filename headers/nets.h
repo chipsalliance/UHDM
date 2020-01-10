@@ -17,62 +17,50 @@
  */
 
 /*
- * File:   primitive_array.h
+ * File:   nets.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef PRIMITIVE_ARRAY_H
-#define PRIMITIVE_ARRAY_H
+#ifndef NETS_H
+#define NETS_H
 
 namespace UHDM {
 
-  class primitive_array : public instance_array {
+  class nets : public BaseClass {
   public:
     // Implicit constructor used to initialize all members,
-    // comment: primitive_array();
-    ~primitive_array()  {}
+    // comment: nets();
+    ~nets()  {}
     
-    expr* get_delay() const { return delay_; }
-
-    bool set_delay(expr* data) { delay_ = data; return true;}
-
-    VectorOfprimitive* get_primitives() const { return primitives_; }
-
-    bool set_primitives(VectorOfprimitive* data) { primitives_ = data; return true;}
-
-    virtual unsigned int getUhdmType() { return uhdmprimitive_array; }   
+    virtual unsigned int getUhdmType() { return uhdmnets; }   
   private:
     
-    expr* delay_;
-
-    VectorOfprimitive* primitives_;
-
   };
 
-  class primitive_arrayFactory {
+  class netsFactory {
   friend Serializer;
   public:
-  static primitive_array* make() {
-    primitive_array* obj = new primitive_array();
+  static nets* make() {
+    nets* obj = new nets();
     objects_.push_back(obj);
     return obj;
   }
   private:
-    static std::vector<primitive_array*> objects_;
+    static std::vector<nets*> objects_;
   };
  	      
-  class VectorOfprimitive_arrayFactory {
+  class VectorOfnetsFactory {
   friend Serializer;
   public:
-  static std::vector<primitive_array*>* make() {
-    std::vector<primitive_array*>* obj = new std::vector<primitive_array*>();
+  static std::vector<nets*>* make() {
+    std::vector<nets*>* obj = new std::vector<nets*>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-  static std::vector<std::vector<primitive_array*>*> objects_;
+  static std::vector<std::vector<nets*>*> objects_;
   };
 
 };

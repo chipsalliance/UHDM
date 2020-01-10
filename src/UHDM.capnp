@@ -388,6 +388,20 @@ vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
+vpiPortIndex @4 :UInt64;
+vpiName @5 :UInt64;
+vpiPortType @6 :UInt64;
+vpiScalar @7 :Bool;
+vpiVector @8 :Bool;
+vpiConnByName @9 :Bool;
+vpiDirection @10 :UInt64;
+vpiSize @11 :UInt64;
+vpiExplicitName @12 :UInt64;
+typespecs @13 :ObjIndexType;
+instance @14 :ObjIndexType;
+module @15 :UInt64;
+highconn @16 :ObjIndexType;
+lowconn @17 :ObjIndexType;
 }
 struct Primitive {
 vpiParent @0 :UInt64;
@@ -444,7 +458,7 @@ taskfunc @14 :ObjIndexType;
 ranges @15 :List(UInt64);
 udpdefn @16 :UInt64;
 module @17 :UInt64;
-refobjinterfnetvargroup @18 :List(ObjIndexType);
+expr @18 :ObjIndexType;
 }
 struct Aliasstmt {
 vpiParent @0 :UInt64;

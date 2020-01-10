@@ -36,27 +36,27 @@ namespace UHDM {
     
     std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
 
-    void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
+    bool set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); return true; }
 
     std::string get_vpiFullName() const { return SymbolFactory::getSymbol(vpiFullName_); }
 
-    void set_vpiFullName(std::string data) { vpiFullName_ = SymbolFactory::make(data); }
+    bool set_vpiFullName(std::string data) { vpiFullName_ = SymbolFactory::make(data); return true; }
 
     int get_vpiSize() const { return vpiSize_; }
 
-    void set_vpiSize(int data) { vpiSize_ = data; }
+    bool set_vpiSize(int data) { vpiSize_ = data; return true;}
 
     expr* get_expr() const { return expr_; }
 
-    void set_expr(expr* data) { expr_ = data; }
+    bool set_expr(expr* data) { expr_ = data; return true;}
 
     expr* get_left_expr() const { return left_expr_; }
 
-    void set_left_expr(expr* data) { left_expr_ = data; }
+    bool set_left_expr(expr* data) { left_expr_ = data; return true;}
 
     expr* get_right_expr() const { return right_expr_; }
 
-    void set_right_expr(expr* data) { right_expr_ = data; }
+    bool set_right_expr(expr* data) { right_expr_ = data; return true;}
 
     VectorOfinstance* get_instances() const { return instances_; }
 
@@ -64,7 +64,7 @@ namespace UHDM {
 
     range* get_range() const { return range_; }
 
-    void set_range(range* data) { range_ = data; }
+    bool set_range(range* data) { range_ = data; return true;}
 
     VectorOfmodule* get_modules() const { return modules_; }
 

@@ -36,63 +36,63 @@ namespace UHDM {
     
     std::string get_vpiDefName() const { return SymbolFactory::getSymbol(vpiDefName_); }
 
-    void set_vpiDefName(std::string data) { vpiDefName_ = SymbolFactory::make(data); }
+    bool set_vpiDefName(std::string data) { vpiDefName_ = SymbolFactory::make(data); return true; }
 
     bool get_vpiArrayMember() const { return vpiArrayMember_; }
 
-    void set_vpiArrayMember(bool data) { vpiArrayMember_ = data; }
+    bool set_vpiArrayMember(bool data) { vpiArrayMember_ = data; return true;}
 
     bool get_vpiCellInstance() const { return vpiCellInstance_; }
 
-    void set_vpiCellInstance(bool data) { vpiCellInstance_ = data; }
+    bool set_vpiCellInstance(bool data) { vpiCellInstance_ = data; return true;}
 
     int get_vpiDefNetType() const { return vpiDefNetType_; }
 
-    void set_vpiDefNetType(int data) { vpiDefNetType_ = data; }
+    bool set_vpiDefNetType(int data) { vpiDefNetType_ = data; return true;}
 
     std::string get_vpiDefFile() const { return SymbolFactory::getSymbol(vpiDefFile_); }
 
-    void set_vpiDefFile(std::string data) { vpiDefFile_ = SymbolFactory::make(data); }
+    bool set_vpiDefFile(std::string data) { vpiDefFile_ = SymbolFactory::make(data); return true; }
 
     int get_vpiDefDelayMode() const { return vpiDefDelayMode_; }
 
-    void set_vpiDefDelayMode(int data) { vpiDefDelayMode_ = data; }
+    bool set_vpiDefDelayMode(int data) { vpiDefDelayMode_ = data; return true;}
 
     bool get_vpiProtected() const { return vpiProtected_; }
 
-    void set_vpiProtected(bool data) { vpiProtected_ = data; }
+    bool set_vpiProtected(bool data) { vpiProtected_ = data; return true;}
 
     int get_vpiTimePrecision() const { return vpiTimePrecision_; }
 
-    void set_vpiTimePrecision(int data) { vpiTimePrecision_ = data; }
+    bool set_vpiTimePrecision(int data) { vpiTimePrecision_ = data; return true;}
 
     int get_vpiTimeUnit() const { return vpiTimeUnit_; }
 
-    void set_vpiTimeUnit(int data) { vpiTimeUnit_ = data; }
+    bool set_vpiTimeUnit(int data) { vpiTimeUnit_ = data; return true;}
 
     int get_vpiUnconnDrive() const { return vpiUnconnDrive_; }
 
-    void set_vpiUnconnDrive(int data) { vpiUnconnDrive_ = data; }
+    bool set_vpiUnconnDrive(int data) { vpiUnconnDrive_ = data; return true;}
 
     std::string get_vpiLibrary() const { return SymbolFactory::getSymbol(vpiLibrary_); }
 
-    void set_vpiLibrary(std::string data) { vpiLibrary_ = SymbolFactory::make(data); }
+    bool set_vpiLibrary(std::string data) { vpiLibrary_ = SymbolFactory::make(data); return true; }
 
     std::string get_vpiCell() const { return SymbolFactory::getSymbol(vpiCell_); }
 
-    void set_vpiCell(std::string data) { vpiCell_ = SymbolFactory::make(data); }
+    bool set_vpiCell(std::string data) { vpiCell_ = SymbolFactory::make(data); return true; }
 
     std::string get_vpiConfig() const { return SymbolFactory::getSymbol(vpiConfig_); }
 
-    void set_vpiConfig(std::string data) { vpiConfig_ = SymbolFactory::make(data); }
+    bool set_vpiConfig(std::string data) { vpiConfig_ = SymbolFactory::make(data); return true; }
 
     bool get_vpiAutomatic() const { return vpiAutomatic_; }
 
-    void set_vpiAutomatic(bool data) { vpiAutomatic_ = data; }
+    bool set_vpiAutomatic(bool data) { vpiAutomatic_ = data; return true;}
 
     bool get_vpiTop() const { return vpiTop_; }
 
-    void set_vpiTop(bool data) { vpiTop_ = data; }
+    bool set_vpiTop(bool data) { vpiTop_ = data; return true;}
 
     VectorOftask_func* get_task_func() const { return task_func_; }
 
@@ -116,7 +116,7 @@ namespace UHDM {
 
     instance* get_instance() const { return instance_; }
 
-    void set_instance(instance* data) { instance_ = data; }
+    bool set_instance(instance* data) { instance_ = data; return true;}
 
     VectorOfprogram* get_programs() const { return programs_; }
 
@@ -140,7 +140,7 @@ namespace UHDM {
 
     module* get_module() const { return module_; }
 
-    void set_module(module* data) { module_ = data; }
+    bool set_module(module* data) { module_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdminstance; }   
   private:

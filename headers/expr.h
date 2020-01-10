@@ -36,11 +36,11 @@ namespace UHDM {
     
     std::string get_vpiDecompile() const { return SymbolFactory::getSymbol(vpiDecompile_); }
 
-    void set_vpiDecompile(std::string data) { vpiDecompile_ = SymbolFactory::make(data); }
+    bool set_vpiDecompile(std::string data) { vpiDecompile_ = SymbolFactory::make(data); return true; }
 
     int get_vpiSize() const { return vpiSize_; }
 
-    void set_vpiSize(int data) { vpiSize_ = data; }
+    bool set_vpiSize(int data) { vpiSize_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmexpr; }   
   private:

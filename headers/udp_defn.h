@@ -17,22 +17,22 @@
  */
 
 /*
- * File:   package.h
+ * File:   udp_defn.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef PACKAGE_H
-#define PACKAGE_H
+#ifndef UDP_DEFN_H
+#define UDP_DEFN_H
 
 namespace UHDM {
 
-  class package : public instance {
+  class udp_defn : public BaseClass {
   public:
     // Implicit constructor used to initialize all members,
-    // comment: package();
-    ~package() final {}
+    // comment: udp_defn();
+    ~udp_defn() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
 
@@ -50,13 +50,9 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
-    unsigned int get_vpiType() { return vpiPackage; }
+    unsigned int get_vpiType() { return vpiUdpDefn; }
 
-    bool get_vpiUnit() const { return vpiUnit_; }
-
-    bool set_vpiUnit(bool data) { vpiUnit_ = data; return true;}
-
-    virtual unsigned int getUhdmType() { return uhdmpackage; }   
+    virtual unsigned int getUhdmType() { return uhdmudp_defn; }   
   private:
     
     BaseClass* vpiParent_;
@@ -67,32 +63,30 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
-    bool vpiUnit_;
-
   };
 
-  class packageFactory {
+  class udp_defnFactory {
   friend Serializer;
   public:
-  static package* make() {
-    package* obj = new package();
+  static udp_defn* make() {
+    udp_defn* obj = new udp_defn();
     objects_.push_back(obj);
     return obj;
   }
   private:
-    static std::vector<package*> objects_;
+    static std::vector<udp_defn*> objects_;
   };
  	      
-  class VectorOfpackageFactory {
+  class VectorOfudp_defnFactory {
   friend Serializer;
   public:
-  static std::vector<package*>* make() {
-    std::vector<package*>* obj = new std::vector<package*>();
+  static std::vector<udp_defn*>* make() {
+    std::vector<udp_defn*>* obj = new std::vector<udp_defn*>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-  static std::vector<std::vector<package*>*> objects_;
+  static std::vector<std::vector<udp_defn*>*> objects_;
   };
 
 };

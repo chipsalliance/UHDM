@@ -36,31 +36,31 @@ namespace UHDM {
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
 
-    void set_vpiParent(BaseClass* data) { vpiParent_ = data; }
+    bool set_vpiParent(BaseClass* data) { vpiParent_ = data; return true;}
 
     unsigned int get_uhdmParentType() const { return uhdmParentType_; }
 
-    void set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; }
+    bool set_uhdmParentType(unsigned int data) { uhdmParentType_ = data; return true;}
 
     std::string get_vpiFile() const { return SymbolFactory::getSymbol(vpiFile_); }
 
-    void set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); }
+    bool set_vpiFile(std::string data) { vpiFile_ = SymbolFactory::make(data); return true; }
 
     unsigned int get_vpiLineNo() const { return vpiLineNo_; }
 
-    void set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; }
+    bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
     bool get_vpiSigned() const { return vpiSigned_; }
 
-    void set_vpiSigned(bool data) { vpiSigned_ = data; }
+    bool set_vpiSigned(bool data) { vpiSigned_ = data; return true;}
 
     int get_vpiSize() const { return vpiSize_; }
 
-    void set_vpiSize(int data) { vpiSize_ = data; }
+    bool set_vpiSize(int data) { vpiSize_ = data; return true;}
 
     int get_vpiFuncType() const { return vpiFuncType_; }
 
-    void set_vpiFuncType(int data) { vpiFuncType_ = data; }
+    bool set_vpiFuncType(int data) { vpiFuncType_ = data; return true;}
 
     unsigned int get_vpiType() { return vpiFunction; }
 

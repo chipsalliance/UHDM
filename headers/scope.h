@@ -36,11 +36,11 @@ namespace UHDM {
     
     std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
 
-    void set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); }
+    bool set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); return true; }
 
     std::string get_vpiFullName() const { return SymbolFactory::getSymbol(vpiFullName_); }
 
-    void set_vpiFullName(std::string data) { vpiFullName_ = SymbolFactory::make(data); }
+    bool set_vpiFullName(std::string data) { vpiFullName_ = SymbolFactory::make(data); return true; }
 
     VectorOfconcurrent_assertion* get_concurrent_assertions() const { return concurrent_assertions_; }
 
@@ -100,7 +100,7 @@ namespace UHDM {
 
     VectorOfany* get_instance_items() const { return instance_items_; }
 
-    bool set_instance_items(VectorOfany* data) { if (!instance_itemGroupCompliant(data)) return false; instance_items_ = data; return true;}
+    bool set_instance_items(VectorOfany* data) {if (!instance_itemGroupCompliant(data)) return false; instance_items_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmscope; }   
   private:

@@ -36,59 +36,59 @@ namespace UHDM {
     
     bool get_vpiMethod() const { return vpiMethod_; }
 
-    void set_vpiMethod(bool data) { vpiMethod_ = data; }
+    bool set_vpiMethod(bool data) { vpiMethod_ = data; return true;}
 
     int get_vpiAccessType() const { return vpiAccessType_; }
 
-    void set_vpiAccessType(int data) { vpiAccessType_ = data; }
+    bool set_vpiAccessType(int data) { vpiAccessType_ = data; return true;}
 
     int get_vpiVisibility() const { return vpiVisibility_; }
 
-    void set_vpiVisibility(int data) { vpiVisibility_ = data; }
+    bool set_vpiVisibility(int data) { vpiVisibility_ = data; return true;}
 
     bool get_vpiVirtual() const { return vpiVirtual_; }
 
-    void set_vpiVirtual(bool data) { vpiVirtual_ = data; }
+    bool set_vpiVirtual(bool data) { vpiVirtual_ = data; return true;}
 
     bool get_vpiAutomatic() const { return vpiAutomatic_; }
 
-    void set_vpiAutomatic(bool data) { vpiAutomatic_ = data; }
+    bool set_vpiAutomatic(bool data) { vpiAutomatic_ = data; return true;}
 
     bool get_vpiDPIContext() const { return vpiDPIContext_; }
 
-    void set_vpiDPIContext(bool data) { vpiDPIContext_ = data; }
+    bool set_vpiDPIContext(bool data) { vpiDPIContext_ = data; return true;}
 
     int get_vpiDPICStr() const { return vpiDPICStr_; }
 
-    void set_vpiDPICStr(int data) { vpiDPICStr_ = data; }
+    bool set_vpiDPICStr(int data) { vpiDPICStr_ = data; return true;}
 
     std::string get_vpiDPICIdentifier() const { return SymbolFactory::getSymbol(vpiDPICIdentifier_); }
 
-    void set_vpiDPICIdentifier(std::string data) { vpiDPICIdentifier_ = SymbolFactory::make(data); }
+    bool set_vpiDPICIdentifier(std::string data) { vpiDPICIdentifier_ = SymbolFactory::make(data); return true; }
 
     expr* get_left_expr() const { return left_expr_; }
 
-    void set_left_expr(expr* data) { left_expr_ = data; }
+    bool set_left_expr(expr* data) { left_expr_ = data; return true;}
 
     expr* get_right_expr() const { return right_expr_; }
 
-    void set_right_expr(expr* data) { right_expr_ = data; }
+    bool set_right_expr(expr* data) { right_expr_ = data; return true;}
 
     stmt* get_stmt() const { return stmt_; }
 
-    void set_stmt(stmt* data) { stmt_ = data; }
+    bool set_stmt(stmt* data) { stmt_ = data; return true;}
 
     clocking_block* get_class_defn() const { return class_defn_; }
 
-    void set_class_defn(clocking_block* data) { class_defn_ = data; }
+    bool set_class_defn(clocking_block* data) { class_defn_ = data; return true;}
 
     ref_obj* get_ref_obj() const { return ref_obj_; }
 
-    void set_ref_obj(ref_obj* data) { ref_obj_ = data; }
+    bool set_ref_obj(ref_obj* data) { ref_obj_ = data; return true;}
 
     io_decl* get_io_decl() const { return io_decl_; }
 
-    void set_io_decl(io_decl* data) { io_decl_ = data; }
+    bool set_io_decl(io_decl* data) { io_decl_ = data; return true;}
 
     virtual unsigned int getUhdmType() { return uhdmtask_func; }   
   private:

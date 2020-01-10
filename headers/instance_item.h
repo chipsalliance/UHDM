@@ -25,21 +25,11 @@
 
 #ifndef INSTANCE_ITEM_H
 #define INSTANCE_ITEM_H
-#include <iostream>
 
 namespace UHDM {
 
-  static bool instance_itemGroupCompliant (VectorOfany* vec) {
-    for (auto item : *vec) {
-      BaseClass* the_item = (BaseClass*) item;
-      unsigned int uhdmtype = the_item->getUhdmType();
-      if ((uhdmtype != uhdmtask_func) && (uhdmtype != uhdmtask) && (uhdmtype != uhdmfunction) && (uhdmtype != uhdmnet) && (uhdmtype != uhdmarray_net) && (uhdmtype != uhdmvariables) && (uhdmtype != uhdmparameters) && (uhdmtype != uhdmassertion) && (uhdmtype != uhdmtypespec) && (uhdmtype != uhdmclass_defn) && (uhdmtype != uhdmprogram) && (uhdmtype != uhdmprogram_array) && (uhdmtype != uhdmlogic_var) && (uhdmtype != uhdmarray_var  ) && (uhdmtype != uhdmnamed_event) && (uhdmtype != uhdmnamed_event_array) && (uhdmtype != uhdmspec_param)) {
-	std::cout << "Internal Error: adding wrong object type (" << getUhdmName(uhdmtype) << ") in a instance_item vector!\n";   
-	return false;
-      }
-    }
-    return true;
-  }
+  bool instance_itemGroupCompliant(any* item);
+  bool instance_itemGroupCompliant(VectorOfany* vec);
  	     
 };
 

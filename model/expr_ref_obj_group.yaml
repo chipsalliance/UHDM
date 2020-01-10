@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "port" formal description
+# Universal Hardware Data Model (UHDM) "expr_ref_obj_group" formal description
  
-- obj_def: port
-  - extends: ports
+- group_def: expr_ref_obj_group
+  - class_ref: expr
+  - obj_ref: ref_obj

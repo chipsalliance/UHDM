@@ -108,6 +108,7 @@ std::vector<interface_tf_decl*> interface_tf_declFactory::objects_;
 std::vector<std::vector<interface_tf_decl*>*> VectorOfinterface_tf_declFactory::objects_;
 std::vector<cont_assign*> cont_assignFactory::objects_;
 std::vector<std::vector<cont_assign*>*> VectorOfcont_assignFactory::objects_;
+std::vector<std::vector<ports*>*> VectorOfportsFactory::objects_;
 std::vector<port*> portFactory::objects_;
 std::vector<std::vector<port*>*> VectorOfportFactory::objects_;
 std::vector<primitive*> primitiveFactory::objects_;
@@ -178,6 +179,126 @@ std::vector<module*> moduleFactory::objects_;
 std::vector<std::vector<module*>*> VectorOfmoduleFactory::objects_;
 std::vector<design*> designFactory::objects_;
 std::vector<std::vector<design*>*> VectorOfdesignFactory::objects_;
+
+std::string getUhdmName(unsigned int type) {
+      switch (type) {
+case 2167: return "uhdmdef_param";
+case 2168: return "uhdmrange";
+case 2170: return "uhdmranges";
+case 2169: return "uhdmudp_defn";
+case 2171: return "uhdmalias_stmt";
+case 2172: return "uhdmclocking_block";
+case 2173: return "uhdmparam_assign";
+case 2174: return "uhdminstance_array";
+case 2175: return "uhdminstances";
+case 2176: return "uhdmmodules";
+case 2177: return "uhdminterface_array";
+case 2106: return "uhdmprocess";
+case 2178: return "uhdmparam_assigns";
+case 2107: return "uhdmproperty_decl";
+case 2180: return "uhdmmodule_array";
+case 2179: return "uhdmprogram_array";
+case 2108: return "uhdmsequence_decl";
+case 2181: return "uhdmprimitive_array";
+case 2110: return "uhdmvirtual_interface_var";
+case 2109: return "uhdmconcurrent_assertion";
+case 2182: return "uhdmdelay";
+case 2111: return "uhdmlet_decl";
+case 2183: return "uhdmprimitives";
+case 2112: return "uhdmstmt";
+case 2184: return "uhdmgate_array";
+case 2113: return "uhdmscope";
+case 2185: return "uhdmswitch_array";
+case 2114: return "uhdmconcurrent_assertions";
+case 2186: return "uhdmudp_array";
+case 2115: return "uhdmvariables";
+case 2187: return "uhdmnet";
+case 2116: return "uhdmparameters";
+case 2188: return "uhdmnets";
+case 2117: return "uhdmscopes";
+case 2200: return "uhdmmodports";
+case 2190: return "uhdmnamed_event";
+case 2189: return "uhdmarray_net";
+case 2118: return "uhdmtypespecs";
+case 2201: return "uhdmglobal_clocking";
+case 2191: return "uhdmnamed_event_array";
+case 2119: return "uhdmproperty_decls";
+case 2120: return "uhdmsequence_decls";
+case 2202: return "uhdmdefault_clocking";
+case 2192: return "uhdmspec_param";
+case 2121: return "uhdmnamed_events";
+case 2203: return "uhdmmod_paths";
+case 2193: return "uhdmassertion";
+case 2122: return "uhdmnamed_event_arrays";
+case 2204: return "uhdmcont_assigns";
+case 2194: return "uhdmtypespec";
+case 2123: return "uhdmvirtual_interface_vars";
+case 2205: return "uhdminterfaces";
+case 2195: return "uhdmclass_typespec";
+case 2124: return "uhdmlogic_var";
+case 2206: return "uhdminterface_arrays";
+case 2196: return "uhdmclass_obj";
+case 2125: return "uhdmarray_var";
+case 2207: return "uhdmprogram";
+case 2197: return "uhdmprograms";
+case 2126: return "uhdmarray_var_mem";
+case 2208: return "uhdmclocking_blocks";
+case 2198: return "uhdmprogram_arrays";
+case 2127: return "uhdmlet_decls";
+case 2210: return "uhdmprimitive_arrays";
+case 2209: return "uhdmpackage";
+case 2199: return "uhdminterface_tf_decls";
+case 2128: return "uhdminstance_items";
+case 2211: return "uhdmmodule_arrays";
+case 2129: return "uhdmbegin";
+case 2130: return "uhdmstmts";
+case 2212: return "uhdmtchks";
+case 2131: return "uhdmnamed_begin";
+case 2213: return "uhdmdef_params";
+case 2132: return "uhdmnamed_fork";
+case 2214: return "uhdmalias_stmts";
+case 2133: return "uhdmfork_stmt";
+case 2215: return "uhdmdesign";
+case 2134: return "uhdmfor_stmt";
+case 2216: return "uhdmallModules";
+case 2135: return "uhdmforeach_stmt";
+case 2217: return "uhdmtopModules";
+case 2136: return "uhdmgen_scope";
+case 2218: return "uhdmallPrograms";
+case 2137: return "uhdmexpr_dist";
+case 2219: return "uhdmallPackages";
+case 2138: return "uhdmexpr";
+case 2139: return "uhdmdistribution";
+case 2140: return "uhdmoperand_group";
+case 2141: return "uhdmoperation";
+case 2142: return "uhdmoperands";
+case 2143: return "uhdmref_obj";
+case 2144: return "uhdmtask_func";
+case 2145: return "uhdmleft_expr";
+case 2146: return "uhdmright_expr";
+case 2147: return "uhdmclass_defn";
+case 2148: return "uhdmio_decl";
+case 2149: return "uhdmtask";
+case 2150: return "uhdmfunction";
+case 2151: return "uhdmmodport";
+case 2152: return "uhdmio_decls";
+case 2153: return "uhdminterface";
+case 2154: return "uhdminterface_tf_decl";
+case 2155: return "uhdmtasks";
+case 2156: return "uhdmfunctions";
+case 2157: return "uhdmcont_assign";
+case 2158: return "uhdmports";
+case 2160: return "uhdmmodule";
+case 2159: return "uhdminstance";
+case 2161: return "uhdmhigh_conn";
+case 2162: return "uhdmlow_conn";
+case 2163: return "uhdmport";
+case 2164: return "uhdmprimitive";
+case 2165: return "uhdmmod_path";
+case 2166: return "uhdmtchk";
+default: return "NO TYPE";
+}
+}
 
 
 BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
@@ -1835,16 +1956,16 @@ void Serializer::save(std::string file) {
     Tasks[index].setVpiDPICIdentifier(SymbolFactory::make(obj->get_vpiDPICIdentifier()));
   if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp0 = Tasks[index].getLeftexpr();
-    tmp0.setIndex(getId((obj->get_left_expr())));
-    tmp0.setType(obj->get_left_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp0.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp1 = Tasks[index].getRightexpr();
-    tmp1.setIndex(getId((obj->get_right_expr())));
-    tmp1.setType(obj->get_right_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   }  if (obj->get_stmt()) {
     ::ObjIndexType::Builder tmp2 = Tasks[index].getStmt();
-    tmp2.setIndex(getId((obj->get_stmt())));
-    tmp2.setType(obj->get_stmt()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_stmt())));
+    tmp2.setType(((BaseClass*)obj->get_stmt())->getUhdmType());
   }    Tasks[index].setClassdefn(getId(obj->get_class_defn()));
     Tasks[index].setRefobj(getId(obj->get_ref_obj()));
     Tasks[index].setIodecl(getId(obj->get_io_decl()));
@@ -2112,16 +2233,16 @@ void Serializer::save(std::string file) {
     Functions[index].setVpiDPICIdentifier(SymbolFactory::make(obj->get_vpiDPICIdentifier()));
   if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp0 = Functions[index].getLeftexpr();
-    tmp0.setIndex(getId((obj->get_left_expr())));
-    tmp0.setType(obj->get_left_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp0.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp1 = Functions[index].getRightexpr();
-    tmp1.setIndex(getId((obj->get_right_expr())));
-    tmp1.setType(obj->get_right_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   }  if (obj->get_stmt()) {
     ::ObjIndexType::Builder tmp2 = Functions[index].getStmt();
-    tmp2.setIndex(getId((obj->get_stmt())));
-    tmp2.setType(obj->get_stmt()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_stmt())));
+    tmp2.setType(((BaseClass*)obj->get_stmt())->getUhdmType());
   }    Functions[index].setClassdefn(getId(obj->get_class_defn()));
     Functions[index].setRefobj(getId(obj->get_ref_obj()));
     Functions[index].setIodecl(getId(obj->get_io_decl()));
@@ -2430,6 +2551,33 @@ void Serializer::save(std::string file) {
     Ports[index].setUhdmParentType(obj->get_uhdmParentType());
     Ports[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Ports[index].setVpiLineNo(obj->get_vpiLineNo());
+    Ports[index].setVpiPortIndex(obj->get_vpiPortIndex());
+    Ports[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Ports[index].setVpiPortType(obj->get_vpiPortType());
+    Ports[index].setVpiScalar(obj->get_vpiScalar());
+    Ports[index].setVpiVector(obj->get_vpiVector());
+    Ports[index].setVpiConnByName(obj->get_vpiConnByName());
+    Ports[index].setVpiDirection(obj->get_vpiDirection());
+    Ports[index].setVpiSize(obj->get_vpiSize());
+    Ports[index].setVpiExplicitName(SymbolFactory::make(obj->get_vpiExplicitName()));
+  if (obj->get_typespecs()) {
+    ::ObjIndexType::Builder tmp0 = Ports[index].getTypespecs();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespecs())));
+    tmp0.setType(((BaseClass*)obj->get_typespecs())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Ports[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }    Ports[index].setModule(getId(obj->get_module()));
+  if (obj->get_high_conn()) {
+    ::ObjIndexType::Builder tmp2 = Ports[index].getHighconn();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_high_conn())));
+    tmp2.setType(((BaseClass*)obj->get_high_conn())->getUhdmType());
+  }  if (obj->get_low_conn()) {
+    ::ObjIndexType::Builder tmp3 = Ports[index].getLowconn();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_low_conn())));
+    tmp3.setType(((BaseClass*)obj->get_low_conn())->getUhdmType());
+  }
 
    index++;
  }
@@ -2508,24 +2656,24 @@ void Serializer::save(std::string file) {
     Iodecls[index].setVpiVector(obj->get_vpiVector());
   if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp0 = Iodecls[index].getLeftexpr();
-    tmp0.setIndex(getId((obj->get_left_expr())));
-    tmp0.setType(obj->get_left_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp0.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp1 = Iodecls[index].getRightexpr();
-    tmp1.setIndex(getId((obj->get_right_expr())));
-    tmp1.setType(obj->get_right_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   }  if (obj->get_typespecs()) {
     ::ObjIndexType::Builder tmp2 = Iodecls[index].getTypespecs();
-    tmp2.setIndex(getId((obj->get_typespecs())));
-    tmp2.setType(obj->get_typespecs()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_typespecs())));
+    tmp2.setType(((BaseClass*)obj->get_typespecs())->getUhdmType());
   }  if (obj->get_instance()) {
     ::ObjIndexType::Builder tmp3 = Iodecls[index].getInstance();
-    tmp3.setIndex(getId((obj->get_instance())));
-    tmp3.setType(obj->get_instance()->getUhdmType());
+    tmp3.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp3.setType(((BaseClass*)obj->get_instance())->getUhdmType());
   }  if (obj->get_task_func()) {
     ::ObjIndexType::Builder tmp4 = Iodecls[index].getTaskfunc();
-    tmp4.setIndex(getId((obj->get_task_func())));
-    tmp4.setType(obj->get_task_func()->getUhdmType());
+    tmp4.setIndex(getId(((BaseClass*) obj->get_task_func())));
+    tmp4.setType(((BaseClass*)obj->get_task_func())->getUhdmType());
   } 
     if (obj->get_ranges()) {  
       ::capnp::List<::uint64_t>::Builder Rangess = Iodecls[index].initRanges(obj->get_ranges()->size());
@@ -2535,16 +2683,11 @@ void Serializer::save(std::string file) {
     }
     Iodecls[index].setUdpdefn(getId(obj->get_udp_defn()));
     Iodecls[index].setModule(getId(obj->get_module()));
- 
-    if (obj->get_ref_obj_interf_net_var_group()) {  
-      ::capnp::List<::ObjIndexType>::Builder Refobjinterfnetvargroups = Iodecls[index].initRefobjinterfnetvargroup(obj->get_ref_obj_interf_net_var_group()->size());
-      for (unsigned int ind = 0; ind < obj->get_ref_obj_interf_net_var_group()->size(); ind++) {
-        ::ObjIndexType::Builder tmp = Refobjinterfnetvargroups[ind];
-        tmp.setIndex(getId(((BaseClass*) (*obj->get_ref_obj_interf_net_var_group())[ind])));
-        tmp.setType(((BaseClass*)((*obj->get_ref_obj_interf_net_var_group())[ind]))->getUhdmType());
-      }
-    }
-
+  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp5 = Iodecls[index].getExpr();
+    tmp5.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp5.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  }
    index++;
  }
  ::capnp::List<Aliasstmt>::Builder Aliasstmts = cap_root.initFactoryAliasstmt(alias_stmtFactory::objects_.size());
@@ -2716,16 +2859,16 @@ void Serializer::save(std::string file) {
     Interfacearrays[index].setVpiSize(obj->get_vpiSize());
   if (obj->get_expr()) {
     ::ObjIndexType::Builder tmp0 = Interfacearrays[index].getExpr();
-    tmp0.setIndex(getId((obj->get_expr())));
-    tmp0.setType(obj->get_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp0.setType(((BaseClass*)obj->get_expr())->getUhdmType());
   }  if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp1 = Interfacearrays[index].getLeftexpr();
-    tmp1.setIndex(getId((obj->get_left_expr())));
-    tmp1.setType(obj->get_left_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp1.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp2 = Interfacearrays[index].getRightexpr();
-    tmp2.setIndex(getId((obj->get_right_expr())));
-    tmp2.setType(obj->get_right_expr()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp2.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   } 
     if (obj->get_instances()) {  
       ::capnp::List<::ObjIndexType>::Builder Instancess = Interfacearrays[index].initInstances(obj->get_instances()->size());
@@ -2759,16 +2902,16 @@ void Serializer::save(std::string file) {
     Programarrays[index].setVpiSize(obj->get_vpiSize());
   if (obj->get_expr()) {
     ::ObjIndexType::Builder tmp0 = Programarrays[index].getExpr();
-    tmp0.setIndex(getId((obj->get_expr())));
-    tmp0.setType(obj->get_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp0.setType(((BaseClass*)obj->get_expr())->getUhdmType());
   }  if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp1 = Programarrays[index].getLeftexpr();
-    tmp1.setIndex(getId((obj->get_left_expr())));
-    tmp1.setType(obj->get_left_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp1.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp2 = Programarrays[index].getRightexpr();
-    tmp2.setIndex(getId((obj->get_right_expr())));
-    tmp2.setType(obj->get_right_expr()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp2.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   } 
     if (obj->get_instances()) {  
       ::capnp::List<::ObjIndexType>::Builder Instancess = Programarrays[index].initInstances(obj->get_instances()->size());
@@ -2809,16 +2952,16 @@ void Serializer::save(std::string file) {
     Modulearrays[index].setVpiSize(obj->get_vpiSize());
   if (obj->get_expr()) {
     ::ObjIndexType::Builder tmp0 = Modulearrays[index].getExpr();
-    tmp0.setIndex(getId((obj->get_expr())));
-    tmp0.setType(obj->get_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp0.setType(((BaseClass*)obj->get_expr())->getUhdmType());
   }  if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp1 = Modulearrays[index].getLeftexpr();
-    tmp1.setIndex(getId((obj->get_left_expr())));
-    tmp1.setType(obj->get_left_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp1.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp2 = Modulearrays[index].getRightexpr();
-    tmp2.setIndex(getId((obj->get_right_expr())));
-    tmp2.setType(obj->get_right_expr()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp2.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   } 
     if (obj->get_instances()) {  
       ::capnp::List<::ObjIndexType>::Builder Instancess = Modulearrays[index].initInstances(obj->get_instances()->size());
@@ -2849,8 +2992,8 @@ void Serializer::save(std::string file) {
     Gatearrays[index].setVpiLineNo(obj->get_vpiLineNo());
   if (obj->get_delay()) {
     ::ObjIndexType::Builder tmp0 = Gatearrays[index].getDelay();
-    tmp0.setIndex(getId((obj->get_delay())));
-    tmp0.setType(obj->get_delay()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_delay())));
+    tmp0.setType(((BaseClass*)obj->get_delay())->getUhdmType());
   } 
     if (obj->get_primitives()) {  
       ::capnp::List<::ObjIndexType>::Builder Primitivess = Gatearrays[index].initPrimitives(obj->get_primitives()->size());
@@ -2865,16 +3008,16 @@ void Serializer::save(std::string file) {
     Gatearrays[index].setVpiSize(obj->get_vpiSize());
   if (obj->get_expr()) {
     ::ObjIndexType::Builder tmp0 = Gatearrays[index].getExpr();
-    tmp0.setIndex(getId((obj->get_expr())));
-    tmp0.setType(obj->get_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp0.setType(((BaseClass*)obj->get_expr())->getUhdmType());
   }  if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp1 = Gatearrays[index].getLeftexpr();
-    tmp1.setIndex(getId((obj->get_left_expr())));
-    tmp1.setType(obj->get_left_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp1.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp2 = Gatearrays[index].getRightexpr();
-    tmp2.setIndex(getId((obj->get_right_expr())));
-    tmp2.setType(obj->get_right_expr()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp2.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   } 
     if (obj->get_instances()) {  
       ::capnp::List<::ObjIndexType>::Builder Instancess = Gatearrays[index].initInstances(obj->get_instances()->size());
@@ -2899,16 +3042,16 @@ void Serializer::save(std::string file) {
     Gatearrays[index].setVpiSize(obj->get_vpiSize());
   if (obj->get_expr()) {
     ::ObjIndexType::Builder tmp0 = Gatearrays[index].getExpr();
-    tmp0.setIndex(getId((obj->get_expr())));
-    tmp0.setType(obj->get_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp0.setType(((BaseClass*)obj->get_expr())->getUhdmType());
   }  if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp1 = Gatearrays[index].getLeftexpr();
-    tmp1.setIndex(getId((obj->get_left_expr())));
-    tmp1.setType(obj->get_left_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp1.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp2 = Gatearrays[index].getRightexpr();
-    tmp2.setIndex(getId((obj->get_right_expr())));
-    tmp2.setType(obj->get_right_expr()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp2.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   } 
     if (obj->get_instances()) {  
       ::capnp::List<::ObjIndexType>::Builder Instancess = Gatearrays[index].initInstances(obj->get_instances()->size());
@@ -2939,8 +3082,8 @@ void Serializer::save(std::string file) {
     Switcharrays[index].setVpiLineNo(obj->get_vpiLineNo());
   if (obj->get_delay()) {
     ::ObjIndexType::Builder tmp0 = Switcharrays[index].getDelay();
-    tmp0.setIndex(getId((obj->get_delay())));
-    tmp0.setType(obj->get_delay()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_delay())));
+    tmp0.setType(((BaseClass*)obj->get_delay())->getUhdmType());
   } 
     if (obj->get_primitives()) {  
       ::capnp::List<::ObjIndexType>::Builder Primitivess = Switcharrays[index].initPrimitives(obj->get_primitives()->size());
@@ -2955,16 +3098,16 @@ void Serializer::save(std::string file) {
     Switcharrays[index].setVpiSize(obj->get_vpiSize());
   if (obj->get_expr()) {
     ::ObjIndexType::Builder tmp0 = Switcharrays[index].getExpr();
-    tmp0.setIndex(getId((obj->get_expr())));
-    tmp0.setType(obj->get_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp0.setType(((BaseClass*)obj->get_expr())->getUhdmType());
   }  if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp1 = Switcharrays[index].getLeftexpr();
-    tmp1.setIndex(getId((obj->get_left_expr())));
-    tmp1.setType(obj->get_left_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp1.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp2 = Switcharrays[index].getRightexpr();
-    tmp2.setIndex(getId((obj->get_right_expr())));
-    tmp2.setType(obj->get_right_expr()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp2.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   } 
     if (obj->get_instances()) {  
       ::capnp::List<::ObjIndexType>::Builder Instancess = Switcharrays[index].initInstances(obj->get_instances()->size());
@@ -2989,16 +3132,16 @@ void Serializer::save(std::string file) {
     Switcharrays[index].setVpiSize(obj->get_vpiSize());
   if (obj->get_expr()) {
     ::ObjIndexType::Builder tmp0 = Switcharrays[index].getExpr();
-    tmp0.setIndex(getId((obj->get_expr())));
-    tmp0.setType(obj->get_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp0.setType(((BaseClass*)obj->get_expr())->getUhdmType());
   }  if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp1 = Switcharrays[index].getLeftexpr();
-    tmp1.setIndex(getId((obj->get_left_expr())));
-    tmp1.setType(obj->get_left_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp1.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp2 = Switcharrays[index].getRightexpr();
-    tmp2.setIndex(getId((obj->get_right_expr())));
-    tmp2.setType(obj->get_right_expr()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp2.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   } 
     if (obj->get_instances()) {  
       ::capnp::List<::ObjIndexType>::Builder Instancess = Switcharrays[index].initInstances(obj->get_instances()->size());
@@ -3029,8 +3172,8 @@ void Serializer::save(std::string file) {
     Udparrays[index].setVpiLineNo(obj->get_vpiLineNo());
   if (obj->get_delay()) {
     ::ObjIndexType::Builder tmp0 = Udparrays[index].getDelay();
-    tmp0.setIndex(getId((obj->get_delay())));
-    tmp0.setType(obj->get_delay()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_delay())));
+    tmp0.setType(((BaseClass*)obj->get_delay())->getUhdmType());
   } 
     if (obj->get_primitives()) {  
       ::capnp::List<::ObjIndexType>::Builder Primitivess = Udparrays[index].initPrimitives(obj->get_primitives()->size());
@@ -3045,16 +3188,16 @@ void Serializer::save(std::string file) {
     Udparrays[index].setVpiSize(obj->get_vpiSize());
   if (obj->get_expr()) {
     ::ObjIndexType::Builder tmp0 = Udparrays[index].getExpr();
-    tmp0.setIndex(getId((obj->get_expr())));
-    tmp0.setType(obj->get_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp0.setType(((BaseClass*)obj->get_expr())->getUhdmType());
   }  if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp1 = Udparrays[index].getLeftexpr();
-    tmp1.setIndex(getId((obj->get_left_expr())));
-    tmp1.setType(obj->get_left_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp1.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp2 = Udparrays[index].getRightexpr();
-    tmp2.setIndex(getId((obj->get_right_expr())));
-    tmp2.setType(obj->get_right_expr()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp2.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   } 
     if (obj->get_instances()) {  
       ::capnp::List<::ObjIndexType>::Builder Instancess = Udparrays[index].initInstances(obj->get_instances()->size());
@@ -3079,16 +3222,16 @@ void Serializer::save(std::string file) {
     Udparrays[index].setVpiSize(obj->get_vpiSize());
   if (obj->get_expr()) {
     ::ObjIndexType::Builder tmp0 = Udparrays[index].getExpr();
-    tmp0.setIndex(getId((obj->get_expr())));
-    tmp0.setType(obj->get_expr()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp0.setType(((BaseClass*)obj->get_expr())->getUhdmType());
   }  if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp1 = Udparrays[index].getLeftexpr();
-    tmp1.setIndex(getId((obj->get_left_expr())));
-    tmp1.setType(obj->get_left_expr()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp1.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
   }  if (obj->get_right_expr()) {
     ::ObjIndexType::Builder tmp2 = Udparrays[index].getRightexpr();
-    tmp2.setIndex(getId((obj->get_right_expr())));
-    tmp2.setType(obj->get_right_expr()->getUhdmType());
+    tmp2.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp2.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
   } 
     if (obj->get_instances()) {  
       ::capnp::List<::ObjIndexType>::Builder Instancess = Udparrays[index].initInstances(obj->get_instances()->size());
@@ -3570,12 +3713,12 @@ void Serializer::save(std::string file) {
     Interfaces[index].setVpiIndex(obj->get_vpiIndex());
   if (obj->get_expr_dist()) {
     ::ObjIndexType::Builder tmp0 = Interfaces[index].getExprdist();
-    tmp0.setIndex(getId((obj->get_expr_dist())));
-    tmp0.setType(obj->get_expr_dist()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr_dist())));
+    tmp0.setType(((BaseClass*)obj->get_expr_dist())->getUhdmType());
   }  if (obj->get_instance_array()) {
     ::ObjIndexType::Builder tmp1 = Interfaces[index].getInstancearray();
-    tmp1.setIndex(getId((obj->get_instance_array())));
-    tmp1.setType(obj->get_instance_array()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance_array())));
+    tmp1.setType(((BaseClass*)obj->get_instance_array())->getUhdmType());
   } 
     if (obj->get_process()) {  
       ::capnp::List<::ObjIndexType>::Builder Processs = Interfaces[index].initProcess(obj->get_process()->size());
@@ -3691,8 +3834,8 @@ void Serializer::save(std::string file) {
     }
   if (obj->get_instance()) {
     ::ObjIndexType::Builder tmp0 = Interfaces[index].getInstance();
-    tmp0.setIndex(getId((obj->get_instance())));
-    tmp0.setType(obj->get_instance()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp0.setType(((BaseClass*)obj->get_instance())->getUhdmType());
   } 
     if (obj->get_programs()) {  
       ::capnp::List<::uint64_t>::Builder Programss = Interfaces[index].initPrograms(obj->get_programs()->size());
@@ -3983,12 +4126,12 @@ void Serializer::save(std::string file) {
     Programs[index].setVpiIndex(obj->get_vpiIndex());
   if (obj->get_instance_array()) {
     ::ObjIndexType::Builder tmp0 = Programs[index].getInstancearray();
-    tmp0.setIndex(getId((obj->get_instance_array())));
-    tmp0.setType(obj->get_instance_array()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_instance_array())));
+    tmp0.setType(((BaseClass*)obj->get_instance_array())->getUhdmType());
   }  if (obj->get_expr_dist()) {
     ::ObjIndexType::Builder tmp1 = Programs[index].getExprdist();
-    tmp1.setIndex(getId((obj->get_expr_dist())));
-    tmp1.setType(obj->get_expr_dist()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_expr_dist())));
+    tmp1.setType(((BaseClass*)obj->get_expr_dist())->getUhdmType());
   } 
     if (obj->get_process()) {  
       ::capnp::List<::ObjIndexType>::Builder Processs = Programs[index].initProcess(obj->get_process()->size());
@@ -4089,8 +4232,8 @@ void Serializer::save(std::string file) {
     }
   if (obj->get_instance()) {
     ::ObjIndexType::Builder tmp0 = Programs[index].getInstance();
-    tmp0.setIndex(getId((obj->get_instance())));
-    tmp0.setType(obj->get_instance()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp0.setType(((BaseClass*)obj->get_instance())->getUhdmType());
   } 
     if (obj->get_programs()) {  
       ::capnp::List<::uint64_t>::Builder Programss = Programs[index].initPrograms(obj->get_programs()->size());
@@ -4441,8 +4584,8 @@ void Serializer::save(std::string file) {
     }
   if (obj->get_instance()) {
     ::ObjIndexType::Builder tmp0 = Packages[index].getInstance();
-    tmp0.setIndex(getId((obj->get_instance())));
-    tmp0.setType(obj->get_instance()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp0.setType(((BaseClass*)obj->get_instance())->getUhdmType());
   } 
     if (obj->get_programs()) {  
       ::capnp::List<::uint64_t>::Builder Programss = Packages[index].initPrograms(obj->get_programs()->size());
@@ -4735,12 +4878,12 @@ void Serializer::save(std::string file) {
     Modules[index].setVpiDefDecayTime(obj->get_vpiDefDecayTime());
   if (obj->get_expr_dist()) {
     ::ObjIndexType::Builder tmp0 = Modules[index].getExprdist();
-    tmp0.setIndex(getId((obj->get_expr_dist())));
-    tmp0.setType(obj->get_expr_dist()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr_dist())));
+    tmp0.setType(((BaseClass*)obj->get_expr_dist())->getUhdmType());
   }  if (obj->get_instance_array()) {
     ::ObjIndexType::Builder tmp1 = Modules[index].getInstancearray();
-    tmp1.setIndex(getId((obj->get_instance_array())));
-    tmp1.setType(obj->get_instance_array()->getUhdmType());
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance_array())));
+    tmp1.setType(((BaseClass*)obj->get_instance_array())->getUhdmType());
   } 
     if (obj->get_process()) {  
       ::capnp::List<::ObjIndexType>::Builder Processs = Modules[index].initProcess(obj->get_process()->size());
@@ -4917,8 +5060,8 @@ void Serializer::save(std::string file) {
     }
   if (obj->get_instance()) {
     ::ObjIndexType::Builder tmp0 = Modules[index].getInstance();
-    tmp0.setIndex(getId((obj->get_instance())));
-    tmp0.setType(obj->get_instance()->getUhdmType());
+    tmp0.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp0.setType(((BaseClass*)obj->get_instance())->getUhdmType());
   } 
     if (obj->get_programs()) {  
       ::capnp::List<::uint64_t>::Builder Programss = Modules[index].initPrograms(obj->get_programs()->size());

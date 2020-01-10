@@ -217,6 +217,10 @@ proc printMethods { type vpi card {real_type ""} } {
     if {$type == "string"} {
 	set type "std::string"
     }
+    set check ""
+    if {$type == "any"} {
+	set check "if (!${real_type}GroupCompliant(data)) return false;"
+    }
     if {$card == "1"} {
 	set pointer ""
 	if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string")} {
@@ -224,18 +228,14 @@ proc printMethods { type vpi card {real_type ""} } {
 	}
 	if {$type == "std::string"} {
 	    append methods "\n    ${type}${pointer} get_${vpi}() const { return SymbolFactory::getSymbol(${vpi}_); }\n"
-	    append methods "\n    void set_${vpi}(${type}${pointer} data) { ${vpi}_ = SymbolFactory::make(data); }\n"	    
+	    append methods "\n    bool set_${vpi}(${type}${pointer} data) { ${vpi}_ = SymbolFactory::make(data); return true; }\n" 
 	} else {
-	    append methods "\n    ${type}${pointer} get_${vpi}() const { return ${vpi}_; }\n"
-	    append methods "\n    void set_${vpi}(${type}${pointer} data) { ${vpi}_ = data; }\n"
+	    append methods "\n    ${type}${pointer} get_${vpi}() const { return ${vpi}_; }\n"	    
+	    append methods "\n    bool set_${vpi}(${type}${pointer} data) {${check} ${vpi}_ = data; return true;}\n"
 	}
     } elseif {$card == "any"} {
 	append methods "\n    VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
-	if {$type == "any"} {
-	    append methods "\n    bool set_${vpi}(VectorOf${type}* data) { if (!${real_type}GroupCompliant(data)) return false; ${vpi}_ = data; return true;}\n"
-	} else {
-	    append methods "\n    bool set_${vpi}(VectorOf${type}* data) { ${vpi}_ = data; return true;}\n"
-	}
+        append methods "\n    bool set_${vpi}(VectorOf${type}* data) {${check} ${vpi}_ = data; return true;}\n"
     }
     return $methods
 }
@@ -339,7 +339,7 @@ proc printGetHandleBody { classname type vpi object card } {
 	append vpi_get_handle_body "\n\
  if (handle->type == uhdm${classname}) {
      if (type == $vpi) {
-       return (vpiHandle) new uhdm_handle((($classname*)(object))->get_${object}()->getUhdmType(), (($classname*)(object))->get_${object}());\n\
+       return (vpiHandle) new uhdm_handle(((BaseClass*)(($classname*)(object))->get_${object}())->getUhdmType(), (($classname*)(object))->get_${object}());\n\
      } 
 }
 "
@@ -420,43 +420,50 @@ proc generate_group_checker { model } {
     set data [subst $$model]
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
-    
-    set fid [open "templates/group_header.h"]
-    set template [read $fid]
-    close $fid
-    
-    regsub -all {<GROUPNAME>} $template $groupname template
-    regsub -all {<UPPER_GROUPNAME>} $template [string toupper $groupname] template
 
-    set oid [open "headers/${groupname}.h" "w"]
-    set checktype ""
-    dict for {key val} $data {
-	if {($key == "obj_ref") || ($key == "class_ref")} {
-	    dict for {iter content} $val {
-		set name $iter
-		if {$checktype != ""} {
-		    append checktype " \\&\\& "
-		}
-		set uhdmclasstype uhdm$name
-		append checktype "(uhdmtype != $uhdmclasstype)"
-		if {$key == "class_ref"} {
-		    if [info exist ALL_CHILDREN($name)] {
-			foreach child $ALL_CHILDREN($name) {
-			    set name $child
-			    if {$checktype != ""} {
-				append checktype " \\&\\& "
+    set files [list [list "templates/group_header.h" "headers/${groupname}.h"] \
+		   [list "templates/group_header.cpp" "src/${groupname}.cpp"]]
+
+    foreach pair $files {
+	foreach {input output} $pair {}
+	       
+	set fid [open $input]
+	set template [read $fid]
+	close $fid
+    
+	regsub -all {<GROUPNAME>} $template $groupname template
+	regsub -all {<UPPER_GROUPNAME>} $template [string toupper $groupname] template
+ 	
+	set oid [open $output "w"]
+	set checktype ""
+	dict for {key val} $data {
+	    if {($key == "obj_ref") || ($key == "class_ref")} {
+		dict for {iter content} $val {
+		    set name $iter
+		    if {$checktype != ""} {
+			append checktype " \\&\\& "
+		    }
+		    set uhdmclasstype uhdm$name
+		    append checktype "(uhdmtype != $uhdmclasstype)"
+		    if {$key == "class_ref"} {
+			if [info exist ALL_CHILDREN($name)] {
+			    foreach child $ALL_CHILDREN($name) {
+				set name $child
+				if {$checktype != ""} {
+				    append checktype " \\&\\& "
+				}
+				set uhdmclasstype uhdm$name
+				append checktype "(uhdmtype != $uhdmclasstype)"
 			    }
-			    set uhdmclasstype uhdm$name
-			    append checktype "(uhdmtype != $uhdmclasstype)"
 			}
 		    }
 		}
-	    }
-	} 
+	    } 
+	}
+	regsub -all {<CHECKTYPE>} $template $checktype template 
+	puts $oid $template
+	close $oid
     }
-    regsub -all {<CHECKTYPE>} $template $checktype template 
-    puts $oid $template
-    close $oid
 }
 
 proc generate_code { models } {
@@ -642,14 +649,14 @@ proc generate_code { models } {
 			if {$key == "class_ref" || $key == "group_ref"} {
 			    append SAVE($classname) "  if (obj->get_${name}()) {\n"
 			    append SAVE($classname) "    ::ObjIndexType::Builder tmp$indTmp = ${Classname}s\[index\].get[string toupper ${Name} 0 0]();\n"
-			    append SAVE($classname) "    tmp${indTmp}.setIndex(getId((obj->get_${name}())));\n"
-			    append SAVE($classname) "    tmp${indTmp}.setType(obj->get_${name}()->getUhdmType());\n  }"			    
+			    append SAVE($classname) "    tmp${indTmp}.setIndex(getId(((BaseClass*) obj->get_${name}())));\n"
+			    append SAVE($classname) "    tmp${indTmp}.setType(((BaseClass*)obj->get_${name}())->getUhdmType());\n  }"			    
 			    
 			    incr indTmp
 			} else {
 			    append SAVE($classname) "    ${Classname}s\[index\].set[string toupper ${Name} 0 0](getId(obj->get_${name}()));\n"
 			}
-			if {$key == "class_ref"} {
+			if {$key == "class_ref" || $key == "group_ref"} {
 			    append RESTORE($classname) "     ${classname}Factory::objects_\[index\]->set_${name}((${type}*)getObject(obj.get[string toupper ${Name} 0 0]().getType(),obj.get[string toupper ${Name} 0 0]().getIndex()-1));\n"
 			} else {
 			    append RESTORE($classname) "   if (obj.get[string toupper ${Name} 0 0]()) 
@@ -797,7 +804,7 @@ proc generate_code { models } {
     close $fid 
     set uhdmId [open "headers/uhdm.h" "w"]
 
-    set name_id_map "\nstatic std::string getUhdmName(unsigned int type) \{
+    set name_id_map "\nstd::string getUhdmName(unsigned int type) \{
       switch (type) \{
 "
     foreach id [array names DEFINE_ID] {
@@ -806,7 +813,8 @@ proc generate_code { models } {
     append name_id_map "default: return \"NO TYPE\";
 \}
 \}\n"
-    append defines $name_id_map
+
+    append factories $name_id_map
     
     regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
     regsub -all {<INCLUDE_FILES>} $uhdm_content $headers uhdm_content
