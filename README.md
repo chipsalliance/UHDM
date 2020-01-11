@@ -56,4 +56,7 @@ Universal Hardware Data Model
  * $(CXX) -std=c++14 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/uhdm/libuhdm.a -lcapnp -lkj -ldl -lutil -lm -lrt -lpthread -o test_inst
 
 # Useful links
-http://ecee.colorado.edu/~mathys/ecen2350/IntelSoftware/pdf/IEEE_Std1800-2017_8299595.pdf
+* [SystemVerilog 2017](http://ecee.colorado.edu/~mathys/ecen2350/IntelSoftware/pdf/IEEE_Std1800-2017_8299595.pdf) - System Verilog Standard
+* [Surelog](https://github.com/alainmarcel/Surelog/) - Surelog parser
+* [Verible](https://github.com/google/verible) - Verible linter
+
