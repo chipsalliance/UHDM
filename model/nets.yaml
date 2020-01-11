@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,3 +15,158 @@
 # Universal Hardware Data Model (UHDM) "nets" formal description
  
 - class_def: nets
+  - property: array_member
+    name: array member
+    vpi: vpiArrayMember
+    type: bool
+    card: 1
+  - property: constant_selection
+    name: constant selection
+    vpi: vpiConstantSelect
+    type: bool
+    card: 1
+  - property: expanded
+    name: expanded
+    vpi: vpiExpanded
+    type: bool
+    card: 1
+  - property: implicitly_declared
+    name: implicitly declared
+    vpi: vpiImplicitDecl
+    type: bool
+    card: 1
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+  - property: net_decl_assign
+    name: net decl assign
+    vpi: vpiNetDeclAssign
+    type: bool
+    card: 1
+  - property: net_type
+    name: net type
+    vpi: vpiNetType
+    type: unsigned int
+    card: 1
+  - property: resolved_net_type
+    name: resolved net type
+    vpi: vpiResolvedNetType
+    type: unsigned int
+    card: 1
+  - property: scalar
+    name: scalar
+    vpi: vpiScalar
+    type: bool
+    card: 1
+  - property: scalared_declaration
+    name: scalared declaration
+    vpi: vpiExplicitScalared
+    type: bool
+    card: 1
+  - property: sign
+    name: sign
+    vpi: vpiSigned
+    type: bool
+    card: 1
+  - property: size
+    name: size
+    vpi: vpiSize
+    type: int
+    card: 1
+  - property: strength0
+    name: strength0
+    vpi: vpiStrength0
+    type: int
+    card: 1
+  - property: strength1
+    name: strength1
+    vpi: vpiStrength1
+    type: int
+    card: 1
+  - property: charge_strength
+    name: charge strength
+    vpi: vpiChargeStrength
+    type: int
+    card: 1
+  - property: vector
+    name: vector
+    vpi: vpiVector
+    type: bool
+    card: 1
+  - property: vectored_declaration
+    name: vectored declaration
+    vpi: vpiExplicitVectored
+    type: bool
+    card: 1
+  - property: member
+    name: member
+    vpi: vpiStructUnionMember
+    type: bool
+    card: 1
+  - class_ref: ports
+    name: ports
+    vpi: vpiPortInst
+    type: ports
+    card: any
+  - class_ref: drivers
+    name: drivers
+    vpi: vpiDriver
+    type: net_drivers
+    card: any
+  - class_ref: loads
+    name: loads
+    vpi: vpiLoad
+    type: net_loads
+    card: any
+  - class_ref: local_drivers
+    name: local drivers
+    vpi: vpiLocalDriver
+    type: net_drivers
+    card: any
+  - class_ref: local_loads
+    name: local loads
+    vpi: vpiLocalLoad
+    type: net_loads
+    card: any
+  - obj_ref: prim_terms
+    name: prim terms
+    vpi: vpiPrimTerm
+    type: prim_term
+    card: any
+  - obj_ref: cont_assigns
+    name: cont assigns
+    vpi: vpiContAssign
+    type: cont_assign
+    card: any
+  - obj_ref: path_term
+    name: path term
+    vpi: vpiPathTerm
+    type: path_term
+    card: any
+  - obj_ref: tchk_term
+    name: tchk term
+    vpi: vpiTchkTerm
+    type: tchk_term
+    card: any
+  - class_ref: sim_nets
+    name: sim nets
+    vpi: vpiSimNet
+    type: nets
+    card: 1
+  - class_ref: typespec
+    name: typespec
+    vpi: vpiTypespec
+    type: typespec
+    card: 1
+  - obj_ref: module
+    name: module
+    vpi: vpiModule
+    type: module
+    card: 1

@@ -33,7 +33,7 @@ namespace UHDM {
   bool ref_obj_interf_net_var_groupGroupCompliant(any* item) {
     BaseClass* the_item = (BaseClass*) item;
     unsigned int uhdmtype = the_item->getUhdmType();
-    if ((uhdmtype != uhdmnets) && (uhdmtype != uhdmvariables) && (uhdmtype != uhdmref_obj) && (uhdmtype != uhdminterface_tf_decl)) {
+    if ((uhdmtype != uhdmnets) && (uhdmtype != uhdmarray_net) && (uhdmtype != uhdmnet) && (uhdmtype != uhdmvariables) && (uhdmtype != uhdmref_obj) && (uhdmtype != uhdminterface_tf_decl)) {
       std::cout << "Internal Error: adding wrong object type (" << getUhdmName(uhdmtype) << ") in a ref_obj_interf_net_var_group group!\n";   
       return false;
     }
