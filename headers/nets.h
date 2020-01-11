@@ -34,9 +34,195 @@ namespace UHDM {
     // comment: nets();
     ~nets()  {}
     
+    bool get_vpiArrayMember() const { return vpiArrayMember_; }
+
+    bool set_vpiArrayMember(bool data) { vpiArrayMember_ = data; return true;}
+
+    bool get_vpiConstantSelect() const { return vpiConstantSelect_; }
+
+    bool set_vpiConstantSelect(bool data) { vpiConstantSelect_ = data; return true;}
+
+    bool get_vpiExpanded() const { return vpiExpanded_; }
+
+    bool set_vpiExpanded(bool data) { vpiExpanded_ = data; return true;}
+
+    bool get_vpiImplicitDecl() const { return vpiImplicitDecl_; }
+
+    bool set_vpiImplicitDecl(bool data) { vpiImplicitDecl_ = data; return true;}
+
+    std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
+
+    bool set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); return true; }
+
+    std::string get_vpiFullName() const { return SymbolFactory::getSymbol(vpiFullName_); }
+
+    bool set_vpiFullName(std::string data) { vpiFullName_ = SymbolFactory::make(data); return true; }
+
+    bool get_vpiNetDeclAssign() const { return vpiNetDeclAssign_; }
+
+    bool set_vpiNetDeclAssign(bool data) { vpiNetDeclAssign_ = data; return true;}
+
+    unsigned int get_vpiNetType() const { return vpiNetType_; }
+
+    bool set_vpiNetType(unsigned int data) { vpiNetType_ = data; return true;}
+
+    unsigned int get_vpiResolvedNetType() const { return vpiResolvedNetType_; }
+
+    bool set_vpiResolvedNetType(unsigned int data) { vpiResolvedNetType_ = data; return true;}
+
+    bool get_vpiScalar() const { return vpiScalar_; }
+
+    bool set_vpiScalar(bool data) { vpiScalar_ = data; return true;}
+
+    bool get_vpiExplicitScalared() const { return vpiExplicitScalared_; }
+
+    bool set_vpiExplicitScalared(bool data) { vpiExplicitScalared_ = data; return true;}
+
+    bool get_vpiSigned() const { return vpiSigned_; }
+
+    bool set_vpiSigned(bool data) { vpiSigned_ = data; return true;}
+
+    int get_vpiSize() const { return vpiSize_; }
+
+    bool set_vpiSize(int data) { vpiSize_ = data; return true;}
+
+    int get_vpiStrength0() const { return vpiStrength0_; }
+
+    bool set_vpiStrength0(int data) { vpiStrength0_ = data; return true;}
+
+    int get_vpiStrength1() const { return vpiStrength1_; }
+
+    bool set_vpiStrength1(int data) { vpiStrength1_ = data; return true;}
+
+    int get_vpiChargeStrength() const { return vpiChargeStrength_; }
+
+    bool set_vpiChargeStrength(int data) { vpiChargeStrength_ = data; return true;}
+
+    bool get_vpiVector() const { return vpiVector_; }
+
+    bool set_vpiVector(bool data) { vpiVector_ = data; return true;}
+
+    bool get_vpiExplicitVectored() const { return vpiExplicitVectored_; }
+
+    bool set_vpiExplicitVectored(bool data) { vpiExplicitVectored_ = data; return true;}
+
+    bool get_vpiStructUnionMember() const { return vpiStructUnionMember_; }
+
+    bool set_vpiStructUnionMember(bool data) { vpiStructUnionMember_ = data; return true;}
+
+    VectorOfports* get_ports() const { return ports_; }
+
+    bool set_ports(VectorOfports* data) { ports_ = data; return true;}
+
+    VectorOfnet_drivers* get_drivers() const { return drivers_; }
+
+    bool set_drivers(VectorOfnet_drivers* data) { drivers_ = data; return true;}
+
+    VectorOfnet_loads* get_loads() const { return loads_; }
+
+    bool set_loads(VectorOfnet_loads* data) { loads_ = data; return true;}
+
+    VectorOfnet_drivers* get_local_drivers() const { return local_drivers_; }
+
+    bool set_local_drivers(VectorOfnet_drivers* data) { local_drivers_ = data; return true;}
+
+    VectorOfnet_loads* get_local_loads() const { return local_loads_; }
+
+    bool set_local_loads(VectorOfnet_loads* data) { local_loads_ = data; return true;}
+
+    nets* get_sim_nets() const { return sim_nets_; }
+
+    bool set_sim_nets(nets* data) { sim_nets_ = data; return true;}
+
+    typespec* get_typespec() const { return typespec_; }
+
+    bool set_typespec(typespec* data) { typespec_ = data; return true;}
+
+    VectorOfprim_term* get_prim_terms() const { return prim_terms_; }
+
+    bool set_prim_terms(VectorOfprim_term* data) { prim_terms_ = data; return true;}
+
+    VectorOfcont_assign* get_cont_assigns() const { return cont_assigns_; }
+
+    bool set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; return true;}
+
+    VectorOfpath_term* get_path_term() const { return path_term_; }
+
+    bool set_path_term(VectorOfpath_term* data) { path_term_ = data; return true;}
+
+    VectorOftchk_term* get_tchk_term() const { return tchk_term_; }
+
+    bool set_tchk_term(VectorOftchk_term* data) { tchk_term_ = data; return true;}
+
+    module* get_module() const { return module_; }
+
+    bool set_module(module* data) { module_ = data; return true;}
+
     virtual unsigned int getUhdmType() { return uhdmnets; }   
   private:
     
+    bool vpiArrayMember_;
+
+    bool vpiConstantSelect_;
+
+    bool vpiExpanded_;
+
+    bool vpiImplicitDecl_;
+
+    unsigned int vpiName_;
+
+    unsigned int vpiFullName_;
+
+    bool vpiNetDeclAssign_;
+
+    unsigned int vpiNetType_;
+
+    unsigned int vpiResolvedNetType_;
+
+    bool vpiScalar_;
+
+    bool vpiExplicitScalared_;
+
+    bool vpiSigned_;
+
+    int vpiSize_;
+
+    int vpiStrength0_;
+
+    int vpiStrength1_;
+
+    int vpiChargeStrength_;
+
+    bool vpiVector_;
+
+    bool vpiExplicitVectored_;
+
+    bool vpiStructUnionMember_;
+
+    VectorOfports* ports_;
+
+    VectorOfnet_drivers* drivers_;
+
+    VectorOfnet_loads* loads_;
+
+    VectorOfnet_drivers* local_drivers_;
+
+    VectorOfnet_loads* local_loads_;
+
+    nets* sim_nets_;
+
+    typespec* typespec_;
+
+    VectorOfprim_term* prim_terms_;
+
+    VectorOfcont_assign* cont_assigns_;
+
+    VectorOfpath_term* path_term_;
+
+    VectorOftchk_term* tchk_term_;
+
+    module* module_;
+
   };
 
   class netsFactory {

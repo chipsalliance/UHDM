@@ -17,22 +17,22 @@
  */
 
 /*
- * File:   array_net.h
+ * File:   prim_term.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef ARRAY_NET_H
-#define ARRAY_NET_H
+#ifndef PRIM_TERM_H
+#define PRIM_TERM_H
 
 namespace UHDM {
 
-  class array_net : public nets {
+  class prim_term : public BaseClass {
   public:
     // Implicit constructor used to initialize all members,
-    // comment: array_net();
-    ~array_net() final {}
+    // comment: prim_term();
+    ~prim_term() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
 
@@ -50,17 +50,9 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
-    VectorOfnet* get_nets() const { return nets_; }
+    unsigned int get_vpiType() { return vpiPrimTerm; }
 
-    bool set_nets(VectorOfnet* data) { nets_ = data; return true;}
-
-    VectorOfrange* get_range() const { return range_; }
-
-    bool set_range(VectorOfrange* data) { range_ = data; return true;}
-
-    unsigned int get_vpiType() { return vpiArrayNet; }
-
-    virtual unsigned int getUhdmType() { return uhdmarray_net; }   
+    virtual unsigned int getUhdmType() { return uhdmprim_term; }   
   private:
     
     BaseClass* vpiParent_;
@@ -71,34 +63,30 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
-    VectorOfnet* nets_;
-
-    VectorOfrange* range_;
-
   };
 
-  class array_netFactory {
+  class prim_termFactory {
   friend Serializer;
   public:
-  static array_net* make() {
-    array_net* obj = new array_net();
+  static prim_term* make() {
+    prim_term* obj = new prim_term();
     objects_.push_back(obj);
     return obj;
   }
   private:
-    static std::vector<array_net*> objects_;
+    static std::vector<prim_term*> objects_;
   };
  	      
-  class VectorOfarray_netFactory {
+  class VectorOfprim_termFactory {
   friend Serializer;
   public:
-  static std::vector<array_net*>* make() {
-    std::vector<array_net*>* obj = new std::vector<array_net*>();
+  static std::vector<prim_term*>* make() {
+    std::vector<prim_term*>* obj = new std::vector<prim_term*>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-  static std::vector<std::vector<array_net*>*> objects_;
+  static std::vector<std::vector<prim_term*>*> objects_;
   };
 
 };

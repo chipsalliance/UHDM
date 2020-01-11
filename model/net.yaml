@@ -15,3 +15,4 @@
 # Universal Hardware Data Model (UHDM) "net" formal description
  
 - class_def: net
+  - extends: nets

@@ -33,7 +33,7 @@ namespace UHDM {
   bool actual_groupGroupCompliant(any* item) {
     BaseClass* the_item = (BaseClass*) item;
     unsigned int uhdmtype = the_item->getUhdmType();
-    if ((uhdmtype != uhdmnets) && (uhdmtype != uhdmvariables) && (uhdmtype != uhdminterface) && (uhdmtype != uhdminterface_array) && (uhdmtype != uhdmmodport) && (uhdmtype != uhdmnamed_event) && (uhdmtype != uhdmnamed_event_array) && (uhdmtype != uhdmpart_select)) {
+    if ((uhdmtype != uhdmnets) && (uhdmtype != uhdmarray_net) && (uhdmtype != uhdmnet) && (uhdmtype != uhdmvariables) && (uhdmtype != uhdminterface) && (uhdmtype != uhdminterface_array) && (uhdmtype != uhdmmodport) && (uhdmtype != uhdmnamed_event) && (uhdmtype != uhdmnamed_event_array) && (uhdmtype != uhdmpart_select)) {
       std::cout << "Internal Error: adding wrong object type (" << getUhdmName(uhdmtype) << ") in a actual_group group!\n";   
       return false;
     }

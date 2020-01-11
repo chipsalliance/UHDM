@@ -47,20 +47,23 @@ struct UhdmRoot {
   factoryGatearray @38 :List(Gatearray);
   factorySwitcharray @39 :List(Switcharray);
   factoryUdparray @40 :List(Udparray);
-  factoryArraynet @41 :List(Arraynet);
-  factoryLogicvar @42 :List(Logicvar);
-  factoryArrayvar @43 :List(Arrayvar);
-  factoryNamedevent @44 :List(Namedevent);
-  factoryNamedeventarray @45 :List(Namedeventarray);
-  factorySpecparam @46 :List(Specparam);
-  factoryClassdefn @47 :List(Classdefn);
-  factoryClasstypespec @48 :List(Classtypespec);
-  factoryClassobj @49 :List(Classobj);
-  factoryInterface @50 :List(Interface);
-  factoryProgram @51 :List(Program);
-  factoryPackage @52 :List(Package);
-  factoryModule @53 :List(Module);
-  factoryDesign @54 :List(Design);
+  factoryPrimterm @41 :List(Primterm);
+  factoryPathterm @42 :List(Pathterm);
+  factoryTchkterm @43 :List(Tchkterm);
+  factoryArraynet @44 :List(Arraynet);
+  factoryLogicvar @45 :List(Logicvar);
+  factoryArrayvar @46 :List(Arrayvar);
+  factoryNamedevent @47 :List(Namedevent);
+  factoryNamedeventarray @48 :List(Namedeventarray);
+  factorySpecparam @49 :List(Specparam);
+  factoryClassdefn @50 :List(Classdefn);
+  factoryClasstypespec @51 :List(Classtypespec);
+  factoryClassobj @52 :List(Classobj);
+  factoryInterface @53 :List(Interface);
+  factoryProgram @54 :List(Program);
+  factoryPackage @55 :List(Package);
+  factoryModule @56 :List(Module);
+  factoryDesign @57 :List(Design);
 
 }
 
@@ -631,11 +634,62 @@ instances @12 :List(ObjIndexType);
 range @13 :UInt64;
 modules @14 :List(UInt64);
 }
+struct Primterm {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
+struct Pathterm {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
+struct Tchkterm {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+}
 struct Arraynet {
 vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
+nets @4 :List(ObjIndexType);
+range @5 :List(UInt64);
+vpiArrayMember @6 :Bool;
+vpiConstantSelect @7 :Bool;
+vpiExpanded @8 :Bool;
+vpiImplicitDecl @9 :Bool;
+vpiName @10 :UInt64;
+vpiFullName @11 :UInt64;
+vpiNetDeclAssign @12 :Bool;
+vpiNetType @13 :UInt64;
+vpiResolvedNetType @14 :UInt64;
+vpiScalar @15 :Bool;
+vpiExplicitScalared @16 :Bool;
+vpiSigned @17 :Bool;
+vpiSize @18 :Int64;
+vpiStrength0 @19 :Int64;
+vpiStrength1 @20 :Int64;
+vpiChargeStrength @21 :Int64;
+vpiVector @22 :Bool;
+vpiExplicitVectored @23 :Bool;
+vpiStructUnionMember @24 :Bool;
+ports @25 :List(ObjIndexType);
+drivers @26 :List(ObjIndexType);
+loads @27 :List(ObjIndexType);
+localdrivers @28 :List(ObjIndexType);
+localloads @29 :List(ObjIndexType);
+simnets @30 :ObjIndexType;
+typespec @31 :ObjIndexType;
+primterms @32 :List(UInt64);
+contassigns @33 :List(UInt64);
+pathterm @34 :List(UInt64);
+tchkterm @35 :List(UInt64);
+module @36 :UInt64;
 }
 struct Logicvar {
 vpiParent @0 :UInt64;

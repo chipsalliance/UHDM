@@ -52,8 +52,14 @@ primitive_array.yaml
 gate_array.yaml
 switch_array.yaml
 udp_array.yaml
-net.yaml
+typespec.yaml
+net_drivers.yaml
+net_loads.yaml
+prim_term.yaml
+path_term.yaml
+tchk_term.yaml
 nets.yaml
+net.yaml
 array_net.yaml
 logic_var.yaml
 array_var.yaml
@@ -62,7 +68,6 @@ named_event_array.yaml
 parameters.yaml
 spec_param.yaml
 assertion.yaml
-typespec.yaml
 class_defn.yaml
 class_typespec.yaml
 class_obj.yaml

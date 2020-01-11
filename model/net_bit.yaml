@@ -12,17 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "array net" formal description
+# Universal Hardware Data Model (UHDM) "net bit" formal description
  
-- obj_def: array_net
+- obj_def: net_bit
   - extends: nets
-  - obj_ref: range
-    name: range
-    vpi: vpiRange
-    type: range
-    card: any
-  - class_ref: nets
-    name: nets
-    vpi: vpiNet
-    type: net
+  - class_ref: expr
+    name: expr
+    vpi: vpiIndex
+    type: expr
     card: any

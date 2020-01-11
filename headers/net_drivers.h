@@ -17,50 +17,50 @@
  */
 
 /*
- * File:   net.h
+ * File:   net_drivers.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef NET_H
-#define NET_H
+#ifndef NET_DRIVERS_H
+#define NET_DRIVERS_H
 
 namespace UHDM {
 
-  class net : public nets {
+  class net_drivers : public BaseClass {
   public:
     // Implicit constructor used to initialize all members,
-    // comment: net();
-    ~net()  {}
+    // comment: net_drivers();
+    ~net_drivers()  {}
     
-    virtual unsigned int getUhdmType() { return uhdmnet; }   
+    virtual unsigned int getUhdmType() { return uhdmnet_drivers; }   
   private:
     
   };
 
-  class netFactory {
+  class net_driversFactory {
   friend Serializer;
   public:
-  static net* make() {
-    net* obj = new net();
+  static net_drivers* make() {
+    net_drivers* obj = new net_drivers();
     objects_.push_back(obj);
     return obj;
   }
   private:
-    static std::vector<net*> objects_;
+    static std::vector<net_drivers*> objects_;
   };
  	      
-  class VectorOfnetFactory {
+  class VectorOfnet_driversFactory {
   friend Serializer;
   public:
-  static std::vector<net*>* make() {
-    std::vector<net*>* obj = new std::vector<net*>();
+  static std::vector<net_drivers*>* make() {
+    std::vector<net_drivers*>* obj = new std::vector<net_drivers*>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-  static std::vector<std::vector<net*>*> objects_;
+  static std::vector<std::vector<net_drivers*>*> objects_;
   };
 
 };

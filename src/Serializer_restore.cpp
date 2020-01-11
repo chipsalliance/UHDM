@@ -248,6 +248,21 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(udp_arrayFactory::make(), ind);
  }
 
+ ::capnp::List<Primterm>::Reader Primterms = cap_root.getFactoryPrimterm();
+ for (unsigned ind = 0; ind < Primterms.size(); ind++) {
+   setId(prim_termFactory::make(), ind);
+ }
+
+ ::capnp::List<Pathterm>::Reader Pathterms = cap_root.getFactoryPathterm();
+ for (unsigned ind = 0; ind < Pathterms.size(); ind++) {
+   setId(path_termFactory::make(), ind);
+ }
+
+ ::capnp::List<Tchkterm>::Reader Tchkterms = cap_root.getFactoryTchkterm();
+ for (unsigned ind = 0; ind < Tchkterms.size(); ind++) {
+   setId(tchk_termFactory::make(), ind);
+ }
+
  ::capnp::List<Arraynet>::Reader Arraynets = cap_root.getFactoryArraynet();
  for (unsigned ind = 0; ind < Arraynets.size(); ind++) {
    setId(array_netFactory::make(), ind);
@@ -2622,11 +2637,152 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  }
 
  index = 0;
+ for (Primterm::Reader obj : Primterms) {
+   prim_termFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   prim_termFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   prim_termFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   prim_termFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
+ for (Pathterm::Reader obj : Pathterms) {
+   path_termFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   path_termFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   path_termFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   path_termFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
+ for (Tchkterm::Reader obj : Tchkterms) {
+   tchk_termFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   tchk_termFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   tchk_termFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   tchk_termFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+
+   index++;
+ }
+
+ index = 0;
  for (Arraynet::Reader obj : Arraynets) {
    array_netFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
    array_netFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    array_netFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    array_netFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    
+    if (obj.getNets().size()) { 
+      std::vector<net*>* vect = VectorOfnetFactory::make();
+      for (unsigned int ind = 0; ind < obj.getNets().size(); ind++) {
+ 	vect->push_back((net*)getObject(obj.getNets()[ind].getType(),obj.getNets()[ind].getIndex()-1));
+      }
+      array_netFactory::objects_[index]->set_nets(vect);
+    }
+    
+    if (obj.getRange().size()) { 
+      std::vector<range*>* vect = VectorOfrangeFactory::make();
+      for (unsigned int ind = 0; ind < obj.getRange().size(); ind++) {
+ 	vect->push_back(rangeFactory::objects_[obj.getRange()[ind]-1]);
+      }
+      array_netFactory::objects_[index]->set_range(vect);
+    }
+    array_netFactory::objects_[index]->set_vpiArrayMember(obj.getVpiArrayMember());
+    array_netFactory::objects_[index]->set_vpiConstantSelect(obj.getVpiConstantSelect());
+    array_netFactory::objects_[index]->set_vpiExpanded(obj.getVpiExpanded());
+    array_netFactory::objects_[index]->set_vpiImplicitDecl(obj.getVpiImplicitDecl());
+    array_netFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    array_netFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));
+    array_netFactory::objects_[index]->set_vpiNetDeclAssign(obj.getVpiNetDeclAssign());
+    array_netFactory::objects_[index]->set_vpiNetType(obj.getVpiNetType());
+    array_netFactory::objects_[index]->set_vpiResolvedNetType(obj.getVpiResolvedNetType());
+    array_netFactory::objects_[index]->set_vpiScalar(obj.getVpiScalar());
+    array_netFactory::objects_[index]->set_vpiExplicitScalared(obj.getVpiExplicitScalared());
+    array_netFactory::objects_[index]->set_vpiSigned(obj.getVpiSigned());
+    array_netFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+    array_netFactory::objects_[index]->set_vpiStrength0(obj.getVpiStrength0());
+    array_netFactory::objects_[index]->set_vpiStrength1(obj.getVpiStrength1());
+    array_netFactory::objects_[index]->set_vpiChargeStrength(obj.getVpiChargeStrength());
+    array_netFactory::objects_[index]->set_vpiVector(obj.getVpiVector());
+    array_netFactory::objects_[index]->set_vpiExplicitVectored(obj.getVpiExplicitVectored());
+    array_netFactory::objects_[index]->set_vpiStructUnionMember(obj.getVpiStructUnionMember());
+    
+    if (obj.getPorts().size()) { 
+      std::vector<ports*>* vect = VectorOfportsFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPorts().size(); ind++) {
+ 	vect->push_back((ports*)getObject(obj.getPorts()[ind].getType(),obj.getPorts()[ind].getIndex()-1));
+      }
+      array_netFactory::objects_[index]->set_ports(vect);
+    }
+    
+    if (obj.getDrivers().size()) { 
+      std::vector<net_drivers*>* vect = VectorOfnet_driversFactory::make();
+      for (unsigned int ind = 0; ind < obj.getDrivers().size(); ind++) {
+ 	vect->push_back((net_drivers*)getObject(obj.getDrivers()[ind].getType(),obj.getDrivers()[ind].getIndex()-1));
+      }
+      array_netFactory::objects_[index]->set_drivers(vect);
+    }
+    
+    if (obj.getLoads().size()) { 
+      std::vector<net_loads*>* vect = VectorOfnet_loadsFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLoads().size(); ind++) {
+ 	vect->push_back((net_loads*)getObject(obj.getLoads()[ind].getType(),obj.getLoads()[ind].getIndex()-1));
+      }
+      array_netFactory::objects_[index]->set_loads(vect);
+    }
+    
+    if (obj.getLocaldrivers().size()) { 
+      std::vector<net_drivers*>* vect = VectorOfnet_driversFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLocaldrivers().size(); ind++) {
+ 	vect->push_back((net_drivers*)getObject(obj.getLocaldrivers()[ind].getType(),obj.getLocaldrivers()[ind].getIndex()-1));
+      }
+      array_netFactory::objects_[index]->set_local_drivers(vect);
+    }
+    
+    if (obj.getLocalloads().size()) { 
+      std::vector<net_loads*>* vect = VectorOfnet_loadsFactory::make();
+      for (unsigned int ind = 0; ind < obj.getLocalloads().size(); ind++) {
+ 	vect->push_back((net_loads*)getObject(obj.getLocalloads()[ind].getType(),obj.getLocalloads()[ind].getIndex()-1));
+      }
+      array_netFactory::objects_[index]->set_local_loads(vect);
+    }
+     array_netFactory::objects_[index]->set_sim_nets((nets*)getObject(obj.getSimnets().getType(),obj.getSimnets().getIndex()-1));
+     array_netFactory::objects_[index]->set_typespec((typespec*)getObject(obj.getTypespec().getType(),obj.getTypespec().getIndex()-1));
+    
+    if (obj.getPrimterms().size()) { 
+      std::vector<prim_term*>* vect = VectorOfprim_termFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPrimterms().size(); ind++) {
+ 	vect->push_back(prim_termFactory::objects_[obj.getPrimterms()[ind]-1]);
+      }
+      array_netFactory::objects_[index]->set_prim_terms(vect);
+    }
+    
+    if (obj.getContassigns().size()) { 
+      std::vector<cont_assign*>* vect = VectorOfcont_assignFactory::make();
+      for (unsigned int ind = 0; ind < obj.getContassigns().size(); ind++) {
+ 	vect->push_back(cont_assignFactory::objects_[obj.getContassigns()[ind]-1]);
+      }
+      array_netFactory::objects_[index]->set_cont_assigns(vect);
+    }
+    
+    if (obj.getPathterm().size()) { 
+      std::vector<path_term*>* vect = VectorOfpath_termFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPathterm().size(); ind++) {
+ 	vect->push_back(path_termFactory::objects_[obj.getPathterm()[ind]-1]);
+      }
+      array_netFactory::objects_[index]->set_path_term(vect);
+    }
+    
+    if (obj.getTchkterm().size()) { 
+      std::vector<tchk_term*>* vect = VectorOftchk_termFactory::make();
+      for (unsigned int ind = 0; ind < obj.getTchkterm().size(); ind++) {
+ 	vect->push_back(tchk_termFactory::objects_[obj.getTchkterm()[ind]-1]);
+      }
+      array_netFactory::objects_[index]->set_tchk_term(vect);
+    }
+    if (obj.getModule()) 
+      array_netFactory::objects_[index]->set_module(moduleFactory::objects_[obj.getModule()-1]);
 
    index++;
  }
