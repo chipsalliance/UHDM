@@ -50,6 +50,22 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
+    std::string get_vpiName() const { return SymbolFactory::getSymbol(vpiName_); }
+
+    bool set_vpiName(std::string data) { vpiName_ = SymbolFactory::make(data); return true; }
+
+    std::string get_vpiFullName() const { return SymbolFactory::getSymbol(vpiFullName_); }
+
+    bool set_vpiFullName(std::string data) { vpiFullName_ = SymbolFactory::make(data); return true; }
+
+    std::string get_vpiDefName() const { return SymbolFactory::getSymbol(vpiDefName_); }
+
+    bool set_vpiDefName(std::string data) { vpiDefName_ = SymbolFactory::make(data); return true; }
+
+    bool get_vpiGeneric() const { return vpiGeneric_; }
+
+    bool set_vpiGeneric(bool data) { vpiGeneric_ = data; return true;}
+
     VectorOfports* get_ports() const { return ports_; }
 
     bool set_ports(VectorOfports* data) { ports_ = data; return true;}
@@ -57,6 +73,14 @@ namespace UHDM {
     typespec* get_typespec() const { return typespec_; }
 
     bool set_typespec(typespec* data) { typespec_ = data; return true;}
+
+    instance* get_instance() const { return instance_; }
+
+    bool set_instance(instance* data) { instance_ = data; return true;}
+
+    task_func* get_task_func() const { return task_func_; }
+
+    bool set_task_func(task_func* data) { task_func_ = data; return true;}
 
     any* get_actual_group() const { return actual_group_; }
 
@@ -75,9 +99,21 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
+    unsigned int vpiName_;
+
+    unsigned int vpiFullName_;
+
+    unsigned int vpiDefName_;
+
+    bool vpiGeneric_;
+
     VectorOfports* ports_;
 
     typespec* typespec_;
+
+    instance* instance_;
+
+    task_func* task_func_;
 
     any* actual_group_;
 

@@ -55,6 +55,7 @@ typedef void any;
 #include "headers/distribution.h"
 #include "headers/operand_group.h"
 #include "headers/operation.h"
+#include "headers/part_select.h"
 #include "headers/actual_group.h"
 #include "headers/ref_obj.h"
 #include "headers/variables.h"
@@ -212,6 +213,12 @@ vpiHandle vpi_handle (PLI_INT32 type,
  } 
 }
 
+ if (handle->type == uhdmpart_select) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((part_select*)(object))->get_vpiParent())->getUhdmType(), ((part_select*)(object))->get_vpiParent());
+ } 
+}
+
  if (handle->type == uhdmref_obj) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((BaseClass*)((ref_obj*)(object))->get_vpiParent())->getUhdmType(), ((ref_obj*)(object))->get_vpiParent());
@@ -221,6 +228,18 @@ vpiHandle vpi_handle (PLI_INT32 type,
  if (handle->type == uhdmref_obj) {
      if (type == vpiTypespec) {
        return (vpiHandle) new uhdm_handle(((BaseClass*)((ref_obj*)(object))->get_typespec())->getUhdmType(), ((ref_obj*)(object))->get_typespec());
+ } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (type == vpiInstance) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((ref_obj*)(object))->get_instance())->getUhdmType(), ((ref_obj*)(object))->get_instance());
+ } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (type == vpiTaskFunc) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((ref_obj*)(object))->get_task_func())->getUhdmType(), ((ref_obj*)(object))->get_task_func());
  } 
 }
 
@@ -5305,9 +5324,27 @@ PLI_INT32 vpi_get (PLI_INT32   property,
      } 
 }
 
+ if (handle->type == uhdmpart_select) {
+     if (property == vpiLineNo) {
+       return ((part_select*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmpart_select) {
+     if (property == vpiType) {
+       return ((part_select*)(obj))->get_vpiType();
+     } 
+}
+
  if (handle->type == uhdmref_obj) {
      if (property == vpiLineNo) {
        return ((ref_obj*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (property == vpiGeneric) {
+       return ((ref_obj*)(obj))->get_vpiGeneric();
      } 
 }
 
@@ -6661,9 +6698,27 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmpart_select) {
+     if (property == vpiLineNo) {
+       return ((part_select*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmpart_select) {
+     if (property == vpiType) {
+       return ((part_select*)(obj))->get_vpiType();
+     } 
+}
+
  if (handle->type == uhdmref_obj) {
      if (property == vpiLineNo) {
        return ((ref_obj*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (property == vpiGeneric) {
+       return ((ref_obj*)(obj))->get_vpiGeneric();
      } 
 }
 
@@ -8011,9 +8066,33 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmpart_select) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((part_select*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
  if (handle->type == uhdmref_obj) {
      if (property == vpiFile) {
        return (PLI_BYTE8*) strdup(((ref_obj*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((ref_obj*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((ref_obj*)(obj))->get_vpiFullName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (property == vpiDefName) {
+       return (PLI_BYTE8*) strdup(((ref_obj*)(obj))->get_vpiDefName().c_str());
      } 
 }
 

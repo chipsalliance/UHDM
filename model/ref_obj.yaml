@@ -15,6 +15,26 @@
 # Universal Hardware Data Model (UHDM) "ref_obj" formal description
  
 - obj_def: ref_obj
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+  - property: definition_name
+    name: definition name
+    vpi: vpiDefName
+    type: string
+    card: 1  
+  - property: generic
+    name: generic
+    vpi: vpiGeneric
+    type: bool
+    card: 1 
   - class_ref: ports
     name: ports
     vpi: vpiPortInst
@@ -30,3 +50,13 @@
     vpi: vpiActual
     type: actual_group
     card: 1
+  - class_ref: instance
+    name: instance
+    vpi: vpiInstance
+    type: instance
+    card: 1
+  - class_ref: task_func
+    name: task func
+    vpi: vpiTaskFunc
+    type: task_func
+    card: 1  

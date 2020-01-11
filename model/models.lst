@@ -19,6 +19,7 @@ expr.yaml
 distribution.yaml
 operand_group.yaml
 operation.yaml
+part_select.yaml
 actual_group.yaml
 ref_obj.yaml
 variables.yaml

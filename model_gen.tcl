@@ -659,8 +659,8 @@ proc generate_code { models } {
 			if {$key == "class_ref" || $key == "group_ref"} {
 			    append RESTORE($classname) "     ${classname}Factory::objects_\[index\]->set_${name}((${type}*)getObject(obj.get[string toupper ${Name} 0 0]().getType(),obj.get[string toupper ${Name} 0 0]().getIndex()-1));\n"
 			} else {
-			    append RESTORE($classname) "   if (obj.get[string toupper ${Name} 0 0]()) 
-     ${classname}Factory::objects_\[index\]->set_${name}(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()-1\]);\n"
+			    append RESTORE($classname) "    if (obj.get[string toupper ${Name} 0 0]()) 
+      ${classname}Factory::objects_\[index\]->set_${name}(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()-1\]);\n"
 			}
 		    } else {
 
@@ -692,7 +692,7 @@ proc generate_code { models } {
 			} else {
 			    append RESTORE($classname) " 	vect->push_back(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()\[ind\]-1\]);\n"
 			}			
-			append RESTORE($classname) "    }
+			append RESTORE($classname) "      }
       ${classname}Factory::objects_\[index\]->set_${name}(vect);
     }
 "

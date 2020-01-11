@@ -12,17 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "actual group" formal description
+# Universal Hardware Data Model (UHDM) "part select" formal description
  
-- group_def: actual_group
-  - obj_ref: interface
-  - obj_ref: interface_array
-  - obj_ref: modport
-  - class_ref: nets
-  - class_ref: variables
-  - obj_ref: named_event
-  - obj_ref: named_event_array
-  - obj_ref: part_select
-
+- obj_def: part_select
 
 
