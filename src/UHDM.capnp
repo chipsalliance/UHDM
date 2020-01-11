@@ -29,36 +29,37 @@ struct UhdmRoot {
   factoryInterfacetfdecl @20 :List(Interfacetfdecl);
   factoryContassign @21 :List(Contassign);
   factoryPort @22 :List(Port);
-  factoryPrimitive @23 :List(Primitive);
-  factoryModpath @24 :List(Modpath);
-  factoryTchk @25 :List(Tchk);
-  factoryDefparam @26 :List(Defparam);
-  factoryRange @27 :List(Range);
-  factoryUdpdefn @28 :List(Udpdefn);
-  factoryIodecl @29 :List(Iodecl);
-  factoryAliasstmt @30 :List(Aliasstmt);
-  factoryClockingblock @31 :List(Clockingblock);
-  factoryParamassign @32 :List(Paramassign);
-  factoryInterfacearray @33 :List(Interfacearray);
-  factoryProgramarray @34 :List(Programarray);
-  factoryModulearray @35 :List(Modulearray);
-  factoryGatearray @36 :List(Gatearray);
-  factorySwitcharray @37 :List(Switcharray);
-  factoryUdparray @38 :List(Udparray);
-  factoryArraynet @39 :List(Arraynet);
-  factoryLogicvar @40 :List(Logicvar);
-  factoryArrayvar @41 :List(Arrayvar);
-  factoryNamedevent @42 :List(Namedevent);
-  factoryNamedeventarray @43 :List(Namedeventarray);
-  factorySpecparam @44 :List(Specparam);
-  factoryClassdefn @45 :List(Classdefn);
-  factoryClasstypespec @46 :List(Classtypespec);
-  factoryClassobj @47 :List(Classobj);
-  factoryInterface @48 :List(Interface);
-  factoryProgram @49 :List(Program);
-  factoryPackage @50 :List(Package);
-  factoryModule @51 :List(Module);
-  factoryDesign @52 :List(Design);
+  factoryPortbit @23 :List(Portbit);
+  factoryPrimitive @24 :List(Primitive);
+  factoryModpath @25 :List(Modpath);
+  factoryTchk @26 :List(Tchk);
+  factoryDefparam @27 :List(Defparam);
+  factoryRange @28 :List(Range);
+  factoryUdpdefn @29 :List(Udpdefn);
+  factoryIodecl @30 :List(Iodecl);
+  factoryAliasstmt @31 :List(Aliasstmt);
+  factoryClockingblock @32 :List(Clockingblock);
+  factoryParamassign @33 :List(Paramassign);
+  factoryInterfacearray @34 :List(Interfacearray);
+  factoryProgramarray @35 :List(Programarray);
+  factoryModulearray @36 :List(Modulearray);
+  factoryGatearray @37 :List(Gatearray);
+  factorySwitcharray @38 :List(Switcharray);
+  factoryUdparray @39 :List(Udparray);
+  factoryArraynet @40 :List(Arraynet);
+  factoryLogicvar @41 :List(Logicvar);
+  factoryArrayvar @42 :List(Arrayvar);
+  factoryNamedevent @43 :List(Namedevent);
+  factoryNamedeventarray @44 :List(Namedeventarray);
+  factorySpecparam @45 :List(Specparam);
+  factoryClassdefn @46 :List(Classdefn);
+  factoryClasstypespec @47 :List(Classtypespec);
+  factoryClassobj @48 :List(Classobj);
+  factoryInterface @49 :List(Interface);
+  factoryProgram @50 :List(Program);
+  factoryPackage @51 :List(Package);
+  factoryModule @52 :List(Module);
+  factoryDesign @53 :List(Design);
 
 }
 
@@ -281,6 +282,9 @@ vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
+ports @4 :List(ObjIndexType);
+typespec @5 :ObjIndexType;
+actualgroup @6 :ObjIndexType;
 }
 struct Task {
 vpiParent @0 :UInt64;
@@ -384,6 +388,27 @@ vpiFile @2 :UInt64;
 vpiLineNo @3 :UInt32;
 }
 struct Port {
+vpiParent @0 :UInt64;
+uhdmParentType @1 :UInt64;
+vpiFile @2 :UInt64;
+vpiLineNo @3 :UInt32;
+bits @4 :List(UInt64);
+vpiPortIndex @5 :UInt64;
+vpiName @6 :UInt64;
+vpiPortType @7 :UInt64;
+vpiScalar @8 :Bool;
+vpiVector @9 :Bool;
+vpiConnByName @10 :Bool;
+vpiDirection @11 :UInt64;
+vpiSize @12 :UInt64;
+vpiExplicitName @13 :UInt64;
+typespecs @14 :ObjIndexType;
+instance @15 :ObjIndexType;
+module @16 :UInt64;
+highconn @17 :ObjIndexType;
+lowconn @18 :ObjIndexType;
+}
+struct Portbit {
 vpiParent @0 :UInt64;
 uhdmParentType @1 :UInt64;
 vpiFile @2 :UInt64;

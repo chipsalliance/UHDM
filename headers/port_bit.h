@@ -17,22 +17,22 @@
  */
 
 /*
- * File:   port.h
+ * File:   port_bit.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef PORT_H
-#define PORT_H
+#ifndef PORT_BIT_H
+#define PORT_BIT_H
 
 namespace UHDM {
 
-  class port : public ports {
+  class port_bit : public ports {
   public:
     // Implicit constructor used to initialize all members,
-    // comment: port();
-    ~port() final {}
+    // comment: port_bit();
+    ~port_bit() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
 
@@ -50,13 +50,9 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
-    VectorOfport_bit* get_bits() const { return bits_; }
+    unsigned int get_vpiType() { return vpiPortBit; }
 
-    bool set_bits(VectorOfport_bit* data) { bits_ = data; return true;}
-
-    unsigned int get_vpiType() { return vpiPort; }
-
-    virtual unsigned int getUhdmType() { return uhdmport; }   
+    virtual unsigned int getUhdmType() { return uhdmport_bit; }   
   private:
     
     BaseClass* vpiParent_;
@@ -67,32 +63,30 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
-    VectorOfport_bit* bits_;
-
   };
 
-  class portFactory {
+  class port_bitFactory {
   friend Serializer;
   public:
-  static port* make() {
-    port* obj = new port();
+  static port_bit* make() {
+    port_bit* obj = new port_bit();
     objects_.push_back(obj);
     return obj;
   }
   private:
-    static std::vector<port*> objects_;
+    static std::vector<port_bit*> objects_;
   };
  	      
-  class VectorOfportFactory {
+  class VectorOfport_bitFactory {
   friend Serializer;
   public:
-  static std::vector<port*>* make() {
-    std::vector<port*>* obj = new std::vector<port*>();
+  static std::vector<port_bit*>* make() {
+    std::vector<port_bit*>* obj = new std::vector<port_bit*>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-  static std::vector<std::vector<port*>*> objects_;
+  static std::vector<std::vector<port_bit*>*> objects_;
   };
 
 };

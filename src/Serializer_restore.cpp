@@ -158,6 +158,11 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    setId(portFactory::make(), ind);
  }
 
+ ::capnp::List<Portbit>::Reader Portbits = cap_root.getFactoryPortbit();
+ for (unsigned ind = 0; ind < Portbits.size(); ind++) {
+   setId(port_bitFactory::make(), ind);
+ }
+
  ::capnp::List<Primitive>::Reader Primitives = cap_root.getFactoryPrimitive();
  for (unsigned ind = 0; ind < Primitives.size(); ind++) {
    setId(primitiveFactory::make(), ind);
@@ -1355,6 +1360,16 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    ref_objFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    ref_objFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    ref_objFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    
+    if (obj.getPorts().size()) { 
+      std::vector<ports*>* vect = VectorOfportsFactory::make();
+      for (unsigned int ind = 0; ind < obj.getPorts().size(); ind++) {
+ 	vect->push_back((ports*)getObject(obj.getPorts()[ind].getType(),obj.getPorts()[ind].getIndex()-1));
+    }
+      ref_objFactory::objects_[index]->set_ports(vect);
+    }
+     ref_objFactory::objects_[index]->set_typespec((typespec*)getObject(obj.getTypespec().getType(),obj.getTypespec().getIndex()-1));
+     ref_objFactory::objects_[index]->set_actual_group((any*)getObject(obj.getActualgroup().getType(),obj.getActualgroup().getIndex()-1));
 
    index++;
  }
@@ -1968,6 +1983,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    portFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    portFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    portFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    
+    if (obj.getBits().size()) { 
+      std::vector<port_bit*>* vect = VectorOfport_bitFactory::make();
+      for (unsigned int ind = 0; ind < obj.getBits().size(); ind++) {
+ 	vect->push_back(port_bitFactory::objects_[obj.getBits()[ind]-1]);
+    }
+      portFactory::objects_[index]->set_bits(vect);
+    }
     portFactory::objects_[index]->set_vpiPortIndex(obj.getVpiPortIndex());
     portFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     portFactory::objects_[index]->set_vpiPortType(obj.getVpiPortType());
@@ -1983,6 +2006,31 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
      portFactory::objects_[index]->set_module(moduleFactory::objects_[obj.getModule()-1]);
      portFactory::objects_[index]->set_high_conn((any*)getObject(obj.getHighconn().getType(),obj.getHighconn().getIndex()-1));
      portFactory::objects_[index]->set_low_conn((any*)getObject(obj.getLowconn().getType(),obj.getLowconn().getIndex()-1));
+
+   index++;
+ }
+
+ index = 0;
+ for (Portbit::Reader obj : Portbits) {
+   port_bitFactory::objects_[index]->set_uhdmParentType(obj.getUhdmParentType());
+   port_bitFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
+   port_bitFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
+   port_bitFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    port_bitFactory::objects_[index]->set_vpiPortIndex(obj.getVpiPortIndex());
+    port_bitFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
+    port_bitFactory::objects_[index]->set_vpiPortType(obj.getVpiPortType());
+    port_bitFactory::objects_[index]->set_vpiScalar(obj.getVpiScalar());
+    port_bitFactory::objects_[index]->set_vpiVector(obj.getVpiVector());
+    port_bitFactory::objects_[index]->set_vpiConnByName(obj.getVpiConnByName());
+    port_bitFactory::objects_[index]->set_vpiDirection(obj.getVpiDirection());
+    port_bitFactory::objects_[index]->set_vpiSize(obj.getVpiSize());
+    port_bitFactory::objects_[index]->set_vpiExplicitName(SymbolFactory::getSymbol(obj.getVpiExplicitName()));
+     port_bitFactory::objects_[index]->set_typespecs((typespec*)getObject(obj.getTypespecs().getType(),obj.getTypespecs().getIndex()-1));
+     port_bitFactory::objects_[index]->set_instance((instance*)getObject(obj.getInstance().getType(),obj.getInstance().getIndex()-1));
+   if (obj.getModule()) 
+     port_bitFactory::objects_[index]->set_module(moduleFactory::objects_[obj.getModule()-1]);
+     port_bitFactory::objects_[index]->set_high_conn((any*)getObject(obj.getHighconn().getType(),obj.getHighconn().getIndex()-1));
+     port_bitFactory::objects_[index]->set_low_conn((any*)getObject(obj.getLowconn().getType(),obj.getLowconn().getIndex()-1));
 
    index++;
  }

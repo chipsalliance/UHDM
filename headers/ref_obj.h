@@ -50,6 +50,18 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
+    VectorOfports* get_ports() const { return ports_; }
+
+    bool set_ports(VectorOfports* data) { ports_ = data; return true;}
+
+    typespec* get_typespec() const { return typespec_; }
+
+    bool set_typespec(typespec* data) { typespec_ = data; return true;}
+
+    any* get_actual_group() const { return actual_group_; }
+
+    bool set_actual_group(any* data) {if (!actual_groupGroupCompliant(data)) return false; actual_group_ = data; return true;}
+
     unsigned int get_vpiType() { return vpiRefObj; }
 
     virtual unsigned int getUhdmType() { return uhdmref_obj; }   
@@ -62,6 +74,12 @@ namespace UHDM {
     unsigned int vpiFile_;
 
     unsigned int vpiLineNo_;
+
+    VectorOfports* ports_;
+
+    typespec* typespec_;
+
+    any* actual_group_;
 
   };
 

@@ -19,6 +19,7 @@ expr.yaml
 distribution.yaml
 operand_group.yaml
 operation.yaml
+actual_group.yaml
 ref_obj.yaml
 variables.yaml
 task_func.yaml
@@ -30,6 +31,7 @@ cont_assign.yaml
 expr_ref_obj_group.yaml
 ports.yaml
 port.yaml
+port_bit.yaml
 primitive.yaml
 mod_path.yaml
 tchk.yaml

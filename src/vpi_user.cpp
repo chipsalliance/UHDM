@@ -55,6 +55,7 @@ typedef void any;
 #include "headers/distribution.h"
 #include "headers/operand_group.h"
 #include "headers/operation.h"
+#include "headers/actual_group.h"
 #include "headers/ref_obj.h"
 #include "headers/variables.h"
 #include "headers/task_func.h"
@@ -66,6 +67,7 @@ typedef void any;
 #include "headers/expr_ref_obj_group.h"
 #include "headers/ports.h"
 #include "headers/port.h"
+#include "headers/port_bit.h"
 #include "headers/primitive.h"
 #include "headers/mod_path.h"
 #include "headers/tchk.h"
@@ -216,6 +218,18 @@ vpiHandle vpi_handle (PLI_INT32 type,
  } 
 }
 
+ if (handle->type == uhdmref_obj) {
+     if (type == vpiTypespec) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((ref_obj*)(object))->get_typespec())->getUhdmType(), ((ref_obj*)(object))->get_typespec());
+ } 
+}
+
+ if (handle->type == uhdmref_obj) {
+     if (type == vpiActual) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((ref_obj*)(object))->get_actual_group())->getUhdmType(), ((ref_obj*)(object))->get_actual_group());
+ } 
+}
+
  if (handle->type == uhdmtask_func) {
      if (type == vpiLeftRange) {
        return (vpiHandle) new uhdm_handle(((BaseClass*)((task_func*)(object))->get_left_expr())->getUhdmType(), ((task_func*)(object))->get_left_expr());
@@ -321,6 +335,12 @@ vpiHandle vpi_handle (PLI_INT32 type,
  if (handle->type == uhdmport) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((BaseClass*)((port*)(object))->get_vpiParent())->getUhdmType(), ((port*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (type == vpiParent) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((port_bit*)(object))->get_vpiParent())->getUhdmType(), ((port_bit*)(object))->get_vpiParent());
  } 
 }
 
@@ -1807,6 +1827,15 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  }
 
     
+ if (handle->type == uhdmref_obj) {
+ if (type == vpiPortInst) {
+ if (((ref_obj*)(object))->get_ports())
+ return (vpiHandle) new uhdm_handle(uhdmports, ((ref_obj*)(object))->get_ports());
+ else return 0;
+  }
+ }
+
+    
  if (handle->type == uhdmtask_func) {
  if (type == vpiConcurrentAssertions) {
  if (((scope*)(object))->get_concurrent_assertions())
@@ -2234,6 +2263,15 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  if (type == vpiFunction) {
  if (((interface_tf_decl*)(object))->get_functions())
  return (vpiHandle) new uhdm_handle(uhdmfunctions, ((interface_tf_decl*)(object))->get_functions());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmport) {
+ if (type == vpiBit) {
+ if (((port*)(object))->get_bits())
+ return (vpiHandle) new uhdm_handle(uhdmbits, ((port*)(object))->get_bits());
  else return 0;
   }
  }
@@ -4579,6 +4617,15 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
+  if (handle->type == uhdmports) {
+ VectorOfports* the_vec = (VectorOfports*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
   if (handle->type == uhdmio_decls) {
  VectorOfio_decl* the_vec = (VectorOfio_decl*)vect;
  if (handle->index < the_vec->size()) {
@@ -4599,6 +4646,15 @@ vpiHandle vpi_scan (vpiHandle iterator) {
 
   if (handle->type == uhdmfunctions) {
  VectorOffunction* the_vec = (VectorOffunction*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
+  if (handle->type == uhdmbits) {
+ VectorOfport_bit* the_vec = (VectorOfport_bit*)vect;
  if (handle->index < the_vec->size()) {
  uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
  handle->index++;
@@ -5564,6 +5620,60 @@ PLI_INT32 vpi_get (PLI_INT32   property,
  if (handle->type == uhdmport) {
      if (property == vpiSize) {
        return ((port*)(obj))->get_vpiSize();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiLineNo) {
+       return ((port_bit*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiType) {
+       return ((port_bit*)(obj))->get_vpiType();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiPortIndex) {
+       return ((port_bit*)(obj))->get_vpiPortIndex();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiPortType) {
+       return ((port_bit*)(obj))->get_vpiPortType();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiScalar) {
+       return ((port_bit*)(obj))->get_vpiScalar();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiVector) {
+       return ((port_bit*)(obj))->get_vpiVector();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiConnByName) {
+       return ((port_bit*)(obj))->get_vpiConnByName();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiDirection) {
+       return ((port_bit*)(obj))->get_vpiDirection();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiSize) {
+       return ((port_bit*)(obj))->get_vpiSize();
      } 
 }
 
@@ -6869,6 +6979,60 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiLineNo) {
+       return ((port_bit*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiType) {
+       return ((port_bit*)(obj))->get_vpiType();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiPortIndex) {
+       return ((port_bit*)(obj))->get_vpiPortIndex();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiPortType) {
+       return ((port_bit*)(obj))->get_vpiPortType();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiScalar) {
+       return ((port_bit*)(obj))->get_vpiScalar();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiVector) {
+       return ((port_bit*)(obj))->get_vpiVector();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiConnByName) {
+       return ((port_bit*)(obj))->get_vpiConnByName();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiDirection) {
+       return ((port_bit*)(obj))->get_vpiDirection();
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiSize) {
+       return ((port_bit*)(obj))->get_vpiSize();
+     } 
+}
+
  if (handle->type == uhdmprimitive) {
      if (property == vpiLineNo) {
        return ((primitive*)(obj))->get_vpiLineNo();
@@ -7970,6 +8134,24 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
  if (handle->type == uhdmport) {
      if (property == vpiExplicitName) {
        return (PLI_BYTE8*) strdup(((port*)(obj))->get_vpiExplicitName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiFile) {
+       return (PLI_BYTE8*) strdup(((port_bit*)(obj))->get_vpiFile().c_str());
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((port_bit*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmport_bit) {
+     if (property == vpiExplicitName) {
+       return (PLI_BYTE8*) strdup(((port_bit*)(obj))->get_vpiExplicitName().c_str());
      } 
 }
 
