@@ -2,7 +2,7 @@
 Universal Hardware Data Model
 
 # Presentation
-* [UHDM Presentation](https://docs.google.com/presentation/d/1evu8aBWMFwi_UrK-DfWXowfsXM4Bp9knQuHV24lwkPc/edit#slide=id.p) - UHDM
+* [UHDM Presentation](https://docs.google.com/presentation/d/1evu8aBWMFwi_UrK-DfWXowfsXM4Bp9knQuHV24lwkPc/edit#slide=id.p)
 
 # Purpose
 
@@ -29,18 +29,35 @@ Universal Hardware Data Model
 # Model Concepts
  * The model is captured in .yaml files, one per object models detailed pages 976-1050 of the SystemVerilog 2017 IEEE standard.
  * To match the standard, several concepts are observed in the model:
-    * obj_def : A leaf object specification (Object can be allocated and persisted)
-    * class_def : A virtual class specification (Class is used either with inheritance - extends:, or as composition of a - class_ref)
-    * property : typically an int, bool, string property with a name and a vpi access type (ie: vpiModule) accessed by the vpi_get function
-    * obj_ref : a reference to one (accessed by vpi_handle) or many (accessed by vpi_iterate) leaf objects 
-    * class_ref : a reference to one or many virtual class, actual objects returned will be of a leaf type
+    * obj_def: A leaf object specification (Object can be allocated and persisted)
+    * class_def: A virtual class specification (Class is used either with inheritance - extends:, or as composition of a - class_ref)
+    * property: typically an int, bool, string property with a name and a vpi access type (ie: vpiModule) accessed by the vpi_get function
+    * obj_ref: a reference to one (accessed by vpi_handle) or many (accessed by vpi_iterate) leaf objects 
+    * class_ref: a reference to one or many virtual class, actual objects returned will be of a leaf type
     * extends: Class inheritance specified by the extends keyword
     * group_def: Grouping of objects in a named or unnamed group (We actually give a representative name to unnamed groups)
-    * group_ref: a reference to one or many members of a group of objects 
+    * group_ref: a reference to one or many members of a group of objects
+ * Keywords used to capture the model in Yaml
+    * all of the above (obj_def...), plus for each definition (obj_ref, class_ref, group_ref, property), the following sub fields:
+    * name: the name of the field (spaces accepted), verbatim from the standard
+    * vpi: the name of the VPI access type to access this object member (Has to match a defined value in vpi_user.h or sv_vpi_user.h)
+    * type: the formal type of the field:
+      * obj_ref
+      * class_ref
+      * group_ref
+      * int
+      * unsigned int
+      * bool
+      * string
+    * card: cardinality of the field
+      * 1
+      * any (0 or more)
+
 
 # Model creation
  * The model creation task consists in converting the Object Model diagrams into their Yaml representation and invoking the creation of the concrete
  C++ classes, iterators, serialization code by invoking "make"
+ * [How to create the model (presentation)](https://docs.google.com/presentation/d/1SGpgeeWmxJ-1AU8EKABrTyKwcfHOe-pfK8yXArTKIz8/edit?usp=sharing)
  
 # Actual Design creation
  * The design creation task consists in invoking:
