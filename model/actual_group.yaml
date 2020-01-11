@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "port" formal description
+# Universal Hardware Data Model (UHDM) "actual group" formal description
  
-- obj_def: port
-  - extends: ports
-  - obj_ref: bits
-    name: bits
-    vpi: vpiBit
-    type: port_bit
-    card: any
+- group_def: actual_group
+  - obj_ref: interface
+  - obj_ref: interface_array
+  - obj_ref: modport
+  
+
+

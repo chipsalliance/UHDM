@@ -111,6 +111,8 @@ std::vector<std::vector<cont_assign*>*> VectorOfcont_assignFactory::objects_;
 std::vector<std::vector<ports*>*> VectorOfportsFactory::objects_;
 std::vector<port*> portFactory::objects_;
 std::vector<std::vector<port*>*> VectorOfportFactory::objects_;
+std::vector<port_bit*> port_bitFactory::objects_;
+std::vector<std::vector<port_bit*>*> VectorOfport_bitFactory::objects_;
 std::vector<primitive*> primitiveFactory::objects_;
 std::vector<std::vector<primitive*>*> VectorOfprimitiveFactory::objects_;
 std::vector<mod_path*> mod_pathFactory::objects_;
@@ -182,120 +184,123 @@ std::vector<std::vector<design*>*> VectorOfdesignFactory::objects_;
 
 std::string getUhdmName(unsigned int type) {
       switch (type) {
-case 2167: return "uhdmdef_param";
-case 2168: return "uhdmrange";
-case 2170: return "uhdmranges";
-case 2169: return "uhdmudp_defn";
-case 2171: return "uhdmalias_stmt";
-case 2172: return "uhdmclocking_block";
-case 2173: return "uhdmparam_assign";
-case 2174: return "uhdminstance_array";
-case 2175: return "uhdminstances";
-case 2176: return "uhdmmodules";
-case 2177: return "uhdminterface_array";
-case 2106: return "uhdmprocess";
-case 2178: return "uhdmparam_assigns";
-case 2107: return "uhdmproperty_decl";
-case 2180: return "uhdmmodule_array";
-case 2179: return "uhdmprogram_array";
-case 2108: return "uhdmsequence_decl";
-case 2181: return "uhdmprimitive_array";
-case 2110: return "uhdmvirtual_interface_var";
-case 2109: return "uhdmconcurrent_assertion";
-case 2182: return "uhdmdelay";
-case 2111: return "uhdmlet_decl";
-case 2183: return "uhdmprimitives";
-case 2112: return "uhdmstmt";
-case 2184: return "uhdmgate_array";
-case 2113: return "uhdmscope";
-case 2185: return "uhdmswitch_array";
-case 2114: return "uhdmconcurrent_assertions";
-case 2186: return "uhdmudp_array";
-case 2115: return "uhdmvariables";
-case 2187: return "uhdmnet";
-case 2116: return "uhdmparameters";
-case 2188: return "uhdmnets";
-case 2117: return "uhdmscopes";
-case 2200: return "uhdmmodports";
-case 2190: return "uhdmnamed_event";
-case 2189: return "uhdmarray_net";
-case 2118: return "uhdmtypespecs";
-case 2201: return "uhdmglobal_clocking";
-case 2191: return "uhdmnamed_event_array";
-case 2119: return "uhdmproperty_decls";
-case 2120: return "uhdmsequence_decls";
-case 2202: return "uhdmdefault_clocking";
-case 2192: return "uhdmspec_param";
-case 2121: return "uhdmnamed_events";
-case 2203: return "uhdmmod_paths";
-case 2193: return "uhdmassertion";
-case 2122: return "uhdmnamed_event_arrays";
-case 2204: return "uhdmcont_assigns";
-case 2194: return "uhdmtypespec";
-case 2123: return "uhdmvirtual_interface_vars";
-case 2205: return "uhdminterfaces";
-case 2195: return "uhdmclass_typespec";
-case 2124: return "uhdmlogic_var";
-case 2206: return "uhdminterface_arrays";
-case 2196: return "uhdmclass_obj";
-case 2125: return "uhdmarray_var";
-case 2207: return "uhdmprogram";
-case 2197: return "uhdmprograms";
-case 2126: return "uhdmarray_var_mem";
-case 2208: return "uhdmclocking_blocks";
-case 2198: return "uhdmprogram_arrays";
-case 2127: return "uhdmlet_decls";
-case 2210: return "uhdmprimitive_arrays";
-case 2209: return "uhdmpackage";
-case 2199: return "uhdminterface_tf_decls";
-case 2128: return "uhdminstance_items";
-case 2211: return "uhdmmodule_arrays";
-case 2129: return "uhdmbegin";
-case 2130: return "uhdmstmts";
-case 2212: return "uhdmtchks";
-case 2131: return "uhdmnamed_begin";
-case 2213: return "uhdmdef_params";
-case 2132: return "uhdmnamed_fork";
-case 2214: return "uhdmalias_stmts";
-case 2133: return "uhdmfork_stmt";
-case 2215: return "uhdmdesign";
-case 2134: return "uhdmfor_stmt";
-case 2216: return "uhdmallModules";
-case 2135: return "uhdmforeach_stmt";
-case 2217: return "uhdmtopModules";
-case 2136: return "uhdmgen_scope";
-case 2218: return "uhdmallPrograms";
-case 2137: return "uhdmexpr_dist";
-case 2219: return "uhdmallPackages";
-case 2138: return "uhdmexpr";
-case 2139: return "uhdmdistribution";
-case 2140: return "uhdmoperand_group";
-case 2141: return "uhdmoperation";
-case 2142: return "uhdmoperands";
-case 2143: return "uhdmref_obj";
-case 2144: return "uhdmtask_func";
-case 2145: return "uhdmleft_expr";
-case 2146: return "uhdmright_expr";
-case 2147: return "uhdmclass_defn";
-case 2148: return "uhdmio_decl";
-case 2149: return "uhdmtask";
-case 2150: return "uhdmfunction";
-case 2151: return "uhdmmodport";
-case 2152: return "uhdmio_decls";
-case 2153: return "uhdminterface";
-case 2154: return "uhdminterface_tf_decl";
-case 2155: return "uhdmtasks";
-case 2156: return "uhdmfunctions";
-case 2157: return "uhdmcont_assign";
-case 2158: return "uhdmports";
-case 2160: return "uhdmmodule";
-case 2159: return "uhdminstance";
-case 2161: return "uhdmhigh_conn";
-case 2162: return "uhdmlow_conn";
-case 2163: return "uhdmport";
-case 2164: return "uhdmprimitive";
-case 2165: return "uhdmmod_path";
-case 2166: return "uhdmtchk";
+case 2167: return "uhdmlow_conn";
+case 2168: return "uhdmport";
+case 2170: return "uhdmport_bit";
+case 2169: return "uhdmbits";
+case 2171: return "uhdmprimitive";
+case 2172: return "uhdmmod_path";
+case 2173: return "uhdmtchk";
+case 2174: return "uhdmdef_param";
+case 2175: return "uhdmrange";
+case 2176: return "uhdmudp_defn";
+case 2177: return "uhdmranges";
+case 2178: return "uhdmalias_stmt";
+case 2180: return "uhdmparam_assign";
+case 2179: return "uhdmclocking_block";
+case 2181: return "uhdminstance_array";
+case 2110: return "uhdmproperty_decl";
+case 2109: return "uhdmprocess";
+case 2182: return "uhdminstances";
+case 2111: return "uhdmsequence_decl";
+case 2183: return "uhdmmodules";
+case 2112: return "uhdmconcurrent_assertion";
+case 2184: return "uhdminterface_array";
+case 2113: return "uhdmvirtual_interface_var";
+case 2185: return "uhdmparam_assigns";
+case 2114: return "uhdmlet_decl";
+case 2186: return "uhdmprogram_array";
+case 2115: return "uhdmstmt";
+case 2187: return "uhdmmodule_array";
+case 2116: return "uhdmscope";
+case 2188: return "uhdmprimitive_array";
+case 2117: return "uhdmconcurrent_assertions";
+case 2200: return "uhdmassertion";
+case 2190: return "uhdmprimitives";
+case 2189: return "uhdmdelay";
+case 2118: return "uhdmvariables";
+case 2201: return "uhdmclass_typespec";
+case 2191: return "uhdmgate_array";
+case 2120: return "uhdmscopes";
+case 2119: return "uhdmparameters";
+case 2202: return "uhdmclass_obj";
+case 2192: return "uhdmswitch_array";
+case 2121: return "uhdmtypespecs";
+case 2203: return "uhdmprograms";
+case 2193: return "uhdmudp_array";
+case 2122: return "uhdmproperty_decls";
+case 2204: return "uhdmprogram_arrays";
+case 2194: return "uhdmnet";
+case 2123: return "uhdmsequence_decls";
+case 2205: return "uhdminterface_tf_decls";
+case 2195: return "uhdmnets";
+case 2124: return "uhdmnamed_events";
+case 2206: return "uhdmmodports";
+case 2196: return "uhdmarray_net";
+case 2125: return "uhdmnamed_event_arrays";
+case 2207: return "uhdmglobal_clocking";
+case 2197: return "uhdmnamed_event";
+case 2126: return "uhdmvirtual_interface_vars";
+case 2208: return "uhdmdefault_clocking";
+case 2198: return "uhdmnamed_event_array";
+case 2127: return "uhdmlogic_var";
+case 2210: return "uhdmcont_assigns";
+case 2209: return "uhdmmod_paths";
+case 2199: return "uhdmspec_param";
+case 2128: return "uhdmarray_var";
+case 2211: return "uhdminterfaces";
+case 2129: return "uhdmarray_var_mem";
+case 2130: return "uhdmlet_decls";
+case 2212: return "uhdminterface_arrays";
+case 2131: return "uhdminstance_items";
+case 2213: return "uhdmprogram";
+case 2132: return "uhdmbegin";
+case 2214: return "uhdmclocking_blocks";
+case 2133: return "uhdmstmts";
+case 2215: return "uhdmpackage";
+case 2134: return "uhdmnamed_begin";
+case 2216: return "uhdmprimitive_arrays";
+case 2135: return "uhdmnamed_fork";
+case 2217: return "uhdmmodule_arrays";
+case 2136: return "uhdmfork_stmt";
+case 2218: return "uhdmtchks";
+case 2137: return "uhdmfor_stmt";
+case 2220: return "uhdmalias_stmts";
+case 2219: return "uhdmdef_params";
+case 2138: return "uhdmforeach_stmt";
+case 2221: return "uhdmdesign";
+case 2139: return "uhdmgen_scope";
+case 2140: return "uhdmexpr_dist";
+case 2222: return "uhdmallModules";
+case 2141: return "uhdmexpr";
+case 2223: return "uhdmtopModules";
+case 2142: return "uhdmdistribution";
+case 2224: return "uhdmallPrograms";
+case 2143: return "uhdmoperand_group";
+case 2225: return "uhdmallPackages";
+case 2144: return "uhdmoperation";
+case 2145: return "uhdmoperands";
+case 2146: return "uhdmref_obj";
+case 2147: return "uhdmports";
+case 2148: return "uhdmtypespec";
+case 2149: return "uhdmactual_group";
+case 2150: return "uhdmtask_func";
+case 2151: return "uhdmleft_expr";
+case 2152: return "uhdmright_expr";
+case 2153: return "uhdmclass_defn";
+case 2154: return "uhdmio_decl";
+case 2155: return "uhdmtask";
+case 2156: return "uhdmfunction";
+case 2157: return "uhdmmodport";
+case 2158: return "uhdmio_decls";
+case 2160: return "uhdminterface_tf_decl";
+case 2159: return "uhdminterface";
+case 2161: return "uhdmtasks";
+case 2162: return "uhdmfunctions";
+case 2163: return "uhdmcont_assign";
+case 2164: return "uhdminstance";
+case 2165: return "uhdmmodule";
+case 2166: return "uhdmhigh_conn";
 default: return "NO TYPE";
 }
 }
@@ -324,6 +329,7 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdminterface_tf_decl: return interface_tf_declFactory::objects_[index];
   case uhdmcont_assign: return cont_assignFactory::objects_[index];
   case uhdmport: return portFactory::objects_[index];
+  case uhdmport_bit: return port_bitFactory::objects_[index];
   case uhdmprimitive: return primitiveFactory::objects_[index];
   case uhdmmod_path: return mod_pathFactory::objects_[index];
   case uhdmtchk: return tchkFactory::objects_[index];
@@ -467,6 +473,11 @@ void Serializer::purge() {
     delete obj;
   }
   portFactory::objects_.clear();
+
+  for (auto obj : port_bitFactory::objects_) {
+    delete obj;
+  }
+  port_bitFactory::objects_.clear();
 
   for (auto obj : primitiveFactory::objects_) {
     delete obj;
@@ -729,6 +740,11 @@ void Serializer::save(std::string file) {
   }
   index = 1;
   for (auto obj : portFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : port_bitFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -1936,7 +1952,24 @@ void Serializer::save(std::string file) {
     Refobjs[index].setUhdmParentType(obj->get_uhdmParentType());
     Refobjs[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Refobjs[index].setVpiLineNo(obj->get_vpiLineNo());
-
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Refobjs[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Refobjs[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_actual_group()) {
+    ::ObjIndexType::Builder tmp1 = Refobjs[index].getActualgroup();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_actual_group())));
+    tmp1.setType(((BaseClass*)obj->get_actual_group())->getUhdmType());
+  }
    index++;
  }
  ::capnp::List<Task>::Builder Tasks = cap_root.initFactoryTask(taskFactory::objects_.size());
@@ -2551,6 +2584,13 @@ void Serializer::save(std::string file) {
     Ports[index].setUhdmParentType(obj->get_uhdmParentType());
     Ports[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Ports[index].setVpiLineNo(obj->get_vpiLineNo());
+ 
+    if (obj->get_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Bitss = Ports[index].initBits(obj->get_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_bits()->size(); ind++) {
+        Bitss.set(ind, getId((*obj->get_bits())[ind]));
+      }
+    }
     Ports[index].setVpiPortIndex(obj->get_vpiPortIndex());
     Ports[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Ports[index].setVpiPortType(obj->get_vpiPortType());
@@ -2575,6 +2615,43 @@ void Serializer::save(std::string file) {
     tmp2.setType(((BaseClass*)obj->get_high_conn())->getUhdmType());
   }  if (obj->get_low_conn()) {
     ::ObjIndexType::Builder tmp3 = Ports[index].getLowconn();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_low_conn())));
+    tmp3.setType(((BaseClass*)obj->get_low_conn())->getUhdmType());
+  }
+
+   index++;
+ }
+ ::capnp::List<Portbit>::Builder Portbits = cap_root.initFactoryPortbit(port_bitFactory::objects_.size());
+ index = 0;
+ for (auto obj : port_bitFactory::objects_) {
+    Portbits[index].setVpiParent(getId(obj->get_vpiParent()));
+    Portbits[index].setUhdmParentType(obj->get_uhdmParentType());
+    Portbits[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Portbits[index].setVpiLineNo(obj->get_vpiLineNo());
+    Portbits[index].setVpiPortIndex(obj->get_vpiPortIndex());
+    Portbits[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Portbits[index].setVpiPortType(obj->get_vpiPortType());
+    Portbits[index].setVpiScalar(obj->get_vpiScalar());
+    Portbits[index].setVpiVector(obj->get_vpiVector());
+    Portbits[index].setVpiConnByName(obj->get_vpiConnByName());
+    Portbits[index].setVpiDirection(obj->get_vpiDirection());
+    Portbits[index].setVpiSize(obj->get_vpiSize());
+    Portbits[index].setVpiExplicitName(SymbolFactory::make(obj->get_vpiExplicitName()));
+  if (obj->get_typespecs()) {
+    ::ObjIndexType::Builder tmp0 = Portbits[index].getTypespecs();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespecs())));
+    tmp0.setType(((BaseClass*)obj->get_typespecs())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Portbits[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }    Portbits[index].setModule(getId(obj->get_module()));
+  if (obj->get_high_conn()) {
+    ::ObjIndexType::Builder tmp2 = Portbits[index].getHighconn();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_high_conn())));
+    tmp2.setType(((BaseClass*)obj->get_high_conn())->getUhdmType());
+  }  if (obj->get_low_conn()) {
+    ::ObjIndexType::Builder tmp3 = Portbits[index].getLowconn();
     tmp3.setIndex(getId(((BaseClass*) obj->get_low_conn())));
     tmp3.setType(((BaseClass*)obj->get_low_conn())->getUhdmType());
   }
