@@ -17,7 +17,7 @@
  */
 
 /*
- * File:   actual_group.cpp
+ * File:   enum_struct_packed_net_group.cpp
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
@@ -26,23 +26,23 @@
 
 #include <iostream>
 #include "headers/uhdm.h"
-#include "actual_group.h"
+#include "enum_struct_packed_net_group.h"
 
 namespace UHDM {
 
-  bool actual_groupGroupCompliant(any* item) {
+  bool enum_struct_packed_net_groupGroupCompliant(any* item) {
     BaseClass* the_item = (BaseClass*) item;
     unsigned int uhdmtype = the_item->getUhdmType();
-    if ((uhdmtype != uhdmnets) && (uhdmtype != uhdmlogic_net) && (uhdmtype != uhdminteger_net) && (uhdmtype != uhdmenum_net) && (uhdmtype != uhdmstruct_net) && (uhdmtype != uhdmpacked_array_net) && (uhdmtype != uhdmarray_net) && (uhdmtype != uhdmtime_net) && (uhdmtype != uhdmnet_bit) && (uhdmtype != uhdmnet) && (uhdmtype != uhdmvariables) && (uhdmtype != uhdminterface) && (uhdmtype != uhdminterface_array) && (uhdmtype != uhdmmodport) && (uhdmtype != uhdmnamed_event) && (uhdmtype != uhdmnamed_event_array) && (uhdmtype != uhdmpart_select)) {
-      std::cout << "Internal Error: adding wrong object type (" << getUhdmName(uhdmtype) << ") in a actual_group group!\n";   
+    if ((uhdmtype != uhdmenum_net) && (uhdmtype != uhdmstruct_net) && (uhdmtype != uhdmpacked_array_net)) {
+      std::cout << "Internal Error: adding wrong object type (" << getUhdmName(uhdmtype) << ") in a enum_struct_packed_net_group group!\n";   
       return false;
     }
     return true;
   }
 
-  bool actual_groupGroupCompliant(VectorOfany* vec) {
+  bool enum_struct_packed_net_groupGroupCompliant(VectorOfany* vec) {
     for (auto item : *vec) {
-      if (!actual_groupGroupCompliant(item)) {
+      if (!enum_struct_packed_net_groupGroupCompliant(item)) {
 	return false;
       }
     }

@@ -59,8 +59,16 @@ prim_term.yaml
 path_term.yaml
 tchk_term.yaml
 nets.yaml
+net_bit.yaml
 net.yaml
+struct_net.yaml
+enum_net.yaml
+integer_net.yaml
+time_net.yaml
+logic_net.yaml
 array_net.yaml
+enum_struct_packed_net_group.yaml
+packed_array_net.yaml
 logic_var.yaml
 array_var.yaml
 named_event.yaml

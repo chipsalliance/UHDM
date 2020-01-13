@@ -159,9 +159,23 @@ std::vector<std::vector<path_term*>*> VectorOfpath_termFactory::objects_;
 std::vector<tchk_term*> tchk_termFactory::objects_;
 std::vector<std::vector<tchk_term*>*> VectorOftchk_termFactory::objects_;
 std::vector<std::vector<nets*>*> VectorOfnetsFactory::objects_;
+std::vector<net_bit*> net_bitFactory::objects_;
+std::vector<std::vector<net_bit*>*> VectorOfnet_bitFactory::objects_;
 std::vector<std::vector<net*>*> VectorOfnetFactory::objects_;
+std::vector<struct_net*> struct_netFactory::objects_;
+std::vector<std::vector<struct_net*>*> VectorOfstruct_netFactory::objects_;
+std::vector<enum_net*> enum_netFactory::objects_;
+std::vector<std::vector<enum_net*>*> VectorOfenum_netFactory::objects_;
+std::vector<integer_net*> integer_netFactory::objects_;
+std::vector<std::vector<integer_net*>*> VectorOfinteger_netFactory::objects_;
+std::vector<time_net*> time_netFactory::objects_;
+std::vector<std::vector<time_net*>*> VectorOftime_netFactory::objects_;
+std::vector<logic_net*> logic_netFactory::objects_;
+std::vector<std::vector<logic_net*>*> VectorOflogic_netFactory::objects_;
 std::vector<array_net*> array_netFactory::objects_;
 std::vector<std::vector<array_net*>*> VectorOfarray_netFactory::objects_;
+std::vector<packed_array_net*> packed_array_netFactory::objects_;
+std::vector<std::vector<packed_array_net*>*> VectorOfpacked_array_netFactory::objects_;
 std::vector<logic_var*> logic_varFactory::objects_;
 std::vector<std::vector<logic_var*>*> VectorOflogic_varFactory::objects_;
 std::vector<array_var*> array_varFactory::objects_;
@@ -194,135 +208,144 @@ std::vector<std::vector<design*>*> VectorOfdesignFactory::objects_;
 
 std::string getUhdmName(unsigned int type) {
       switch (type) {
-case 2167: return "uhdmmodport";
-case 2168: return "uhdmio_decls";
-case 2170: return "uhdminterface_tf_decl";
-case 2169: return "uhdminterface";
-case 2171: return "uhdmtasks";
-case 2172: return "uhdmfunctions";
-case 2173: return "uhdmcont_assign";
-case 2174: return "uhdmmodule";
-case 2175: return "uhdmhigh_conn";
-case 2176: return "uhdmlow_conn";
-case 2177: return "uhdmport";
-case 2178: return "uhdmbits";
-case 2180: return "uhdmprimitive";
-case 2179: return "uhdmport_bit";
-case 2181: return "uhdmmod_path";
-case 2182: return "uhdmtchk";
-case 2183: return "uhdmdef_param";
-case 2184: return "uhdmrange";
-case 2185: return "uhdmudp_defn";
-case 2186: return "uhdmranges";
-case 2187: return "uhdmalias_stmt";
-case 2188: return "uhdmclocking_block";
-case 2117: return "uhdmprocess";
-case 2200: return "uhdmgate_array";
-case 2190: return "uhdminstance_array";
-case 2189: return "uhdmparam_assign";
-case 2118: return "uhdmproperty_decl";
-case 2201: return "uhdmswitch_array";
-case 2191: return "uhdminstances";
-case 2120: return "uhdmconcurrent_assertion";
-case 2119: return "uhdmsequence_decl";
-case 2202: return "uhdmudp_array";
-case 2192: return "uhdmmodules";
-case 2121: return "uhdmvirtual_interface_var";
-case 2203: return "uhdmnet_drivers";
-case 2193: return "uhdminterface_array";
-case 2122: return "uhdmlet_decl";
-case 2204: return "uhdmnet_loads";
-case 2194: return "uhdmparam_assigns";
-case 2123: return "uhdmstmt";
-case 2205: return "uhdmprim_term";
-case 2195: return "uhdmprogram_array";
-case 2124: return "uhdmscope";
-case 2206: return "uhdmpath_term";
-case 2196: return "uhdmmodule_array";
-case 2125: return "uhdmconcurrent_assertions";
-case 2207: return "uhdmtchk_term";
-case 2197: return "uhdmprimitive_array";
-case 2126: return "uhdmvariables";
-case 2208: return "uhdmnets";
-case 2198: return "uhdmdelay";
-case 2127: return "uhdmparameters";
-case 2210: return "uhdmloads";
-case 2209: return "uhdmdrivers";
-case 2199: return "uhdmprimitives";
-case 2128: return "uhdmscopes";
-case 2211: return "uhdmlocal_drivers";
-case 2129: return "uhdmtypespecs";
-case 2130: return "uhdmproperty_decls";
-case 2212: return "uhdmlocal_loads";
-case 2131: return "uhdmsequence_decls";
-case 2213: return "uhdmsim_nets";
-case 2132: return "uhdmnamed_events";
-case 2214: return "uhdmprim_terms";
-case 2133: return "uhdmnamed_event_arrays";
-case 2215: return "uhdmcont_assigns";
-case 2134: return "uhdmvirtual_interface_vars";
-case 2216: return "uhdmnet";
-case 2135: return "uhdmlogic_var";
-case 2217: return "uhdmarray_net";
-case 2136: return "uhdmarray_var";
-case 2218: return "uhdmnamed_event";
-case 2137: return "uhdmarray_var_mem";
-case 2220: return "uhdmspec_param";
-case 2219: return "uhdmnamed_event_array";
-case 2138: return "uhdmlet_decls";
-case 2221: return "uhdmassertion";
-case 2139: return "uhdminstance_items";
-case 2140: return "uhdmbegin";
-case 2222: return "uhdmclass_typespec";
-case 2141: return "uhdmstmts";
-case 2223: return "uhdmclass_obj";
-case 2142: return "uhdmnamed_begin";
-case 2224: return "uhdmprograms";
-case 2143: return "uhdmnamed_fork";
-case 2225: return "uhdmprogram_arrays";
-case 2144: return "uhdmfork_stmt";
-case 2226: return "uhdminterface_tf_decls";
-case 2145: return "uhdmfor_stmt";
-case 2227: return "uhdmmodports";
-case 2146: return "uhdmforeach_stmt";
-case 2228: return "uhdmglobal_clocking";
-case 2147: return "uhdmgen_scope";
-case 2230: return "uhdmmod_paths";
-case 2229: return "uhdmdefault_clocking";
-case 2148: return "uhdmexpr_dist";
-case 2231: return "uhdminterfaces";
-case 2149: return "uhdmexpr";
-case 2150: return "uhdmdistribution";
-case 2232: return "uhdminterface_arrays";
-case 2151: return "uhdmoperand_group";
-case 2233: return "uhdmprogram";
-case 2152: return "uhdmoperation";
-case 2234: return "uhdmclocking_blocks";
-case 2153: return "uhdmoperands";
-case 2235: return "uhdmpackage";
-case 2154: return "uhdmpart_select";
-case 2236: return "uhdmprimitive_arrays";
-case 2155: return "uhdmref_obj";
-case 2237: return "uhdmmodule_arrays";
-case 2156: return "uhdmports";
-case 2238: return "uhdmtchks";
-case 2157: return "uhdmtypespec";
-case 2240: return "uhdmalias_stmts";
-case 2239: return "uhdmdef_params";
-case 2158: return "uhdminstance";
-case 2241: return "uhdmdesign";
-case 2159: return "uhdmtask_func";
-case 2160: return "uhdmactual_group";
-case 2242: return "uhdmallModules";
-case 2161: return "uhdmleft_expr";
-case 2243: return "uhdmtopModules";
-case 2162: return "uhdmright_expr";
-case 2244: return "uhdmallPrograms";
-case 2163: return "uhdmclass_defn";
-case 2245: return "uhdmallPackages";
-case 2164: return "uhdmio_decl";
-case 2165: return "uhdmtask";
-case 2166: return "uhdmfunction";
+case 2248: return "uhdmdefault_clocking";
+case 2167: return "uhdmtypespec";
+case 2250: return "uhdminterfaces";
+case 2249: return "uhdmmod_paths";
+case 2168: return "uhdminstance";
+case 2251: return "uhdminterface_arrays";
+case 2169: return "uhdmtask_func";
+case 2170: return "uhdmactual_group";
+case 2252: return "uhdmprogram";
+case 2171: return "uhdmleft_expr";
+case 2253: return "uhdmclocking_blocks";
+case 2172: return "uhdmright_expr";
+case 2254: return "uhdmpackage";
+case 2173: return "uhdmclass_defn";
+case 2255: return "uhdmprimitive_arrays";
+case 2174: return "uhdmio_decl";
+case 2256: return "uhdmmodule_arrays";
+case 2175: return "uhdmtask";
+case 2257: return "uhdmtchks";
+case 2176: return "uhdmfunction";
+case 2258: return "uhdmdef_params";
+case 2177: return "uhdmmodport";
+case 2260: return "uhdmdesign";
+case 2259: return "uhdmalias_stmts";
+case 2178: return "uhdmio_decls";
+case 2261: return "uhdmallModules";
+case 2180: return "uhdminterface_tf_decl";
+case 2179: return "uhdminterface";
+case 2262: return "uhdmtopModules";
+case 2181: return "uhdmtasks";
+case 2263: return "uhdmallPrograms";
+case 2182: return "uhdmfunctions";
+case 2264: return "uhdmallPackages";
+case 2183: return "uhdmcont_assign";
+case 2184: return "uhdmmodule";
+case 2185: return "uhdmhigh_conn";
+case 2186: return "uhdmlow_conn";
+case 2187: return "uhdmport";
+case 2188: return "uhdmbits";
+case 2200: return "uhdminstance_array";
+case 2190: return "uhdmprimitive";
+case 2189: return "uhdmport_bit";
+case 2201: return "uhdminstances";
+case 2191: return "uhdmmod_path";
+case 2202: return "uhdmmodules";
+case 2192: return "uhdmtchk";
+case 2203: return "uhdminterface_array";
+case 2193: return "uhdmdef_param";
+case 2204: return "uhdmparam_assigns";
+case 2194: return "uhdmrange";
+case 2205: return "uhdmprogram_array";
+case 2195: return "uhdmudp_defn";
+case 2206: return "uhdmmodule_array";
+case 2196: return "uhdmranges";
+case 2207: return "uhdmprimitive_array";
+case 2197: return "uhdmalias_stmt";
+case 2208: return "uhdmdelay";
+case 2198: return "uhdmclocking_block";
+case 2127: return "uhdmprocess";
+case 2210: return "uhdmgate_array";
+case 2209: return "uhdmprimitives";
+case 2199: return "uhdmparam_assign";
+case 2128: return "uhdmproperty_decl";
+case 2211: return "uhdmswitch_array";
+case 2130: return "uhdmconcurrent_assertion";
+case 2129: return "uhdmsequence_decl";
+case 2212: return "uhdmudp_array";
+case 2131: return "uhdmvirtual_interface_var";
+case 2213: return "uhdmnet_drivers";
+case 2132: return "uhdmlet_decl";
+case 2214: return "uhdmnet_loads";
+case 2133: return "uhdmstmt";
+case 2215: return "uhdmprim_term";
+case 2134: return "uhdmscope";
+case 2216: return "uhdmpath_term";
+case 2135: return "uhdmconcurrent_assertions";
+case 2217: return "uhdmtchk_term";
+case 2136: return "uhdmvariables";
+case 2218: return "uhdmnets";
+case 2137: return "uhdmparameters";
+case 2220: return "uhdmloads";
+case 2219: return "uhdmdrivers";
+case 2138: return "uhdmscopes";
+case 2221: return "uhdmlocal_drivers";
+case 2139: return "uhdmtypespecs";
+case 2140: return "uhdmproperty_decls";
+case 2222: return "uhdmlocal_loads";
+case 2141: return "uhdmsequence_decls";
+case 2223: return "uhdmsim_nets";
+case 2142: return "uhdmnamed_events";
+case 2224: return "uhdmprim_terms";
+case 2143: return "uhdmnamed_event_arrays";
+case 2225: return "uhdmcont_assigns";
+case 2144: return "uhdmvirtual_interface_vars";
+case 2226: return "uhdmnet_bit";
+case 2145: return "uhdmlogic_var";
+case 2227: return "uhdmnet";
+case 2146: return "uhdmarray_var";
+case 2228: return "uhdmnet_bits";
+case 2147: return "uhdmarray_var_mem";
+case 2230: return "uhdmenum_net";
+case 2229: return "uhdmstruct_net";
+case 2148: return "uhdmlet_decls";
+case 2231: return "uhdminteger_net";
+case 2149: return "uhdminstance_items";
+case 2150: return "uhdmbegin";
+case 2232: return "uhdmtime_net";
+case 2151: return "uhdmstmts";
+case 2233: return "uhdmlogic_net";
+case 2152: return "uhdmnamed_begin";
+case 2234: return "uhdmarray_net";
+case 2153: return "uhdmnamed_fork";
+case 2235: return "uhdmpacked_array_net";
+case 2154: return "uhdmfork_stmt";
+case 2236: return "uhdmelements";
+case 2155: return "uhdmfor_stmt";
+case 2237: return "uhdmnamed_event";
+case 2156: return "uhdmforeach_stmt";
+case 2238: return "uhdmnamed_event_array";
+case 2157: return "uhdmgen_scope";
+case 2240: return "uhdmassertion";
+case 2239: return "uhdmspec_param";
+case 2158: return "uhdmexpr_dist";
+case 2241: return "uhdmclass_typespec";
+case 2159: return "uhdmexpr";
+case 2160: return "uhdmdistribution";
+case 2242: return "uhdmclass_obj";
+case 2161: return "uhdmoperand_group";
+case 2243: return "uhdmprograms";
+case 2162: return "uhdmoperation";
+case 2244: return "uhdmprogram_arrays";
+case 2163: return "uhdmoperands";
+case 2245: return "uhdminterface_tf_decls";
+case 2164: return "uhdmpart_select";
+case 2246: return "uhdmmodports";
+case 2165: return "uhdmref_obj";
+case 2247: return "uhdmglobal_clocking";
+case 2166: return "uhdmports";
 default: return "NO TYPE";
 }
 }
@@ -372,7 +395,14 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdmprim_term: return prim_termFactory::objects_[index];
   case uhdmpath_term: return path_termFactory::objects_[index];
   case uhdmtchk_term: return tchk_termFactory::objects_[index];
+  case uhdmnet_bit: return net_bitFactory::objects_[index];
+  case uhdmstruct_net: return struct_netFactory::objects_[index];
+  case uhdmenum_net: return enum_netFactory::objects_[index];
+  case uhdminteger_net: return integer_netFactory::objects_[index];
+  case uhdmtime_net: return time_netFactory::objects_[index];
+  case uhdmlogic_net: return logic_netFactory::objects_[index];
   case uhdmarray_net: return array_netFactory::objects_[index];
+  case uhdmpacked_array_net: return packed_array_netFactory::objects_[index];
   case uhdmlogic_var: return logic_varFactory::objects_[index];
   case uhdmarray_var: return array_varFactory::objects_[index];
   case uhdmnamed_event: return named_eventFactory::objects_[index];
@@ -605,10 +635,45 @@ void Serializer::purge() {
   }
   tchk_termFactory::objects_.clear();
 
+  for (auto obj : net_bitFactory::objects_) {
+    delete obj;
+  }
+  net_bitFactory::objects_.clear();
+
+  for (auto obj : struct_netFactory::objects_) {
+    delete obj;
+  }
+  struct_netFactory::objects_.clear();
+
+  for (auto obj : enum_netFactory::objects_) {
+    delete obj;
+  }
+  enum_netFactory::objects_.clear();
+
+  for (auto obj : integer_netFactory::objects_) {
+    delete obj;
+  }
+  integer_netFactory::objects_.clear();
+
+  for (auto obj : time_netFactory::objects_) {
+    delete obj;
+  }
+  time_netFactory::objects_.clear();
+
+  for (auto obj : logic_netFactory::objects_) {
+    delete obj;
+  }
+  logic_netFactory::objects_.clear();
+
   for (auto obj : array_netFactory::objects_) {
     delete obj;
   }
   array_netFactory::objects_.clear();
+
+  for (auto obj : packed_array_netFactory::objects_) {
+    delete obj;
+  }
+  packed_array_netFactory::objects_.clear();
 
   for (auto obj : logic_varFactory::objects_) {
     delete obj;
@@ -895,7 +960,42 @@ void Serializer::save(std::string file) {
     index++;
   }
   index = 1;
+  for (auto obj : net_bitFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : struct_netFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : enum_netFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : integer_netFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : time_netFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : logic_netFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
   for (auto obj : array_netFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : packed_array_netFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -3448,6 +3548,1281 @@ void Serializer::save(std::string file) {
 
    index++;
  }
+ ::capnp::List<Netbit>::Builder Netbits = cap_root.initFactoryNetbit(net_bitFactory::objects_.size());
+ index = 0;
+ for (auto obj : net_bitFactory::objects_) {
+    Netbits[index].setVpiParent(getId(obj->get_vpiParent()));
+    Netbits[index].setUhdmParentType(obj->get_uhdmParentType());
+    Netbits[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Netbits[index].setVpiLineNo(obj->get_vpiLineNo());
+ 
+    if (obj->get_expr()) {  
+      ::capnp::List<::ObjIndexType>::Builder Exprs = Netbits[index].initExpr(obj->get_expr()->size());
+      for (unsigned int ind = 0; ind < obj->get_expr()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Exprs[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_expr())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_expr())[ind]))->getUhdmType());
+      }
+    }
+    Netbits[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Netbits[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Netbits[index].setVpiExpanded(obj->get_vpiExpanded());
+    Netbits[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Netbits[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Netbits[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Netbits[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Netbits[index].setVpiNetType(obj->get_vpiNetType());
+    Netbits[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Netbits[index].setVpiScalar(obj->get_vpiScalar());
+    Netbits[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Netbits[index].setVpiSigned(obj->get_vpiSigned());
+    Netbits[index].setVpiSize(obj->get_vpiSize());
+    Netbits[index].setVpiStrength0(obj->get_vpiStrength0());
+    Netbits[index].setVpiStrength1(obj->get_vpiStrength1());
+    Netbits[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Netbits[index].setVpiVector(obj->get_vpiVector());
+    Netbits[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Netbits[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Netbits[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Netbits[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Netbits[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Netbits[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Netbits[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Netbits[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Netbits[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Netbits[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Netbits[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Netbits[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Netbits[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Netbits[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Structnet>::Builder Structnets = cap_root.initFactoryStructnet(struct_netFactory::objects_.size());
+ index = 0;
+ for (auto obj : struct_netFactory::objects_) {
+    Structnets[index].setVpiParent(getId(obj->get_vpiParent()));
+    Structnets[index].setUhdmParentType(obj->get_uhdmParentType());
+    Structnets[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Structnets[index].setVpiLineNo(obj->get_vpiLineNo());
+    Structnets[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+ 
+    if (obj->get_nets()) {  
+      ::capnp::List<::ObjIndexType>::Builder Netss = Structnets[index].initNets(obj->get_nets()->size());
+      for (unsigned int ind = 0; ind < obj->get_nets()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Netss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_nets())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_nets())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_expr()) {  
+      ::capnp::List<::ObjIndexType>::Builder Exprs = Structnets[index].initExpr(obj->get_expr()->size());
+      for (unsigned int ind = 0; ind < obj->get_expr()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Exprs[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_expr())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_expr())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_net_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Netbitss = Structnets[index].initNetbits(obj->get_net_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_net_bits()->size(); ind++) {
+        Netbitss.set(ind, getId((*obj->get_net_bits())[ind]));
+      }
+    }
+    Structnets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Structnets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Structnets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Structnets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Structnets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Structnets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Structnets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Structnets[index].setVpiNetType(obj->get_vpiNetType());
+    Structnets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Structnets[index].setVpiScalar(obj->get_vpiScalar());
+    Structnets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Structnets[index].setVpiSigned(obj->get_vpiSigned());
+    Structnets[index].setVpiSize(obj->get_vpiSize());
+    Structnets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Structnets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Structnets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Structnets[index].setVpiVector(obj->get_vpiVector());
+    Structnets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Structnets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Structnets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Structnets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Structnets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Structnets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Structnets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Structnets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Structnets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Structnets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Structnets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Structnets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Structnets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Structnets[index].setModule(getId(obj->get_module()));
+
+
+    Structnets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Structnets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Structnets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Structnets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Structnets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Structnets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Structnets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Structnets[index].setVpiNetType(obj->get_vpiNetType());
+    Structnets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Structnets[index].setVpiScalar(obj->get_vpiScalar());
+    Structnets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Structnets[index].setVpiSigned(obj->get_vpiSigned());
+    Structnets[index].setVpiSize(obj->get_vpiSize());
+    Structnets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Structnets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Structnets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Structnets[index].setVpiVector(obj->get_vpiVector());
+    Structnets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Structnets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Structnets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Structnets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Structnets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Structnets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Structnets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Structnets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Structnets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Structnets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Structnets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Structnets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Structnets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Structnets[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Enumnet>::Builder Enumnets = cap_root.initFactoryEnumnet(enum_netFactory::objects_.size());
+ index = 0;
+ for (auto obj : enum_netFactory::objects_) {
+    Enumnets[index].setVpiParent(getId(obj->get_vpiParent()));
+    Enumnets[index].setUhdmParentType(obj->get_uhdmParentType());
+    Enumnets[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Enumnets[index].setVpiLineNo(obj->get_vpiLineNo());
+    Enumnets[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+ 
+    if (obj->get_expr()) {  
+      ::capnp::List<::ObjIndexType>::Builder Exprs = Enumnets[index].initExpr(obj->get_expr()->size());
+      for (unsigned int ind = 0; ind < obj->get_expr()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Exprs[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_expr())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_expr())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_net_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Netbitss = Enumnets[index].initNetbits(obj->get_net_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_net_bits()->size(); ind++) {
+        Netbitss.set(ind, getId((*obj->get_net_bits())[ind]));
+      }
+    }
+    Enumnets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Enumnets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Enumnets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Enumnets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Enumnets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Enumnets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Enumnets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Enumnets[index].setVpiNetType(obj->get_vpiNetType());
+    Enumnets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Enumnets[index].setVpiScalar(obj->get_vpiScalar());
+    Enumnets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Enumnets[index].setVpiSigned(obj->get_vpiSigned());
+    Enumnets[index].setVpiSize(obj->get_vpiSize());
+    Enumnets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Enumnets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Enumnets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Enumnets[index].setVpiVector(obj->get_vpiVector());
+    Enumnets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Enumnets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Enumnets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Enumnets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Enumnets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Enumnets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Enumnets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Enumnets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Enumnets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Enumnets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Enumnets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Enumnets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Enumnets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Enumnets[index].setModule(getId(obj->get_module()));
+
+
+    Enumnets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Enumnets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Enumnets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Enumnets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Enumnets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Enumnets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Enumnets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Enumnets[index].setVpiNetType(obj->get_vpiNetType());
+    Enumnets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Enumnets[index].setVpiScalar(obj->get_vpiScalar());
+    Enumnets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Enumnets[index].setVpiSigned(obj->get_vpiSigned());
+    Enumnets[index].setVpiSize(obj->get_vpiSize());
+    Enumnets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Enumnets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Enumnets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Enumnets[index].setVpiVector(obj->get_vpiVector());
+    Enumnets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Enumnets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Enumnets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Enumnets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Enumnets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Enumnets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Enumnets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Enumnets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Enumnets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Enumnets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Enumnets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Enumnets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Enumnets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Enumnets[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Integernet>::Builder Integernets = cap_root.initFactoryIntegernet(integer_netFactory::objects_.size());
+ index = 0;
+ for (auto obj : integer_netFactory::objects_) {
+    Integernets[index].setVpiParent(getId(obj->get_vpiParent()));
+    Integernets[index].setUhdmParentType(obj->get_uhdmParentType());
+    Integernets[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Integernets[index].setVpiLineNo(obj->get_vpiLineNo());
+ 
+    if (obj->get_net_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Netbitss = Integernets[index].initNetbits(obj->get_net_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_net_bits()->size(); ind++) {
+        Netbitss.set(ind, getId((*obj->get_net_bits())[ind]));
+      }
+    }
+    Integernets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Integernets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Integernets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Integernets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Integernets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Integernets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Integernets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Integernets[index].setVpiNetType(obj->get_vpiNetType());
+    Integernets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Integernets[index].setVpiScalar(obj->get_vpiScalar());
+    Integernets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Integernets[index].setVpiSigned(obj->get_vpiSigned());
+    Integernets[index].setVpiSize(obj->get_vpiSize());
+    Integernets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Integernets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Integernets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Integernets[index].setVpiVector(obj->get_vpiVector());
+    Integernets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Integernets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Integernets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Integernets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Integernets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Integernets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Integernets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Integernets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Integernets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Integernets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Integernets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Integernets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Integernets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Integernets[index].setModule(getId(obj->get_module()));
+
+
+    Integernets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Integernets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Integernets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Integernets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Integernets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Integernets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Integernets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Integernets[index].setVpiNetType(obj->get_vpiNetType());
+    Integernets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Integernets[index].setVpiScalar(obj->get_vpiScalar());
+    Integernets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Integernets[index].setVpiSigned(obj->get_vpiSigned());
+    Integernets[index].setVpiSize(obj->get_vpiSize());
+    Integernets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Integernets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Integernets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Integernets[index].setVpiVector(obj->get_vpiVector());
+    Integernets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Integernets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Integernets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Integernets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Integernets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Integernets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Integernets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Integernets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Integernets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Integernets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Integernets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Integernets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Integernets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Integernets[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Timenet>::Builder Timenets = cap_root.initFactoryTimenet(time_netFactory::objects_.size());
+ index = 0;
+ for (auto obj : time_netFactory::objects_) {
+    Timenets[index].setVpiParent(getId(obj->get_vpiParent()));
+    Timenets[index].setUhdmParentType(obj->get_uhdmParentType());
+    Timenets[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Timenets[index].setVpiLineNo(obj->get_vpiLineNo());
+ 
+    if (obj->get_net_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Netbitss = Timenets[index].initNetbits(obj->get_net_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_net_bits()->size(); ind++) {
+        Netbitss.set(ind, getId((*obj->get_net_bits())[ind]));
+      }
+    }
+    Timenets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Timenets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Timenets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Timenets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Timenets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Timenets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Timenets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Timenets[index].setVpiNetType(obj->get_vpiNetType());
+    Timenets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Timenets[index].setVpiScalar(obj->get_vpiScalar());
+    Timenets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Timenets[index].setVpiSigned(obj->get_vpiSigned());
+    Timenets[index].setVpiSize(obj->get_vpiSize());
+    Timenets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Timenets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Timenets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Timenets[index].setVpiVector(obj->get_vpiVector());
+    Timenets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Timenets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Timenets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Timenets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Timenets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Timenets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Timenets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Timenets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Timenets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Timenets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Timenets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Timenets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Timenets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Timenets[index].setModule(getId(obj->get_module()));
+
+
+    Timenets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Timenets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Timenets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Timenets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Timenets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Timenets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Timenets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Timenets[index].setVpiNetType(obj->get_vpiNetType());
+    Timenets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Timenets[index].setVpiScalar(obj->get_vpiScalar());
+    Timenets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Timenets[index].setVpiSigned(obj->get_vpiSigned());
+    Timenets[index].setVpiSize(obj->get_vpiSize());
+    Timenets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Timenets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Timenets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Timenets[index].setVpiVector(obj->get_vpiVector());
+    Timenets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Timenets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Timenets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Timenets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Timenets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Timenets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Timenets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Timenets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Timenets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Timenets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Timenets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Timenets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Timenets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Timenets[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Logicnet>::Builder Logicnets = cap_root.initFactoryLogicnet(logic_netFactory::objects_.size());
+ index = 0;
+ for (auto obj : logic_netFactory::objects_) {
+    Logicnets[index].setVpiParent(getId(obj->get_vpiParent()));
+    Logicnets[index].setUhdmParentType(obj->get_uhdmParentType());
+    Logicnets[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Logicnets[index].setVpiLineNo(obj->get_vpiLineNo());
+  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp0 = Logicnets[index].getLeftexpr();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp0.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp1 = Logicnets[index].getRightexpr();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
+  } 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Logicnets[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
+ 
+    if (obj->get_net_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Netbitss = Logicnets[index].initNetbits(obj->get_net_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_net_bits()->size(); ind++) {
+        Netbitss.set(ind, getId((*obj->get_net_bits())[ind]));
+      }
+    }
+    Logicnets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Logicnets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Logicnets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Logicnets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Logicnets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Logicnets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Logicnets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Logicnets[index].setVpiNetType(obj->get_vpiNetType());
+    Logicnets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Logicnets[index].setVpiScalar(obj->get_vpiScalar());
+    Logicnets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Logicnets[index].setVpiSigned(obj->get_vpiSigned());
+    Logicnets[index].setVpiSize(obj->get_vpiSize());
+    Logicnets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Logicnets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Logicnets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Logicnets[index].setVpiVector(obj->get_vpiVector());
+    Logicnets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Logicnets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Logicnets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Logicnets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Logicnets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Logicnets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Logicnets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Logicnets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Logicnets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Logicnets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Logicnets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Logicnets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Logicnets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Logicnets[index].setModule(getId(obj->get_module()));
+
+
+    Logicnets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Logicnets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Logicnets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Logicnets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Logicnets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Logicnets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Logicnets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Logicnets[index].setVpiNetType(obj->get_vpiNetType());
+    Logicnets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Logicnets[index].setVpiScalar(obj->get_vpiScalar());
+    Logicnets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Logicnets[index].setVpiSigned(obj->get_vpiSigned());
+    Logicnets[index].setVpiSize(obj->get_vpiSize());
+    Logicnets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Logicnets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Logicnets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Logicnets[index].setVpiVector(obj->get_vpiVector());
+    Logicnets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Logicnets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Logicnets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Logicnets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Logicnets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Logicnets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Logicnets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Logicnets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Logicnets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Logicnets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Logicnets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Logicnets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Logicnets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Logicnets[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
  ::capnp::List<Arraynet>::Builder Arraynets = cap_root.initFactoryArraynet(array_netFactory::objects_.size());
  index = 0;
  for (auto obj : array_netFactory::objects_) {
@@ -3572,6 +4947,262 @@ void Serializer::save(std::string file) {
       }
     }
     Arraynets[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Packedarraynet>::Builder Packedarraynets = cap_root.initFactoryPackedarraynet(packed_array_netFactory::objects_.size());
+ index = 0;
+ for (auto obj : packed_array_netFactory::objects_) {
+    Packedarraynets[index].setVpiParent(getId(obj->get_vpiParent()));
+    Packedarraynets[index].setUhdmParentType(obj->get_uhdmParentType());
+    Packedarraynets[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Packedarraynets[index].setVpiLineNo(obj->get_vpiLineNo());
+    Packedarraynets[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp0 = Packedarraynets[index].getLeftexpr();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp0.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp1 = Packedarraynets[index].getRightexpr();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
+  } 
+    if (obj->get_expr()) {  
+      ::capnp::List<::ObjIndexType>::Builder Exprs = Packedarraynets[index].initExpr(obj->get_expr()->size());
+      for (unsigned int ind = 0; ind < obj->get_expr()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Exprs[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_expr())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_expr())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Packedarraynets[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
+ 
+    if (obj->get_elements()) {  
+      ::capnp::List<::ObjIndexType>::Builder Elementss = Packedarraynets[index].initElements(obj->get_elements()->size());
+      for (unsigned int ind = 0; ind < obj->get_elements()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Elementss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_elements())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_elements())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_net_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Netbitss = Packedarraynets[index].initNetbits(obj->get_net_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_net_bits()->size(); ind++) {
+        Netbitss.set(ind, getId((*obj->get_net_bits())[ind]));
+      }
+    }
+    Packedarraynets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Packedarraynets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Packedarraynets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Packedarraynets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Packedarraynets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Packedarraynets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Packedarraynets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Packedarraynets[index].setVpiNetType(obj->get_vpiNetType());
+    Packedarraynets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Packedarraynets[index].setVpiScalar(obj->get_vpiScalar());
+    Packedarraynets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Packedarraynets[index].setVpiSigned(obj->get_vpiSigned());
+    Packedarraynets[index].setVpiSize(obj->get_vpiSize());
+    Packedarraynets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Packedarraynets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Packedarraynets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Packedarraynets[index].setVpiVector(obj->get_vpiVector());
+    Packedarraynets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Packedarraynets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Packedarraynets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Packedarraynets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Packedarraynets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Packedarraynets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Packedarraynets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Packedarraynets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Packedarraynets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Packedarraynets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Packedarraynets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Packedarraynets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Packedarraynets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Packedarraynets[index].setModule(getId(obj->get_module()));
+
+
+    Packedarraynets[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Packedarraynets[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Packedarraynets[index].setVpiExpanded(obj->get_vpiExpanded());
+    Packedarraynets[index].setVpiImplicitDecl(obj->get_vpiImplicitDecl());
+    Packedarraynets[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Packedarraynets[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Packedarraynets[index].setVpiNetDeclAssign(obj->get_vpiNetDeclAssign());
+    Packedarraynets[index].setVpiNetType(obj->get_vpiNetType());
+    Packedarraynets[index].setVpiResolvedNetType(obj->get_vpiResolvedNetType());
+    Packedarraynets[index].setVpiScalar(obj->get_vpiScalar());
+    Packedarraynets[index].setVpiExplicitScalared(obj->get_vpiExplicitScalared());
+    Packedarraynets[index].setVpiSigned(obj->get_vpiSigned());
+    Packedarraynets[index].setVpiSize(obj->get_vpiSize());
+    Packedarraynets[index].setVpiStrength0(obj->get_vpiStrength0());
+    Packedarraynets[index].setVpiStrength1(obj->get_vpiStrength1());
+    Packedarraynets[index].setVpiChargeStrength(obj->get_vpiChargeStrength());
+    Packedarraynets[index].setVpiVector(obj->get_vpiVector());
+    Packedarraynets[index].setVpiExplicitVectored(obj->get_vpiExplicitVectored());
+    Packedarraynets[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Packedarraynets[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Driverss = Packedarraynets[index].initDrivers(obj->get_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Driverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Loadss = Packedarraynets[index].initLoads(obj->get_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Loadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_loads())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localdriverss = Packedarraynets[index].initLocaldrivers(obj->get_local_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localdriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_local_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Localloadss = Packedarraynets[index].initLocalloads(obj->get_local_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_local_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Localloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_local_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_local_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_sim_nets()) {
+    ::ObjIndexType::Builder tmp0 = Packedarraynets[index].getSimnets();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_sim_nets())));
+    tmp0.setType(((BaseClass*)obj->get_sim_nets())->getUhdmType());
+  }  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp1 = Packedarraynets[index].getTypespec();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp1.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  } 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Packedarraynets[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Packedarraynets[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+ 
+    if (obj->get_path_term()) {  
+      ::capnp::List<::uint64_t>::Builder Pathterms = Packedarraynets[index].initPathterm(obj->get_path_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_path_term()->size(); ind++) {
+        Pathterms.set(ind, getId((*obj->get_path_term())[ind]));
+      }
+    }
+ 
+    if (obj->get_tchk_term()) {  
+      ::capnp::List<::uint64_t>::Builder Tchkterms = Packedarraynets[index].initTchkterm(obj->get_tchk_term()->size());
+      for (unsigned int ind = 0; ind < obj->get_tchk_term()->size(); ind++) {
+        Tchkterms.set(ind, getId((*obj->get_tchk_term())[ind]));
+      }
+    }
+    Packedarraynets[index].setModule(getId(obj->get_module()));
 
 
    index++;
