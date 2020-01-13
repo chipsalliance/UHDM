@@ -34,9 +34,15 @@ namespace UHDM {
     // comment: net();
     ~net()  {}
     
+    VectorOfnet_bit* get_net_bits() const { return net_bits_; }
+
+    bool set_net_bits(VectorOfnet_bit* data) { net_bits_ = data; return true;}
+
     virtual unsigned int getUhdmType() { return uhdmnet; }   
   private:
     
+    VectorOfnet_bit* net_bits_;
+
   };
 
   class netFactory {

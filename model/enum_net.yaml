@@ -12,13 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "net" formal description
+# Universal Hardware Data Model (UHDM) "enum net" formal description
  
-- class_def: net
-  - extends: nets
-  - obj_ref: net_bits
-    name: net bits
-    vpi: vpiBit
-    type: net_bit
+- obj_def: enum_net
+  - extends: net
+  - property: packed_array_member
+    name: packed array member
+    vpi: vpiPackedArrayMember
+    type: bool
+    card: 1
+  - class_ref: expr
+    name: expr
+    vpi: vpiIndex
+    type: expr
     card: any
-
+    
