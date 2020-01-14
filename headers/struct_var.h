@@ -50,9 +50,21 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
+    bool get_vpiPackedArrayMember() const { return vpiPackedArrayMember_; }
+
+    bool set_vpiPackedArrayMember(bool data) { vpiPackedArrayMember_ = data; return true;}
+
+    bool get_vpiConstantSelect() const { return vpiConstantSelect_; }
+
+    bool set_vpiConstantSelect(bool data) { vpiConstantSelect_ = data; return true;}
+
     VectorOfvariables* get_variables() const { return variables_; }
 
     bool set_variables(VectorOfvariables* data) { variables_ = data; return true;}
+
+    expr* get_expr_index() const { return expr_index_; }
+
+    bool set_expr_index(expr* data) { expr_index_ = data; return true;}
 
     VectorOfvar_bit* get_var_bits() const { return var_bits_; }
 
@@ -71,7 +83,13 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
+    bool vpiPackedArrayMember_;
+
+    bool vpiConstantSelect_;
+
     VectorOfvariables* variables_;
+
+    expr* expr_index_;
 
     VectorOfvar_bit* var_bits_;
 

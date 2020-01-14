@@ -50,6 +50,18 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
+    bool get_vpiPackedArrayMember() const { return vpiPackedArrayMember_; }
+
+    bool set_vpiPackedArrayMember(bool data) { vpiPackedArrayMember_ = data; return true;}
+
+    bool get_vpiConstantSelect() const { return vpiConstantSelect_; }
+
+    bool set_vpiConstantSelect(bool data) { vpiConstantSelect_ = data; return true;}
+
+    bool get_vpiPacked() const { return vpiPacked_; }
+
+    bool set_vpiPacked(bool data) { vpiPacked_ = data; return true;}
+
     expr* get_left_expr() const { return left_expr_; }
 
     bool set_left_expr(expr* data) { left_expr_ = data; return true;}
@@ -58,6 +70,10 @@ namespace UHDM {
 
     bool set_right_expr(expr* data) { right_expr_ = data; return true;}
 
+    expr* get_expr_index() const { return expr_index_; }
+
+    bool set_expr_index(expr* data) { expr_index_ = data; return true;}
+
     VectorOfrange* get_ranges() const { return ranges_; }
 
     bool set_ranges(VectorOfrange* data) { ranges_ = data; return true;}
@@ -65,6 +81,10 @@ namespace UHDM {
     VectorOfvar_bit* get_var_bits() const { return var_bits_; }
 
     bool set_var_bits(VectorOfvar_bit* data) { var_bits_ = data; return true;}
+
+    VectorOfany* get_elements() const { return elements_; }
+
+    bool set_elements(VectorOfany* data) {if (!enum_struct_union_packed_var_groupGroupCompliant(data)) return false; elements_ = data; return true;}
 
     unsigned int get_vpiType() { return vpiPackedArrayVar; }
 
@@ -79,13 +99,23 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
+    bool vpiPackedArrayMember_;
+
+    bool vpiConstantSelect_;
+
+    bool vpiPacked_;
+
     expr* left_expr_;
 
     expr* right_expr_;
 
+    expr* expr_index_;
+
     VectorOfrange* ranges_;
 
     VectorOfvar_bit* var_bits_;
+
+    VectorOfany* elements_;
 
   };
 

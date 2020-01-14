@@ -35,6 +35,7 @@ long_int_var.yaml
 integer_var.yaml
 time_var.yaml
 array_var.yaml
+enum_struct_union_packed_var_group.yaml
 packed_array_var.yaml
 bit_var.yaml
 logic_var.yaml

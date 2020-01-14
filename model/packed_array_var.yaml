@@ -16,6 +16,21 @@
  
 - obj_def: packed_array_var
   - extends: variables
+  - property: packed_array_member
+    name: packed array member
+    vpi: vpiPackedArrayMember
+    type: bool
+    card: 1
+  - property: constant_selection
+    name: constant selection
+    vpi: vpiConstantSelect
+    type: bool
+    card: 1    
+  - property: packed
+    name: packed
+    vpi: vpiPacked
+    type: bool
+    card: 1
   - obj_ref: ranges
     name: ranges
     vpi: vpiRange
@@ -36,3 +51,13 @@
     vpi: vpiBit
     type: var_bit
     card: any
+  - group_ref: elements
+    name: elements
+    vpi: vpiElement
+    type: enum_struct_union_packed_var_group
+    card: any  
+  - class_ref: expr_index
+    name: expr index
+    vpi: vpiIndex
+    type: expr
+    card: 1

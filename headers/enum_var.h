@@ -50,6 +50,18 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
+    bool get_vpiPackedArrayMember() const { return vpiPackedArrayMember_; }
+
+    bool set_vpiPackedArrayMember(bool data) { vpiPackedArrayMember_ = data; return true;}
+
+    bool get_vpiConstantSelect() const { return vpiConstantSelect_; }
+
+    bool set_vpiConstantSelect(bool data) { vpiConstantSelect_ = data; return true;}
+
+    expr* get_expr_index() const { return expr_index_; }
+
+    bool set_expr_index(expr* data) { expr_index_ = data; return true;}
+
     unsigned int get_vpiType() { return vpiEnumVar; }
 
     virtual unsigned int getUhdmType() { return uhdmenum_var; }   
@@ -62,6 +74,12 @@ namespace UHDM {
     unsigned int vpiFile_;
 
     unsigned int vpiLineNo_;
+
+    bool vpiPackedArrayMember_;
+
+    bool vpiConstantSelect_;
+
+    expr* expr_index_;
 
   };
 

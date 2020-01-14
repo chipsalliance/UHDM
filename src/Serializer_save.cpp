@@ -246,169 +246,169 @@ std::vector<std::vector<design*>*> VectorOfdesignFactory::objects_;
 
 std::string getUhdmName(unsigned int type) {
       switch (type) {
-case 2248: return "uhdmmodules";
-case 2167: return "uhdmbegin";
-case 2250: return "uhdmparam_assigns";
-case 2249: return "uhdminterface_array";
-case 2168: return "uhdmstmts";
-case 2251: return "uhdmprogram_array";
-case 2169: return "uhdmnamed_begin";
-case 2170: return "uhdmnamed_fork";
-case 2252: return "uhdmmodule_array";
-case 2171: return "uhdmfork_stmt";
-case 2253: return "uhdmprimitive_array";
-case 2172: return "uhdmfor_stmt";
-case 2254: return "uhdmdelay";
-case 2173: return "uhdmforeach_stmt";
-case 2255: return "uhdmprimitives";
-case 2174: return "uhdmgen_scope";
-case 2256: return "uhdmgate_array";
-case 2175: return "uhdmexpr_dist";
-case 2257: return "uhdmswitch_array";
-case 2176: return "uhdmexpr";
-case 2258: return "uhdmudp_array";
-case 2177: return "uhdmdistribution";
-case 2260: return "uhdmnet_loads";
-case 2259: return "uhdmnet_drivers";
-case 2178: return "uhdmoperand_group";
-case 2261: return "uhdmprim_term";
-case 2179: return "uhdmoperation";
-case 2180: return "uhdmoperands";
-case 2262: return "uhdmnets";
-case 2181: return "uhdmpart_select";
-case 2263: return "uhdmdrivers";
-case 2182: return "uhdmref_obj";
-case 2264: return "uhdmloads";
-case 2183: return "uhdmports";
-case 2265: return "uhdmlocal_drivers";
-case 2184: return "uhdmtypespec";
-case 2266: return "uhdmlocal_loads";
-case 2185: return "uhdminstance";
-case 2267: return "uhdmsim_nets";
-case 2186: return "uhdmtask_func";
-case 2268: return "uhdmnet_bit";
-case 2187: return "uhdmactual_group";
-case 2270: return "uhdmnet_bits";
-case 2269: return "uhdmnet";
-case 2188: return "uhdmvar_select";
-case 2271: return "uhdmstruct_net";
-case 2200: return "uhdmshort_int_var";
-case 2189: return "uhdmvariable_drivers";
-case 2190: return "uhdmvariable_loads";
-case 2272: return "uhdmenum_net";
-case 2201: return "uhdmint_var";
-case 2191: return "uhdmindexes";
-case 2273: return "uhdminteger_net";
-case 2202: return "uhdmlong_int_var";
-case 2192: return "uhdmprim_terms";
-case 2274: return "uhdmtime_net";
-case 2203: return "uhdminteger_var";
-case 2193: return "uhdmcont_assigns";
-case 2275: return "uhdmlogic_net";
-case 2204: return "uhdmtime_var";
-case 2194: return "uhdmpath_term";
-case 2276: return "uhdmarray_net";
-case 2205: return "uhdmleft_expr";
-case 2195: return "uhdmtchk_term";
-case 2277: return "uhdmpacked_array_net";
-case 2206: return "uhdmright_expr";
-case 2196: return "uhdmmodule";
-case 2278: return "uhdmelements";
-case 2207: return "uhdmvar_selects";
-case 2197: return "uhdmshort_real_var";
-case 2280: return "uhdmnamed_event_array";
-case 2279: return "uhdmnamed_event";
-case 2208: return "uhdmranges";
-case 2198: return "uhdmreal_var";
-case 2281: return "uhdmspec_param";
-case 2210: return "uhdmvar_bits";
-case 2209: return "uhdmpacked_array_var";
-case 2199: return "uhdmbyte_var";
-case 2282: return "uhdmassertion";
-case 2211: return "uhdmbit_var";
-case 2283: return "uhdmclass_typespec";
-case 2212: return "uhdmstruct_var";
-case 2284: return "uhdmclass_obj";
-case 2213: return "uhdmunion_var";
-case 2285: return "uhdmprograms";
-case 2214: return "uhdmenum_var";
-case 2286: return "uhdmprogram_arrays";
-case 2215: return "uhdmstring_var";
-case 2287: return "uhdminterface_tf_decls";
-case 2216: return "uhdmchandle_var";
-case 2288: return "uhdmmodports";
-case 2217: return "uhdmclass_var";
-case 2300: return "uhdmdef_params";
-case 2290: return "uhdmdefault_clocking";
-case 2289: return "uhdmglobal_clocking";
-case 2218: return "uhdmvar_bit";
-case 2301: return "uhdmalias_stmts";
-case 2291: return "uhdmmod_paths";
-case 2220: return "uhdmexpr_indexes";
-case 2219: return "uhdmexpr_index";
-case 2302: return "uhdmdesign";
-case 2292: return "uhdminterfaces";
-case 2221: return "uhdmclass_defn";
-case 2303: return "uhdmallModules";
-case 2293: return "uhdminterface_arrays";
-case 2222: return "uhdmio_decl";
-case 2304: return "uhdmtopModules";
-case 2294: return "uhdmprogram";
-case 2223: return "uhdmtask";
-case 2305: return "uhdmallPrograms";
-case 2295: return "uhdmclocking_blocks";
-case 2224: return "uhdmfunction";
-case 2306: return "uhdmallPackages";
-case 2296: return "uhdmpackage";
-case 2225: return "uhdmmodport";
-case 2144: return "uhdmprocess";
-case 2297: return "uhdmprimitive_arrays";
-case 2226: return "uhdmio_decls";
-case 2145: return "uhdmproperty_decl";
-case 2298: return "uhdmmodule_arrays";
-case 2227: return "uhdminterface";
-case 2146: return "uhdmsequence_decl";
-case 2299: return "uhdmtchks";
-case 2228: return "uhdminterface_tf_decl";
-case 2147: return "uhdmconcurrent_assertion";
-case 2230: return "uhdmfunctions";
-case 2229: return "uhdmtasks";
-case 2148: return "uhdmvirtual_interface_var";
-case 2231: return "uhdmcont_assign";
-case 2150: return "uhdmstmt";
-case 2149: return "uhdmlet_decl";
-case 2232: return "uhdmhigh_conn";
-case 2151: return "uhdmscope";
-case 2233: return "uhdmlow_conn";
-case 2152: return "uhdmconcurrent_assertions";
-case 2234: return "uhdmport";
-case 2153: return "uhdmvariables";
-case 2235: return "uhdmbits";
-case 2154: return "uhdmparameters";
-case 2236: return "uhdmport_bit";
-case 2155: return "uhdmscopes";
-case 2237: return "uhdmprimitive";
-case 2156: return "uhdmtypespecs";
-case 2238: return "uhdmmod_path";
-case 2157: return "uhdmproperty_decls";
-case 2240: return "uhdmdef_param";
-case 2239: return "uhdmtchk";
-case 2158: return "uhdmsequence_decls";
-case 2241: return "uhdmrange";
-case 2159: return "uhdmnamed_events";
-case 2160: return "uhdmnamed_event_arrays";
-case 2242: return "uhdmudp_defn";
-case 2161: return "uhdmvirtual_interface_vars";
-case 2243: return "uhdmalias_stmt";
-case 2162: return "uhdmlogic_var";
-case 2244: return "uhdmclocking_block";
-case 2163: return "uhdmarray_var";
-case 2245: return "uhdmparam_assign";
-case 2164: return "uhdmarray_var_mem";
-case 2246: return "uhdminstance_array";
-case 2165: return "uhdmlet_decls";
-case 2247: return "uhdminstances";
-case 2166: return "uhdminstance_items";
+case 2248: return "uhdminstance_array";
+case 2167: return "uhdminstance_items";
+case 2250: return "uhdmmodules";
+case 2249: return "uhdminstances";
+case 2168: return "uhdmbegin";
+case 2251: return "uhdminterface_array";
+case 2169: return "uhdmstmts";
+case 2170: return "uhdmnamed_begin";
+case 2252: return "uhdmparam_assigns";
+case 2171: return "uhdmnamed_fork";
+case 2253: return "uhdmprogram_array";
+case 2172: return "uhdmfork_stmt";
+case 2254: return "uhdmmodule_array";
+case 2173: return "uhdmfor_stmt";
+case 2255: return "uhdmprimitive_array";
+case 2174: return "uhdmforeach_stmt";
+case 2256: return "uhdmdelay";
+case 2175: return "uhdmgen_scope";
+case 2257: return "uhdmprimitives";
+case 2176: return "uhdmexpr_dist";
+case 2258: return "uhdmgate_array";
+case 2177: return "uhdmexpr";
+case 2260: return "uhdmudp_array";
+case 2259: return "uhdmswitch_array";
+case 2178: return "uhdmdistribution";
+case 2261: return "uhdmnet_drivers";
+case 2179: return "uhdmoperand_group";
+case 2180: return "uhdmoperation";
+case 2262: return "uhdmnet_loads";
+case 2181: return "uhdmoperands";
+case 2263: return "uhdmprim_term";
+case 2182: return "uhdmpart_select";
+case 2264: return "uhdmnets";
+case 2183: return "uhdmref_obj";
+case 2265: return "uhdmdrivers";
+case 2184: return "uhdmports";
+case 2266: return "uhdmloads";
+case 2185: return "uhdmtypespec";
+case 2267: return "uhdmlocal_drivers";
+case 2186: return "uhdminstance";
+case 2268: return "uhdmlocal_loads";
+case 2187: return "uhdmtask_func";
+case 2270: return "uhdmnet_bit";
+case 2269: return "uhdmsim_nets";
+case 2188: return "uhdmactual_group";
+case 2271: return "uhdmnet";
+case 2200: return "uhdmbyte_var";
+case 2189: return "uhdmvar_select";
+case 2190: return "uhdmvariable_drivers";
+case 2272: return "uhdmnet_bits";
+case 2201: return "uhdmshort_int_var";
+case 2191: return "uhdmvariable_loads";
+case 2273: return "uhdmstruct_net";
+case 2202: return "uhdmint_var";
+case 2192: return "uhdmindexes";
+case 2274: return "uhdmenum_net";
+case 2203: return "uhdmlong_int_var";
+case 2193: return "uhdmprim_terms";
+case 2275: return "uhdminteger_net";
+case 2204: return "uhdminteger_var";
+case 2194: return "uhdmcont_assigns";
+case 2276: return "uhdmtime_net";
+case 2205: return "uhdmtime_var";
+case 2195: return "uhdmpath_term";
+case 2277: return "uhdmlogic_net";
+case 2206: return "uhdmleft_expr";
+case 2196: return "uhdmtchk_term";
+case 2278: return "uhdmarray_net";
+case 2207: return "uhdmright_expr";
+case 2197: return "uhdmmodule";
+case 2280: return "uhdmnamed_event";
+case 2279: return "uhdmpacked_array_net";
+case 2208: return "uhdmvar_selects";
+case 2198: return "uhdmshort_real_var";
+case 2281: return "uhdmnamed_event_array";
+case 2210: return "uhdmpacked_array_var";
+case 2209: return "uhdmranges";
+case 2199: return "uhdmreal_var";
+case 2282: return "uhdmspec_param";
+case 2211: return "uhdmexpr_index";
+case 2283: return "uhdmassertion";
+case 2212: return "uhdmvar_bits";
+case 2284: return "uhdmclass_typespec";
+case 2213: return "uhdmelements";
+case 2285: return "uhdmclass_obj";
+case 2214: return "uhdmbit_var";
+case 2286: return "uhdmprograms";
+case 2215: return "uhdmstruct_var";
+case 2287: return "uhdmprogram_arrays";
+case 2216: return "uhdmunion_var";
+case 2288: return "uhdminterface_tf_decls";
+case 2217: return "uhdmenum_var";
+case 2300: return "uhdmtchks";
+case 2290: return "uhdmglobal_clocking";
+case 2289: return "uhdmmodports";
+case 2218: return "uhdmstring_var";
+case 2301: return "uhdmdef_params";
+case 2291: return "uhdmdefault_clocking";
+case 2220: return "uhdmclass_var";
+case 2219: return "uhdmchandle_var";
+case 2302: return "uhdmalias_stmts";
+case 2292: return "uhdmmod_paths";
+case 2221: return "uhdmvar_bit";
+case 2303: return "uhdmdesign";
+case 2293: return "uhdminterfaces";
+case 2222: return "uhdmexpr_indexes";
+case 2304: return "uhdmallModules";
+case 2294: return "uhdminterface_arrays";
+case 2223: return "uhdmclass_defn";
+case 2305: return "uhdmtopModules";
+case 2295: return "uhdmprogram";
+case 2224: return "uhdmio_decl";
+case 2306: return "uhdmallPrograms";
+case 2296: return "uhdmclocking_blocks";
+case 2225: return "uhdmtask";
+case 2307: return "uhdmallPackages";
+case 2297: return "uhdmpackage";
+case 2226: return "uhdmfunction";
+case 2145: return "uhdmprocess";
+case 2298: return "uhdmprimitive_arrays";
+case 2227: return "uhdmmodport";
+case 2146: return "uhdmproperty_decl";
+case 2299: return "uhdmmodule_arrays";
+case 2228: return "uhdmio_decls";
+case 2147: return "uhdmsequence_decl";
+case 2230: return "uhdminterface_tf_decl";
+case 2229: return "uhdminterface";
+case 2148: return "uhdmconcurrent_assertion";
+case 2231: return "uhdmtasks";
+case 2150: return "uhdmlet_decl";
+case 2149: return "uhdmvirtual_interface_var";
+case 2232: return "uhdmfunctions";
+case 2151: return "uhdmstmt";
+case 2233: return "uhdmcont_assign";
+case 2152: return "uhdmscope";
+case 2234: return "uhdmhigh_conn";
+case 2153: return "uhdmconcurrent_assertions";
+case 2235: return "uhdmlow_conn";
+case 2154: return "uhdmvariables";
+case 2236: return "uhdmport";
+case 2155: return "uhdmparameters";
+case 2237: return "uhdmbits";
+case 2156: return "uhdmscopes";
+case 2238: return "uhdmport_bit";
+case 2157: return "uhdmtypespecs";
+case 2240: return "uhdmmod_path";
+case 2239: return "uhdmprimitive";
+case 2158: return "uhdmproperty_decls";
+case 2241: return "uhdmtchk";
+case 2159: return "uhdmsequence_decls";
+case 2160: return "uhdmnamed_events";
+case 2242: return "uhdmdef_param";
+case 2161: return "uhdmnamed_event_arrays";
+case 2243: return "uhdmrange";
+case 2162: return "uhdmvirtual_interface_vars";
+case 2244: return "uhdmudp_defn";
+case 2163: return "uhdmlogic_var";
+case 2245: return "uhdmalias_stmt";
+case 2164: return "uhdmarray_var";
+case 2246: return "uhdmclocking_block";
+case 2165: return "uhdmarray_var_mem";
+case 2247: return "uhdmparam_assign";
+case 2166: return "uhdmlet_decls";
 default: return "NO TYPE";
 }
 }
@@ -3310,6 +3310,9 @@ void Serializer::save(std::string file) {
     Packedarrayvars[index].setUhdmParentType(obj->get_uhdmParentType());
     Packedarrayvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Packedarrayvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Packedarrayvars[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+    Packedarrayvars[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Packedarrayvars[index].setVpiPacked(obj->get_vpiPacked());
   if (obj->get_left_expr()) {
     ::ObjIndexType::Builder tmp0 = Packedarrayvars[index].getLeftexpr();
     tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
@@ -3318,6 +3321,10 @@ void Serializer::save(std::string file) {
     ::ObjIndexType::Builder tmp1 = Packedarrayvars[index].getRightexpr();
     tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
     tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
+  }  if (obj->get_expr_index()) {
+    ::ObjIndexType::Builder tmp2 = Packedarrayvars[index].getExprindex();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_expr_index())));
+    tmp2.setType(((BaseClass*)obj->get_expr_index())->getUhdmType());
   } 
     if (obj->get_ranges()) {  
       ::capnp::List<::uint64_t>::Builder Rangess = Packedarrayvars[index].initRanges(obj->get_ranges()->size());
@@ -3330,6 +3337,15 @@ void Serializer::save(std::string file) {
       ::capnp::List<::uint64_t>::Builder Varbitss = Packedarrayvars[index].initVarbits(obj->get_var_bits()->size());
       for (unsigned int ind = 0; ind < obj->get_var_bits()->size(); ind++) {
         Varbitss.set(ind, getId((*obj->get_var_bits())[ind]));
+      }
+    }
+ 
+    if (obj->get_elements()) {  
+      ::capnp::List<::ObjIndexType>::Builder Elementss = Packedarrayvars[index].initElements(obj->get_elements()->size());
+      for (unsigned int ind = 0; ind < obj->get_elements()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Elementss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_elements())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_elements())[ind]))->getUhdmType());
       }
     }
     Packedarrayvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
@@ -3658,6 +3674,8 @@ void Serializer::save(std::string file) {
     Structvars[index].setUhdmParentType(obj->get_uhdmParentType());
     Structvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Structvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Structvars[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+    Structvars[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
  
     if (obj->get_variables()) {  
       ::capnp::List<::ObjIndexType>::Builder Variabless = Structvars[index].initVariables(obj->get_variables()->size());
@@ -3667,7 +3685,11 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
- 
+  if (obj->get_expr_index()) {
+    ::ObjIndexType::Builder tmp0 = Structvars[index].getExprindex();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr_index())));
+    tmp0.setType(((BaseClass*)obj->get_expr_index())->getUhdmType());
+  } 
     if (obj->get_var_bits()) {  
       ::capnp::List<::uint64_t>::Builder Varbitss = Structvars[index].initVarbits(obj->get_var_bits()->size());
       for (unsigned int ind = 0; ind < obj->get_var_bits()->size(); ind++) {
@@ -3768,6 +3790,8 @@ void Serializer::save(std::string file) {
     Unionvars[index].setUhdmParentType(obj->get_uhdmParentType());
     Unionvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Unionvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Unionvars[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+    Unionvars[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
  
     if (obj->get_variables()) {  
       ::capnp::List<::ObjIndexType>::Builder Variabless = Unionvars[index].initVariables(obj->get_variables()->size());
@@ -3777,7 +3801,11 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
       }
     }
- 
+  if (obj->get_expr_index()) {
+    ::ObjIndexType::Builder tmp0 = Unionvars[index].getExprindex();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr_index())));
+    tmp0.setType(((BaseClass*)obj->get_expr_index())->getUhdmType());
+  } 
     if (obj->get_var_bits()) {  
       ::capnp::List<::uint64_t>::Builder Varbitss = Unionvars[index].initVarbits(obj->get_var_bits()->size());
       for (unsigned int ind = 0; ind < obj->get_var_bits()->size(); ind++) {
@@ -3878,7 +3906,13 @@ void Serializer::save(std::string file) {
     Enumvars[index].setUhdmParentType(obj->get_uhdmParentType());
     Enumvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
     Enumvars[index].setVpiLineNo(obj->get_vpiLineNo());
-    Enumvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Enumvars[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+    Enumvars[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+  if (obj->get_expr_index()) {
+    ::ObjIndexType::Builder tmp0 = Enumvars[index].getExprindex();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr_index())));
+    tmp0.setType(((BaseClass*)obj->get_expr_index())->getUhdmType());
+  }    Enumvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
     Enumvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
     Enumvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
     Enumvars[index].setVpiSigned(obj->get_vpiSigned());

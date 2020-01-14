@@ -16,6 +16,16 @@
  
 - obj_def: struct_var
   - extends: variables
+  - property: packed_array_member
+    name: packed array member
+    vpi: vpiPackedArrayMember
+    type: bool
+    card: 1
+  - property: constant_selection
+    name: constant selection
+    vpi: vpiConstantSelect
+    type: bool
+    card: 1
   - obj_ref: var_bits
     name: var bits
     vpi: vpiBit
@@ -26,3 +36,8 @@
     vpi: vpiMember
     type: variables
     card: any
+  - class_ref: expr_index
+    name: expr index
+    vpi: vpiIndex
+    type: expr
+    card: 1

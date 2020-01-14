@@ -71,6 +71,7 @@ typedef void any;
 #include "headers/integer_var.h"
 #include "headers/time_var.h"
 #include "headers/array_var.h"
+#include "headers/enum_struct_union_packed_var_group.h"
 #include "headers/packed_array_var.h"
 #include "headers/bit_var.h"
 #include "headers/logic_var.h"
@@ -420,6 +421,12 @@ vpiHandle vpi_handle (PLI_INT32 type,
  } 
 }
 
+ if (handle->type == uhdmpacked_array_var) {
+     if (type == vpiIndex) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((packed_array_var*)(object))->get_expr_index())->getUhdmType(), ((packed_array_var*)(object))->get_expr_index());
+ } 
+}
+
  if (handle->type == uhdmbit_var) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((BaseClass*)((bit_var*)(object))->get_vpiParent())->getUhdmType(), ((bit_var*)(object))->get_vpiParent());
@@ -462,15 +469,33 @@ vpiHandle vpi_handle (PLI_INT32 type,
  } 
 }
 
+ if (handle->type == uhdmstruct_var) {
+     if (type == vpiIndex) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((struct_var*)(object))->get_expr_index())->getUhdmType(), ((struct_var*)(object))->get_expr_index());
+ } 
+}
+
  if (handle->type == uhdmunion_var) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((BaseClass*)((union_var*)(object))->get_vpiParent())->getUhdmType(), ((union_var*)(object))->get_vpiParent());
  } 
 }
 
+ if (handle->type == uhdmunion_var) {
+     if (type == vpiIndex) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((union_var*)(object))->get_expr_index())->getUhdmType(), ((union_var*)(object))->get_expr_index());
+ } 
+}
+
  if (handle->type == uhdmenum_var) {
      if (type == vpiParent) {
        return (vpiHandle) new uhdm_handle(((BaseClass*)((enum_var*)(object))->get_vpiParent())->getUhdmType(), ((enum_var*)(object))->get_vpiParent());
+ } 
+}
+
+ if (handle->type == uhdmenum_var) {
+     if (type == vpiIndex) {
+       return (vpiHandle) new uhdm_handle(((BaseClass*)((enum_var*)(object))->get_expr_index())->getUhdmType(), ((enum_var*)(object))->get_expr_index());
  } 
 }
 
@@ -2765,6 +2790,15 @@ vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
  if (type == vpiBit) {
  if (((packed_array_var*)(object))->get_var_bits())
  return (vpiHandle) new uhdm_handle(uhdmvar_bits, ((packed_array_var*)(object))->get_var_bits());
+ else return 0;
+  }
+ }
+
+    
+ if (handle->type == uhdmpacked_array_var) {
+ if (type == vpiElement) {
+ if (((packed_array_var*)(object))->get_elements())
+ return (vpiHandle) new uhdm_handle(uhdmelements, ((packed_array_var*)(object))->get_elements());
  else return 0;
   }
  }
@@ -7306,6 +7340,15 @@ vpiHandle vpi_scan (vpiHandle iterator) {
  }
  }
 
+  if (handle->type == uhdmelements) {
+ VectorOfany* the_vec = (VectorOfany*)vect;
+ if (handle->index < the_vec->size()) {
+ uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));
+ handle->index++;
+ return (vpiHandle) h;
+ }
+ }
+
   if (handle->type == uhdmranges) {
  VectorOfrange* the_vec = (VectorOfrange*)vect;
  if (handle->index < the_vec->size()) {
@@ -9138,6 +9181,24 @@ PLI_INT32 vpi_get (PLI_INT32   property,
 }
 
  if (handle->type == uhdmpacked_array_var) {
+     if (property == vpiPackedArrayMember) {
+       return ((packed_array_var*)(obj))->get_vpiPackedArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmpacked_array_var) {
+     if (property == vpiConstantSelect) {
+       return ((packed_array_var*)(obj))->get_vpiConstantSelect();
+     } 
+}
+
+ if (handle->type == uhdmpacked_array_var) {
+     if (property == vpiPacked) {
+       return ((packed_array_var*)(obj))->get_vpiPacked();
+     } 
+}
+
+ if (handle->type == uhdmpacked_array_var) {
      if (property == vpiType) {
        return ((packed_array_var*)(obj))->get_vpiType();
      } 
@@ -9390,6 +9451,18 @@ PLI_INT32 vpi_get (PLI_INT32   property,
 }
 
  if (handle->type == uhdmstruct_var) {
+     if (property == vpiPackedArrayMember) {
+       return ((struct_var*)(obj))->get_vpiPackedArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmstruct_var) {
+     if (property == vpiConstantSelect) {
+       return ((struct_var*)(obj))->get_vpiConstantSelect();
+     } 
+}
+
+ if (handle->type == uhdmstruct_var) {
      if (property == vpiType) {
        return ((struct_var*)(obj))->get_vpiType();
      } 
@@ -9474,6 +9547,18 @@ PLI_INT32 vpi_get (PLI_INT32   property,
 }
 
  if (handle->type == uhdmunion_var) {
+     if (property == vpiPackedArrayMember) {
+       return ((union_var*)(obj))->get_vpiPackedArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmunion_var) {
+     if (property == vpiConstantSelect) {
+       return ((union_var*)(obj))->get_vpiConstantSelect();
+     } 
+}
+
+ if (handle->type == uhdmunion_var) {
      if (property == vpiType) {
        return ((union_var*)(obj))->get_vpiType();
      } 
@@ -9554,6 +9639,18 @@ PLI_INT32 vpi_get (PLI_INT32   property,
  if (handle->type == uhdmenum_var) {
      if (property == vpiLineNo) {
        return ((enum_var*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmenum_var) {
+     if (property == vpiPackedArrayMember) {
+       return ((enum_var*)(obj))->get_vpiPackedArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmenum_var) {
+     if (property == vpiConstantSelect) {
+       return ((enum_var*)(obj))->get_vpiConstantSelect();
      } 
 }
 
@@ -13338,6 +13435,24 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
 }
 
  if (handle->type == uhdmpacked_array_var) {
+     if (property == vpiPackedArrayMember) {
+       return ((packed_array_var*)(obj))->get_vpiPackedArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmpacked_array_var) {
+     if (property == vpiConstantSelect) {
+       return ((packed_array_var*)(obj))->get_vpiConstantSelect();
+     } 
+}
+
+ if (handle->type == uhdmpacked_array_var) {
+     if (property == vpiPacked) {
+       return ((packed_array_var*)(obj))->get_vpiPacked();
+     } 
+}
+
+ if (handle->type == uhdmpacked_array_var) {
      if (property == vpiType) {
        return ((packed_array_var*)(obj))->get_vpiType();
      } 
@@ -13590,6 +13705,18 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
 }
 
  if (handle->type == uhdmstruct_var) {
+     if (property == vpiPackedArrayMember) {
+       return ((struct_var*)(obj))->get_vpiPackedArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmstruct_var) {
+     if (property == vpiConstantSelect) {
+       return ((struct_var*)(obj))->get_vpiConstantSelect();
+     } 
+}
+
+ if (handle->type == uhdmstruct_var) {
      if (property == vpiType) {
        return ((struct_var*)(obj))->get_vpiType();
      } 
@@ -13674,6 +13801,18 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
 }
 
  if (handle->type == uhdmunion_var) {
+     if (property == vpiPackedArrayMember) {
+       return ((union_var*)(obj))->get_vpiPackedArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmunion_var) {
+     if (property == vpiConstantSelect) {
+       return ((union_var*)(obj))->get_vpiConstantSelect();
+     } 
+}
+
+ if (handle->type == uhdmunion_var) {
      if (property == vpiType) {
        return ((union_var*)(obj))->get_vpiType();
      } 
@@ -13754,6 +13893,18 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
  if (handle->type == uhdmenum_var) {
      if (property == vpiLineNo) {
        return ((enum_var*)(obj))->get_vpiLineNo();
+     } 
+}
+
+ if (handle->type == uhdmenum_var) {
+     if (property == vpiPackedArrayMember) {
+       return ((enum_var*)(obj))->get_vpiPackedArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmenum_var) {
+     if (property == vpiConstantSelect) {
+       return ((enum_var*)(obj))->get_vpiConstantSelect();
      } 
 }
 

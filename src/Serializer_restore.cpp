@@ -2310,8 +2310,12 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    packed_array_varFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    packed_array_varFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    packed_array_varFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    packed_array_varFactory::objects_[index]->set_vpiPackedArrayMember(obj.getVpiPackedArrayMember());
+    packed_array_varFactory::objects_[index]->set_vpiConstantSelect(obj.getVpiConstantSelect());
+    packed_array_varFactory::objects_[index]->set_vpiPacked(obj.getVpiPacked());
      packed_array_varFactory::objects_[index]->set_left_expr((expr*)getObject(obj.getLeftexpr().getType(),obj.getLeftexpr().getIndex()-1));
      packed_array_varFactory::objects_[index]->set_right_expr((expr*)getObject(obj.getRightexpr().getType(),obj.getRightexpr().getIndex()-1));
+     packed_array_varFactory::objects_[index]->set_expr_index((expr*)getObject(obj.getExprindex().getType(),obj.getExprindex().getIndex()-1));
     
     if (obj.getRanges().size()) { 
       std::vector<range*>* vect = VectorOfrangeFactory::make();
@@ -2327,6 +2331,14 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
  	vect->push_back(var_bitFactory::objects_[obj.getVarbits()[ind]-1]);
       }
       packed_array_varFactory::objects_[index]->set_var_bits(vect);
+    }
+    
+    if (obj.getElements().size()) { 
+      std::vector<any*>* vect = VectorOfanyFactory::make();
+      for (unsigned int ind = 0; ind < obj.getElements().size(); ind++) {
+ 	vect->push_back((any*)getObject(obj.getElements()[ind].getType(),obj.getElements()[ind].getIndex()-1));
+      }
+      packed_array_varFactory::objects_[index]->set_elements(vect);
     }
     packed_array_varFactory::objects_[index]->set_vpiArrayMember(obj.getVpiArrayMember());
     packed_array_varFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
@@ -2610,6 +2622,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    struct_varFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    struct_varFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    struct_varFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    struct_varFactory::objects_[index]->set_vpiPackedArrayMember(obj.getVpiPackedArrayMember());
+    struct_varFactory::objects_[index]->set_vpiConstantSelect(obj.getVpiConstantSelect());
     
     if (obj.getVariables().size()) { 
       std::vector<variables*>* vect = VectorOfvariablesFactory::make();
@@ -2618,6 +2632,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
       }
       struct_varFactory::objects_[index]->set_variables(vect);
     }
+     struct_varFactory::objects_[index]->set_expr_index((expr*)getObject(obj.getExprindex().getType(),obj.getExprindex().getIndex()-1));
     
     if (obj.getVarbits().size()) { 
       std::vector<var_bit*>* vect = VectorOfvar_bitFactory::make();
@@ -2708,6 +2723,8 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    union_varFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    union_varFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    union_varFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    union_varFactory::objects_[index]->set_vpiPackedArrayMember(obj.getVpiPackedArrayMember());
+    union_varFactory::objects_[index]->set_vpiConstantSelect(obj.getVpiConstantSelect());
     
     if (obj.getVariables().size()) { 
       std::vector<variables*>* vect = VectorOfvariablesFactory::make();
@@ -2716,6 +2733,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
       }
       union_varFactory::objects_[index]->set_variables(vect);
     }
+     union_varFactory::objects_[index]->set_expr_index((expr*)getObject(obj.getExprindex().getType(),obj.getExprindex().getIndex()-1));
     
     if (obj.getVarbits().size()) { 
       std::vector<var_bit*>* vect = VectorOfvar_bitFactory::make();
@@ -2806,6 +2824,9 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
    enum_varFactory::objects_[index]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));
    enum_varFactory::objects_[index]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));
    enum_varFactory::objects_[index]->set_vpiLineNo(obj.getVpiLineNo());
+    enum_varFactory::objects_[index]->set_vpiPackedArrayMember(obj.getVpiPackedArrayMember());
+    enum_varFactory::objects_[index]->set_vpiConstantSelect(obj.getVpiConstantSelect());
+     enum_varFactory::objects_[index]->set_expr_index((expr*)getObject(obj.getExprindex().getType(),obj.getExprindex().getIndex()-1));
     enum_varFactory::objects_[index]->set_vpiArrayMember(obj.getVpiArrayMember());
     enum_varFactory::objects_[index]->set_vpiName(SymbolFactory::getSymbol(obj.getVpiName()));
     enum_varFactory::objects_[index]->set_vpiFullName(SymbolFactory::getSymbol(obj.getVpiFullName()));

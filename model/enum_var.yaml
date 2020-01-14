@@ -16,4 +16,18 @@
  
 - obj_def: enum_var
   - extends: variables
-
+  - property: packed_array_member
+    name: packed array member
+    vpi: vpiPackedArrayMember
+    type: bool
+    card: 1
+  - property: constant_selection
+    name: constant selection
+    vpi: vpiConstantSelect
+    type: bool
+    card: 1
+  - class_ref: expr_index
+    name: expr index
+    vpi: vpiIndex
+    type: expr
+    card: 1    
