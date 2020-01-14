@@ -12,29 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "instance array" formal description
+# Universal Hardware Data Model (UHDM) "packed array var" formal description
  
-- class_def: instance_array
-  - property: name
-    name: name
-    vpi: vpiName
-    type: string
-    card: 1
-  - property: full_name
-    name: full name
-    vpi: vpiFullName
-    type: string
-    card: 1
-  - property: size
-    name: size
-    vpi: vpiSize
-    type: int
-    card: 1
-  - class_ref: expr
-    name: expr
-    vpi: vpiExpr
-    type: expr
-    card: 1
+- obj_def: packed_array_var
+  - extends: variables
   - obj_ref: ranges
     name: ranges
     vpi: vpiRange
@@ -49,14 +30,9 @@
     name: right range
     vpi: vpiRightRange
     type: expr
-    card: 1
-  - class_ref: instances
-    name: instances
-    vpi: vpiInstance
-    type: instance
-    card: any
-  - obj_ref: modules
-    name: modules
-    vpi: vpiModule
-    type: module
+    card: 1   
+  - obj_ref: var_bits
+    name: var bits
+    vpi: vpiBit
+    type: var_bit
     card: any

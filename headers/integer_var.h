@@ -17,22 +17,22 @@
  */
 
 /*
- * File:   logic_var.h
+ * File:   integer_var.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef LOGIC_VAR_H
-#define LOGIC_VAR_H
+#ifndef INTEGER_VAR_H
+#define INTEGER_VAR_H
 
 namespace UHDM {
 
-  class logic_var : public variables {
+  class integer_var : public variables {
   public:
     // Implicit constructor used to initialize all members,
-    // comment: logic_var();
-    ~logic_var() final {}
+    // comment: integer_var();
+    ~integer_var() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
 
@@ -50,25 +50,9 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
-    expr* get_left_expr() const { return left_expr_; }
+    unsigned int get_vpiType() { return vpiIntegerVar; }
 
-    bool set_left_expr(expr* data) { left_expr_ = data; return true;}
-
-    expr* get_right_expr() const { return right_expr_; }
-
-    bool set_right_expr(expr* data) { right_expr_ = data; return true;}
-
-    VectorOfrange* get_ranges() const { return ranges_; }
-
-    bool set_ranges(VectorOfrange* data) { ranges_ = data; return true;}
-
-    VectorOfvar_bit* get_var_bits() const { return var_bits_; }
-
-    bool set_var_bits(VectorOfvar_bit* data) { var_bits_ = data; return true;}
-
-    unsigned int get_vpiType() { return vpiLogicVar; }
-
-    virtual unsigned int getUhdmType() { return uhdmlogic_var; }   
+    virtual unsigned int getUhdmType() { return uhdminteger_var; }   
   private:
     
     BaseClass* vpiParent_;
@@ -79,38 +63,30 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
-    expr* left_expr_;
-
-    expr* right_expr_;
-
-    VectorOfrange* ranges_;
-
-    VectorOfvar_bit* var_bits_;
-
   };
 
-  class logic_varFactory {
+  class integer_varFactory {
   friend Serializer;
   public:
-  static logic_var* make() {
-    logic_var* obj = new logic_var();
+  static integer_var* make() {
+    integer_var* obj = new integer_var();
     objects_.push_back(obj);
     return obj;
   }
   private:
-    static std::vector<logic_var*> objects_;
+    static std::vector<integer_var*> objects_;
   };
  	      
-  class VectorOflogic_varFactory {
+  class VectorOfinteger_varFactory {
   friend Serializer;
   public:
-  static std::vector<logic_var*>* make() {
-    std::vector<logic_var*>* obj = new std::vector<logic_var*>();
+  static std::vector<integer_var*>* make() {
+    std::vector<integer_var*>* obj = new std::vector<integer_var*>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-  static std::vector<std::vector<logic_var*>*> objects_;
+  static std::vector<std::vector<integer_var*>*> objects_;
   };
 
 };

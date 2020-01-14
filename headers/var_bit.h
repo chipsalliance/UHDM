@@ -17,22 +17,22 @@
  */
 
 /*
- * File:   logic_var.h
+ * File:   var_bit.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef LOGIC_VAR_H
-#define LOGIC_VAR_H
+#ifndef VAR_BIT_H
+#define VAR_BIT_H
 
 namespace UHDM {
 
-  class logic_var : public variables {
+  class var_bit : public variables {
   public:
     // Implicit constructor used to initialize all members,
-    // comment: logic_var();
-    ~logic_var() final {}
+    // comment: var_bit();
+    ~var_bit() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
 
@@ -50,25 +50,21 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
-    expr* get_left_expr() const { return left_expr_; }
+    bool get_vpiConstantSelect() const { return vpiConstantSelect_; }
 
-    bool set_left_expr(expr* data) { left_expr_ = data; return true;}
+    bool set_vpiConstantSelect(bool data) { vpiConstantSelect_ = data; return true;}
 
-    expr* get_right_expr() const { return right_expr_; }
+    expr* get_expr_index() const { return expr_index_; }
 
-    bool set_right_expr(expr* data) { right_expr_ = data; return true;}
+    bool set_expr_index(expr* data) { expr_index_ = data; return true;}
 
-    VectorOfrange* get_ranges() const { return ranges_; }
+    VectorOfexpr* get_expr_indexes() const { return expr_indexes_; }
 
-    bool set_ranges(VectorOfrange* data) { ranges_ = data; return true;}
+    bool set_expr_indexes(VectorOfexpr* data) { expr_indexes_ = data; return true;}
 
-    VectorOfvar_bit* get_var_bits() const { return var_bits_; }
+    unsigned int get_vpiType() { return vpiVarBit; }
 
-    bool set_var_bits(VectorOfvar_bit* data) { var_bits_ = data; return true;}
-
-    unsigned int get_vpiType() { return vpiLogicVar; }
-
-    virtual unsigned int getUhdmType() { return uhdmlogic_var; }   
+    virtual unsigned int getUhdmType() { return uhdmvar_bit; }   
   private:
     
     BaseClass* vpiParent_;
@@ -79,38 +75,36 @@ namespace UHDM {
 
     unsigned int vpiLineNo_;
 
-    expr* left_expr_;
+    bool vpiConstantSelect_;
 
-    expr* right_expr_;
+    expr* expr_index_;
 
-    VectorOfrange* ranges_;
-
-    VectorOfvar_bit* var_bits_;
+    VectorOfexpr* expr_indexes_;
 
   };
 
-  class logic_varFactory {
+  class var_bitFactory {
   friend Serializer;
   public:
-  static logic_var* make() {
-    logic_var* obj = new logic_var();
+  static var_bit* make() {
+    var_bit* obj = new var_bit();
     objects_.push_back(obj);
     return obj;
   }
   private:
-    static std::vector<logic_var*> objects_;
+    static std::vector<var_bit*> objects_;
   };
  	      
-  class VectorOflogic_varFactory {
+  class VectorOfvar_bitFactory {
   friend Serializer;
   public:
-  static std::vector<logic_var*>* make() {
-    std::vector<logic_var*>* obj = new std::vector<logic_var*>();
+  static std::vector<var_bit*>* make() {
+    std::vector<var_bit*>* obj = new std::vector<var_bit*>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-  static std::vector<std::vector<logic_var*>*> objects_;
+  static std::vector<std::vector<var_bit*>*> objects_;
   };
 
 };

@@ -12,38 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "array var" formal description
+# Universal Hardware Data Model (UHDM) "var bit" formal description
  
-- obj_def: array_var
+- obj_def: var_bit
   - extends: variables
-  - property: array_type
-    name: array type
-    vpi: vpiArrayType
-    type: int
+  - property: constant_selection
+    name: constant selection
+    vpi: vpiConstantSelect
+    type: bool
     card: 1
-  - obj_ref: var_selects
-    name: var selects
-    vpi: vpiVarSelect
-    type: var_select
-    card: 1
-  - obj_ref: ranges
-    name: ranges
-    vpi: vpiRange
-    type: range
-    card: any
-  - class_ref: left_expr
-    name: left range
-    vpi: vpiLeftRange
+  - class_ref: expr_index
+    name: expr index
+    vpi: vpiIndex
     type: expr
     card: 1
-  - class_ref: right_expr
-    name: right range
-    vpi: vpiRightRange
+  - class_ref: expr_indexes
+    name: expor indexes
+    vpi: vpiIndex
     type: expr
-    card: 1
-  - class_ref: variables
-    name: variables
-    vpi: vpiReg
-    type: variables
     card: any
-  
+

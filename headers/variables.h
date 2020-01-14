@@ -90,6 +90,58 @@ namespace UHDM {
 
     bool set_vpiVector(bool data) { vpiVector_ = data; return true;}
 
+    VectorOfports* get_ports() const { return ports_; }
+
+    bool set_ports(VectorOfports* data) { ports_ = data; return true;}
+
+    VectorOfvariable_drivers* get_variable_drivers() const { return variable_drivers_; }
+
+    bool set_variable_drivers(VectorOfvariable_drivers* data) { variable_drivers_ = data; return true;}
+
+    VectorOfvariable_loads* get_variable_loads() const { return variable_loads_; }
+
+    bool set_variable_loads(VectorOfvariable_loads* data) { variable_loads_ = data; return true;}
+
+    typespec* get_typespec() const { return typespec_; }
+
+    bool set_typespec(typespec* data) { typespec_ = data; return true;}
+
+    instance* get_instance() const { return instance_; }
+
+    bool set_instance(instance* data) { instance_ = data; return true;}
+
+    scope* get_scope() const { return scope_; }
+
+    bool set_scope(scope* data) { scope_ = data; return true;}
+
+    expr* get_expr() const { return expr_; }
+
+    bool set_expr(expr* data) { expr_ = data; return true;}
+
+    VectorOfexpr* get_indexes() const { return indexes_; }
+
+    bool set_indexes(VectorOfexpr* data) { indexes_ = data; return true;}
+
+    VectorOfprim_term* get_prim_terms() const { return prim_terms_; }
+
+    bool set_prim_terms(VectorOfprim_term* data) { prim_terms_ = data; return true;}
+
+    VectorOfcont_assign* get_cont_assigns() const { return cont_assigns_; }
+
+    bool set_cont_assigns(VectorOfcont_assign* data) { cont_assigns_ = data; return true;}
+
+    path_term* get_path_term() const { return path_term_; }
+
+    bool set_path_term(path_term* data) { path_term_ = data; return true;}
+
+    tchk_term* get_tchk_term() const { return tchk_term_; }
+
+    bool set_tchk_term(tchk_term* data) { tchk_term_ = data; return true;}
+
+    module* get_module() const { return module_; }
+
+    bool set_module(module* data) { module_ = data; return true;}
+
     virtual unsigned int getUhdmType() { return uhdmvariables; }   
   private:
     
@@ -120,6 +172,32 @@ namespace UHDM {
     int vpiVisibility_;
 
     bool vpiVector_;
+
+    VectorOfports* ports_;
+
+    VectorOfvariable_drivers* variable_drivers_;
+
+    VectorOfvariable_loads* variable_loads_;
+
+    typespec* typespec_;
+
+    instance* instance_;
+
+    scope* scope_;
+
+    expr* expr_;
+
+    VectorOfexpr* indexes_;
+
+    VectorOfprim_term* prim_terms_;
+
+    VectorOfcont_assign* cont_assigns_;
+
+    path_term* path_term_;
+
+    tchk_term* tchk_term_;
+
+    module* module_;
 
   };
 

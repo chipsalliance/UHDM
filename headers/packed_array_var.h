@@ -17,22 +17,22 @@
  */
 
 /*
- * File:   logic_var.h
+ * File:   packed_array_var.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef LOGIC_VAR_H
-#define LOGIC_VAR_H
+#ifndef PACKED_ARRAY_VAR_H
+#define PACKED_ARRAY_VAR_H
 
 namespace UHDM {
 
-  class logic_var : public variables {
+  class packed_array_var : public variables {
   public:
     // Implicit constructor used to initialize all members,
-    // comment: logic_var();
-    ~logic_var() final {}
+    // comment: packed_array_var();
+    ~packed_array_var() final {}
     
     BaseClass* get_vpiParent() const { return vpiParent_; }
 
@@ -66,9 +66,9 @@ namespace UHDM {
 
     bool set_var_bits(VectorOfvar_bit* data) { var_bits_ = data; return true;}
 
-    unsigned int get_vpiType() { return vpiLogicVar; }
+    unsigned int get_vpiType() { return vpiPackedArrayVar; }
 
-    virtual unsigned int getUhdmType() { return uhdmlogic_var; }   
+    virtual unsigned int getUhdmType() { return uhdmpacked_array_var; }   
   private:
     
     BaseClass* vpiParent_;
@@ -89,28 +89,28 @@ namespace UHDM {
 
   };
 
-  class logic_varFactory {
+  class packed_array_varFactory {
   friend Serializer;
   public:
-  static logic_var* make() {
-    logic_var* obj = new logic_var();
+  static packed_array_var* make() {
+    packed_array_var* obj = new packed_array_var();
     objects_.push_back(obj);
     return obj;
   }
   private:
-    static std::vector<logic_var*> objects_;
+    static std::vector<packed_array_var*> objects_;
   };
  	      
-  class VectorOflogic_varFactory {
+  class VectorOfpacked_array_varFactory {
   friend Serializer;
   public:
-  static std::vector<logic_var*>* make() {
-    std::vector<logic_var*>* obj = new std::vector<logic_var*>();
+  static std::vector<packed_array_var*>* make() {
+    std::vector<packed_array_var*>* obj = new std::vector<packed_array_var*>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-  static std::vector<std::vector<logic_var*>*> objects_;
+  static std::vector<std::vector<packed_array_var*>*> objects_;
   };
 
 };
