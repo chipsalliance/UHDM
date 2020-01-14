@@ -28,7 +28,7 @@
 
 namespace UHDM {
 
-  class logic_var : public BaseClass {
+  class logic_var : public variables {
   public:
     // Implicit constructor used to initialize all members,
     // comment: logic_var();
@@ -50,6 +50,22 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
+    expr* get_left_expr() const { return left_expr_; }
+
+    bool set_left_expr(expr* data) { left_expr_ = data; return true;}
+
+    expr* get_right_expr() const { return right_expr_; }
+
+    bool set_right_expr(expr* data) { right_expr_ = data; return true;}
+
+    VectorOfrange* get_ranges() const { return ranges_; }
+
+    bool set_ranges(VectorOfrange* data) { ranges_ = data; return true;}
+
+    VectorOfvar_bit* get_var_bits() const { return var_bits_; }
+
+    bool set_var_bits(VectorOfvar_bit* data) { var_bits_ = data; return true;}
+
     unsigned int get_vpiType() { return vpiLogicVar; }
 
     virtual unsigned int getUhdmType() { return uhdmlogic_var; }   
@@ -62,6 +78,14 @@ namespace UHDM {
     unsigned int vpiFile_;
 
     unsigned int vpiLineNo_;
+
+    expr* left_expr_;
+
+    expr* right_expr_;
+
+    VectorOfrange* ranges_;
+
+    VectorOfvar_bit* var_bits_;
 
   };
 

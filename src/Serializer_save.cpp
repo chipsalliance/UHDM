@@ -98,7 +98,49 @@ std::vector<part_select*> part_selectFactory::objects_;
 std::vector<std::vector<part_select*>*> VectorOfpart_selectFactory::objects_;
 std::vector<ref_obj*> ref_objFactory::objects_;
 std::vector<std::vector<ref_obj*>*> VectorOfref_objFactory::objects_;
+std::vector<var_select*> var_selectFactory::objects_;
+std::vector<std::vector<var_select*>*> VectorOfvar_selectFactory::objects_;
 std::vector<std::vector<variables*>*> VectorOfvariablesFactory::objects_;
+std::vector<std::vector<variable_drivers*>*> VectorOfvariable_driversFactory::objects_;
+std::vector<std::vector<variable_loads*>*> VectorOfvariable_loadsFactory::objects_;
+std::vector<short_real_var*> short_real_varFactory::objects_;
+std::vector<std::vector<short_real_var*>*> VectorOfshort_real_varFactory::objects_;
+std::vector<real_var*> real_varFactory::objects_;
+std::vector<std::vector<real_var*>*> VectorOfreal_varFactory::objects_;
+std::vector<byte_var*> byte_varFactory::objects_;
+std::vector<std::vector<byte_var*>*> VectorOfbyte_varFactory::objects_;
+std::vector<short_int_var*> short_int_varFactory::objects_;
+std::vector<std::vector<short_int_var*>*> VectorOfshort_int_varFactory::objects_;
+std::vector<int_var*> int_varFactory::objects_;
+std::vector<std::vector<int_var*>*> VectorOfint_varFactory::objects_;
+std::vector<long_int_var*> long_int_varFactory::objects_;
+std::vector<std::vector<long_int_var*>*> VectorOflong_int_varFactory::objects_;
+std::vector<integer_var*> integer_varFactory::objects_;
+std::vector<std::vector<integer_var*>*> VectorOfinteger_varFactory::objects_;
+std::vector<time_var*> time_varFactory::objects_;
+std::vector<std::vector<time_var*>*> VectorOftime_varFactory::objects_;
+std::vector<array_var*> array_varFactory::objects_;
+std::vector<std::vector<array_var*>*> VectorOfarray_varFactory::objects_;
+std::vector<packed_array_var*> packed_array_varFactory::objects_;
+std::vector<std::vector<packed_array_var*>*> VectorOfpacked_array_varFactory::objects_;
+std::vector<bit_var*> bit_varFactory::objects_;
+std::vector<std::vector<bit_var*>*> VectorOfbit_varFactory::objects_;
+std::vector<logic_var*> logic_varFactory::objects_;
+std::vector<std::vector<logic_var*>*> VectorOflogic_varFactory::objects_;
+std::vector<struct_var*> struct_varFactory::objects_;
+std::vector<std::vector<struct_var*>*> VectorOfstruct_varFactory::objects_;
+std::vector<union_var*> union_varFactory::objects_;
+std::vector<std::vector<union_var*>*> VectorOfunion_varFactory::objects_;
+std::vector<enum_var*> enum_varFactory::objects_;
+std::vector<std::vector<enum_var*>*> VectorOfenum_varFactory::objects_;
+std::vector<string_var*> string_varFactory::objects_;
+std::vector<std::vector<string_var*>*> VectorOfstring_varFactory::objects_;
+std::vector<chandle_var*> chandle_varFactory::objects_;
+std::vector<std::vector<chandle_var*>*> VectorOfchandle_varFactory::objects_;
+std::vector<class_var*> class_varFactory::objects_;
+std::vector<std::vector<class_var*>*> VectorOfclass_varFactory::objects_;
+std::vector<var_bit*> var_bitFactory::objects_;
+std::vector<std::vector<var_bit*>*> VectorOfvar_bitFactory::objects_;
 std::vector<std::vector<task_func*>*> VectorOftask_funcFactory::objects_;
 std::vector<task*> taskFactory::objects_;
 std::vector<std::vector<task*>*> VectorOftaskFactory::objects_;
@@ -176,10 +218,6 @@ std::vector<array_net*> array_netFactory::objects_;
 std::vector<std::vector<array_net*>*> VectorOfarray_netFactory::objects_;
 std::vector<packed_array_net*> packed_array_netFactory::objects_;
 std::vector<std::vector<packed_array_net*>*> VectorOfpacked_array_netFactory::objects_;
-std::vector<logic_var*> logic_varFactory::objects_;
-std::vector<std::vector<logic_var*>*> VectorOflogic_varFactory::objects_;
-std::vector<array_var*> array_varFactory::objects_;
-std::vector<std::vector<array_var*>*> VectorOfarray_varFactory::objects_;
 std::vector<named_event*> named_eventFactory::objects_;
 std::vector<std::vector<named_event*>*> VectorOfnamed_eventFactory::objects_;
 std::vector<named_event_array*> named_event_arrayFactory::objects_;
@@ -208,144 +246,169 @@ std::vector<std::vector<design*>*> VectorOfdesignFactory::objects_;
 
 std::string getUhdmName(unsigned int type) {
       switch (type) {
-case 2248: return "uhdminterface_arrays";
-case 2167: return "uhdmactual_group";
-case 2250: return "uhdmclocking_blocks";
-case 2249: return "uhdmprogram";
-case 2168: return "uhdmleft_expr";
-case 2251: return "uhdmpackage";
-case 2169: return "uhdmright_expr";
-case 2170: return "uhdmclass_defn";
-case 2252: return "uhdmprimitive_arrays";
-case 2171: return "uhdmio_decl";
-case 2253: return "uhdmmodule_arrays";
-case 2172: return "uhdmtask";
-case 2254: return "uhdmtchks";
-case 2173: return "uhdmfunction";
-case 2255: return "uhdmdef_params";
-case 2174: return "uhdmmodport";
-case 2256: return "uhdmalias_stmts";
-case 2175: return "uhdmio_decls";
-case 2257: return "uhdmdesign";
-case 2176: return "uhdminterface";
-case 2258: return "uhdmallModules";
-case 2177: return "uhdminterface_tf_decl";
-case 2260: return "uhdmallPrograms";
-case 2259: return "uhdmtopModules";
-case 2178: return "uhdmtasks";
-case 2261: return "uhdmallPackages";
-case 2180: return "uhdmcont_assign";
-case 2179: return "uhdmfunctions";
-case 2181: return "uhdmmodule";
-case 2182: return "uhdmhigh_conn";
-case 2183: return "uhdmlow_conn";
-case 2184: return "uhdmport";
-case 2185: return "uhdmbits";
-case 2186: return "uhdmport_bit";
-case 2187: return "uhdmprimitive";
-case 2188: return "uhdmmod_path";
-case 2200: return "uhdminterface_array";
-case 2190: return "uhdmdef_param";
-case 2189: return "uhdmtchk";
-case 2201: return "uhdmparam_assigns";
-case 2191: return "uhdmrange";
-case 2202: return "uhdmprogram_array";
-case 2192: return "uhdmudp_defn";
-case 2203: return "uhdmmodule_array";
-case 2193: return "uhdmranges";
-case 2204: return "uhdmprimitive_array";
-case 2194: return "uhdmalias_stmt";
-case 2205: return "uhdmdelay";
-case 2195: return "uhdmclocking_block";
-case 2124: return "uhdmprocess";
-case 2206: return "uhdmprimitives";
-case 2196: return "uhdmparam_assign";
-case 2125: return "uhdmproperty_decl";
-case 2207: return "uhdmgate_array";
-case 2197: return "uhdminstance_array";
-case 2126: return "uhdmsequence_decl";
-case 2208: return "uhdmswitch_array";
-case 2198: return "uhdminstances";
-case 2127: return "uhdmconcurrent_assertion";
-case 2210: return "uhdmnet_drivers";
-case 2209: return "uhdmudp_array";
-case 2199: return "uhdmmodules";
-case 2128: return "uhdmvirtual_interface_var";
-case 2211: return "uhdmnet_loads";
-case 2130: return "uhdmstmt";
-case 2129: return "uhdmlet_decl";
-case 2212: return "uhdmprim_term";
-case 2131: return "uhdmscope";
-case 2213: return "uhdmpath_term";
-case 2132: return "uhdmconcurrent_assertions";
-case 2214: return "uhdmtchk_term";
-case 2133: return "uhdmvariables";
-case 2215: return "uhdmnets";
-case 2134: return "uhdmparameters";
-case 2216: return "uhdmdrivers";
-case 2135: return "uhdmscopes";
-case 2217: return "uhdmloads";
-case 2136: return "uhdmtypespecs";
-case 2218: return "uhdmlocal_drivers";
-case 2137: return "uhdmproperty_decls";
-case 2220: return "uhdmsim_nets";
-case 2219: return "uhdmlocal_loads";
-case 2138: return "uhdmsequence_decls";
-case 2221: return "uhdmprim_terms";
-case 2139: return "uhdmnamed_events";
-case 2140: return "uhdmnamed_event_arrays";
-case 2222: return "uhdmcont_assigns";
-case 2141: return "uhdmvirtual_interface_vars";
-case 2223: return "uhdmnet_bit";
-case 2142: return "uhdmlogic_var";
-case 2224: return "uhdmnet";
-case 2143: return "uhdmarray_var";
-case 2225: return "uhdmnet_bits";
-case 2144: return "uhdmarray_var_mem";
-case 2226: return "uhdmstruct_net";
-case 2145: return "uhdmlet_decls";
-case 2227: return "uhdmenum_net";
-case 2146: return "uhdminstance_items";
-case 2228: return "uhdminteger_net";
-case 2147: return "uhdmbegin";
-case 2230: return "uhdmlogic_net";
-case 2229: return "uhdmtime_net";
-case 2148: return "uhdmstmts";
-case 2231: return "uhdmarray_net";
-case 2149: return "uhdmnamed_begin";
-case 2150: return "uhdmnamed_fork";
-case 2232: return "uhdmpacked_array_net";
-case 2151: return "uhdmfork_stmt";
-case 2233: return "uhdmelements";
-case 2152: return "uhdmfor_stmt";
-case 2234: return "uhdmnamed_event";
-case 2153: return "uhdmforeach_stmt";
-case 2235: return "uhdmnamed_event_array";
-case 2154: return "uhdmgen_scope";
-case 2236: return "uhdmspec_param";
-case 2155: return "uhdmexpr_dist";
-case 2237: return "uhdmassertion";
-case 2156: return "uhdmexpr";
-case 2238: return "uhdmclass_typespec";
-case 2157: return "uhdmdistribution";
-case 2240: return "uhdmprograms";
-case 2239: return "uhdmclass_obj";
-case 2158: return "uhdmoperand_group";
-case 2241: return "uhdmprogram_arrays";
-case 2159: return "uhdmoperation";
-case 2160: return "uhdmoperands";
-case 2242: return "uhdminterface_tf_decls";
-case 2161: return "uhdmpart_select";
-case 2243: return "uhdmmodports";
-case 2162: return "uhdmref_obj";
-case 2244: return "uhdmglobal_clocking";
-case 2163: return "uhdmports";
-case 2245: return "uhdmdefault_clocking";
-case 2164: return "uhdmtypespec";
-case 2246: return "uhdmmod_paths";
-case 2165: return "uhdminstance";
-case 2247: return "uhdminterfaces";
-case 2166: return "uhdmtask_func";
+case 2248: return "uhdminstance_array";
+case 2167: return "uhdminstance_items";
+case 2250: return "uhdmmodules";
+case 2249: return "uhdminstances";
+case 2168: return "uhdmbegin";
+case 2251: return "uhdminterface_array";
+case 2169: return "uhdmstmts";
+case 2170: return "uhdmnamed_begin";
+case 2252: return "uhdmparam_assigns";
+case 2171: return "uhdmnamed_fork";
+case 2253: return "uhdmprogram_array";
+case 2172: return "uhdmfork_stmt";
+case 2254: return "uhdmmodule_array";
+case 2173: return "uhdmfor_stmt";
+case 2255: return "uhdmprimitive_array";
+case 2174: return "uhdmforeach_stmt";
+case 2256: return "uhdmdelay";
+case 2175: return "uhdmgen_scope";
+case 2257: return "uhdmprimitives";
+case 2176: return "uhdmexpr_dist";
+case 2258: return "uhdmgate_array";
+case 2177: return "uhdmexpr";
+case 2260: return "uhdmudp_array";
+case 2259: return "uhdmswitch_array";
+case 2178: return "uhdmdistribution";
+case 2261: return "uhdmnet_drivers";
+case 2179: return "uhdmoperand_group";
+case 2180: return "uhdmoperation";
+case 2262: return "uhdmnet_loads";
+case 2181: return "uhdmoperands";
+case 2263: return "uhdmprim_term";
+case 2182: return "uhdmpart_select";
+case 2264: return "uhdmnets";
+case 2183: return "uhdmref_obj";
+case 2265: return "uhdmdrivers";
+case 2184: return "uhdmports";
+case 2266: return "uhdmloads";
+case 2185: return "uhdmtypespec";
+case 2267: return "uhdmlocal_drivers";
+case 2186: return "uhdminstance";
+case 2268: return "uhdmlocal_loads";
+case 2187: return "uhdmtask_func";
+case 2270: return "uhdmnet_bit";
+case 2269: return "uhdmsim_nets";
+case 2188: return "uhdmactual_group";
+case 2271: return "uhdmnet";
+case 2200: return "uhdmbyte_var";
+case 2189: return "uhdmvar_select";
+case 2190: return "uhdmvariable_drivers";
+case 2272: return "uhdmnet_bits";
+case 2201: return "uhdmshort_int_var";
+case 2191: return "uhdmvariable_loads";
+case 2273: return "uhdmstruct_net";
+case 2202: return "uhdmint_var";
+case 2192: return "uhdmindexes";
+case 2274: return "uhdmenum_net";
+case 2203: return "uhdmlong_int_var";
+case 2193: return "uhdmprim_terms";
+case 2275: return "uhdminteger_net";
+case 2204: return "uhdminteger_var";
+case 2194: return "uhdmcont_assigns";
+case 2276: return "uhdmtime_net";
+case 2205: return "uhdmtime_var";
+case 2195: return "uhdmpath_term";
+case 2277: return "uhdmlogic_net";
+case 2206: return "uhdmleft_expr";
+case 2196: return "uhdmtchk_term";
+case 2278: return "uhdmarray_net";
+case 2207: return "uhdmright_expr";
+case 2197: return "uhdmmodule";
+case 2280: return "uhdmnamed_event";
+case 2279: return "uhdmpacked_array_net";
+case 2208: return "uhdmvar_selects";
+case 2198: return "uhdmshort_real_var";
+case 2281: return "uhdmnamed_event_array";
+case 2210: return "uhdmpacked_array_var";
+case 2209: return "uhdmranges";
+case 2199: return "uhdmreal_var";
+case 2282: return "uhdmspec_param";
+case 2211: return "uhdmexpr_index";
+case 2283: return "uhdmassertion";
+case 2212: return "uhdmvar_bits";
+case 2284: return "uhdmclass_typespec";
+case 2213: return "uhdmelements";
+case 2285: return "uhdmclass_obj";
+case 2214: return "uhdmbit_var";
+case 2286: return "uhdmprograms";
+case 2215: return "uhdmstruct_var";
+case 2287: return "uhdmprogram_arrays";
+case 2216: return "uhdmunion_var";
+case 2288: return "uhdminterface_tf_decls";
+case 2217: return "uhdmenum_var";
+case 2300: return "uhdmtchks";
+case 2290: return "uhdmglobal_clocking";
+case 2289: return "uhdmmodports";
+case 2218: return "uhdmstring_var";
+case 2301: return "uhdmdef_params";
+case 2291: return "uhdmdefault_clocking";
+case 2220: return "uhdmclass_var";
+case 2219: return "uhdmchandle_var";
+case 2302: return "uhdmalias_stmts";
+case 2292: return "uhdmmod_paths";
+case 2221: return "uhdmvar_bit";
+case 2303: return "uhdmdesign";
+case 2293: return "uhdminterfaces";
+case 2222: return "uhdmexpr_indexes";
+case 2304: return "uhdmallModules";
+case 2294: return "uhdminterface_arrays";
+case 2223: return "uhdmclass_defn";
+case 2305: return "uhdmtopModules";
+case 2295: return "uhdmprogram";
+case 2224: return "uhdmio_decl";
+case 2306: return "uhdmallPrograms";
+case 2296: return "uhdmclocking_blocks";
+case 2225: return "uhdmtask";
+case 2307: return "uhdmallPackages";
+case 2297: return "uhdmpackage";
+case 2226: return "uhdmfunction";
+case 2145: return "uhdmprocess";
+case 2298: return "uhdmprimitive_arrays";
+case 2227: return "uhdmmodport";
+case 2146: return "uhdmproperty_decl";
+case 2299: return "uhdmmodule_arrays";
+case 2228: return "uhdmio_decls";
+case 2147: return "uhdmsequence_decl";
+case 2230: return "uhdminterface_tf_decl";
+case 2229: return "uhdminterface";
+case 2148: return "uhdmconcurrent_assertion";
+case 2231: return "uhdmtasks";
+case 2150: return "uhdmlet_decl";
+case 2149: return "uhdmvirtual_interface_var";
+case 2232: return "uhdmfunctions";
+case 2151: return "uhdmstmt";
+case 2233: return "uhdmcont_assign";
+case 2152: return "uhdmscope";
+case 2234: return "uhdmhigh_conn";
+case 2153: return "uhdmconcurrent_assertions";
+case 2235: return "uhdmlow_conn";
+case 2154: return "uhdmvariables";
+case 2236: return "uhdmport";
+case 2155: return "uhdmparameters";
+case 2237: return "uhdmbits";
+case 2156: return "uhdmscopes";
+case 2238: return "uhdmport_bit";
+case 2157: return "uhdmtypespecs";
+case 2240: return "uhdmmod_path";
+case 2239: return "uhdmprimitive";
+case 2158: return "uhdmproperty_decls";
+case 2241: return "uhdmtchk";
+case 2159: return "uhdmsequence_decls";
+case 2160: return "uhdmnamed_events";
+case 2242: return "uhdmdef_param";
+case 2161: return "uhdmnamed_event_arrays";
+case 2243: return "uhdmrange";
+case 2162: return "uhdmvirtual_interface_vars";
+case 2244: return "uhdmudp_defn";
+case 2163: return "uhdmlogic_var";
+case 2245: return "uhdmalias_stmt";
+case 2164: return "uhdmarray_var";
+case 2246: return "uhdmclocking_block";
+case 2165: return "uhdmarray_var_mem";
+case 2247: return "uhdmparam_assign";
+case 2166: return "uhdmlet_decls";
 default: return "NO TYPE";
 }
 }
@@ -369,6 +432,26 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdmoperation: return operationFactory::objects_[index];
   case uhdmpart_select: return part_selectFactory::objects_[index];
   case uhdmref_obj: return ref_objFactory::objects_[index];
+  case uhdmvar_select: return var_selectFactory::objects_[index];
+  case uhdmshort_real_var: return short_real_varFactory::objects_[index];
+  case uhdmreal_var: return real_varFactory::objects_[index];
+  case uhdmbyte_var: return byte_varFactory::objects_[index];
+  case uhdmshort_int_var: return short_int_varFactory::objects_[index];
+  case uhdmint_var: return int_varFactory::objects_[index];
+  case uhdmlong_int_var: return long_int_varFactory::objects_[index];
+  case uhdminteger_var: return integer_varFactory::objects_[index];
+  case uhdmtime_var: return time_varFactory::objects_[index];
+  case uhdmarray_var: return array_varFactory::objects_[index];
+  case uhdmpacked_array_var: return packed_array_varFactory::objects_[index];
+  case uhdmbit_var: return bit_varFactory::objects_[index];
+  case uhdmlogic_var: return logic_varFactory::objects_[index];
+  case uhdmstruct_var: return struct_varFactory::objects_[index];
+  case uhdmunion_var: return union_varFactory::objects_[index];
+  case uhdmenum_var: return enum_varFactory::objects_[index];
+  case uhdmstring_var: return string_varFactory::objects_[index];
+  case uhdmchandle_var: return chandle_varFactory::objects_[index];
+  case uhdmclass_var: return class_varFactory::objects_[index];
+  case uhdmvar_bit: return var_bitFactory::objects_[index];
   case uhdmtask: return taskFactory::objects_[index];
   case uhdmfunction: return functionFactory::objects_[index];
   case uhdmmodport: return modportFactory::objects_[index];
@@ -403,8 +486,6 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   case uhdmlogic_net: return logic_netFactory::objects_[index];
   case uhdmarray_net: return array_netFactory::objects_[index];
   case uhdmpacked_array_net: return packed_array_netFactory::objects_[index];
-  case uhdmlogic_var: return logic_varFactory::objects_[index];
-  case uhdmarray_var: return array_varFactory::objects_[index];
   case uhdmnamed_event: return named_eventFactory::objects_[index];
   case uhdmnamed_event_array: return named_event_arrayFactory::objects_[index];
   case uhdmspec_param: return spec_paramFactory::objects_[index];
@@ -504,6 +585,106 @@ void Serializer::purge() {
     delete obj;
   }
   ref_objFactory::objects_.clear();
+
+  for (auto obj : var_selectFactory::objects_) {
+    delete obj;
+  }
+  var_selectFactory::objects_.clear();
+
+  for (auto obj : short_real_varFactory::objects_) {
+    delete obj;
+  }
+  short_real_varFactory::objects_.clear();
+
+  for (auto obj : real_varFactory::objects_) {
+    delete obj;
+  }
+  real_varFactory::objects_.clear();
+
+  for (auto obj : byte_varFactory::objects_) {
+    delete obj;
+  }
+  byte_varFactory::objects_.clear();
+
+  for (auto obj : short_int_varFactory::objects_) {
+    delete obj;
+  }
+  short_int_varFactory::objects_.clear();
+
+  for (auto obj : int_varFactory::objects_) {
+    delete obj;
+  }
+  int_varFactory::objects_.clear();
+
+  for (auto obj : long_int_varFactory::objects_) {
+    delete obj;
+  }
+  long_int_varFactory::objects_.clear();
+
+  for (auto obj : integer_varFactory::objects_) {
+    delete obj;
+  }
+  integer_varFactory::objects_.clear();
+
+  for (auto obj : time_varFactory::objects_) {
+    delete obj;
+  }
+  time_varFactory::objects_.clear();
+
+  for (auto obj : array_varFactory::objects_) {
+    delete obj;
+  }
+  array_varFactory::objects_.clear();
+
+  for (auto obj : packed_array_varFactory::objects_) {
+    delete obj;
+  }
+  packed_array_varFactory::objects_.clear();
+
+  for (auto obj : bit_varFactory::objects_) {
+    delete obj;
+  }
+  bit_varFactory::objects_.clear();
+
+  for (auto obj : logic_varFactory::objects_) {
+    delete obj;
+  }
+  logic_varFactory::objects_.clear();
+
+  for (auto obj : struct_varFactory::objects_) {
+    delete obj;
+  }
+  struct_varFactory::objects_.clear();
+
+  for (auto obj : union_varFactory::objects_) {
+    delete obj;
+  }
+  union_varFactory::objects_.clear();
+
+  for (auto obj : enum_varFactory::objects_) {
+    delete obj;
+  }
+  enum_varFactory::objects_.clear();
+
+  for (auto obj : string_varFactory::objects_) {
+    delete obj;
+  }
+  string_varFactory::objects_.clear();
+
+  for (auto obj : chandle_varFactory::objects_) {
+    delete obj;
+  }
+  chandle_varFactory::objects_.clear();
+
+  for (auto obj : class_varFactory::objects_) {
+    delete obj;
+  }
+  class_varFactory::objects_.clear();
+
+  for (auto obj : var_bitFactory::objects_) {
+    delete obj;
+  }
+  var_bitFactory::objects_.clear();
 
   for (auto obj : taskFactory::objects_) {
     delete obj;
@@ -675,16 +856,6 @@ void Serializer::purge() {
   }
   packed_array_netFactory::objects_.clear();
 
-  for (auto obj : logic_varFactory::objects_) {
-    delete obj;
-  }
-  logic_varFactory::objects_.clear();
-
-  for (auto obj : array_varFactory::objects_) {
-    delete obj;
-  }
-  array_varFactory::objects_.clear();
-
   for (auto obj : named_eventFactory::objects_) {
     delete obj;
   }
@@ -826,6 +997,106 @@ void Serializer::save(std::string file) {
   }
   index = 1;
   for (auto obj : ref_objFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : var_selectFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : short_real_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : real_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : byte_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : short_int_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : int_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : long_int_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : integer_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : time_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : array_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : packed_array_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : bit_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : logic_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : struct_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : union_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : enum_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : string_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : chandle_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : class_varFactory::objects_) {
+    setId(obj, index);
+    index++;
+  }
+  index = 1;
+  for (auto obj : var_bitFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -996,16 +1267,6 @@ void Serializer::save(std::string file) {
   }
   index = 1;
   for (auto obj : packed_array_netFactory::objects_) {
-    setId(obj, index);
-    index++;
-  }
-  index = 1;
-  for (auto obj : logic_varFactory::objects_) {
-    setId(obj, index);
-    index++;
-  }
-  index = 1;
-  for (auto obj : array_varFactory::objects_) {
     setId(obj, index);
     index++;
   }
@@ -2160,6 +2421,1974 @@ void Serializer::save(std::string file) {
   }
    index++;
  }
+ ::capnp::List<Varselect>::Builder Varselects = cap_root.initFactoryVarselect(var_selectFactory::objects_.size());
+ index = 0;
+ for (auto obj : var_selectFactory::objects_) {
+    Varselects[index].setVpiParent(getId(obj->get_vpiParent()));
+    Varselects[index].setUhdmParentType(obj->get_uhdmParentType());
+    Varselects[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Varselects[index].setVpiLineNo(obj->get_vpiLineNo());
+
+   index++;
+ }
+ ::capnp::List<Shortrealvar>::Builder Shortrealvars = cap_root.initFactoryShortrealvar(short_real_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : short_real_varFactory::objects_) {
+    Shortrealvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Shortrealvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Shortrealvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Shortrealvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Shortrealvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Shortrealvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Shortrealvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Shortrealvars[index].setVpiSigned(obj->get_vpiSigned());
+    Shortrealvars[index].setVpiSize(obj->get_vpiSize());
+    Shortrealvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Shortrealvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Shortrealvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Shortrealvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Shortrealvars[index].setVpiRandType(obj->get_vpiRandType());
+    Shortrealvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Shortrealvars[index].setVpiScalar(obj->get_vpiScalar());
+    Shortrealvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Shortrealvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Shortrealvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Shortrealvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Shortrealvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Shortrealvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Shortrealvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Shortrealvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Shortrealvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Shortrealvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Shortrealvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Shortrealvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Shortrealvars[index].setPathterm(getId(obj->get_path_term()));
+    Shortrealvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Shortrealvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Realvar>::Builder Realvars = cap_root.initFactoryRealvar(real_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : real_varFactory::objects_) {
+    Realvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Realvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Realvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Realvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Realvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Realvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Realvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Realvars[index].setVpiSigned(obj->get_vpiSigned());
+    Realvars[index].setVpiSize(obj->get_vpiSize());
+    Realvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Realvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Realvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Realvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Realvars[index].setVpiRandType(obj->get_vpiRandType());
+    Realvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Realvars[index].setVpiScalar(obj->get_vpiScalar());
+    Realvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Realvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Realvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Realvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Realvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Realvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Realvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Realvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Realvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Realvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Realvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Realvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Realvars[index].setPathterm(getId(obj->get_path_term()));
+    Realvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Realvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Bytevar>::Builder Bytevars = cap_root.initFactoryBytevar(byte_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : byte_varFactory::objects_) {
+    Bytevars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Bytevars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Bytevars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Bytevars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Bytevars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Bytevars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Bytevars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Bytevars[index].setVpiSigned(obj->get_vpiSigned());
+    Bytevars[index].setVpiSize(obj->get_vpiSize());
+    Bytevars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Bytevars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Bytevars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Bytevars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Bytevars[index].setVpiRandType(obj->get_vpiRandType());
+    Bytevars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Bytevars[index].setVpiScalar(obj->get_vpiScalar());
+    Bytevars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Bytevars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Bytevars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Bytevars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Bytevars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Bytevars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Bytevars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Bytevars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Bytevars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Bytevars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Bytevars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Bytevars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Bytevars[index].setPathterm(getId(obj->get_path_term()));
+    Bytevars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Bytevars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Shortintvar>::Builder Shortintvars = cap_root.initFactoryShortintvar(short_int_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : short_int_varFactory::objects_) {
+    Shortintvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Shortintvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Shortintvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Shortintvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Shortintvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Shortintvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Shortintvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Shortintvars[index].setVpiSigned(obj->get_vpiSigned());
+    Shortintvars[index].setVpiSize(obj->get_vpiSize());
+    Shortintvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Shortintvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Shortintvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Shortintvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Shortintvars[index].setVpiRandType(obj->get_vpiRandType());
+    Shortintvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Shortintvars[index].setVpiScalar(obj->get_vpiScalar());
+    Shortintvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Shortintvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Shortintvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Shortintvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Shortintvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Shortintvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Shortintvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Shortintvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Shortintvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Shortintvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Shortintvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Shortintvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Shortintvars[index].setPathterm(getId(obj->get_path_term()));
+    Shortintvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Shortintvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Intvar>::Builder Intvars = cap_root.initFactoryIntvar(int_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : int_varFactory::objects_) {
+    Intvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Intvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Intvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Intvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Intvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Intvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Intvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Intvars[index].setVpiSigned(obj->get_vpiSigned());
+    Intvars[index].setVpiSize(obj->get_vpiSize());
+    Intvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Intvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Intvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Intvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Intvars[index].setVpiRandType(obj->get_vpiRandType());
+    Intvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Intvars[index].setVpiScalar(obj->get_vpiScalar());
+    Intvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Intvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Intvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Intvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Intvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Intvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Intvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Intvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Intvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Intvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Intvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Intvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Intvars[index].setPathterm(getId(obj->get_path_term()));
+    Intvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Intvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Longintvar>::Builder Longintvars = cap_root.initFactoryLongintvar(long_int_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : long_int_varFactory::objects_) {
+    Longintvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Longintvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Longintvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Longintvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Longintvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Longintvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Longintvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Longintvars[index].setVpiSigned(obj->get_vpiSigned());
+    Longintvars[index].setVpiSize(obj->get_vpiSize());
+    Longintvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Longintvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Longintvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Longintvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Longintvars[index].setVpiRandType(obj->get_vpiRandType());
+    Longintvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Longintvars[index].setVpiScalar(obj->get_vpiScalar());
+    Longintvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Longintvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Longintvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Longintvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Longintvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Longintvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Longintvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Longintvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Longintvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Longintvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Longintvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Longintvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Longintvars[index].setPathterm(getId(obj->get_path_term()));
+    Longintvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Longintvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Integervar>::Builder Integervars = cap_root.initFactoryIntegervar(integer_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : integer_varFactory::objects_) {
+    Integervars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Integervars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Integervars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Integervars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Integervars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Integervars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Integervars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Integervars[index].setVpiSigned(obj->get_vpiSigned());
+    Integervars[index].setVpiSize(obj->get_vpiSize());
+    Integervars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Integervars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Integervars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Integervars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Integervars[index].setVpiRandType(obj->get_vpiRandType());
+    Integervars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Integervars[index].setVpiScalar(obj->get_vpiScalar());
+    Integervars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Integervars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Integervars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Integervars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Integervars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Integervars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Integervars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Integervars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Integervars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Integervars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Integervars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Integervars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Integervars[index].setPathterm(getId(obj->get_path_term()));
+    Integervars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Integervars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Timevar>::Builder Timevars = cap_root.initFactoryTimevar(time_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : time_varFactory::objects_) {
+    Timevars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Timevars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Timevars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Timevars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Timevars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Timevars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Timevars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Timevars[index].setVpiSigned(obj->get_vpiSigned());
+    Timevars[index].setVpiSize(obj->get_vpiSize());
+    Timevars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Timevars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Timevars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Timevars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Timevars[index].setVpiRandType(obj->get_vpiRandType());
+    Timevars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Timevars[index].setVpiScalar(obj->get_vpiScalar());
+    Timevars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Timevars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Timevars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Timevars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Timevars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Timevars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Timevars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Timevars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Timevars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Timevars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Timevars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Timevars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Timevars[index].setPathterm(getId(obj->get_path_term()));
+    Timevars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Timevars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Arrayvar>::Builder Arrayvars = cap_root.initFactoryArrayvar(array_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : array_varFactory::objects_) {
+    Arrayvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Arrayvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Arrayvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Arrayvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Arrayvars[index].setVpiArrayType(obj->get_vpiArrayType());
+  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp0 = Arrayvars[index].getLeftexpr();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp0.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp1 = Arrayvars[index].getRightexpr();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
+  } 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Arrayvars[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
+      }
+    }
+    Arrayvars[index].setVarselects(getId(obj->get_var_selects()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Arrayvars[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
+    Arrayvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Arrayvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Arrayvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Arrayvars[index].setVpiSigned(obj->get_vpiSigned());
+    Arrayvars[index].setVpiSize(obj->get_vpiSize());
+    Arrayvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Arrayvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Arrayvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Arrayvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Arrayvars[index].setVpiRandType(obj->get_vpiRandType());
+    Arrayvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Arrayvars[index].setVpiScalar(obj->get_vpiScalar());
+    Arrayvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Arrayvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Arrayvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Arrayvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Arrayvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Arrayvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Arrayvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Arrayvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Arrayvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Arrayvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Arrayvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Arrayvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Arrayvars[index].setPathterm(getId(obj->get_path_term()));
+    Arrayvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Arrayvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Packedarrayvar>::Builder Packedarrayvars = cap_root.initFactoryPackedarrayvar(packed_array_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : packed_array_varFactory::objects_) {
+    Packedarrayvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Packedarrayvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Packedarrayvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Packedarrayvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Packedarrayvars[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+    Packedarrayvars[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+    Packedarrayvars[index].setVpiPacked(obj->get_vpiPacked());
+  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp0 = Packedarrayvars[index].getLeftexpr();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp0.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp1 = Packedarrayvars[index].getRightexpr();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
+  }  if (obj->get_expr_index()) {
+    ::ObjIndexType::Builder tmp2 = Packedarrayvars[index].getExprindex();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_expr_index())));
+    tmp2.setType(((BaseClass*)obj->get_expr_index())->getUhdmType());
+  } 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Packedarrayvars[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
+ 
+    if (obj->get_var_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Varbitss = Packedarrayvars[index].initVarbits(obj->get_var_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_var_bits()->size(); ind++) {
+        Varbitss.set(ind, getId((*obj->get_var_bits())[ind]));
+      }
+    }
+ 
+    if (obj->get_elements()) {  
+      ::capnp::List<::ObjIndexType>::Builder Elementss = Packedarrayvars[index].initElements(obj->get_elements()->size());
+      for (unsigned int ind = 0; ind < obj->get_elements()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Elementss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_elements())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_elements())[ind]))->getUhdmType());
+      }
+    }
+    Packedarrayvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Packedarrayvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Packedarrayvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Packedarrayvars[index].setVpiSigned(obj->get_vpiSigned());
+    Packedarrayvars[index].setVpiSize(obj->get_vpiSize());
+    Packedarrayvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Packedarrayvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Packedarrayvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Packedarrayvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Packedarrayvars[index].setVpiRandType(obj->get_vpiRandType());
+    Packedarrayvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Packedarrayvars[index].setVpiScalar(obj->get_vpiScalar());
+    Packedarrayvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Packedarrayvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Packedarrayvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Packedarrayvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Packedarrayvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Packedarrayvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Packedarrayvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Packedarrayvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Packedarrayvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Packedarrayvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Packedarrayvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Packedarrayvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Packedarrayvars[index].setPathterm(getId(obj->get_path_term()));
+    Packedarrayvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Packedarrayvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Bitvar>::Builder Bitvars = cap_root.initFactoryBitvar(bit_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : bit_varFactory::objects_) {
+    Bitvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Bitvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Bitvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Bitvars[index].setVpiLineNo(obj->get_vpiLineNo());
+  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp0 = Bitvars[index].getLeftexpr();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp0.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp1 = Bitvars[index].getRightexpr();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
+  } 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Bitvars[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
+ 
+    if (obj->get_var_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Varbitss = Bitvars[index].initVarbits(obj->get_var_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_var_bits()->size(); ind++) {
+        Varbitss.set(ind, getId((*obj->get_var_bits())[ind]));
+      }
+    }
+    Bitvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Bitvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Bitvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Bitvars[index].setVpiSigned(obj->get_vpiSigned());
+    Bitvars[index].setVpiSize(obj->get_vpiSize());
+    Bitvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Bitvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Bitvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Bitvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Bitvars[index].setVpiRandType(obj->get_vpiRandType());
+    Bitvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Bitvars[index].setVpiScalar(obj->get_vpiScalar());
+    Bitvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Bitvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Bitvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Bitvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Bitvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Bitvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Bitvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Bitvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Bitvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Bitvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Bitvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Bitvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Bitvars[index].setPathterm(getId(obj->get_path_term()));
+    Bitvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Bitvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Logicvar>::Builder Logicvars = cap_root.initFactoryLogicvar(logic_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : logic_varFactory::objects_) {
+    Logicvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Logicvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Logicvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Logicvars[index].setVpiLineNo(obj->get_vpiLineNo());
+  if (obj->get_left_expr()) {
+    ::ObjIndexType::Builder tmp0 = Logicvars[index].getLeftexpr();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_left_expr())));
+    tmp0.setType(((BaseClass*)obj->get_left_expr())->getUhdmType());
+  }  if (obj->get_right_expr()) {
+    ::ObjIndexType::Builder tmp1 = Logicvars[index].getRightexpr();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_right_expr())));
+    tmp1.setType(((BaseClass*)obj->get_right_expr())->getUhdmType());
+  } 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Logicvars[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
+ 
+    if (obj->get_var_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Varbitss = Logicvars[index].initVarbits(obj->get_var_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_var_bits()->size(); ind++) {
+        Varbitss.set(ind, getId((*obj->get_var_bits())[ind]));
+      }
+    }
+    Logicvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Logicvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Logicvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Logicvars[index].setVpiSigned(obj->get_vpiSigned());
+    Logicvars[index].setVpiSize(obj->get_vpiSize());
+    Logicvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Logicvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Logicvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Logicvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Logicvars[index].setVpiRandType(obj->get_vpiRandType());
+    Logicvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Logicvars[index].setVpiScalar(obj->get_vpiScalar());
+    Logicvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Logicvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Logicvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Logicvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Logicvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Logicvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Logicvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Logicvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Logicvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Logicvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Logicvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Logicvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Logicvars[index].setPathterm(getId(obj->get_path_term()));
+    Logicvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Logicvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Structvar>::Builder Structvars = cap_root.initFactoryStructvar(struct_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : struct_varFactory::objects_) {
+    Structvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Structvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Structvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Structvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Structvars[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+    Structvars[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Structvars[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_expr_index()) {
+    ::ObjIndexType::Builder tmp0 = Structvars[index].getExprindex();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr_index())));
+    tmp0.setType(((BaseClass*)obj->get_expr_index())->getUhdmType());
+  } 
+    if (obj->get_var_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Varbitss = Structvars[index].initVarbits(obj->get_var_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_var_bits()->size(); ind++) {
+        Varbitss.set(ind, getId((*obj->get_var_bits())[ind]));
+      }
+    }
+    Structvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Structvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Structvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Structvars[index].setVpiSigned(obj->get_vpiSigned());
+    Structvars[index].setVpiSize(obj->get_vpiSize());
+    Structvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Structvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Structvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Structvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Structvars[index].setVpiRandType(obj->get_vpiRandType());
+    Structvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Structvars[index].setVpiScalar(obj->get_vpiScalar());
+    Structvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Structvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Structvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Structvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Structvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Structvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Structvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Structvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Structvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Structvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Structvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Structvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Structvars[index].setPathterm(getId(obj->get_path_term()));
+    Structvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Structvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Unionvar>::Builder Unionvars = cap_root.initFactoryUnionvar(union_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : union_varFactory::objects_) {
+    Unionvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Unionvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Unionvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Unionvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Unionvars[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+    Unionvars[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+ 
+    if (obj->get_variables()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabless = Unionvars[index].initVariables(obj->get_variables()->size());
+      for (unsigned int ind = 0; ind < obj->get_variables()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabless[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variables())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variables())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_expr_index()) {
+    ::ObjIndexType::Builder tmp0 = Unionvars[index].getExprindex();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr_index())));
+    tmp0.setType(((BaseClass*)obj->get_expr_index())->getUhdmType());
+  } 
+    if (obj->get_var_bits()) {  
+      ::capnp::List<::uint64_t>::Builder Varbitss = Unionvars[index].initVarbits(obj->get_var_bits()->size());
+      for (unsigned int ind = 0; ind < obj->get_var_bits()->size(); ind++) {
+        Varbitss.set(ind, getId((*obj->get_var_bits())[ind]));
+      }
+    }
+    Unionvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Unionvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Unionvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Unionvars[index].setVpiSigned(obj->get_vpiSigned());
+    Unionvars[index].setVpiSize(obj->get_vpiSize());
+    Unionvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Unionvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Unionvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Unionvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Unionvars[index].setVpiRandType(obj->get_vpiRandType());
+    Unionvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Unionvars[index].setVpiScalar(obj->get_vpiScalar());
+    Unionvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Unionvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Unionvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Unionvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Unionvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Unionvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Unionvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Unionvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Unionvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Unionvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Unionvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Unionvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Unionvars[index].setPathterm(getId(obj->get_path_term()));
+    Unionvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Unionvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Enumvar>::Builder Enumvars = cap_root.initFactoryEnumvar(enum_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : enum_varFactory::objects_) {
+    Enumvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Enumvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Enumvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Enumvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Enumvars[index].setVpiPackedArrayMember(obj->get_vpiPackedArrayMember());
+    Enumvars[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+  if (obj->get_expr_index()) {
+    ::ObjIndexType::Builder tmp0 = Enumvars[index].getExprindex();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr_index())));
+    tmp0.setType(((BaseClass*)obj->get_expr_index())->getUhdmType());
+  }    Enumvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Enumvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Enumvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Enumvars[index].setVpiSigned(obj->get_vpiSigned());
+    Enumvars[index].setVpiSize(obj->get_vpiSize());
+    Enumvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Enumvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Enumvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Enumvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Enumvars[index].setVpiRandType(obj->get_vpiRandType());
+    Enumvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Enumvars[index].setVpiScalar(obj->get_vpiScalar());
+    Enumvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Enumvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Enumvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Enumvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Enumvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Enumvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Enumvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Enumvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Enumvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Enumvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Enumvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Enumvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Enumvars[index].setPathterm(getId(obj->get_path_term()));
+    Enumvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Enumvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Stringvar>::Builder Stringvars = cap_root.initFactoryStringvar(string_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : string_varFactory::objects_) {
+    Stringvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Stringvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Stringvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Stringvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Stringvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Stringvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Stringvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Stringvars[index].setVpiSigned(obj->get_vpiSigned());
+    Stringvars[index].setVpiSize(obj->get_vpiSize());
+    Stringvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Stringvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Stringvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Stringvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Stringvars[index].setVpiRandType(obj->get_vpiRandType());
+    Stringvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Stringvars[index].setVpiScalar(obj->get_vpiScalar());
+    Stringvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Stringvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Stringvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Stringvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Stringvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Stringvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Stringvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Stringvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Stringvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Stringvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Stringvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Stringvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Stringvars[index].setPathterm(getId(obj->get_path_term()));
+    Stringvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Stringvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Chandlevar>::Builder Chandlevars = cap_root.initFactoryChandlevar(chandle_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : chandle_varFactory::objects_) {
+    Chandlevars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Chandlevars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Chandlevars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Chandlevars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Chandlevars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Chandlevars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Chandlevars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Chandlevars[index].setVpiSigned(obj->get_vpiSigned());
+    Chandlevars[index].setVpiSize(obj->get_vpiSize());
+    Chandlevars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Chandlevars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Chandlevars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Chandlevars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Chandlevars[index].setVpiRandType(obj->get_vpiRandType());
+    Chandlevars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Chandlevars[index].setVpiScalar(obj->get_vpiScalar());
+    Chandlevars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Chandlevars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Chandlevars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Chandlevars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Chandlevars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Chandlevars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Chandlevars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Chandlevars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Chandlevars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Chandlevars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Chandlevars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Chandlevars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Chandlevars[index].setPathterm(getId(obj->get_path_term()));
+    Chandlevars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Chandlevars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Classvar>::Builder Classvars = cap_root.initFactoryClassvar(class_varFactory::objects_.size());
+ index = 0;
+ for (auto obj : class_varFactory::objects_) {
+    Classvars[index].setVpiParent(getId(obj->get_vpiParent()));
+    Classvars[index].setUhdmParentType(obj->get_uhdmParentType());
+    Classvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Classvars[index].setVpiLineNo(obj->get_vpiLineNo());
+    Classvars[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Classvars[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Classvars[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Classvars[index].setVpiSigned(obj->get_vpiSigned());
+    Classvars[index].setVpiSize(obj->get_vpiSize());
+    Classvars[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Classvars[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Classvars[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Classvars[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Classvars[index].setVpiRandType(obj->get_vpiRandType());
+    Classvars[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Classvars[index].setVpiScalar(obj->get_vpiScalar());
+    Classvars[index].setVpiVisibility(obj->get_vpiVisibility());
+    Classvars[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Classvars[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Classvars[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Classvars[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Classvars[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Classvars[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Classvars[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Classvars[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Classvars[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Classvars[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Classvars[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Classvars[index].setPathterm(getId(obj->get_path_term()));
+    Classvars[index].setTchkterm(getId(obj->get_tchk_term()));
+    Classvars[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
+ ::capnp::List<Varbit>::Builder Varbits = cap_root.initFactoryVarbit(var_bitFactory::objects_.size());
+ index = 0;
+ for (auto obj : var_bitFactory::objects_) {
+    Varbits[index].setVpiParent(getId(obj->get_vpiParent()));
+    Varbits[index].setUhdmParentType(obj->get_uhdmParentType());
+    Varbits[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
+    Varbits[index].setVpiLineNo(obj->get_vpiLineNo());
+    Varbits[index].setVpiConstantSelect(obj->get_vpiConstantSelect());
+  if (obj->get_expr_index()) {
+    ::ObjIndexType::Builder tmp0 = Varbits[index].getExprindex();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_expr_index())));
+    tmp0.setType(((BaseClass*)obj->get_expr_index())->getUhdmType());
+  } 
+    if (obj->get_expr_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Exprindexess = Varbits[index].initExprindexes(obj->get_expr_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_expr_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Exprindexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_expr_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_expr_indexes())[ind]))->getUhdmType());
+      }
+    }
+    Varbits[index].setVpiArrayMember(obj->get_vpiArrayMember());
+    Varbits[index].setVpiName(SymbolFactory::make(obj->get_vpiName()));
+    Varbits[index].setVpiFullName(SymbolFactory::make(obj->get_vpiFullName()));
+    Varbits[index].setVpiSigned(obj->get_vpiSigned());
+    Varbits[index].setVpiSize(obj->get_vpiSize());
+    Varbits[index].setVpiAutomatic(obj->get_vpiAutomatic());
+    Varbits[index].setVpiAllocScheme(obj->get_vpiAllocScheme());
+    Varbits[index].setVpiConstantVariable(obj->get_vpiConstantVariable());
+    Varbits[index].setVpiIsRandomized(obj->get_vpiIsRandomized());
+    Varbits[index].setVpiRandType(obj->get_vpiRandType());
+    Varbits[index].setVpiStructUnionMember(obj->get_vpiStructUnionMember());
+    Varbits[index].setVpiScalar(obj->get_vpiScalar());
+    Varbits[index].setVpiVisibility(obj->get_vpiVisibility());
+    Varbits[index].setVpiVector(obj->get_vpiVector());
+ 
+    if (obj->get_ports()) {  
+      ::capnp::List<::ObjIndexType>::Builder Portss = Varbits[index].initPorts(obj->get_ports()->size());
+      for (unsigned int ind = 0; ind < obj->get_ports()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Portss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_ports())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_ports())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_drivers()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variabledriverss = Varbits[index].initVariabledrivers(obj->get_variable_drivers()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_drivers()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variabledriverss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_drivers())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_drivers())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_variable_loads()) {  
+      ::capnp::List<::ObjIndexType>::Builder Variableloadss = Varbits[index].initVariableloads(obj->get_variable_loads()->size());
+      for (unsigned int ind = 0; ind < obj->get_variable_loads()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Variableloadss[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_variable_loads())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_variable_loads())[ind]))->getUhdmType());
+      }
+    }
+  if (obj->get_typespec()) {
+    ::ObjIndexType::Builder tmp0 = Varbits[index].getTypespec();
+    tmp0.setIndex(getId(((BaseClass*) obj->get_typespec())));
+    tmp0.setType(((BaseClass*)obj->get_typespec())->getUhdmType());
+  }  if (obj->get_instance()) {
+    ::ObjIndexType::Builder tmp1 = Varbits[index].getInstance();
+    tmp1.setIndex(getId(((BaseClass*) obj->get_instance())));
+    tmp1.setType(((BaseClass*)obj->get_instance())->getUhdmType());
+  }  if (obj->get_scope()) {
+    ::ObjIndexType::Builder tmp2 = Varbits[index].getScope();
+    tmp2.setIndex(getId(((BaseClass*) obj->get_scope())));
+    tmp2.setType(((BaseClass*)obj->get_scope())->getUhdmType());
+  }  if (obj->get_expr()) {
+    ::ObjIndexType::Builder tmp3 = Varbits[index].getExpr();
+    tmp3.setIndex(getId(((BaseClass*) obj->get_expr())));
+    tmp3.setType(((BaseClass*)obj->get_expr())->getUhdmType());
+  } 
+    if (obj->get_indexes()) {  
+      ::capnp::List<::ObjIndexType>::Builder Indexess = Varbits[index].initIndexes(obj->get_indexes()->size());
+      for (unsigned int ind = 0; ind < obj->get_indexes()->size(); ind++) {
+        ::ObjIndexType::Builder tmp = Indexess[ind];
+        tmp.setIndex(getId(((BaseClass*) (*obj->get_indexes())[ind])));
+        tmp.setType(((BaseClass*)((*obj->get_indexes())[ind]))->getUhdmType());
+      }
+    }
+ 
+    if (obj->get_prim_terms()) {  
+      ::capnp::List<::uint64_t>::Builder Primtermss = Varbits[index].initPrimterms(obj->get_prim_terms()->size());
+      for (unsigned int ind = 0; ind < obj->get_prim_terms()->size(); ind++) {
+        Primtermss.set(ind, getId((*obj->get_prim_terms())[ind]));
+      }
+    }
+ 
+    if (obj->get_cont_assigns()) {  
+      ::capnp::List<::uint64_t>::Builder Contassignss = Varbits[index].initContassigns(obj->get_cont_assigns()->size());
+      for (unsigned int ind = 0; ind < obj->get_cont_assigns()->size(); ind++) {
+        Contassignss.set(ind, getId((*obj->get_cont_assigns())[ind]));
+      }
+    }
+    Varbits[index].setPathterm(getId(obj->get_path_term()));
+    Varbits[index].setTchkterm(getId(obj->get_tchk_term()));
+    Varbits[index].setModule(getId(obj->get_module()));
+
+
+   index++;
+ }
  ::capnp::List<Task>::Builder Tasks = cap_root.initFactoryTask(taskFactory::objects_.size());
  index = 0;
  for (auto obj : taskFactory::objects_) {
@@ -3143,7 +5372,13 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
-    Interfacearrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Interfacearrays[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Interfacearrays[index].initModules(obj->get_modules()->size());
@@ -3186,7 +5421,13 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
-    Programarrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Programarrays[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Programarrays[index].initModules(obj->get_modules()->size());
@@ -3236,7 +5477,13 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
-    Modulearrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Modulearrays[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Modulearrays[index].initModules(obj->get_modules()->size());
@@ -3292,7 +5539,13 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
-    Gatearrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Gatearrays[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Gatearrays[index].initModules(obj->get_modules()->size());
@@ -3326,7 +5579,13 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
-    Gatearrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Gatearrays[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Gatearrays[index].initModules(obj->get_modules()->size());
@@ -3382,7 +5641,13 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
-    Switcharrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Switcharrays[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Switcharrays[index].initModules(obj->get_modules()->size());
@@ -3416,7 +5681,13 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
-    Switcharrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Switcharrays[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Switcharrays[index].initModules(obj->get_modules()->size());
@@ -3472,7 +5743,13 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
-    Udparrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Udparrays[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Udparrays[index].initModules(obj->get_modules()->size());
@@ -3506,7 +5783,13 @@ void Serializer::save(std::string file) {
         tmp.setType(((BaseClass*)((*obj->get_instances())[ind]))->getUhdmType());
       }
     }
-    Udparrays[index].setRange(getId(obj->get_range()));
+ 
+    if (obj->get_ranges()) {  
+      ::capnp::List<::uint64_t>::Builder Rangess = Udparrays[index].initRanges(obj->get_ranges()->size());
+      for (unsigned int ind = 0; ind < obj->get_ranges()->size(); ind++) {
+        Rangess.set(ind, getId((*obj->get_ranges())[ind]));
+      }
+    }
  
     if (obj->get_modules()) {  
       ::capnp::List<::uint64_t>::Builder Moduless = Udparrays[index].initModules(obj->get_modules()->size());
@@ -5204,26 +7487,6 @@ void Serializer::save(std::string file) {
     }
     Packedarraynets[index].setModule(getId(obj->get_module()));
 
-
-   index++;
- }
- ::capnp::List<Logicvar>::Builder Logicvars = cap_root.initFactoryLogicvar(logic_varFactory::objects_.size());
- index = 0;
- for (auto obj : logic_varFactory::objects_) {
-    Logicvars[index].setVpiParent(getId(obj->get_vpiParent()));
-    Logicvars[index].setUhdmParentType(obj->get_uhdmParentType());
-    Logicvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
-    Logicvars[index].setVpiLineNo(obj->get_vpiLineNo());
-
-   index++;
- }
- ::capnp::List<Arrayvar>::Builder Arrayvars = cap_root.initFactoryArrayvar(array_varFactory::objects_.size());
- index = 0;
- for (auto obj : array_varFactory::objects_) {
-    Arrayvars[index].setVpiParent(getId(obj->get_vpiParent()));
-    Arrayvars[index].setUhdmParentType(obj->get_uhdmParentType());
-    Arrayvars[index].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));
-    Arrayvars[index].setVpiLineNo(obj->get_vpiLineNo());
 
    index++;
  }
