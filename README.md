@@ -14,9 +14,15 @@ Universal Hardware Data Model
     * Consumed by tools like Yosys or Verilator
  
 # HowTo
+
+First, install the [Capn'proto][capnproto] dependency:
+`sudo aptitude install libcapnp-dev capnproto`
+
+```bash
  * git clone https://github.com/alainmarcel/UHDM.git
  * cd UHDM
  * make all
+```
 
 # Features
  * All SystemVerilog models are expression in a Yaml type syntax (One file per Verilog Object Model)
@@ -80,3 +86,4 @@ Universal Hardware Data Model
 * [Surelog](https://github.com/alainmarcel/Surelog/) - Surelog parser
 * [Verible](https://github.com/google/verible) - Verible linter
 
+[capnproto]: https://capnproto.org/
