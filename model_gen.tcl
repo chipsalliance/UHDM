@@ -108,7 +108,7 @@ proc parse_model { file } {
 	}
 	set INDENT(curr) $indent
 	
-	if [regexp {\- obj_def: (.*)} $line tmp name] {
+	if [regexp {\- obj_def: ([a-zA-Z0-9_]+)} $line tmp name] {
 	    set vpiType ""
 	    set vpiObj  ""
 	    global obj_def$modelId
@@ -120,7 +120,7 @@ proc parse_model { file } {
 	    set OBJ(curr) obj_def$modelId
 	    incr modelId
 	}
-	if [regexp {\- class_def: (.*)} $line tmp name] {
+	if [regexp {\- class_def: ([a-zA-Z0-9_]+)} $line tmp name] {
 	    set vpiType ""
 	    set vpiObj  ""
 	    global obj_def$modelId
@@ -132,7 +132,7 @@ proc parse_model { file } {
 	    set OBJ(curr) obj_def$modelId
 	    incr modelId
 	}
-	if [regexp {\- group_def: (.*)} $line tmp name] {
+	if [regexp {\- group_def: ([a-zA-Z0-9_]+)} $line tmp name] {
 	    set vpiType ""
 	    set vpiObj  ""
 	    global obj_def$modelId
@@ -144,17 +144,17 @@ proc parse_model { file } {
 	    set OBJ(curr) obj_def$modelId
 	    incr modelId
 	}
-	if [regexp {property: (.*)} $line tmp name] {
+	if [regexp {property: ([a-zA-Z0-9_]+)} $line tmp name] {
 	    dict set $OBJ(curr) "properties" $name {}
 	    set obj_name $name
 	    set obj_type "properties"
 	}
-	if [regexp {class_ref: (.*)} $line tmp name] {
+	if [regexp {class_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
 	    dict set $OBJ(curr) "class_ref" $name {}
 	    set obj_name $name
 	    set obj_type "class_ref"
 	}
-	if [regexp {extends: (.*)} $line tmp name] {
+	if [regexp {extends: ([a-zA-Z0-9_]+)} $line tmp name] {
 	    dict set $OBJ(curr) "extends" class_def $name 
 	    set obj_name $name
 	    set obj_type "class_ref"	    
@@ -162,17 +162,17 @@ proc parse_model { file } {
 	    set classname [dict get $data name]
 	    set BASECLASS($classname) $name
 	}
-	if [regexp {obj_ref: (.*)} $line tmp name] {
+	if [regexp {obj_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
 	    dict set $OBJ(curr) "obj_ref" $name {}
 	    set obj_name $name
 	    set obj_type "obj_ref"
 	}
-	if [regexp {group_ref: (.*)} $line tmp name] {
+	if [regexp {group_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
 	    dict set $OBJ(curr) "group_ref" $name {}
 	    set obj_name $name
 	    set obj_type "group_ref"
 	}
-	if [regexp {class: (.*)} $line tmp name] {
+	if [regexp {class: ([a-zA-Z0-9_]+)} $line tmp name] {
 	    dict set $OBJ(curr) "class" $name {}
 	    set obj_name $name
 	    set obj_type "class"
@@ -180,13 +180,13 @@ proc parse_model { file } {
 	if [regexp {type: (.*)} $line tmp type] {
 	    dict set $OBJ(curr) $obj_type $obj_name type $type
 	}
-	if [regexp {vpi: (.*)} $line tmp vpiType] {
+	if [regexp {vpi: ([a-zA-Z0-9_]+)} $line tmp vpiType] {
 	    dict set $OBJ(curr) $obj_type $obj_name vpi $vpiType	    
 	}
-	if [regexp {vpi_obj: (.*)} $line tmp vpiObj] {
+	if [regexp {vpi_obj: ([a-zA-Z0-9_]+)} $line tmp vpiObj] {
 	    dict set $OBJ(curr) $obj_type $obj_name vpi $vpiObj	    
 	}
-	if [regexp {card: (.*)} $line tmp card] {
+	if [regexp {card: ([a-zA-Z0-9_]+)} $line tmp card] {
 	    dict set $OBJ(curr) $obj_type $obj_name card $card
 	    foreach {id define} [defineType 0 $name $vpiType] {}
 	    if {$define != ""} {
@@ -194,7 +194,7 @@ proc parse_model { file } {
             }
 	    dict set $OBJ(curr) $obj_type $obj_name "id" $id
 	}
-	if [regexp {name: (.*)} $line tmp name] {
+	if [regexp {name: ([a-zA-Z0-9_]*)} $line tmp name] {
 	    dict set $OBJ(curr) $obj_type $obj_name name $name
 	}
     }

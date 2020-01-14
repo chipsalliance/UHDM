@@ -6612,6 +6612,78 @@ PLI_INT32 vpi_get (PLI_INT32   property,
      } 
 }
 
+ if (handle->type == uhdmvariables) {
+     if (property == vpiArrayMember) {
+       return ((variables*)(obj))->get_vpiArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiSigned) {
+       return ((variables*)(obj))->get_vpiSigned();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiSize) {
+       return ((variables*)(obj))->get_vpiSize();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiAutomatic) {
+       return ((variables*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiAllocScheme) {
+       return ((variables*)(obj))->get_vpiAllocScheme();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiConstantVariable) {
+       return ((variables*)(obj))->get_vpiConstantVariable();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiIsRandomized) {
+       return ((variables*)(obj))->get_vpiIsRandomized();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiRandType) {
+       return ((variables*)(obj))->get_vpiRandType();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiStructUnionMember) {
+       return ((variables*)(obj))->get_vpiStructUnionMember();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiScalar) {
+       return ((variables*)(obj))->get_vpiScalar();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiVisibility) {
+       return ((variables*)(obj))->get_vpiVisibility();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiVector) {
+       return ((variables*)(obj))->get_vpiVector();
+     } 
+}
+
  if (handle->type == uhdmtask_func) {
      if (property == vpiMethod) {
        return ((task_func*)(obj))->get_vpiMethod();
@@ -9144,6 +9216,78 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
      } 
 }
 
+ if (handle->type == uhdmvariables) {
+     if (property == vpiArrayMember) {
+       return ((variables*)(obj))->get_vpiArrayMember();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiSigned) {
+       return ((variables*)(obj))->get_vpiSigned();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiSize) {
+       return ((variables*)(obj))->get_vpiSize();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiAutomatic) {
+       return ((variables*)(obj))->get_vpiAutomatic();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiAllocScheme) {
+       return ((variables*)(obj))->get_vpiAllocScheme();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiConstantVariable) {
+       return ((variables*)(obj))->get_vpiConstantVariable();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiIsRandomized) {
+       return ((variables*)(obj))->get_vpiIsRandomized();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiRandType) {
+       return ((variables*)(obj))->get_vpiRandType();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiStructUnionMember) {
+       return ((variables*)(obj))->get_vpiStructUnionMember();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiScalar) {
+       return ((variables*)(obj))->get_vpiScalar();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiVisibility) {
+       return ((variables*)(obj))->get_vpiVisibility();
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiVector) {
+       return ((variables*)(obj))->get_vpiVector();
+     } 
+}
+
  if (handle->type == uhdmtask_func) {
      if (property == vpiMethod) {
        return ((task_func*)(obj))->get_vpiMethod();
@@ -11667,6 +11811,18 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
  if (handle->type == uhdmref_obj) {
      if (property == vpiDefName) {
        return (PLI_BYTE8*) strdup(((ref_obj*)(obj))->get_vpiDefName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiName) {
+       return (PLI_BYTE8*) strdup(((variables*)(obj))->get_vpiName().c_str());
+     } 
+}
+
+ if (handle->type == uhdmvariables) {
+     if (property == vpiFullName) {
+       return (PLI_BYTE8*) strdup(((variables*)(obj))->get_vpiFullName().c_str());
      } 
 }
 
