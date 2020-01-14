@@ -28,7 +28,7 @@
 
 namespace UHDM {
 
-  class array_var : public BaseClass {
+  class array_var : public variables {
   public:
     // Implicit constructor used to initialize all members,
     // comment: array_var();
@@ -50,6 +50,30 @@ namespace UHDM {
 
     bool set_vpiLineNo(unsigned int data) { vpiLineNo_ = data; return true;}
 
+    int get_vpiArrayType() const { return vpiArrayType_; }
+
+    bool set_vpiArrayType(int data) { vpiArrayType_ = data; return true;}
+
+    expr* get_left_expr() const { return left_expr_; }
+
+    bool set_left_expr(expr* data) { left_expr_ = data; return true;}
+
+    expr* get_right_expr() const { return right_expr_; }
+
+    bool set_right_expr(expr* data) { right_expr_ = data; return true;}
+
+    VectorOfvariables* get_variables() const { return variables_; }
+
+    bool set_variables(VectorOfvariables* data) { variables_ = data; return true;}
+
+    var_select* get_var_selects() const { return var_selects_; }
+
+    bool set_var_selects(var_select* data) { var_selects_ = data; return true;}
+
+    VectorOfrange* get_ranges() const { return ranges_; }
+
+    bool set_ranges(VectorOfrange* data) { ranges_ = data; return true;}
+
     unsigned int get_vpiType() { return vpiArrayVar; }
 
     virtual unsigned int getUhdmType() { return uhdmarray_var; }   
@@ -62,6 +86,18 @@ namespace UHDM {
     unsigned int vpiFile_;
 
     unsigned int vpiLineNo_;
+
+    int vpiArrayType_;
+
+    expr* left_expr_;
+
+    expr* right_expr_;
+
+    VectorOfvariables* variables_;
+
+    var_select* var_selects_;
+
+    VectorOfrange* ranges_;
 
   };
 

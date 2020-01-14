@@ -62,9 +62,9 @@ namespace UHDM {
 
     bool set_instances(VectorOfinstance* data) { instances_ = data; return true;}
 
-    range* get_range() const { return range_; }
+    VectorOfrange* get_ranges() const { return ranges_; }
 
-    bool set_range(range* data) { range_ = data; return true;}
+    bool set_ranges(VectorOfrange* data) { ranges_ = data; return true;}
 
     VectorOfmodule* get_modules() const { return modules_; }
 
@@ -87,7 +87,7 @@ namespace UHDM {
 
     VectorOfinstance* instances_;
 
-    range* range_;
+    VectorOfrange* ranges_;
 
     VectorOfmodule* modules_;
 
