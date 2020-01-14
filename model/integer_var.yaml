@@ -12,28 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "logic var" formal description
+# Universal Hardware Data Model (UHDM) "integer var" formal description
  
-- obj_def: logic_var
+- obj_def: integer_var
   - extends: variables
-  - obj_ref: ranges
-    name: ranges
-    vpi: vpiRange
-    type: range
-    card: any
-  - class_ref: left_expr
-    name: left range
-    vpi: vpiLeftRange
-    type: expr
-    card: 1
-  - class_ref: right_expr
-    name: right range
-    vpi: vpiRightRange
-    type: expr
-    card: 1
-  - obj_ref: var_bits
-    name: var bits
-    vpi: vpiBit
-    type: var_bit
-    card: any
-  
+

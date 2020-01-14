@@ -85,3 +85,68 @@
     vpi: vpiVector
     type: bool
     card: 1
+  - class_ref: ports
+    name: ports
+    vpi: vpiPortInst
+    type: ports
+    card: any
+  - class_ref: variable_drivers
+    name: variable drivers
+    vpi: vpiDriver
+    type: variable_drivers
+    card: any
+  - class_ref: variable_loads
+    name: variable loads
+    vpi: vpiLoad
+    type: variable_loads
+    card: any
+  - obj_ref: prim_terms
+    name: prim term
+    vpi: vpiPrimTerm
+    type: prim_term
+    card: any
+  - obj_ref: cont_assigns
+    name: cont assign
+    vpi: vpiContAssign
+    type: cont_assign
+    card: any
+  - obj_ref: path_term
+    name: path term
+    vpi: vpiPathTerm
+    type: path_term
+    card: 1
+  - obj_ref: tchk_term
+    name: tchk term
+    vpi: vpiTchkTerm
+    type: tchk_term
+    card: 1
+  - class_ref: typespec
+    name: typespec
+    vpi: vpiTypespec
+    type: typespec
+    card: 1
+  - obj_ref: module
+    name: module
+    vpi: vpiModule
+    type: module
+    card: 1
+  - class_ref: instance
+    name: instance
+    vpi: vpiInstance
+    type: instance
+    card: 1
+  - class_ref: scope
+    name: scope
+    vpi: vpiScope
+    type: scope
+    card: 1
+  - class_ref: expr
+    name: expr
+    vpi: vpiExpr
+    type: expr
+    card: 1
+  - class_ref: indexes
+    name: indexes
+    vpi: vpiIndex
+    type: expr
+    card: any
