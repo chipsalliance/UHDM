@@ -15,3 +15,73 @@
 # Universal Hardware Data Model (UHDM) "variables" formal description
  
 - class_def: variables
+  - property: array_member
+    name: array member
+    vpi: vpiArrayMember
+    type: bool
+    card: 1
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+  - property: sign
+    name: sign
+    vpi: vpiSigned
+    type: bool
+    card: 1
+  - property: size
+    name: size
+    vpi: vpiSize
+    type: int
+    card: 1
+  - property: default_lifetime
+    name: default lifetime
+    vpi: vpiAutomatic
+    type: bool
+    card: 1
+  - property: memory_allocation
+    name: memory allocation
+    vpi: vpiAllocScheme
+    type: int
+    card: 1
+  - property: constant_variable
+    name: constant variable
+    vpi: vpiConstantVariable
+    type: bool
+    card: 1
+  - property: is_randomized
+    name: is randomized
+    vpi: vpiIsRandomized
+    type: bool
+    card: 1
+  - property: randomization_type
+    name: randomization type
+    vpi: vpiRandType
+    type: int
+    card: 1
+  - property: member
+    name: member
+    vpi: vpiStructUnionMember
+    type: bool
+    card: 1
+  - property: scalar
+    name: scalar
+    vpi: vpiScalar
+    type: bool
+    card: 1
+  - property: visibility
+    name: visibility
+    vpi: vpiVisibility
+    type: int
+    card: 1
+  - property: vector
+    name: vector
+    vpi: vpiVector
+    type: bool
+    card: 1
