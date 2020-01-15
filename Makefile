@@ -14,7 +14,8 @@ test:
 	$(MAKE) -C build test
 
 clean:
-	rm -f src/UHDM.capnp.c++ src/UHDM.capnp.h
+	rm -f src/*
+	rm -rf headers/*
 	rm -rf build
 
 install:
