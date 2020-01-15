@@ -505,10 +505,14 @@ proc generate_code { models } {
 	    regsub -all {<FINAL_DESTRUCTOR>} $template "" template
 	    regsub -all {<VIRTUAL>} $template "virtual " template
 	    regsub -all {<OVERRIDE_OR_FINAL>}  $template "override" template
+	    regsub -all {<DISABLE_OBJECT_FACTORY>} $template "#if 0 // This class cannot be instantiated" template
+	    regsub -all {<END_DISABLE_OBJECT_FACTORY>} $template "#endif" template
 	} else {
 	    regsub -all {<FINAL_DESTRUCTOR>} $template "final" template
 	    regsub -all {<VIRTUAL>} $template "" template
 	    regsub -all {<OVERRIDE_OR_FINAL>}  $template "final" template
+	    regsub -all {<DISABLE_OBJECT_FACTORY>} $template "" template
+	    regsub -all {<END_DISABLE_OBJECT_FACTORY>} $template "" template
 	}
 	set Classname [string toupper $classname 0 0]
 	regsub -all  {_} $Classname "" Classname

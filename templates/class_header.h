@@ -39,6 +39,7 @@ namespace UHDM {
     <MEMBERS>
   };
 
+ <DISABLE_OBJECT_FACTORY> 
   class <CLASSNAME>Factory {
   friend Serializer;
   public:
@@ -50,7 +51,8 @@ namespace UHDM {
   private:
     static std::vector<<CLASSNAME>*> objects_;
   };
- 	      
+ <END_DISABLE_OBJECT_FACTORY> 
+  
   class VectorOf<CLASSNAME>Factory {
   friend Serializer;
   public:
