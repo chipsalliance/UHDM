@@ -503,6 +503,12 @@ proc generate_code { models } {
 	set capnp_schema($classname) ""
 	if {$modeltype == "class_def"} {
 	    regsub -all {<FINAL_DESTRUCTOR>} $template "" template
+	    regsub -all {<VIRTUAL>} $template "virtual " template
+	    regsub -all {<OVERRIDE_OR_FINAL>}  $template "override" template
+	} else {
+	    regsub -all {<FINAL_DESTRUCTOR>} $template "final" template
+	    regsub -all {<VIRTUAL>} $template "" template
+	    regsub -all {<OVERRIDE_OR_FINAL>}  $template "final" template
 	}
 	set Classname [string toupper $classname 0 0]
 	regsub -all  {_} $Classname "" Classname
@@ -617,7 +623,14 @@ proc generate_code { models } {
 		    set type [dict get $content type]
 		    set card [dict get $content card]
 		    set id   [dict get $content id]
-
+		    set plural ""
+		    if {$card == "any"} {
+			if ![regexp {s$} $name] {
+			    set plural "s"
+			}
+		    }
+		    set name "${name}${plural}"
+		    
 		    set real_type $type
 		    if {$key == "group_ref"} {
 			set type "any"
@@ -710,7 +723,6 @@ proc generate_code { models } {
 	regsub -all {<METHODS>} $template $methods($classname) template
 	regsub -all {<MEMBERS>} $template $members($classname) template
 	regsub -all {<EXTENDS>} $template BaseClass template
-	regsub -all {<FINAL_DESTRUCTOR>} $template "final" template
 	
 	puts $oid $template
 	close $oid

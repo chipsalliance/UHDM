@@ -121,16 +121,6 @@
     vpi: vpiArrayNet
     type: array_net
     card: any
-  - obj_ref: named_event
-    name: named event
-    vpi: vpiNamedEvent
-    type: named_event
-    card: any
-  - obj_ref: named_event_array
-    name: named event
-    vpi: vpiNamedEvent
-    type: named_event
-    card: any
   - obj_ref: spec_param
     name: spec param
     vpi: vpiSpecParam

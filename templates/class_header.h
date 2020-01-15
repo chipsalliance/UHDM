@@ -32,9 +32,9 @@ namespace UHDM {
   public:
     // Implicit constructor used to initialize all members,
     // comment: <CLASSNAME>();
-    ~<CLASSNAME>() <FINAL_DESTRUCTOR> {}
+    <VIRTUAL>~<CLASSNAME>() <FINAL_DESTRUCTOR> {}
     <METHODS>
-    virtual unsigned int getUhdmType() { return uhdm<CLASSNAME>; }   
+    <VIRTUAL> unsigned int getUhdmType() <OVERRIDE_OR_FINAL> { return uhdm<CLASSNAME>; }   
   private:
     <MEMBERS>
   };
