@@ -227,7 +227,7 @@ proc printMethods { type vpi card {real_type ""} } {
 	    set pointer "*"
 	}
 	if {$type == "std::string"} {
-	    append methods "\n    ${type}${pointer} get_${vpi}() const { return SymbolFactory::getSymbol(${vpi}_); }\n"
+	    append methods "\n    const ${type}${pointer}\\& get_${vpi}() const { return SymbolFactory::getSymbol(${vpi}_); }\n"
 	    append methods "\n    bool set_${vpi}(${type}${pointer} data) { ${vpi}_ = SymbolFactory::make(data); return true; }\n" 
 	} else {
 	    append methods "\n    ${type}${pointer} get_${vpi}() const { return ${vpi}_; }\n"	    
