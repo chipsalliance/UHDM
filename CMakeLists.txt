@@ -52,14 +52,27 @@ add_custom_command(
    DEPENDS ${PROJECT_SOURCE_DIR}/model_gen.tcl ${PROJECT_SOURCE_DIR}/model/models.lst ${PROJECT_SOURCE_DIR}/model/*.yaml ${PROJECT_SOURCE_DIR}/templates/*.h ${PROJECT_SOURCE_DIR}/templates/*.cpp ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
    )
 
-file(GLOB uhdm_SRC
+set (uhdm_SRC
   ${PROJECT_SOURCE_DIR}/src/vpi_user.cpp
   ${PROJECT_SOURCE_DIR}/src/SymbolFactory.cpp
   ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp
   ${PROJECT_SOURCE_DIR}/src/Serializer_restore.cpp  
   ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.c++
-  ${PROJECT_SOURCE_DIR}/src/*.cpp
+  ${PROJECT_SOURCE_DIR}/src/actual_group.cpp
+  ${PROJECT_SOURCE_DIR}/src/instance_item.cpp
+  ${PROJECT_SOURCE_DIR}/src/enum_struct_packed_net_group.cpp
+  ${PROJECT_SOURCE_DIR}/src/ref_obj_interf_net_var_group.cpp
+  ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_var_group.cpp
+  ${PROJECT_SOURCE_DIR}/src/expr_ref_obj_group.cpp
   )
+
+foreach( src_file ${uhdm_SRC} )
+      set_source_files_properties(
+          ${src_file}
+          PROPERTIES
+          GENERATED TRUE
+          )
+endforeach( src_file ${uhdm_SRC} )
 
 set (UHDM_PUBLIC_HEADERS
   ${PROJECT_SOURCE_DIR}/headers/uhdm.h
