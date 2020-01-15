@@ -52,8 +52,8 @@ std::vector<vpiHandle> build_designs () {
   VectorOftask_func* v4 = VectorOftask_funcFactory::make();
   v4->push_back(f1);
   v4->push_back(f2);
-  p1->set_task_func(v4);
-  // Instance items
+  p1->set_task_funcs(v4);
+  // Instance items, illustrates the use of groups
   program* pr1 = programFactory::make();
   pr1->set_vpiName("PR1");
   VectorOfany* inst_items = VectorOfanyFactory::make();
