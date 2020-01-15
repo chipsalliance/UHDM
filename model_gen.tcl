@@ -318,7 +318,7 @@ proc printIterateBody { name classname vpi card } {
  if (handle->type == uhdm${classname}) {\n\
   if (type == $vpi) {\n\
      if ((($classname*)(object))->get_${name}())\n\
-       return (vpiHandle) new uhdm_handle(uhdm${name}, (($classname*)(object))->get_${name}());\n\
+       return NewHandle(uhdm${name}, (($classname*)(object))->get_${name}());\n\
      else return 0;
   }\n\
 }\n"
@@ -350,7 +350,7 @@ proc printGetHandleBody { classname type vpi object card } {
 	append vpi_get_handle_body "\n\
  if (handle->type == uhdm${classname}) {
      if (type == $vpi) {
-       return (vpiHandle) new uhdm_handle(((BaseClass*)(($classname*)(object))->get_${object}())->getUhdmType(), (($classname*)(object))->get_${object}());\n\
+       return NewHandle(((BaseClass*)(($classname*)(object))->get_${object}())->getUhdmType(), (($classname*)(object))->get_${object}());\n\
      } 
 }
 "
