@@ -16,6 +16,17 @@
 
 set model_files $argv
 
+
+variable myLocation [file normalize [info script]]
+
+proc exec_path {} {
+    variable myLocation
+    return [file dirname $myLocation]
+}
+
+file mkdir [exec_path]/src
+file mkdir [exec_path]/headers
+
 # proc copied from: https://wiki.tcl-lang.org/page/pdict%3A+Pretty+print+a+dict
 proc pdict { d {i 0} {p "  "} {s " -> "} } {
     global $d
@@ -55,7 +66,7 @@ proc pdict { d {i 0} {p "  "} {s " -> "} } {
 
 proc parse_vpi_user_defines { } {
     global ID
-    set fid [open "include/vpi_user.h"]
+    set fid [open "[exec_path]/include/vpi_user.h"]
     set content [read $fid]
     set lines [split $content "\n"]
     foreach line $lines {
@@ -72,7 +83,7 @@ set OBJECTID 2000
 proc parse_model { file } {
     global ID OBJECTID BASECLASS DIRECT_CHILDREN ALL_CHILDREN
     set models {}
-    set fid [open $file]
+    set fid [open "$file"]
     set modellist [read $fid]
     close $fid
 
@@ -82,7 +93,7 @@ proc parse_model { file } {
 	    continue
 	}
 	if {$line != ""} {
-	    set fid [open model/$line]
+	    set fid [open "[exec_path]/model/$line"]
 	    set model [read $fid]
 	    append content "$model\n"
 	    close $fid
@@ -421,20 +432,20 @@ proc generate_group_checker { model } {
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
 
-    set files [list [list "templates/group_header.h" "headers/${groupname}.h"] \
-		   [list "templates/group_header.cpp" "src/${groupname}.cpp"]]
+    set files [list [list "[exec_path]/templates/group_header.h" "[exec_path]/headers/${groupname}.h"] \
+		   [list "[exec_path]/templates/group_header.cpp" "[exec_path]/src/${groupname}.cpp"]]
 
     foreach pair $files {
 	foreach {input output} $pair {}
 	       
-	set fid [open $input]
+	set fid [open "$input"]
 	set template [read $fid]
 	close $fid
     
 	regsub -all {<GROUPNAME>} $template $groupname template
 	regsub -all {<UPPER_GROUPNAME>} $template [string toupper $groupname] template
  	
-	set oid [open $output "w"]
+	set oid [open "$output" "w"]
 	set checktype ""
 	dict for {key val} $data {
 	    if {($key == "obj_ref") || ($key == "class_ref")} {
@@ -471,7 +482,7 @@ proc generate_code { models } {
     puts "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
-    set fid [open "templates/class_header.h"]
+    set fid [open "[exec_path]/templates/class_header.h"]
     set template_content [read $fid]
     close $fid
 
@@ -534,7 +545,7 @@ proc generate_code { models } {
 	}
         lappend classes $classname
 	
-	set oid [open "headers/$classname.h" "w"]
+	set oid [open "[exec_path]/headers/$classname.h" "w"]
 	regsub -all {<CLASSNAME>} $template $classname template
 	regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
 	set methods($classname) ""
@@ -815,10 +826,10 @@ proc generate_code { models } {
     }
 
     # uhdm.h
-    set fid [open "templates/uhdm.h"]
+    set fid [open "[exec_path]/templates/uhdm.h"]
     set uhdm_content [read $fid]
     close $fid 
-    set uhdmId [open "headers/uhdm.h" "w"]
+    set uhdmId [open "[exec_path]/headers/uhdm.h" "w"]
 
     set name_id_map "\nstd::string getUhdmName(unsigned int type) \{
       switch (type) \{
@@ -838,16 +849,16 @@ proc generate_code { models } {
     close $uhdmId
 
     # containers.h
-    set fid [open "templates/containers.h"]
+    set fid [open "[exec_path]/templates/containers.h"]
     set container_content [read $fid]
     close $fid 
-    set containerId [open "headers/containers.h" "w"]
+    set containerId [open "[exec_path]/headers/containers.h" "w"]
     regsub -all {<CONTAINERS>} $container_content $containers container_content
     puts $containerId $container_content
     close $containerId
 
     # vpi_user.cpp
-    set fid [open "templates/vpi_user.cpp" ]
+    set fid [open "[exec_path]/templates/vpi_user.cpp" ]
     set vpi_user [read $fid]
     close $fid
     regsub {<HEADERS>} $vpi_user $headers vpi_user
@@ -857,25 +868,25 @@ proc generate_code { models } {
     regsub -all {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
     regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
     
-    set vpi_userId [open "src/vpi_user.cpp" "w"]
+    set vpi_userId [open "[exec_path]/src/vpi_user.cpp" "w"]
     puts $vpi_userId $vpi_user
     close $vpi_userId
 
     # UHDM.capnp
-    set fid [open "templates/UHDM.capnp"]
+    set fid [open "[exec_path]/templates/UHDM.capnp"]
     set capnp_content [read $fid]
     close $fid
     regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema_all capnp_content
     regsub {<CAPNP_ROOT_SCHEMA>} $capnp_content $capnp_root_schema capnp_content
-    set capnpId [open "src/UHDM.capnp" "w"]
+    set capnpId [open "[exec_path]/src/UHDM.capnp" "w"]
     puts $capnpId $capnp_content
     close $capnpId
     puts "Generating Capnp schema..."
-    exec sh -c "rm -rf src/UHDM.capnp.*"
-    exec sh -c "capnp compile -oc++:. src/UHDM.capnp"
+    exec sh -c "rm -rf [exec_path]/src/UHDM.capnp.*"
+    exec sh -c "capnp compile -oc++:[exec_path]/ [exec_path]/src/UHDM.capnp"
 
     # SymbolFactory.cpp
-    exec sh -c "cp -rf templates/SymbolFactory.cpp src/SymbolFactory.cpp"
+    exec sh -c "cp -rf [exec_path]/templates/SymbolFactory.cpp [exec_path]/src/SymbolFactory.cpp"
     
     # Serializer.cpp
     set files "Serializer_save.cpp Serializer_restore.cpp"
@@ -886,7 +897,7 @@ proc generate_code { models } {
 	set capnp_id ""
 	set factory_purge ""
 	
-	set fid [open templates/$file]
+	set fid [open "[exec_path]/templates/$file"]
 	set serializer_content [read $fid]
 	close $fid
 	foreach class $classes {
@@ -946,7 +957,7 @@ $RESTORE($class)
 	regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content
 	regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
 	regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
-	set serializerId [open "src/$file" "w"]
+	set serializerId [open "[exec_path]/src/$file" "w"]
 	puts $serializerId $serializer_content
 	close $serializerId
     }
