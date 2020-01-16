@@ -92,7 +92,7 @@ set (ALL_LIBRARIES_FOR_UHDM
   dl util m rt pthread
 )
 
-add_dependencies(GenerateCode capnp capnpc capnp_tool capnpc_cpp capnpc_capnp)
+add_dependencies(GenerateCode capnp capnpc capnp_tool capnpc_cpp capnpc_capnp capnp-tests)
 
 ENABLE_TESTING()
 
