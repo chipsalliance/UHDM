@@ -1,7 +1,7 @@
 # -*- mode:cmake -*-
 cmake_minimum_required (VERSION 3.0)
 
-add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
+add_subdirectory(third_party/capnproto)
 
 
 # Detect build type, fallback to release and throw a warning if use didn't specify any
@@ -92,7 +92,7 @@ set (ALL_LIBRARIES_FOR_UHDM
   dl util m rt pthread
 )
 
-add_dependencies(GenerateCode capnp)
+add_dependencies(GenerateCode capnp capnpc)
 
 ENABLE_TESTING()
 
