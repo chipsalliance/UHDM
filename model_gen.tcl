@@ -14,8 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set model_files $argv
-
+set model_files [lindex $argv 0]
+set working_dir [lindex $argv 1]
+puts "UHDM MODEL GENERATION"
+puts "Working dir: $working_dir"
 
 variable myLocation [file normalize [info script]]
 
@@ -63,37 +65,6 @@ proc pdict { d {i 0} {p "  "} {s " -> "} } {
     }
     return
 }
-
-# findFiles
-# basedir - the directory to start looking in
-# pattern - A pattern, as defined by the glob command, that the files must match
-proc findFiles { basedir pattern } {
-
-    # Fix the directory name, this ensures the directory name is in the
-    # native format for the platform and contains a final directory seperator
-    set basedir [string trimright [file join [file normalize $basedir] { }]]
-    set fileList {}
-
-    # Look in the current directory for matching files, -type {f r}
-    # means ony readable normal files are looked at, -nocomplain stops
-    # an error being thrown if the returned list is empty
-    foreach fileName [glob -nocomplain -type {f r} -path $basedir $pattern] {
-        lappend fileList $fileName
-    }
-
-    # Now look for any sub direcories in the current directory
-    foreach dirName [glob -nocomplain -type {d  r} -path $basedir *] {
-        # Recusively call the routine on the sub directory and append any
-        # new files to the results
-        set subDirList [findFiles $dirName $pattern]
-        if { [llength $subDirList] > 0 } {
-            foreach subDirFile $subDirList {
-                lappend fileList $subDirFile
-            }
-        }
-    }
-    return $fileList
- }
 
 proc parse_vpi_user_defines { } {
     global ID
@@ -509,7 +480,7 @@ proc generate_group_checker { model } {
 }
 
 proc generate_code { models } {
-    global ID BASECLASS DEFINE_ID
+    global ID BASECLASS DEFINE_ID working_dir
     puts "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
@@ -914,7 +885,8 @@ proc generate_code { models } {
     close $capnpId
     puts "Generating Capnp schema..."
     exec sh -c "rm -rf [exec_path]/src/UHDM.capnp.*"
-    set capnp_path [file dirname [findFiles . capnpc-c++]]
+    set capnp_path [exec sh -c "find $working_dir -name capnpc-c++"]
+    set capnp_path [file dirname $capnp_path]
     
     exec sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [exec_path]/src/UHDM.capnp"
 
