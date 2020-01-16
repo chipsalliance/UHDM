@@ -22,17 +22,19 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
+#include <string.h>
+
+#include <iostream>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
-#include <iostream>
+
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
 typedef void any;
 #include "headers/containers.h"
 #include "include/vpi_uhdm.h"
 #include "headers/uhdm.h"
-#include <string.h>
 
 <HEADERS>
 
@@ -44,18 +46,20 @@ vpiHandle vpi_handle_by_name (PLI_BYTE8    *name,
 }
 
 vpiHandle vpi_handle_by_index (vpiHandle object,
-                                PLI_INT32    indx) {
+                               PLI_INT32    indx) {
   return 0;
 }
 
-/* for traversing relationships */
+static vpiHandle NewHandle (unsigned int type, const void *object) {
+  return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
+}
 
 vpiHandle vpi_handle (PLI_INT32 type,
                       vpiHandle   refHandle) {
-  uhdm_handle* handle = (uhdm_handle*) refHandle;
-  BaseClass*  object = (BaseClass*) handle->object;
+  const uhdm_handle* const handle = (const uhdm_handle*) refHandle;
+  const BaseClass* const object = (const BaseClass*) handle->object;
   <VPI_HANDLE_BODY>
-  std::cout << "VPI ERROR: Bad usage of vpi_handle" << std::endl;    
+  std::cout << "VPI ERROR: Bad usage of vpi_handle" << std::endl;
   return 0;
 }
 
@@ -66,12 +70,14 @@ vpiHandle vpi_handle_multi (PLI_INT32 type,
   return 0;
 }
 
+/* for traversing relationships */
+
 vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
-  const uhdm_handle* const handle = (uhdm_handle*) refHandle;
-  const BaseClass*  object = (BaseClass*) handle->object;
+  const uhdm_handle* const handle = (const uhdm_handle*) refHandle;
+  const BaseClass* const object = (const BaseClass*) handle->object;
   <VPI_ITERATE_BODY>
-  std::cout << "VPI ERROR: Bad usage of vpi_iterate" << std::endl;    
-  return 0;   
+  std::cout << "VPI ERROR: Bad usage of vpi_iterate" << std::endl;
+  return 0;
 }
 
 vpiHandle vpi_scan (vpiHandle iterator) {
@@ -96,7 +102,7 @@ PLI_INT32 vpi_release_handle (vpiHandle object) {
 PLI_INT32 vpi_get (PLI_INT32   property,
                    vpiHandle   object) {
   if (!object) {
-      std::cout << "VPI ERROR: Bad usage of vpi_get" << std::endl;    
+      std::cout << "VPI ERROR: Bad usage of vpi_get" << std::endl;
     return 0;
   }
   uhdm_handle* handle = (uhdm_handle*) object;
@@ -108,7 +114,7 @@ PLI_INT32 vpi_get (PLI_INT32   property,
 PLI_INT64 vpi_get64 (PLI_INT32 property,
                      vpiHandle   object) {
   if (!object) {
-      std::cout << "VPI ERROR: Bad usage of vpi_get64" << std::endl;    
+      std::cout << "VPI ERROR: Bad usage of vpi_get64" << std::endl;
     return 0;
   }
   uhdm_handle* handle = (uhdm_handle*) object;
@@ -120,7 +126,7 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
 PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
                         vpiHandle   object) {
   if (!object) {
-    std::cout << "VPI ERROR: Bad usage of vpi_get_str" << std::endl;    
+    std::cout << "VPI ERROR: Bad usage of vpi_get_str" << std::endl;
     return 0;
   }
   uhdm_handle* handle = (uhdm_handle*) object;
