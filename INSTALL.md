@@ -10,7 +10,7 @@
 
 * Please install the following package updates:
 
-   * sudo apt-get install build-essential cmake git tclsh capnproto libcapnp-dev
+   * sudo apt-get install build-essential cmake git tclsh
 
 * UHDM Source code
   * git clone https://github.com/alainmarcel/UHDM.git

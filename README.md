@@ -15,9 +15,6 @@ Universal Hardware Data Model
  
 # HowTo
 
-First, install the [Capn'proto][capnproto] dependency:
-`sudo aptitude install libcapnp-dev capnproto`
-
 ```bash
  * git clone https://github.com/alainmarcel/UHDM.git
  * cd UHDM
