@@ -883,7 +883,7 @@ proc generate_code { models } {
     close $capnpId
     puts "Generating Capnp schema..."
     exec sh -c "rm -rf [exec_path]/src/UHDM.capnp.*"
-    exec sh -c "./build/third_party/capnproto/c++/src/capnp/capnp compile -oc++:[exec_path]/ [exec_path]/src/UHDM.capnp"
+    exec sh -c "export PATH=./build/third_party/capnproto/c++/src/capnp; ./build/third_party/capnproto/c++/src/capnp/capnp compile -oc++:[exec_path]/ [exec_path]/src/UHDM.capnp"
 
     # SymbolFactory.cpp
     exec sh -c "cp -rf [exec_path]/templates/SymbolFactory.cpp [exec_path]/src/SymbolFactory.cpp"
