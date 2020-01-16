@@ -916,7 +916,7 @@ proc generate_code { models } {
     exec sh -c "rm -rf [exec_path]/src/UHDM.capnp.*"
     set capnp_path [file dirname [findFiles . capnpc-c++]]
     
-    exec sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:[exec_path]/ [exec_path]/src/UHDM.capnp"
+    exec sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [exec_path]/src/UHDM.capnp"
 
     # SymbolFactory.cpp
     exec sh -c "cp -rf [exec_path]/templates/SymbolFactory.cpp [exec_path]/src/SymbolFactory.cpp"
