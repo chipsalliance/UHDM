@@ -1,6 +1,9 @@
 # -*- mode:cmake -*-
 cmake_minimum_required (VERSION 3.0)
 
+add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
+
+
 # Detect build type, fallback to release and throw a warning if use didn't specify any
 if(NOT CMAKE_BUILD_TYPE)
   message(WARNING "Build type not set, falling back to Release mode.
@@ -88,6 +91,8 @@ set (ALL_LIBRARIES_FOR_UHDM
   uhdm capnp kj
   dl util m rt pthread
 )
+
+add_dependencies(GenerateCode capnp)
 
 ENABLE_TESTING()
 
