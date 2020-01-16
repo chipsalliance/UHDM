@@ -54,7 +54,7 @@ add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 add_custom_command(
    OUTPUT ${model-GENERATED_SRC}
    COMMAND
-   tclsh ${PROJECT_SOURCE_DIR}/model_gen.tcl ${PROJECT_SOURCE_DIR}/model/models.lst
+   tclsh ${PROJECT_SOURCE_DIR}/model_gen.tcl ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_BINARY_DIR}
    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/../"
    DEPENDS ${PROJECT_SOURCE_DIR}/model_gen.tcl ${PROJECT_SOURCE_DIR}/model/models.lst ${PROJECT_SOURCE_DIR}/model/*.yaml ${PROJECT_SOURCE_DIR}/templates/*.h ${PROJECT_SOURCE_DIR}/templates/*.cpp ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
    )
