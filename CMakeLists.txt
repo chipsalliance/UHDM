@@ -1,6 +1,9 @@
 # -*- mode:cmake -*-
 cmake_minimum_required (VERSION 3.0)
 
+add_subdirectory(third_party/capnproto)
+
+
 # Detect build type, fallback to release and throw a warning if use didn't specify any
 if(NOT CMAKE_BUILD_TYPE)
   message(WARNING "Build type not set, falling back to Release mode.
@@ -21,6 +24,7 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/include/")
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/")
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/headers/")
 INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src/")
 
 # Directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/dist/${CMAKE_BUILD_TYPE}/)
@@ -88,6 +92,8 @@ set (ALL_LIBRARIES_FOR_UHDM
   uhdm capnp kj
   dl util m rt pthread
 )
+
+add_dependencies(GenerateCode capnp capnpc capnp_tool capnpc_cpp)
 
 ENABLE_TESTING()
 
