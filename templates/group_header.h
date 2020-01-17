@@ -23,8 +23,8 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef <UPPER_GROUPNAME>_H
-#define <UPPER_GROUPNAME>_H
+#ifndef UHDM_<UPPER_GROUPNAME>_H
+#define UHDM_<UPPER_GROUPNAME>_H
 
 namespace UHDM {
 

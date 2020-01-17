@@ -26,8 +26,8 @@
 #include <vector>
 #include <unordered_map>
 
-#ifndef CONTAINERS_H
-#define CONTAINERS_H
+#ifndef UHDM_CONTAINERS_H
+#define UHDM_CONTAINERS_H
 
 namespace UHDM {
   typedef void any;
