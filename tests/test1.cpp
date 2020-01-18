@@ -73,10 +73,10 @@ int main (int argc, char** argv) {
   std::string orig = print_designs(build_designs());
   std::cout << orig; 
   std::cout << "\nSave design" << std::endl;
-  Serializer::save("design.uhdmap");
+  Serializer::save("surelog.uhdm");
   
   std::cout << "Restore design" << std::endl;
-  std::vector<vpiHandle> restoredDesigns = Serializer::restore("design.uhdmap");
+  std::vector<vpiHandle> restoredDesigns = Serializer::restore("surelog.uhdm");
   
   std::string restored = print_designs(restoredDesigns);
   std::cout << restored;
