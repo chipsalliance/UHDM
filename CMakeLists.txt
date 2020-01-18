@@ -115,6 +115,13 @@ ADD_TEST(NAME uhdm-test2
          COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test2
          WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
+add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/tests/dump.cpp )
+set_target_properties(uhdm-dump PROPERTIES OUTPUT_NAME uhdm-dump )
+add_dependencies(uhdm-dump uhdm)
+target_link_libraries(uhdm-dump ${ALL_LIBRARIES_FOR_UHDM} )
+ADD_TEST(NAME uhdm-dump
+         COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-dump
+         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
        
 
 # Installation target     
