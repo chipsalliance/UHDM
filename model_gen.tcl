@@ -244,7 +244,11 @@ proc printMethods { type vpi card {real_type ""} } {
 	    append methods "\n    bool set_${vpi}(${type}${pointer} data) { ${vpi}_ = SymbolFactory::make(data); return true; }\n" 
 	} else {
 	    append methods "\n    ${type}${pointer} get_${vpi}() const { return ${vpi}_; }\n"	    
-	    append methods "\n    bool set_${vpi}(${type}${pointer} data) {${check} ${vpi}_ = data; return true;}\n"
+	    if {$vpi == "vpiParent"} {
+		append methods "\n    bool set_${vpi}(${type}${pointer} data) {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->getUhdmType(); return true;}\n"
+	    } else {
+		append methods "\n    bool set_${vpi}(${type}${pointer} data) {${check} ${vpi}_ = data; return true;}\n"
+	    }
 	}
     } elseif {$card == "any"} {
 	append methods "\n    VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
