@@ -28,7 +28,7 @@
 #define VPI_UHDM_H
 
 #include <unordered_map>
-std::string getUhdmName(unsigned int type);
+std::string UhdmName(unsigned int type);
 
 namespace UHDM {
   typedef std::vector<std::string> Id2SymbolMap;
@@ -37,28 +37,28 @@ namespace UHDM {
   class BaseClass {
   public: 
     //BaseClass(){}
-    virtual unsigned int getUhdmType() = 0;   
+    virtual unsigned int UhdmType() = 0;   
     virtual ~BaseClass(){}
   };
   
   class Serializer {
   public:
-    static void save(std::string file);
-    static void purge();
-    static const std::vector<vpiHandle> restore(std::string file);
+    static void Save(std::string file);
+    static void Purge();
+    static const std::vector<vpiHandle> Restore(std::string file);
   private:
-    static BaseClass* getObject(unsigned int objectType, unsigned int index);
-    static void setId(BaseClass* p, unsigned long id);
-    static unsigned long getId(BaseClass* p) ;
+    static BaseClass* GetObject(unsigned int objectType, unsigned int index);
+    static void SetId(BaseClass* p, unsigned long id);
+    static unsigned long GetId(BaseClass* p) ;
     static std::unordered_map<BaseClass*, unsigned long> allIds_;
   };
 
   class SymbolFactory {
     friend Serializer;
   public:
-    static unsigned int make(const std::string& symbol);
-    static const std::string& getSymbol(unsigned int id);
-    static unsigned int getId(const std::string& symbol);
+    static unsigned int Make(const std::string& symbol);
+    static const std::string& GetSymbol(unsigned int id);
+    static unsigned int GetId(const std::string& symbol);
   private:
     static unsigned int idCounter_;
     static std::string bad_symbol_;
@@ -70,7 +70,7 @@ namespace UHDM {
   class VectorOfanyFactory {
   friend Serializer;
   public:
-    static std::vector<UHDM::any*>* make() {
+    static std::vector<UHDM::any*>* Make() {
       std::vector<UHDM::any*>* obj = new std::vector<UHDM::any*>();
     objects_.push_back(obj);
     return obj;
@@ -93,7 +93,7 @@ struct uhdm_handle {
 class uhdm_handleFactory {
   friend UHDM::Serializer;
   public:
-  static vpiHandle make(unsigned int type, const void* object) {
+  static vpiHandle Make(unsigned int type, const void* object) {
     uhdm_handle* obj = new uhdm_handle(type, object);
     objects_.push_back(obj);
     return (vpiHandle) obj;

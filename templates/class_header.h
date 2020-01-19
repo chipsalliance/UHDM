@@ -34,7 +34,7 @@ namespace UHDM {
     // comment: <CLASSNAME>();
     <VIRTUAL>~<CLASSNAME>() <FINAL_DESTRUCTOR> {}
     <METHODS>
-    <VIRTUAL> unsigned int getUhdmType() <OVERRIDE_OR_FINAL> { return uhdm<CLASSNAME>; }   
+    <VIRTUAL> unsigned int UhdmType() <OVERRIDE_OR_FINAL> { return uhdm<CLASSNAME>; }   
   private:
     <MEMBERS>
   };
@@ -43,7 +43,7 @@ namespace UHDM {
   class <CLASSNAME>Factory {
   friend Serializer;
   public:
-  static <CLASSNAME>* make() {
+  static <CLASSNAME>* Make() {
     <CLASSNAME>* obj = new <CLASSNAME>();
     objects_.push_back(obj);
     return obj;
@@ -56,7 +56,7 @@ namespace UHDM {
   class VectorOf<CLASSNAME>Factory {
   friend Serializer;
   public:
-  static std::vector<<CLASSNAME>*>* make() {
+  static std::vector<<CLASSNAME>*>* Make() {
     std::vector<<CLASSNAME>*>* obj = new std::vector<<CLASSNAME>*>();
     objects_.push_back(obj);
     return obj;

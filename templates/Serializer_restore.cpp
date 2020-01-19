@@ -39,8 +39,8 @@ typedef void any;
 
 using namespace UHDM;
 
-const std::vector<vpiHandle> Serializer::restore(std::string file) {
-  purge();
+const std::vector<vpiHandle> Serializer::Restore(std::string file) {
+  Purge();
   std::vector<vpiHandle> designs;
   int fileid = open(file.c_str(), O_RDONLY);
   ::capnp::PackedFdMessageReader message(fileid);
@@ -49,7 +49,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
 
   ::capnp::List<::capnp::Text>::Reader symbols = cap_root.getSymbols();
   for (auto symbol : symbols) {
-    SymbolFactory::make(symbol);
+    SymbolFactory::Make(symbol);
   }
  
 <CAPNP_INIT_FACTORIES>  
@@ -57,7 +57,7 @@ const std::vector<vpiHandle> Serializer::restore(std::string file) {
 <CAPNP_RESTORE_FACTORIES>  
   
    for (auto d : designFactory::objects_) {
-    vpiHandle designH = uhdm_handleFactory::make(uhdmdesign, d);
+    vpiHandle designH = uhdm_handleFactory::Make(uhdmdesign, d);
     designs.push_back(designH);
   }
    
