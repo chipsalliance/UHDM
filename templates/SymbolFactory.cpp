@@ -48,7 +48,7 @@ Symbol2IdMap SymbolFactory::symbol2IdMap_;
 
 unsigned int SymbolFactory::idCounter_ = 0;
 
-unsigned int SymbolFactory::make(const std::string& symbol) {
+unsigned int SymbolFactory::Make(const std::string& symbol) {
   Symbol2IdMap::iterator itr = symbol2IdMap_.find(symbol);
   if (itr == symbol2IdMap_.end()) {
     symbol2IdMap_.insert(std::make_pair(symbol, idCounter_));
@@ -64,13 +64,13 @@ unsigned int SymbolFactory::make(const std::string& symbol) {
 
 std::string SymbolFactory::bad_symbol_ = "@@BAD_SYMBOL@@";
 
-const std::string& SymbolFactory::getSymbol(unsigned int id) {
+const std::string& SymbolFactory::GetSymbol(unsigned int id) {
    if (id >= id2SymbolMap_.size())
     return bad_symbol_;
   return id2SymbolMap_[id];
 }
 
-unsigned int SymbolFactory::getId(const std::string& symbol) {
+unsigned int SymbolFactory::GetId(const std::string& symbol) {
    Symbol2IdMap::iterator itr = symbol2IdMap_.find(symbol);
   if (itr == symbol2IdMap_.end()) {
     return 0;

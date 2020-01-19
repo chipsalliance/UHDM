@@ -240,19 +240,19 @@ proc printMethods { type vpi card {real_type ""} } {
 	    set pointer "*"
 	}
 	if {$type == "std::string"} {
-	    append methods "\n    const ${type}${pointer}\\& get_${vpi}() const { return SymbolFactory::getSymbol(${vpi}_); }\n"
-	    append methods "\n    bool set_${vpi}(${type}${pointer} data) { ${vpi}_ = SymbolFactory::make(data); return true; }\n" 
+	    append methods "\n    const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const { return SymbolFactory::GetSymbol(${vpi}_); }\n"
+	    append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data) { ${vpi}_ = SymbolFactory::Make(data); return true; }\n" 
 	} else {
-	    append methods "\n    ${type}${pointer} get_${vpi}() const { return ${vpi}_; }\n"	    
+	    append methods "\n    ${type}${pointer} [string toupper ${vpi} 0 0]() const { return ${vpi}_; }\n"	    
 	    if {$vpi == "vpiParent"} {
-		append methods "\n    bool set_${vpi}(${type}${pointer} data) {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->getUhdmType(); return true;}\n"
+		append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data) {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->UhdmType(); return true;}\n"
 	    } else {
-		append methods "\n    bool set_${vpi}(${type}${pointer} data) {${check} ${vpi}_ = data; return true;}\n"
+		append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data) {${check} ${vpi}_ = data; return true;}\n"
 	    }
 	}
     } elseif {$card == "any"} {
-	append methods "\n    VectorOf${type}* get_${vpi}() const { return ${vpi}_; }\n"
-        append methods "\n    bool set_${vpi}(VectorOf${type}* data) {${check} ${vpi}_ = data; return true;}\n"
+	append methods "\n    VectorOf${type}* [string toupper ${vpi} 0 0]() const { return ${vpi}_; }\n"
+        append methods "\n    bool [string toupper ${vpi} 0 0](VectorOf${type}* data) {${check} ${vpi}_ = data; return true;}\n"
     }
     return $methods
 }
@@ -323,8 +323,8 @@ proc printIterateBody { name classname vpi card } {
 	append vpi_iterate_body "\n\    
  if (handle->type == uhdm${classname}) {\n\
   if (type == $vpi) {\n\
-     if ((($classname*)(object))->get_${name}())\n\
-       return NewHandle(uhdm${name}, (($classname*)(object))->get_${name}());\n\
+     if ((($classname*)(object))->[string toupper ${name} 0 0]())\n\
+       return NewHandle(uhdm${name}, (($classname*)(object))->[string toupper ${name} 0 0]());\n\
      else return 0;
   }\n\
 }\n"
@@ -338,7 +338,7 @@ proc printGetBody {classname type vpi card} {
 	append vpi_get_body "\n\
  if (handle->type == uhdm${classname}) {
      if (property == $vpi) {
-       return (($classname*)(obj))->get_${vpi}();
+       return (($classname*)(obj))->[string toupper ${vpi} 0 0]();
      } 
 }
 "
@@ -349,14 +349,14 @@ proc printGetBody {classname type vpi card} {
 
 proc printGetHandleBody { classname type vpi object card } {
     if {$type == "BaseClass"} {
-	set type "(($classname*)(object))->get_uhdmParentType()"
+	set type "(($classname*)(object))->UhdmParentType()"
     }
     set vpi_get_handle_body ""
     if {$card == 1} {
 	append vpi_get_handle_body "\n\
  if (handle->type == uhdm${classname}) {
      if (type == $vpi) {
-       return NewHandle(((BaseClass*)(($classname*)(object))->get_${object}())->getUhdmType(), (($classname*)(object))->get_${object}());\n\
+       return NewHandle(((BaseClass*)(($classname*)(object))->[string toupper ${object} 0 0]())->UhdmType(), (($classname*)(object))->[string toupper ${object} 0 0]());\n\
      } 
 }
 "
@@ -370,7 +370,7 @@ proc printGetStrBody {classname type vpi card} {
 	append vpi_get_str_body "\n\
  if (handle->type == uhdm${classname}) {
      if (property == $vpi) {
-       return (PLI_BYTE8*) strdup((($classname*)(obj))->get_${vpi}().c_str());
+       return (PLI_BYTE8*) strdup((($classname*)(obj))->[string toupper ${vpi} 0 0]().c_str());
      } 
 }
 "
@@ -397,7 +397,7 @@ proc printScanBody { name classname type card } {
   if (handle->type == uhdm${name}) {\n\
     VectorOf${type}* the_vec = (VectorOf${type}*)vect;\n\
       if (handle->index < the_vec->size()) {\n\
-          uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->getUhdmType(), the_vec->at(handle->index));\n\
+          uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->UhdmType(), the_vec->at(handle->index));\n\
 	  handle->index++;\n\
           return (vpiHandle) h;\n\
       }\n\
@@ -583,14 +583,14 @@ proc generate_code { models } {
 	    lappend capnp_schema($classname) [list vpiLineNo UInt32]
 	    append capnp_root_schema "  factory${Classname} @${capnpRootSchemaIndex} :List($Classname);\n"
 	    incr capnpRootSchemaIndex
-	    append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(getId(obj->get_vpiParent()));\n"
-	    append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->get_uhdmParentType());\n"
-	    append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(SymbolFactory::make(obj->get_vpiFile()));\n"
-	    append SAVE($classname) "    ${Classname}s\[index\].setVpiLineNo(obj->get_vpiLineNo());\n"
-	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_uhdmParentType(obj.getUhdmParentType());\n"
-	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiParent(getObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
-	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiFile(SymbolFactory::getSymbol(obj.getVpiFile()));\n"
-	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->set_vpiLineNo(obj.getVpiLineNo());\n"
+	    append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(GetId(obj->VpiParent()));\n"
+	    append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->UhdmParentType());\n"
+	    append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(SymbolFactory::Make(obj->VpiFile()));\n"
+	    append SAVE($classname) "    ${Classname}s\[index\].setVpiLineNo(obj->VpiLineNo());\n"
+	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->UhdmParentType(obj.getUhdmParentType());\n"
+	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->VpiParent(GetObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
+	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->VpiFile(SymbolFactory::GetSymbol(obj.getVpiFile()));\n"
+	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->VpiLineNo(obj.getVpiLineNo());\n"
 	}
 
 	set indTmp 0
@@ -604,7 +604,7 @@ proc generate_code { models } {
 		    set card [dict get $conf card]
 		    if {$prop == "type"} {
 			set type_specified 1
-			append methods($classname) "\n    $type get_${vpi}() { return $name; }\n"
+			append methods($classname) "\n    $type [string toupper ${vpi} 0 0]() { return $name; }\n"
 			lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
 			continue
 		    }
@@ -623,11 +623,11 @@ proc generate_code { models } {
 		    set Vpi [string toupper $vpi 0 0]
 		    regsub -all  {_} $Vpi "" Vpi
 		    if {$type == "string"} {
-			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(SymbolFactory::make(obj->get_${vpi}()));\n"
-			append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->set_${vpi}(SymbolFactory::getSymbol(obj.get${Vpi}()));\n"
+			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(SymbolFactory::Make(obj->[string toupper ${vpi} 0 0]()));\n"
+			append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->[string toupper ${vpi} 0 0](SymbolFactory::GetSymbol(obj.get${Vpi}()));\n"
 		    } else {
-			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->get_${vpi}());\n"
-			append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->set_${vpi}(obj.get${Vpi}());\n"
+			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->[string toupper ${vpi} 0 0]());\n"
+			append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->[string toupper ${vpi} 0 0](obj.get${Vpi}());\n"
 		    }
 		}
 
@@ -681,20 +681,20 @@ proc generate_code { models } {
 		    lappend capnp_schema($classname) [printCapnpSchema $obj_key $Name $card]
 		    if {$card == 1} {
 			if {$key == "class_ref" || $key == "group_ref"} {
-			    append SAVE($classname) "  if (obj->get_${name}()) {\n"
+			    append SAVE($classname) "  if (obj->[string toupper ${name} 0 0]()) {\n"
 			    append SAVE($classname) "    ::ObjIndexType::Builder tmp$indTmp = ${Classname}s\[index\].get[string toupper ${Name} 0 0]();\n"
-			    append SAVE($classname) "    tmp${indTmp}.setIndex(getId(((BaseClass*) obj->get_${name}())));\n"
-			    append SAVE($classname) "    tmp${indTmp}.setType(((BaseClass*)obj->get_${name}())->getUhdmType());\n  }"			    
+			    append SAVE($classname) "    tmp${indTmp}.setIndex(GetId(((BaseClass*) obj->[string toupper ${name} 0 0]())));\n"
+			    append SAVE($classname) "    tmp${indTmp}.setType(((BaseClass*)obj->[string toupper ${name} 0 0]())->UhdmType());\n  }"			    
 			    
 			    incr indTmp
 			} else {
-			    append SAVE($classname) "    ${Classname}s\[index\].set[string toupper ${Name} 0 0](getId(obj->get_${name}()));\n"
+			    append SAVE($classname) "    ${Classname}s\[index\].set[string toupper ${Name} 0 0](GetId(obj->[string toupper ${name} 0 0]()));\n"
 			}
 			if {$key == "class_ref" || $key == "group_ref"} {
-			    append RESTORE($classname) "     ${classname}Factory::objects_\[index\]->set_${name}((${type}*)getObject(obj.get[string toupper ${Name} 0 0]().getType(),obj.get[string toupper ${Name} 0 0]().getIndex()-1));\n"
+			    append RESTORE($classname) "     ${classname}Factory::objects_\[index\]->[string toupper ${name} 0 0]((${type}*)GetObject(obj.get[string toupper ${Name} 0 0]().getType(),obj.get[string toupper ${Name} 0 0]().getIndex()-1));\n"
 			} else {
 			    append RESTORE($classname) "    if (obj.get[string toupper ${Name} 0 0]()) 
-      ${classname}Factory::objects_\[index\]->set_${name}(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()-1\]);\n"
+      ${classname}Factory::objects_\[index\]->[string toupper ${name} 0 0](${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()-1\]);\n"
 			}
 		    } else {
 
@@ -704,30 +704,30 @@ proc generate_code { models } {
 			    set obj_key ::uint64_t
 			}
 			append SAVE($classname) " 
-    if (obj->get_${name}()) {  
-      ::capnp::List<$obj_key>::Builder [string toupper ${Name} 0 0]s = ${Classname}s\[index\].init[string toupper ${Name} 0 0](obj->get_${name}()->size());
-      for (unsigned int ind = 0; ind < obj->get_${name}()->size(); ind++) {\n"
+    if (obj->[string toupper ${name} 0 0]()) {  
+      ::capnp::List<$obj_key>::Builder [string toupper ${Name} 0 0]s = ${Classname}s\[index\].init[string toupper ${Name} 0 0](obj->[string toupper ${name} 0 0]()->size());
+      for (unsigned int ind = 0; ind < obj->[string toupper ${name} 0 0]()->size(); ind++) {\n"
 			if {$key == "class_ref" || $key == "group_ref"} {
 			    append SAVE($classname) "        ::ObjIndexType::Builder tmp = [string toupper ${Name} 0 0]s\[ind\];\n"
-			    append SAVE($classname) "        tmp.setIndex(getId(((BaseClass*) (*obj->get_${name}())\[ind\])));\n"
-			    append SAVE($classname) "        tmp.setType(((BaseClass*)((*obj->get_${name}())\[ind\]))->getUhdmType());"
+			    append SAVE($classname) "        tmp.setIndex(GetId(((BaseClass*) (*obj->[string toupper ${name} 0 0]())\[ind\])));\n"
+			    append SAVE($classname) "        tmp.setType(((BaseClass*)((*obj->[string toupper ${name} 0 0]())\[ind\]))->UhdmType());"
 			} else {
-			    append SAVE($classname) "        [string toupper ${Name} 0 0]s.set(ind, getId((*obj->get_${name}())\[ind\]));"
+			    append SAVE($classname) "        [string toupper ${Name} 0 0]s.set(ind, GetId((*obj->[string toupper ${name} 0 0]())\[ind\]));"
 			}
 			append SAVE($classname) "\n      }
     }
 "
 			append RESTORE($classname) "    
     if (obj.get[string toupper ${Name} 0 0]().size()) { 
-      std::vector<${type}*>* vect = VectorOf${type}Factory::make();
+      std::vector<${type}*>* vect = VectorOf${type}Factory::Make();
       for (unsigned int ind = 0; ind < obj.get[string toupper ${Name} 0 0]().size(); ind++) {\n"
 			if {$key == "class_ref" || $key == "group_ref"} {
-			    append RESTORE($classname) " 	vect->push_back((${type}*)getObject(obj.get[string toupper ${Name} 0 0]()\[ind\].getType(),obj.get[string toupper ${Name} 0 0]()\[ind\].getIndex()-1));\n"
+			    append RESTORE($classname) " 	vect->push_back((${type}*)GetObject(obj.get[string toupper ${Name} 0 0]()\[ind\].getType(),obj.get[string toupper ${Name} 0 0]()\[ind\].getIndex()-1));\n"
 			} else {
 			    append RESTORE($classname) " 	vect->push_back(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()\[ind\]-1\]);\n"
 			}			
 			append RESTORE($classname) "      }
-      ${classname}Factory::objects_\[index\]->set_${name}(vect);
+      ${classname}Factory::objects_\[index\]->[string toupper ${name} 0 0](vect);
     }
 "
 		    }
@@ -737,7 +737,7 @@ proc generate_code { models } {
 
 	if {($type_specified == 0) && ($modeltype == "obj_def")} {
 	    set vpiclasstype [makeVpiName $classname]
-	    append methods($classname) "\n    unsigned int get_vpiType() { return $vpiclasstype; }\n"
+	    append methods($classname) "\n    unsigned int VpiType() { return $vpiclasstype; }\n"
 	    lappend vpi_get_body_inst($classname) [list $classname "unsigned int" vpiType 1]
 
 	}
@@ -787,9 +787,10 @@ proc generate_code { models } {
 	    set save ""
 	    foreach line [split $SAVE($baseclass) "\n"] {
 		set base $baseclass
+		set tmp $line
 		regsub -all  {_} $baseclass "" base		
-		regsub [string toupper $base 0 0]s $line ${Classname}s tmp
-		regsub [string toupper $base 0 0]s $tmp ${Classname}s tmp
+		regsub -all " [string toupper $base 0 0]s" $line " ${Classname}s" tmp
+		#regsub [string toupper $base 0 0]s $tmp ${Classname}s tmp
 		append save "$tmp\n"
 	    }
 	    append SAVE($classname) $save
@@ -837,7 +838,7 @@ proc generate_code { models } {
     close $fid 
     set uhdmId [open "[exec_path]/headers/uhdm.h" "w"]
 
-    set name_id_map "\nstd::string getUhdmName(unsigned int type) \{
+    set name_id_map "\nstd::string UhdmName(unsigned int type) \{
       switch (type) \{
 "
     foreach id [array names DEFINE_ID] {
@@ -926,7 +927,7 @@ $SAVE($class)
 		append capnp_init_factories "
  ::capnp::List<$Class>::Reader ${Class}s = cap_root.getFactory${Class}();
  for (unsigned ind = 0; ind < ${Class}s.size(); ind++) {
-   setId(${class}Factory::make(), ind);
+   SetId(${class}Factory::Make(), ind);
  }
 " 
 		append capnp_restore_factories "
@@ -947,7 +948,7 @@ $RESTORE($class)
 	    append capnp_id "
   index = 1;
   for (auto obj : ${class}Factory::objects_) {
-    setId(obj, index);
+    SetId(obj, index);
     index++;
   }"
 

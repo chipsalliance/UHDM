@@ -42,12 +42,12 @@ using namespace UHDM;
 
 std::unordered_map<BaseClass*, unsigned long> Serializer::allIds_;
 
-void Serializer::setId(BaseClass* p, unsigned long id) {
+void Serializer::SetId(BaseClass* p, unsigned long id) {
   allIds_.insert(std::make_pair(p, id));
 }
 
 static unsigned long incrId = 0;
-unsigned long Serializer::getId(BaseClass* p) {
+unsigned long Serializer::GetId(BaseClass* p) {
   std::unordered_map<BaseClass*, unsigned long>::iterator itr = allIds_.find(p);
   if (itr == allIds_.end()) {
     unsigned long tmp = incrId;
@@ -62,7 +62,7 @@ unsigned long Serializer::getId(BaseClass* p) {
 std::vector<std::vector<any*>*> VectorOfanyFactory::objects_;
 <FACTORIES>
 
-BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
+BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
   switch (objectType) {
 <FACTORY_OBJECT_TYPE_MAP>
   default:
@@ -71,11 +71,11 @@ BaseClass* Serializer::getObject(unsigned int objectType, unsigned int index) {
   return NULL;
 }
 
-void Serializer::purge() {
+void Serializer::Purge() {
 <FACTORY_PURGE>
 }
 
-void Serializer::save(std::string file) {
+void Serializer::Save(std::string file) {
   int fileid = open(file.c_str(), O_CREAT | O_WRONLY , S_IRWXU);
   ::capnp::MallocMessageBuilder message;
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
@@ -86,7 +86,7 @@ void Serializer::save(std::string file) {
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designFactory::objects_.size());
   index = 0;
   for (auto design : designFactory::objects_) {
-    designs[index].setVpiName(SymbolFactory::make(design->get_vpiName()));
+    designs[index].setVpiName(SymbolFactory::Make(design->VpiName()));
     index++;
   }
 

@@ -11,7 +11,7 @@ int main (int argc, char** argv) {
     fileName = argv[1];
   }
   std::cout << "Restore design from: " << fileName << std::endl;
-  std::vector<vpiHandle> restoredDesigns = Serializer::restore(fileName);
+  std::vector<vpiHandle> restoredDesigns = Serializer::Restore(fileName);
   
   std::string restored = print_designs(restoredDesigns);
   std::cout << restored;
