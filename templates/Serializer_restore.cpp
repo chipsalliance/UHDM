@@ -36,6 +36,7 @@ typedef void any;
 #include <capnp/message.h>
 #include <capnp/serialize-packed.h>
 #include <iostream>
+#include "src/Serializer.h"
 
 using namespace UHDM;
 
@@ -49,15 +50,15 @@ const std::vector<vpiHandle> Serializer::Restore(std::string file) {
 
   ::capnp::List<::capnp::Text>::Reader symbols = cap_root.getSymbols();
   for (auto symbol : symbols) {
-    SymbolFactory::Make(symbol);
+    symbolMaker.Make(symbol);
   }
  
 <CAPNP_INIT_FACTORIES>  
   
 <CAPNP_RESTORE_FACTORIES>  
   
-   for (auto d : designFactory::objects_) {
-    vpiHandle designH = uhdm_handleFactory::Make(uhdmdesign, d);
+   for (auto d : designMaker.objects_) {
+    vpiHandle designH = uhdm_handleMaker.Make(uhdmdesign, d);
     designs.push_back(designH);
   }
    

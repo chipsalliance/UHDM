@@ -40,14 +40,6 @@ typedef void any;
 
 using namespace UHDM;
 
-std::vector<uhdm_handle*> uhdm_handleFactory::objects_;
-
-Id2SymbolMap SymbolFactory::id2SymbolMap_;
-
-Symbol2IdMap SymbolFactory::symbol2IdMap_;
-
-unsigned int SymbolFactory::idCounter_ = 0;
-
 unsigned int SymbolFactory::Make(const std::string& symbol) {
   Symbol2IdMap::iterator itr = symbol2IdMap_.find(symbol);
   if (itr == symbol2IdMap_.end()) {
@@ -61,8 +53,6 @@ unsigned int SymbolFactory::Make(const std::string& symbol) {
     return tmp;
   }
 }
-
-std::string SymbolFactory::bad_symbol_ = "@@BAD_SYMBOL@@";
 
 const std::string& SymbolFactory::GetSymbol(unsigned int id) {
    if (id >= id2SymbolMap_.size())

@@ -225,7 +225,8 @@ proc parse_model { file } {
     return $models
 }
 
-proc printMethods { type vpi card {real_type ""} } {
+proc printMethods { classname type vpi card {real_type ""} } {
+    global methods_cpp
     set methods ""
     if {$type == "string"} {
 	set type "std::string"
@@ -240,8 +241,10 @@ proc printMethods { type vpi card {real_type ""} } {
 	    set pointer "*"
 	}
 	if {$type == "std::string"} {
-	    append methods "\n    const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const { return SymbolFactory::GetSymbol(${vpi}_); }\n"
-	    append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data) { ${vpi}_ = SymbolFactory::Make(data); return true; }\n" 
+	    append methods "\n    const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const;\n"
+	    append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data);\n"
+	    append methods_cpp "\n    const ${type}${pointer}\\& ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
+	    append methods_cpp "\n    bool ${classname}::[string toupper ${vpi} 0 0](${type}${pointer} data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n" 
 	} else {
 	    append methods "\n    ${type}${pointer} [string toupper ${vpi} 0 0]() const { return ${vpi}_; }\n"	    
 	    if {$vpi == "vpiParent"} {
@@ -484,7 +487,7 @@ proc generate_group_checker { model } {
 }
 
 proc generate_code { models } {
-    global ID BASECLASS DEFINE_ID working_dir
+    global ID BASECLASS DEFINE_ID working_dir methods_cpp
     puts "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
@@ -543,11 +546,13 @@ proc generate_code { models } {
 	
 	puts "Generating headers/$classname.h"
 	if {$modeltype != "class_def"} {
-	    append factories "std::vector<${classname}*> ${classname}Factory::objects_;\n"
+	    append factories "    ${classname}Factory ${classname}Maker;\n"
+	    append factories_methods "    ${classname}* Make[string toupper ${classname} 0 0] () { ${classname}* tmp = ${classname}Maker.Make(); tmp->SetSerializer(this); return tmp;}\n"
 	}
-	append factories "std::vector<std::vector<${classname}*>*> VectorOf${classname}Factory::objects_;\n"
+	append factories "    VectorOf${classname}Factory ${classname}VectMaker;\n"
+	append factories_methods "    std::vector<${classname}*>* Make[string toupper ${classname} 0 0]Vec () { return ${classname}VectMaker.Make();}\n"
 	if {$modeltype != "class_def"} {
-	    append factory_object_type_map "  case uhdm${classname}: return ${classname}Factory::objects_\[index\];\n"
+	    append factory_object_type_map "  case uhdm${classname}: return ${classname}Maker.objects_\[index\];\n"
 	}
         lappend classes $classname
 	
@@ -566,14 +571,14 @@ proc generate_code { models } {
 	if {$modeltype != "class_def"} {
 	    # Builtin properties do not need to be specified in each models
 	    # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo" method and field
-	    append methods($classname) [printMethods BaseClass vpiParent 1]
+	    append methods($classname) [printMethods $classname BaseClass vpiParent 1]
 	    append members($classname) [printMembers BaseClass vpiParent 1]
-	    append methods($classname) [printMethods "unsigned int" uhdmParentType 1] 
+	    append methods($classname) [printMethods $classname "unsigned int" uhdmParentType 1] 
 	    append members($classname) [printMembers "unsigned int" uhdmParentType 1]
-	    append methods($classname) [printMethods string vpiFile 1] 
+	    append methods($classname) [printMethods $classname string vpiFile 1] 
 	    append members($classname) [printMembers string vpiFile 1]
 	    lappend vpi_get_str_body_inst($classname) [list $classname string vpiFile 1]
-	    append methods($classname) [printMethods "unsigned int" vpiLineNo 1] 
+	    append methods($classname) [printMethods $classname "unsigned int" vpiLineNo 1] 
 	    append members($classname) [printMembers "unsigned int" vpiLineNo 1]
 	    lappend vpi_get_body_inst($classname) [list $classname int vpiLineNo 1]
 	    append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
@@ -585,12 +590,12 @@ proc generate_code { models } {
 	    incr capnpRootSchemaIndex
 	    append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(GetId(obj->VpiParent()));\n"
 	    append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->UhdmParentType());\n"
-	    append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(SymbolFactory::Make(obj->VpiFile()));\n"
+	    append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));\n"
 	    append SAVE($classname) "    ${Classname}s\[index\].setVpiLineNo(obj->VpiLineNo());\n"
-	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->UhdmParentType(obj.getUhdmParentType());\n"
-	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->VpiParent(GetObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
-	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->VpiFile(SymbolFactory::GetSymbol(obj.getVpiFile()));\n"
-	    append RESTORE($classname) "   ${classname}Factory::objects_\[index\]->VpiLineNo(obj.getVpiLineNo());\n"
+	    append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->UhdmParentType(obj.getUhdmParentType());\n"
+	    append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiParent(GetObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
+	    append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiFile(symbolMaker.GetSymbol(obj.getVpiFile()));\n"
+	    append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiLineNo(obj.getVpiLineNo());\n"
 	}
 
 	set indTmp 0
@@ -614,7 +619,7 @@ proc generate_code { models } {
 		    }
 		    
                     # properties are already defined in vpi_user.h, no need to redefine them
-		    append methods($classname) [printMethods $type $vpi $card] 
+		    append methods($classname) [printMethods $classname $type $vpi $card] 
 		    append members($classname) [printMembers $type $vpi $card]
                     lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
                     lappend vpi_get_str_body_inst($classname) [list $classname $type $vpi $card]
@@ -623,11 +628,11 @@ proc generate_code { models } {
 		    set Vpi [string toupper $vpi 0 0]
 		    regsub -all  {_} $Vpi "" Vpi
 		    if {$type == "string"} {
-			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(SymbolFactory::Make(obj->[string toupper ${vpi} 0 0]()));\n"
-			append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->[string toupper ${vpi} 0 0](SymbolFactory::GetSymbol(obj.get${Vpi}()));\n"
+			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->GetSerializer()->symbolMaker.Make(obj->[string toupper ${vpi} 0 0]()));\n"
+			append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](symbolMaker.GetSymbol(obj.get${Vpi}()));\n"
 		    } else {
 			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->[string toupper ${vpi} 0 0]());\n"
-			append RESTORE($classname) "    ${classname}Factory::objects_\[index\]->[string toupper ${vpi} 0 0](obj.get${Vpi}());\n"
+			append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](obj.get${Vpi}());\n"
 		    }
 		}
 
@@ -663,7 +668,7 @@ proc generate_code { models } {
                     if {$define != ""} {
                       append defines "$define\n"
                     }
-		    append methods($classname) [printMethods $type $name $card $real_type] 
+		    append methods($classname) [printMethods $classname $type $name $card $real_type] 
 		    append members($classname) [printMembers $type $name $card]
 		    append vpi_iterate_body($classname) [printIterateBody $name $classname $vpi $card]
                     append vpi_scan_body [printScanBody $name $classname $type $card]
@@ -691,10 +696,10 @@ proc generate_code { models } {
 			    append SAVE($classname) "    ${Classname}s\[index\].set[string toupper ${Name} 0 0](GetId(obj->[string toupper ${name} 0 0]()));\n"
 			}
 			if {$key == "class_ref" || $key == "group_ref"} {
-			    append RESTORE($classname) "     ${classname}Factory::objects_\[index\]->[string toupper ${name} 0 0]((${type}*)GetObject(obj.get[string toupper ${Name} 0 0]().getType(),obj.get[string toupper ${Name} 0 0]().getIndex()-1));\n"
+			    append RESTORE($classname) "     ${classname}Maker.objects_\[index\]->[string toupper ${name} 0 0]((${type}*)GetObject(obj.get[string toupper ${Name} 0 0]().getType(),obj.get[string toupper ${Name} 0 0]().getIndex()-1));\n"
 			} else {
 			    append RESTORE($classname) "    if (obj.get[string toupper ${Name} 0 0]()) 
-      ${classname}Factory::objects_\[index\]->[string toupper ${name} 0 0](${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()-1\]);\n"
+      ${classname}Maker.objects_\[index\]->[string toupper ${name} 0 0](${type}Maker.objects_\[obj.get[string toupper ${Name} 0 0]()-1\]);\n"
 			}
 		    } else {
 
@@ -719,15 +724,15 @@ proc generate_code { models } {
 "
 			append RESTORE($classname) "    
     if (obj.get[string toupper ${Name} 0 0]().size()) { 
-      std::vector<${type}*>* vect = VectorOf${type}Factory::Make();
+      std::vector<${type}*>* vect = ${type}VectMaker.Make();
       for (unsigned int ind = 0; ind < obj.get[string toupper ${Name} 0 0]().size(); ind++) {\n"
 			if {$key == "class_ref" || $key == "group_ref"} {
 			    append RESTORE($classname) " 	vect->push_back((${type}*)GetObject(obj.get[string toupper ${Name} 0 0]()\[ind\].getType(),obj.get[string toupper ${Name} 0 0]()\[ind\].getIndex()-1));\n"
 			} else {
-			    append RESTORE($classname) " 	vect->push_back(${type}Factory::objects_\[obj.get[string toupper ${Name} 0 0]()\[ind\]-1\]);\n"
+			    append RESTORE($classname) " 	vect->push_back(${type}Maker.objects_\[obj.get[string toupper ${Name} 0 0]()\[ind\]-1\]);\n"
 			}			
 			append RESTORE($classname) "      }
-      ${classname}Factory::objects_\[index\]->[string toupper ${name} 0 0](vect);
+      ${classname}Maker.objects_\[index\]->[string toupper ${name} 0 0](vect);
     }
 "
 		    }
@@ -797,7 +802,7 @@ proc generate_code { models } {
 
 	    # Restore
 	    set restore $RESTORE($baseclass)
-	    regsub -all " ${baseclass}Factory" $RESTORE($baseclass) " ${classname}Factory" restore
+	    regsub -all " ${baseclass}Maker" $RESTORE($baseclass) " ${classname}Maker" restore
 
 	    append RESTORE($classname) $restore
 
@@ -848,7 +853,7 @@ proc generate_code { models } {
 \}
 \}\n"
 
-    append factories $name_id_map
+    append uhdm_name_map $name_id_map
     
     regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
     regsub -all {<INCLUDE_FILES>} $uhdm_content $headers uhdm_content
@@ -899,7 +904,7 @@ proc generate_code { models } {
     exec sh -c "cp -rf [exec_path]/templates/SymbolFactory.cpp [exec_path]/src/SymbolFactory.cpp"
     
     # Serializer.cpp
-    set files "Serializer_save.cpp Serializer_restore.cpp"
+    set files "Serializer_save.cpp Serializer_restore.cpp vpi_uhdm.h Serializer.h"
     foreach file $files {
 	set capnp_init_factories ""
 	set capnp_restore_factories ""
@@ -918,16 +923,16 @@ proc generate_code { models } {
 	    regsub -all  {_} $Class "" Class
 	    if {$SAVE($class) != ""} {
 		append capnp_save "
- ::capnp::List<$Class>::Builder ${Class}s = cap_root.initFactory${Class}(${class}Factory::objects_.size());
+ ::capnp::List<$Class>::Builder ${Class}s = cap_root.initFactory${Class}(${class}Maker.objects_.size());
  index = 0;
- for (auto obj : ${class}Factory::objects_) {
+ for (auto obj : ${class}Maker.objects_) {
 $SAVE($class)
    index++;
  }"
 		append capnp_init_factories "
  ::capnp::List<$Class>::Reader ${Class}s = cap_root.getFactory${Class}();
  for (unsigned ind = 0; ind < ${Class}s.size(); ind++) {
-   SetId(${class}Factory::Make(), ind);
+   SetId(Make[string toupper ${class} 0 0](), ind);
  }
 " 
 		append capnp_restore_factories "
@@ -947,20 +952,24 @@ $RESTORE($class)
 	    }
 	    append capnp_id "
   index = 1;
-  for (auto obj : ${class}Factory::objects_) {
+  for (auto obj : ${class}Maker.objects_) {
     SetId(obj, index);
     index++;
   }"
 
 	    append factory_purge "
-  for (auto obj : ${class}Factory::objects_) {
+  for (auto obj : ${class}Maker.objects_) {
     delete obj;
   }
-  ${class}Factory::objects_.clear();
+  ${class}Maker.objects_.clear();
 "
 	}
 	
 	regsub {<FACTORIES>} $serializer_content $factories serializer_content
+	regsub {<FACTORIES_METHODS>} $serializer_content $factories_methods serializer_content
+	regsub {<METHODS_CPP>} $serializer_content $methods_cpp serializer_content
+	
+	regsub {<UHDM_NAME_MAP>} $serializer_content $uhdm_name_map serializer_content
 	regsub {<FACTORY_PURGE>} $serializer_content $factory_purge serializer_content
 	regsub {<FACTORY_OBJECT_TYPE_MAP>} $serializer_content $factory_object_type_map serializer_content
 	regsub {<CAPNP_ID>} $serializer_content $capnp_id serializer_content

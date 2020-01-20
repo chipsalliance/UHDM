@@ -43,26 +43,26 @@ namespace UHDM {
   class <CLASSNAME>Factory {
   friend Serializer;
   public:
-  static <CLASSNAME>* Make() {
+  <CLASSNAME>* Make() {
     <CLASSNAME>* obj = new <CLASSNAME>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-    static std::vector<<CLASSNAME>*> objects_;
+    std::vector<<CLASSNAME>*> objects_;
   };
  <END_DISABLE_OBJECT_FACTORY> 
   
   class VectorOf<CLASSNAME>Factory {
   friend Serializer;
   public:
-  static std::vector<<CLASSNAME>*>* Make() {
+  std::vector<<CLASSNAME>*>* Make() {
     std::vector<<CLASSNAME>*>* obj = new std::vector<<CLASSNAME>*>();
     objects_.push_back(obj);
     return obj;
   }
   private:
-  static std::vector<std::vector<<CLASSNAME>*>*> objects_;
+  std::vector<std::vector<<CLASSNAME>*>*> objects_;
   };
 
 };

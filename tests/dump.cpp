@@ -29,8 +29,9 @@ int main (int argc, char** argv) {
       std::cout << "File " << fileName << " does not exist!" << std::endl;
       return 1;
   }
+  Serializer serializer;
   std::cout << "Restore design from: " << fileName << std::endl;
-  std::vector<vpiHandle> restoredDesigns = Serializer::Restore(fileName);
+  std::vector<vpiHandle> restoredDesigns = serializer.Restore(fileName);
   
   std::string restored = print_designs(restoredDesigns);
   std::cout << restored;

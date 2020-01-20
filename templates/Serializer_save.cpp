@@ -36,31 +36,29 @@ typedef void any;
 #include <capnp/message.h>
 #include <capnp/serialize-packed.h>
 #include <iostream>
-
+#include "src/Serializer.h"
 
 using namespace UHDM;
-
-std::unordered_map<BaseClass*, unsigned long> Serializer::allIds_;
 
 void Serializer::SetId(BaseClass* p, unsigned long id) {
   allIds_.insert(std::make_pair(p, id));
 }
 
-static unsigned long incrId = 0;
 unsigned long Serializer::GetId(BaseClass* p) {
   std::unordered_map<BaseClass*, unsigned long>::iterator itr = allIds_.find(p);
   if (itr == allIds_.end()) {
-    unsigned long tmp = incrId;
-    allIds_.insert(std::make_pair(p, incrId));
-    incrId++;
+    unsigned long tmp = incrId_;
+    allIds_.insert(std::make_pair(p, incrId_));
+    incrId_++;
     return tmp;		  
   } else {
     return (*itr).second;
   }
 }
 
-std::vector<std::vector<any*>*> VectorOfanyFactory::objects_;
-<FACTORIES>
+<UHDM_NAME_MAP>
+
+<METHODS_CPP>
 
 BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
   switch (objectType) {
@@ -83,16 +81,16 @@ void Serializer::Save(std::string file) {
 
 <CAPNP_ID>
   
-  ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designFactory::objects_.size());
+  ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designMaker.objects_.size());
   index = 0;
-  for (auto design : designFactory::objects_) {
-    designs[index].setVpiName(SymbolFactory::Make(design->VpiName()));
+  for (auto design : designMaker.objects_) {
+    designs[index].setVpiName(design->GetSerializer()->symbolMaker.Make(design->VpiName()));
     index++;
   }
 
-  ::capnp::List<::capnp::Text>::Builder symbols = cap_root.initSymbols(SymbolFactory::id2SymbolMap_.size());
+  ::capnp::List<::capnp::Text>::Builder symbols = cap_root.initSymbols(symbolMaker.id2SymbolMap_.size());
   index = 0;
-  for (auto symbol : SymbolFactory::id2SymbolMap_) {
+  for (auto symbol : symbolMaker.id2SymbolMap_) {
     symbols.set(index, symbol);
     index++;
   }

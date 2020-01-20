@@ -29,11 +29,13 @@
 #define UHDM_H
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
-#include "include/vpi_uhdm.h"
+#include "src/vpi_uhdm.h"
 #include "headers/containers.h"
 
 <DEFINES>
 
 <INCLUDE_FILES>
+
+#include "src/Serializer.h"
 
 #endif
