@@ -9,7 +9,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s.MakeDesign();
-  d->VpiName("design1");
+  d->VpiName("design2");
   module* m1 = s.MakeModule();
   m1->VpiTopModule(true);
   m1->VpiName("M1");
@@ -39,44 +39,22 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   VectorOfpackage* v3 = s.MakePackageVec();
   v3->push_back(p1);
   d->AllPackages(v3);
-  // Function
-  function* f1 = s.MakeFunction();
-  f1->VpiName("MyFunc1");
-  f1->VpiSize(100);
-  function* f2 = s.MakeFunction();
-  f2->VpiName("MyFunc2");
-  f2->VpiSize(200);
-  VectorOftask_func* v4 = s.MakeTask_funcVec();
-  v4->push_back(f1);
-  v4->push_back(f2);
-  p1->Task_funcs(v4);
-  // Instance items, illustrates the use of groups
-  program* pr1 = s.MakeProgram();
-  pr1->VpiName("PR1");
-  VectorOfany* inst_items = s.MakeAnyVec();
-  inst_items->push_back(pr1);
-  function* f3 = s.MakeFunction();
-  f3->VpiName("MyFunc3");
-  f3->VpiSize(300);
-  inst_items->push_back(f3);
-  
-  m1->Instance_items(inst_items);
   designs.push_back(s.MakeUhdmHandle(uhdmdesign, d));
   return designs;
 }
 
 int main (int argc, char** argv) {
   std::cout << "Make design" << std::endl;
-  Serializer* serializer = new Serializer();
+  Serializer serializer;
 
-  std::string orig = print_designs(build_designs(*serializer));
+  std::string orig = print_designs(build_designs(serializer));
   
   std::cout << orig; 
   std::cout << "\nSave design" << std::endl;
-  serializer->Save("surelog.uhdm");
+  serializer.Save("surelog3.uhdm");
   
   std::cout << "Restore design" << std::endl;
-  std::vector<vpiHandle> restoredDesigns = serializer->Restore("surelog.uhdm");
+  std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog3.uhdm");
   
   std::string restored = print_designs(restoredDesigns);
   std::cout << restored;

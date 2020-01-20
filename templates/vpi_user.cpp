@@ -33,8 +33,9 @@
 #include "include/vhpi_user.h"
 typedef void any;
 #include "headers/containers.h"
-#include "include/vpi_uhdm.h"
+#include "headers/vpi_uhdm.h"
 #include "headers/uhdm.h"
+#include "headers/Serializer.h"
 
 <HEADERS>
 
