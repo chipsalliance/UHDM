@@ -36,7 +36,7 @@ typedef void any;
 #include <capnp/message.h>
 #include <capnp/serialize-packed.h>
 #include <iostream>
-#include "src/Serializer.h"
+#include "headers/Serializer.h"
 
 using namespace UHDM;
 
@@ -91,7 +91,7 @@ void Serializer::Save(std::string file) {
   ::capnp::List<::capnp::Text>::Builder symbols = cap_root.initSymbols(symbolMaker.id2SymbolMap_.size());
   index = 0;
   for (auto symbol : symbolMaker.id2SymbolMap_) {
-    symbols.set(index, symbol);
+    symbols.set(index,strdup(symbol.c_str()));
     index++;
   }
 

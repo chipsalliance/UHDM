@@ -115,6 +115,23 @@ ADD_TEST(NAME uhdm-test2
          COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test2
          WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
+add_executable(uhdm-test3 ${PROJECT_SOURCE_DIR}/tests/test3.cpp )
+set_target_properties(uhdm-test3 PROPERTIES OUTPUT_NAME uhdm-test3 )
+add_dependencies(uhdm-test3 uhdm)
+target_link_libraries( uhdm-test3 ${ALL_LIBRARIES_FOR_UHDM} )
+ADD_TEST(NAME uhdm-test3
+         COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test3
+         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+       
+add_executable(uhdm-test4 ${PROJECT_SOURCE_DIR}/tests/test4.cpp )
+set_target_properties(uhdm-test4 PROPERTIES OUTPUT_NAME uhdm-test4 )
+add_dependencies(uhdm-test4 uhdm)
+target_link_libraries( uhdm-test4 ${ALL_LIBRARIES_FOR_UHDM} )
+ADD_TEST(NAME uhdm-test4
+         COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test4
+         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+       
+       
 add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/tests/dump.cpp )
 set_target_properties(uhdm-dump PROPERTIES OUTPUT_NAME uhdm-dump )
 add_dependencies(uhdm-dump uhdm)

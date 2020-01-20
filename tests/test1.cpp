@@ -67,16 +67,16 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
 
 int main (int argc, char** argv) {
   std::cout << "Make design" << std::endl;
-  Serializer serializer;
+  Serializer* serializer = new Serializer();
 
-  std::string orig = print_designs(build_designs(serializer));
+  std::string orig = print_designs(build_designs(*serializer));
   
   std::cout << orig; 
   std::cout << "\nSave design" << std::endl;
-  serializer.Save("surelog.uhdm");
+  serializer->Save("surelog.uhdm");
   
   std::cout << "Restore design" << std::endl;
-  std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog.uhdm");
+  std::vector<vpiHandle> restoredDesigns = serializer->Restore("surelog.uhdm");
   
   std::string restored = print_designs(restoredDesigns);
   std::cout << restored;

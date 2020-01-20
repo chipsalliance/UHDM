@@ -976,7 +976,11 @@ $RESTORE($class)
 	regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content
 	regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
 	regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
-	set serializerId [open "[exec_path]/src/$file" "w"]
+	if {$file == "vpi_uhdm.h" || $file == "Serializer.h"} {
+	    set serializerId [open "[exec_path]/headers/$file" "w"]  
+	} else {
+	    set serializerId [open "[exec_path]/src/$file" "w"]
+	}
 	puts $serializerId $serializer_content
 	close $serializerId
     }
