@@ -250,9 +250,9 @@ proc printMethods { classname type vpi card {real_type ""} } {
 	
 	if {$type == "std::string"} {
 	    append methods "\n    const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const$final;\n"
-	    append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data)$final;\n"
+	    append methods "\n    bool [string toupper ${vpi} 0 0](const ${type}${pointer}\\& data)$final;\n"
 	    append methods_cpp "\n    const ${type}${pointer}\\& ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
-	    append methods_cpp "\n    bool ${classname}::[string toupper ${vpi} 0 0](${type}${pointer} data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n" 
+	    append methods_cpp "\n    bool ${classname}::[string toupper ${vpi} 0 0](const ${type}${pointer}\\& data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n" 
 	} else {
 	    append methods "\n    ${const}${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"	    
 	    if {$vpi == "vpiParent"} {

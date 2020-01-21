@@ -83,7 +83,7 @@ namespace UHDM {
 
     virtual const std::string& VpiFile() const = 0;
 
-    virtual bool VpiFile(std::string data) = 0;
+    virtual bool VpiFile(const std::string& data) = 0;
 
     virtual unsigned int VpiLineNo() const = 0;
 
