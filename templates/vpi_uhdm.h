@@ -64,11 +64,35 @@ namespace UHDM {
   public:
     // Use implicit constructor to initialize all members
     // BaseClass()
-    void SetSerializer(Serializer* serial) { serializer_ = serial; }
-    Serializer* GetSerializer() { return serializer_; }
-    virtual unsigned int UhdmType() = 0;   
+    
     virtual ~BaseClass(){}
+
+    void SetSerializer(Serializer* serial) { serializer_ = serial; }
+
+    Serializer* GetSerializer() { return serializer_; }
+
+    virtual unsigned int UhdmType() = 0;
+
+    virtual BaseClass* VpiParent() const = 0;
+
+    virtual bool VpiParent(BaseClass* data) = 0;
+
+    virtual unsigned int UhdmParentType() const = 0;
+
+    virtual bool UhdmParentType(unsigned int data) = 0;
+
+    virtual const std::string& VpiFile() const = 0;
+
+    virtual bool VpiFile(std::string data) = 0;
+
+    virtual unsigned int VpiLineNo() const = 0;
+
+    virtual bool VpiLineNo(unsigned int data) = 0;
+
   protected:
+    // This base class or any virtual class should not contain actual data fields that need
+    // to be serialized. Only leaf classes contain serializable fields.
+    // Exception, this runtime-only field that is not actually serialized: 
     Serializer* serializer_;
   };
   

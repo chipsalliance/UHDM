@@ -323,14 +323,14 @@ proc printTypeDefs { type card } {
 proc printIterateBody { name classname vpi card } {
     set vpi_iterate_body ""
     if {$card == "any"} {
-	append vpi_iterate_body "\n\    
- if (handle->type == uhdm${classname}) {\n\
-  if (type == $vpi) {\n\
-     if ((($classname*)(object))->[string toupper ${name} 0 0]())\n\
-       return NewHandle(uhdm${name}, (($classname*)(object))->[string toupper ${name} 0 0]());\n\
-     else return 0;
-  }\n\
-}\n"
+	append vpi_iterate_body "   
+  if (handle->type == uhdm${classname}) {
+    if (type == $vpi) {
+      if ((($classname*)(object))->[string toupper ${name} 0 0]())
+       return NewHandle(uhdm${name}, (($classname*)(object))->[string toupper ${name} 0 0]());
+      else return 0;
+    }
+  }"
     return $vpi_iterate_body
    }
 }
@@ -338,13 +338,12 @@ proc printIterateBody { name classname vpi card } {
 proc printGetBody {classname type vpi card} {
     set vpi_get_body ""
     if {($card == 1) && ($type != "string")} {
-	append vpi_get_body "\n\
- if (handle->type == uhdm${classname}) {
-     if (property == $vpi) {
-       return (($classname*)(obj))->[string toupper ${vpi} 0 0]();
-     } 
-}
-"
+	append vpi_get_body "
+  if (handle->type == uhdm${classname}) {
+    if (property == $vpi) {
+      return (($classname*)(obj))->[string toupper ${vpi} 0 0]();
+    } 
+  }"
     }
     return $vpi_get_body
 }
@@ -355,14 +354,23 @@ proc printGetHandleBody { classname type vpi object card } {
 	set type "(($classname*)(object))->UhdmParentType()"
     }
     set vpi_get_handle_body ""
+    set need_casting 1
+    if {$vpi == "vpiParent" && $object == "vpiParent"} {
+	set need_casting 0
+    }
     if {$card == 1} {
-	append vpi_get_handle_body "\n\
- if (handle->type == uhdm${classname}) {
+	set casted_object1 "(object"
+	set casted_object2 "object"
+	if {$need_casting == 1} {
+	    set casted_object1 "((BaseClass*)(($classname*)(object))"
+	    set casted_object2 "(($classname*)(object))"
+	}
+	append vpi_get_handle_body "
+  if (handle->type == uhdm${classname}) {
      if (type == $vpi) {
-       return NewHandle(((BaseClass*)(($classname*)(object))->[string toupper ${object} 0 0]())->UhdmType(), (($classname*)(object))->[string toupper ${object} 0 0]());\n\
+       return NewHandle($casted_object1->[string toupper ${object} 0 0]())->UhdmType(), $casted_object2->[string toupper ${object} 0 0]());
      } 
-}
-"
+  }"
     }
     return $vpi_get_handle_body
 }
@@ -370,13 +378,12 @@ proc printGetHandleBody { classname type vpi object card } {
 proc printGetStrBody {classname type vpi card} {
     set vpi_get_str_body ""
     if {$card == 1 && ($type == "string")} {
-	append vpi_get_str_body "\n\
- if (handle->type == uhdm${classname}) {
-     if (property == $vpi) {
-       return (PLI_BYTE8*) strdup((($classname*)(obj))->[string toupper ${vpi} 0 0]().c_str());
-     } 
-}
-"
+	append vpi_get_str_body "
+  if (handle->type == uhdm${classname}) {
+    if (property == $vpi) {
+      return (PLI_BYTE8*) strdup((($classname*)(obj))->[string toupper ${vpi} 0 0]().c_str());
+    } 
+  }"
     }
     return $vpi_get_str_body
 }
@@ -396,14 +403,14 @@ proc makeVpiName { classname } {
 proc printScanBody { name classname type card } {
     set vpi_scan_body ""
     if {$card == "any"} {
-	append vpi_scan_body "\n
-  if (handle->type == uhdm${name}) {\n\
-    VectorOf${type}* the_vec = (VectorOf${type}*)vect;\n\
-      if (handle->index < the_vec->size()) {\n\
-          uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->UhdmType(), the_vec->at(handle->index));\n\
-	  handle->index++;\n\
-          return (vpiHandle) h;\n\
-      }\n\
+	append vpi_scan_body "
+  if (handle->type == uhdm${name}) {
+    VectorOf${type}* the_vec = (VectorOf${type}*)vect;
+    if (handle->index < the_vec->size()) {
+      uhdm_handle* h = new uhdm_handle(((BaseClass*)the_vec->at(handle->index))->UhdmType(), the_vec->at(handle->index));
+      handle->index++;
+      return (vpiHandle) h;
+    }
   }"
     }
     return $vpi_scan_body
