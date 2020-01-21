@@ -38,7 +38,7 @@ namespace UHDM {
    
 <FACTORIES_METHODS> 
     std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
-    vpiHandle MakeUhdmHandle(unsigned int type, const void* object) { return uhdm_handleMaker.Make(type, object); }
+    vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) { return uhdm_handleMaker.Make(type, object); }
     
     VectorOfanyFactory anyVectMaker;
     SymbolFactory symbolMaker;

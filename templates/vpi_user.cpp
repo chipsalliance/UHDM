@@ -28,7 +28,7 @@
 #include <map>
 #include <string>
 #include <vector>
-
+#include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
 typedef void any;
@@ -51,7 +51,7 @@ vpiHandle vpi_handle_by_index (vpiHandle object,
   return 0;
 }
 
-static vpiHandle NewHandle (unsigned int type, const void *object) {
+static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
   return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
 }
 

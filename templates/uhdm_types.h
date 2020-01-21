@@ -24,17 +24,11 @@
  */
 
 #include <string>
-#include <vector>
-#ifndef UHDM_H
-#define UHDM_H
-#include "headers/uhdm_types.h"
-#include "include/sv_vpi_user.h"
-#include "include/vhpi_user.h"
-#include "headers/vpi_uhdm.h"
-#include "headers/containers.h"
+#ifndef UHDM_TYPES_H
+#define UHDM_TYPES_H
 
-<INCLUDE_FILES>
-
-#include "headers/Serializer.h"
+typedef enum {
+<DEFINES>
+} UHDM_OBJECT_TYPE;
 
 #endif

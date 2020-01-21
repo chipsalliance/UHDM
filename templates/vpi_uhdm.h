@@ -36,9 +36,9 @@ namespace UHDM {
 };
 
 struct uhdm_handle {
-  uhdm_handle(unsigned int type, const void* object) :
+  uhdm_handle(UHDM_OBJECT_TYPE type, const void* object) :
     type(type), object(object), index(0) {}
-  const unsigned int type;
+  const UHDM_OBJECT_TYPE type;
   const void* object;
   unsigned int index;
 };
@@ -46,7 +46,7 @@ struct uhdm_handle {
 class uhdm_handleFactory {
   friend UHDM::Serializer;
   public:
-  vpiHandle Make(unsigned int type, const void* object) {
+  vpiHandle Make(UHDM_OBJECT_TYPE type, const void* object) {
     uhdm_handle* obj = new uhdm_handle(type, object);
     objects_.push_back(obj);
     return (vpiHandle) obj;
@@ -69,7 +69,7 @@ namespace UHDM {
 
     Serializer* GetSerializer() { return serializer_; }
 
-    virtual unsigned int UhdmType() const = 0;
+    virtual UHDM_OBJECT_TYPE UhdmType() const = 0;
 
     virtual const BaseClass* VpiParent() const = 0;
 
