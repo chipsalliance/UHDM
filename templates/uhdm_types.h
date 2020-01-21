@@ -17,7 +17,7 @@
  */
 
 /*
- * File:   <CLASSNAME>.h
+ * File:   uhdm_types.h
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
