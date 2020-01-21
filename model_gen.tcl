@@ -302,7 +302,7 @@ proc printMembers { type vpi card } {
 	    set pointer "*"
 	}
 	if {$type == "std::string"} {
-	    append members "\n    unsigned int ${vpi}_;\n"
+	    append members "\n    SymbolFactory::ID ${vpi}_;\n"
 	} else {
 	    append members "\n    ${type}${pointer} ${vpi}_;\n"	    
 	}
