@@ -241,8 +241,10 @@ proc printMethods { classname type vpi card {real_type ""} } {
     }
     if {$card == "1"} {
 	set pointer ""
+	set const ""
 	if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string")} {
 	    set pointer "*"
+	    set const "const "
 	}
 
 	
@@ -252,7 +254,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
 	    append methods_cpp "\n    const ${type}${pointer}\\& ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
 	    append methods_cpp "\n    bool ${classname}::[string toupper ${vpi} 0 0](${type}${pointer} data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n" 
 	} else {
-	    append methods "\n    ${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"	    
+	    append methods "\n    ${const}${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"	    
 	    if {$vpi == "vpiParent"} {
 		append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data) final {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->UhdmType(); return true;}\n"
 	    } else {

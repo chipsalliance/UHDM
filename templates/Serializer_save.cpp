@@ -40,12 +40,12 @@ typedef void any;
 
 using namespace UHDM;
 
-void Serializer::SetId(BaseClass* p, unsigned long id) {
+void Serializer::SetId(const BaseClass* p, unsigned long id) {
   allIds_.insert(std::make_pair(p, id));
 }
 
-unsigned long Serializer::GetId(BaseClass* p) {
-  std::unordered_map<BaseClass*, unsigned long>::iterator itr = allIds_.find(p);
+unsigned long Serializer::GetId(const BaseClass* p) {
+  std::unordered_map<const BaseClass*, unsigned long>::iterator itr = allIds_.find(p);
   if (itr == allIds_.end()) {
     unsigned long tmp = incrId_;
     allIds_.insert(std::make_pair(p, incrId_));
