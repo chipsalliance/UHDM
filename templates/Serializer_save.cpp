@@ -26,6 +26,7 @@
 #include <vector>
 #include <unordered_map>
 typedef void any;
+#include "headers/uhdm_types.h"
 #include "headers/containers.h"
 #include "headers/uhdm.h"
 #include <sys/types.h>

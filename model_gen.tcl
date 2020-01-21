@@ -231,6 +231,9 @@ proc printMethods { classname type vpi card {real_type ""} } {
     if {$type == "string"} {
 	set type "std::string"
     }
+    if {$vpi == "uhdmType"} {
+	set type "UHDM_OBJECT_TYPE"
+    }
     set final ""
     if {$vpi == "vpiParent" || $vpi == "uhdmParentType" || $vpi == "uhdmType" || $vpi == "vpiLineNo" || $vpi == "vpiFile" } {
 	set final " final"
@@ -431,7 +434,7 @@ proc defineType { def name vpiType } {
     if [info exist ID($name)] {
 	set id $ID($name)
 	if {$def != 0} {
-	    set define "#define $name $id"
+	    #set define "$name = $id,"
 	    set DEFINE_ID($id) $name
 	    set DEFINE_NAME($name) $id
 	}
@@ -442,7 +445,7 @@ proc defineType { def name vpiType } {
 	incr OBJECTID
 	set ID($name) $id
 	if {$def != 0} {
-	    set define "#define $name $id"
+	    set define "$name = $id,"
 	    set DEFINE_ID($id) $name
 	    set DEFINE_NAME($name) $id
 	}
@@ -870,11 +873,19 @@ proc generate_code { models } {
 
     append uhdm_name_map $name_id_map
     
-    regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
     regsub -all {<INCLUDE_FILES>} $uhdm_content $headers uhdm_content
     puts $uhdmId $uhdm_content
     close $uhdmId
 
+    # uhdm_types.h
+    set fid [open "[exec_path]/templates/uhdm_types.h"]
+    set uhdm_content [read $fid]
+    close $fid 
+    set uhdmId [open "[exec_path]/headers/uhdm_types.h" "w"]
+    regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
+    puts $uhdmId $uhdm_content
+    close $uhdmId
+    
     # containers.h
     set fid [open "[exec_path]/templates/containers.h"]
     set container_content [read $fid]
