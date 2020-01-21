@@ -56,8 +56,6 @@ class uhdm_handleFactory {
   };
 
 namespace UHDM {
-  typedef std::vector<std::string> Id2SymbolMap;
-  typedef std::unordered_map<std::string, unsigned long> Symbol2IdMap;
   typedef void any;
 
   class BaseClass {
@@ -90,20 +88,25 @@ namespace UHDM {
     virtual bool VpiLineNo(unsigned int data) = 0;
 
   protected:
-    // This base class or any virtual class should not contain actual data fields that need
-    // to be serialized. Only leaf classes contain serializable fields.
-    // Exception, this runtime-only field that is not actually serialized: 
     Serializer* serializer_;
   };
   
   class SymbolFactory {
     friend Serializer;
   public:
-    unsigned int Make(const std::string& symbol);
-    const std::string& GetSymbol(unsigned int id);
-    unsigned int GetId(const std::string& symbol);
+
+    typedef unsigned int ID;
+    typedef std::vector<std::string> Id2SymbolMap;
+    typedef std::unordered_map<std::string, ID> Symbol2IdMap;
+
+    ID Make(const std::string& symbol);
+
+    const std::string& GetSymbol(ID id);
+
+    ID GetId(const std::string& symbol);
+
   private:
-    unsigned int idCounter_ = 0;
+    ID idCounter_ = 0;
     std::string bad_symbol_ = "@@BAD_SYMBOL@@";
     Id2SymbolMap id2SymbolMap_;
     Symbol2IdMap symbol2IdMap_;
