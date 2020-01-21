@@ -71,9 +71,9 @@ namespace UHDM {
 
     Serializer* GetSerializer() { return serializer_; }
 
-    virtual unsigned int UhdmType() = 0;
+    virtual unsigned int UhdmType() const = 0;
 
-    virtual BaseClass* VpiParent() const = 0;
+    virtual const BaseClass* VpiParent() const = 0;
 
     virtual bool VpiParent(BaseClass* data) = 0;
 
@@ -83,7 +83,7 @@ namespace UHDM {
 
     virtual const std::string& VpiFile() const = 0;
 
-    virtual bool VpiFile(std::string data) = 0;
+    virtual bool VpiFile(const std::string& data) = 0;
 
     virtual unsigned int VpiLineNo() const = 0;
 

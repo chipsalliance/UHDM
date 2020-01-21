@@ -47,9 +47,9 @@ namespace UHDM {
  
   private:
     BaseClass* GetObject(unsigned int objectType, unsigned int index);
-    void SetId(BaseClass* p, unsigned long id);
-    unsigned long GetId(BaseClass* p) ;
-    std::unordered_map<BaseClass*, unsigned long> allIds_;
+    void SetId(const BaseClass* p, unsigned long id);
+    unsigned long GetId(const BaseClass* p) ;
+    std::unordered_map<const BaseClass*, unsigned long> allIds_;
     unsigned long incrId_;
   };
 };
