@@ -231,6 +231,10 @@ proc printMethods { classname type vpi card {real_type ""} } {
     if {$type == "string"} {
 	set type "std::string"
     }
+    set final ""
+    if {$vpi == "vpiParent" || $vpi == "uhdmParentType" || $vpi == "uhdmType" || $vpi == "vpiLineNo" || $vpi == "vpiFile" } {
+	set final " final"
+    }
     set check ""
     if {$type == "any"} {
 	set check "if (!${real_type}GroupCompliant(data)) return false;"
@@ -240,17 +244,19 @@ proc printMethods { classname type vpi card {real_type ""} } {
 	if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string")} {
 	    set pointer "*"
 	}
+
+	
 	if {$type == "std::string"} {
-	    append methods "\n    const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const;\n"
-	    append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data);\n"
+	    append methods "\n    const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const$final;\n"
+	    append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data)$final;\n"
 	    append methods_cpp "\n    const ${type}${pointer}\\& ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
 	    append methods_cpp "\n    bool ${classname}::[string toupper ${vpi} 0 0](${type}${pointer} data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n" 
 	} else {
-	    append methods "\n    ${type}${pointer} [string toupper ${vpi} 0 0]() const { return ${vpi}_; }\n"	    
+	    append methods "\n    ${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"	    
 	    if {$vpi == "vpiParent"} {
-		append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data) {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->UhdmType(); return true;}\n"
+		append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data) final {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->UhdmType(); return true;}\n"
 	    } else {
-		append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data) {${check} ${vpi}_ = data; return true;}\n"
+		append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data)$final {${check} ${vpi}_ = data; return true;}\n"
 	    }
 	}
     } elseif {$card == "any"} {
