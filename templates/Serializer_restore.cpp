@@ -17,26 +17,28 @@
  */
 
 /*
- * File:   Serializer.cpp
+ * File:   Serializer_restore.cpp
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#include <vector>
-#include <map>
-typedef void any;
-#include "headers/uhdm_types.h"
-#include "headers/containers.h"
-#include "headers/uhdm.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "UHDM.capnp.h"
+
+#include <vector>
+#include <map>
+#include <iostream>
+
 #include <capnp/message.h>
 #include <capnp/serialize-packed.h>
-#include <iostream>
+
+#include "headers/uhdm_types.h"
+#include "headers/containers.h"
+#include "headers/uhdm.h"
+#include "UHDM.capnp.h"
 #include "headers/Serializer.h"
 
 using namespace UHDM;

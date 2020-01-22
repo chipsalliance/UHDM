@@ -28,10 +28,11 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "headers/uhdm_types.h"
+
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
-typedef void any;
+
+#include "headers/uhdm_types.h"
 #include "headers/containers.h"
 #include "headers/vpi_uhdm.h"
 #include "headers/uhdm.h"

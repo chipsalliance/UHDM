@@ -861,7 +861,7 @@ proc generate_code { models } {
     close $fid 
     set uhdmId [open "[exec_path]/headers/uhdm.h" "w"]
 
-    set name_id_map "\nstd::string UhdmName(unsigned int type) \{
+    set name_id_map "\nstd::string UHDM::UhdmName(UHDM_OBJECT_TYPE type) \{
       switch (type) \{
 "
     foreach id [array names DEFINE_ID] {
@@ -925,6 +925,12 @@ proc generate_code { models } {
     set capnp_path [file dirname $capnp_path]
     
     exec sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [exec_path]/src/UHDM.capnp"
+
+    # BaseClass.h
+    exec sh -c "cp -rf [exec_path]/templates/BaseClass.h [exec_path]/headers/BaseClass.h"
+
+    # SymbolFactory.h
+    exec sh -c "cp -rf [exec_path]/templates/SymbolFactory.h [exec_path]/headers/SymbolFactory.h"
 
     # SymbolFactory.cpp
     exec sh -c "cp -rf [exec_path]/templates/SymbolFactory.cpp [exec_path]/src/SymbolFactory.cpp"

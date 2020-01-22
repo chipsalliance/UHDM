@@ -26,6 +26,11 @@
 #ifndef UHDM_<UPPER_CLASSNAME>_H
 #define UHDM_<UPPER_CLASSNAME>_H
 
+#include "SymbolFactory.h"
+#include "BaseClass.h"
+#include "containers.h"
+#include "uhdm.h"
+
 namespace UHDM {
 
   class <CLASSNAME> : public <EXTENDS> {
