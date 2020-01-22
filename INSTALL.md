@@ -14,6 +14,8 @@
 
 * UHDM Source code
   * git clone https://github.com/alainmarcel/UHDM.git
+  * cd UHDM
+  * git submodule update --init --recursive
 
 * Build
   * make
