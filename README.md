@@ -18,6 +18,7 @@ Universal Hardware Data Model
 ```bash
  * git clone https://github.com/alainmarcel/UHDM.git
  * cd UHDM
+ * git submodule update --init --recursive
  * make all
 ```
 
