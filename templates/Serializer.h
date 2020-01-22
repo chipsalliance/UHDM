@@ -27,6 +27,8 @@
 #ifndef SERIALIZER_UHDM_H
 #define SERIALIZER_UHDM_H
 
+#include "uhdm.h"
+
 namespace UHDM {
 
   class Serializer {

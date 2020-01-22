@@ -17,26 +17,29 @@
  */
 
 /*
- * File:   Serializer.cpp
+ * File:   SymbolFactory.cpp
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
 
-#include <vector>
-#include <map>
-typedef void any;
-#include "headers/containers.h"
-#include "headers/uhdm.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "UHDM.capnp.h"
-#include <capnp/message.h>
-#include <capnp/serialize-packed.h>
+
+#include <vector>
+#include <map>
 #include <iostream>
 
+#include <capnp/message.h>
+#include <capnp/serialize-packed.h>
+
+#include "headers/uhdm_types.h"
+#include "SymbolFactory.h"
+#include "headers/containers.h"
+#include "headers/uhdm.h"
+#include "UHDM.capnp.h"
 
 using namespace UHDM;
 

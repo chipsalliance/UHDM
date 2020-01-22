@@ -23,12 +23,19 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
-#include <string>
 #ifndef UHDM_TYPES_H
 #define UHDM_TYPES_H
 
-typedef enum {
+namespace UHDM {
+
+  typedef void any;
+
+  typedef enum {
 <DEFINES>
-} UHDM_OBJECT_TYPE;
+  } UHDM_OBJECT_TYPE;
+  
+  std::string UhdmName(UHDM_OBJECT_TYPE type);
+
+};
 
 #endif

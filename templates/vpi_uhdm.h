@@ -29,16 +29,16 @@
 
 #include <unordered_map>
 
-std::string UhdmName(unsigned int type);
+#include "uhdm_types.h"
 
 namespace UHDM {
   class Serializer;  
 };
 
 struct uhdm_handle {
-  uhdm_handle(UHDM_OBJECT_TYPE type, const void* object) :
+  uhdm_handle(UHDM::UHDM_OBJECT_TYPE type, const void* object) :
     type(type), object(object), index(0) {}
-  const UHDM_OBJECT_TYPE type;
+  const UHDM::UHDM_OBJECT_TYPE type;
   const void* object;
   unsigned int index;
 };
@@ -46,86 +46,13 @@ struct uhdm_handle {
 class uhdm_handleFactory {
   friend UHDM::Serializer;
   public:
-  vpiHandle Make(UHDM_OBJECT_TYPE type, const void* object) {
+  vpiHandle Make(UHDM::UHDM_OBJECT_TYPE type, const void* object) {
     uhdm_handle* obj = new uhdm_handle(type, object);
     objects_.push_back(obj);
     return (vpiHandle) obj;
   }
   private:
     std::vector<uhdm_handle*> objects_;
-  };
-
-namespace UHDM {
-  typedef void any;
-
-  class BaseClass {
-  public:
-    // Use implicit constructor to initialize all members
-    // BaseClass()
-    
-    virtual ~BaseClass(){}
-
-    void SetSerializer(Serializer* serial) { serializer_ = serial; }
-
-    Serializer* GetSerializer() { return serializer_; }
-
-    virtual UHDM_OBJECT_TYPE UhdmType() const = 0;
-
-    virtual const BaseClass* VpiParent() const = 0;
-
-    virtual bool VpiParent(BaseClass* data) = 0;
-
-    virtual unsigned int UhdmParentType() const = 0;
-
-    virtual bool UhdmParentType(unsigned int data) = 0;
-
-    virtual const std::string& VpiFile() const = 0;
-
-    virtual bool VpiFile(const std::string& data) = 0;
-
-    virtual unsigned int VpiLineNo() const = 0;
-
-    virtual bool VpiLineNo(unsigned int data) = 0;
-
-  protected:
-    Serializer* serializer_;
-  };
-  
-  class SymbolFactory {
-    friend Serializer;
-  public:
-
-    typedef unsigned int ID;
-    typedef std::vector<std::string> Id2SymbolMap;
-    typedef std::unordered_map<std::string, ID> Symbol2IdMap;
-
-    ID Make(const std::string& symbol);
-
-    const std::string& GetSymbol(ID id);
-
-    ID GetId(const std::string& symbol);
-
-  private:
-    ID idCounter_ = 0;
-    std::string bad_symbol_ = "@@BAD_SYMBOL@@";
-    Id2SymbolMap id2SymbolMap_;
-    Symbol2IdMap symbol2IdMap_;
-  };
-
-  class VectorOfanyFactory {
-  friend Serializer;
-  public:
-    std::vector<UHDM::any*>* Make() {
-      std::vector<UHDM::any*>* obj = new std::vector<UHDM::any*>();
-    objects_.push_back(obj);
-    return obj;
-  }
-  private:
-    std::vector<std::vector<UHDM::any*>*> objects_;
-  };
-
 };
-
-
 
 #endif
