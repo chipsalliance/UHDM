@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "variable loads" formal description
+# Universal Hardware Data Model (UHDM) "variable loads group" formal description
  
-- class_def: variable_loads
+- group_def: variable_loads_group
+  - obj_ref: force
+  - obj_ref: cont_assign
+  - obj_ref: cont_assign_bit
+  - obj_ref: assign_stmt
 

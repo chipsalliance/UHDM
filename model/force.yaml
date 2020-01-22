@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "variable drivers" formal description
+# Universal Hardware Data Model (UHDM) "force" formal description
  
-- class_def: variable_drivers
+- obj_def: force 

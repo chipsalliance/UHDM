@@ -12,6 +12,7 @@ named_begin.yaml
 named_fork.yaml
 fork.yaml
 for.yaml
+force.yaml
 foreach_stmt.yaml
 gen_scope.yaml
 expr_dist_group.yaml
@@ -23,9 +24,9 @@ part_select.yaml
 actual_group.yaml
 ref_obj.yaml
 var_select.yaml
+variable_drivers_group.yaml
+variable_loads_group.yaml
 variables.yaml
-variable_drivers.yaml
-variable_loads.yaml
 short_real_var.yaml
 real_var.yaml
 byte_var.yaml
@@ -35,6 +36,8 @@ long_int_var.yaml
 integer_var.yaml
 time_var.yaml
 array_var.yaml
+reg_array.yaml
+reg.yaml
 enum_struct_union_packed_var_group.yaml
 packed_array_var.yaml
 bit_var.yaml
@@ -52,6 +55,8 @@ function.yaml
 modport.yaml
 interface_tf_decl.yaml
 cont_assign.yaml
+cont_assign_bit.yaml
+assign_stmt.yaml
 expr_ref_obj_group.yaml
 ports.yaml
 port.yaml
