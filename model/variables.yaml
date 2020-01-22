@@ -90,15 +90,15 @@
     vpi: vpiPortInst
     type: ports
     card: any
-  - class_ref: variable_drivers
+  - group_ref: variable_drivers
     name: variable drivers
     vpi: vpiDriver
-    type: variable_drivers
+    type: variable_drivers_group
     card: any
-  - class_ref: variable_loads
+  - group_ref: variable_loads
     name: variable loads
     vpi: vpiLoad
-    type: variable_loads
+    type: variable_loads_group
     card: any
   - obj_ref: prim_terms
     name: prim term

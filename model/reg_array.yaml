@@ -12,42 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "var select" formal description
+# Universal Hardware Data Model (UHDM) "reg array" formal description
  
-- obj_def: var_select
- - property: constant_selection
-    name: constant selection
-    vpi: vpiConstantSelect
+- obj_def: reg_array
+  - property: is_a_memory
+    name: is a memory
+    vpi: vpiIsMemory
     type: bool
     card: 1
-  - property: name
-    name: name
-    vpi: vpiName
-    type: string
-    card: 1
-  - property: full_name
-    name: full name
-    vpi: vpiFullName
-    type: string
-    card: 1  
-  - property: size
-    name: size
-    vpi: vpiSize
-    type: int
-    card: 1
-  - class_ref: expr
-    name: expr
-    vpi: vpiIndex
+  - class_ref: left_expr
+    name: left range
+    vpi: vpiLeftRange
     type: expr
     card: 1
-  - class_ref: exprs
-    name: exprs
-    vpi: vpiIndex
+  - class_ref: right_expr
+    name: right range
+    vpi: vpiRightRange
     type: expr
+    card: 1
+  - obj_ref: regs
+    name: regs
+    vpi: vpiMemoryWord
+    type: reg
     card: any
-  - class_ref: typespec
-    name: typespec
-    vpi: vpiTypespec
-    type: typespec
-    card: 1
-    

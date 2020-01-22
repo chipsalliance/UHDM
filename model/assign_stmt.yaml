@@ -12,22 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "range" formal description
+# Universal Hardware Data Model (UHDM) "assign_stmt" formal description
  
-- obj_def: range
-  - property: size
-    name: size
-    vpi: vpiSize
-    type: int
-    card: 1
-  - class_ref: left_expr
-    name: left range
-    vpi: vpiLeftRange
-    type: expr
-    card: 1
-  - class_ref: right_expr
-    name: right range
-    vpi: vpiRightRange
-    type: expr
-    card: 1
+- obj_def: assign_stmt
 
