@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "class_typespec" formal description
-# class_typespec seems to inherit from "scope" and "typespec"
+# Universal Hardware Data Model (UHDM) "enum_struct_union_packed_array_typespec_group" formal description
+ 
+- group_def: enum_struct_union_packed_array_typespec_group
+  - obj_ref: enum_typespec
+  - obj_ref: struct_typespec
+  - obj_ref: union_typespec
+  - obj_ref: packed_array_typespec
 
-- obj_def: class_typespec
-  - extends: typespec
+
 

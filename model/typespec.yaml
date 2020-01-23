@@ -15,3 +15,18 @@
 # Universal Hardware Data Model (UHDM) "typespec" formal description
  
 - class_def: typespec
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - class_ref: typedef_alias
+    name: typedef alias
+    vpi: vpiTypedefAlias
+    type: typespec
+    card: 1
+  - class_ref: instance
+    name: instance
+    vpi: vpiInstance
+    type: instance
+    card: 1

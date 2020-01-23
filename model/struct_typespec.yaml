@@ -12,9 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "class_typespec" formal description
-# class_typespec seems to inherit from "scope" and "typespec"
-
-- obj_def: class_typespec
+# Universal Hardware Data Model (UHDM) "struct_typespec" formal description
+ 
+- obj_def: struct_typespec
   - extends: typespec
+  - property: packed
+    name: packed
+    vpi: vpiPacked
+    type: bool
+    card: 1
+ 
 

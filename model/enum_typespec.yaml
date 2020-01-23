@@ -12,9 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "class_typespec" formal description
-# class_typespec seems to inherit from "scope" and "typespec"
-
-- obj_def: class_typespec
+# Universal Hardware Data Model (UHDM) "enum_typespec" formal description
+ 
+- obj_def: enum_typespec
   - extends: typespec
-
+  - class_ref: base_typespec
+    name: base typespec
+    vpi: vpiBaseTypespec
+    type: typespec
+    card: 1
+  - obj_ref: enum_consts
+    name: enum consts
+    vpi: vpiEnumConst
+    type: enum_const
+    card: any

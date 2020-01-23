@@ -73,6 +73,7 @@ set (uhdm_SRC
   ${PROJECT_SOURCE_DIR}/src/expr_ref_obj_group.cpp
   ${PROJECT_SOURCE_DIR}/src/variable_drivers_group.cpp
   ${PROJECT_SOURCE_DIR}/src/variable_loads_group.cpp
+  ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
   )
 
 foreach( src_file ${uhdm_SRC} )
