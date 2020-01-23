@@ -27,6 +27,10 @@
 #include <vector>
 #ifndef UHDM_H
 #define UHDM_H
+
+// Missing defines from vpi_user.h
+#define vpiInterfaceTypespec 3000
+
 #include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"

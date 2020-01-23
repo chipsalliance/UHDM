@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,21 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "typespec" formal description
+# Universal Hardware Data Model (UHDM) "interface_typespec" formal description
  
-- class_def: typespec
-  - property: name
-    name: name
-    vpi: vpiName
-    type: string
-    card: 1
-  - class_ref: typedef_alias
-    name: typedef alias
-    vpi: vpiTypedefAlias
-    type: typespec
-    card: 1
-  - class_ref: instance
-    name: instance
-    vpi: vpiInstance
-    type: instance
-    card: 1
+- obj_def: interface_typespec
+  - extends: typespec
+
