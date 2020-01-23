@@ -13,7 +13,8 @@
 # limitations under the License.
 
 # Universal Hardware Data Model (UHDM) "class_typespec" formal description
- 
+# class_typespec seems to inherit from "scope" and "typespec"
+
 - obj_def: class_typespec
   - extends: typespec
 
