@@ -60,6 +60,7 @@ add_custom_command(
    )
 
 set (uhdm_SRC
+  ${PROJECT_SOURCE_DIR}/src/vpi_visitor.cpp
   ${PROJECT_SOURCE_DIR}/src/vpi_user.cpp
   ${PROJECT_SOURCE_DIR}/src/SymbolFactory.cpp
   ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp

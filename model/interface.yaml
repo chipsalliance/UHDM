@@ -68,11 +68,11 @@
     card: any
   - obj_ref: interfaces
     name: interface
-    vpi: uhdminterface
+    vpi: vpiInterface
     type: interface
     card: any
   - obj_ref: interface_arrays
-    vpi: uhdminterface_array
+    vpi: vpiInterfaceArray
     name: interface array
     type: interface_array
     card: any

@@ -38,7 +38,7 @@
     card: 1
   - obj_ref: interfaces
     name: interface
-    vpi: uhdminterface
+    vpi: vpiInterface
     type: interface
     card: any
   - class_ref: expr_dist
@@ -47,7 +47,7 @@
     type: expr_dist
     card: 1
   - obj_ref: interface_arrays
-    vpi: uhdminterface_array
+    vpi: vpiInterfaceArray
     name: interface array
     type: interface_array
     card: any
@@ -62,6 +62,6 @@
     type: cont_assign
     card: any
   - obj_ref: clocking_blocks
-    vpi: uhdmclocking_block
+    vpi: vpiClockingBlock
     type: clocking_block
     card: any
