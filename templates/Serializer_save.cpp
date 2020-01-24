@@ -61,6 +61,13 @@ unsigned long Serializer::GetId(const BaseClass* p) {
 
 <UHDM_NAME_MAP>
 
+std::string UHDM::VpiTypeName(vpiHandle h) {
+  uhdm_handle* handle = (uhdm_handle*) h;
+  BaseClass* obj = (BaseClass*) handle->object;
+  return UhdmName(obj->UhdmType());
+}
+
+
 <METHODS_CPP>
 
 BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {

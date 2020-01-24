@@ -26,6 +26,9 @@
 #ifndef UHDM_TYPES_H
 #define UHDM_TYPES_H
 
+#include <string>
+#include "vpi_user.h"
+
 namespace UHDM {
 
   typedef void any;
@@ -36,6 +39,8 @@ namespace UHDM {
   
   std::string UhdmName(UHDM_OBJECT_TYPE type);
 
+  std::string VpiTypeName(vpiHandle h);
+  
 };
 
 #endif

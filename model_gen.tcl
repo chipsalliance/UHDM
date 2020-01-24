@@ -342,6 +342,7 @@ proc printIterateBody { name classname vpi card } {
       else return 0;
     }
   }"
+    printVpiVisitor $classname $vpi $card 	
     return $vpi_iterate_body
    }
 }
@@ -397,6 +398,24 @@ proc printGetStrBody {classname type vpi card} {
   }"
     }
     return $vpi_get_str_body
+}
+
+proc printVpiVisitor {classname vpi card} {
+    global VISITOR
+    set vpi_visitor ""
+    if ![info exist VISITOR($classname)] {
+	set vpi_visitor "    vpiHandle itr;
+"
+    } 
+    if {$card == 1} {
+    } else {
+	append vpi_visitor "    itr = vpi_iterate($vpi,obj_h); 
+    while (vpiHandle obj = vpi_scan(itr) ) {
+      visit_object(obj, subobject_indent);
+    }
+" 
+    }
+    append VISITOR($classname) $vpi_visitor
 }
 
 proc makeVpiName { classname } {
@@ -505,7 +524,7 @@ proc generate_group_checker { model } {
 }
 
 proc generate_code { models } {
-    global ID BASECLASS DEFINE_ID working_dir methods_cpp
+    global ID BASECLASS DEFINE_ID working_dir methods_cpp VISITOR
     puts "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
@@ -1016,6 +1035,29 @@ $RESTORE($class)
 	puts $serializerId $serializer_content
 	close $serializerId
     }
+
+    # vpi_visitor.cpp
+    set fid [open "[exec_path]/templates/vpi_visitor.cpp"]
+    set visitor_cpp [read $fid]
+    close $fid
+    set vpi_visitor ""
+    foreach classname [array name VISITOR] {
+	set vpiName [makeVpiName $classname]
+	if {$vpiName == "vpiForkStmt"} {
+	    set vpiName "vpiFork"
+	} elseif {$vpiName == "vpiIoDecl"} {
+	    set vpiName "vpiIODecl"
+	} 
+	append vpi_visitor "  if (objectType == $vpiName) {
+$VISITOR($classname)
+  }
+"
+    } 
+    regsub {<OBJECT_VISITORS>} $visitor_cpp $vpi_visitor visitor_cpp
+    set visitorId [open "[exec_path]/src/vpi_visitor.cpp" "w"]
+    puts $visitorId $visitor_cpp
+    close $visitorId
+    
 }
 
 proc debug_models { models } {

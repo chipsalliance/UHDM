@@ -29,7 +29,9 @@
 #define UHDM_H
 
 // Missing defines from vpi_user.h
-#define vpiInterfaceTypespec 3000
+#define vpiDesign 3000
+#define vpiInterfaceTypespec 3001
+#define vpiNets 3002
 
 #include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"
