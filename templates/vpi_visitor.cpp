@@ -46,9 +46,18 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
   unsigned int subobject_indent = indent + 2;
   std::string spaces;
   for (unsigned int i = 0; i < indent; i++) spaces += " ";
+  std::string fileName = "";
+  std::string lineNo = "";
+  if (unsigned int l = vpi_get(vpiLineNo, obj_h)) {
+    lineNo = ", line:" + std::to_string(l);
+  }
+  unsigned int objType = vpi_get(vpiType, obj_h);
+  if (objType == vpiModule || objType == vpiProgram || objType == vpiClassDefn || objType == vpiPackage ||
+      objType == vpiInterface || objType == vpiUdp) {
+    fileName = ", file:" +  std::string(vpi_get_str(vpiFile, obj_h));
+  }
   result += spaces + UHDM::VpiTypeName(obj_h) + ": " + std::string(vpi_get_str(vpiName, obj_h)) +
-    ", file:" +  std::string(vpi_get_str(vpiFile, obj_h)) +
-    ", line:" + std::to_string(vpi_get(vpiLineNo, obj_h)) + "\n";
+    fileName + lineNo + "\n";
   unsigned int objectType = vpi_get(vpiType, obj_h);				     
 <OBJECT_VISITORS>
   return result;

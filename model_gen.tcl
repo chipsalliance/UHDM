@@ -389,6 +389,26 @@ proc printGetHandleBody { classname type vpi object card } {
     return $vpi_get_handle_body
 }
 
+proc printGetStrVisitor {classname type vpi card} {
+    set vpi_get_str_body ""
+    if {($card == 1) && ($type == "string") && ($vpi != "vpiFile")} {
+	append vpi_get_str_body "    result += spaces + std::string(\" $vpi:\") + vpi_get_str($vpi, obj_h) + std::string(\"\\n\");
+"
+    }
+    return $vpi_get_str_body
+}
+
+proc printGetVisitor {classname type vpi card} {
+    set vpi_get_body ""
+    if {($card == 1) && ($type != "string") && ($vpi != "vpiLineNo") && ($vpi != "vpiType")} {
+	append vpi_get_body "    if (vpi_get($vpi, obj_h)) 
+      result += spaces + std::string(\" $vpi:\") + std::to_string(vpi_get($vpi, obj_h)) + std::string(\"\\n\");
+"
+    }
+    return $vpi_get_body
+}
+
+
 proc printGetStrBody {classname type vpi card} {
     set vpi_get_str_body ""
     if {$card == 1 && ($type == "string")} {
@@ -419,12 +439,15 @@ proc printVpiVisitor {classname vpi card} {
 	append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
     if (itr)
       result += visit_object(itr, subobject_indent);
+    vpi_free_object(itr);
 "	
     } else {
 	append vpi_visitor "    itr = vpi_iterate($vpi,obj_h); 
     while (vpiHandle obj = vpi_scan(itr) ) {
       result += visit_object(obj, subobject_indent);
+      vpi_free_object(obj);
     }
+    vpi_free_object(itr);
 " 
     }
     append VISITOR($classname) $vpi_visitor
@@ -806,11 +829,13 @@ proc generate_code { models } {
 	if [info exist vpi_get_str_body_inst($classname)] {
 	    foreach inst $vpi_get_str_body_inst($classname) {
 		append vpi_get_str_body [printGetStrBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		append VISITOR($classname) [printGetStrVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 	    }
 	}
 	if [info exist vpi_get_body_inst($classname)] {
 	    foreach inst $vpi_get_body_inst($classname) {
 		append vpi_get_body [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		append VISITOR($classname) [printGetVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 	    }
 	}
 
