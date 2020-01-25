@@ -419,12 +419,15 @@ proc printVpiVisitor {classname vpi card} {
 	append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
     if (itr)
       result += visit_object(itr, subobject_indent);
+    vpi_free_object(itr);
 "	
     } else {
 	append vpi_visitor "    itr = vpi_iterate($vpi,obj_h); 
     while (vpiHandle obj = vpi_scan(itr) ) {
       result += visit_object(obj, subobject_indent);
+      vpi_free_object(obj);
     }
+    vpi_free_object(itr);
 " 
     }
     append VISITOR($classname) $vpi_visitor
