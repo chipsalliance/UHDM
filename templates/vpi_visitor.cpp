@@ -44,7 +44,9 @@ using namespace UHDM;
 std::string visit_object (vpiHandle obj_h, unsigned int indent) {
   std::string result;
   unsigned int subobject_indent = indent + 2;
-  result += UHDM::VpiTypeName(obj_h) + " name: " + std::string(vpi_get_str(vpiName, obj_h)) +
+  std::string spaces;
+  for (unsigned int i = 0; i < indent; i++) spaces += " ";
+  result += spaces + UHDM::VpiTypeName(obj_h) + ": " + std::string(vpi_get_str(vpiName, obj_h)) +
     ", file:" +  std::string(vpi_get_str(vpiFile, obj_h)) +
     ", line:" + std::to_string(vpi_get(vpiLineNo, obj_h)) + "\n";
   unsigned int objectType = vpi_get(vpiType, obj_h);				     
@@ -55,7 +57,7 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
 std::string visit_designs (std::vector<vpiHandle> designs) {
   std::string result;
   for (auto design : designs) {
-    visit_object(design, 0);
+    result += visit_object(design, 0);
   }
   return result;
 }

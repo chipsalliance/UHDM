@@ -122,10 +122,10 @@
     type: io_decl
     card: any
   - obj_ref: alias_stmts
-    vpi: uhdmalias_stmt
+    vpi: vpiAliasStmt
     type: alias_stmt
     card: any
   - obj_ref: clocking_blocks
-    vpi: uhdmclocking_block
+    vpi: vpiClockingBlock
     type: clocking_block
     card: any

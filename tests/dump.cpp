@@ -17,7 +17,7 @@
 
 using namespace UHDM;
 
-#include "test_helper.h"
+#include "vpi_visitor.h"
 
 int main (int argc, char** argv) {
   std::string fileName = "surelog.uhdm";
@@ -33,7 +33,7 @@ int main (int argc, char** argv) {
   std::cout << "Restore design from: " << fileName << std::endl;
   std::vector<vpiHandle> restoredDesigns = serializer.Restore(fileName);
   
-  std::string restored = print_designs(restoredDesigns);
+  std::string restored = visit_designs(restoredDesigns);
   std::cout << restored;
   return 0;
 };

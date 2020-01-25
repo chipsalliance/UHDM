@@ -380,7 +380,9 @@ proc printGetHandleBody { classname type vpi object card } {
 	append vpi_get_handle_body "
   if (handle->type == uhdm${classname}) {
      if (type == $vpi) {
-       return NewHandle($casted_object1->[string toupper ${object} 0 0]())->UhdmType(), $casted_object2->[string toupper ${object} 0 0]());
+       if ($casted_object1->[string toupper ${object} 0 0]())) 
+         return NewHandle($casted_object1->[string toupper ${object} 0 0]())->UhdmType(), $casted_object2->[string toupper ${object} 0 0]());
+       else return 0;
      } 
   }"
     }
@@ -406,12 +408,22 @@ proc printVpiVisitor {classname vpi card} {
     if ![info exist VISITOR($classname)] {
 	set vpi_visitor "    vpiHandle itr;
 "
-    } 
+    } else {
+	if ![regexp "vpiHandle itr;" $VISITOR($classname)] {
+	    set vpi_visitor "    vpiHandle itr;
+"
+	}
+    }
+    
     if {$card == 1} {
+	append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
+    if (itr)
+      result += visit_object(itr, subobject_indent);
+"	
     } else {
 	append vpi_visitor "    itr = vpi_iterate($vpi,obj_h); 
     while (vpiHandle obj = vpi_scan(itr) ) {
-      visit_object(obj, subobject_indent);
+      result += visit_object(obj, subobject_indent);
     }
 " 
     }
@@ -534,7 +546,7 @@ proc generate_code { models } {
 
     set vpi_iterate_body_all ""
     set vpi_scan_body ""
-    set vpi_handle_body ""
+    set vpi_handle_body_all ""
     set vpi_get_body ""
     set vpi_get_str_body ""
     set headers ""
@@ -618,7 +630,7 @@ proc generate_code { models } {
 	    append methods($classname) [printMethods $classname "unsigned int" vpiLineNo 1] 
 	    append members($classname) [printMembers "unsigned int" vpiLineNo 1]
 	    lappend vpi_get_body_inst($classname) [list $classname int vpiLineNo 1]
-	    append vpi_handle_body [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
+	    append vpi_handle_body($classname) [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
 	    lappend capnp_schema($classname) [list vpiParent UInt64]
 	    lappend capnp_schema($classname) [list uhdmParentType UInt64]
 	    lappend capnp_schema($classname) [list vpiFile UInt64]
@@ -708,8 +720,9 @@ proc generate_code { models } {
 		    append methods($classname) [printMethods $classname $type $name $card $real_type] 
 		    append members($classname) [printMembers $type $name $card]
 		    append vpi_iterate_body($classname) [printIterateBody $name $classname $vpi $card]
+		    append vpi_iterator($classname) "[list $vpi $card] "
                     append vpi_scan_body [printScanBody $name $classname $type $card]
-                    append vpi_handle_body [printGetHandleBody $classname uhdm${type} $vpi $name $card]
+                    append vpi_handle_body($classname) [printGetHandleBody $classname uhdm${type} $vpi $name $card]
 		    
 		    set Type [string toupper $type 0 0]
 		    regsub -all  {_} $Type "" Type		    
@@ -814,6 +827,10 @@ proc generate_code { models } {
 	if [info exist vpi_iterate_body($classname)] {
 	    append vpi_iterate_body_all $vpi_iterate_body($classname)
 	}
+	if [info exist vpi_handle_body($classname)] {
+	    append vpi_handle_body_all $vpi_handle_body($classname)
+	}
+	
 	while {$baseclass != ""} {
 	    
 	    # Capnp schema
@@ -858,7 +875,20 @@ proc generate_code { models } {
 	    if [info exist vpi_iterate_body($baseclass)] {
 		set vpi_iterate $vpi_iterate_body($baseclass)
 		regsub -all "= uhdm$baseclass" $vpi_iterate "= uhdm$classname" vpi_iterate
-		append vpi_iterate_body_all $vpi_iterate
+		append vpi_iterate_body_all $vpi_iterate 	
+	    }
+
+	    if [info exist vpi_handle_body($baseclass)] {
+		set vpi_handle $vpi_handle_body($baseclass)
+		regsub -all "= uhdm$baseclass" $vpi_handle "= uhdm$classname" vpi_handle
+		regsub -all "$baseclass\\*" $vpi_handle "$classname\*" vpi_handle		
+		append vpi_handle_body_all $vpi_handle 	
+	    }
+
+	    if [info exist vpi_iterator($baseclass)] {
+		foreach {vpi card} $vpi_iterator($baseclass) {
+		    printVpiVisitor $classname $vpi $card 	
+		}
 	    }
 
 	    # Parent class
@@ -884,7 +914,9 @@ proc generate_code { models } {
       switch (type) \{
 "
     foreach id [array names DEFINE_ID] {
-	append name_id_map "case $id: return \"$DEFINE_ID($id)\";\n"
+	set printed_name $DEFINE_ID($id)
+	regsub uhdm $printed_name "" printed_name
+	append name_id_map "case $id: return \"$printed_name\";\n"
     }
     append name_id_map "default: return \"NO TYPE\";
 \}
@@ -921,7 +953,7 @@ proc generate_code { models } {
     regsub {<HEADERS>} $vpi_user $headers vpi_user
     regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body_all vpi_user
     regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
-    regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body vpi_user
+    regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body_all vpi_user
     regsub -all {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
     regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
     
@@ -1036,6 +1068,8 @@ $RESTORE($class)
 	close $serializerId
     }
 
+    # cpi_visitor.h
+    exec sh -c "cp -rf [exec_path]/templates/vpi_visitor.h [exec_path]/headers/vpi_visitor.h"
     # vpi_visitor.cpp
     set fid [open "[exec_path]/templates/vpi_visitor.cpp"]
     set visitor_cpp [read $fid]
@@ -1045,6 +1079,8 @@ $RESTORE($class)
 	set vpiName [makeVpiName $classname]
 	if {$vpiName == "vpiForkStmt"} {
 	    set vpiName "vpiFork"
+	} elseif {$vpiName == "vpiForStmt"} {
+	    set vpiName "vpiFor"
 	} elseif {$vpiName == "vpiIoDecl"} {
 	    set vpiName "vpiIODecl"
 	} 
