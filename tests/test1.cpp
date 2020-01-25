@@ -26,6 +26,9 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   m3->VpiParent(m1);
   m3->VpiFile("fake3.sv");
   m3->VpiLineNo(30);
+  module* m4 = s.MakeModule();
+  m4->VpiName("m4");
+  m3->Instance(m4);
   VectorOfmodule* v1 = s.MakeModuleVec();
   v1->push_back(m1);
   d->AllModules(v1);
