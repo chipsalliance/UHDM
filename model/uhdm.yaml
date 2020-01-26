@@ -45,5 +45,19 @@
     vpi_obj: vpiPackage
     vpi: uhdmallPackages
     card: any
-
+  - class: allClasses
+    type: class_defn
+    vpi_obj: vpiClassDefn
+    vpi: uhdmallClasses
+    card: any
+  - class: allInterfaces
+    type: interface
+    vpi_obj: vpiInterface
+    vpi: uhdmallInterfaces
+    card: any
+  - class: allUdps
+    type: udp_defn
+    vpi_obj: vpiUdpDefn
+    vpi: uhdmallUdps
+    card: any
     
