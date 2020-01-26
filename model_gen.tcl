@@ -385,6 +385,7 @@ proc printGetHandleBody { classname type vpi object card } {
        else return 0;
      } 
   }"
+	printVpiVisitor $classname $vpi $card
     }
     return $vpi_get_handle_body
 }
@@ -424,6 +425,10 @@ proc printGetStrBody {classname type vpi card} {
 
 proc printVpiVisitor {classname vpi card} {
     global VISITOR
+    if {$vpi == "vpiParent"} {
+	# To prevent infinite loops in visitors
+	return
+    }
     set vpi_visitor ""
     if ![info exist VISITOR($classname)] {
 	set vpi_visitor "    vpiHandle itr;
