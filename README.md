@@ -9,6 +9,7 @@ Universal Hardware Data Model
  * Auto generate a concrete C++ implementation of the SystemVerilog (VHDL in future) Object Model following the IEEE standard object model
  * Auto generate a standard VPI interface as a facade to the C++ model
  * Auto generate a serialization/deserialization of the data model
+ * Auto generate a Visitor function that exercise the entire VPI interface (used in uhdm-dump executable)
  * The generated Object Model can, for a given design, be:
     * Populated by parsers like [Surelog](https://github.com/alainmarcel/Surelog/) or [Verible](https://github.com/google/verible)
     * Consumed by tools like Yosys or Verilator
@@ -74,10 +75,16 @@ Universal Hardware Data Model
 # Design Navigation
  * After Deserialization of the persisted design (Read [`test2.cpp`](tests/test2.cpp))
  * client applications need to use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`test_helper.h`](tests/test_helper.h))
+ * An example Visitor is auto-generated to print the content of the data model (src/vpi_visitor.cpp)
+ * The uhdm-dump executable creates a human readable view of the UHDM serialized data model.
 
 # Linking libuhdm.a to your application 
  * After instaling (make install), create your own executable (Read [`Makefile`](Makefile)) , ie:
  * $(CXX) -std=c++14 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/uhdm/libuhdm.a -lcapnp -lkj -ldl -lutil -lm -lrt -lpthread -o test_inst
+
+# Generating uhdm databases
+ * Surelog generates natively UHDM databases (surelog.uhdm)
+ * Other parsers are welcome to generate UHDM databases
 
 # Useful links
 * [SystemVerilog 2017](http://ecee.colorado.edu/~mathys/ecen2350/IntelSoftware/pdf/IEEE_Std1800-2017_8299595.pdf) - System Verilog Standard
