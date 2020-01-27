@@ -46,6 +46,7 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
   unsigned int subobject_indent = indent + 2;
   std::string spaces;
   for (unsigned int i = 0; i < indent; i++) spaces += " ";
+  std::string objectName = "";
   std::string fileName = "";
   std::string lineNo   = "";
   std::string parent   = "";
@@ -55,16 +56,18 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
   unsigned int objType = vpi_get(vpiType, obj_h);
   if (objType == vpiModule || objType == vpiProgram || objType == vpiClassDefn || objType == vpiPackage ||
       objType == vpiInterface || objType == vpiUdp) {
-    fileName = ", file:" +  std::string(vpi_get_str(vpiFile, obj_h));
+    if (const char* s = vpi_get_str(vpiFile, obj_h))
+      fileName = ", file:" +  std::string(s);
   }
   if (vpiHandle par = vpi_handle(vpiParent, obj_h)) {
-    std::string parentName = vpi_get_str(vpiName, par);
-    if (parentName != "") {
-      parent = ", parent:" + parentName;
+    if (const char* parentName = vpi_get_str(vpiName, par)) {
+      parent = ", parent:" + std::string(parentName);
     }
   }
-  result += spaces + UHDM::VpiTypeName(obj_h) + ": " + std::string(vpi_get_str(vpiName, obj_h)) +
-    fileName + lineNo + parent + "\n";
+  if (const char* s = vpi_get_str(vpiName, obj_h)) {
+    objectName = s;
+  }
+  result += spaces + UHDM::VpiTypeName(obj_h) + ": " + objectName + fileName + lineNo + parent + "\n";
   unsigned int objectType = vpi_get(vpiType, obj_h);				     
 <OBJECT_VISITORS>
   return result;

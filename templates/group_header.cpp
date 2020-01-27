@@ -31,6 +31,9 @@
 namespace UHDM {
 
   bool <GROUPNAME>GroupCompliant(any* item) {
+    if (item == nullptr) {
+      return true;
+    }
     BaseClass* the_item = (BaseClass*) item;
     UHDM_OBJECT_TYPE uhdmtype = the_item->UhdmType();
     if (<CHECKTYPE>) {

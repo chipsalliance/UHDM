@@ -392,8 +392,11 @@ proc printGetHandleBody { classname type vpi object card } {
 
 proc printGetStrVisitor {classname type vpi card} {
     set vpi_get_str_body ""
+    if {$vpi == "vpiName"} {
+	return ""
+    }
     if {($card == 1) && ($type == "string") && ($vpi != "vpiFile")} {
-	append vpi_get_str_body "    result += spaces + std::string(\" $vpi:\") + vpi_get_str($vpi, obj_h) + std::string(\"\\n\");
+	append vpi_get_str_body "  if (vpi_get_str($vpi, obj_h))  result += spaces + std::string(\" $vpi:\") + vpi_get_str($vpi, obj_h) + std::string(\"\\n\");
 "
     }
     return $vpi_get_str_body
@@ -416,7 +419,11 @@ proc printGetStrBody {classname type vpi card} {
 	append vpi_get_str_body "
   if (handle->type == uhdm${classname}) {
     if (property == $vpi) {
-      return (PLI_BYTE8*) strdup((($classname*)(obj))->[string toupper ${vpi} 0 0]().c_str());
+      if ((($classname*)(obj))->[string toupper ${vpi} 0 0]() == \"\") {
+        return 0;
+      } else { 
+        return (PLI_BYTE8*) (($classname*)(obj))->[string toupper ${vpi} 0 0]().c_str();
+      }
     } 
   }"
     }
@@ -894,11 +901,13 @@ proc generate_code { models } {
 	    if [info exist vpi_get_str_body_inst($baseclass)] {
 		foreach inst $vpi_get_str_body_inst($baseclass) {
 		    append vpi_get_str_body [printGetStrBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		    append VISITOR($classname) [printGetStrVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 		}
 	    }
 	    if [info exist vpi_get_body_inst($baseclass)] {
 		foreach inst $vpi_get_body_inst($baseclass) {
 		    append vpi_get_body [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		    append VISITOR($classname) [printGetVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 		}
 	    }
 
