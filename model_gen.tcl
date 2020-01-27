@@ -396,7 +396,8 @@ proc printGetStrVisitor {classname type vpi card} {
 	return ""
     }
     if {($card == 1) && ($type == "string") && ($vpi != "vpiFile")} {
-	append vpi_get_str_body "  if (vpi_get_str($vpi, obj_h))  result += spaces + std::string(\" $vpi:\") + vpi_get_str($vpi, obj_h) + std::string(\"\\n\");
+	append vpi_get_str_body "    if (const char* s = vpi_get_str($vpi, obj_h))  
+      result += spaces + std::string(\"|$vpi:\") + s + std::string(\"\\n\");
 "
     }
     return $vpi_get_str_body
@@ -405,8 +406,8 @@ proc printGetStrVisitor {classname type vpi card} {
 proc printGetVisitor {classname type vpi card} {
     set vpi_get_body ""
     if {($card == 1) && ($type != "string") && ($vpi != "vpiLineNo") && ($vpi != "vpiType")} {
-	append vpi_get_body "    if (vpi_get($vpi, obj_h)) 
-      result += spaces + std::string(\" $vpi:\") + std::to_string(vpi_get($vpi, obj_h)) + std::string(\"\\n\");
+	append vpi_get_body "    if (const int n = vpi_get($vpi, obj_h)) 
+      result += spaces + std::string(\"|$vpi:\") + std::to_string(n) + std::string(\"\\n\");
 "
     }
     return $vpi_get_body
