@@ -44,8 +44,15 @@ using namespace UHDM;
 std::string visit_object (vpiHandle obj_h, unsigned int indent) {
   std::string result;
   unsigned int subobject_indent = indent + 2;
+  std::string hspaces;
+  if (indent > 0) {
+    for (unsigned int i = 0; i < indent -2 ; i++)
+      hspaces += " ";
+    hspaces += "\\_";
+  }
   std::string spaces;
-  for (unsigned int i = 0; i < indent; i++) spaces += " ";
+  for (unsigned int i = 0; i < indent; i++)
+    spaces += " ";
   std::string objectName = "";
   std::string fileName = "";
   std::string lineNo   = "";
@@ -53,9 +60,9 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
   if (unsigned int l = vpi_get(vpiLineNo, obj_h)) {
     lineNo = ", line:" + std::to_string(l);
   }
-  unsigned int objType = vpi_get(vpiType, obj_h);
-  if (objType == vpiModule || objType == vpiProgram || objType == vpiClassDefn || objType == vpiPackage ||
-      objType == vpiInterface || objType == vpiUdp) {
+  const unsigned int objectType = vpi_get(vpiType, obj_h);				     
+  if (objectType == vpiModule || objectType == vpiProgram || objectType == vpiClassDefn || objectType == vpiPackage ||
+      objectType == vpiInterface || objectType == vpiUdp) {
     if (const char* s = vpi_get_str(vpiFile, obj_h))
       fileName = ", file:" +  std::string(s);
   }
@@ -63,12 +70,12 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
     if (const char* parentName = vpi_get_str(vpiName, par)) {
       parent = ", parent:" + std::string(parentName);
     }
+    vpi_free_object(par);
   }
   if (const char* s = vpi_get_str(vpiName, obj_h)) {
     objectName = s;
   }
-  result += spaces + UHDM::VpiTypeName(obj_h) + ": " + objectName + fileName + lineNo + parent + "\n";
-  unsigned int objectType = vpi_get(vpiType, obj_h);				     
+  result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + objectName + fileName + lineNo + parent + "\n";
 <OBJECT_VISITORS>
   return result;
 }
