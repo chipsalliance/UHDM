@@ -10,24 +10,41 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   // Design building
   design* d = s.MakeDesign();
   d->VpiName("design1");
+  // Module
   module* m1 = s.MakeModule();
   m1->VpiTopModule(true);
   m1->VpiName("M1");
   m1->VpiParent(d);
   m1->VpiFile("fake1.sv");
   m1->VpiLineNo(10);
+  // Module
   module* m2 = s.MakeModule();
   m2->VpiName("M2");
   m2->VpiParent(m1);
   m2->VpiFile("fake2.sv");
   m2->VpiLineNo(20);
+  // Ports
+  VectorOfport* vp = s.MakePortVec();
+  port* p = s.MakePort();
+  p->VpiName("i1");
+  p->VpiDirection(vpiInput);
+  vp->push_back(p);
+  p = s.MakePort();
+  p->VpiName("o1");
+  p->VpiDirection(vpiOutput);
+  vp->push_back(p);
+  m2->Ports(vp);
+  // Module
   module* m3 = s.MakeModule();
   m3->VpiName("M3");
   m3->VpiParent(m1);
   m3->VpiFile("fake3.sv");
   m3->VpiLineNo(30);
+  // Instance
   module* m4 = s.MakeModule();
   m4->VpiName("m4");
+  m4->Ports(vp);
+  m4->VpiParent(m3);
   m3->Instance(m4);
   VectorOfmodule* v1 = s.MakeModuleVec();
   v1->push_back(m1);
@@ -36,6 +53,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   v2->push_back(m2);
   v2->push_back(m3);
   m1->Modules(v2);
+  // Package
   package* p1 = s.MakePackage();
   p1->VpiName("P1");
   p1->VpiDefName("P0");
