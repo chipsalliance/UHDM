@@ -4,7 +4,7 @@
 using namespace UHDM;
 
 #include "test_helper.h"
-#include "vpi_visitor.h"
+#include "headers/vpi_visitor.h"
 
 std::vector<vpiHandle> build_designs (Serializer& s) {
   std::vector<vpiHandle> designs;
