@@ -1,6 +1,6 @@
 
 
-std::string print_designs (std::vector<vpiHandle> designs) {
+std::string print_designs (const std::vector<vpiHandle>& designs) {
   std::string result;
   for (auto restoredDesign : designs) {
     result += "Design name: " + std::string(vpi_get_str(vpiName, restoredDesign)) + "\n";

@@ -4,6 +4,7 @@
 using namespace UHDM;
 
 #include "test_helper.h"
+#include "vpi_visitor.h"
 
 std::vector<vpiHandle> build_designs (Serializer& s) {
   std::vector<vpiHandle> designs;
@@ -88,18 +89,21 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
 
 int main (int argc, char** argv) {
   std::cout << "Make design" << std::endl;
-  Serializer* serializer = new Serializer();
-
-  std::string orig = print_designs(build_designs(*serializer));
-  
+  Serializer serializer;
+  const std::vector<vpiHandle>& designs = build_designs(serializer);
+  std::string orig = print_designs(designs);
+  orig += "VISITOR:\n";
+  orig += visit_designs(designs);
   std::cout << orig; 
   std::cout << "\nSave design" << std::endl;
-  serializer->Save("surelog.uhdm");
+  serializer.Save("surelog.uhdm");
   
   std::cout << "Restore design" << std::endl;
-  std::vector<vpiHandle> restoredDesigns = serializer->Restore("surelog.uhdm");
-  
+  const std::vector<vpiHandle>& restoredDesigns = serializer.Restore("surelog.uhdm");
   std::string restored = print_designs(restoredDesigns);
+  restored += "VISITOR:\n";
+  restored += visit_designs(designs);
   std::cout << restored;
+  
   return (orig != restored);
 };

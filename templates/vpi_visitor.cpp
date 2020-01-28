@@ -80,7 +80,7 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
   return result;
 }
 
-std::string visit_designs (std::vector<vpiHandle> designs) {
+std::string visit_designs (const std::vector<vpiHandle>& designs) {
   std::string result;
   for (auto design : designs) {
     result += visit_object(design, 0);

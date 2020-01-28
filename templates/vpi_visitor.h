@@ -25,6 +25,6 @@
 
 #include <string>
 #include <vector>
-#include "vpi_user.h"
+#include "sv_vpi_user.h"
 
-std::string visit_designs (std::vector<vpiHandle> designs);
+std::string visit_designs (const std::vector<vpiHandle>& designs);
