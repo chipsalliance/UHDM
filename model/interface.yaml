@@ -81,3 +81,9 @@
     vpi: vpiProcess
     type: process
     card: any
+  - obj_ref: ports
+    vpi: vpiPort
+    name: port
+    type: port
+    card: any
+    
