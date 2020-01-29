@@ -102,7 +102,7 @@ int main (int argc, char** argv) {
   const std::vector<vpiHandle>& restoredDesigns = serializer.Restore("surelog.uhdm");
   std::string restored = print_designs(restoredDesigns);
   restored += "VISITOR:\n";
-  restored += visit_designs(designs);
+  restored += visit_designs(restoredDesigns);
   std::cout << restored;
   
   return (orig != restored);
