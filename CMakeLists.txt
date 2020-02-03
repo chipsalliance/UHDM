@@ -60,6 +60,7 @@ add_custom_command(
    )
 
 set (uhdm_SRC
+  ${PROJECT_SOURCE_DIR}/src/vpi_listener.cpp
   ${PROJECT_SOURCE_DIR}/src/vpi_visitor.cpp
   ${PROJECT_SOURCE_DIR}/src/vpi_user.cpp
   ${PROJECT_SOURCE_DIR}/src/SymbolFactory.cpp
@@ -135,7 +136,15 @@ ADD_TEST(NAME uhdm-test4
          COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test4
          WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
        
+add_executable(uhdm-listener ${PROJECT_SOURCE_DIR}/tests/test_listener.cpp )
+set_target_properties(uhdm-listener PROPERTIES OUTPUT_NAME uhdm-listener )
+add_dependencies(uhdm-listener uhdm)
+target_link_libraries( uhdm-listener ${ALL_LIBRARIES_FOR_UHDM} )
+ADD_TEST(NAME uhdm-listener
+         COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-listener
+         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
        
+           
 add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/tests/dump.cpp )
 set_target_properties(uhdm-dump PROPERTIES OUTPUT_NAME uhdm-dump )
 add_dependencies(uhdm-dump uhdm)
