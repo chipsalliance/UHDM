@@ -342,8 +342,8 @@ proc printIterateBody { name classname vpi card } {
       else return 0;
     }
   }"
-    printVpiVisitor $classname $vpi $card 	
-    return $vpi_iterate_body
+	printVpiVisitor $classname $vpi $card
+	return $vpi_iterate_body
    }
 }
 
@@ -386,6 +386,7 @@ proc printGetHandleBody { classname type vpi object card } {
      } 
   }"
 	printVpiVisitor $classname $vpi $card
+	#printVpiListener $classname $vpi $card
     }
     return $vpi_get_handle_body
 }
@@ -431,8 +432,78 @@ proc printGetStrBody {classname type vpi card} {
     return $vpi_get_str_body
 }
 
+proc printVpiListener {classname vpi type card} {
+    global VPI_LISTENERS VPI_LISTENERS_HEADER
+    if {$card == 0} {
+	set VPI_LISTENERS_HEADER($classname) "void listen_${classname}(vpiHandle object, UHDM::VpiListener* listener);
+"
+	set VPI_LISTENERS($classname) "void listen_${classname}(vpiHandle object, VpiListener* listener) \{
+  ${classname}* d = (${classname}*) ((const uhdm_handle*)object)->object;
+  const BaseClass* parent = d->VpiParent();
+  vpiHandle parent_h = 0; 
+  if (parent) {
+    parent_h = NewHandle(parent->UhdmType(), parent);
+  }
+  listener->enter[string toupper ${classname} 0 0](d, parent, object, parent_h);
+"
+	return
+    }
+    if {$vpi == "vpiParent"} {
+	# To prevent infinite loops in visitors
+	return
+    }
+    set vpi_visitor ""
+    if ![info exist VPI_LISTENERS($classname)] {
+	set vpi_visitor "    vpiHandle itr;
+"
+    } else {
+	if ![regexp "vpiHandle itr;" $VPI_LISTENERS($classname)] {
+	    set vpi_visitor "    vpiHandle itr;
+"
+	}
+    }
+    
+    if {$card == 1} {
+	append vpi_visitor "    itr = vpi_handle($vpi,object);
+    if (itr)
+      listen_${type} (itr, listener);
+    vpi_free_object(itr);
+"	
+    } else {
+	append vpi_visitor "    itr = vpi_iterate($vpi,object); 
+    while (vpiHandle obj = vpi_scan(itr) ) {
+      listen_${type} (obj, listener);
+      vpi_free_object(obj);
+    }
+    vpi_free_object(itr);
+" 
+    }
+
+    append VPI_LISTENERS($classname) $vpi_visitor     
+}
+
+proc closeVpiListener {classname} {
+    global VPI_LISTENERS
+    append  VPI_LISTENERS($classname) "
+  listener->leave[string toupper ${classname} 0 0](d, parent, object, parent_h);
+  vpi_release_handle(parent_h);
+\}
+
+" 
+}
+
+proc printClassListener {classname} {
+    global CLASS_LISTENER
+    set listener "    virtual void enter[string toupper ${classname} 0 0](const ${classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) { }
+"
+    append listener "    virtual void leave[string toupper ${classname} 0 0](const ${classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) { }
+
+"
+    set CLASS_LISTENER($classname) $listener   
+}
+
 proc printVpiVisitor {classname vpi card} {
-    global VISITOR
+    global VISITOR 
     if {$vpi == "vpiParent"} {
 	# To prevent infinite loops in visitors
 	return
@@ -463,6 +534,7 @@ proc printVpiVisitor {classname vpi card} {
     vpi_free_object(itr);
 " 
     }
+
     append VISITOR($classname) $vpi_visitor
 }
 
@@ -572,7 +644,7 @@ proc generate_group_checker { model } {
 }
 
 proc generate_code { models } {
-    global ID BASECLASS DEFINE_ID working_dir methods_cpp VISITOR
+    global ID BASECLASS DEFINE_ID working_dir methods_cpp VISITOR CLASS_LISTENER VPI_LISTENERS VPI_LISTENERS_HEADER
     puts "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
@@ -652,7 +724,8 @@ proc generate_code { models } {
         }
 	append SAVE($classname) ""
 	append RESTORE($classname) ""
-
+	printClassListener $classname
+	printVpiListener $classname $classname $classname 0
 	if {$modeltype != "class_def"} {
 	    # Builtin properties do not need to be specified in each models
 	    # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo" method and field
@@ -753,7 +826,8 @@ proc generate_code { models } {
                     if {$define != ""} {
                       append defines "$define\n"
                     }
-		    append methods($classname) [printMethods $classname $type $name $card $real_type] 
+		    append methods($classname) [printMethods $classname $type $name $card $real_type]
+		    printVpiListener $classname $vpi $type $card
 		    append members($classname) [printMembers $type $name $card]
 		    append vpi_iterate_body($classname) [printIterateBody $name $classname $vpi $card]
 		    append vpi_iterator($classname) "[list $vpi $card] "
@@ -825,7 +899,7 @@ proc generate_code { models } {
 		}	    
 	    }
 	}
-
+		
 	if {($type_specified == 0) && ($modeltype == "obj_def")} {
 	    set vpiclasstype [makeVpiName $classname]
 	    append methods($classname) "\n    unsigned int VpiType() { return $vpiclasstype; }\n"
@@ -927,7 +1001,8 @@ proc generate_code { models } {
 
 	    if [info exist vpi_iterator($baseclass)] {
 		foreach {vpi card} $vpi_iterator($baseclass) {
-		    printVpiVisitor $classname $vpi $card 	
+		    printVpiVisitor $classname $vpi $card
+		    #printVpiListener $classname $vpi $card
 		}
 	    }
 
@@ -941,7 +1016,10 @@ proc generate_code { models } {
 
 	if {$modeltype != "class_def"} {
 	    append capnp_schema_all "\}\n"
-	}	
+	}
+
+	closeVpiListener $classname
+
     }
 
     # uhdm.h
@@ -1108,7 +1186,7 @@ $RESTORE($class)
 	close $serializerId
     }
 
-    # cpi_visitor.h
+    # vpi_visitor.h
     exec sh -c "cp -rf [exec_path]/templates/vpi_visitor.h [exec_path]/headers/vpi_visitor.h"
     # vpi_visitor.cpp
     set fid [open "[exec_path]/templates/vpi_visitor.cpp"]
@@ -1133,6 +1211,45 @@ $VISITOR($classname)
     set visitorId [open "[exec_path]/src/vpi_visitor.cpp" "w"]
     puts $visitorId $visitor_cpp
     close $visitorId
+
+    # VpiListener.h
+    set fid [open "[exec_path]/templates/VpiListener.h"]
+    set listener_content [read $fid]
+    close $fid
+    set vpi_listener ""
+    foreach classname [array name CLASS_LISTENER] {
+	append vpi_listener $CLASS_LISTENER($classname)
+    }
+    regsub {<VPI_LISTENER_METHODS>} $listener_content $vpi_listener listener_content
+    set listenerId [open "[exec_path]/headers/VpiListener.h" "w"]
+    puts $listenerId $listener_content
+    close $listenerId
+
+    # vpi_listener.h
+    set fid [open "[exec_path]/templates/vpi_listener.h"]
+    set listener_h [read $fid]
+    close $fid
+    set vpi_listener ""
+    foreach classname [array name VPI_LISTENERS_HEADER] {
+	append vpi_listener $VPI_LISTENERS_HEADER($classname)
+    }
+    regsub {<VPI_LISTENERS_HEADER>} $listener_h $vpi_listener listener_h
+    set listenerId [open "[exec_path]/headers/vpi_listener.h" "w"]
+    puts $listenerId $listener_h
+    close $listenerId
+    # vpi_listener.cpp
+    set fid [open "[exec_path]/templates/vpi_listener.cpp"]
+    set listener_cpp [read $fid]
+    close $fid
+    set vpi_listener ""
+    foreach classname [array name VPI_LISTENERS] {
+	append vpi_listener $VPI_LISTENERS($classname)
+    }
+    regsub {<VPI_LISTENERS>} $listener_cpp $vpi_listener listener_cpp
+    set listenerId [open "[exec_path]/src/vpi_listener.cpp" "w"]
+    puts $listenerId $listener_cpp
+    close $listenerId
+    
     
 }
 
