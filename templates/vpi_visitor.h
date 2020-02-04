@@ -27,4 +27,14 @@
 #include <vector>
 #include "sv_vpi_user.h"
 
+
+#ifndef UHDM_VPI_VISITOR_H
+#define UHDM_VPI_VISITOR_H
+
+namespace UHDM {
+
 std::string visit_designs (const std::vector<vpiHandle>& designs);
+
+};
+
+#endif

@@ -441,7 +441,7 @@ proc printVpiListener {classname vpi type card} {
     listen_${classname}(object, listener); 
     break;
 "
-	set VPI_LISTENERS($classname) "void listen_${classname}(vpiHandle object, VpiListener* listener) \{
+	set VPI_LISTENERS($classname) "void UHDM::listen_${classname}(vpiHandle object, VpiListener* listener) \{
   ${classname}* d = (${classname}*) ((const uhdm_handle*)object)->object;
   const BaseClass* parent = d->VpiParent();
   vpiHandle parent_h = 0; 
@@ -835,7 +835,7 @@ proc generate_code { models } {
 		    printVpiListener $classname $vpi $type $card
 		    append members($classname) [printMembers $type $name $card]
 		    append vpi_iterate_body($classname) [printIterateBody $name $classname $vpi $card]
-		    append vpi_iterator($classname) "[list $vpi $card] "
+		    append vpi_iterator($classname) "[list $vpi $type $card] "
                     append vpi_scan_body [printScanBody $name $classname $type $card]
                     append vpi_handle_body($classname) [printGetHandleBody $classname uhdm${type} $vpi $name $card]
 		    
@@ -1005,9 +1005,9 @@ proc generate_code { models } {
 	    }
 
 	    if [info exist vpi_iterator($baseclass)] {
-		foreach {vpi card} $vpi_iterator($baseclass) {
+		foreach {vpi type card} $vpi_iterator($baseclass) {
 		    printVpiVisitor $classname $vpi $card
-		    #printVpiListener $classname $vpi $card
+		    printVpiListener $classname $vpi $type $card
 		}
 	    }
 

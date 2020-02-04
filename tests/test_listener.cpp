@@ -1,5 +1,6 @@
 #include "headers/uhdm.h"
 #include <iostream>
+#include <stack>
 #include "headers/vpi_listener.h"
 
 using namespace UHDM;
@@ -7,17 +8,33 @@ using namespace UHDM;
 
 class MyVpiListener : public VpiListener {
 
-void enterModule(const module* object, const BaseClass* parent,
+protected:
+  void enterModule(const module* object, const BaseClass* parent,
 		   vpiHandle handle, vpiHandle parentHandle) override {
-std::cout << "Module: " << object->VpiName() << std::endl;
-}
+    std::cout << "Module: " << object->VpiName()
+	      << ", parent: " << vpi_get_str(vpiName, parentHandle) << std::endl;
+    stack_.push(object);
+  }
 
-void enterProgram(const program* object, const BaseClass* parent,
+  void leaveModule(const module* object, const BaseClass* parent,
 		   vpiHandle handle, vpiHandle parentHandle) override {
-std::cout << "Program: " << object->VpiName() << std::endl;
-}
+    stack_.pop();
+  }
   
+  void enterProgram(const program* object, const BaseClass* parent,
+		   vpiHandle handle, vpiHandle parentHandle) override {
+  std::cout << "Program: " << object->VpiName()
+	    << ", parent: " << vpi_get_str(vpiName, parentHandle) << std::endl;
+    stack_.push(object);
+  }
 
+  void leaveProgram(const program* object, const BaseClass* parent,
+		   vpiHandle handle, vpiHandle parentHandle) override {
+    stack_.pop();
+  }
+  
+private:  
+  std::stack<const BaseClass*> stack_;
 };
 
 int main (int argc, char** argv) {
@@ -28,7 +45,7 @@ int main (int argc, char** argv) {
   Serializer serializer1;
   std::cout << "Restore design from: " << fileName << std::endl;
   std::vector<vpiHandle> restoredDesigns = serializer1.Restore(fileName);  
-  VpiListener* listener = new MyVpiListener();
+  MyVpiListener* listener = new MyVpiListener();
   listen_designs(restoredDesigns,listener);
   return 0;
 };

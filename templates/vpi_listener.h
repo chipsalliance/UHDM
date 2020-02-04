@@ -28,9 +28,17 @@
 #include "sv_vpi_user.h"
 #include "VpiListener.h"
 
-void listen_any(vpiHandle object, UHDM::VpiListener* listener);
+#ifndef UHDM_VPI_LISTENER_H
+#define UHDM_VPI_LISTENER_H
+
+namespace UHDM {
 
 void listen_designs (const std::vector<vpiHandle>& designs, UHDM::VpiListener* listener);
 
+void listen_any(vpiHandle object, UHDM::VpiListener* listener);
+
 <VPI_LISTENERS_HEADER>
 
+ };
+
+#endif
