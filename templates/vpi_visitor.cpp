@@ -39,7 +39,7 @@
 #include "headers/uhdm.h"
 #include "headers/Serializer.h"
 
-using namespace UHDM;
+namespace UHDM {
 
 std::string visit_object (vpiHandle obj_h, unsigned int indent) {
   std::string result;
@@ -88,3 +88,4 @@ std::string visit_designs (const std::vector<vpiHandle>& designs) {
   return result;
 }
 
+};

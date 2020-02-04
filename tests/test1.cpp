@@ -75,14 +75,16 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   // Instance items, illustrates the use of groups
   program* pr1 = s.MakeProgram();
   pr1->VpiName("PR1");
+  pr1->VpiParent(m1);
   VectorOfany* inst_items = s.MakeAnyVec();
   inst_items->push_back(pr1);
   function* f3 = s.MakeFunction();
   f3->VpiName("MyFunc3");
   f3->VpiSize(300);
-  inst_items->push_back(f3);
-  
+  f3->VpiParent(m1);
+  inst_items->push_back(f3); 
   m1->Instance_items(inst_items);
+  
   designs.push_back(s.MakeUhdmHandle(uhdmdesign, d));
   return designs;
 }
