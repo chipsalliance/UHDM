@@ -11,9 +11,12 @@ void enterModule(const module* object, const BaseClass* parent,
 		   vpiHandle handle, vpiHandle parentHandle) override {
 std::cout << "Module: " << object->VpiName() << std::endl;
 }
-void leaveModule(const module* object, const BaseClass* parent,
+
+void enterProgram(const program* object, const BaseClass* parent,
 		   vpiHandle handle, vpiHandle parentHandle) override {
+std::cout << "Program: " << object->VpiName() << std::endl;
 }
+  
 
 };
 

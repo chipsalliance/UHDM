@@ -433,9 +433,13 @@ proc printGetStrBody {classname type vpi card} {
 }
 
 proc printVpiListener {classname vpi type card} {
-    global VPI_LISTENERS VPI_LISTENERS_HEADER
+    global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS
     if {$card == 0} {
 	set VPI_LISTENERS_HEADER($classname) "void listen_${classname}(vpiHandle object, UHDM::VpiListener* listener);
+"
+	set VPI_ANY_LISTENERS($classname) "  case uhdm${classname} : 
+    listen_${classname}(object, listener); 
+    break;
 "
 	set VPI_LISTENERS($classname) "void listen_${classname}(vpiHandle object, VpiListener* listener) \{
   ${classname}* d = (${classname}*) ((const uhdm_handle*)object)->object;
@@ -644,7 +648,8 @@ proc generate_group_checker { model } {
 }
 
 proc generate_code { models } {
-    global ID BASECLASS DEFINE_ID working_dir methods_cpp VISITOR CLASS_LISTENER VPI_LISTENERS VPI_LISTENERS_HEADER
+    global ID BASECLASS DEFINE_ID working_dir methods_cpp VISITOR CLASS_LISTENER
+    global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS
     puts "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
@@ -1237,6 +1242,7 @@ $VISITOR($classname)
     set listenerId [open "[exec_path]/headers/vpi_listener.h" "w"]
     puts $listenerId $listener_h
     close $listenerId
+    
     # vpi_listener.cpp
     set fid [open "[exec_path]/templates/vpi_listener.cpp"]
     set listener_cpp [read $fid]
@@ -1245,11 +1251,15 @@ $VISITOR($classname)
     foreach classname [array name VPI_LISTENERS] {
 	append vpi_listener $VPI_LISTENERS($classname)
     }
+    set vpi_any_listener ""
+    foreach classname [array name VPI_ANY_LISTENERS] {
+	append vpi_any_listener $VPI_ANY_LISTENERS($classname)
+    }
     regsub {<VPI_LISTENERS>} $listener_cpp $vpi_listener listener_cpp
+    regsub {<VPI_ANY_LISTENERS>} $listener_cpp $vpi_any_listener listener_cpp
     set listenerId [open "[exec_path]/src/vpi_listener.cpp" "w"]
     puts $listenerId $listener_cpp
-    close $listenerId
-    
+    close $listenerId    
     
 }
 
