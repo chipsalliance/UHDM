@@ -49,6 +49,12 @@ static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
 <VPI_LISTENERS>
 
 void listen_any(vpiHandle object, VpiListener* listener) {
+  unsigned int type = ((const uhdm_handle*)object)->type;
+  switch (type) {
+<VPI_ANY_LISTENERS>
+  default:
+    break;
+  }
 }
 
 void listen_designs (const std::vector<vpiHandle>& designs, VpiListener* listener) {
