@@ -1209,6 +1209,7 @@ $RESTORE($class)
 	} 
 	append vpi_visitor "  if (objectType == $vpiName) {
 $VISITOR($classname)
+    return result;
   }
 "
     } 
