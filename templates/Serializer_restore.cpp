@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include <vector>
 #include <map>
@@ -47,7 +48,10 @@ const std::vector<vpiHandle> Serializer::Restore(std::string file) {
   Purge();
   std::vector<vpiHandle> designs;
   int fileid = open(file.c_str(), O_RDONLY);
-  ::capnp::PackedFdMessageReader message(fileid);
+  ::capnp::ReaderOptions options;
+  options.traversalLimitInWords = ULLONG_MAX;
+  options.nestingLimit = 1024;
+  ::capnp::PackedFdMessageReader message(fileid, options);
   UhdmRoot::Reader cap_root = message.getRoot<UhdmRoot>();
   unsigned long index = 0;
 
