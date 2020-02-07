@@ -1,10 +1,12 @@
-#include "headers/uhdm.h"
-#include <iostream>
- 
-using namespace UHDM;
+// -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
-#include "test_helper.h"
+#include "headers/uhdm.h"
 #include "headers/vpi_visitor.h"
+#include "test_helper.h"
+
+#include <iostream>
+
+using namespace UHDM;
 
 std::vector<vpiHandle> build_designs (Serializer& s) {
   std::vector<vpiHandle> designs;
@@ -82,9 +84,9 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   f3->VpiName("MyFunc3");
   f3->VpiSize(300);
   f3->VpiParent(m1);
-  inst_items->push_back(f3); 
+  inst_items->push_back(f3);
   m1->Instance_items(inst_items);
-  
+
   designs.push_back(s.MakeUhdmHandle(uhdmdesign, d));
   return designs;
 }
@@ -96,16 +98,16 @@ int main (int argc, char** argv) {
   std::string orig = print_designs(designs);
   orig += "VISITOR:\n";
   orig += visit_designs(designs);
-  std::cout << orig; 
+  std::cout << orig;
   std::cout << "\nSave design" << std::endl;
   serializer.Save("surelog.uhdm");
-  
+
   std::cout << "Restore design" << std::endl;
   const std::vector<vpiHandle>& restoredDesigns = serializer.Restore("surelog.uhdm");
   std::string restored = print_designs(restoredDesigns);
   restored += "VISITOR:\n";
   restored += visit_designs(restoredDesigns);
   std::cout << restored;
-  
+
   return (orig != restored);
-};
+}

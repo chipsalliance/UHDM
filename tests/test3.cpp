@@ -1,6 +1,9 @@
-#include "headers/uhdm.h"
+// -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
+
 #include <iostream>
- 
+
+#include "headers/uhdm.h"
+
 using namespace UHDM;
 
 #include "test_helper.h"
@@ -48,15 +51,15 @@ int main (int argc, char** argv) {
   Serializer serializer;
 
   std::string orig = print_designs(build_designs(serializer));
-  
-  std::cout << orig; 
+
+  std::cout << orig;
   std::cout << "\nSave design" << std::endl;
   serializer.Save("surelog3.uhdm");
-  
+
   std::cout << "Restore design" << std::endl;
   std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog3.uhdm");
-  
+
   std::string restored = print_designs(restoredDesigns);
   std::cout << restored;
   return (orig != restored);
-};
+}
