@@ -154,17 +154,17 @@ ADD_TEST(NAME uhdm-dump
          WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
        
 
-# Installation target     
+# Installation target
 INSTALL(
   TARGETS uhdm
-  ARCHIVE DESTINATION /usr/local/lib/uhdm
-  PUBLIC_HEADER DESTINATION /usr/local/include/uhdm
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm
 )
 INSTALL(
   DIRECTORY ${PROJECT_SOURCE_DIR}/include/
-  DESTINATION /usr/local/include/uhdm/include
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/include
 )
 INSTALL(
   DIRECTORY  ${PROJECT_SOURCE_DIR}/headers/
-  DESTINATION /usr/local/include/uhdm/headers/
-  )
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/headers/
+)
