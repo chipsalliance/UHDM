@@ -1,15 +1,15 @@
 # UHDM top Makefile (Wrapper to cmake)
 PREFIX?=/usr/local
 
-release: cmake-prepare
+release: build
 	$(MAKE) -C build
 
 debug:
 	mkdir -p build
-	cd build; cmake ../ -DCMAKE_BUILD_TYPE=Debug
+	cd build; cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX)
 	$(MAKE) -C build
 
-test: cmake-prepare
+test: build
 	$(MAKE) -C build test
 
 clean:
@@ -17,14 +17,15 @@ clean:
 	rm -rf headers/*
 	rm -rf build
 
-install: cmake-prepare
+install: build
+	mkdir -p $(PREFIX)
 	$(MAKE) -C build install
 
 uninstall:
 	rm -rf $(PREFIX)/lib/uhdm
 	rm -rf $(PREFIX)/include/uhdm
 
-cmake-prepare:
+build:
 	mkdir -p build
 	cd build; cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX)
 
