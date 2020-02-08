@@ -50,9 +50,4 @@
     vpi: vpiLhs
     type: expr
     card: 1
-  - obj_ref: cont_assign_bits
-    name: cont assign bits
-    vpi: vpiBit
-    type: cont_assign_bit
-    card: any
 
