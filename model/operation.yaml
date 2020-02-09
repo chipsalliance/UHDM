@@ -21,7 +21,7 @@
     vpi: vpiOpType
     type: int
     card: 1
-  - class_ref: operands
+  - group_ref: operands
     name: operands
     vpi: vpiOperand
     type: operand_group

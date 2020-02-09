@@ -15,6 +15,7 @@
 # Universal Hardware Data Model (UHDM) "var select" formal description
  
 - obj_def: var_select
+ - extends: simple_expr
  - property: constant_selection
     name: constant selection
     vpi: vpiConstantSelect
@@ -30,11 +31,6 @@
     vpi: vpiFullName
     type: string
     card: 1  
-  - property: size
-    name: size
-    vpi: vpiSize
-    type: int
-    card: 1
   - class_ref: expr
     name: expr
     vpi: vpiIndex
@@ -45,9 +41,3 @@
     vpi: vpiIndex
     type: expr
     card: any
-  - class_ref: typespec
-    name: typespec
-    vpi: vpiTypespec
-    type: typespec
-    card: 1
-    

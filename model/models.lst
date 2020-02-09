@@ -16,7 +16,19 @@ force.yaml
 foreach_stmt.yaml
 gen_scope.yaml
 expr_dist_group.yaml
+assertion.yaml
+pattern.yaml
+property_inst.yaml
+interface_expr.yaml
+sequence_inst.yaml
 expr.yaml
+simple_expr.yaml
+parameter.yaml
+constant.yaml
+func_call.yaml
+method_func_call.yaml
+sys_func_call.yaml
+let_expr.yaml
 distribution.yaml
 operand_group.yaml
 operation.yaml
@@ -24,6 +36,7 @@ part_select.yaml
 actual_group.yaml
 ref_obj.yaml
 var_select.yaml
+bit_select.yaml
 variable_drivers_group.yaml
 variable_loads_group.yaml
 variables.yaml
@@ -101,7 +114,6 @@ named_event.yaml
 named_event_array.yaml
 parameters.yaml
 spec_param.yaml
-assertion.yaml
 class_defn.yaml
 class_obj.yaml
 instance.yaml

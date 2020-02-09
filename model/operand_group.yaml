@@ -14,5 +14,11 @@
 
 # Universal Hardware Data Model (UHDM) "operand group" formal description
  
-- class_def: operand_group
-
+- group_def: operand_group
+  - class_ref: expr
+  - group_ref: interface_expr
+  - obj_ref: range
+  - class_ref: pattern
+  - class_ref: sequence_inst
+  - class_ref: property_inst
+  

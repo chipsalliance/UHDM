@@ -15,6 +15,7 @@
 # Universal Hardware Data Model (UHDM) "nets" formal description
  
 - class_def: nets
+  - extends: simple_expr
   - property: array_member
     name: array member
     vpi: vpiArrayMember
@@ -74,11 +75,6 @@
     name: sign
     vpi: vpiSigned
     type: bool
-    card: 1
-  - property: size
-    name: size
-    vpi: vpiSize
-    type: int
     card: 1
   - property: strength0
     name: strength0
@@ -159,11 +155,6 @@
     name: sim nets
     vpi: vpiSimNet
     type: nets
-    card: 1
-  - class_ref: typespec
-    name: typespec
-    vpi: vpiTypespec
-    type: typespec
     card: 1
   - obj_ref: module
     name: module

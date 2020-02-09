@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "part select" formal description
+# Universal Hardware Data Model (UHDM) "sys_func_call" formal description
  
-- obj_def: part_select
+- obj_decl: sys_func_call
   - extends: expr
-  - property: constant_selection
-    name: constant selection
-    vpi: vpiConstantSelect
-    type: bool
-    card: 1
-  - class_ref: left_range
-    name: left range
-    vpi: vpiLeftRange
-    type: expr
-    card: 1
-  - class_ref: right_range
-    name: right range
-    vpi: vpiRightRange
-    type: expr
-    card: 1
 

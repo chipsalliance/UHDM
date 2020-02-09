@@ -26,3 +26,9 @@
     vpi: vpiSize
     type: int
     card: 1
+  - class_ref: typespec
+    name: typespec
+    vpi: vpiTypespec
+    type: typespec
+    card: 1
+    

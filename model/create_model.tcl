@@ -17,6 +17,11 @@ regsub -all {<MODEL_NAME>} $content $modelName content
 regsub -all {<MODEL_TYPE>} $content $modelType content
 regsub -all {<EXTENDS>} $content $extends content
 
+if [file exist "$modelName.yaml"] {
+    puts "ERROR: File $modelName.yaml already exists!"
+    exit 1
+}
+
 set oid [open "$modelName.yaml" "w"]
 puts $oid $content
 close $oid
