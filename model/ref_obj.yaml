@@ -15,6 +15,7 @@
 # Universal Hardware Data Model (UHDM) "ref_obj" formal description
  
 - obj_def: ref_obj
+  - extends: simple_expr
   - property: name
     name: name
     vpi: vpiName
@@ -40,11 +41,6 @@
     vpi: vpiPortInst
     type: ports
     card: any
-  - class_ref: typespec
-    name: typespec
-    vpi: vpiTypespec
-    type: typespec
-    card: 1
   - group_ref: actual_group
     name: actual group
     vpi: vpiActual
