@@ -49,6 +49,12 @@ set(CMAKE_CXX_FLAGS_RELEASE
 set(model-GENERATED_SRC ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.h
                         ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.c++)
 
+# All the files the generator depends on.
+file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
+
+file(GLOB templates_SRC ${PROJECT_SOURCE_DIR}/templates/*.h
+     ${PROJECT_SOURCE_DIR}/templates/*.cpp)
+
 foreach(header_file ${model-GENERATED_SRC})
   set_source_files_properties(${header_file} PROPERTIES GENERATED TRUE)
 endforeach(header_file ${model-GENERATED_SRC})
@@ -60,10 +66,9 @@ add_custom_command(
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/../"
   DEPENDS ${PROJECT_SOURCE_DIR}/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst
-          ${PROJECT_SOURCE_DIR}/model/*.yaml
-          ${PROJECT_SOURCE_DIR}/templates/*.h
-          ${PROJECT_SOURCE_DIR}/templates/*.cpp
-          ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp)
+          ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
+          ${yaml_SRC}
+          ${templates_SRC})
 
 set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/vpi_listener.cpp
