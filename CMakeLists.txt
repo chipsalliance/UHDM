@@ -100,17 +100,18 @@ set_target_properties(uhdm PROPERTIES PUBLIC_HEADER "${UHDM_PUBLIC_HEADERS}")
 
 add_dependencies(uhdm GenerateCode)
 
+set(ALL_CAPNP_LIBS capnp kj)
+
 set(ALL_LIBRARIES_FOR_UHDM
     uhdm
-    capnp
-    kj
+    ${ALL_CAPNP_LIBS}
     dl
     util
     m
     rt
     pthread)
 
-add_dependencies(GenerateCode capnp capnpc capnp_tool capnpc_cpp)
+add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp ${ALL_CAPNP_LIBS})
 
 enable_testing()
 
@@ -170,7 +171,7 @@ add_test(
 
 # Installation target
 install(
-  TARGETS uhdm capnp kj
+  TARGETS uhdm ${ALL_CAPNP_LIBS}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
