@@ -1,7 +1,7 @@
 # -*- mode:cmake -*-
 cmake_minimum_required(VERSION 3.0)
 
-add_subdirectory(third_party/capnproto)
+add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
 
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
@@ -170,7 +170,7 @@ add_test(
 
 # Installation target
 install(
-  TARGETS uhdm
+  TARGETS uhdm capnp kj
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
