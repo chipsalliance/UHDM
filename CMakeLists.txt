@@ -1,6 +1,7 @@
 # -*- mode:cmake -*-
 cmake_minimum_required(VERSION 3.0)
 
+set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
 add_subdirectory(third_party/capnproto)
 
 # Detect build type, fallback to release and throw a warning if use didn't
