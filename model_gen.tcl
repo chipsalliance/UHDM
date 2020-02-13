@@ -21,6 +21,22 @@ puts "Working dir: $working_dir"
 
 variable myLocation [file normalize [info script]]
 
+set DEBUG 0
+
+proc log { arg } {
+    global DEBUG
+    if {$DEBUG == 1} {
+	puts $arg
+    }
+}
+
+proc lognnl { arg } {
+    global DEBUG
+    if {$DEBUG == 1} {
+	puts -nonewline $arg
+    }
+}
+
 proc exec_path {} {
     variable myLocation
     return [file dirname $myLocation]
@@ -39,7 +55,7 @@ proc pdict { d {i 0} {p "  "} {s " -> "} } {
         set dictName $d
         unset d
         upvar 1 $dictName d
-        puts "dict $dictName"
+        log "dict $dictName"
     }
     if { ! [string is list $d] || [llength $d] % 2 != 0 } {
         return -code error  "error: pdict - argument is not a dict"
@@ -52,15 +68,15 @@ proc pdict { d {i 0} {p "  "} {s " -> "} } {
         }
     }
     dict for {key val} ${d} {
-        puts -nonewline "${prefix}[format "%-${max}s" $key]$s"
+        lognnl "${prefix}[format "%-${max}s" $key]$s"
         if {    $fRepExist && [string match "value is a dict*"\
                     [tcl::unsupported::representation $val]]
                 || ! $fRepExist && [string is list $val]
                     && [llength $val] % 2 == 0 } {
-            puts ""
+            log ""
             pdict $val [expr {$i+1}] $p $s
         } else {
-            puts "'${val}'"
+            log "'${val}'"
         }
     }
     return
@@ -650,7 +666,7 @@ proc generate_group_checker { model } {
 proc generate_code { models } {
     global ID BASECLASS DEFINE_ID working_dir methods_cpp VISITOR CLASS_LISTENER
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS
-    puts "=========="
+    log "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
     set fid [open "[exec_path]/templates/class_header.h"]
@@ -675,7 +691,7 @@ proc generate_code { models } {
     set capnp_root_schema ""
     foreach model $models {
 	global $model
-	puts "** $model **"
+	log "** $model **"
 	set data [subst $$model]
 	set classname [dict get $data name]
 	set template $template_content
@@ -706,7 +722,7 @@ proc generate_code { models } {
 	    continue
 	}
 	
-	puts "Generating headers/$classname.h"
+	log "Generating headers/$classname.h"
 	if {$modeltype != "class_def"} {
 	    append factories "    ${classname}Factory ${classname}Maker;\n"
 	    append factories_methods "    ${classname}* Make[string toupper ${classname} 0 0] () { ${classname}* tmp = ${classname}Maker.Make(); tmp->SetSerializer(this); return tmp;}\n"
@@ -1093,7 +1109,7 @@ proc generate_code { models } {
     set capnpId [open "[exec_path]/src/UHDM.capnp" "w"]
     puts $capnpId $capnp_content
     close $capnpId
-    puts "Generating Capnp schema..."
+    log "Generating Capnp schema..."
     exec sh -c "rm -rf [exec_path]/src/UHDM.capnp.*"
     set capnp_path [exec sh -c "find $working_dir -name capnpc-c++"]
     set capnp_path [file dirname $capnp_path]
@@ -1267,7 +1283,7 @@ $VISITOR($classname)
 proc debug_models { models } {
     # Model printout
     foreach model $models {
-	puts "=========="
+	log "=========="
 	global $model
 	pdict $model
     }
@@ -1281,6 +1297,7 @@ debug_models $models
 
 generate_code $models
 
+puts "UHDM MODEL GENERATION DONE."
 
 
 
