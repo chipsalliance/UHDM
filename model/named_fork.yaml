@@ -21,7 +21,7 @@
     vpi: vpiJoinType
     type: int
     card: 1
-  - class_ref: stmts
+  - group_ref: stmts
     name: stmts
     vpi: vpiStmt
     type: stmt

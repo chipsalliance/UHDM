@@ -81,7 +81,7 @@
     vpi: vpiIODecl
     type: io_decl
     card: 1
-  - class_ref: stmt
+  - group_ref: stmt
     name: stmt
     vpi: vpiStmt
     type: stmt

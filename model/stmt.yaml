@@ -14,4 +14,7 @@
 
 # Universal Hardware Data Model (UHDM) "stmt" formal description
  
-- class_def: stmt
+- group_def: stmt
+  - class_ref: scope
+  - class_ref: atomic_stmt
+  
