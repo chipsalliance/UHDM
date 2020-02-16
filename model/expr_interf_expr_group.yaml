@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "fork" formal description
+# Universal Hardware Data Model (UHDM) "expr_interf_expr_group" formal description
  
-- obj_def: fork_stmt
-  - extends: scope
-  - property: type
-    name: vpiFork
-    vpi: vpiType
-    type: unsigned int
-    card: 1
-  - property: join_type
-    name: join type
-    vpi: vpiJoinType
-    type: int
-    card: 1
-  - group_ref: stmts
-    name: stmts
-    vpi: vpiStmt
-    type: stmt
-    card: any
-    
+- group_def: expr_interf_expr_group
+  - class_ref: expr
+  - group_ref: interface_expr
+  
+
+

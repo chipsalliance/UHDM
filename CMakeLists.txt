@@ -88,7 +88,9 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/variable_drivers_group.cpp
     ${PROJECT_SOURCE_DIR}/src/variable_loads_group.cpp
     ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/operand_group.cpp)
+    ${PROJECT_SOURCE_DIR}/src/operand_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/stmt.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_interf_expr_group.cpp)
 
 foreach(src_file ${uhdm_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
