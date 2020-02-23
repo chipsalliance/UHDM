@@ -26,6 +26,11 @@
     vpi: vpiSize
     type: int
     card: 1
+  - property: vpi_get_value
+    name: vpi_get_value
+    vpi: vpiValue
+    type: s_vpi_value
+    card: 1
   - class_ref: typespec
     name: typespec
     vpi: vpiTypespec

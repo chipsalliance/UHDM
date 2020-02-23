@@ -7,12 +7,13 @@
 using namespace UHDM;
 
 #include "test_helper.h"
+#include "vpi_visitor.h"
 
 std::vector<vpiHandle> build_designs (Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s.MakeDesign();
-  d->VpiName("design2");
+  d->VpiName("design3");
   module* m1 = s.MakeModule();
   m1->VpiTopModule(true);
   m1->VpiName("M1");
@@ -24,6 +25,38 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   m2->VpiParent(m1);
   m2->VpiFile("fake2.sv");
   m2->VpiLineNo(20);
+
+  initial* init = s.MakeInitial();
+  VectorOfprocess* processes = s.MakeProcessVec();
+  processes->push_back(init);
+  begin* begin_block = s.MakeBegin();
+  init->Stmt(begin_block);
+  VectorOfany* statements = s.MakeAnyVec();
+  ref_obj* lhs_rf = s.MakeRef_obj();
+  lhs_rf->VpiName("out");          
+  assignment* assign1 = s.MakeAssignment();
+  assign1->Lhs(lhs_rf);
+  constant* c1 = s.MakeConstant();
+  c1->VpiValue("INT:0");
+  assign1->Rhs(c1);
+  statements->push_back(assign1);
+
+  delay_control* dc = s.MakeDelay_control();
+  dc->VpiDelay("#100");
+
+  assignment* assign2 = s.MakeAssignment();
+  assign2->Lhs(lhs_rf);
+  constant* c2 = s.MakeConstant();
+  c2->VpiValue("INT:1");
+  assign2->Rhs(c2);
+  dc->Stmt(assign2);
+  statements->push_back(dc);
+
+  
+  begin_block->Stmts(statements);
+  m2->Process(processes);
+
+    
   module* m3 = s.MakeModule();
   m3->VpiName("M3");
   m3->VpiParent(m1);
@@ -50,7 +83,7 @@ int main (int argc, char** argv) {
   std::cout << "Make design" << std::endl;
   Serializer serializer;
 
-  std::string orig = print_designs(build_designs(serializer));
+  std::string orig = visit_designs(build_designs(serializer));
 
   std::cout << orig;
   std::cout << "\nSave design" << std::endl;
@@ -59,7 +92,7 @@ int main (int argc, char** argv) {
   std::cout << "Restore design" << std::endl;
   std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog3.uhdm");
 
-  std::string restored = print_designs(restoredDesigns);
+  std::string restored = visit_designs(restoredDesigns);
   std::cout << restored;
   return (orig != restored);
 }

@@ -247,6 +247,12 @@ proc printMethods { classname type vpi card {real_type ""} } {
     if {$type == "string"} {
 	set type "std::string"
     }
+    if {$type == "s_vpi_value"} {
+	set type "std::string"
+    }
+    if {$type == "s_vpi_delay"} {
+	set type "std::string"
+    }
     if {$vpi == "uhdmType"} {
 	set type "UHDM_OBJECT_TYPE"
     }
@@ -303,6 +309,12 @@ proc printCapnpSchema {type vpi card} {
     if {$type == "any"} {
         set type "Int64"
     }
+    if {$type == "s_vpi_value"} {
+	set type "UInt64"
+    }
+    if {$type == "s_vpi_delay"} {
+	set type "UInt64"
+    }
     if {$card == "1"} {
 	return [list ${vpi} ${type}]
     } elseif {$card == "any"} {
@@ -312,7 +324,7 @@ proc printCapnpSchema {type vpi card} {
 
 proc printMembers { type vpi card } {
     set members ""
-    if {$type == "string"} {
+    if {$type == "string" || $type == "s_vpi_value" || $type == "s_vpi_delay"} {
 	set type "std::string"
     }
     if {$card == "1"} {
@@ -365,7 +377,7 @@ proc printIterateBody { name classname vpi card } {
 
 proc printGetBody {classname type vpi card} {
     set vpi_get_body ""
-    if {($card == 1) && ($type != "string")} {
+    if {($card == 1) && ($type != "string") && ($type != "s_vpi_value") && ($type != "s_vpi_delay")} {
 	append vpi_get_body "
   if (handle->type == uhdm${classname}) {
     if (property == $vpi) {
@@ -374,6 +386,34 @@ proc printGetBody {classname type vpi card} {
   }"
     }
     return $vpi_get_body
+}
+
+proc printGetValueBody {classname type vpi card} {
+    set vpi_get_value_body ""
+    if {($card == 1) && ($type == "s_vpi_value")} {
+	append vpi_get_value_body "
+  if (handle->type == uhdm${classname}) {
+    const s_vpi_value* v = String2VpiValue((($classname*)(obj))->VpiValue());
+    if (v) {
+      *value_p = *v;
+    }
+  }"
+    }
+    return $vpi_get_value_body
+}
+
+proc printGetDelayBody {classname type vpi card} {
+    set vpi_get_delay_body ""
+    if {($card == 1) && ($type == "s_vpi_delay")} {
+	append vpi_get_delay_body "
+  if (handle->type == uhdm${classname}) {
+    const s_vpi_delay* v = String2VpiDelays((($classname*)(obj))->VpiDelay());
+    if (v) {
+      *delay_p = *v;
+    }
+  }"
+    }
+    return $vpi_get_delay_body
 }
 
 
@@ -422,7 +462,21 @@ proc printGetStrVisitor {classname type vpi card} {
 
 proc printGetVisitor {classname type vpi card} {
     set vpi_get_body ""
-    if {($card == 1) && ($type != "string") && ($vpi != "vpiLineNo") && ($vpi != "vpiType")} {
+    if {$vpi == "vpiValue"} {
+	append vpi_get_body "    s_vpi_value value;
+    vpi_get_value(obj_h, \\&value);
+    if (value.format) {
+      result += spaces + visit_value(\\&value);
+    }
+"
+    } elseif {$vpi == "vpiDelay"} {
+	append vpi_get_body "    s_vpi_delay delay;
+    vpi_get_delays(obj_h, \\&delay);
+    if (delay.da != nullptr) {
+      result += spaces + visit_delays(\\&delay);
+    }
+"
+    } elseif {($card == 1) && ($type != "string") && ($vpi != "vpiLineNo") && ($vpi != "vpiType")} {
 	append vpi_get_body "    if (const int n = vpi_get($vpi, obj_h)) 
       result += spaces + std::string(\"|$vpi:\") + std::to_string(n) + std::string(\"\\n\");
 "
@@ -677,6 +731,8 @@ proc generate_code { models } {
     set vpi_scan_body ""
     set vpi_handle_body_all ""
     set vpi_get_body ""
+    set vpi_get_value_body ""
+    set vpi_get_delay_body ""
     set vpi_get_str_body ""
     set headers ""
     set defines ""
@@ -806,7 +862,7 @@ proc generate_code { models } {
 		
 		    set Vpi [string toupper $vpi 0 0]
 		    regsub -all  {_} $Vpi "" Vpi
-		    if {$type == "string"} {
+		    if {$type == "string" || $type == "s_vpi_value" || $type == "s_vpi_delay"} {
 			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->GetSerializer()->symbolMaker.Make(obj->[string toupper ${vpi} 0 0]()));\n"
 			append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](symbolMaker.GetSymbol(obj.get${Vpi}()));\n"
 		    } else {
@@ -943,6 +999,8 @@ proc generate_code { models } {
 	if [info exist vpi_get_body_inst($classname)] {
 	    foreach inst $vpi_get_body_inst($classname) {
 		append vpi_get_body [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		append vpi_get_value_body [printGetValueBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		append vpi_get_delay_body [printGetDelayBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 		append VISITOR($classname) [printGetVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 	    }
 	}
@@ -974,7 +1032,6 @@ proc generate_code { models } {
 		    incr capnpIndex
 		}
 	    }
-
 	    # Save
 	    set save ""
 	    foreach line [split $SAVE($baseclass) "\n"] {
@@ -1003,6 +1060,8 @@ proc generate_code { models } {
 	    if [info exist vpi_get_body_inst($baseclass)] {
 		foreach inst $vpi_get_body_inst($baseclass) {
 		    append vpi_get_body [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		    append vpi_get_value_body [printGetValueBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+		    append vpi_get_delay_body [printGetDelayBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 		    append VISITOR($classname) [printGetVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 		}
 	    }
@@ -1094,6 +1153,8 @@ proc generate_code { models } {
     regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
     regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body_all vpi_user
     regsub -all {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
+    regsub -all {<VPI_GET_VALUE_BODY>} $vpi_user $vpi_get_value_body vpi_user
+    regsub -all {<VPI_GET_DELAY_BODY>} $vpi_user $vpi_get_delay_body vpi_user
     regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
     
     set vpi_userId [open "[exec_path]/src/vpi_user.cpp" "w"]

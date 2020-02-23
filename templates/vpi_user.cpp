@@ -52,6 +52,51 @@ vpiHandle vpi_handle_by_index (vpiHandle object,
   return 0;
 }
 
+
+s_vpi_value* String2VpiValue(std::string s) {
+  s_vpi_value* val = new s_vpi_value;
+  val->format = 0;
+  val->value.integer = 0;
+  if (strstr(s.c_str(), "INT:")) {
+    s.erase(0,4);
+    val->format = vpiIntVal;
+    val->value.integer = atoi(s.c_str());
+  }
+  return val;
+}
+
+
+s_vpi_delay* String2VpiDelays(std::string s) {
+  s_vpi_delay* delay = new s_vpi_delay;
+  delay->da = nullptr;
+  if (strstr(s.c_str(), "#")) {
+    s.erase(0,1);
+    delay->da = new t_vpi_time;
+    delay->no_of_delays = 1;
+    delay->time_type = vpiScaledRealTime;
+    delay->da[0].low  = atoi(s.c_str());
+    delay->da[0].type = vpiScaledRealTime;
+  }
+  return delay;
+}
+
+
+std::string VpiValue2String(const s_vpi_value* value) {
+  std::string result;
+  if (value == nullptr)
+    return result;
+  switch (value->format) {
+  case vpiIntVal: {
+    return std::string(std::string("INT:") + std::to_string(value->value.integer));
+    break;
+  }
+  default:
+    break;
+  }
+  return result;
+}
+
+
 static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
   return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
 }
@@ -142,6 +187,13 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
 
 void vpi_get_delays (vpiHandle object,
                      p_vpi_delay delay_p) {
+  if (!object) {
+    std::cout << "VPI ERROR: Bad usage of vpi_get_delay" << std::endl;
+  }
+  uhdm_handle* handle = (uhdm_handle*) object;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  delay_p->da = nullptr;
+  <VPI_GET_DELAY_BODY>
 }
 
 void vpi_put_delays (vpiHandle object,
@@ -150,8 +202,15 @@ void vpi_put_delays (vpiHandle object,
 
 /* value processing */
 
-void vpi_get_value (vpiHandle expr,
+void vpi_get_value (vpiHandle vexpr,
                     p_vpi_value value_p) {
+  if (!vexpr) {
+    std::cout << "VPI ERROR: Bad usage of vpi_get_value" << std::endl;
+  }
+  uhdm_handle* handle = (uhdm_handle*) vexpr;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  value_p->format = 0;
+  <VPI_GET_VALUE_BODY>
 }
 
 vpiHandle vpi_put_value (vpiHandle object,
