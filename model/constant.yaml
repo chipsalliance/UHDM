@@ -13,11 +13,11 @@
 # limitations under the License.
 
 # Universal Hardware Data Model (UHDM) "constant" formal description
- 
-- obj_decl: constant
+
+- obj_def: constant
   - extends: expr
   - property: constant_type
-    name: constant type
-    vpi: vpiConstType
-    type: int
-    card: 1
+     name: constant type
+     vpi: vpiConstType
+     type: int
+     card: 1

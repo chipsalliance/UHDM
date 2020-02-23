@@ -41,6 +41,34 @@
 
 namespace UHDM {
 
+std::string visit_value(s_vpi_value* value) {
+  if (value == nullptr)
+    return "";
+  switch (value->format) {
+  case vpiIntVal: {
+    return std::string(std::string("INT:") + std::to_string(value->value.integer) + "\n");
+    break;
+  }
+  default:
+    break;
+  }
+  return "";
+}
+
+std::string visit_delays(s_vpi_delay* delay) {
+  if (delay == nullptr)
+    return "";
+  switch (delay->time_type) {
+  case vpiScaledRealTime: {
+    return std::string(std::string("#") + std::to_string(delay->da[0].low) + "\n");
+    break;
+  }
+  default:
+    break;
+  }
+  return "";
+}  
+
 std::string visit_object (vpiHandle obj_h, unsigned int indent) {
   std::string result;
   unsigned int subobject_indent = indent + 2;

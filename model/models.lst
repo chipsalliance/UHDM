@@ -32,8 +32,8 @@ property_inst.yaml
 sequence_inst.yaml
 expr.yaml
 simple_expr.yaml
-parameter.yaml
 constant.yaml
+parameter.yaml
 func_call.yaml
 method_func_call.yaml
 sys_func_call.yaml
