@@ -46,7 +46,7 @@ std::string visit_value(s_vpi_value* value) {
     return "";
   switch (value->format) {
   case vpiIntVal: {
-    return std::string(std::string("INT:") + std::to_string(value->value.integer) + "\n");
+    return std::string(std::string("|INT:") + std::to_string(value->value.integer) + "\n");
     break;
   }
   default:
@@ -60,7 +60,7 @@ std::string visit_delays(s_vpi_delay* delay) {
     return "";
   switch (delay->time_type) {
   case vpiScaledRealTime: {
-    return std::string(std::string("#") + std::to_string(delay->da[0].low) + "\n");
+    return std::string(std::string("|#") + std::to_string(delay->da[0].low) + "\n");
     break;
   }
   default:
