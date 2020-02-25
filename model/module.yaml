@@ -46,7 +46,7 @@
     vpi: vpiDefaultClocking
     type: clocking_block
     card: 1
-  - class_ref: expr_dist
+  - group_ref: expr_dist
     name: expr distribution
     vpi: vpiDefaultDisableIff
     type: expr_dist

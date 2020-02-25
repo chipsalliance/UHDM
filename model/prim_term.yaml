@@ -15,3 +15,8 @@
 # Universal Hardware Data Model (UHDM) "prim term" formal description
  
 - obj_def: prim_term
+  - property: vpi_get_value
+    name: vpi_get_value
+    vpi: vpiValue
+    type: value
+    card: 1

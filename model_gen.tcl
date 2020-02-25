@@ -247,10 +247,10 @@ proc printMethods { classname type vpi card {real_type ""} } {
     if {$type == "string"} {
 	set type "std::string"
     }
-    if {$type == "s_vpi_value"} {
+    if {$type == "value"} {
 	set type "std::string"
     }
-    if {$type == "s_vpi_delay"} {
+    if {$type == "delay"} {
 	set type "std::string"
     }
     if {$vpi == "uhdmType"} {
@@ -309,10 +309,10 @@ proc printCapnpSchema {type vpi card} {
     if {$type == "any"} {
         set type "Int64"
     }
-    if {$type == "s_vpi_value"} {
+    if {$type == "value"} {
 	set type "UInt64"
     }
-    if {$type == "s_vpi_delay"} {
+    if {$type == "delay"} {
 	set type "UInt64"
     }
     if {$card == "1"} {
@@ -324,7 +324,7 @@ proc printCapnpSchema {type vpi card} {
 
 proc printMembers { type vpi card } {
     set members ""
-    if {$type == "string" || $type == "s_vpi_value" || $type == "s_vpi_delay"} {
+    if {$type == "string" || $type == "value" || $type == "delay"} {
 	set type "std::string"
     }
     if {$card == "1"} {
@@ -377,7 +377,7 @@ proc printIterateBody { name classname vpi card } {
 
 proc printGetBody {classname type vpi card} {
     set vpi_get_body ""
-    if {($card == 1) && ($type != "string") && ($type != "s_vpi_value") && ($type != "s_vpi_delay")} {
+    if {($card == 1) && ($type != "string") && ($type != "value") && ($type != "delay")} {
 	append vpi_get_body "
   if (handle->type == uhdm${classname}) {
     if (property == $vpi) {
@@ -390,7 +390,7 @@ proc printGetBody {classname type vpi card} {
 
 proc printGetValueBody {classname type vpi card} {
     set vpi_get_value_body ""
-    if {($card == 1) && ($type == "s_vpi_value")} {
+    if {($card == 1) && ($type == "value")} {
 	append vpi_get_value_body "
   if (handle->type == uhdm${classname}) {
     const s_vpi_value* v = String2VpiValue((($classname*)(obj))->VpiValue());
@@ -404,7 +404,7 @@ proc printGetValueBody {classname type vpi card} {
 
 proc printGetDelayBody {classname type vpi card} {
     set vpi_get_delay_body ""
-    if {($card == 1) && ($type == "s_vpi_delay")} {
+    if {($card == 1) && ($type == "delay")} {
 	append vpi_get_delay_body "
   if (handle->type == uhdm${classname}) {
     const s_vpi_delay* v = String2VpiDelays((($classname*)(obj))->VpiDelay());
@@ -862,7 +862,7 @@ proc generate_code { models } {
 		
 		    set Vpi [string toupper $vpi 0 0]
 		    regsub -all  {_} $Vpi "" Vpi
-		    if {$type == "string" || $type == "s_vpi_value" || $type == "s_vpi_delay"} {
+		    if {$type == "string" || $type == "value" || $type == "delay"} {
 			append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->GetSerializer()->symbolMaker.Make(obj->[string toupper ${vpi} 0 0]()));\n"
 			append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](symbolMaker.GetSymbol(obj.get${Vpi}()));\n"
 		    } else {

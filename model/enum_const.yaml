@@ -20,4 +20,8 @@
     vpi: vpiName
     type: string
     card: 1
-
+  - property: vpi_get_value
+    name: vpi_get_value
+    vpi: vpiValue
+    type: value
+    card: 1
