@@ -80,7 +80,7 @@
     name: vector
     vpi: vpiVector
     type: bool
-    card: 1
+    card: 1 
   - class_ref: ports
     name: ports
     vpi: vpiPortInst

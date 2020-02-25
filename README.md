@@ -37,14 +37,15 @@ Universal Hardware Data Model
  * To match the standard, several concepts are observed in the model:
     * obj_def: A leaf object specification (Object can be allocated and persisted)
     * class_def: A virtual class specification (Class is used either with inheritance - extends:, or as composition of a - class_ref)
-    * property: typically an int, bool, string property with a name and a vpi access type (ie: vpiModule) accessed by the vpi_get function
-    * obj_ref: a reference to one (accessed by vpi_handle) or many (accessed by vpi_iterate) leaf objects 
-    * class_ref: a reference to one or many virtual class, actual objects returned will be of a leaf type
+    * property: Typically an int, bool, string property with a name and a vpi access type (ie: vpiModule) accessed by the vpi_get function
+    * obj_ref: A reference to one (accessed by vpi_handle) or many (accessed by vpi_iterate) leaf objects 
+    * class_ref: A reference to one or many virtual class, actual objects returned will be of a leaf type
     * extends: Class inheritance specified by the extends keyword
     * group_def: Grouping of objects in a named or unnamed group (We actually give a representative name to unnamed groups)
-    * group_ref: a reference to one or many members of a group of objects
+    * group_ref: A reference to one or many members of a group of objects
  * Keywords used to capture the model in Yaml
-    * all of the above (obj_def...), plus for each definition (obj_ref, class_ref, group_ref, property), the following sub fields:
+    * all of the above keywords (obj_def...group_ref),
+    * For each reference (obj_def, class_def, group_def) and property, the following sub fields:
     * name: the name of the field (spaces accepted), verbatim from the standard
     * vpi: the name of the VPI access type to access this object member (Has to match a defined value in vpi_user.h or sv_vpi_user.h)
     * type: the formal type of the field:
@@ -55,6 +56,8 @@ Universal Hardware Data Model
       * unsigned int
       * bool
       * string
+      * value (VPI s_vpi_value)
+      * delay (VPI s_vpi_delay)
     * card: cardinality of the field
       * 1
       * any (0 or more)
@@ -93,5 +96,4 @@ Universal Hardware Data Model
 * [SystemVerilog 2017](http://ecee.colorado.edu/~mathys/ecen2350/IntelSoftware/pdf/IEEE_Std1800-2017_8299595.pdf) - System Verilog Standard
 * [Surelog](https://github.com/alainmarcel/Surelog/) - Surelog parser
 * [Verible](https://github.com/google/verible) - Verible linter
-
-[capnproto]: https://capnproto.org/
+* [capnproto](https://capnproto.org/) - Cap'n Proto serialization

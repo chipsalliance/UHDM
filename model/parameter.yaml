@@ -16,4 +16,13 @@
  
 - obj_decl: parameter
   - extends: simple_expr
-
+  - property: constant_type
+    name: constant type
+    vpi: vpiConstType
+    type: int
+    card: 1
+  - property: sign
+    name: sign
+    vpi: vpiSigned
+    type: bool
+    card: 1

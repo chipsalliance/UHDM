@@ -14,5 +14,7 @@
 
 # Universal Hardware Data Model (UHDM) "expr distribution class" formal description
  
-- class_def: expr_dist
+- group_def: expr_dist
+  - class_ref: expr
+  - obj_ref: distribution
  

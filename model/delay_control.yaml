@@ -19,7 +19,7 @@
   - property: vpi_get_delays
     name: vpi_get_delays
     vpi: vpiDelay
-    type: s_vpi_delay
+    type: delay
     card: 1
   - group_ref: stmt
     name: stmt
