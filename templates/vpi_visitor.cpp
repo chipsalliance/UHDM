@@ -69,19 +69,23 @@ std::string visit_delays(s_vpi_delay* delay) {
   return "";
 }  
 
-std::string visit_object (vpiHandle obj_h, unsigned int indent) {
+std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::string& relation) {
   std::string result;
   unsigned int subobject_indent = indent + 2;
   std::string hspaces;
+  std::string rspaces;
   if (indent > 0) {
-    for (unsigned int i = 0; i < indent -2 ; i++)
+    for (unsigned int i = 0; i < indent -2 ; i++) {
       hspaces += " ";
+    }
+    rspaces = hspaces + "| ";
     hspaces += "\\_";
   }
   std::string spaces;
   for (unsigned int i = 0; i < indent; i++)
     spaces += " ";
-  std::string objectName = "";
+  std::string objectName = ""; // Instance name
+  std::string defName    = ""; // Definition name
   std::string fileName = "";
   std::string lineNo   = "";
   std::string parent   = "";
@@ -100,10 +104,19 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
     }
     vpi_free_object(par);
   }
-  if (const char* s = vpi_get_str(vpiName, obj_h)) {
-    objectName = s;
+  if (const char* s = vpi_get_str(vpiDefName, obj_h)) {
+    defName = s;
   }
-  result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + objectName + fileName + lineNo + parent + "\n";
+  if (const char* s = vpi_get_str(vpiName, obj_h)) {
+    if (defName != "") {
+      defName += " ";
+    }
+    objectName = std::string("(") + s + std::string(")");
+  }
+  if (relation != "") {
+    result += rspaces + relation + ":\n";
+  }
+  result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + defName + objectName + fileName + lineNo + parent + "\n";
 <OBJECT_VISITORS>
   return result;
 }
@@ -111,7 +124,7 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
 std::string visit_designs (const std::vector<vpiHandle>& designs) {
   std::string result;
   for (auto design : designs) {
-    result += visit_object(design, 0);
+    result += visit_object(design, 0, "");
   }
   return result;
 }

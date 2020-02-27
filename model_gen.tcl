@@ -449,9 +449,6 @@ proc printGetHandleBody { classname type vpi object card } {
 
 proc printGetStrVisitor {classname type vpi card} {
     set vpi_get_str_body ""
-    if {$vpi == "vpiName"} {
-	return ""
-    }
     if {($card == 1) && ($type == "string") && ($vpi != "vpiFile")} {
 	append vpi_get_str_body "    if (const char* s = vpi_get_str($vpi, obj_h))  
       result += spaces + std::string(\"|$vpi:\") + s + std::string(\"\\n\");
@@ -596,13 +593,13 @@ proc printVpiVisitor {classname vpi card} {
     if {$card == 1} {
 	append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
     if (itr)
-      result += visit_object(itr, subobject_indent);
+      result += visit_object(itr, subobject_indent, \"$vpi\");
     vpi_free_object(itr);
 "	
     } else {
 	append vpi_visitor "    itr = vpi_iterate($vpi,obj_h); 
     while (vpiHandle obj = vpi_scan(itr) ) {
-      result += visit_object(obj, subobject_indent);
+      result += visit_object(obj, subobject_indent, \"$vpi\");
       vpi_free_object(obj);
     }
     vpi_free_object(itr);

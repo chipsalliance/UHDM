@@ -55,4 +55,13 @@ class uhdm_handleFactory {
     std::vector<uhdm_handle*> objects_;
 };
 
+
+s_vpi_value* String2VpiValue(const std::string& s);
+
+s_vpi_delay* String2VpiDelays(const std::string& s);
+
+std::string VpiValue2String(const s_vpi_value* value);
+
+std::string VpiDelay2String(const s_vpi_delay* delay);
+
 #endif

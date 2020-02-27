@@ -3,10 +3,10 @@
 #include <iostream>
 
 #include "headers/uhdm.h"
+#include "headers/vpi_visitor.h"
 
 using namespace UHDM;
 
-#include "test_helper.h"
 #include "vpi_visitor.h"
 
 std::vector<vpiHandle> build_designs (Serializer& s) {
@@ -16,12 +16,13 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   d->VpiName("design3");
   module* m1 = s.MakeModule();
   m1->VpiTopModule(true);
-  m1->VpiName("M1");
+  m1->VpiDefName("M1");
   m1->VpiParent(d);
   m1->VpiFile("fake1.sv");
   m1->VpiLineNo(10);
   module* m2 = s.MakeModule();
-  m2->VpiName("M2");
+  m2->VpiDefName("M2");
+  m2->VpiName("u1");
   m2->VpiParent(m1);
   m2->VpiFile("fake2.sv");
   m2->VpiLineNo(20);
@@ -47,18 +48,20 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   assignment* assign2 = s.MakeAssignment();
   assign2->Lhs(lhs_rf);
   constant* c2 = s.MakeConstant();
-  c2->VpiValue("INT:1");
+  s_vpi_value val;
+  val.format  = vpiIntVal;
+  val.value.integer = 1;
+  c2->VpiValue(VpiValue2String(&val));
   assign2->Rhs(c2);
   dc->Stmt(assign2);
   statements->push_back(dc);
-
   
   begin_block->Stmts(statements);
   m2->Process(processes);
 
-    
   module* m3 = s.MakeModule();
-  m3->VpiName("M3");
+  m3->VpiDefName("M3");
+  m3->VpiName("u2");
   m3->VpiParent(m1);
   m3->VpiFile("fake3.sv");
   m3->VpiLineNo(30);
@@ -70,7 +73,6 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   v2->push_back(m3);
   m1->Modules(v2);
   package* p1 = s.MakePackage();
-  p1->VpiName("P1");
   p1->VpiDefName("P0");
   VectorOfpackage* v3 = s.MakePackageVec();
   v3->push_back(p1);

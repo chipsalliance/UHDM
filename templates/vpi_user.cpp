@@ -53,28 +53,30 @@ vpiHandle vpi_handle_by_index (vpiHandle object,
 }
 
 
-s_vpi_value* String2VpiValue(std::string s) {
+s_vpi_value* String2VpiValue(const std::string& s) {
+  std::string scopy = s;
   s_vpi_value* val = new s_vpi_value;
   val->format = 0;
   val->value.integer = 0;
-  if (strstr(s.c_str(), "INT:")) {
-    s.erase(0,4);
+  if (strstr(scopy.c_str(), "INT:")) {
+    scopy.erase(0,4);
     val->format = vpiIntVal;
-    val->value.integer = atoi(s.c_str());
+    val->value.integer = atoi(scopy.c_str());
   }
   return val;
 }
 
 
-s_vpi_delay* String2VpiDelays(std::string s) {
+s_vpi_delay* String2VpiDelays(const std::string& s) {
+  std::string scopy = s;
   s_vpi_delay* delay = new s_vpi_delay;
   delay->da = nullptr;
-  if (strstr(s.c_str(), "#")) {
-    s.erase(0,1);
+  if (strstr(scopy.c_str(), "#")) {
+    scopy.erase(0,1);
     delay->da = new t_vpi_time;
     delay->no_of_delays = 1;
     delay->time_type = vpiScaledRealTime;
-    delay->da[0].low  = atoi(s.c_str());
+    delay->da[0].low  = atoi(scopy.c_str());
     delay->da[0].type = vpiScaledRealTime;
   }
   return delay;
@@ -96,6 +98,23 @@ std::string VpiValue2String(const s_vpi_value* value) {
   return result;
 }
 
+
+ std::string VpiDelay2String(const s_vpi_delay* delay) {
+  std::string result;
+  if (delay == nullptr)
+    return result;
+  if (delay->da == nullptr)
+    return result;
+  switch (delay->time_type) {
+  case vpiScaledRealTime: {
+    return std::string(std::string("#") + std::to_string(delay->da[0].low));
+    break;
+  }
+  default:
+    break;
+  }
+  return result;
+}
 
 static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
   return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
