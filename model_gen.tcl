@@ -519,8 +519,8 @@ proc printVpiListener {classname vpi type card} {
 "
 	return
     }
-    if {$vpi == "vpiParent"} {
-	# To prevent infinite loops in visitors
+    if {($vpi == "vpiParent") || ($vpi == "vpiInstance") || ($vpi == "vpiModule")} {
+	# To prevent infinite loops in visitors as these 3 relations are pointing upward in the tree
 	return
     }
     set vpi_visitor ""
@@ -574,17 +574,14 @@ proc printClassListener {classname} {
 }
 
 proc printVpiVisitor {classname vpi card} {
-    global VISITOR 
-    if {$vpi == "vpiParent"} {
-	# To prevent infinite loops in visitors
-	return
-    }
+    global VISITOR_RELATIONS 
+    
     set vpi_visitor ""
-    if ![info exist VISITOR($classname)] {
+    if ![info exist VISITOR_RELATIONS($classname)] {
 	set vpi_visitor "    vpiHandle itr;
 "
     } else {
-	if ![regexp "vpiHandle itr;" $VISITOR($classname)] {
+	if ![regexp "vpiHandle itr;" $VISITOR_RELATIONS($classname)] {
 	    set vpi_visitor "    vpiHandle itr;
 "
 	}
@@ -593,20 +590,20 @@ proc printVpiVisitor {classname vpi card} {
     if {$card == 1} {
 	append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
     if (itr)
-      result += visit_object(itr, subobject_indent, \"$vpi\");
+      result += visit_object(itr, subobject_indent, \"$vpi\", visited);
     vpi_free_object(itr);
 "	
     } else {
 	append vpi_visitor "    itr = vpi_iterate($vpi,obj_h); 
     while (vpiHandle obj = vpi_scan(itr) ) {
-      result += visit_object(obj, subobject_indent, \"$vpi\");
+      result += visit_object(obj, subobject_indent, \"$vpi\", visited);
       vpi_free_object(obj);
     }
     vpi_free_object(itr);
 " 
     }
 
-    append VISITOR($classname) $vpi_visitor
+    append VISITOR_RELATIONS($classname) $vpi_visitor
 }
 
 proc makeVpiName { classname } {
@@ -715,7 +712,7 @@ proc generate_group_checker { model } {
 }
 
 proc generate_code { models } {
-    global ID BASECLASS DEFINE_ID working_dir methods_cpp VISITOR CLASS_LISTENER
+    global ID BASECLASS DEFINE_ID working_dir methods_cpp VISITOR VISITOR_RELATIONS CLASS_LISTENER
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS
     log "=========="
     exec sh -c "mkdir -p headers"
@@ -1280,9 +1277,15 @@ $RESTORE($class)
 	    set vpiName "vpiFor"
 	} elseif {$vpiName == "vpiIoDecl"} {
 	    set vpiName "vpiIODecl"
-	} 
+	}
+	set relations ""
+	if [info exist VISITOR_RELATIONS($classname)] {
+	    set relations $VISITOR_RELATIONS($classname)
+	}
+
 	append vpi_visitor "  if (objectType == $vpiName) {
 $VISITOR($classname)
+$relations
     return result;
   }
 "
