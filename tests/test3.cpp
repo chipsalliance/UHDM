@@ -23,7 +23,10 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   module* m2 = s.MakeModule();
   m2->VpiDefName("M2");
   m2->VpiName("u1");
+  m2->VpiFullName("M1.u1");
   m2->VpiParent(m1);
+  m2->Instance(m1);
+  m2->Module(m1);
   m2->VpiFile("fake2.sv");
   m2->VpiLineNo(20);
 
@@ -62,7 +65,10 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   module* m3 = s.MakeModule();
   m3->VpiDefName("M3");
   m3->VpiName("u2");
+  m3->VpiFullName("M1.u2");
   m3->VpiParent(m1);
+  m3->Instance(m1);
+  m3->Module(m1);
   m3->VpiFile("fake3.sv");
   m3->VpiLineNo(30);
   VectorOfmodule* v1 = s.MakeModuleVec();
