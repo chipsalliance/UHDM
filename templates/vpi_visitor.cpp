@@ -29,6 +29,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
@@ -69,16 +70,22 @@ std::string visit_delays(s_vpi_delay* delay) {
   return "";
 }  
 
-std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::string& relation) {
+std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::string& relation, std::set<const BaseClass*>& visited) {
   std::string result;
   unsigned int subobject_indent = indent + 2;
   std::string hspaces;
   std::string rspaces;
+  const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
+  const BaseClass* const object = (const BaseClass*) handle->object;
+  if (visited.find(object) != visited.end()) {
+    return result;
+  }
+  visited.insert(object);
   if (indent > 0) {
     for (unsigned int i = 0; i < indent -2 ; i++) {
       hspaces += " ";
     }
-    rspaces = hspaces + "| ";
+    rspaces = hspaces + "|";
     hspaces += "\\_";
   }
   std::string spaces;
@@ -124,7 +131,8 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::strin
 std::string visit_designs (const std::vector<vpiHandle>& designs) {
   std::string result;
   for (auto design : designs) {
-    result += visit_object(design, 0, "");
+    std::set<const BaseClass*> visited;
+    result += visit_object(design, 0, "", visited);
   }
   return result;
 }
