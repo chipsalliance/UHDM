@@ -77,8 +77,9 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::strin
   std::string rspaces;
   const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
   const BaseClass* const object = (const BaseClass*) handle->object;
+  bool alreadyVisited = false;
   if (visited.find(object) != visited.end()) {
-    return result;
+    alreadyVisited = true;
   }
   visited.insert(object);
   if (indent > 0) {
@@ -124,6 +125,9 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::strin
     result += rspaces + relation + ":\n";
   }
   result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + defName + objectName + fileName + lineNo + parent + "\n";
+  if ( alreadyVisited) {
+    return result;
+  }
 <OBJECT_VISITORS>
   return result;
 }
