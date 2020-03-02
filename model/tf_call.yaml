@@ -14,7 +14,7 @@
 
 # Universal Hardware Data Model (UHDM) "tf_call" formal description
 
-- obj_decl: tf_call
+- class_def: tf_call
   - class_ref: scope
     name: scope
     vpi: vpiScope
@@ -27,6 +27,6 @@
     card: any
   - property: name
     name: name
-    type: str
+    type: string
     vpi: vpiName
     card: 1

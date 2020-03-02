@@ -156,7 +156,7 @@ type_parameter.yaml
 typespec_member.yaml
 enum_const.yaml
 bit_typespec.yaml
-uhdm.yaml
 tf_call_args.yaml
-sys_func_task_call_group.yaml
 tf_call.yaml
+sys_func_task_call_group.yaml
+uhdm.yaml
