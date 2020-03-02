@@ -157,3 +157,4 @@ typespec_member.yaml
 enum_const.yaml
 bit_typespec.yaml
 uhdm.yaml
+tf_call.yaml
