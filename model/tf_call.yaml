@@ -25,3 +25,8 @@
     vpi: vpiArgument
     type: tf_call_args
     card: any
+  - property: name
+    name: name
+    type: str
+    vpi: vpiName
+    card: 1
