@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "sys_func_call" formal description
- 
-- obj_def: sys_func_call
-  - extends: expr
-  - extends: tf_call
-  - property: func_type
-    name: type
-    type: int
-    vpi: vpiFuncType
+# Universal Hardware Data Model (UHDM) "method_func_task_call_group" formal description
+
+- group_def: method_func_task_call_group
+  - class_ref: prefix
+    name: prefix
+    type: expr
+    vpi: vpiPrefix
+    card: 1
+  - group_ref: with
+    name: with
+    type: with_expr_constr_group
+    vpi: vpiWith
+    card: 1
+  - property: is_built_in
+    name: is built in
+    type: bool
+    vpi: vpiUserDefn
     card: 1
