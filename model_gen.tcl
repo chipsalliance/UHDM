@@ -594,6 +594,10 @@ proc printVpiVisitor {classname vpi card} {
     vpi_free_object(itr);
 "	
     } else {
+	if {$classname == "design"} {
+	    append vpi_visitor "    if (indent == 0) visited.clear();
+"
+	}
 	append vpi_visitor "    itr = vpi_iterate($vpi,obj_h); 
     while (vpiHandle obj = vpi_scan(itr) ) {
       result += visit_object(obj, subobject_indent, \"$vpi\", visited);
