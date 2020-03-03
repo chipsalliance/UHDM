@@ -15,4 +15,10 @@
 # Universal Hardware Data Model (UHDM) "func_call" formal description
  
 - obj_decl: func_call
+  - extends: tf_call
   - extends: expr
+  - property: func_type
+    name: type
+    type: int
+    vpi: vpiFuncType
+    card: 1

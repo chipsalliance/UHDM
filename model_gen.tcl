@@ -1284,6 +1284,8 @@ $RESTORE($class)
 	    set vpiName "vpiIODecl"
 	} elseif {$vpiName == "vpiTfCall"} {
 	    set vpiName "vpiSysTfCall"
+	} elseif {$vpiName == "vpiAtomicStmt"} {
+	    set vpiName "vpiStmt"
 	}
 	set relations ""
 	if [info exist VISITOR_RELATIONS($classname)] {

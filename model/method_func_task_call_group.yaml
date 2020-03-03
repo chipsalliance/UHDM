@@ -12,22 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "tf_call" formal description
+# Universal Hardware Data Model (UHDM) "method_func_task_call_group" formal description
 
-- class_def: tf_call
-  - extends: atomic_stmt
-  - class_ref: scope
-    name: scope
-    vpi: vpiScope
-    type: scope
+- group_def: method_func_task_call_group
+  - class_ref: prefix
+    name: prefix
+    type: expr
+    vpi: vpiPrefix
     card: 1
-  - group_ref: tf_call_args
-    name: tf_call_args
-    vpi: vpiArgument
-    type: tf_call_args
-    card: any
-  - property: name
-    name: name
-    type: string
-    vpi: vpiName
+  - group_ref: with
+    name: with
+    type: with_expr_constr_group
+    vpi: vpiWith
+    card: 1
+  - property: is_built_in
+    name: is built in
+    type: bool
+    vpi: vpiUserDefn
     card: 1
