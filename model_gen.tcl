@@ -1271,12 +1271,15 @@ $RESTORE($class)
     set vpi_visitor ""
     foreach classname [array name VISITOR] {
 	set vpiName [makeVpiName $classname]
+	# Exceptions where the vpi_user relation does not match the class name
 	if {$vpiName == "vpiForkStmt"} {
 	    set vpiName "vpiFork"
 	} elseif {$vpiName == "vpiForStmt"} {
 	    set vpiName "vpiFor"
 	} elseif {$vpiName == "vpiIoDecl"} {
 	    set vpiName "vpiIODecl"
+	} elseif {$vpiName == "vpiTfCall"} {
+	    set vpiName "vpiSysTfCall"
 	}
 	set relations ""
 	if [info exist VISITOR_RELATIONS($classname)] {
