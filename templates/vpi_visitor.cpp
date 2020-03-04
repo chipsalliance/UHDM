@@ -125,7 +125,10 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::strin
     result += rspaces + relation + ":\n";
   }
   result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + defName + objectName + fileName + lineNo + parent + "\n";
-  if ( alreadyVisited) {
+  if (alreadyVisited) {
+    return result;
+  }
+  if (relation == "vpiParent") {
     return result;
   }
 <OBJECT_VISITORS>
