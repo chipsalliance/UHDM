@@ -16,4 +16,12 @@
  
 - obj_def: event_control
   - extends: atomic_stmt
+  - group_ref: expr_sequence_inst_named_event_group
+    type: expr_sequence_inst_named_event_group
+    vpi: vpiCondition
+    card: 1
+  - group_ref: stmt
+    type: stmt
+    vpi: vpiStmt
+    card: 1
 

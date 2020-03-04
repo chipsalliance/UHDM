@@ -90,6 +90,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
     ${PROJECT_SOURCE_DIR}/src/operand_group.cpp
     ${PROJECT_SOURCE_DIR}/src/stmt.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_sequence_inst_named_event_group.cpp
     ${PROJECT_SOURCE_DIR}/src/tf_call_args.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_interf_expr_group.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_dist.cpp)

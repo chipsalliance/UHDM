@@ -12,13 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "always" formal description
- 
-- obj_def: always
-  - extends: process
-  - property: always_type
-    name: always type
-    type: int
-    vpi: vpiAlwaysType
-    card: 1
+# Universal Hardware Data Model (UHDM) "expr_sequence_inst_named_event_group" formal description
 
+- group_def: expr_sequence_inst_named_event_group
+  - class_ref: expr
+  - obj_ref: sequence_inst
+  - obj_ref: named_event
