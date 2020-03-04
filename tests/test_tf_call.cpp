@@ -38,6 +38,20 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   display->Tf_call_args(arguments);
   statements->push_back(display);
 
+  func_call* my_func_call = s.MakeFunc_call();
+  function* my_func = s.MakeFunction();
+  my_func->VpiName("a_func");
+  my_func_call->Function(my_func);
+  VectorOfany *arguments2 = s.MakeAnyVec();
+  constant* cA2 = s.MakeConstant();
+  cA2->VpiValue("INT:1");
+  arguments2->push_back(cA2);
+  constant* cA3 = s.MakeConstant();
+  cA3->VpiValue("INT:2");
+  arguments2->push_back(cA3);
+  my_func_call->Tf_call_args(arguments2);
+  statements->push_back(my_func_call);
+
   begin_block->Stmts(statements);
   m1->Process(processes);
 
