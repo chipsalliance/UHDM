@@ -90,6 +90,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
     ${PROJECT_SOURCE_DIR}/src/operand_group.cpp
     ${PROJECT_SOURCE_DIR}/src/stmt.cpp
+    ${PROJECT_SOURCE_DIR}/src/tf_call_args.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_interf_expr_group.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_dist.cpp)
 
@@ -152,6 +153,15 @@ target_link_libraries(uhdm-test4 ${ALL_LIBRARIES_FOR_UHDM})
 add_test(
   NAME uhdm-test4
   COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test4
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+add_executable(uhdm-test-tf-call ${PROJECT_SOURCE_DIR}/tests/test_tf_call.cpp)
+set_target_properties(uhdm-test-tf-call PROPERTIES OUTPUT_NAME uhdm-test-tf-call)
+add_dependencies(uhdm-test-tf-call uhdm)
+target_link_libraries(uhdm-test-tf-call ${ALL_LIBRARIES_FOR_UHDM})
+add_test(
+  NAME uhdm-test-tf-call
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test-tf-call
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-listener ${PROJECT_SOURCE_DIR}/tests/test_listener.cpp)

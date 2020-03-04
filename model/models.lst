@@ -34,7 +34,6 @@ expr.yaml
 simple_expr.yaml
 constant.yaml
 parameter.yaml
-sys_func_call.yaml
 let_expr.yaml
 distribution.yaml
 operand_group.yaml
@@ -157,6 +156,7 @@ bit_typespec.yaml
 tf_call_args.yaml
 tf_call.yaml
 sys_func_task_call_group.yaml
+sys_func_call.yaml
 with_expr_constr_group.yaml
 method_func_task_call_group.yaml
 method_func_call.yaml
