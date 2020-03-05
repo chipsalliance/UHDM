@@ -16,7 +16,7 @@
 
 - group_def: tf_call_args
   - class_ref: expr
-  - class_ref: interface_expr
+  - group_ref: interface_expr
   - class_ref: scope
   - class_ref: primitive
   - obj_ref: named_event
