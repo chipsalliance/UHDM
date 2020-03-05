@@ -83,6 +83,7 @@ port.yaml
 port_bit.yaml
 primitive.yaml
 mod_path.yaml
+expr_tchk_term_group.yaml
 tchk.yaml
 def_param.yaml
 range.yaml

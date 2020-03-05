@@ -93,6 +93,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/expr_sequence_inst_named_event_group.cpp
     ${PROJECT_SOURCE_DIR}/src/tf_call_args.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_interf_expr_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_tchk_term_group.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_dist.cpp)
 
 foreach(src_file ${uhdm_SRC})
