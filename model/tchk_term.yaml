@@ -15,3 +15,18 @@
 # Universal Hardware Data Model (UHDM) "tchk term" formal description
  
 - obj_def: tchk_term
+  - class_ref: expr
+    name: expr
+    type: expr
+    vpi: vpiExpr
+    card: 1
+  - class_ref: condition
+    name: condition
+    type: expr
+    vpi: vpiCondition
+    card: 1
+  - property: edge
+    name: edge
+    type: int
+    vpi: vpiEdge
+    card: 1
