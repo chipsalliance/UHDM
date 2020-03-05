@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Alain Dargelas
+# Copyright 2019 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "simple_expr" formal description
- 
-- class_def: simple_expr
-  - extends: expr
-  - group_ref: vpiUse
-    name: simple_expr_use_group
-    type: simple_expr_use_group
-    vpi: vpiUse
-    card: any
-    #TODO: this is still incomplete
+# Universal Hardware Data Model (UHDM) "expr_tchk_term_group" formal description
 
+- group_def: expr_tchk_term_group
+  - class_ref: expr
+  - obj_ref: tchk_term

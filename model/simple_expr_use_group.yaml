@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "simple_expr" formal description
- 
-- class_def: simple_expr
-  - extends: expr
-  - group_ref: vpiUse
-    name: simple_expr_use_group
-    type: simple_expr_use_group
-    vpi: vpiUse
-    card: any
-    #TODO: this is still incomplete
+# Universal Hardware Data Model (UHDM) "simple_expr_use_group" formal description
 
+- group_def: simple_expr_use_group
+  - obj_ref: prim_term
+  - obj_ref: path_term
+  - obj_ref: tchk_term
+  - obj_ref: delay_term
+  - class_ref: ports
+  - class_ref: stmt
+  - obj_ref: cont_assign
+  - obj_ref: cont_assign_bit

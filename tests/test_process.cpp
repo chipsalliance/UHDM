@@ -26,10 +26,15 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   processes->push_back(proc_always);
 
   event_control* at = s.MakeEvent_control();
-  VectorOfexpr* posedge_clk = s.MakeExprVec();
   ref_obj* clk = s.MakeRef_obj();
   clk->VpiName("clk");
-  at->Condition(clk);
+  tchk_term* posedge_clk = s.MakeTchk_term();
+  posedge_clk->VpiEdge(vpiPosedge);
+  posedge_clk->Expr(clk);
+  VectorOfany* simple_exp_vec = s.MakeAnyVec();
+  simple_exp_vec->push_back(posedge_clk);
+  clk->VpiUses(simple_exp_vec);
+  at->VpiCondition(clk);
 
   VectorOfany* statements = s.MakeAnyVec();
   ref_obj* lhs_rf = s.MakeRef_obj();

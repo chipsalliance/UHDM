@@ -12,6 +12,7 @@ atomic_stmt.yaml
 interface_expr.yaml
 expr_interf_expr_group.yaml
 delay_control.yaml
+delay_term.yaml
 expr_sequence_inst_named_event_group.yaml
 event_control.yaml
 repeat_control.yaml
@@ -32,6 +33,7 @@ pattern.yaml
 property_inst.yaml
 sequence_inst.yaml
 expr.yaml
+simple_expr_use_group.yaml
 simple_expr.yaml
 constant.yaml
 parameter.yaml
