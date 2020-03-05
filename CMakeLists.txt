@@ -165,6 +165,15 @@ add_test(
   COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test-tf-call
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
+add_executable(uhdm-test-process ${PROJECT_SOURCE_DIR}/tests/test_process.cpp)
+set_target_properties(uhdm-test-process PROPERTIES OUTPUT_NAME uhdm-test-process)
+add_dependencies(uhdm-test-process uhdm)
+target_link_libraries(uhdm-test-process ${ALL_LIBRARIES_FOR_UHDM})
+add_test(
+  NAME uhdm-test-process
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test-process
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
 add_executable(uhdm-listener ${PROJECT_SOURCE_DIR}/tests/test_listener.cpp)
 set_target_properties(uhdm-listener PROPERTIES OUTPUT_NAME uhdm-listener)
 add_dependencies(uhdm-listener uhdm)
