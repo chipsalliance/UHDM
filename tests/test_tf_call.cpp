@@ -76,10 +76,10 @@ int main (int argc, char** argv) {
 
   std::cout << orig;
   std::cout << "\nSave design" << std::endl;
-  serializer.Save("surelog3.uhdm");
+  serializer.Save("surelog_tf_call.uhdm");
 
   std::cout << "Restore design" << std::endl;
-  std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog3.uhdm");
+  std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog_tf_call.uhdm");
 
   std::string restored = visit_designs(restoredDesigns);
   std::cout << restored;
