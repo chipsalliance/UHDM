@@ -20,3 +20,8 @@
     vpi: vpiStmt
     type: stmt
     card: 1
+  - obj_ref: module
+    name: module
+    vpi: vpiModule
+    type: module
+    card: 1

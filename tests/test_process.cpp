@@ -20,8 +20,9 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   m1->VpiLineNo(10);
 
   always* proc_always = s.MakeAlways();
-	  begin* begin_block = s.MakeBegin();
-	  proc_always->Stmt(begin_block);
+  begin* begin_block = s.MakeBegin();
+  proc_always->Stmt(begin_block);
+  proc_always->Module(m1);
   VectorOfprocess* processes = s.MakeProcessVec();
   processes->push_back(proc_always);
 
