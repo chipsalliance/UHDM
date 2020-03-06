@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "stmt" formal description
- 
-- group_def: stmt
-  - class_ref: scope
-  - class_ref: atomic_stmt
-  - class_ref: process
-    name: process
-    type: process
-    vpi: vpiProcess
-    card: 1
-  
+# Universal Hardware Data Model (UHDM) "delay_term" formal description
+
+- obj_def: delay_term
+  #TODO: Complete the model

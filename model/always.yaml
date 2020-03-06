@@ -16,4 +16,9 @@
  
 - obj_def: always
   - extends: process
+  - property: always_type
+    name: always type
+    type: int
+    vpi: vpiAlwaysType
+    card: 1
 

@@ -16,4 +16,10 @@
  
 - class_def: simple_expr
   - extends: expr
+  - group_ref: vpiUse
+    name: simple_expr_use_group
+    type: simple_expr_use_group
+    vpi: vpiUse
+    card: any
+    #TODO: this is still incomplete
 
