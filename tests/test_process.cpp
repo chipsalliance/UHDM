@@ -43,22 +43,12 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   assignment* assign1 = s.MakeAssignment();
   assign1->Lhs(lhs_rf);
   constant* c1 = s.MakeConstant();
-  c1->VpiValue("INT:0");
-  assign1->Rhs(c1);
-  statements->push_back(assign1);
-
-  delay_control* dc = s.MakeDelay_control();
-  dc->VpiDelay("#100");
-
-  assignment* assign2 = s.MakeAssignment();
-  assign2->Lhs(lhs_rf);
-  constant* c2 = s.MakeConstant();
   s_vpi_value val;
   val.format  = vpiIntVal;
   val.value.integer = 1;
-  c2->VpiValue(VpiValue2String(&val));
-  assign2->Rhs(c2);
-  at->Stmt(assign2);
+  c1->VpiValue(VpiValue2String(&val));
+  assign1->Rhs(c1);
+  at->Stmt(assign1);
   statements->push_back(at);
 
   begin_block->Stmts(statements);
