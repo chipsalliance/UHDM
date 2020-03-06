@@ -17,7 +17,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s.MakeDesign();
-  d->VpiName("design3");
+  d->VpiName("design_process");
   module* m1 = s.MakeModule();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
@@ -83,10 +83,10 @@ int main (int argc, char** argv) {
 
   std::cout << orig;
   std::cout << "\nSave design" << std::endl;
-  serializer.Save("surelog3.uhdm");
+  serializer.Save("surelog_process.uhdm");
 
   std::cout << "Restore design" << std::endl;
-  std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog3.uhdm");
+  std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog_process.uhdm");
 
   std::string restored = visit_designs(restoredDesigns);
   std::cout << restored;
