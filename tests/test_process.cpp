@@ -7,6 +7,12 @@ using namespace UHDM;
 
 #include "vpi_visitor.h"
 
+// This builds a simple design:
+// module m1;
+//   always @(posedge clk)
+//     out = 1;
+//   end
+// endmodule
 std::vector<vpiHandle> build_designs (Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
@@ -19,6 +25,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   m1->VpiFile("fake1.sv");
   m1->VpiLineNo(10);
 
+  // always @(posedge clk) begin
   always* proc_always = s.MakeAlways();
   begin* begin_block = s.MakeBegin();
   proc_always->Stmt(begin_block);
@@ -26,6 +33,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   VectorOfprocess* processes = s.MakeProcessVec();
   processes->push_back(proc_always);
 
+  // @(posedge clk)
   event_control* at = s.MakeEvent_control();
   ref_obj* clk = s.MakeRef_obj();
   clk->VpiName("clk");
@@ -37,6 +45,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   clk->VpiUses(simple_exp_vec);
   at->VpiCondition(clk);
 
+  // out = 1;
   VectorOfany* statements = s.MakeAnyVec();
   ref_obj* lhs_rf = s.MakeRef_obj();
   lhs_rf->VpiName("out");
