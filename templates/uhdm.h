@@ -33,6 +33,7 @@
 #define vpiInterfaceTypespec 3001
 #define vpiNets 3002
 #define vpiSimpleExpr 3003
+#define vpiParameters 3004
 
 #include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"
