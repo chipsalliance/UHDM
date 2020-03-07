@@ -36,7 +36,6 @@ expr.yaml
 simple_expr_use_group.yaml
 simple_expr.yaml
 constant.yaml
-parameter.yaml
 let_expr.yaml
 distribution.yaml
 operand_group.yaml
@@ -87,13 +86,13 @@ primitive.yaml
 mod_path.yaml
 expr_tchk_term_group.yaml
 tchk.yaml
-def_param.yaml
 range.yaml
 udp_defn.yaml
 ref_obj_interf_net_var_group.yaml
 io_decl.yaml
 alias_stmt.yaml
 clocking_block.yaml
+expr_typespec_group.yaml
 param_assign.yaml
 instance_array.yaml
 interface_array.yaml
@@ -123,6 +122,8 @@ packed_array_net.yaml
 named_event.yaml
 named_event_array.yaml
 parameters.yaml
+parameter.yaml
+def_param.yaml
 spec_param.yaml
 class_defn.yaml
 class_obj.yaml
