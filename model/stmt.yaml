@@ -17,9 +17,4 @@
 - group_def: stmt
   - class_ref: scope
   - class_ref: atomic_stmt
-  - class_ref: process
-    name: process
-    type: process
-    vpi: vpiProcess
-    card: 1
-  
+
