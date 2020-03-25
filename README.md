@@ -93,6 +93,7 @@ Universal Hardware Data Model
  * Other parsers are welcome to generate UHDM databases
 
 # Useful links
+* [Verilog_Object_Model.pdf](third_party/Verilog_Object_Model.pdf) - Object Model section of the IEEE_Std1800-2017_8299595.pdf (Practical for searches)
 * [SystemVerilog 2017](http://ecee.colorado.edu/~mathys/ecen2350/IntelSoftware/pdf/IEEE_Std1800-2017_8299595.pdf) - System Verilog Standard
 * [Surelog](https://github.com/alainmarcel/Surelog/) - Surelog parser
 * [Verible](https://github.com/google/verible) - Verible linter
