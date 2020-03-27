@@ -45,18 +45,25 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   assign1->Rhs(c1);
   statements->push_back(assign1);
 
-  delay_control* dc = s.MakeDelay_control();
-  dc->VpiDelay("#100");
-
   assignment* assign2 = s.MakeAssignment();
   assign2->Lhs(lhs_rf);
   constant* c2 = s.MakeConstant();
+  c2->VpiValue("STRING:a string");
+  assign2->Rhs(c2);
+  statements->push_back(assign2);
+  
+  delay_control* dc = s.MakeDelay_control();
+  dc->VpiDelay("#100");
+
+  assignment* assign3 = s.MakeAssignment();
+  assign3->Lhs(lhs_rf);
+  constant* c3 = s.MakeConstant();
   s_vpi_value val;
   val.format  = vpiIntVal;
   val.value.integer = 1;
-  c2->VpiValue(VpiValue2String(&val));
-  assign2->Rhs(c2);
-  dc->Stmt(assign2);
+  c3->VpiValue(VpiValue2String(&val));
+  assign3->Rhs(c3);
+  dc->Stmt(assign3);
   statements->push_back(dc);
   
   begin_block->Stmts(statements);

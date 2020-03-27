@@ -50,6 +50,11 @@ std::string visit_value(s_vpi_value* value) {
     return std::string(std::string("|INT:") + std::to_string(value->value.integer) + "\n");
     break;
   }
+  case vpiStringVal: {
+    const char* s = (const char*) value->value.str;
+    return std::string(std::string("|STRING:") + std::string(s) + "\n");
+    break;
+  }  
   default:
     break;
   }

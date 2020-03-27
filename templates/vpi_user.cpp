@@ -58,6 +58,7 @@ s_vpi_value* String2VpiValue(const std::string& s) {
   s_vpi_value* val = new s_vpi_value;
   val->format = 0;
   val->value.integer = 0;
+  val->value.str = nullptr;
   if (strstr(scopy.c_str(), "INT:")) {
     scopy.erase(0,4);
     val->format = vpiIntVal;
