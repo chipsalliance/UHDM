@@ -62,6 +62,10 @@ s_vpi_value* String2VpiValue(const std::string& s) {
     scopy.erase(0,4);
     val->format = vpiIntVal;
     val->value.integer = atoi(scopy.c_str());
+  } else if (strstr(scopy.c_str(), "STRING:")) {
+    scopy.erase(0,7);
+    val->format = vpiStringVal;
+    val->value.str = strdup(scopy.c_str());
   }
   return val;
 }
@@ -92,6 +96,10 @@ std::string VpiValue2String(const s_vpi_value* value) {
     return std::string(std::string("INT:") + std::to_string(value->value.integer));
     break;
   }
+  case vpiStringVal: {
+    return std::string(std::string("STRING:") + value->value.str);
+    break;
+  }  
   default:
     break;
   }
