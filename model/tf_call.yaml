@@ -15,7 +15,12 @@
 # Universal Hardware Data Model (UHDM) "tf_call" formal description
 
 - class_def: tf_call
-  - extends: atomic_stmt
+# The Verilog Object Model says tf_call inhehit from atomic stmt,
+# But since we don't support multiple inheritence, it is more practical to make it inherit from
+# expr
+# We also extend the "stmt" group def to include tf_call
+#  - extends: atomic_stmt
+  - extends: expr
   - class_ref: scope
     name: scope
     vpi: vpiScope

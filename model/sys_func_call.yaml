@@ -15,7 +15,6 @@
 # Universal Hardware Data Model (UHDM) "sys_func_call" formal description
  
 - obj_def: sys_func_call
-  - extends: expr
   - extends: tf_call
   - property: func_type
     name: type
