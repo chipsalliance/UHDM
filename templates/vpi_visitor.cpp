@@ -54,7 +54,30 @@ std::string visit_value(s_vpi_value* value) {
     const char* s = (const char*) value->value.str;
     return std::string(std::string("|STRING:") + std::string(s) + "\n");
     break;
-  }  
+  }
+  case vpiBinStrVal: {
+    const char* s = (const char*) value->value.str;
+    return std::string(std::string("|BIN:") + std::string(s) + "\n");
+    break;
+  }
+  case vpiHexStrVal: {
+    const char* s = (const char*) value->value.str;
+    return std::string(std::string("|HEX:") + std::string(s) + "\n");
+    break;
+  }
+  case vpiOctStrVal: {
+    const char* s = (const char*) value->value.str;
+    return std::string(std::string("|OCT:") + std::string(s) + "\n");
+    break;
+  }
+  case vpiRealVal: {
+    return std::string(std::string("|REAL:") + std::to_string(value->value.real) + "\n");
+    break;
+  }
+  case vpiScalarVal: {
+    return std::string(std::string("|SCAL:") + std::to_string(value->value.scalar) + "\n");
+    break;
+  } 
   default:
     break;
   }

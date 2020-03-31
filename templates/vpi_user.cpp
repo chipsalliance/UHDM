@@ -63,11 +63,31 @@ s_vpi_value* String2VpiValue(const std::string& s) {
     scopy.erase(0,4);
     val->format = vpiIntVal;
     val->value.integer = atoi(scopy.c_str());
+  } if (strstr(scopy.c_str(), "SCAL:")) {
+    scopy.erase(0,5);
+    val->format = vpiScalarVal;
+    val->value.integer = atoi(scopy.c_str());
+  }else if (strstr(scopy.c_str(), "BIN:")) {
+    scopy.erase(0,4);
+    val->format = vpiBinStrVal;
+    val->value.str = strdup(scopy.c_str());
+  } else if (strstr(scopy.c_str(), "HEX:")) {
+    scopy.erase(0,4);
+    val->format = vpiHexStrVal;
+    val->value.str = strdup(scopy.c_str());
+  } else if (strstr(scopy.c_str(), "OCT:")) {
+    scopy.erase(0,4);
+    val->format = vpiOctStrVal;
+    val->value.str = strdup(scopy.c_str());
   } else if (strstr(scopy.c_str(), "STRING:")) {
     scopy.erase(0,7);
     val->format = vpiStringVal;
     val->value.str = strdup(scopy.c_str());
-  }
+  } else if (strstr(scopy.c_str(), "REAL:")) {
+    scopy.erase(0,5);
+    val->format = vpiRealVal;
+    val->value.real = atol(scopy.c_str());
+  } 
   return val;
 }
 
@@ -97,10 +117,30 @@ std::string VpiValue2String(const s_vpi_value* value) {
     return std::string(std::string("INT:") + std::to_string(value->value.integer));
     break;
   }
+  case vpiScalarVal: {
+    return std::string(std::string("SCAL:") + std::to_string(value->value.scalar));
+    break;
+  }
   case vpiStringVal: {
     return std::string(std::string("STRING:") + value->value.str);
     break;
-  }  
+  }
+  case vpiHexStrVal: {
+    return std::string(std::string("HEX:") + value->value.str);
+    break;
+  }
+  case vpiOctStrVal: {
+    return std::string(std::string("OCT:") + value->value.str);
+    break;
+  }
+  case vpiBinStrVal: {
+    return std::string(std::string("BIN:") + value->value.str);
+    break;
+  }
+  case vpiRealVal: {
+    return std::string(std::string("REAL:") + std::to_string(value->value.real));
+    break;
+  }   
   default:
     break;
   }
@@ -108,7 +148,7 @@ std::string VpiValue2String(const s_vpi_value* value) {
 }
 
 
- std::string VpiDelay2String(const s_vpi_delay* delay) {
+std::string VpiDelay2String(const s_vpi_delay* delay) {
   std::string result;
   if (delay == nullptr)
     return result;
