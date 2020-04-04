@@ -20,3 +20,13 @@
     vpi: vpiDisableCondition
     type: expr_dist
     card: 1
+  - class_ref: vpiClockingEvent
+    name: clocking event
+    vpi: vpiClockingEvent
+    type: expr
+    card: 1   
+  - group_ref: vpiPropertyExpr
+    name: property expr
+    vpi: vpiPropertyExpr
+    type: property_expr_group
+    card: 1  

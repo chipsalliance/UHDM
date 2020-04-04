@@ -12,23 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "property_inst" formal description
- 
-- obj_def: property_inst
-  - extends: assertion
-  - group_ref: vpiDisableCondition
-    name: disable condition
-    vpi: vpiDisableCondition
-    type: expr_dist
+# Universal Hardware Data Model (UHDM) "clocked_property" formal description
+
+- obj_def: clocked_property
+  - property: type
+    name: vpiClockedProp
+    vpi: vpiType
+    type: unsigned int
     card: 1
-  - group_ref: vpiArgument
-    name: arguments
-    vpi: vpiArgument
-    type: property_expr_named_event_group
-    card: any
-  - obj_ref: property_decl
-    name: property decl
-    vpi: vpiPropertyDecl
-    type: property_decl
+  - class_ref: vpiClockingEvent
+    name: clocking event
+    vpi: vpiClockingEvent
+    type: expr
+    card: 1   
+  - group_ref: vpiPropertyExpr
+    name: property expr
+    vpi: vpiPropertyExpr
+    type: property_expr_group
     card: 1
-  

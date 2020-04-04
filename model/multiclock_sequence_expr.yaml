@@ -12,23 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "property_inst" formal description
+# Universal Hardware Data Model (UHDM) "multiclock_sequence_expr" formal description
  
-- obj_def: property_inst
-  - extends: assertion
-  - group_ref: vpiDisableCondition
-    name: disable condition
-    vpi: vpiDisableCondition
-    type: expr_dist
-    card: 1
-  - group_ref: vpiArgument
-    name: arguments
-    vpi: vpiArgument
-    type: property_expr_named_event_group
-    card: any
-  - obj_ref: property_decl
-    name: property decl
-    vpi: vpiPropertyDecl
-    type: property_decl
-    card: 1
-  
+- obj_def: multiclock_sequence_expr
+

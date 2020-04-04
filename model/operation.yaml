@@ -21,6 +21,11 @@
     vpi: vpiOpType
     type: int
     card: 1
+  - property: operator_strength
+    name: operator strength
+    vpi: vpiOpStrong
+    type: bool
+    card: 1  
   - group_ref: operands
     name: operands
     vpi: vpiOperand
