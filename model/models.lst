@@ -1,9 +1,10 @@
 property_decl.yaml
 sequence_decl.yaml
-concurrent_assertion.yaml
 virtual_interface_var.yaml
 let_decl.yaml
 stmt.yaml
+property_inst_spec_group.yaml
+concurrent_assertion.yaml
 process.yaml
 always.yaml
 final.yaml
@@ -29,8 +30,10 @@ foreach_stmt.yaml
 gen_scope.yaml
 expr_dist_group.yaml
 assertion.yaml
+assert.yaml
 pattern.yaml
 property_inst.yaml
+property_spec.yaml
 sequence_inst.yaml
 expr.yaml
 simple_expr_use_group.yaml

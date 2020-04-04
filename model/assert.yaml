@@ -12,9 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "assertion" formal description
+# Universal Hardware Data Model (UHDM) "assert" formal description
  
-- class_def: assertion
+- class_def: assert
+  - extends: concurrent_assertions
+  - group_ref: else_stmt
+    name: else stmt
+    vpi: vpiElseStmt
+    type: stmt
+    card: 1
   - property: start_line
     name: start line
     vpi: vpiStartLine

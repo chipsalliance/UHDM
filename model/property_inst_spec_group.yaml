@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "property_inst" formal description
+# Universal Hardware Data Model (UHDM) "property_spec" formal description
  
-- obj_def: property_inst
-  - extends: assertion
-  - group_ref: vpiDisableCondition
-    name: disable condition
-    vpi: vpiDisableCondition
-    type: expr_dist
-    card: 1
+- group_def: property_inst_spec_group
+  - obj_ref: property_inst
+  - obj_ref: property_spec
+
