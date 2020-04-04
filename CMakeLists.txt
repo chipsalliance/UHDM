@@ -98,7 +98,8 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/expr_dist.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_typespec_group.cpp
     ${PROJECT_SOURCE_DIR}/src/property_inst_spec_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/property_expr_named_event_group.cpp)
+    ${PROJECT_SOURCE_DIR}/src/property_expr_named_event_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/property_expr_group.cpp)
 
 foreach(src_file ${uhdm_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
