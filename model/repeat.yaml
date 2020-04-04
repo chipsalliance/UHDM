@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "atomic_stmt" formal description
- 
-- class_def: atomic_stmt
-  - property: label
-    name: label
-    vpi: vpiName
-    type: string
+# Universal Hardware Data Model (UHDM) "repeat" formal description
+
+- obj_def: repeat
+  - extends: atomic_stmt
+  - class_ref: vpiCondition
+    name: condition
+    vpi: vpiCondition
+    type: expr
+    card: 1
+  - group_ref: vpiStmt
+    name: stmt
+    vpi: vpiStmt
+    type: stmt
     card: 1
 

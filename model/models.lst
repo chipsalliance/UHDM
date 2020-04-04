@@ -25,6 +25,12 @@ named_begin.yaml
 named_fork.yaml
 fork.yaml
 for.yaml
+if_stmt.yaml
+forever.yaml
+while.yaml
+repeat.yaml
+do_while.yaml
+if_else.yaml
 force.yaml
 foreach_stmt.yaml
 gen_scope.yaml

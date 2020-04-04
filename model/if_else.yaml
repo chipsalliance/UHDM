@@ -12,12 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "atomic_stmt" formal description
+# Universal Hardware Data Model (UHDM) "if_else_stmt" formal description
  
-- class_def: atomic_stmt
-  - property: label
-    name: label
-    vpi: vpiName
-    type: string
+- obj_def: if_else
+  - extends: atomic_stmt
+  - property: qualifier
+    name: qualifier
+    vpi: vpiQualifier
+    type: int
     card: 1
-
+  - class_ref: vpiCondition
+    name: condition
+    vpi: vpiCondition
+    type: expr
+    card: 1
+  - group_ref: vpiStmt
+    name: stmt
+    vpi: vpiStmt
+    type: stmt
+    card: 1
+  - group_ref: vpiElseStmt
+    name: else stmt
+    vpi: vpiElseStmt
+    type: stmt
+    card: 1

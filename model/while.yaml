@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,48 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "for_stmt" formal description
- 
-- obj_def: for_stmt
-  - extends: scope
+# Universal Hardware Data Model (UHDM) "while_stmt" formal description
+
+- obj_def: while_stmt
+  - extends: atomic_stmt
   - property: type
-    name: vpiFor
+    name: vpiWhile
     vpi: vpiType
     type: unsigned int
     card: 1
-  - property: has_local_variables
-    name: has local variables
-    vpi: vpiLocalVarDecls
-    type: int
-    card: 1
-  - group_ref: vpiForInitStmts
-    name: init stmts
-    vpi: vpiForInitStmt
-    type: stmt
-    card: any
-  - group_ref: vpiForIncStmts
-    name: inc stmts
-    vpi: vpiForIncStmt
-    type: stmt
-    card: any
-  - group_ref: vpiForInitStmt
-    name: init stmt
-    vpi: vpiForInitStmt
-    type: stmt
-    card: 1
-  - group_ref: vpiCondition
+  - class_ref: vpiCondition
     name: condition
     vpi: vpiCondition
-    type: stmt
-    card: any
-  - group_ref: vpiForIncStmt
-    name: inc stmt
-    vpi: vpiForIncStmt
-    type: stmt
+    type: expr
     card: 1
   - group_ref: vpiStmt
     name: stmt
     vpi: vpiStmt
     type: stmt
     card: 1
-    
+
