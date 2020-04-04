@@ -32,10 +32,15 @@ expr_dist_group.yaml
 assertion.yaml
 assert.yaml
 pattern.yaml
+expr.yaml
+property_expr_named_event_group.yaml
+property_expr.yaml
 property_inst.yaml
 property_spec.yaml
 sequence_inst.yaml
-expr.yaml
+sequence_expr.yaml
+clocked_property.yaml
+multiclock_sequence_expr.yaml
 simple_expr_use_group.yaml
 simple_expr.yaml
 constant.yaml
