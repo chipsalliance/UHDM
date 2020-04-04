@@ -788,6 +788,8 @@ proc write_vpi_visitor_cpp {} {
 	    set vpiName "vpiSysTfCall"
 	} elseif {$vpiName == "vpiAtomicStmt"} {
 	    set vpiName "vpiStmt"
+	} elseif {$vpiName == "vpiAssertStmt"} {
+	    set vpiName "vpiAssert"
 	}
 	set relations ""
 	if [info exist VISITOR_RELATIONS($classname)] {

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "assert" formal description
+# Universal Hardware Data Model (UHDM) "assert_stmt" (assert is a C/C++ keyword) formal description
  
-- class_def: assert
+- class_def: assert_stmt
   - extends: concurrent_assertions
   - group_ref: else_stmt
     name: else stmt
