@@ -36,9 +36,9 @@
     type: sequence_decl
     card: any
   - class_ref: concurrent_assertions
-    name: concurrent assertion
+    name: concurrent assertions
     vpi: vpiConcurrentAssertions
-    type: concurrent_assertion
+    type: concurrent_assertions
     card: any
   - obj_ref: named_events
     name: named event

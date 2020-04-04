@@ -16,4 +16,8 @@
  
 - obj_def: property_inst
   - extends: assertion
-
+  - group_ref: vpiDisableCondition
+    name: disable condition
+    vpi: vpiDisableCondition
+    type: expr_dist
+    card: 1

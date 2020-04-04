@@ -14,4 +14,34 @@
 
 # Universal Hardware Data Model (UHDM) "concurrent assertion" formal description
  
-- class_def: concurrent_assertion
+- class_def: concurrent_assertions
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+  - property: is_clock_inferred
+    name: is clock inferred
+    vpi: vpiIsClockInferred
+    type: bool
+    card: 1    
+  - class_ref: clocking_event
+    name: clocking event
+    vpi: vpiClockingEvent
+    type: expr
+    card: 1
+  - group_ref: stmt
+    name: stmt
+    vpi: vpiStmt
+    type: stmt
+    card: 1
+  - group_ref: vpiProperty
+    name: vpiProperty
+    vpi: vpiProperty
+    type: property_inst_spec_group
+    card: 1
