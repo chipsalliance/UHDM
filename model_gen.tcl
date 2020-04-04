@@ -792,6 +792,10 @@ proc write_vpi_visitor_cpp {} {
 	    set vpiName "vpiAssert"
 	} elseif {$vpiName == "vpiClockedProperty"} {
 	    set vpiName "vpiClockedProp"
+	} elseif {$vpiName == "vpiIfStmt"} {
+	    set vpiName "vpiIf"
+	} elseif {$vpiName == "vpiWhileStmt"} {
+	    set vpiName "vpiWhile"
 	}
 	set relations ""
 	if [info exist VISITOR_RELATIONS($classname)] {
