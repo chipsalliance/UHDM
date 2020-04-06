@@ -37,6 +37,9 @@ gen_scope.yaml
 expr_dist_group.yaml
 assertion.yaml
 assert.yaml
+immediate_assert.yaml
+immediate_assume.yaml
+immediate_cover.yaml
 pattern.yaml
 expr.yaml
 property_expr_named_event_group.yaml
