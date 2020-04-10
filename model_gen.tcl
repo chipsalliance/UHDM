@@ -716,9 +716,9 @@ proc generate_group_checker { model } {
 }
 
 proc write_vpi_listener_cpp {} {
-	global VPI_LISTENERS VPI_ANY_LISTENERS
+    global VPI_LISTENERS VPI_ANY_LISTENERS
 
-	set fid [open "[exec_path]/templates/vpi_listener.cpp"]
+    set fid [open "[exec_path]/templates/vpi_listener.cpp"]
     set listener_cpp [read $fid]
     close $fid
     set vpi_listener ""
@@ -737,9 +737,9 @@ proc write_vpi_listener_cpp {} {
 }
 
 proc write_vpi_listener_h {} {
-	global VPI_LISTENERS_HEADER
+    global VPI_LISTENERS_HEADER
 
-  	set fid [open "[exec_path]/templates/vpi_listener.h"]
+    set fid [open "[exec_path]/templates/vpi_listener.h"]
     set listener_h [read $fid]
     close $fid
     set vpi_listener ""
@@ -753,9 +753,9 @@ proc write_vpi_listener_h {} {
 }
 
 proc write_VpiListener_h {} {
-	global CLASS_LISTENER
+    global CLASS_LISTENER
 
-	set fid [open "[exec_path]/templates/VpiListener.h"]
+    set fid [open "[exec_path]/templates/VpiListener.h"]
     set listener_content [read $fid]
     close $fid
     set vpi_listener ""
@@ -769,9 +769,9 @@ proc write_VpiListener_h {} {
 }
 
 proc write_vpi_visitor_cpp {} {
-	global VISITOR VISITOR_RELATIONS
-
-	set fid [open "[exec_path]/templates/vpi_visitor.cpp"]
+    global VISITOR VISITOR_RELATIONS
+    
+    set fid [open "[exec_path]/templates/vpi_visitor.cpp"]
     set visitor_cpp [read $fid]
     close $fid
     set vpi_visitor ""
@@ -796,6 +796,8 @@ proc write_vpi_visitor_cpp {} {
 	    set vpiName "vpiIf"
 	} elseif {$vpiName == "vpiWhileStmt"} {
 	    set vpiName "vpiWhile"
+	} elseif {$vpiName == "vpiCaseStmt"} {
+	    set vpiName "vpiCase"
 	}
 	set relations ""
 	if [info exist VISITOR_RELATIONS($classname)] {
@@ -816,7 +818,7 @@ $relations
 }
 
 proc write_capnp { capnp_schema_all capnp_root_schema } {
-	set fid [open "[exec_path]/templates/UHDM.capnp"]
+    set fid [open "[exec_path]/templates/UHDM.capnp"]
     set capnp_content [read $fid]
     close $fid
     regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema_all capnp_content
@@ -827,9 +829,9 @@ proc write_capnp { capnp_schema_all capnp_root_schema } {
 }
 
 proc write_uhdm_h { headers} {
-	global DEFINE_ID uhdm_name_map
-
-	set fid [open "[exec_path]/templates/uhdm.h"]
+    global DEFINE_ID uhdm_name_map
+    
+    set fid [open "[exec_path]/templates/uhdm.h"]
     set uhdm_content [read $fid]
     close $fid 
     set uhdmId [open "[exec_path]/headers/uhdm.h" "w"]
@@ -899,79 +901,79 @@ proc update_vpi_inst { baseclass classname lvl } {
 }
 
 proc process_baseclass { baseclass classname modeltype capnpIndex } {
-	global SAVE RESTORE BASECLASS vpi_iterator vpi_handle_body vpi_iterate_body
-	upvar capnp_schema capnp_schema_l capnp_schema_all capnp_schema_all_l
-	upvar vpi_iterate_body_all vpi_iterate_body_all_l vpi_handle_body_all vpi_handle_body_all_l
-	set idx $capnpIndex
-
-	set Classname [string toupper $classname 0 0]
-	regsub -all  {_} $Classname "" Classname
-
-	while {$baseclass != ""} {
+    global SAVE RESTORE BASECLASS vpi_iterator vpi_handle_body vpi_iterate_body
+    upvar capnp_schema capnp_schema_l capnp_schema_all capnp_schema_all_l
+    upvar vpi_iterate_body_all vpi_iterate_body_all_l vpi_handle_body_all vpi_handle_body_all_l
+    set idx $capnpIndex
+    
+    set Classname [string toupper $classname 0 0]
+    regsub -all  {_} $Classname "" Classname
+    
+    while {$baseclass != ""} {
 	
-		# Capnp schema
-		if {$modeltype != "class_def"} {
-		foreach member $capnp_schema_l($baseclass) {
-			foreach {name type} $member {}
-			append capnp_schema_all_l "$name @$idx :$type;\n"
-			incr idx
-		}
-		}
-		# Save
-		set save ""
-		foreach line [split $SAVE($baseclass) "\n"] {
-		set base $baseclass
-		set tmp $line
-		regsub -all  {_} $baseclass "" base		
-		regsub -all " [string toupper $base 0 0]s" $line " ${Classname}s" tmp
-		append save "$tmp\n"
-		}
-		append SAVE($classname) $save
-
-		# Restore
-		set restore $RESTORE($baseclass)
-		regsub -all " ${baseclass}Maker" $RESTORE($baseclass) " ${classname}Maker" restore
-
-		append RESTORE($classname) $restore
-
-		# VPI
-		update_vpi_inst $baseclass $classname 2
-
-		if [info exist vpi_iterate_body($baseclass)] {
-		set vpi_iterate $vpi_iterate_body($baseclass)
-		regsub -all "= uhdm$baseclass" $vpi_iterate "= uhdm$classname" vpi_iterate
-		append vpi_iterate_body_all_l $vpi_iterate 	
-		}
-
-		if [info exist vpi_handle_body($baseclass)] {
-		set vpi_handle $vpi_handle_body($baseclass)
-		regsub -all "= uhdm$baseclass" $vpi_handle "= uhdm$classname" vpi_handle
-		regsub -all "$baseclass\\*" $vpi_handle "$classname\*" vpi_handle		
-		append vpi_handle_body_all_l $vpi_handle 	
-		}
-
-		if [info exist vpi_iterator($baseclass)] {
-		foreach {vpi type card} $vpi_iterator($baseclass) {
-			printVpiVisitor $classname $vpi $card
-			printVpiListener $classname $vpi $type $card
-		}
-		}
-
-		# Parent class
-		if [info exist BASECLASS($baseclass)] {
-		set baseclass $BASECLASS($baseclass)
-		} else {
-		set baseclass ""
-		}
+	# Capnp schema
+	if {$modeltype != "class_def"} {
+	    foreach member $capnp_schema_l($baseclass) {
+		foreach {name type} $member {}
+		append capnp_schema_all_l "$name @$idx :$type;\n"
+		incr idx
+	    }
+	}
+	# Save
+	set save ""
+	foreach line [split $SAVE($baseclass) "\n"] {
+	    set base $baseclass
+	    set tmp $line
+	    regsub -all  {_} $baseclass "" base		
+	    regsub -all " [string toupper $base 0 0]s" $line " ${Classname}s" tmp
+	    append save "$tmp\n"
+	}
+	append SAVE($classname) $save
+	
+	# Restore
+	set restore $RESTORE($baseclass)
+	regsub -all " ${baseclass}Maker" $RESTORE($baseclass) " ${classname}Maker" restore
+	
+	append RESTORE($classname) $restore
+	
+	# VPI
+	update_vpi_inst $baseclass $classname 2
+	
+	if [info exist vpi_iterate_body($baseclass)] {
+	    set vpi_iterate $vpi_iterate_body($baseclass)
+	    regsub -all "= uhdm$baseclass" $vpi_iterate "= uhdm$classname" vpi_iterate
+	    append vpi_iterate_body_all_l $vpi_iterate 	
+	}
+	
+	if [info exist vpi_handle_body($baseclass)] {
+	    set vpi_handle $vpi_handle_body($baseclass)
+	    regsub -all "= uhdm$baseclass" $vpi_handle "= uhdm$classname" vpi_handle
+	    regsub -all "$baseclass\\*" $vpi_handle "$classname\*" vpi_handle		
+	    append vpi_handle_body_all_l $vpi_handle 	
+	}
+	
+	if [info exist vpi_iterator($baseclass)] {
+	    foreach {vpi type card} $vpi_iterator($baseclass) {
+		printVpiVisitor $classname $vpi $card
+		printVpiListener $classname $vpi $type $card
+	    }
 	}
 
-	return idx
+	# Parent class
+	if [info exist BASECLASS($baseclass)] {
+	    set baseclass $BASECLASS($baseclass)
+	} else {
+	    set baseclass ""
+	}
+    }
+    
+    return idx
 }
 
 proc generate_code { models } {
     global ID BASECLASS DEFINE_ID SAVE RESTORE working_dir methods_cpp VISITOR VISITOR_RELATIONS CLASS_LISTENER
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS
-	global uhdm_name_map headers vpi_handle_body_all vpi_handle_body vpi_iterator vpi_iterate_body
+    global uhdm_name_map headers vpi_handle_body_all vpi_handle_body vpi_iterator vpi_iterate_body
 	
     log "=========="
     exec sh -c "mkdir -p headers"
@@ -1030,9 +1032,9 @@ proc generate_code { models } {
 	}
 	set Classname [string toupper $classname 0 0]
 	regsub -all  {_} $Classname "" Classname
-
+	
 	append headers "#include \"headers/$classname.h\"\n"
-
+	
 	if {$modeltype == "group_def"} {
 	    generate_group_checker $model
 	    continue
@@ -1048,7 +1050,7 @@ proc generate_code { models } {
 	if {$modeltype != "class_def"} {
 	    append factory_object_type_map "  case uhdm${classname}: return ${classname}Maker.objects_\[index\];\n"
 	}
-    lappend classes $classname
+	lappend classes $classname
 	
 	set oid [open "[exec_path]/headers/$classname.h" "w"]
 	regsub -all {<CLASSNAME>} $template $classname template
@@ -1109,13 +1111,13 @@ proc generate_code { models } {
 			append containers [printTypeDefs $type $card]
 		    }
 		    
-            # properties are already defined in vpi_user.h, no need to redefine them
+		    # properties are already defined in vpi_user.h, no need to redefine them
 		    append methods($classname) [printMethods $classname $type $vpi $card] 
 		    append members($classname) [printMembers $type $vpi $card]
-            lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
-        	lappend vpi_get_str_body_inst($classname) [list $classname $type $vpi $card]
+		    lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
+		    lappend vpi_get_str_body_inst($classname) [list $classname $type $vpi $card]
 		    lappend capnp_schema($classname) [printCapnpSchema $type $vpi $card]
-		
+		    
 		    set Vpi [string toupper $vpi 0 0]
 		    regsub -all  {_} $Vpi "" Vpi
 		    if {$type == "string" || $type == "value" || $type == "delay"} {
@@ -1164,8 +1166,8 @@ proc generate_code { models } {
 		    append members($classname) [printMembers $type $name $card]
 		    append vpi_iterate_body($classname) [printIterateBody $name $classname $vpi $card]
 		    append vpi_iterator($classname) "[list $vpi $type $card] "
-            append vpi_scan_body [printScanBody $name $classname $type $card]
-            append vpi_handle_body($classname) [printGetHandleBody $classname uhdm${type} $vpi $name $card]
+		    append vpi_scan_body [printScanBody $name $classname $type $card]
+		    append vpi_handle_body($classname) [printGetHandleBody $classname uhdm${type} $vpi $name $card]
 		    
 		    set Type [string toupper $type 0 0]
 		    regsub -all  {_} $Type "" Type		    
@@ -1280,7 +1282,7 @@ proc generate_code { models } {
     write_uhdm_types_h $defines
     
     # containers.h
-	write_containers_h $containers
+    write_containers_h $containers
 
     # vpi_user.cpp
     set fid [open "[exec_path]/templates/vpi_user.cpp" ]
@@ -1402,7 +1404,7 @@ $RESTORE($class)
     # vpi_visitor.h
     exec sh -c "cp -rf [exec_path]/templates/vpi_visitor.h [exec_path]/headers/vpi_visitor.h"
     # vpi_visitor.cpp
-	write_vpi_visitor_cpp
+    write_vpi_visitor_cpp
 
     # VpiListener.h
     write_VpiListener_h
