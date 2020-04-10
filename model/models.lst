@@ -31,6 +31,9 @@ while.yaml
 repeat.yaml
 do_while.yaml
 if_else.yaml
+pattern_expr_group.yaml
+case_stmt.yaml
+case_item.yaml
 force.yaml
 foreach_stmt.yaml
 gen_scope.yaml

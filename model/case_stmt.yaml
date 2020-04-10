@@ -1,0 +1,43 @@
+# Copyright 2019-2020 Alain Dargelas
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Universal Hardware Data Model (UHDM) "case_stmt" ("case" is a C++ keyword) formal description
+ 
+- obj_def: case_stmt
+  - extends: atomic_stmt
+  - property: type
+    name: vpiCase
+    vpi: vpiType
+    type: unsigned int
+    card: 1
+  - property: case_type
+    name: case type
+    vpi: vpiCaseType
+    type: int
+    card: 1
+  - property: qualifier
+    name: qualifier
+    vpi: vpiQualifier
+    type: int
+    card: 1
+  - class_ref: vpiCondition
+    name: condition
+    vpi: vpiCondition
+    type: expr
+    card: 1
+  - obj_ref: case_items
+    name: case items
+    vpi: vpiCaseItem
+    type: case_item
+    card: any
