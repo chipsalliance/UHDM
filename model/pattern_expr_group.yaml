@@ -16,4 +16,4 @@
  
 - group_def: pattern_expr_group
   - class_ref: pattern
-  - expr_ref: expr
+  - class_ref: expr
