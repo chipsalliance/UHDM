@@ -31,3 +31,8 @@
     vpi: vpiFullName
     type: string
     card: 1  
+  - class_ref: vpiIndex
+    name: vpiIndex
+    vpi: vpiIndex
+    type: expr
+    card: 1
