@@ -28,7 +28,7 @@
     card: 1
   - class_ref: base_expr
     name: base expr
-    vpi: vpiBaseRange
+    vpi: vpiBaseExpr
     type: expr
     card: 1
   - class_ref: width_expr
