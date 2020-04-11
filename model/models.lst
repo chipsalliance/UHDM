@@ -61,6 +61,7 @@ distribution.yaml
 operand_group.yaml
 operation.yaml
 part_select.yaml
+indexed_part_select.yaml
 actual_group.yaml
 ref_obj.yaml
 var_select.yaml
