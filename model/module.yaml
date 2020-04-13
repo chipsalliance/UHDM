@@ -117,6 +117,10 @@
     vpi: vpiDefParam
     type: def_param
     card: any
+  - obj_ref: param_assigns
+    vpi: vpiParamAssign
+    type: param_assign
+    card: any  
   - obj_ref: io_decls
     vpi: vpiIODecl
     type: io_decl
