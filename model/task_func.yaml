@@ -56,12 +56,12 @@
     vpi: vpiDPICIdentifier
     type: string
     card: 1
-  - class_ref: left_expr
+  - class_ref: left_range
     name: left range
     vpi: vpiLeftRange
     type: expr
     card: 1
-  - class_ref: right_expr
+  - class_ref: right_range
     name: right range
     vpi: vpiRightRange
     type: expr
