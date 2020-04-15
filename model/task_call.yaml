@@ -12,17 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "func_call" formal description
+# Universal Hardware Data Model (UHDM) "task_call" formal description
  
-- obj_def: func_call
+- obj_def: task_call
   - extends: tf_call
-  - property: func_type
-    name: type
-    type: int
-    vpi: vpiFuncType
-    card: 1
-  - obj_ref: function
-    name: function
-    type: function
-    vpi: vpiFunction
+  - obj_ref: task
+    name: task
+    type: task
+    vpi: vpiTask
     card: 1

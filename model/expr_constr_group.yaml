@@ -1,3 +1,4 @@
+
 # Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "func_call" formal description
- 
-- obj_def: func_call
-  - extends: tf_call
-  - property: func_type
-    name: type
-    type: int
-    vpi: vpiFuncType
-    card: 1
-  - obj_ref: function
-    name: function
-    type: function
-    vpi: vpiFunction
-    card: 1
+# Universal Hardware Data Model (UHDM) "expr_constr_group" formal description
+
+- group_def: expr_constr_group
+  - class_ref: expr
+  - obj_ref: constraint
