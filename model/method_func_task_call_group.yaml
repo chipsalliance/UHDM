@@ -18,18 +18,3 @@
   # Should extend: tf_call, but a group cannot - will be done in members
   - obj_ref: method_func_call
   - obj_ref: method_task_call
-  - class_ref: prefix
-    name: prefix
-    type: expr
-    vpi: vpiPrefix
-    card: 1
-  - group_ref: with
-    name: with
-    type: with_expr_constr_group
-    vpi: vpiWith
-    card: 1
-  - property: is_built_in
-    name: is built in
-    type: bool
-    vpi: vpiUserDefn
-    card: 1
