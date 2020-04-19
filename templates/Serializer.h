@@ -46,7 +46,8 @@ namespace UHDM {
     SymbolFactory symbolMaker;
     uhdm_handleFactory uhdm_handleMaker;
 <FACTORIES>
- 
+
+  std::unordered_map<const BaseClass*, unsigned long>& AllObjects() { return allIds_; }
   private:
     BaseClass* GetObject(unsigned int objectType, unsigned int index);
     void SetId(const BaseClass* p, unsigned long id);
