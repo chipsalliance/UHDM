@@ -25,8 +25,3 @@
     vpi: vpiTypedefAlias
     type: typespec
     card: 1
-  - class_ref: instance
-    name: instance
-    vpi: vpiInstance
-    type: instance
-    card: 1
