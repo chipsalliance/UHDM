@@ -65,7 +65,12 @@
     name: right range
     vpi: vpiRightRange
     type: expr
-    card: 1   
+    card: 1
+  - class_ref: return
+    name: return
+    vpi: vpiReturn
+    type: variables
+    card: 1     
   - obj_ref: class_defn
     name: class defn
     vpi: vpiClassDefn
@@ -80,7 +85,7 @@
     name: io decl
     vpi: vpiIODecl
     type: io_decl
-    card: 1
+    card: any
   - group_ref: stmt
     name: stmt
     vpi: vpiStmt
