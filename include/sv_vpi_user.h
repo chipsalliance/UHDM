@@ -44,7 +44,7 @@ extern "C" {
 #define vpiTypeParameter                      609
 
 /* variables */
-#define vpiVarBit                             vpiRegBit
+/* see uhdm.h #define vpiVarBit                            vpiRegBit */
 #define vpiLongIntVar                         610
 #define vpiShortIntVar                        611
 #define vpiIntVar                             612
@@ -56,8 +56,8 @@ extern "C" {
 #define vpiStructVar                          618
 #define vpiUnionVar                           619
 #define vpiBitVar                             620
-#define vpiLogicVar                           vpiReg
-#define vpiArrayVar                           vpiRegArray
+/* see uhdm.h #define vpiLogicVar                           vpiReg */
+/* see uhdm.h #define vpiArrayVar                           vpiRegArray */
 #define vpiClassObj                           621
 #define vpiChandleVar                         622
 #define vpiPackedArrayVar                     623
