@@ -21,4 +21,9 @@
     vpi: vpiType
     type: unsigned int
     card: 1
+  - class_ref: vpiCondition
+    name: condition
+    vpi: vpiCondition
+    type: expr
+    card: 1
  
