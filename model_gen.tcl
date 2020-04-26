@@ -798,6 +798,12 @@ proc write_vpi_visitor_cpp {} {
 	    set vpiName "vpiWhile"
 	} elseif {$vpiName == "vpiCaseStmt"} {
 	    set vpiName "vpiCase"
+	} elseif {$vpiName == "vpiContinueStmt"} {
+	    set vpiName "vpiContinue"
+	} elseif {$vpiName == "vpiBreakStmt"} {
+	    set vpiName "vpiBreak"
+	}  elseif {$vpiName == "vpiReturnStmt"} {
+	    set vpiName "vpiReturn"
 	}
 	set relations ""
 	if [info exist VISITOR_RELATIONS($classname)] {

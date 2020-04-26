@@ -27,6 +27,9 @@ fork.yaml
 for.yaml
 if_stmt.yaml
 forever.yaml
+continue_stmt.yaml
+break_stmt.yaml
+return_stmt.yaml
 while.yaml
 repeat.yaml
 do_while.yaml
