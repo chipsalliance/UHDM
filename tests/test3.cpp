@@ -91,6 +91,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   v3->push_back(p1);
   d->AllPackages(v3);
   designs.push_back(s.MakeUhdmHandle(uhdmdesign, d));
+
   return designs;
 }
 

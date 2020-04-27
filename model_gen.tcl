@@ -375,6 +375,31 @@ proc printIterateBody { name classname vpi card } {
    }
 }
 
+proc printGetHandleByNameBody { name classname vpi card } {
+    if {$card == 1} {
+	set vpi_handle_by_name_body "   
+  if (handle->type == uhdm${classname}) {
+    if ((($classname*)(object))->[string toupper ${name} 0 0]()) {
+      if ((($classname*)(object))->[string toupper ${name} 0 0]()->VpiName() == name) {
+        return NewHandle((($classname*)(object))->[string toupper ${name} 0 0]()->UhdmType(), (($classname*)(object))->[string toupper ${name} 0 0]());
+      }
+    }
+  }"  
+    } else {
+	set vpi_handle_by_name_body "   
+  if (handle->type == uhdm${classname}) {
+    if ((($classname*)(object))->[string toupper ${name} 0 0]()) {
+      for (auto\\& obj : *(($classname*)(object))->[string toupper ${name} 0 0]()) {
+        if (obj->VpiName() == name) {
+          return NewHandle(obj->UhdmType(), obj);
+        }
+      }
+    }
+  }"     
+    }
+    return $vpi_handle_by_name_body
+}
+
 proc printGetBody {classname type vpi card} {
     set vpi_get_body ""
     if {($card == 1) && ($type != "string") && ($type != "value") && ($type != "delay")} {
@@ -883,33 +908,34 @@ proc write_containers_h { containers } {
 }
 
 proc update_vpi_inst { baseclass classname lvl } {
-	global VISITOR
-
-	upvar $lvl vpi_get_str_body_inst vpi_get_str_body_inst_l
-	upvar $lvl vpi_get_body_inst vpi_get_body_inst_l
-	upvar $lvl vpi_get_str_body vpi_get_str_body_l
-	upvar $lvl vpi_get_body vpi_get_body_l vpi_get_value_body vpi_get_value_body_l vpi_get_delay_body vpi_get_delay_body_l
-
-	if [info exist vpi_get_str_body_inst_l($baseclass)] {
+    global VISITOR
+    
+    upvar $lvl vpi_get_str_body_inst vpi_get_str_body_inst_l
+    upvar $lvl vpi_get_body_inst vpi_get_body_inst_l
+    upvar $lvl vpi_get_str_body vpi_get_str_body_l
+    upvar $lvl vpi_get_body vpi_get_body_l vpi_get_value_body vpi_get_value_body_l vpi_get_delay_body vpi_get_delay_body_l
+    
+    if [info exist vpi_get_str_body_inst_l($baseclass)] {
 	foreach inst $vpi_get_str_body_inst_l($baseclass) {
-		append vpi_get_str_body_l [printGetStrBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
-		append VISITOR($classname) [printGetStrVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+	    append vpi_get_str_body_l [printGetStrBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+	    append VISITOR($classname) [printGetStrVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 	}
-	}
-	if [info exist vpi_get_body_inst_l($baseclass)] {
+    }
+    if [info exist vpi_get_body_inst_l($baseclass)] {
 	foreach inst $vpi_get_body_inst_l($baseclass) {
-		append vpi_get_body_l [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
-		append vpi_get_value_body_l [printGetValueBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
-		append vpi_get_delay_body_l [printGetDelayBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
-		append VISITOR($classname) [printGetVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+	    append vpi_get_body_l [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+	    append vpi_get_value_body_l [printGetValueBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+	    append vpi_get_delay_body_l [printGetDelayBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+	    append VISITOR($classname) [printGetVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
 	}
-	}
+    }
 }
 
 proc process_baseclass { baseclass classname modeltype capnpIndex } {
-    global SAVE RESTORE BASECLASS vpi_iterator vpi_handle_body vpi_iterate_body
+    global SAVE RESTORE BASECLASS vpi_iterator vpi_handle_body vpi_iterate_body vpi_handle_by_name_body
     upvar capnp_schema capnp_schema_l capnp_schema_all capnp_schema_all_l
     upvar vpi_iterate_body_all vpi_iterate_body_all_l vpi_handle_body_all vpi_handle_body_all_l
+    upvar vpi_handle_by_name_body_all vpi_handle_by_name_body_all_l
     set idx $capnpIndex
     
     set Classname [string toupper $classname 0 0]
@@ -957,6 +983,12 @@ proc process_baseclass { baseclass classname modeltype capnpIndex } {
 	    regsub -all "$baseclass\\*" $vpi_handle "$classname\*" vpi_handle		
 	    append vpi_handle_body_all_l $vpi_handle 	
 	}
+
+	if [info exist vpi_handle_by_name_body($baseclass)] {
+	    set vpi_handle_by_name $vpi_handle_by_name_body($baseclass)
+	    regsub -all "= uhdm$baseclass" $vpi_handle_by_name "= uhdm$classname" vpi_handle_by_name
+	    append vpi_handle_by_name_body_all_l $vpi_handle_by_name 	
+	}
 	
 	if [info exist vpi_iterator($baseclass)] {
 	    foreach {vpi type card} $vpi_iterator($baseclass) {
@@ -979,7 +1011,7 @@ proc process_baseclass { baseclass classname modeltype capnpIndex } {
 proc generate_code { models } {
     global ID BASECLASS DEFINE_ID SAVE RESTORE working_dir methods_cpp VISITOR VISITOR_RELATIONS CLASS_LISTENER
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS
-    global uhdm_name_map headers vpi_handle_body_all vpi_handle_body vpi_iterator vpi_iterate_body
+    global uhdm_name_map headers vpi_handle_body_all vpi_handle_body vpi_iterator vpi_iterate_body vpi_handle_by_name_body vpi_handle_by_name_body_all
 	
     log "=========="
     exec sh -c "mkdir -p headers"
@@ -989,6 +1021,7 @@ proc generate_code { models } {
     close $fid
 
     set vpi_iterate_body_all ""
+    set vpi_handle_by_name_body_all ""
     set vpi_scan_body ""
     set vpi_handle_body_all ""
     set vpi_get_body ""
@@ -1075,7 +1108,7 @@ proc generate_code { models } {
 	    append methods($classname) [printMethods $classname "unsigned int" uhdmParentType 1] 
 	    append members($classname) [printMembers "unsigned int" uhdmParentType 1]
 	    append methods($classname) [printMethods $classname string vpiFile 1] 
-	    append members($classname) [printMembers string vpiFile 1]
+	    append members($classname) [printMembers string vpiFile 1]	    
 	    lappend vpi_get_str_body_inst($classname) [list $classname string vpiFile 1]
 	    append methods($classname) [printMethods $classname "unsigned int" vpiLineNo 1] 
 	    append members($classname) [printMembers "unsigned int" vpiLineNo 1]
@@ -1171,6 +1204,7 @@ proc generate_code { models } {
 		    printVpiListener $classname $vpi $type $card
 		    append members($classname) [printMembers $type $name $card]
 		    append vpi_iterate_body($classname) [printIterateBody $name $classname $vpi $card]
+		    append vpi_handle_by_name_body($classname) [printGetHandleByNameBody $name $classname $vpi $card]
 		    append vpi_iterator($classname) "[list $vpi $type $card] "
 		    append vpi_scan_body [printScanBody $name $classname $type $card]
 		    append vpi_handle_body($classname) [printGetHandleBody $classname uhdm${type} $vpi $name $card]
@@ -1250,7 +1284,7 @@ proc generate_code { models } {
 	puts $oid $template
 	close $oid
 
-	#VPI
+	# VPI
 	update_vpi_inst $classname $classname 1
 
 	set capnpIndex 0    
@@ -1269,8 +1303,11 @@ proc generate_code { models } {
 	if [info exist vpi_handle_body($classname)] {
 	    append vpi_handle_body_all $vpi_handle_body($classname)
 	}
+	if [info exist vpi_handle_by_name_body($classname)] {
+	    append vpi_handle_by_name_body_all $vpi_handle_by_name_body($classname)
+	}
 
-	#process baseclass recursively 	
+	# process baseclass recursively 	
 	set capnpIndex [process_baseclass $baseclass $classname $modeltype $capnpIndex]
 
 	if {$modeltype != "class_def"} {
@@ -1295,6 +1332,7 @@ proc generate_code { models } {
     set vpi_user [read $fid]
     close $fid
     regsub {<HEADERS>} $vpi_user $headers vpi_user
+    regsub {<VPI_HANDLE_BY_NAME_BODY>} $vpi_user $vpi_handle_by_name_body_all vpi_user
     regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body_all vpi_user
     regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
     regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body_all vpi_user

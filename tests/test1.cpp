@@ -89,7 +89,21 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   inst_items->push_back(f3);
   m1->Instance_items(inst_items);
 
-  designs.push_back(s.MakeUhdmHandle(uhdmdesign, d));
+  vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
+  designs.push_back(dh);
+
+  char name[]{"P1"};
+  vpiHandle obj_h = vpi_handle_by_name(name, dh);
+  if (obj_h == 0) {
+    exit(1);
+  } else {
+    char name[]{"MyFunc1"};
+    vpiHandle obj_h1 = vpi_handle_by_name(name, obj_h);
+    if (obj_h1 == 0) {
+      exit(1);
+    }
+  }
+  
   return designs;
 }
 

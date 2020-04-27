@@ -42,17 +42,6 @@
 
 using namespace UHDM;
 
-vpiHandle vpi_handle_by_name (PLI_BYTE8    *name,
-                              vpiHandle    scope) {
-  return 0;
-}
-
-vpiHandle vpi_handle_by_index (vpiHandle object,
-                               PLI_INT32    indx) {
-  return 0;
-}
-
-
 s_vpi_value* String2VpiValue(const std::string& s) {
   std::string scopy = s;
   s_vpi_value* val = new s_vpi_value;
@@ -167,6 +156,20 @@ std::string VpiDelay2String(const s_vpi_delay* delay) {
 
 static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
   return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
+}
+
+
+vpiHandle vpi_handle_by_index (vpiHandle object,
+                               PLI_INT32    indx) {
+  return 0;
+}
+
+vpiHandle vpi_handle_by_name (PLI_BYTE8    *name,
+                              vpiHandle    refHandle) {
+  const uhdm_handle* const handle = (const uhdm_handle*) refHandle;
+  const BaseClass* const object = (const BaseClass*) handle->object;
+  <VPI_HANDLE_BY_NAME_BODY>
+  return 0;
 }
 
 vpiHandle vpi_handle (PLI_INT32 type,
