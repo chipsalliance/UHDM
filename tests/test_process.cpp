@@ -21,6 +21,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   module* m1 = s.MakeModule();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
+  m1->VpiName("u1");
   m1->VpiParent(d);
   m1->VpiFile("fake1.sv");
   m1->VpiLineNo(10);
@@ -71,7 +72,15 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   VectorOfpackage* v3 = s.MakePackageVec();
   v3->push_back(p1);
   d->AllPackages(v3);
-  designs.push_back(s.MakeUhdmHandle(uhdmdesign, d));
+
+  vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
+  designs.push_back(dh);
+
+  char name[]{"u1"};
+  vpiHandle obj_h = vpi_handle_by_name(name, dh);
+  if (obj_h == 0) {
+    exit(1);
+  }
   return designs;
 }
 
