@@ -14,7 +14,7 @@ Universal Hardware Data Model
  * The generated Object Model can, for a given design, be:
     * Populated by parsers like [Surelog](https://github.com/alainmarcel/Surelog/) or [Verible](https://github.com/google/verible)
     * Consumed by tools like Yosys or Verilator
- 
+
 # HowTo
 
 ```bash
@@ -31,20 +31,21 @@ Universal Hardware Data Model
  * Supports the concept of "design" on top of the IEEE standard to support partitioning and multi-language (SystemVerilog - VHDL)
  * Any deviation/addition from the standard is cleary indicated by a uhdm prefix, IEEE standard API is either prefixed by vpi (Verilog) or vhpi (VHDL).
 
- 
+
 # Model Concepts
  * The model is captured in .yaml files, one per object models detailed pages 976-1050 of the SystemVerilog 2017 IEEE standard.
  * To match the standard, several concepts are observed in the model:
     * obj_def: A leaf object specification (Object can be allocated and persisted)
     * class_def: A virtual class specification (Class is used either with inheritance - extends:, or as composition of a - class_ref)
-    * property: typically an int, bool, string property with a name and a vpi access type (ie: vpiModule) accessed by the vpi_get function
-    * obj_ref: a reference to one (accessed by vpi_handle) or many (accessed by vpi_iterate) leaf objects 
-    * class_ref: a reference to one or many virtual class, actual objects returned will be of a leaf type
+    * property: Typically an int, bool, string property with a name and a vpi access type (ie: vpiModule) accessed by the vpi_get function
+    * obj_ref: A reference to one (accessed by vpi_handle) or many (accessed by vpi_iterate) leaf objects
+    * class_ref: A reference to one or many virtual class, actual objects returned will be of a leaf type
     * extends: Class inheritance specified by the extends keyword
     * group_def: Grouping of objects in a named or unnamed group (We actually give a representative name to unnamed groups)
-    * group_ref: a reference to one or many members of a group of objects
+    * group_ref: A reference to one or many members of a group of objects
  * Keywords used to capture the model in Yaml
-    * all of the above (obj_def...), plus for each definition (obj_ref, class_ref, group_ref, property), the following sub fields:
+    * all of the above keywords (obj_def...group_ref),
+    * For each reference (obj_def, class_def, group_def) and property, the following sub fields:
     * name: the name of the field (spaces accepted), verbatim from the standard
     * vpi: the name of the VPI access type to access this object member (Has to match a defined value in vpi_user.h or sv_vpi_user.h)
     * type: the formal type of the field:
@@ -55,6 +56,8 @@ Universal Hardware Data Model
       * unsigned int
       * bool
       * string
+      * value (VPI s_vpi_value)
+      * delay (VPI s_vpi_delay)
     * card: cardinality of the field
       * 1
       * any (0 or more)
@@ -64,7 +67,7 @@ Universal Hardware Data Model
  * The model creation task consists in converting the Object Model diagrams into their Yaml representation and invoking the creation of the concrete
  C++ classes, iterators, serialization code by invoking "make"
  * [How to create the model (presentation)](https://docs.google.com/presentation/d/1SGpgeeWmxJ-1AU8EKABrTyKwcfHOe-pfK8yXArTKIz8/edit?usp=sharing)
- 
+
 # Actual Design creation
  * The design creation task consists in invoking:
    * the proper concrete object factory methods to get serializable objects
@@ -72,7 +75,7 @@ Universal Hardware Data Model
    * assemble the model by creating legal object relations (compile time and runtime checking) following the IEEE standard
    * invoking the serialization call
  * Read [`test1.cpp`](tests/test1.cpp)
- 
+
 # Design Navigation
  * After Deserialization of the persisted design (Read [`test2.cpp`](tests/test2.cpp))
  * client applications need to use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`test_helper.h`](tests/test_helper.h))
@@ -81,7 +84,7 @@ Universal Hardware Data Model
  * The listener enables client application development with minimum disruption while the data model evolves.
  * The uhdm-dump executable creates a human readable view of the UHDM serialized data model.
 
-# Linking libuhdm.a to your application 
+# Linking libuhdm.a to your application
  * After instaling (make install), create your own executable (Read [`Makefile`](Makefile)) , ie:
  * $(CXX) -std=c++14 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/uhdm/libuhdm.a -lcapnp -lkj -ldl -lutil -lm -lrt -lpthread -o test_inst
 
@@ -90,8 +93,8 @@ Universal Hardware Data Model
  * Other parsers are welcome to generate UHDM databases
 
 # Useful links
+* [Verilog_Object_Model.pdf](third_party/Verilog_Object_Model.pdf) - Object Model section of the IEEE_Std1800-2017_8299595.pdf (Practical for searches)
 * [SystemVerilog 2017](http://ecee.colorado.edu/~mathys/ecen2350/IntelSoftware/pdf/IEEE_Std1800-2017_8299595.pdf) - System Verilog Standard
 * [Surelog](https://github.com/alainmarcel/Surelog/) - Surelog parser
 * [Verible](https://github.com/google/verible) - Verible linter
-
-[capnproto]: https://capnproto.org/
+* [capnproto](https://capnproto.org/) - Cap'n Proto serialization

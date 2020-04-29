@@ -42,18 +42,134 @@
 
 using namespace UHDM;
 
-vpiHandle vpi_handle_by_name (PLI_BYTE8    *name,
-                              vpiHandle    scope) {
-  return 0;
+s_vpi_value* String2VpiValue(const std::string& s) {
+  std::string scopy = s;
+  s_vpi_value* val = new s_vpi_value;
+  val->format = 0;
+  val->value.integer = 0;
+  val->value.str = nullptr;
+  if (strstr(scopy.c_str(), "INT:")) {
+    scopy.erase(0,4);
+    val->format = vpiIntVal;
+    val->value.integer = atoi(scopy.c_str());
+  } if (strstr(scopy.c_str(), "SCAL:")) {
+    scopy.erase(0,5);
+    val->format = vpiScalarVal;
+    val->value.integer = atoi(scopy.c_str());
+  }else if (strstr(scopy.c_str(), "BIN:")) {
+    scopy.erase(0,4);
+    val->format = vpiBinStrVal;
+    val->value.str = strdup(scopy.c_str());
+  } else if (strstr(scopy.c_str(), "HEX:")) {
+    scopy.erase(0,4);
+    val->format = vpiHexStrVal;
+    val->value.str = strdup(scopy.c_str());
+  } else if (strstr(scopy.c_str(), "OCT:")) {
+    scopy.erase(0,4);
+    val->format = vpiOctStrVal;
+    val->value.str = strdup(scopy.c_str());
+  } else if (strstr(scopy.c_str(), "STRING:")) {
+    scopy.erase(0,7);
+    val->format = vpiStringVal;
+    val->value.str = strdup(scopy.c_str());
+  } else if (strstr(scopy.c_str(), "REAL:")) {
+    scopy.erase(0,5);
+    val->format = vpiRealVal;
+    val->value.real = atol(scopy.c_str());
+  } 
+  return val;
 }
+
+
+s_vpi_delay* String2VpiDelays(const std::string& s) {
+  std::string scopy = s;
+  s_vpi_delay* delay = new s_vpi_delay;
+  delay->da = nullptr;
+  if (strstr(scopy.c_str(), "#")) {
+    scopy.erase(0,1);
+    delay->da = new t_vpi_time;
+    delay->no_of_delays = 1;
+    delay->time_type = vpiScaledRealTime;
+    delay->da[0].low  = atoi(scopy.c_str());
+    delay->da[0].type = vpiScaledRealTime;
+  }
+  return delay;
+}
+
+
+std::string VpiValue2String(const s_vpi_value* value) {
+  std::string result;
+  if (value == nullptr)
+    return result;
+  switch (value->format) {
+  case vpiIntVal: {
+    return std::string(std::string("INT:") + std::to_string(value->value.integer));
+    break;
+  }
+  case vpiScalarVal: {
+    return std::string(std::string("SCAL:") + std::to_string(value->value.scalar));
+    break;
+  }
+  case vpiStringVal: {
+    return std::string(std::string("STRING:") + value->value.str);
+    break;
+  }
+  case vpiHexStrVal: {
+    return std::string(std::string("HEX:") + value->value.str);
+    break;
+  }
+  case vpiOctStrVal: {
+    return std::string(std::string("OCT:") + value->value.str);
+    break;
+  }
+  case vpiBinStrVal: {
+    return std::string(std::string("BIN:") + value->value.str);
+    break;
+  }
+  case vpiRealVal: {
+    return std::string(std::string("REAL:") + std::to_string(value->value.real));
+    break;
+  }   
+  default:
+    break;
+  }
+  return result;
+}
+
+
+std::string VpiDelay2String(const s_vpi_delay* delay) {
+  std::string result;
+  if (delay == nullptr)
+    return result;
+  if (delay->da == nullptr)
+    return result;
+  switch (delay->time_type) {
+  case vpiScaledRealTime: {
+    return std::string(std::string("#") + std::to_string(delay->da[0].low));
+    break;
+  }
+  default:
+    break;
+  }
+  return result;
+}
+
+static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
+  return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
+}
+
 
 vpiHandle vpi_handle_by_index (vpiHandle object,
                                PLI_INT32    indx) {
   return 0;
 }
 
-static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
-  return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
+vpiHandle vpi_handle_by_name (PLI_BYTE8    *name,
+                              vpiHandle    refHandle) {
+  const uhdm_handle* const handle = (const uhdm_handle*) refHandle;
+  const BaseClass* const object = (const BaseClass*) handle->object;
+  <VPI_HANDLE_BY_NAME_BODY>
+  return 0;
 }
 
 vpiHandle vpi_handle (PLI_INT32 type,
@@ -142,6 +258,13 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
 
 void vpi_get_delays (vpiHandle object,
                      p_vpi_delay delay_p) {
+  if (!object) {
+    std::cout << "VPI ERROR: Bad usage of vpi_get_delay" << std::endl;
+  }
+  uhdm_handle* handle = (uhdm_handle*) object;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  delay_p->da = nullptr;
+  <VPI_GET_DELAY_BODY>
 }
 
 void vpi_put_delays (vpiHandle object,
@@ -150,8 +273,15 @@ void vpi_put_delays (vpiHandle object,
 
 /* value processing */
 
-void vpi_get_value (vpiHandle expr,
+void vpi_get_value (vpiHandle vexpr,
                     p_vpi_value value_p) {
+  if (!vexpr) {
+    std::cout << "VPI ERROR: Bad usage of vpi_get_value" << std::endl;
+  }
+  uhdm_handle* handle = (uhdm_handle*) vexpr;
+  BaseClass*  obj = (BaseClass*) handle->object;
+  value_p->format = 0;
+  <VPI_GET_VALUE_BODY>
 }
 
 vpiHandle vpi_put_value (vpiHandle object,

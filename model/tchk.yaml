@@ -12,8 +12,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "tchk.yaml" formal description
+# Universal Hardware Data Model (UHDM) "tchk" formal description
  
 - obj_def: tchk
-
-
+  - obj_ref: module
+    name: module
+    type: module
+    vpi: vpiModule
+    card: 1
+  - class_ref: expr
+    name: expr
+    type: expr
+    vpi: vpiDelay
+    card: 1
+  - group_ref: expr_tchk_term
+    name: expr_tchk_term
+    type: expr_tchk_term_group
+    vpi: vpiExpr
+    card: any
+  - obj_ref: tchk_ref_term
+    name: tchk_ref_term
+    type: tchk_term
+    vpi: vpiTchkRefTerm
+    card: 1
+  - obj_ref: tchk_data_term
+    name: tchk_data_term
+    type: tchk_term
+    vpi: vpiTchkDataTerm
+    card: 1
+  - class_ref: reg
+    name: regs
+    type: reg
+    vpi: vpiTchkNotifier
+    card: 1
+  - property: limit
+    name: limit
+    vpi: vpiDelay
+    type: delay
+    card: 1
+  - property: tchk_type
+    name: tchk type
+    type: int
+    vpi: vpiTchkType
+    card: 1

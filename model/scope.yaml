@@ -36,9 +36,9 @@
     type: sequence_decl
     card: any
   - class_ref: concurrent_assertions
-    name: concurrent assertion
+    name: concurrent assertions
     vpi: vpiConcurrentAssertions
-    type: concurrent_assertion
+    type: concurrent_assertions
     card: any
   - obj_ref: named_events
     name: named event
@@ -80,6 +80,10 @@
     vpi: vpiParameter
     type: parameters
     card: any
+  - obj_ref: param_assigns
+    vpi: vpiParamAssign
+    type: param_assign
+    card: any    
   - class_ref: scopes
     name: scopes
     vpi: vpiInternalScope

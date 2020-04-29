@@ -28,11 +28,19 @@
 #ifndef UHDM_H
 #define UHDM_H
 
-// Missing defines from vpi_user.h
+// Missing defines from vpi_user.h, sv_vpi_user.h
 #define vpiDesign 3000
 #define vpiInterfaceTypespec 3001
 #define vpiNets 3002
 #define vpiSimpleExpr 3003
+#define vpiParameters 3004
+#define vpiSequenceExpr 3005
+
+// These define where orinally aliased in sv_vpi_user.h
+// Aliasing makes it hard to distinguish in automatic generated code, assigning unique values.
+#define vpiVarBit    3006
+#define vpiLogicVar  3007
+#define vpiArrayVar  3008
 
 #include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"

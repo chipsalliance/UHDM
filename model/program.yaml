@@ -41,7 +41,7 @@
     vpi: vpiInterface
     type: interface
     card: any
-  - class_ref: expr_dist
+  - group_ref: expr_dist
     name: expr distribution
     vpi: vpiDefaultDisableIff
     type: expr_dist

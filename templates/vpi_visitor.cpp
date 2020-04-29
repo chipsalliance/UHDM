@@ -29,6 +29,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
@@ -41,19 +42,86 @@
 
 namespace UHDM {
 
-std::string visit_object (vpiHandle obj_h, unsigned int indent) {
+std::string visit_value(s_vpi_value* value) {
+  if (value == nullptr)
+    return "";
+  switch (value->format) {
+  case vpiIntVal: {
+    return std::string(std::string("|INT:") + std::to_string(value->value.integer) + "\n");
+    break;
+  }
+  case vpiStringVal: {
+    const char* s = (const char*) value->value.str;
+    return std::string(std::string("|STRING:") + std::string(s) + "\n");
+    break;
+  }
+  case vpiBinStrVal: {
+    const char* s = (const char*) value->value.str;
+    return std::string(std::string("|BIN:") + std::string(s) + "\n");
+    break;
+  }
+  case vpiHexStrVal: {
+    const char* s = (const char*) value->value.str;
+    return std::string(std::string("|HEX:") + std::string(s) + "\n");
+    break;
+  }
+  case vpiOctStrVal: {
+    const char* s = (const char*) value->value.str;
+    return std::string(std::string("|OCT:") + std::string(s) + "\n");
+    break;
+  }
+  case vpiRealVal: {
+    return std::string(std::string("|REAL:") + std::to_string(value->value.real) + "\n");
+    break;
+  }
+  case vpiScalarVal: {
+    return std::string(std::string("|SCAL:") + std::to_string(value->value.scalar) + "\n");
+    break;
+  } 
+  default:
+    break;
+  }
+  return "";
+}
+
+std::string visit_delays(s_vpi_delay* delay) {
+  if (delay == nullptr)
+    return "";
+  switch (delay->time_type) {
+  case vpiScaledRealTime: {
+    return std::string(std::string("|#") + std::to_string(delay->da[0].low) + "\n");
+    break;
+  }
+  default:
+    break;
+  }
+  return "";
+}  
+
+std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::string& relation, std::set<const BaseClass*>& visited) {
   std::string result;
   unsigned int subobject_indent = indent + 2;
   std::string hspaces;
+  std::string rspaces;
+  const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
+  const BaseClass* const object = (const BaseClass*) handle->object;
+  bool alreadyVisited = false;
+  if (visited.find(object) != visited.end()) {
+    alreadyVisited = true;
+  }
+  visited.insert(object);
   if (indent > 0) {
-    for (unsigned int i = 0; i < indent -2 ; i++)
+    for (unsigned int i = 0; i < indent -2 ; i++) {
       hspaces += " ";
+    }
+    rspaces = hspaces + "|";
     hspaces += "\\_";
   }
   std::string spaces;
   for (unsigned int i = 0; i < indent; i++)
     spaces += " ";
-  std::string objectName = "";
+  std::string objectName = ""; // Instance name
+  std::string defName    = ""; // Definition name
   std::string fileName = "";
   std::string lineNo   = "";
   std::string parent   = "";
@@ -72,10 +140,25 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
     }
     vpi_free_object(par);
   }
-  if (const char* s = vpi_get_str(vpiName, obj_h)) {
-    objectName = s;
+  if (const char* s = vpi_get_str(vpiDefName, obj_h)) {
+    defName = s;
   }
-  result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + objectName + fileName + lineNo + parent + "\n";
+  if (const char* s = vpi_get_str(vpiName, obj_h)) {
+    if (defName != "") {
+      defName += " ";
+    }
+    objectName = std::string("(") + s + std::string(")");
+  }
+  if (relation != "") {
+    result += rspaces + relation + ":\n";
+  }
+  result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + defName + objectName + fileName + lineNo + parent + "\n";
+  if (alreadyVisited) {
+    return result;
+  }
+  if (relation == "vpiParent") {
+    return result;
+  }
 <OBJECT_VISITORS>
   return result;
 }
@@ -83,7 +166,8 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent) {
 std::string visit_designs (const std::vector<vpiHandle>& designs) {
   std::string result;
   for (auto design : designs) {
-    result += visit_object(design, 0);
+    std::set<const BaseClass*> visited;
+    result += visit_object(design, 0, "", visited);
   }
   return result;
 }

@@ -14,6 +14,20 @@
 
 # Universal Hardware Data Model (UHDM) "method_func_call" formal description
  
-- obj_decl: method_func_call
-  - extends: expr
-
+- obj_def: method_func_call
+  - extends: tf_call
+  - property: is_built_in
+    name: is built in
+    type: bool
+    vpi: vpiUserDefn
+    card: 1
+  - class_ref: prefix
+    name: prefix
+    type: expr
+    vpi: vpiPrefix
+    card: 1
+  - group_ref: with
+    name: with
+    type: expr_constr_group
+    vpi: vpiWith
+    card: 1

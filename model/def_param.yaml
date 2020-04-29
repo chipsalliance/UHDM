@@ -15,5 +15,14 @@
 # Universal Hardware Data Model (UHDM) "def_param" formal description
  
 - obj_def: def_param
-
+  - class_ref: rhs
+    name: rhs
+    vpi: vpiRhs
+    type: expr
+    card: 1
+  - obj_ref: lhs
+    name: lhs
+    vpi: vpiLhs
+    type: parameter
+    card: 1
 

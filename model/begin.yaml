@@ -16,7 +16,7 @@
  
 - obj_def: begin
   - extends: scope
-  - class_ref: stmts
+  - group_ref: stmts
     name: stmts
     vpi: vpiStmt
     type: stmt

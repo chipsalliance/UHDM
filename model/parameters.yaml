@@ -15,3 +15,19 @@
 # Universal Hardware Data Model (UHDM) "parameters" formal description
  
 - class_def: parameters
+  - property: local
+    name: local
+    vpi: vpiLocalParam
+    type: bool
+    card: 1
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+    

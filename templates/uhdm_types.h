@@ -30,8 +30,8 @@
 #include "vpi_user.h"
 
 namespace UHDM {
-
-  typedef void any;
+  class BaseClass;
+  typedef BaseClass any;
 
   typedef enum {
 <DEFINES>

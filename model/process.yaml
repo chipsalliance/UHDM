@@ -14,4 +14,14 @@
 
 # Universal Hardware Data Model (UHDM) "process" formal description
  
-- obj_def: process
+- class_def: process
+  - group_ref: stmt
+    name: stmt
+    vpi: vpiStmt
+    type: stmt
+    card: 1
+  - obj_ref: module
+    name: module
+    vpi: vpiModule
+    type: module
+    card: 1

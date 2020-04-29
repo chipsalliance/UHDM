@@ -2,7 +2,6 @@
 
 #include "headers/uhdm.h"
 #include "headers/vpi_visitor.h"
-#include "test_helper.h"
 
 #include <iostream>
 
@@ -16,13 +15,14 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   // Module
   module* m1 = s.MakeModule();
   m1->VpiTopModule(true);
-  m1->VpiName("M1");
+  m1->VpiDefName("M1");
   m1->VpiParent(d);
   m1->VpiFile("fake1.sv");
   m1->VpiLineNo(10);
   // Module
   module* m2 = s.MakeModule();
-  m2->VpiName("M2");
+  m2->VpiDefName("M2");
+  m2->VpiName("u1");
   m2->VpiParent(m1);
   m2->VpiFile("fake2.sv");
   m2->VpiLineNo(20);
@@ -39,16 +39,18 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   m2->Ports(vp);
   // Module
   module* m3 = s.MakeModule();
-  m3->VpiName("M3");
+  m3->VpiDefName("M3");
+  m3->VpiName("u2");
   m3->VpiParent(m1);
   m3->VpiFile("fake3.sv");
   m3->VpiLineNo(30);
   // Instance
   module* m4 = s.MakeModule();
-  m4->VpiName("m4");
+  m4->VpiDefName("M4");
+  m4->VpiName("u3");
   m4->Ports(vp);
   m4->VpiParent(m3);
-  m3->Instance(m4);
+  m4->Instance(m3);
   VectorOfmodule* v1 = s.MakeModuleVec();
   v1->push_back(m1);
   d->AllModules(v1);
@@ -76,7 +78,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   p1->Task_funcs(v4);
   // Instance items, illustrates the use of groups
   program* pr1 = s.MakeProgram();
-  pr1->VpiName("PR1");
+  pr1->VpiDefName("PR1");
   pr1->VpiParent(m1);
   VectorOfany* inst_items = s.MakeAnyVec();
   inst_items->push_back(pr1);
@@ -87,7 +89,21 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   inst_items->push_back(f3);
   m1->Instance_items(inst_items);
 
-  designs.push_back(s.MakeUhdmHandle(uhdmdesign, d));
+  vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
+  designs.push_back(dh);
+
+  char name[]{"P1"};
+  vpiHandle obj_h = vpi_handle_by_name(name, dh);
+  if (obj_h == 0) {
+    exit(1);
+  } else {
+    char name[]{"MyFunc1"};
+    vpiHandle obj_h1 = vpi_handle_by_name(name, obj_h);
+    if (obj_h1 == 0) {
+      exit(1);
+    }
+  }
+  
   return designs;
 }
 
@@ -95,7 +111,7 @@ int main (int argc, char** argv) {
   std::cout << "Make design" << std::endl;
   Serializer serializer;
   const std::vector<vpiHandle>& designs = build_designs(serializer);
-  std::string orig = print_designs(designs);
+  std::string orig;
   orig += "VISITOR:\n";
   orig += visit_designs(designs);
   std::cout << orig;
@@ -104,7 +120,7 @@ int main (int argc, char** argv) {
 
   std::cout << "Restore design" << std::endl;
   const std::vector<vpiHandle>& restoredDesigns = serializer.Restore("surelog.uhdm");
-  std::string restored = print_designs(restoredDesigns);
+  std::string restored;
   restored += "VISITOR:\n";
   restored += visit_designs(restoredDesigns);
   std::cout << restored;

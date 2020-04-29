@@ -56,16 +56,21 @@
     vpi: vpiDPICIdentifier
     type: string
     card: 1
-  - class_ref: left_expr
+  - class_ref: left_range
     name: left range
     vpi: vpiLeftRange
     type: expr
     card: 1
-  - class_ref: right_expr
+  - class_ref: right_range
     name: right range
     vpi: vpiRightRange
     type: expr
-    card: 1   
+    card: 1
+  - class_ref: return
+    name: return
+    vpi: vpiReturn
+    type: variables
+    card: 1     
   - obj_ref: class_defn
     name: class defn
     vpi: vpiClassDefn
@@ -80,8 +85,8 @@
     name: io decl
     vpi: vpiIODecl
     type: io_decl
-    card: 1
-  - class_ref: stmt
+    card: any
+  - group_ref: stmt
     name: stmt
     vpi: vpiStmt
     type: stmt

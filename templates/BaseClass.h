@@ -31,7 +31,7 @@
 
 namespace UHDM {
   class Serializer;
-  
+  static std::string nonamebaseclass ("");
   class BaseClass {
   public:
     // Use implicit constructor to initialize all members
@@ -60,6 +60,8 @@ namespace UHDM {
     virtual unsigned int VpiLineNo() const = 0;
 
     virtual bool VpiLineNo(unsigned int data) = 0;
+
+    virtual const std::string& VpiName() const { return nonamebaseclass; }
 
   protected:
     Serializer* serializer_;

@@ -14,6 +14,20 @@
 
 # Universal Hardware Data Model (UHDM) "sys_func_call" formal description
  
-- obj_decl: sys_func_call
-  - extends: expr
-
+- obj_def: sys_func_call
+  - extends: tf_call
+  - property: func_type
+    name: type
+    type: int
+    vpi: vpiFuncType
+    card: 1
+  - property: user_defined
+    name: user-defined
+    type: bool
+    vpi: vpiUserDefn
+    card: 1
+  - obj_ref: user_systf
+    name: user systf
+    type: user_systf
+    vpi: vpiUserSystf
+    card: 1

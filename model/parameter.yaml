@@ -14,6 +14,41 @@
 
 # Universal Hardware Data Model (UHDM) "parameter" formal description
  
-- obj_decl: parameter
-  - extends: simple_expr
-
+- obj_def: parameter
+  - extends: parameters
+  - property: constant_type
+    name: constant type
+    vpi: vpiConstType
+    type: int
+    card: 1
+  - property: sign
+    name: sign
+    vpi: vpiSigned
+    type: bool
+    card: 1
+  - property: vpi_get_value
+    name: vpi_get_value
+    vpi: vpiValue
+    type: value
+    card: 1
+  - class_ref: typespec
+    name: typespec
+    vpi: vpiTypespec
+    type: typespec
+    card: 1
+  - class_ref: expr
+    name: expr
+    vpi: vpiExpr
+    type: expr
+    card: 1
+  - class_ref: left_range
+    name: left range
+    vpi: vpiLeftRange
+    type: expr
+    card: 1
+  - class_ref: right_range
+    name: right range
+    vpi: vpiRightRange
+    type: expr
+    card: 1
+    

@@ -21,4 +21,4 @@
   - class_ref: pattern
   - class_ref: sequence_inst
   - class_ref: property_inst
-  
+  - group_ref: property_expr_group

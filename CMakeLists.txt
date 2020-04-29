@@ -88,7 +88,20 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/variable_drivers_group.cpp
     ${PROJECT_SOURCE_DIR}/src/variable_loads_group.cpp
     ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/operand_group.cpp)
+    ${PROJECT_SOURCE_DIR}/src/operand_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/stmt.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_sequence_inst_named_event_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/tf_call_args.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_interf_expr_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_tchk_term_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/simple_expr_use_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_dist.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_typespec_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/property_inst_spec_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/property_expr_named_event_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/property_expr_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/pattern_expr_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_constr_group.cpp)
 
 foreach(src_file ${uhdm_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
@@ -150,6 +163,24 @@ target_link_libraries(uhdm-test4 ${ALL_LIBRARIES_FOR_UHDM})
 add_test(
   NAME uhdm-test4
   COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test4
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+add_executable(uhdm-test-tf-call ${PROJECT_SOURCE_DIR}/tests/test_tf_call.cpp)
+set_target_properties(uhdm-test-tf-call PROPERTIES OUTPUT_NAME uhdm-test-tf-call)
+add_dependencies(uhdm-test-tf-call uhdm)
+target_link_libraries(uhdm-test-tf-call ${ALL_LIBRARIES_FOR_UHDM})
+add_test(
+  NAME uhdm-test-tf-call
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test-tf-call
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+add_executable(uhdm-test-process ${PROJECT_SOURCE_DIR}/tests/test_process.cpp)
+set_target_properties(uhdm-test-process PROPERTIES OUTPUT_NAME uhdm-test-process)
+add_dependencies(uhdm-test-process uhdm)
+target_link_libraries(uhdm-test-process ${ALL_LIBRARIES_FOR_UHDM})
+add_test(
+  NAME uhdm-test-process
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test-process
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-listener ${PROJECT_SOURCE_DIR}/tests/test_listener.cpp)
