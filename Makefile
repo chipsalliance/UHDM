@@ -29,6 +29,7 @@ build:
 	mkdir -p build
 	cd build; cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX)
 
+# TODO: the following static libraries should probably be all distributed together in libuhdm.a (ar ADDLIB)
 test_install:
-	$(CXX) -std=c++14 -g tests/test1.cpp -I$(PREFIX)/include/uhdm -I$(PREFIX)/include/uhdm/include $(PREFIX)/lib/uhdm/libuhdm.a -L$(PREFIX)/lib -lcapnp -lkj -ldl -lutil -lm -lrt -lpthread -o test_inst
+	$(CXX) -std=c++14 -g tests/test1.cpp -I$(PREFIX)/include/uhdm -I$(PREFIX)/include/uhdm/include $(PREFIX)/lib/uhdm/libuhdm.a $(PREFIX)/lib/uhdm/libcapnp.a $(PREFIX)/lib/uhdm/libkj.a -ldl -lutil -lm -lrt -lpthread -o test_inst
 	./test_inst
