@@ -15,6 +15,10 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+
           packages:
             - g++-7
             - cmake
@@ -27,8 +31,6 @@ matrix:
 
 before_install:
   - eval "${MATRIX_EVAL}"
-
-install:
 
 # Build steps
 script:
