@@ -32,6 +32,9 @@ matrix:
 before_install:
   - eval "${MATRIX_EVAL}"
 
+install:
+  - export PATH=/usr/bin:$PATH
+
 # Build steps
 script:
   - cmake --version
