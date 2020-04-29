@@ -2,6 +2,7 @@ sudo: required
 
 # Enable C++ support
 language: cpp
+
 # Compiler selection
 compiler:
   - gcc
@@ -14,24 +15,31 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - sourceline: "ppa:ubuntu-toolchain-r/test"
+            - sourceline: 'deb https://apt.kitware.com/ubuntu/ xenial main'
+              key_url: 'https://apt.kitware.com/keys/kitware-archive-latest.asc'
+
           packages:
             - g++-7
+            - cmake
+            - build-essential
+            - tclsh
+
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
 
 before_install:
   - eval "${MATRIX_EVAL}"
-  - sudo apt-get install build-essential tclsh
-  
+
 install:
+  - export PATH=/usr/bin:$PATH
 
 # Build steps
 script:
+  - cmake --version
   - make clean
   - make
   - make test
   - sudo make install
   - make test_install
-  
-  
