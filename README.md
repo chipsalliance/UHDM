@@ -85,8 +85,8 @@ Universal Hardware Data Model
  * The uhdm-dump executable creates a human readable view of the UHDM serialized data model.
 
 # Linking libuhdm.a to your application
- * After instaling (make install), create your own executable (Read [`Makefile`](Makefile)) , ie:
- * $(CXX) -std=c++14 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/uhdm/libuhdm.a -lcapnp -lkj -ldl -lutil -lm -lrt -lpthread -o test_inst
+ * After instaling (`make install`), create your own executable (Read [`Makefile`](Makefile)) , ie:
+ * `$(CXX) -std=c++14 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/uhdm/libuhdm.a /usr/local/lib/uhdm/libcapnp.a /usr/local/lib/uhdm/libkj.a -ldl -lutil -lm -lrt -lpthread -o test_inst`
 
 # Generating uhdm databases
  * Surelog generates natively UHDM databases (surelog.uhdm)
