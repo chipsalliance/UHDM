@@ -21,5 +21,9 @@
     vpi: vpiPacked
     type: bool
     card: 1
- 
+  - obj_ref: members
+    name: members
+    vpi: vpiTypespecMember
+    type: typespec_member
+    card: any
 
