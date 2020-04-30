@@ -45,18 +45,37 @@ sudo apt-get install -y \
         git \
         make \
         tclsh \
+        xsltproc \
+
+
+sudo apt-get install -y \
+        g++-7 \
+        g++-8 \
+        g++-9 \
+        gcc-7 \
+        gcc-8 \
+        gcc-9 \
+
+echo
+echo "========================================"
+echo "Setting up compiler infrastructure"
+echo "----------------------------------------"
+# g++
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 150
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 100
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 50
+# gcc
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 150
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 50
+# set alternatives
+sudo update-alternatives --set g++ /usr/bin/g++-7
+sudo update-alternatives --set gcc /usr/bin/gcc-7
+sudo update-alternatives --set cc /usr/bin/gcc
+sudo update-alternatives --set c++ /usr/bin/g++
 
 if [ -z "${BUILD_TOOL}" ]; then
     export BUILD_TOOL=make
 fi
 
-export CC=gcc-7
-export CXX=g++-7
-
-echo "----------------------------------------"
-
-echo
-echo "========================================"
-echo "Setting up environment env"
-echo "----------------------------------------"
 echo "----------------------------------------"
