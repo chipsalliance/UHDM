@@ -12,6 +12,10 @@ debug:
 test: build
 	$(MAKE) -C build test
 
+test-junit: release
+	cd build && ctest --no-compress-output -T Test -C RelWithDebInfo --output-on-failure
+	xsltproc .github/kokoro/ctest2junit.xsl build/Testing/*/Test.xml > build/test_results.xml
+
 clean:
 	rm -f src/*
 	rm -rf headers/*

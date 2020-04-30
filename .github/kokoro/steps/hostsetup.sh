@@ -45,6 +45,7 @@ sudo apt-get install -y \
         git \
         make \
         tclsh \
+        xsltproc \
 
 
 sudo apt-get install -y \
