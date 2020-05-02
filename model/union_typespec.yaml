@@ -16,6 +16,11 @@
  
 - obj_def: union_typespec
   - extends: typespec
+  - property: packed
+    name: packed
+    vpi: vpiPacked
+    type: bool
+    card: 1
   - property: tagged
     name: tagged
     vpi: vpiTagged
