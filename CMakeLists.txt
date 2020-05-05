@@ -201,6 +201,15 @@ add_test(
   COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-dump
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
+add_executable(visitor-elab ${PROJECT_SOURCE_DIR}/tests/visitor_elab.cpp)
+set_target_properties(visitor-elab PROPERTIES OUTPUT_NAME visitor-elab)
+add_dependencies(visitor-elab uhdm)
+target_link_libraries(visitor-elab ${ALL_LIBRARIES_FOR_UHDM})
+add_test(
+  NAME visitor-elab
+  COMMAND dist/${CMAKE_BUILD_TYPE}/visitor-elab
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
 # Installation target
 install(
   TARGETS uhdm ${ALL_CAPNP_LIBS}
