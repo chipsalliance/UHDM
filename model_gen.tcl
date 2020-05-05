@@ -545,29 +545,29 @@ proc printVpiListener {classname vpi type card} {
 "
         return
     }
-    if {($vpi == "vpiParent") || ($vpi == "vpiInstance") || ($vpi == "vpiModule")} {
-        # To prevent infinite loops in visitors as these 3 relations are pointing upward in the tree
+    if {($vpi == "vpiParent") || ($vpi == "vpiInstance")} {
+        # To prevent infinite loops in visitors as these 2 relations are pointing upward in the tree (vpiModule could be a problem too)
         return
     }
-    set vpi_visitor ""
+    set vpi_listener ""
     if ![info exist VPI_LISTENERS($classname)] {
-        set vpi_visitor "    vpiHandle itr;
+        set vpi_listener "    vpiHandle itr;
 "
     } else {
         if ![regexp "vpiHandle itr;" $VPI_LISTENERS($classname)] {
-            set vpi_visitor "    vpiHandle itr;
+            set vpi_listener "    vpiHandle itr;
 "
         }
     }
 
     if {$card == 1} {
-        append vpi_visitor "    itr = vpi_handle($vpi,object);
+        append vpi_listener "    itr = vpi_handle($vpi,object);
     if (itr)
       listen_${type} (itr, listener);
     vpi_free_object(itr);
 "
     } else {
-        append vpi_visitor "    itr = vpi_iterate($vpi,object);
+        append vpi_listener "    itr = vpi_iterate($vpi,object);
     while (vpiHandle obj = vpi_scan(itr) ) {
       listen_${type} (obj, listener);
       vpi_free_object(obj);
@@ -576,7 +576,7 @@ proc printVpiListener {classname vpi type card} {
 "
     }
 
-    append VPI_LISTENERS($classname) $vpi_visitor
+    append VPI_LISTENERS($classname) $vpi_listener
 }
 
 proc closeVpiListener {classname} {

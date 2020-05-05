@@ -25,21 +25,6 @@
     vpi: vpiType
     type: unsigned int
     card: 1
-  - class: allModules
-    type: module
-    vpi_obj: vpiModule
-    vpi: uhdmallModules
-    card: any
-  - class: topModules
-    type: module
-    vpi_obj: vpiModule
-    vpi: uhdmtopModules
-    card: any
-  - class: allPrograms
-    type: program
-    vpi_obj: vpiProgram
-    vpi: uhdmallPrograms
-    card: any
   - class: allPackages
     type: package
     vpi_obj: vpiPackage
@@ -49,7 +34,7 @@
     type: class_defn
     vpi_obj: vpiClassDefn
     vpi: uhdmallClasses
-    card: any
+    card: any  
   - class: allInterfaces
     type: interface
     vpi_obj: vpiInterface
@@ -60,4 +45,18 @@
     vpi_obj: vpiUdpDefn
     vpi: uhdmallUdps
     card: any
-    
+  - class: allPrograms
+    type: program
+    vpi_obj: vpiProgram
+    vpi: uhdmallPrograms
+    card: any   
+  - class: allModules
+    type: module
+    vpi_obj: vpiModule
+    vpi: uhdmallModules
+    card: any
+  - class: topModules
+    type: module
+    vpi_obj: vpiModule
+    vpi: uhdmtopModules
+    card: any  

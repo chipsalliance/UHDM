@@ -87,6 +87,7 @@
     type: cont_assign
     card: any
   - obj_ref: modules
+    name: modules
     vpi: vpiModule
     type: module
     card: any
