@@ -1274,7 +1274,7 @@ proc generate_code { models } {
 
         if {($type_specified == 0) && ($modeltype == "obj_def")} {
             set vpiclasstype [makeVpiName $classname]
-            append methods($classname) "\n    unsigned int VpiType() { return $vpiclasstype; }\n"
+            append methods($classname) "\n    unsigned int VpiType() const { return $vpiclasstype; }\n"
             lappend vpi_get_body_inst($classname) [list $classname "unsigned int" vpiType 1]
 
         }
