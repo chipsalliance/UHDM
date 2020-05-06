@@ -60,6 +60,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     m2->VpiDefName("M2");
     m2->VpiFile("fake2.sv");
     m2->VpiLineNo(20);
+    m2->VpiParent(d);
     // M2 Ports
     VectorOfport* vp = s.MakePortVec();
     port* p = s.MakePort();
@@ -105,6 +106,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     m3->VpiName("M1");    // Instance name
     m3->VpiTopModule(true);
     m3->Modules(v1);
+    m3->VpiParent(d);
   }
   
   //-------------------------------------------
@@ -172,9 +174,20 @@ class MyElaboratorListener : public VpiListener {
 protected:
   void enterModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
-    std::cout << "Module: " << object->VpiDefName() << " (" << object->VpiName() << ")" << std::endl;
-    componentMap_.insert(std::make_pair(object->VpiDefName(), object));
-    
+    bool topLevelModule         = object->VpiTopModule();
+    const std::string& instName = object->VpiName(); 
+    const std::string& defName  = object->VpiDefName(); 
+    bool flatModule             = (instName == "") && ((object->VpiParent() == 0) || ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule))); // false when it is a module in a hierachy tree
+    std::cout << "Module: " << defName << " (" << instName << ") Flat:"  << flatModule << ", Top:" << topLevelModule << std::endl;
+
+    if (flatModule) {
+      // Flat list of module (unelaborated)
+      flatComponentMap_.insert(std::make_pair(object->VpiDefName(), object));
+    } else {
+      // Hierachical module list (elaborated)
+      
+      
+    }
     stack_.push(object);
   }
 
@@ -187,7 +200,7 @@ protected:
 private:
   std::stack<const BaseClass*> stack_;
 
-  std::map<std::string, const BaseClass*> componentMap_;
+  std::map<std::string, const BaseClass*> flatComponentMap_;
 };
 
 int main (int argc, char** argv) {
