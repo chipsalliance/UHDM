@@ -61,7 +61,11 @@ Universal Hardware Data Model
     * card: cardinality of the field
       * 1
       * any (0 or more)
-
+ * When created by Surelog, the UHDM/VPI Data Model is a Folded Model:
+    * The Instance tree contains the Design Hierarchy and Elaborated Nets/Ports with High conn and Low conn connections done.
+    * The module definitions contain the logic elements (non-elaborated)
+    * To get the complete picture of the design one has to use both views (Example in [`listener_elab.cpp`](tests/listener_elab.cpp))
+ * In contrast, The Standard VPI Data Model in Fully Elaborated.
 
 # Model creation
  * The model creation task consists in converting the Object Model diagrams into their Yaml representation and invoking the creation of the concrete
@@ -78,10 +82,13 @@ Universal Hardware Data Model
 
 # Design Navigation
  * After Deserialization of the persisted design (Read [`test2.cpp`](tests/test2.cpp))
- * client applications need to use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`test_helper.h`](tests/test_helper.h))
- * An example Visitor is auto-generated to print the content of the data model (src/vpi_visitor.cpp)
- * An example Listener is used in as an example (tests/vpi_listener.cpp),
- * The listener enables client application development with minimum disruption while the data model evolves.
+ * Client applications can use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`test_helper.h`](tests/test_helper.h))
+ * Or use the Visitor (More like a Walker)
+   * An example Visitor is auto-generated to print the content of the data model (src/vpi_visitor.cpp)
+ * Or use the Listener Design Pattern
+   * An example Listener is used as an example (tests/vpi_listener.cpp),
+   * The listener enables client application development with minimum disruption while the data model evolves.
+   * An Elaborator example code uses the Listener Design Pattern in [`listener_elab.cpp`](tests/listener_elab.cpp)
  * The uhdm-dump executable creates a human readable view of the UHDM serialized data model.
 
 # Linking libuhdm.a to your application
