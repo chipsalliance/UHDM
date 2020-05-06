@@ -201,13 +201,13 @@ add_test(
   COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-dump
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-add_executable(visitor-elab ${PROJECT_SOURCE_DIR}/tests/visitor_elab.cpp)
-set_target_properties(visitor-elab PROPERTIES OUTPUT_NAME visitor-elab)
-add_dependencies(visitor-elab uhdm)
-target_link_libraries(visitor-elab ${ALL_LIBRARIES_FOR_UHDM})
+add_executable(listener-elab ${PROJECT_SOURCE_DIR}/tests/listener_elab.cpp)
+set_target_properties(listener-elab PROPERTIES OUTPUT_NAME listener-elab)
+add_dependencies(listener-elab uhdm)
+target_link_libraries(listener-elab ${ALL_LIBRARIES_FOR_UHDM})
 add_test(
-  NAME visitor-elab
-  COMMAND dist/${CMAKE_BUILD_TYPE}/visitor-elab
+  NAME listener-elab
+  COMMAND dist/${CMAKE_BUILD_TYPE}/listener-elab
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 # Installation target

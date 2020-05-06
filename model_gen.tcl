@@ -1142,7 +1142,7 @@ proc generate_code { models } {
                     set card [dict get $conf card]
                     if {$prop == "type"} {
                         set type_specified 1
-                        append methods($classname) "\n    $type [string toupper ${vpi} 0 0]() { return $name; }\n"
+                        append methods($classname) "\n    $type [string toupper ${vpi} 0 0]() const final { return $name; }\n"
                         lappend vpi_get_body_inst($classname) [list $classname $type $vpi $card]
                         continue
                     }
@@ -1274,7 +1274,7 @@ proc generate_code { models } {
 
         if {($type_specified == 0) && ($modeltype == "obj_def")} {
             set vpiclasstype [makeVpiName $classname]
-            append methods($classname) "\n    unsigned int VpiType() const { return $vpiclasstype; }\n"
+            append methods($classname) "\n    unsigned int VpiType() const final { return $vpiclasstype; }\n"
             lappend vpi_get_body_inst($classname) [list $classname "unsigned int" vpiType 1]
 
         }
