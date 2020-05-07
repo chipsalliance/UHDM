@@ -43,49 +43,22 @@ proc exec_path {} {
     return [file dirname $myLocation]
 }
 
-file mkdir [exec_path]/src
-file mkdir [exec_path]/headers
-
-# proc copied from: https://wiki.tcl-lang.org/page/pdict%3A+Pretty+print+a+dict
-proc pdict { d {i 0} {p "  "} {s " -> "} } {
-    global $d
-    set fRepExist [expr {0 < [llength\
-                                  [info commands tcl::unsupported::representation]]}]
-    if { (![string is list $d] || [llength $d] == 1)
-         && [uplevel 1 [list info exists $d]] } {
-        set dictName $d
-        unset d
-        upvar 1 $dictName d
-        log "dict $dictName"
-    }
-    if { ! [string is list $d] || [llength $d] % 2 != 0 } {
-        return -code error  "error: pdict - argument is not a dict"
-    }
-    set prefix [string repeat $p $i]
-    set max 0
-    foreach key [dict keys $d] {
-        if { [string length $key] > $max } {
-            set max [string length $key]
-        }
-    }
-    dict for {key val} ${d} {
-        lognnl "${prefix}[format "%-${max}s" $key]$s"
-        if {    $fRepExist && [string match "value is a dict*"\
-                                   [tcl::unsupported::representation $val]]
-                || ! $fRepExist && [string is list $val]
-                && [llength $val] % 2 == 0 } {
-            log ""
-            pdict $val [expr {$i+1}] $p $s
-        } else {
-            log "'${val}'"
-        }
-    }
-    return
+proc project_path {} {
+    variable myLocation
+    return [file dirname [file dirname $myLocation]]
 }
+
+
+file mkdir [project_path]/src
+file mkdir [project_path]/headers
+
+source [exec_path]/pdict.tcl
+source [exec_path]/parse_model.tcl
+source [exec_path]/generate_elaborator.tcl
 
 proc parse_vpi_user_defines { } {
     global ID
-    set fid [open "[exec_path]/include/vpi_user.h"]
+    set fid [open "[project_path]/include/vpi_user.h"]
     set content [read $fid]
     set lines [split $content "\n"]
     foreach line $lines {
@@ -98,149 +71,6 @@ proc parse_vpi_user_defines { } {
 
 # Above sv_vpi_user.h and vhpi_user.h ranges
 set OBJECTID 2000
-
-proc parse_model { file } {
-    global ID OBJECTID BASECLASS DIRECT_CHILDREN ALL_CHILDREN
-    set models {}
-    set fid [open "$file"]
-    set modellist [read $fid]
-    close $fid
-
-    set lines [split $modellist "\n"]
-    foreach line $lines {
-        if [regexp {^\#} $line] {
-            continue
-        }
-        if {$line != ""} {
-            set fid [open "[exec_path]/model/$line"]
-            set model [read $fid]
-            append content "$model\n"
-            close $fid
-        }
-    }
-
-    set lines [split $content "\n"]
-    set OBJ(curr) ""
-    set INDENT(curr) 0
-    set modelId 0
-    set obj_name ""
-    set obj_type ""
-    set vpiType ""
-    set vpiObj ""
-    foreach line $lines {
-        if [regexp {^#} $line] {
-            continue
-        }
-        set spaces ""
-        regexp {^([ ]*)} $line tmp spaces
-        set indent [string length $spaces]
-        if {$indent <= $INDENT(curr)} {
-        }
-        set INDENT(curr) $indent
-
-        if [regexp {\- obj_def: ([a-zA-Z0-9_]+)} $line tmp name] {
-            set vpiType ""
-            set vpiObj  ""
-            global obj_def$modelId
-
-            foreach {id define} [defineType 0 $name $vpiType] {}
-
-            set obj_def$modelId [dict create "name" $name "type" obj_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]
-            lappend models obj_def$modelId
-            set OBJ(curr) obj_def$modelId
-            incr modelId
-        }
-        if [regexp {\- class_def: ([a-zA-Z0-9_]+)} $line tmp name] {
-            set vpiType ""
-            set vpiObj  ""
-            global obj_def$modelId
-
-            foreach {id define} [defineType 0 $name $vpiType] {}
-
-            set obj_def$modelId [dict create "name" $name "type" class_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]
-            lappend models obj_def$modelId
-            set OBJ(curr) obj_def$modelId
-            incr modelId
-        }
-        if [regexp {\- group_def: ([a-zA-Z0-9_]+)} $line tmp name] {
-            set vpiType ""
-            set vpiObj  ""
-            global obj_def$modelId
-
-            foreach {id define} [defineType 0 $name $vpiType] {}
-
-            set obj_def$modelId [dict create "name" $name "type" group_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]
-            lappend models obj_def$modelId
-            set OBJ(curr) obj_def$modelId
-            incr modelId
-        }
-        if [regexp {property: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "properties" $name {}
-            set obj_name $name
-            set obj_type "properties"
-        }
-        if [regexp {class_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "class_ref" $name {}
-            set obj_name $name
-            set obj_type "class_ref"
-        }
-        if [regexp {extends: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "extends" class_def $name
-            set obj_name $name
-            set obj_type "class_ref"
-            set data [subst $$OBJ(curr)]
-            set classname [dict get $data name]
-            set BASECLASS($classname) $name
-        }
-        if [regexp {obj_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "obj_ref" $name {}
-            set obj_name $name
-            set obj_type "obj_ref"
-        }
-        if [regexp {group_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "group_ref" $name {}
-            set obj_name $name
-            set obj_type "group_ref"
-        }
-        if [regexp {class: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "class" $name {}
-            set obj_name $name
-            set obj_type "class"
-        }
-        if [regexp {type: (.*)} $line tmp type] {
-            dict set $OBJ(curr) $obj_type $obj_name type $type
-        }
-        if [regexp {vpi: ([a-zA-Z0-9_]+)} $line tmp vpiType] {
-            dict set $OBJ(curr) $obj_type $obj_name vpi $vpiType
-        }
-        if [regexp {vpi_obj: ([a-zA-Z0-9_]+)} $line tmp vpiObj] {
-            dict set $OBJ(curr) $obj_type $obj_name vpi $vpiObj
-        }
-        if [regexp {card: ([a-zA-Z0-9_]+)} $line tmp card] {
-            dict set $OBJ(curr) $obj_type $obj_name card $card
-            foreach {id define} [defineType 0 $name $vpiType] {}
-            if {$define != ""} {
-                append defines "$define\n"
-            }
-            dict set $OBJ(curr) $obj_type $obj_name "id" $id
-        }
-        if [regexp {name: ([a-zA-Z0-9_]*)} $line tmp name] {
-            dict set $OBJ(curr) $obj_type $obj_name name $name
-        }
-    }
-
-    foreach classname [array names BASECLASS] {
-        set baseclass $BASECLASS($classname)
-        append DIRECT_CHILDREN($baseclass) "$classname "
-        append ALL_CHILDREN($baseclass) "$classname "
-        if [info exist BASECLASS($baseclass)] {
-            append ALL_CHILDREN($BASECLASS($baseclass)) "$classname "
-        }
-
-    }
-
-    return $models
-}
 
 proc printMethods { classname type vpi card {real_type ""} } {
     global methods_cpp
@@ -696,8 +526,8 @@ proc generate_group_checker { model } {
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
 
-    set files [list [list "[exec_path]/templates/group_header.h" "[exec_path]/headers/${groupname}.h"] \
-                   [list "[exec_path]/templates/group_header.cpp" "[exec_path]/src/${groupname}.cpp"]]
+    set files [list [list "[project_path]/templates/group_header.h" "[project_path]/headers/${groupname}.h"] \
+                   [list "[project_path]/templates/group_header.cpp" "[project_path]/src/${groupname}.cpp"]]
 
     foreach pair $files {
         foreach {input output} $pair {}
@@ -744,7 +574,7 @@ proc generate_group_checker { model } {
 proc write_vpi_listener_cpp {} {
     global VPI_LISTENERS VPI_ANY_LISTENERS
 
-    set fid [open "[exec_path]/templates/vpi_listener.cpp"]
+    set fid [open "[project_path]/templates/vpi_listener.cpp"]
     set listener_cpp [read $fid]
     close $fid
     set vpi_listener ""
@@ -757,7 +587,7 @@ proc write_vpi_listener_cpp {} {
     }
     regsub {<VPI_LISTENERS>} $listener_cpp $vpi_listener listener_cpp
     regsub {<VPI_ANY_LISTENERS>} $listener_cpp $vpi_any_listener listener_cpp
-    set listenerId [open "[exec_path]/src/vpi_listener.cpp" "w"]
+    set listenerId [open "[project_path]/src/vpi_listener.cpp" "w"]
     puts $listenerId $listener_cpp
     close $listenerId
 }
@@ -765,7 +595,7 @@ proc write_vpi_listener_cpp {} {
 proc write_vpi_listener_h {} {
     global VPI_LISTENERS_HEADER
 
-    set fid [open "[exec_path]/templates/vpi_listener.h"]
+    set fid [open "[project_path]/templates/vpi_listener.h"]
     set listener_h [read $fid]
     close $fid
     set vpi_listener ""
@@ -773,7 +603,7 @@ proc write_vpi_listener_h {} {
         append vpi_listener $VPI_LISTENERS_HEADER($classname)
     }
     regsub {<VPI_LISTENERS_HEADER>} $listener_h $vpi_listener listener_h
-    set listenerId [open "[exec_path]/headers/vpi_listener.h" "w"]
+    set listenerId [open "[project_path]/headers/vpi_listener.h" "w"]
     puts $listenerId $listener_h
     close $listenerId
 }
@@ -781,7 +611,7 @@ proc write_vpi_listener_h {} {
 proc write_uhdm_forward_decl {} {
     global VPI_LISTENERS_HEADER
 
-    set fid [open "[exec_path]/templates/uhdm_forward_decl.h"]
+    set fid [open "[project_path]/templates/uhdm_forward_decl.h"]
     set uhdm_forward_h [read $fid]
     close $fid
     set forward_declaration ""
@@ -789,7 +619,7 @@ proc write_uhdm_forward_decl {} {
         append forward_declaration "class $classname;\n"
     }
     regsub {<UHDM_FORWARD_DECL>} $uhdm_forward_h $forward_declaration uhdm_forward_h
-    set forwardId [open "[exec_path]/headers/uhdm_forward_decl.h" "w"]
+    set forwardId [open "[project_path]/headers/uhdm_forward_decl.h" "w"]
     puts $forwardId $uhdm_forward_h
     close $forwardId
 }
@@ -797,7 +627,7 @@ proc write_uhdm_forward_decl {} {
 proc write_VpiListener_h {} {
     global CLASS_LISTENER
 
-    set fid [open "[exec_path]/templates/VpiListener.h"]
+    set fid [open "[project_path]/templates/VpiListener.h"]
     set listener_content [read $fid]
     close $fid
     set vpi_listener ""
@@ -805,7 +635,7 @@ proc write_VpiListener_h {} {
         append vpi_listener $CLASS_LISTENER($classname)
     }
     regsub {<VPI_LISTENER_METHODS>} $listener_content $vpi_listener listener_content
-    set listenerId [open "[exec_path]/headers/VpiListener.h" "w"]
+    set listenerId [open "[project_path]/headers/VpiListener.h" "w"]
     puts $listenerId $listener_content
     close $listenerId
 }
@@ -813,7 +643,7 @@ proc write_VpiListener_h {} {
 proc write_vpi_visitor_cpp {} {
     global VISITOR VISITOR_RELATIONS
 
-    set fid [open "[exec_path]/templates/vpi_visitor.cpp"]
+    set fid [open "[project_path]/templates/vpi_visitor.cpp"]
     set visitor_cpp [read $fid]
     close $fid
     set vpi_visitor ""
@@ -860,18 +690,18 @@ $relations
 "
     }
     regsub {<OBJECT_VISITORS>} $visitor_cpp $vpi_visitor visitor_cpp
-    set visitorId [open "[exec_path]/src/vpi_visitor.cpp" "w"]
+    set visitorId [open "[project_path]/src/vpi_visitor.cpp" "w"]
     puts $visitorId $visitor_cpp
     close $visitorId
 }
 
 proc write_capnp { capnp_schema_all capnp_root_schema } {
-    set fid [open "[exec_path]/templates/UHDM.capnp"]
+    set fid [open "[project_path]/templates/UHDM.capnp"]
     set capnp_content [read $fid]
     close $fid
     regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema_all capnp_content
     regsub {<CAPNP_ROOT_SCHEMA>} $capnp_content $capnp_root_schema capnp_content
-    set capnpId [open "[exec_path]/src/UHDM.capnp" "w"]
+    set capnpId [open "[project_path]/src/UHDM.capnp" "w"]
     puts $capnpId $capnp_content
     close $capnpId
 }
@@ -879,10 +709,10 @@ proc write_capnp { capnp_schema_all capnp_root_schema } {
 proc write_uhdm_h { headers} {
     global DEFINE_ID uhdm_name_map
 
-    set fid [open "[exec_path]/templates/uhdm.h"]
+    set fid [open "[project_path]/templates/uhdm.h"]
     set uhdm_content [read $fid]
     close $fid
-    set uhdmId [open "[exec_path]/headers/uhdm.h" "w"]
+    set uhdmId [open "[project_path]/headers/uhdm.h" "w"]
 
     set name_id_map "\nstd::string UHDM::UhdmName(UHDM_OBJECT_TYPE type) \{
       switch (type) \{
@@ -905,20 +735,20 @@ proc write_uhdm_h { headers} {
 }
 
 proc write_uhdm_types_h { defines } {
-    set fid [open "[exec_path]/templates/uhdm_types.h"]
+    set fid [open "[project_path]/templates/uhdm_types.h"]
     set uhdm_content [read $fid]
     close $fid
-    set uhdmId [open "[exec_path]/headers/uhdm_types.h" "w"]
+    set uhdmId [open "[project_path]/headers/uhdm_types.h" "w"]
     regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
     puts $uhdmId $uhdm_content
     close $uhdmId
 }
 
 proc write_containers_h { containers } {
-    set fid [open "[exec_path]/templates/containers.h"]
+    set fid [open "[project_path]/templates/containers.h"]
     set container_content [read $fid]
     close $fid
-    set containerId [open "[exec_path]/headers/containers.h" "w"]
+    set containerId [open "[project_path]/headers/containers.h" "w"]
     regsub -all {<CONTAINERS>} $container_content $containers container_content
     puts $containerId $container_content
     close $containerId
@@ -1033,7 +863,7 @@ proc generate_code { models } {
     log "=========="
     exec sh -c "mkdir -p headers"
     exec sh -c "mkdir -p src"
-    set fid [open "[exec_path]/templates/class_header.h"]
+    set fid [open "[project_path]/templates/class_header.h"]
     set template_content [read $fid]
     close $fid
 
@@ -1108,7 +938,7 @@ proc generate_code { models } {
         }
         lappend classes $classname
 
-        set oid [open "[exec_path]/headers/$classname.h" "w"]
+        set oid [open "[project_path]/headers/$classname.h" "w"]
         regsub -all {<CLASSNAME>} $template $classname template
         regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
         foreach {id define} [defineType 1 uhdm${classname} ""] {}
@@ -1345,7 +1175,7 @@ proc generate_code { models } {
     write_containers_h $containers
 
     # vpi_user.cpp
-    set fid [open "[exec_path]/templates/vpi_user.cpp" ]
+    set fid [open "[project_path]/templates/vpi_user.cpp" ]
     set vpi_user [read $fid]
     close $fid
     regsub {<HEADERS>} $vpi_user $headers vpi_user
@@ -1358,27 +1188,27 @@ proc generate_code { models } {
     regsub -all {<VPI_GET_DELAY_BODY>} $vpi_user $vpi_get_delay_body vpi_user
     regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
 
-    set vpi_userId [open "[exec_path]/src/vpi_user.cpp" "w"]
+    set vpi_userId [open "[project_path]/src/vpi_user.cpp" "w"]
     puts $vpi_userId $vpi_user
     close $vpi_userId
 
     # UHDM.capnp
     write_capnp $capnp_schema_all $capnp_root_schema
     log "Generating Capnp schema..."
-    exec sh -c "rm -rf [exec_path]/src/UHDM.capnp.*"
+    exec sh -c "rm -rf [project_path]/src/UHDM.capnp.*"
     set capnp_path [exec sh -c "find $working_dir -name capnpc-c++"]
     set capnp_path [file dirname $capnp_path]
 
-    exec sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [exec_path]/src/UHDM.capnp"
+    exec sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
 
     # BaseClass.h
-    exec sh -c "cp -rf [exec_path]/templates/BaseClass.h [exec_path]/headers/BaseClass.h"
+    exec sh -c "cp -rf [project_path]/templates/BaseClass.h [project_path]/headers/BaseClass.h"
 
     # SymbolFactory.h
-    exec sh -c "cp -rf [exec_path]/templates/SymbolFactory.h [exec_path]/headers/SymbolFactory.h"
+    exec sh -c "cp -rf [project_path]/templates/SymbolFactory.h [project_path]/headers/SymbolFactory.h"
 
     # SymbolFactory.cpp
-    exec sh -c "cp -rf [exec_path]/templates/SymbolFactory.cpp [exec_path]/src/SymbolFactory.cpp"
+    exec sh -c "cp -rf [project_path]/templates/SymbolFactory.cpp [project_path]/src/SymbolFactory.cpp"
 
     # Serializer.cpp
     set files "Serializer_save.cpp Serializer_restore.cpp vpi_uhdm.h Serializer.h"
@@ -1389,7 +1219,7 @@ proc generate_code { models } {
         set capnp_id ""
         set factory_purge ""
 
-        set fid [open "[exec_path]/templates/$file"]
+        set fid [open "[project_path]/templates/$file"]
         set serializer_content [read $fid]
         close $fid
         foreach class $classes {
@@ -1454,16 +1284,16 @@ $RESTORE($class)
         regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
         regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
         if {$file == "vpi_uhdm.h" || $file == "Serializer.h"} {
-            set serializerId [open "[exec_path]/headers/$file" "w"]
+            set serializerId [open "[project_path]/headers/$file" "w"]
         } else {
-            set serializerId [open "[exec_path]/src/$file" "w"]
+            set serializerId [open "[project_path]/src/$file" "w"]
         }
         puts $serializerId $serializer_content
         close $serializerId
     }
 
     # vpi_visitor.h
-    exec sh -c "cp -rf [exec_path]/templates/vpi_visitor.h [exec_path]/headers/vpi_visitor.h"
+    exec sh -c "cp -rf [project_path]/templates/vpi_visitor.h [project_path]/headers/vpi_visitor.h"
     # vpi_visitor.cpp
     write_vpi_visitor_cpp
 
@@ -1479,6 +1309,7 @@ $RESTORE($class)
     # uhdm_forward_decl.h
     write_uhdm_forward_decl
 
+    generate_elaborator
 }
 
 proc debug_models { models } {
