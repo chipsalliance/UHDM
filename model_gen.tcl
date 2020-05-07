@@ -778,6 +778,22 @@ proc write_vpi_listener_h {} {
     close $listenerId
 }
 
+proc write_uhdm_forward_decl {} {
+    global VPI_LISTENERS_HEADER
+
+    set fid [open "[exec_path]/templates/uhdm_forward_decl.h"]
+    set uhdm_forward_h [read $fid]
+    close $fid
+    set forward_declaration ""
+    foreach classname [array name VPI_LISTENERS_HEADER] {
+        append forward_declaration "class $classname;\n"
+    }
+    regsub {<UHDM_FORWARD_DECL>} $uhdm_forward_h $forward_declaration uhdm_forward_h
+    set forwardId [open "[exec_path]/headers/uhdm_forward_decl.h" "w"]
+    puts $forwardId $uhdm_forward_h
+    close $forwardId
+}
+
 proc write_VpiListener_h {} {
     global CLASS_LISTENER
 
@@ -1459,6 +1475,9 @@ $RESTORE($class)
 
     # vpi_listener.cpp
     write_vpi_listener_cpp
+
+    # uhdm_forward_decl.h
+    write_uhdm_forward_decl
 
 }
 

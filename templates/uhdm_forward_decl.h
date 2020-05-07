@@ -2,7 +2,7 @@
 
 /*
 
- Copyright 2019 Alain Dargelas
+ Copyright 2019-2020 Alain Dargelas
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,30 +18,18 @@
  */
 
 /*
- * File:   VpiListener.h
+ * File:   uhdm_forward_decl.h
  * Author:
  *
- * Created on December 14, 2019, 10:03 PM
+ * Created on May 06, 2020, 10:03 PM
  */
 
-#ifndef UHDM_VPILISTENER_CLASS_H
-#define UHDM_VPILISTENER_CLASS_H
+#ifndef UHDM_FORWARD_DECL_CLASS_H
+#define UHDM_FORWARD_DECL_CLASS_H
 
 namespace UHDM {
-  
-  class VpiListener {
-  public:
-    // Use implicit constructor to initialize all members
-    // VpiListener()
-    
-    virtual ~VpiListener() {}
-
-<VPI_LISTENER_METHODS>
-
-  protected:
-    
-  };
-  
+class BaseClass;  
+<UHDM_FORWARD_DECL>
 };
 
 
