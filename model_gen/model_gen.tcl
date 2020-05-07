@@ -45,49 +45,16 @@ proc exec_path {} {
 
 proc project_path {} {
     variable myLocation
-    return [file dirname [exec_path]]
+    return [file dirname [file dirname $myLocation]]
 }
 
 
 file mkdir [project_path]/src
 file mkdir [project_path]/headers
 
-# proc copied from: https://wiki.tcl-lang.org/page/pdict%3A+Pretty+print+a+dict
-proc pdict { d {i 0} {p "  "} {s " -> "} } {
-    global $d
-    set fRepExist [expr {0 < [llength\
-                                  [info commands tcl::unsupported::representation]]}]
-    if { (![string is list $d] || [llength $d] == 1)
-         && [uplevel 1 [list info exists $d]] } {
-        set dictName $d
-        unset d
-        upvar 1 $dictName d
-        log "dict $dictName"
-    }
-    if { ! [string is list $d] || [llength $d] % 2 != 0 } {
-        return -code error  "error: pdict - argument is not a dict"
-    }
-    set prefix [string repeat $p $i]
-    set max 0
-    foreach key [dict keys $d] {
-        if { [string length $key] > $max } {
-            set max [string length $key]
-        }
-    }
-    dict for {key val} ${d} {
-        lognnl "${prefix}[format "%-${max}s" $key]$s"
-        if {    $fRepExist && [string match "value is a dict*"\
-                                   [tcl::unsupported::representation $val]]
-                || ! $fRepExist && [string is list $val]
-                && [llength $val] % 2 == 0 } {
-            log ""
-            pdict $val [expr {$i+1}] $p $s
-        } else {
-            log "'${val}'"
-        }
-    }
-    return
-}
+source [exec_path]/pdict.tcl
+source [exec_path]/parse_model.tcl
+source [exec_path]/generate_elaborator.tcl
 
 proc parse_vpi_user_defines { } {
     global ID
@@ -104,149 +71,6 @@ proc parse_vpi_user_defines { } {
 
 # Above sv_vpi_user.h and vhpi_user.h ranges
 set OBJECTID 2000
-
-proc parse_model { file } {
-    global ID OBJECTID BASECLASS DIRECT_CHILDREN ALL_CHILDREN
-    set models {}
-    set fid [open "$file"]
-    set modellist [read $fid]
-    close $fid
-
-    set lines [split $modellist "\n"]
-    foreach line $lines {
-        if [regexp {^\#} $line] {
-            continue
-        }
-        if {$line != ""} {
-            set fid [open "[project_path]/model/$line"]
-            set model [read $fid]
-            append content "$model\n"
-            close $fid
-        }
-    }
-
-    set lines [split $content "\n"]
-    set OBJ(curr) ""
-    set INDENT(curr) 0
-    set modelId 0
-    set obj_name ""
-    set obj_type ""
-    set vpiType ""
-    set vpiObj ""
-    foreach line $lines {
-        if [regexp {^#} $line] {
-            continue
-        }
-        set spaces ""
-        regexp {^([ ]*)} $line tmp spaces
-        set indent [string length $spaces]
-        if {$indent <= $INDENT(curr)} {
-        }
-        set INDENT(curr) $indent
-
-        if [regexp {\- obj_def: ([a-zA-Z0-9_]+)} $line tmp name] {
-            set vpiType ""
-            set vpiObj  ""
-            global obj_def$modelId
-
-            foreach {id define} [defineType 0 $name $vpiType] {}
-
-            set obj_def$modelId [dict create "name" $name "type" obj_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]
-            lappend models obj_def$modelId
-            set OBJ(curr) obj_def$modelId
-            incr modelId
-        }
-        if [regexp {\- class_def: ([a-zA-Z0-9_]+)} $line tmp name] {
-            set vpiType ""
-            set vpiObj  ""
-            global obj_def$modelId
-
-            foreach {id define} [defineType 0 $name $vpiType] {}
-
-            set obj_def$modelId [dict create "name" $name "type" class_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]
-            lappend models obj_def$modelId
-            set OBJ(curr) obj_def$modelId
-            incr modelId
-        }
-        if [regexp {\- group_def: ([a-zA-Z0-9_]+)} $line tmp name] {
-            set vpiType ""
-            set vpiObj  ""
-            global obj_def$modelId
-
-            foreach {id define} [defineType 0 $name $vpiType] {}
-
-            set obj_def$modelId [dict create "name" $name "type" group_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]
-            lappend models obj_def$modelId
-            set OBJ(curr) obj_def$modelId
-            incr modelId
-        }
-        if [regexp {property: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "properties" $name {}
-            set obj_name $name
-            set obj_type "properties"
-        }
-        if [regexp {class_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "class_ref" $name {}
-            set obj_name $name
-            set obj_type "class_ref"
-        }
-        if [regexp {extends: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "extends" class_def $name
-            set obj_name $name
-            set obj_type "class_ref"
-            set data [subst $$OBJ(curr)]
-            set classname [dict get $data name]
-            set BASECLASS($classname) $name
-        }
-        if [regexp {obj_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "obj_ref" $name {}
-            set obj_name $name
-            set obj_type "obj_ref"
-        }
-        if [regexp {group_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "group_ref" $name {}
-            set obj_name $name
-            set obj_type "group_ref"
-        }
-        if [regexp {class: ([a-zA-Z0-9_]+)} $line tmp name] {
-            dict set $OBJ(curr) "class" $name {}
-            set obj_name $name
-            set obj_type "class"
-        }
-        if [regexp {type: (.*)} $line tmp type] {
-            dict set $OBJ(curr) $obj_type $obj_name type $type
-        }
-        if [regexp {vpi: ([a-zA-Z0-9_]+)} $line tmp vpiType] {
-            dict set $OBJ(curr) $obj_type $obj_name vpi $vpiType
-        }
-        if [regexp {vpi_obj: ([a-zA-Z0-9_]+)} $line tmp vpiObj] {
-            dict set $OBJ(curr) $obj_type $obj_name vpi $vpiObj
-        }
-        if [regexp {card: ([a-zA-Z0-9_]+)} $line tmp card] {
-            dict set $OBJ(curr) $obj_type $obj_name card $card
-            foreach {id define} [defineType 0 $name $vpiType] {}
-            if {$define != ""} {
-                append defines "$define\n"
-            }
-            dict set $OBJ(curr) $obj_type $obj_name "id" $id
-        }
-        if [regexp {name: ([a-zA-Z0-9_]*)} $line tmp name] {
-            dict set $OBJ(curr) $obj_type $obj_name name $name
-        }
-    }
-
-    foreach classname [array names BASECLASS] {
-        set baseclass $BASECLASS($classname)
-        append DIRECT_CHILDREN($baseclass) "$classname "
-        append ALL_CHILDREN($baseclass) "$classname "
-        if [info exist BASECLASS($baseclass)] {
-            append ALL_CHILDREN($BASECLASS($baseclass)) "$classname "
-        }
-
-    }
-
-    return $models
-}
 
 proc printMethods { classname type vpi card {real_type ""} } {
     global methods_cpp
@@ -1485,6 +1309,7 @@ $RESTORE($class)
     # uhdm_forward_decl.h
     write_uhdm_forward_decl
 
+    generate_elaborator
 }
 
 proc debug_models { models } {

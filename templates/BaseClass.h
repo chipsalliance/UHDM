@@ -64,8 +64,15 @@ namespace UHDM {
     virtual const std::string& VpiName() const { return nonamebaseclass; }
 
     virtual unsigned int VpiType() const { return 0; }
+
+    void* ClientData() { return clientData_; }
+
+    void ClientData(void* data) { clientData_ = data; }
+    
   protected:
     Serializer* serializer_;
+
+    void* clientData_;
   };
   
 };

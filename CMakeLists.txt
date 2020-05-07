@@ -62,10 +62,10 @@ endforeach(header_file ${model-GENERATED_SRC})
 add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 add_custom_command(
   OUTPUT ${model-GENERATED_SRC}
-  COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen.tcl
+  COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_BINARY_DIR}
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/../"
-  DEPENDS ${PROJECT_SOURCE_DIR}/model_gen.tcl
+  DEPENDS ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst
           ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
           ${yaml_SRC}
@@ -79,6 +79,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp
     ${PROJECT_SOURCE_DIR}/src/Serializer_restore.cpp
     ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.c++
+    ${PROJECT_SOURCE_DIR}/src/clone_tree.cpp
     ${PROJECT_SOURCE_DIR}/src/actual_group.cpp
     ${PROJECT_SOURCE_DIR}/src/instance_item.cpp
     ${PROJECT_SOURCE_DIR}/src/enum_struct_packed_net_group.cpp
@@ -208,6 +209,15 @@ target_link_libraries(listener-elab ${ALL_LIBRARIES_FOR_UHDM})
 add_test(
   NAME listener-elab
   COMMAND dist/${CMAKE_BUILD_TYPE}/listener-elab
+  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+add_executable(full-elab ${PROJECT_SOURCE_DIR}/tests/full_elab.cpp)
+set_target_properties(full-elab PROPERTIES OUTPUT_NAME full-elab)
+add_dependencies(full-elab uhdm)
+target_link_libraries(full-elab ${ALL_LIBRARIES_FOR_UHDM})
+add_test(
+  NAME full-elab
+  COMMAND dist/${CMAKE_BUILD_TYPE}/full-elab
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 # Installation target
