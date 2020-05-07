@@ -31,6 +31,9 @@
 #include <map>
 #include <stack>
 
+// Verifies that the forward declaration header compiles
+#include "headers/uhdm_forward_decl.h"
+
 #include "headers/uhdm.h"
 #include "headers/vpi_listener.h"
 #include "headers/vpi_visitor.h"
