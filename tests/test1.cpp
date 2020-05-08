@@ -7,6 +7,13 @@
 
 using namespace UHDM;
 
+class MyPayLoad : public ClientData {
+public:
+  MyPayLoad(int f) { foo_ = f; }
+private:
+  int foo_;
+};
+
 std::vector<vpiHandle> build_designs (Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
@@ -89,6 +96,9 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   inst_items->push_back(f3);
   m1->Instance_items(inst_items);
 
+  MyPayLoad* pl = new MyPayLoad(10);
+  m1->Data(pl);
+  
   vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
   designs.push_back(dh);
 
