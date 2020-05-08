@@ -77,10 +77,10 @@ proc generate_elaborator { models } {
                         }
                         
                         if {$card == 1} {
-                            append clone_cases "    clone_obj->${method}((${cast}*) clone_tree((($classname*)root)->${method}(), s));
+                            append clone_cases "    clone_obj->${method}((${cast}*) clone_tree((($classname*)root)->${method}(), s, elaborator));
 "
                             if {$classname == "module"} {
-                                append vpi_listener "          inst->${method}((${cast}*) clone_tree(defMod->${method}(), *serializer_));
+                                append vpi_listener "          inst->${method}((${cast}*) clone_tree(defMod->${method}(), *serializer_, this));
 "
                             }
                         } else {                          
@@ -88,7 +88,7 @@ proc generate_elaborator { models } {
       auto clone_vec = s.Make${Cast}Vec();
       clone_obj->${method}(clone_vec);
       for (auto obj : *vec) {
-        clone_vec->push_back((${cast}*) clone_tree(obj,s));
+        clone_vec->push_back((${cast}*) clone_tree(obj, s, elaborator));
       }
     }
 "
@@ -98,7 +98,7 @@ proc generate_elaborator { models } {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
-              clone_vec->push_back((${cast}*) clone_tree(obj, *serializer_));
+              clone_vec->push_back((${cast}*) clone_tree(obj, *serializer_, this));
             }
           }
 "

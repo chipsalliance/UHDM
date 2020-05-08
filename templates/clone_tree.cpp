@@ -24,10 +24,14 @@
  */
 
 #include "uhdm.h"
+#include "clone_tree.h"
+#include "ElaboratorListener.h"
+
+using namespace UHDM;
 
 namespace UHDM {
 
-BaseClass* clone_tree (const BaseClass* root, Serializer& s) {
+BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener* elaborator) {
   if (root == nullptr)
     return nullptr;
   BaseClass* clone = nullptr;

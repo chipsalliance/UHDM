@@ -24,6 +24,11 @@
  * Created on May 6, 2020, 10:03 PM
  */
 
+#include <map>
+#include <stack>
+#include <iostream>
+
+#include "headers/VpiListener.h"
 #include "headers/clone_tree.h"
 
 namespace UHDM {
@@ -97,10 +102,8 @@ protected:
   }
 
   
-private:
-
   // Bind to a net in the parent instance
-  net* bindParentNet_(const std::string& name) {
+  net* bindParentNet(const std::string& name) {
     std::pair<const BaseClass*, ComponentMap> mem = instStack_.top();
     instStack_.pop();
     ComponentMap& netMap = instStack_.top().second;
@@ -113,7 +116,7 @@ private:
   }
     
   // Bind to a net in the current instance
-  net* bindNet_(const std::string& name) {
+  net* bindNet(const std::string& name) {
     ComponentMap& netMap = instStack_.top().second;
     ComponentMap::iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
@@ -121,6 +124,8 @@ private:
     }
     return nullptr;
   }
+
+private:
 
   // Instance context stack
   std::stack<std::pair<const BaseClass*, ComponentMap>> instStack_;

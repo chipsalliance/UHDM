@@ -27,13 +27,13 @@
 #include <vector>
 #include "sv_vpi_user.h"
 
-
 #ifndef UHDM_CLONE_TREE_H
 #define UHDM_CLONE_TREE_H
 
 namespace UHDM {
+  class ElaboratorListener;
 
-  BaseClass* clone_tree (const BaseClass* root, Serializer& s);
+  BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener* elaborator = nullptr);
 
 };
 
