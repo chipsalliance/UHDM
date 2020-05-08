@@ -475,7 +475,38 @@ proc makeVpiName { classname } {
         }
     }
     regsub -all "_" $vpiclasstype "" vpiclasstype
-    return $vpiclasstype
+
+    set vpiName $vpiclasstype
+    # Exceptions where the vpi_user relation does not match the class name
+    if {$vpiName == "vpiForkStmt"} {
+        set vpiName "vpiFork"
+    } elseif {$vpiName == "vpiForStmt"} {
+        set vpiName "vpiFor"
+    } elseif {$vpiName == "vpiIoDecl"} {
+        set vpiName "vpiIODecl"
+    } elseif {$vpiName == "vpiTfCall"} {
+        set vpiName "vpiSysTfCall"
+    } elseif {$vpiName == "vpiAtomicStmt"} {
+        set vpiName "vpiStmt"
+    } elseif {$vpiName == "vpiAssertStmt"} {
+        set vpiName "vpiAssert"
+    } elseif {$vpiName == "vpiClockedProperty"} {
+        set vpiName "vpiClockedProp"
+    } elseif {$vpiName == "vpiIfStmt"} {
+        set vpiName "vpiIf"
+    } elseif {$vpiName == "vpiWhileStmt"} {
+        set vpiName "vpiWhile"
+    } elseif {$vpiName == "vpiCaseStmt"} {
+        set vpiName "vpiCase"
+    } elseif {$vpiName == "vpiContinueStmt"} {
+        set vpiName "vpiContinue"
+    } elseif {$vpiName == "vpiBreakStmt"} {
+        set vpiName "vpiBreak"
+    }  elseif {$vpiName == "vpiReturnStmt"} {
+        set vpiName "vpiReturn"
+    }
+
+    return $vpiName
 }
 
 proc printScanBody { name classname type card } {
@@ -649,34 +680,6 @@ proc write_vpi_visitor_cpp {} {
     set vpi_visitor ""
     foreach classname [array name VISITOR] {
         set vpiName [makeVpiName $classname]
-        # Exceptions where the vpi_user relation does not match the class name
-        if {$vpiName == "vpiForkStmt"} {
-            set vpiName "vpiFork"
-        } elseif {$vpiName == "vpiForStmt"} {
-            set vpiName "vpiFor"
-        } elseif {$vpiName == "vpiIoDecl"} {
-            set vpiName "vpiIODecl"
-        } elseif {$vpiName == "vpiTfCall"} {
-            set vpiName "vpiSysTfCall"
-        } elseif {$vpiName == "vpiAtomicStmt"} {
-            set vpiName "vpiStmt"
-        } elseif {$vpiName == "vpiAssertStmt"} {
-            set vpiName "vpiAssert"
-        } elseif {$vpiName == "vpiClockedProperty"} {
-            set vpiName "vpiClockedProp"
-        } elseif {$vpiName == "vpiIfStmt"} {
-            set vpiName "vpiIf"
-        } elseif {$vpiName == "vpiWhileStmt"} {
-            set vpiName "vpiWhile"
-        } elseif {$vpiName == "vpiCaseStmt"} {
-            set vpiName "vpiCase"
-        } elseif {$vpiName == "vpiContinueStmt"} {
-            set vpiName "vpiContinue"
-        } elseif {$vpiName == "vpiBreakStmt"} {
-            set vpiName "vpiBreak"
-        }  elseif {$vpiName == "vpiReturnStmt"} {
-            set vpiName "vpiReturn"
-        }
         set relations ""
         if [info exist VISITOR_RELATIONS($classname)] {
             set relations $VISITOR_RELATIONS($classname)
@@ -1058,6 +1061,7 @@ proc generate_code { models } {
 
                     set Type [string toupper $type 0 0]
                     regsub -all  {_} $Type "" Type
+                    set Name $name
                     regsub -all  {_} $name "" Name
 
                     if {$key == "class_ref" || $key == "group_ref"} {
@@ -1309,7 +1313,6 @@ $RESTORE($class)
     # uhdm_forward_decl.h
     write_uhdm_forward_decl
 
-    generate_elaborator
 }
 
 proc debug_models { models } {
@@ -1328,5 +1331,7 @@ set models [parse_model $model_files]
 debug_models $models
 
 generate_code $models
+
+generate_elaborator $models
 
 puts "UHDM MODEL GENERATION DONE."

@@ -32,6 +32,12 @@
 namespace UHDM {
   class Serializer;
   static std::string nonamebaseclass ("");
+
+  class ClientData {
+  public:
+    virtual ~ClientData(){};
+  };
+  
   class BaseClass {
   public:
     // Use implicit constructor to initialize all members
@@ -65,14 +71,14 @@ namespace UHDM {
 
     virtual unsigned int VpiType() const { return 0; }
 
-    void* ClientData() { return clientData_; }
+    ClientData* Data() { return clientData_; }
 
-    void ClientData(void* data) { clientData_ = data; }
+    void Data(ClientData* data) { clientData_ = data; }
     
   protected:
     Serializer* serializer_;
 
-    void* clientData_;
+    ClientData* clientData_;
   };
   
 };

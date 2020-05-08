@@ -27,19 +27,12 @@
 
 namespace UHDM {
 
-BaseClass* clone_tree (BaseClass* root, Serializer& s) {
+BaseClass* clone_tree (const BaseClass* root, Serializer& s) {
   if (root == nullptr)
     return nullptr;
   BaseClass* clone = nullptr;
-  switch (root->VpiType()) {
-    // Hand coded, will be auto genrated
-  case vpiContAssign: {
-    cont_assign* cassign = s.MakeCont_assign();
-    *cassign = *((cont_assign*)root);
-    clone = cassign;
-  }
-    
-    <CLONE_CASES>
+  switch (root->VpiType()) {  
+<CLONE_CASES>
   default:
     break;
   }

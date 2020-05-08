@@ -33,7 +33,7 @@
 
 namespace UHDM {
 
-  BaseClass* clone_tree (BaseClass* root, Serializer& s);
+  BaseClass* clone_tree (const BaseClass* root, Serializer& s);
 
 };
 

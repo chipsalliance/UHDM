@@ -29,9 +29,9 @@
 namespace UHDM {
   
 class ElaboratorListener : public VpiListener {
-
+  
 public:
-  ElaboratorListener (Serializer* serializer) : serializer_(serializer) {}
+  ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}
     
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
@@ -45,7 +45,8 @@ protected:
     bool flatModule             = (instName == "") && ((object->VpiParent() == 0) ||
                                                        ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
                                   // false when it is a module in a hierachy tree
-    std::cout << "Module: " << defName << " (" << instName << ") Flat:"  << flatModule << ", Top:" << topLevelModule << std::endl;
+    if (debug_)
+      std::cout << "Module: " << defName << " (" << instName << ") Flat:"  << flatModule << ", Top:" << topLevelModule << std::endl;
 
     if (flatModule) {
       // Flat list of module (unelaborated)
@@ -73,15 +74,7 @@ protected:
         case vpiModule: {
           module* defMod = (module*) comp;
 
-	  // Hand coded, will be auto genrated
-	  if (defMod->Cont_assigns()) {
-	    VectorOfcont_assign* assigns = serializer_->MakeCont_assignVec();
-	    inst->Cont_assigns(assigns);
-	    for (cont_assign* cassign : *defMod->Cont_assigns()) {
-	      assigns->push_back((cont_assign*) clone_tree(cassign, *serializer_));
-	    }
-	  }
-	  <ELABORATOR_LISTENER>
+<ELABORATOR_LISTENER>
 
           break;
         }
@@ -106,7 +99,7 @@ protected:
   
 private:
 
-  // Bind to a net in the parent instace
+  // Bind to a net in the parent instance
   net* bindParentNet_(const std::string& name) {
     std::pair<const BaseClass*, ComponentMap> mem = instStack_.top();
     instStack_.pop();
@@ -119,7 +112,7 @@ private:
     return nullptr;
   }
     
-  // Bind to a net in the current instace
+  // Bind to a net in the current instance
   net* bindNet_(const std::string& name) {
     ComponentMap& netMap = instStack_.top().second;
     ComponentMap::iterator netItr = netMap.find(name);
@@ -136,6 +129,8 @@ private:
   ComponentMap flatComponentMap_;
 
   Serializer* serializer_;
+
+  bool debug_;
 };
 
 };
