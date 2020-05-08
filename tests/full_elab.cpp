@@ -189,7 +189,7 @@ int main (int argc, char** argv) {
   std::cout << orig;
   
   std::cout << std::endl;
-  ElaboratorListener* listener = new ElaboratorListener(&serializer);
+  ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
   listen_designs(designs,listener);
   std::cout << std::endl;
 

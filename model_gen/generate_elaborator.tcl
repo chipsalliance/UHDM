@@ -68,15 +68,22 @@ proc generate_elaborator { models } {
                             set cast "any"
                         }
                         set Cast [string toupper ${cast} 0 0]
-                        
-                        if {$card == 1} {
-                            append clone_cases "    clone_obj->[string toupper ${name} 0 0]((${cast}*) clone_tree((($classname*)root)->[string toupper ${name} 0 0](), s));
-"                             
-                        } else {
-                            set method [string toupper ${name} 0 0] 
+
+                        set method [string toupper ${name} 0 0]
+                        if {$card == "any"} {
                             if ![regexp {s$} $method] {
                                 append method "s"
                             }
+                        }
+                        
+                        if {$card == 1} {
+                            append clone_cases "    clone_obj->${method}((${cast}*) clone_tree((($classname*)root)->${method}(), s));
+"
+                            if {$classname == "module"} {
+                                append vpi_listener "          inst->${method}((${cast}*) clone_tree(defMod->${method}(), *serializer_));
+"
+                            }
+                        } else {                          
                             append clone_cases "    if (auto vec = (($classname*)root)->${method}()) {
       auto clone_vec = s.Make${Cast}Vec();
       clone_obj->${method}(clone_vec);
@@ -85,6 +92,18 @@ proc generate_elaborator { models } {
       }
     }
 "
+                            if {($classname == "module") && ($method != "Ports")} {
+                                # We don't want to ovrride the elaborated instance ports by the module def ports
+                                append vpi_listener "          if (auto vec = defMod->${method}()) {
+            auto clone_vec = serializer_->Make${Cast}Vec();
+            inst->${method}(clone_vec);
+            for (auto obj : *vec) {
+              clone_vec->push_back((${cast}*) clone_tree(obj, *serializer_));
+            }
+          }
+"
+                                
+                            }  
                         }
                     }
                 }
