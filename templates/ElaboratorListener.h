@@ -29,7 +29,7 @@
 namespace UHDM {
   
 class ElaboratorListener : public VpiListener {
-
+  
 public:
   ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}
     
@@ -99,7 +99,7 @@ protected:
   
 private:
 
-  // Bind to a net in the parent instace
+  // Bind to a net in the parent instance
   net* bindParentNet_(const std::string& name) {
     std::pair<const BaseClass*, ComponentMap> mem = instStack_.top();
     instStack_.pop();
@@ -112,7 +112,7 @@ private:
     return nullptr;
   }
     
-  // Bind to a net in the current instace
+  // Bind to a net in the current instance
   net* bindNet_(const std::string& name) {
     ComponentMap& netMap = instStack_.top().second;
     ComponentMap::iterator netItr = netMap.find(name);
