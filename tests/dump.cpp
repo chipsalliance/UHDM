@@ -1,6 +1,5 @@
 #include <iostream>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <string.h>
 #include <limits.h> /* PATH_MAX */
 #include <errno.h>
@@ -8,11 +7,15 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
-#include <dirent.h>
 #include <stdio.h>
 #include <regex>
 #include <fstream>
 #include <sstream>
+
+#if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+  #include <dirent.h>
+  #include <unistd.h>
+#endif
 
 #include "headers/uhdm.h"
 #include "headers/vpi_listener.h"

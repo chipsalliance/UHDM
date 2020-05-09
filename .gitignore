@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Project specific folders and files
+/headers
+/src
+/CMakeBuilds
+/.vs

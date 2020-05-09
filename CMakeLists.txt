@@ -39,12 +39,22 @@ set(CMAKE_BUILD_FILES_DIRECTORY ${dir})
 set(CMAKE_BUILD_DIRECTORY ${dir})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG
-    "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -g ${MY_CXX_WARNING_FLAGS}"
-)
-set(CMAKE_CXX_FLAGS_RELEASE
-    "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -DNDEBUG ${MY_CXX_WARNING_FLAGS}"
-)
+
+if (UNIX)
+  set(CMAKE_CXX_FLAGS_DEBUG
+      "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -g ${MY_CXX_WARNING_FLAGS}"
+  )
+  set(CMAKE_CXX_FLAGS_RELEASE
+      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -DNDEBUG ${MY_CXX_WARNING_FLAGS}"
+  )
+elseif (WIN32)
+  set(CMAKE_CXX_FLAGS_DEBUG
+      "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} /W3 /DPLI_DLLISPEC= ${MY_CXX_WARNING_FLAGS}"
+  )
+  set(CMAKE_CXX_FLAGS_RELEASE
+      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /W3 /DPLI_DLLISPEC= ${MY_CXX_WARNING_FLAGS}"
+  )
+endif()
 
 # model_gen generated
 set(model-GENERATED_SRC ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.h
@@ -117,14 +127,20 @@ add_dependencies(uhdm GenerateCode)
 
 set(ALL_CAPNP_LIBS capnp kj)
 
-set(ALL_LIBRARIES_FOR_UHDM
-    uhdm
-    ${ALL_CAPNP_LIBS}
-    dl
-    util
-    m
-    rt
-    pthread)
+if (UNIX)
+  set(ALL_LIBRARIES_FOR_UHDM
+      uhdm
+      ${ALL_CAPNP_LIBS}
+      dl
+      util
+      m
+      rt
+      pthread)
+elseif (WIN32)
+  set(ALL_LIBRARIES_FOR_UHDM
+      uhdm
+      ${ALL_CAPNP_LIBS})
+endif()
 
 add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp ${ALL_CAPNP_LIBS})
 

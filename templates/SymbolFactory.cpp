@@ -26,7 +26,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 #include <unistd.h>
+#endif
 
 #include <vector>
 #include <map>
