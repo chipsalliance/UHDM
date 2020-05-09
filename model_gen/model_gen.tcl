@@ -56,6 +56,17 @@ source [exec_path]/pdict.tcl
 source [exec_path]/parse_model.tcl
 source [exec_path]/generate_elaborator.tcl
 
+proc find_file { baseDir filename } {
+    set filepath [ file join $baseDir $filename ]
+    if { [file exists $filepath] } { return $filepath; }
+
+    set dirs [ glob -nocomplain -type d [ file join $baseDir * ] ]
+    foreach dir $dirs {
+        set filepath [ find_file $dir $filename ]
+        if { [file exists $filepath] } { return $filepath; }
+    }
+}
+
 proc parse_vpi_user_defines { } {
     global ID
     set fid [open "[project_path]/include/vpi_user.h"]
@@ -88,8 +99,10 @@ proc printMethods { classname type vpi card {real_type ""} } {
         set type "UHDM_OBJECT_TYPE"
     }
     set final ""
+    set virtual ""
     if {$vpi == "vpiParent" || $vpi == "uhdmParentType" || $vpi == "uhdmType" || $vpi == "vpiLineNo" || $vpi == "vpiFile" } {
         set final " final"
+        set virtual "virtual "
     }
     set check ""
     if {$type == "any"} {
@@ -105,16 +118,16 @@ proc printMethods { classname type vpi card {real_type ""} } {
 
 
         if {$type == "std::string"} {
-            append methods "\n    const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const$final;\n"
-            append methods "\n    bool [string toupper ${vpi} 0 0](const ${type}${pointer}\\& data)$final;\n"
+            append methods "\n    ${virtual}const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const$final;\n"
+            append methods "\n    ${virtual}bool [string toupper ${vpi} 0 0](const ${type}${pointer}\\& data)$final;\n"
             append methods_cpp "\n    const ${type}${pointer}\\& ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
             append methods_cpp "\n    bool ${classname}::[string toupper ${vpi} 0 0](const ${type}${pointer}\\& data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n"
         } else {
-            append methods "\n    ${const}${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"
+            append methods "\n    ${virtual}${const}${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"
             if {$vpi == "vpiParent"} {
-                append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data) final {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->UhdmType(); return true;}\n"
+                append methods "\n    virtual bool [string toupper ${vpi} 0 0](${type}${pointer} data) final {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->UhdmType(); return true;}\n"
             } else {
-                append methods "\n    bool [string toupper ${vpi} 0 0](${type}${pointer} data)$final {${check} ${vpi}_ = data; return true;}\n"
+                append methods "\n    ${virtual}bool [string toupper ${vpi} 0 0](${type}${pointer} data)$final {${check} ${vpi}_ = data; return true;}\n"
             }
         }
     } elseif {$card == "any"} {
@@ -862,13 +875,20 @@ proc generate_code { models } {
     global ID BASECLASS DEFINE_ID SAVE RESTORE working_dir methods_cpp VISITOR VISITOR_RELATIONS CLASS_LISTENER
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS
     global uhdm_name_map headers vpi_handle_body_all vpi_handle_body vpi_iterator vpi_iterate_body vpi_handle_by_name_body vpi_handle_by_name_body_all
+    global tcl_platform
 
     log "=========="
-    exec sh -c "mkdir -p headers"
-    exec sh -c "mkdir -p src"
+    file mkdir [exec_path]/src
+    file mkdir [exec_path]/headers
     set fid [open "[project_path]/templates/class_header.h"]
     set template_content [read $fid]
     close $fid
+
+    if { $tcl_platform(platform) == "windows" } {
+        set exeext ".exe"
+    } else {
+        set exeext ""
+    }
 
     set vpi_iterate_body_all ""
     set vpi_handle_by_name_body_all ""
@@ -914,7 +934,7 @@ proc generate_code { models } {
             regsub -all {<END_DISABLE_OBJECT_FACTORY>} $template "#endif" template
         } else {
             regsub -all {<FINAL_DESTRUCTOR>} $template "final" template
-            regsub -all {<VIRTUAL>} $template "" template
+            regsub -all {<VIRTUAL>} $template "virtual " template
             regsub -all {<OVERRIDE_OR_FINAL>}  $template "final" template
             regsub -all {<DISABLE_OBJECT_FACTORY>} $template "" template
             regsub -all {<END_DISABLE_OBJECT_FACTORY>} $template "" template
@@ -1199,20 +1219,25 @@ proc generate_code { models } {
     # UHDM.capnp
     write_capnp $capnp_schema_all $capnp_root_schema
     log "Generating Capnp schema..."
-    exec sh -c "rm -rf [project_path]/src/UHDM.capnp.*"
-    set capnp_path [exec sh -c "find $working_dir -name capnpc-c++"]
+    file delete -force [project_path]/src/UHDM.capnp.*"
+    set capnp_path [find_file $working_dir "capnpc-c++$exeext"]
+    puts "capnp_path = $capnp_path"
     set capnp_path [file dirname $capnp_path]
 
-    exec sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+    if { $tcl_platform(platform) == "windows" } {
+      exec cmd /c "set PATH=$capnp_path;%PATH%; && cd /d [project_path]/src && $capnp_path/capnp.exe compile -oc++ UHDM.capnp"
+    } else {
+      exec sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+    }
 
     # BaseClass.h
-    exec sh -c "cp -rf [project_path]/templates/BaseClass.h [project_path]/headers/BaseClass.h"
+    file copy -force -- "[project_path]/templates/BaseClass.h" "[project_path]/headers/BaseClass.h"
 
     # SymbolFactory.h
-    exec sh -c "cp -rf [project_path]/templates/SymbolFactory.h [project_path]/headers/SymbolFactory.h"
+    file copy -force -- "[project_path]/templates/SymbolFactory.h" "[project_path]/headers/SymbolFactory.h"
 
     # SymbolFactory.cpp
-    exec sh -c "cp -rf [project_path]/templates/SymbolFactory.cpp [project_path]/src/SymbolFactory.cpp"
+    file copy -force -- "[project_path]/templates/SymbolFactory.cpp" "[project_path]/src/SymbolFactory.cpp"
 
     # Serializer.cpp
     set files "Serializer_save.cpp Serializer_restore.cpp vpi_uhdm.h Serializer.h"
@@ -1297,7 +1322,8 @@ $RESTORE($class)
     }
 
     # vpi_visitor.h
-    exec sh -c "cp -rf [project_path]/templates/vpi_visitor.h [project_path]/headers/vpi_visitor.h"
+    file copy -force -- "[project_path]/templates/vpi_visitor.h" "[project_path]/headers/vpi_visitor.h"
+
     # vpi_visitor.cpp
     write_vpi_visitor_cpp
 

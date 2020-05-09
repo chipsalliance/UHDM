@@ -26,7 +26,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
+
+#if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+  #include <io.h>
+  #define S_IRWXU (_S_IREAD | _S_IWRITE)
+#else
+  #include <unistd.h>
+#endif
 
 #include <vector>
 #include <map>

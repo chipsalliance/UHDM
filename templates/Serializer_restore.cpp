@@ -26,8 +26,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <limits.h>
+
+#if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+  #include <io.h>
+#else
+  #include <unistd.h>
+#endif
 
 #include <vector>
 #include <map>
