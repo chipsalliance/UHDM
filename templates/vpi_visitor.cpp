@@ -125,6 +125,7 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::strin
   std::string fileName = "";
   std::string lineNo   = "";
   std::string parent   = "";
+  std::string uhdmid   = ", id:" + std::to_string(object->UhdmId());
   if (unsigned int l = vpi_get(vpiLineNo, obj_h)) {
     lineNo = ", line:" + std::to_string(l);
   }
@@ -152,7 +153,7 @@ std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::strin
   if (relation != "") {
     result += rspaces + relation + ":\n";
   }
-  result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + defName + objectName + fileName + lineNo + parent + "\n";
+  result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + defName + objectName + uhdmid + fileName + lineNo + parent + "\n";
   if (alreadyVisited) {
     return result;
   }
