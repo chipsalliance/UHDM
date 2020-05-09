@@ -15,7 +15,7 @@
 # Universal Hardware Data Model (UHDM) "always" formal description
  
 - obj_def: always
-  - extends: process
+  - extends: process_stmt
   - property: always_type
     name: always type
     type: int

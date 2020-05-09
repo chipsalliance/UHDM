@@ -79,7 +79,7 @@
   - class_ref: process
     name: process
     vpi: vpiProcess
-    type: process
+    type: process_stmt
     card: any
   - obj_ref: ports
     vpi: vpiPort

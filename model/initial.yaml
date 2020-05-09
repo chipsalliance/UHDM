@@ -15,6 +15,6 @@
 # Universal Hardware Data Model (UHDM) "initial" formal description
  
 - obj_def: initial
-  - extends: process
+  - extends: process_stmt
 
 

@@ -20,7 +20,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   m1->VpiLineNo(10);
 
   initial* init = s.MakeInitial();
-  VectorOfprocess* processes = s.MakeProcessVec();
+  VectorOfprocess_stmt* processes = s.MakeProcess_stmtVec();
   processes->push_back(init);
   begin* begin_block = s.MakeBegin();
   init->Stmt(begin_block);

@@ -515,8 +515,14 @@ proc makeVpiName { classname } {
         set vpiName "vpiContinue"
     } elseif {$vpiName == "vpiBreakStmt"} {
         set vpiName "vpiBreak"
-    }  elseif {$vpiName == "vpiReturnStmt"} {
+    } elseif {$vpiName == "vpiReturnStmt"} {
         set vpiName "vpiReturn"
+    } elseif {$vpiName == "vpiProcessStmt"} {
+        set vpiName "vpiProcess"
+    } elseif {$vpiName == "vpiForeverStmt"} {
+        set vpiName "vpiForever"
+    } elseif {$vpiName == "vpiFinalStmt"} {
+        set vpiName "vpiFinal"
     }
 
     return $vpiName

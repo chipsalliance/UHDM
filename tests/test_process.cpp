@@ -31,7 +31,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   begin* begin_block = s.MakeBegin();
   proc_always->Stmt(begin_block);
   proc_always->Module(m1);
-  VectorOfprocess* processes = s.MakeProcessVec();
+  VectorOfprocess_stmt* processes = s.MakeProcess_stmtVec();
   processes->push_back(proc_always);
 
   // @(posedge clk)
