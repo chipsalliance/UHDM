@@ -28,7 +28,9 @@
 #define UHDM_FORWARD_DECL_CLASS_H
 
 namespace UHDM {
-class BaseClass;  
+class BaseClass;
+typedef BaseClass any;  
+typedef std::vector<BaseClass*> VectorOfany;
 <UHDM_FORWARD_DECL>
 };
 

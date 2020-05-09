@@ -14,7 +14,7 @@
 
 # Universal Hardware Data Model (UHDM) "process" formal description
  
-- class_def: process
+- class_def: process_stmt
   - group_ref: stmt
     name: stmt
     vpi: vpiStmt
