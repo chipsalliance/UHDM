@@ -33,7 +33,7 @@ namespace UHDM {
 
   class Serializer {
   public:
-    Serializer() : incrId_(0) {symbolMaker.Make("");}
+    Serializer() : incrId_(0), objId_(0) {symbolMaker.Make("");}
     void Save(std::string file);
     void Purge();
     const std::vector<vpiHandle> Restore(std::string file);
@@ -53,7 +53,8 @@ namespace UHDM {
     void SetId(const BaseClass* p, unsigned long id);
     unsigned long GetId(const BaseClass* p) ;
     std::unordered_map<const BaseClass*, unsigned long> allIds_;
-    unsigned long incrId_;
+    unsigned long incrId_; // Capnp id
+    unsigned long objId_;  // ID for property annotations
   };
 };
 

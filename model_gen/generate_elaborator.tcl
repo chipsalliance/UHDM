@@ -37,7 +37,9 @@ proc generate_elaborator { models } {
   
         append clone_cases "  case $vpiName: {
     $classname* clone_obj = s.Make${Classname}();
+    unsigned long id = clone_obj->UhdmId();
     *clone_obj =  *(($classname*)root);
+    clone_obj->UhdmId(id);
     clone = clone_obj;
 "     
         while {$baseclass != ""} {

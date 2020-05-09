@@ -963,7 +963,7 @@ proc generate_code { models } {
         log "Generating headers/$classname.h"
         if {$modeltype != "class_def"} {
             append factories "    ${classname}Factory ${classname}Maker;\n"
-            append factories_methods "    ${classname}* Make[string toupper ${classname} 0 0] () { ${classname}* tmp = ${classname}Maker.Make(); tmp->SetSerializer(this); return tmp;}\n"
+            append factories_methods "    ${classname}* Make[string toupper ${classname} 0 0] () { ${classname}* tmp = ${classname}Maker.Make(); tmp->SetSerializer(this); tmp->UhdmId(objId_++); return tmp;}\n"
         }
         append factories "    VectorOf${classname}Factory ${classname}VectMaker;\n"
         append factories_methods "    std::vector<${classname}*>* Make[string toupper ${classname} 0 0]Vec () { return ${classname}VectMaker.Make();}\n"
@@ -983,7 +983,7 @@ proc generate_code { models } {
         printVpiListener $classname $classname $classname 0
         if {$modeltype != "class_def"} {
             # Builtin properties do not need to be specified in each models
-            # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo" method and field
+            # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo, Id" method and field
             append methods($classname) [printMethods $classname BaseClass vpiParent 1]
             append members($classname) [printMembers BaseClass vpiParent 1]
             append methods($classname) [printMethods $classname "unsigned int" uhdmParentType 1]
@@ -994,21 +994,26 @@ proc generate_code { models } {
             append methods($classname) [printMethods $classname "unsigned int" vpiLineNo 1]
             append members($classname) [printMembers "unsigned int" vpiLineNo 1]
             lappend vpi_get_body_inst($classname) [list $classname int vpiLineNo 1]
+            append methods($classname) [printMethods $classname "unsigned int" uhdmId 1]
+            append members($classname) [printMembers "unsigned int" uhdmId 1]
             append vpi_handle_body($classname) [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
             lappend capnp_schema($classname) [list vpiParent UInt64]
             lappend capnp_schema($classname) [list uhdmParentType UInt64]
             lappend capnp_schema($classname) [list vpiFile UInt64]
             lappend capnp_schema($classname) [list vpiLineNo UInt32]
+            lappend capnp_schema($classname) [list uhdmId UInt64]
             append capnp_root_schema "  factory${Classname} @${capnpRootSchemaIndex} :List($Classname);\n"
             incr capnpRootSchemaIndex
             append SAVE($classname) "    ${Classname}s\[index\].setVpiParent(GetId(obj->VpiParent()));\n"
             append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->UhdmParentType());\n"
             append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));\n"
             append SAVE($classname) "    ${Classname}s\[index\].setVpiLineNo(obj->VpiLineNo());\n"
+            append SAVE($classname) "    ${Classname}s\[index\].setUhdmId(obj->UhdmId());\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->UhdmParentType(obj.getUhdmParentType());\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiParent(GetObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiFile(symbolMaker.GetSymbol(obj.getVpiFile()));\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiLineNo(obj.getVpiLineNo());\n"
+            append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->UhdmId(obj.getUhdmId());\n"
         }
 
         set indTmp 0
@@ -1230,7 +1235,7 @@ proc generate_code { models } {
     # UHDM.capnp
     write_capnp $capnp_schema_all $capnp_root_schema
     log "Generating Capnp schema..."
-    file delete -force [project_path]/src/UHDM.capnp.*"
+    file delete -force [project_path]/src/UHDM.capnp.*
     set capnp_path [find_file $working_dir "capnpc-c++$exeext"]
     puts "capnp_path = $capnp_path"
     set capnp_path [file dirname $capnp_path]

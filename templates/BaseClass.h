@@ -39,13 +39,13 @@ namespace UHDM {
   };
   
   class BaseClass {
+    friend Serializer;
+
   public:
     // Use implicit constructor to initialize all members
     // BaseClass()
     
     virtual ~BaseClass(){}
-
-    void SetSerializer(Serializer* serial) { serializer_ = serial; }
 
     Serializer* GetSerializer() { return serializer_; }
 
@@ -74,11 +74,18 @@ namespace UHDM {
     ClientData* Data() { return clientData_; }
 
     void Data(ClientData* data) { clientData_ = data; }
-    
+
+    virtual unsigned int UhdmId() const = 0;
+
+    virtual bool UhdmId(unsigned int id) = 0;
+
   protected:
+    void SetSerializer(Serializer* serial) { serializer_ = serial; }
+    
     Serializer* serializer_;
 
     ClientData* clientData_;
+
   };
   
 };
