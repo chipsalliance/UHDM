@@ -389,9 +389,14 @@ proc printVpiListener {classname vpi type card} {
         return
     }
     if {($vpi == "vpiParent") || ($vpi == "vpiInstance")} {
-        # To prevent infinite loops in visitors as these 2 relations are pointing upward in the tree (vpiModule could be a problem too)
+        # To prevent infinite loops in visitors as these 2 relations are pointing upward in the tree
         return
     }
+    if {($vpi == "vpiModule") && ($card == 1)} {
+        # upward vpiModule relation (when card == 1, pointing to the parent obejct) creates loops
+        return
+    }
+    
     set vpi_listener ""
     if ![info exist VPI_LISTENERS($classname)] {
         set vpi_listener "    vpiHandle itr;

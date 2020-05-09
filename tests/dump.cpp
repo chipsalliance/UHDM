@@ -50,7 +50,7 @@ int main (int argc, char** argv) {
   std::cout << restored;
 
   if (elab) {
-    ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
+    ElaboratorListener* listener = new ElaboratorListener(&serializer, false);
     listen_designs(restoredDesigns, listener);
     std::string restoredPostElab = visit_designs(restoredDesigns);
     std::cout << "Restore design Post-Elab: " << std::endl;
