@@ -79,6 +79,15 @@ proc generate_elaborator { models } {
                         if {$card == 1} {
                             append clone_cases "    clone_obj->${method}((${cast}*) clone_tree((($classname*)root)->${method}(), s, elaborator));
 "
+                            if {$classname == "ref_obj"} {
+                                if {$method == "Actual_group"} {
+                                    append clone_cases "    if (clone_obj->${method}() == nullptr) {
+      clone_obj->${method}(elaborator->bindNet((($classname*)root)->VpiName()));
+    }
+"  
+                                } 
+                            }
+                            
                             if {$classname == "module"} {
                                 append vpi_listener "          inst->${method}((${cast}*) clone_tree(defMod->${method}(), *serializer_, this));
 "
@@ -93,7 +102,7 @@ proc generate_elaborator { models } {
     }
 "
                             if {($classname == "module") && ($method != "Ports")} {
-                                # We don't want to ovrride the elaborated instance ports by the module def ports
+                                # We don't want to override the elaborated instance ports by the module def ports
                                 append vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);

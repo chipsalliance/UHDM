@@ -36,8 +36,33 @@ namespace UHDM {
 class ElaboratorListener : public VpiListener {
   
 public:
+  
   ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}
+
+  // Bind to a net in the parent instance
+  net* bindParentNet(const std::string& name) {
+    std::pair<const BaseClass*, ComponentMap> mem = instStack_.top();
+    instStack_.pop();
+    ComponentMap& netMap = instStack_.top().second;
+    instStack_.push(mem);
+    ComponentMap::iterator netItr = netMap.find(name);
+    if (netItr != netMap.end()) {
+      return (net*) (*netItr).second;
+    }
+    return nullptr;
+  }
     
+  // Bind to a net in the current instance
+  net* bindNet(const std::string& name) {
+    ComponentMap& netMap = instStack_.top().second;
+    ComponentMap::iterator netItr = netMap.find(name);
+    if (netItr != netMap.end()) {
+      return (net*) (*netItr).second;
+    }
+    return nullptr;
+  }
+
+  
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
@@ -99,30 +124,6 @@ protected:
                                   // false when it is a module in a hierachy tree
     if (!flatModule) 
       instStack_.pop();
-  }
-
-  
-  // Bind to a net in the parent instance
-  net* bindParentNet(const std::string& name) {
-    std::pair<const BaseClass*, ComponentMap> mem = instStack_.top();
-    instStack_.pop();
-    ComponentMap& netMap = instStack_.top().second;
-    instStack_.push(mem);
-    ComponentMap::iterator netItr = netMap.find(name);
-    if (netItr != netMap.end()) {
-      return (net*) (*netItr).second;
-    }
-    return nullptr;
-  }
-    
-  // Bind to a net in the current instance
-  net* bindNet(const std::string& name) {
-    ComponentMap& netMap = instStack_.top().second;
-    ComponentMap::iterator netItr = netMap.find(name);
-    if (netItr != netMap.end()) {
-      return (net*) (*netItr).second;
-    }
-    return nullptr;
   }
 
 private:

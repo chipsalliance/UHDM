@@ -1,4 +1,3 @@
-#include "headers/uhdm.h"
 #include <iostream>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -15,15 +14,26 @@
 #include <fstream>
 #include <sstream>
 
-using namespace UHDM;
+#include "headers/uhdm.h"
+#include "headers/vpi_listener.h"
+#include "headers/vpi_visitor.h"
+#include "headers/ElaboratorListener.h"
 
-#include "vpi_visitor.h"
+using namespace UHDM;
 
 int main (int argc, char** argv) {
   std::string fileName = "surelog.uhdm";
   if (argc > 1) {
     fileName = argv[1];
   }
+
+  bool elab = false;
+  if (argc > 2) {
+    if (std::string(argv[2]) == "-elab") {
+      elab = true;
+    }
+  }
+  
   struct stat buffer;
   if (stat(fileName.c_str(), &buffer) != 0) {
       std::cout << "File " << fileName << " does not exist!" << std::endl;
@@ -35,5 +45,14 @@ int main (int argc, char** argv) {
   
   std::string restored = visit_designs(restoredDesigns);
   std::cout << restored;
+
+  if (elab) {
+    ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
+    listen_designs(restoredDesigns, listener);
+    std::string restoredPostElab = visit_designs(restoredDesigns);
+    std::cout << "Restore design Post-Elab: " << std::endl;
+    std::cout << restoredPostElab;
+  }
+  
   return 0;
 };
