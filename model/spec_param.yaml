@@ -16,3 +16,8 @@
  
 - obj_def: spec_param
   - extends: simple_expr
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any

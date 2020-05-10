@@ -31,3 +31,8 @@
     vpi: vpiOperand
     type: operand_group
     card: any
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any

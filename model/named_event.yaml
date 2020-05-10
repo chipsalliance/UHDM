@@ -15,3 +15,8 @@
 # Universal Hardware Data Model (UHDM) "named event" formal description
  
 - obj_def: named_event
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any

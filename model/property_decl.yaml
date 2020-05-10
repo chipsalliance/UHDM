@@ -15,3 +15,8 @@
 # Universal Hardware Data Model (UHDM) "property decl" formal description
  
 - obj_def: property_decl
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any

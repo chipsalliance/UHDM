@@ -12,17 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "primitive.yaml" formal description
- 
-- class_def: primitive
+# Universal Hardware Data Model (UHDM) "attribute" formal description
+
+- obj_def: attribute
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: on_definition
+    name: on definition
+    vpi: vpiDefAttribute
+    type: bool
+    card: 1
   - property: vpi_get_value
     name: vpi_get_value
     vpi: vpiValue
     type: value
     card: 1
-  - obj_ref: attributes
-    name: attributes
-    vpi: vpiAttribute
-    type: attribute
-    card: any
-    
+  - property: definition_location_file
+    name: definition location file
+    vpi: vpiDefFile
+    type: string
+    card: 1
+  - property: definition_location_line
+    name: definition location line
+    vpi: vpiDefLineNo
+    type: unsigned int
+    card: 1 

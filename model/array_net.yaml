@@ -26,3 +26,8 @@
     vpi: vpiNet
     type: net
     card: any
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any
