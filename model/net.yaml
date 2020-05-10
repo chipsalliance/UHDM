@@ -21,4 +21,9 @@
     vpi: vpiBit
     type: net_bit
     card: any
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any
 

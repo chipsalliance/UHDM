@@ -15,5 +15,10 @@
 # Universal Hardware Data Model (UHDM) "mod_path.yaml" formal description
  
 - obj_def: mod_path
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any
 
 

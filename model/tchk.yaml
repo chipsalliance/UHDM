@@ -55,3 +55,8 @@
     type: int
     vpi: vpiTchkType
     card: 1
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any

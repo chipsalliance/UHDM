@@ -45,3 +45,8 @@
     vpi: vpiProperty
     type: property_inst_spec_group
     card: 1
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any  

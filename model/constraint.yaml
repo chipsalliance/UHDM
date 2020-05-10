@@ -15,4 +15,8 @@
 # Universal Hardware Data Model (UHDM) "constraint" formal description
  
 - obj_def: constraint
-
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any

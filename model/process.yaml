@@ -25,3 +25,8 @@
     vpi: vpiModule
     type: module
     card: 1
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any

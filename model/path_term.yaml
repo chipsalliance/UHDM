@@ -15,3 +15,8 @@
 # Universal Hardware Data Model (UHDM) "path term" formal description
  
 - obj_def: path_term
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any
