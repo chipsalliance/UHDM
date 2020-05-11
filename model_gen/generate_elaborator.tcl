@@ -85,7 +85,7 @@ proc generate_elaborator { models } {
                             if {$classname == "ref_obj"} {
                                 if {$method == "Actual_group"} {
                                     append clone_cases "    if (clone_obj->${method}() == nullptr) {
-      clone_obj->${method}(elaborator->bindNet((($classname*)root)->VpiName()));
+      clone_obj->${method}(elaborator->bindAny((($classname*)root)->VpiName()));
     }
 "  
                                 } 
