@@ -39,22 +39,9 @@ public:
   
   ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}
 
-  // Bind to a net in the parent instance
-  net* bindParentNet(const std::string& name) {
-    std::pair<const BaseClass*, ComponentMap> mem = instStack_.top();
-    instStack_.pop();
-    ComponentMap& netMap = instStack_.top().second;
-    instStack_.push(mem);
-    ComponentMap::iterator netItr = netMap.find(name);
-    if (netItr != netMap.end()) {
-      return (net*) (*netItr).second;
-    }
-    return nullptr;
-  }
-    
   // Bind to a net in the current instance
   net* bindNet(const std::string& name) {
-    ComponentMap& netMap = instStack_.top().second;
+    ComponentMap& netMap = instStack_.top().second.first;
     ComponentMap::iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
       return (net*) (*netItr).second;
@@ -62,6 +49,20 @@ public:
     return nullptr;
   }
 
+  // Bind to a net or parameter in the current instance
+  any* bindAny(const std::string& name) {
+    ComponentMap& netMap = instStack_.top().second.first;
+    ComponentMap::iterator netItr = netMap.find(name);
+    if (netItr != netMap.end()) {
+      return (any*) (*netItr).second;
+    }
+    ComponentMap& paramMap = instStack_.top().second.second;
+    ComponentMap::iterator paramItr = paramMap.find(name);
+    if (paramItr != paramMap.end()) {
+      return (any*) (*paramItr).second;
+    }
+    return nullptr;
+  }
   
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
@@ -91,9 +92,22 @@ protected:
           netMap.insert(std::make_pair(net->VpiName(), net));
         }
       }
-      
+
+      // Collect instance parameters
+      ComponentMap paramMap;
+      if (object->Parameters()) {
+        for (parameters* param : *object->Parameters()) {
+          paramMap.insert(std::make_pair(param->VpiName(), param));
+        }
+      }
+      if (object->Def_params()) {
+        for (def_param* param : *object->Def_params()) {
+          paramMap.insert(std::make_pair(param->VpiName(), param));
+        }
+      }
+           
       // Push instance context on the stack
-      instStack_.push(std::make_pair(object, netMap));
+      instStack_.push(std::make_pair(object, std::make_pair(netMap, paramMap)));
       
       // Check if Module instance has a definition
       ComponentMap::iterator itrDef = flatComponentMap_.find(defName);      
@@ -129,7 +143,7 @@ protected:
 private:
 
   // Instance context stack
-  std::stack<std::pair<const BaseClass*, ComponentMap>> instStack_;
+  std::stack<std::pair<const BaseClass*, std::pair<ComponentMap, ComponentMap>>> instStack_;
 
   // Flat list of components (modules, udps, interfaces)
   ComponentMap flatComponentMap_;
