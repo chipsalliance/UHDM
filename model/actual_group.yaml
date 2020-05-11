@@ -13,6 +13,7 @@
 # limitations under the License.
 
 # Universal Hardware Data Model (UHDM) "actual group" formal description
+# Parameters are not in the actual group in the Standard, we add them to the group for binding convenience
  
 - group_def: actual_group
   - obj_ref: interface
@@ -23,6 +24,7 @@
   - obj_ref: named_event
   - obj_ref: named_event_array
   - obj_ref: part_select
+  - obj_ref: parameter
 
 
 
