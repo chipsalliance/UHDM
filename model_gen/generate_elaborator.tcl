@@ -34,10 +34,23 @@ proc generate_elaborator { models } {
         set vpiName [makeVpiName $classname]
 
         set baseclass $classname
-  
+
         append clone_cases "  case $vpiName: {
-    $classname* clone_obj = s.Make${Classname}();
-    unsigned long id = clone_obj->UhdmId();
+"
+        
+        if [regexp {Net} $vpiName] {
+            append clone_cases "    $classname* clone_obj = dynamic_cast<$classname*>(elaborator->bindNet((($classname*)root)->VpiName()));
+    if (clone_obj == nullptr) {
+      clone_obj = s.Make${Classname}();
+    } 
+"   
+
+        } else {
+            append clone_cases "    $classname* clone_obj = s.Make${Classname}();
+"
+        }
+
+        append clone_cases "    unsigned long id = clone_obj->UhdmId();
     *clone_obj =  *(($classname*)root);
     clone_obj->UhdmId(id);
     clone = clone_obj;
