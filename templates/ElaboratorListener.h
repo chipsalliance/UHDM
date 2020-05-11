@@ -63,6 +63,15 @@ public:
     }
     return nullptr;
   }
+
+   any* bindParam(const std::string& name) {
+    ComponentMap& paramMap = instStack_.top().second.second;
+    ComponentMap::iterator paramItr = paramMap.find(name);
+    if (paramItr != paramMap.end()) {
+      return (any*) (*paramItr).second;
+    }
+    return nullptr;
+  }
   
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;

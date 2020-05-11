@@ -44,7 +44,12 @@ proc generate_elaborator { models } {
       clone_obj = s.Make${Classname}();
     } 
 "   
-
+        } elseif [regexp {Parameter} $vpiName] {
+            append clone_cases "    $classname* clone_obj = dynamic_cast<$classname*>(elaborator->bindParam((($classname*)root)->VpiName()));
+    if (clone_obj == nullptr) {
+      clone_obj = s.Make${Classname}();
+    } 
+"   
         } else {
             append clone_cases "    $classname* clone_obj = s.Make${Classname}();
 "
