@@ -41,7 +41,8 @@ proc generate_elaborator { models } {
     *clone_obj =  *(($classname*)root);
     clone_obj->UhdmId(id);
     clone = clone_obj;
-"     
+"
+        set rootclassname $classname
         while {$baseclass != ""} {
             set data $DATA($baseclass)
             set classname [dict get $data name]
@@ -90,7 +91,7 @@ proc generate_elaborator { models } {
                                 } 
                             }
                             
-                            if {$classname == "module"} {
+                            if {$rootclassname == "module"} {
                                 append vpi_listener "          inst->${method}((${cast}*) clone_tree(defMod->${method}(), *serializer_, this));
 "
                             }
@@ -103,7 +104,7 @@ proc generate_elaborator { models } {
       }
     }
 "
-                            if {($classname == "module") && ($method != "Ports")} {
+                            if {($rootclassname == "module") && ($method != "Ports")} {
                                 # We don't want to override the elaborated instance ports by the module def ports
                                 append vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
