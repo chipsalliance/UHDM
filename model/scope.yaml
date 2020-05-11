@@ -75,7 +75,7 @@
     vpi: vpiMemory
     type: array_var
     card: any
-  - class_ref: parameters
+  - group_ref: parameters
     name: parameters
     vpi: vpiParameter
     type: parameters

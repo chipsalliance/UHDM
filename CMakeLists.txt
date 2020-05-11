@@ -112,7 +112,8 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/property_expr_named_event_group.cpp
     ${PROJECT_SOURCE_DIR}/src/property_expr_group.cpp
     ${PROJECT_SOURCE_DIR}/src/pattern_expr_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_constr_group.cpp)
+    ${PROJECT_SOURCE_DIR}/src/expr_constr_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/parameters.cpp)
 
 foreach(src_file ${uhdm_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)

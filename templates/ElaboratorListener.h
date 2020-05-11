@@ -96,7 +96,7 @@ protected:
       // Collect instance parameters
       ComponentMap paramMap;
       if (object->Parameters()) {
-        for (parameters* param : *object->Parameters()) {
+        for (any* param : *object->Parameters()) {
           paramMap.insert(std::make_pair(param->VpiName(), param));
         }
       }
