@@ -20,6 +20,7 @@ event_control.yaml
 repeat_control.yaml
 assignment.yaml
 instance_item.yaml
+parameters.yaml
 scope.yaml
 begin.yaml
 named_begin.yaml
@@ -146,7 +147,6 @@ enum_struct_packed_net_group.yaml
 packed_array_net.yaml
 named_event.yaml
 named_event_array.yaml
-parameters.yaml
 parameter.yaml
 def_param.yaml
 spec_param.yaml

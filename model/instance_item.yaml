@@ -25,7 +25,7 @@
   - obj_ref: array_var  
   - obj_ref: named_event
   - obj_ref: named_event_array
-  - class_ref: parameters
+  - group_ref: parameters
   - obj_ref: spec_param
   - class_ref: assertion
   - class_ref: typespec
