@@ -101,6 +101,12 @@ protected:
           netMap.insert(std::make_pair(net->VpiName(), net));
         }
       }
+      // collect the port if there is no explicit net
+      if (object->Ports()) {
+        for (port* port : *object->Ports()) {
+          netMap.insert(std::make_pair(port->VpiName(), port));
+        }
+      }
 
       // Collect instance parameters
       ComponentMap paramMap;
