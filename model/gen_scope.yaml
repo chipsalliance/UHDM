@@ -16,6 +16,21 @@
  
 - obj_def: gen_scope
   - extends: scope
+  - property: array_member
+    name: array member
+    vpi: vpiArrayMember
+    type: bool
+    card: 1
+  - property: protected
+    name: protected
+    vpi: vpiProtected
+    type: bool
+    card: 1
+  - property: implicitly_declared
+    name: implicitly declared
+    vpi: vpiImplicitDecl
+    type: bool
+    card: 1  
   - class_ref: net
     name: net
     vpi: vpiNet
