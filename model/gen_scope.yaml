@@ -16,6 +16,11 @@
  
 - obj_def: gen_scope
   - extends: scope
+  - class_ref: vpiIndex
+    name: vpiIndex
+    vpi: vpiIndex
+    type: expr
+    card: 1
   - property: array_member
     name: array member
     vpi: vpiArrayMember
