@@ -41,7 +41,10 @@ case_stmt.yaml
 case_item.yaml
 force.yaml
 foreach_stmt.yaml
+interf_prog_mod_group.yaml
 gen_scope.yaml
+gen_var.yaml
+gen_scope_array.yaml
 expr_dist_group.yaml
 assertion.yaml
 assert.yaml
