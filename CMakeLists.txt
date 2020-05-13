@@ -211,7 +211,7 @@ add_test(
 
 # Installation target
 install(
-  TARGETS uhdm ${ALL_CAPNP_LIBS}
+  TARGETS uhdm capnp kj
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
