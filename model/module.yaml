@@ -130,3 +130,8 @@
     vpi: vpiClockingBlock
     type: clocking_block
     card: any
+  - obj_ref: gen_scope_array
+    name: gen scope array
+    vpi: vpiGenScopeArray
+    type: gen_scope_array
+    card: any
