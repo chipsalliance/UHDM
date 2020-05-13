@@ -16,3 +16,106 @@
  
 - obj_def: gen_scope
   - extends: scope
+  - class_ref: vpiIndex
+    name: vpiIndex
+    vpi: vpiIndex
+    type: expr
+    card: 1
+  - property: array_member
+    name: array member
+    vpi: vpiArrayMember
+    type: bool
+    card: 1
+  - property: protected
+    name: protected
+    vpi: vpiProtected
+    type: bool
+    card: 1
+  - property: implicitly_declared
+    name: implicitly declared
+    vpi: vpiImplicitDecl
+    type: bool
+    card: 1  
+  - class_ref: net
+    name: net
+    vpi: vpiNet
+    type: net
+    card: any
+  - class_ref: array_net
+    name: array net
+    vpi: vpiArrayNet
+    type: array_net
+    card: any
+  - class_ref: process
+    name: process
+    vpi: vpiProcess
+    type: process_stmt
+    card: any
+  - obj_ref: cont_assigns
+    name: cont assign
+    vpi: vpiContAssign
+    type: cont_assign
+    card: any
+  - obj_ref: modules
+    name: modules
+    vpi: vpiModule
+    type: module
+    card: any
+  - obj_ref: module_arrays
+    name: module array
+    vpi: vpiModuleArray
+    type: module_array
+    card: any
+  - class_ref: primitives
+    name: primitive
+    vpi: vpiPrimitive
+    type: primitive
+    card: any
+  - class_ref: primitive_arrays
+    name: primitive array
+    vpi: vpiPrimitiveArray
+    type: primitive_array
+    card: any
+  - obj_ref: def_params
+    vpi: vpiDefParam
+    type: def_param
+    card: any
+  - obj_ref: gen_scope_arrays
+    name: gen scope arrays
+    vpi: vpiGenScopeArray
+    type: gen_scope_array
+    card: any
+  - obj_ref: programs
+    name: program
+    vpi: vpiProgram
+    type: program
+    card: any
+  - obj_ref: program_arrays
+    name: program array
+    vpi: vpiProgramArray
+    type: program
+    card: any
+  - class_ref: assertion
+    name: assertion
+    vpi: vpiAssertion
+    type: assertion
+    card: any
+  - obj_ref: interfaces
+    name: interface
+    vpi: vpiInterface
+    type: interface
+    card: any
+  - obj_ref: interface_arrays
+    vpi: vpiInterfaceArray
+    name: interface array
+    type: interface_array
+    card: any
+  - obj_ref: alias_stmts
+    vpi: vpiAliasStmt
+    type: alias_stmt
+    card: any
+  - obj_ref: clocking_blocks
+    vpi: vpiClockingBlock
+    type: clocking_block
+    card: any
+  
