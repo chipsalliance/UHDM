@@ -49,7 +49,7 @@
 
 using namespace UHDM;
 
-const std::vector<vpiHandle> Serializer::Restore(std::string file) {
+const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
   Purge();
   std::vector<vpiHandle> designs;
   int fileid = open(file.c_str(), O_RDONLY);
@@ -64,16 +64,16 @@ const std::vector<vpiHandle> Serializer::Restore(std::string file) {
   for (auto symbol : symbols) {
     symbolMaker.Make(symbol);
   }
- 
-<CAPNP_INIT_FACTORIES>  
-  
-<CAPNP_RESTORE_FACTORIES>  
-  
+
+<CAPNP_INIT_FACTORIES>
+
+<CAPNP_RESTORE_FACTORIES>
+
    for (auto d : designMaker.objects_) {
     vpiHandle designH = uhdm_handleMaker.Make(uhdmdesign, d);
     designs.push_back(designH);
   }
-   
-  close(fileid); 
+
+  close(fileid);
   return designs;
 }
