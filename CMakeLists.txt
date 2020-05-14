@@ -38,6 +38,13 @@ include_directories("${PROJECT_SOURCE_DIR}/third_party/UHDM/src/")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
 
+# Directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+    ${CMAKE_BINARY_DIR}/dist/${CMAKE_BUILD_TYPE}/)
+set(CMAKE_BUILD_FILES_DIRECTORY ${dir})
+set(CMAKE_BUILD_DIRECTORY ${dir})
+
+
 if(MSVC)
   set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj /DPLI_DLLISPEC= ${MY_CXX_WARNING_FLAGS}"
@@ -73,7 +80,8 @@ add_custom_command(
   OUTPUT ${model-GENERATED_SRC}
   COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_BINARY_DIR}
-  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+	
+	  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/../"
   DEPENDS ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst
           ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
@@ -143,21 +151,21 @@ add_executable(uhdm-test1 ${PROJECT_SOURCE_DIR}/tests/test1.cpp)
 target_link_libraries(uhdm-test1 PRIVATE uhdm)
 add_test(
   NAME uhdm-test1
-  COMMAND uhdm-test1
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test1
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-test2 ${PROJECT_SOURCE_DIR}/tests/test2.cpp)
 target_link_libraries(uhdm-test2 PRIVATE uhdm)
 add_test(
   NAME uhdm-test2
-  COMMAND uhdm-test2
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test2
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-test3 ${PROJECT_SOURCE_DIR}/tests/test3.cpp)
 target_link_libraries(uhdm-test3 PRIVATE uhdm)
 add_test(
   NAME uhdm-test3
-  COMMAND uhdm-test3
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test3
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-test4 ${PROJECT_SOURCE_DIR}/tests/test4.cpp)
@@ -171,42 +179,42 @@ add_executable(uhdm-test-tf-call ${PROJECT_SOURCE_DIR}/tests/test_tf_call.cpp)
 target_link_libraries(uhdm-test-tf-call PRIVATE uhdm)
 add_test(
   NAME uhdm-test-tf-call
-  COMMAND uhdm-test-tf-call
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test-tf-call
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-test-process ${PROJECT_SOURCE_DIR}/tests/test_process.cpp)
 target_link_libraries(uhdm-test-process PRIVATE uhdm)
 add_test(
   NAME uhdm-test-process
-  COMMAND uhdm-test-process
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test-process
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-listener ${PROJECT_SOURCE_DIR}/tests/test_listener.cpp)
 target_link_libraries(uhdm-listener PRIVATE uhdm)
 add_test(
   NAME uhdm-listener
-  COMMAND uhdm-listener
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-listener
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/tests/dump.cpp)
 target_link_libraries(uhdm-dump PRIVATE uhdm)
 add_test(
   NAME uhdm-dump
-  COMMAND uhdm-dump --elab surelog.uhdm
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-dump --elab surelog.uhdm
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(listener-elab ${PROJECT_SOURCE_DIR}/tests/listener_elab.cpp)
 target_link_libraries(listener-elab PRIVATE uhdm)
 add_test(
   NAME listener-elab
-  COMMAND listener-elab
+  COMMAND dist/${CMAKE_BUILD_TYPE}/listener-elab
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(full-elab ${PROJECT_SOURCE_DIR}/tests/full_elab.cpp)
 target_link_libraries(full-elab PRIVATE uhdm)
 add_test(
   NAME full-elab
-  COMMAND full-elab
+  COMMAND dist/${CMAKE_BUILD_TYPE}/full-elab
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 # Installation target
