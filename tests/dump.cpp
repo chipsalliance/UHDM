@@ -99,7 +99,7 @@ int main (int argc, char** argv) {
     return 1;
   }
 
-  std::cerr << uhdmFile << ": Restored design Pre-Elab: " << std::endl;
+  std::cout << uhdmFile << ": Restored design Pre-Elab: " << std::endl;
   visit_designs(restoredDesigns, std::cout);
 
   if (!goldenFile.empty()) {
@@ -112,7 +112,7 @@ int main (int argc, char** argv) {
   if (elab) {
     ElaboratorListener* listener = new ElaboratorListener(&serializer, false);
     listen_designs(restoredDesigns, listener);
-    std::cerr << uhdmFile << ": Restored design Post-Elab: " << std::endl;
+    std::cout << uhdmFile << ": Restored design Post-Elab: " << std::endl;
     visit_designs(restoredDesigns, std::cout);
   }
 
