@@ -192,7 +192,7 @@ add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/tests/dump.cpp)
 target_link_libraries(uhdm-dump PRIVATE uhdm)
 add_test(
   NAME uhdm-dump
-  COMMAND uhdm-dump
+  COMMAND uhdm-dump --elab surelog.uhdm
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(listener-elab ${PROJECT_SOURCE_DIR}/tests/listener_elab.cpp)
