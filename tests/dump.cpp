@@ -24,38 +24,91 @@
 
 using namespace UHDM;
 
+static bool ReadIntoString(const std::string &filename, std::string *content) {
+  std::ifstream fs;
+  fs.open(std::string(filename).c_str());
+  if (!fs.good())
+    return false;
+  content->assign((std::istreambuf_iterator<char>(fs)),
+                  std::istreambuf_iterator<char>());
+  return true;
+}
+
+static bool CompareContentWithFile(const std::string &content,
+                                   const std::string &filename) {
+  std::string expected;
+  if (!ReadIntoString(filename, &expected)) {
+    std::cerr << "Couldn't read '" << filename << "'" << std::endl;
+    return false;
+  }
+  if (content != expected) {
+    std::cerr << "Dump does not match content of '"
+              << filename << "'" << std::endl;
+    return false;
+  } else {
+    std::cerr << "Dump matches '" << filename << "'" << std::endl;
+  }
+  return true;
+}
+
+static int usage(const char *progname) {
+  fprintf(stderr, "Usage:\n%s [options] <uhdm-file> [<golden-file-to-compare>]\n", progname);
+  fprintf(stderr, "Reads UHDM binary representation and prints tree. If --elab is given, the\n"
+          "tree is elaborated first.\n");
+  fprintf(stderr, "Options:\n"
+          "\t--elab          : Elaborate the restored design.\n"
+          "\nIf golden file is given to compare, exit code represent if output matches.\n");
+  return 1;
+}
+
 int main (int argc, char** argv) {
-  std::string fileName = "surelog.uhdm";
-  if (argc > 1) {
-    fileName = argv[1];
+  bool elab = false;
+  std::string uhdmFile;
+  std::string goldenFile;
+
+  // Simple option parsing that works on all platforms.
+  for (int i = 1; i < argc; ++i) {
+    const std::string arg = argv[i];
+    // Also supporting legacy long option with single dash
+    if (arg == "-elab" || arg == "--elab") elab = true;
+    else if (uhdmFile.empty()) uhdmFile = arg;
+    else if (goldenFile.empty()) goldenFile = arg;
+    else return usage(argv[0]);
   }
 
-  bool elab = false;
-  if (argc > 2) {
-    if (std::string(argv[2]) == "-elab") {
-      elab = true;
-    }
+  if (uhdmFile.empty()) {
+    uhdmFile = "surelog.uhdm";
   }
-  
+
   struct stat buffer;
-  if (stat(fileName.c_str(), &buffer) != 0) {
-      std::cout << "File " << fileName << " does not exist!" << std::endl;
-      return 1;
+  if (stat(uhdmFile.c_str(), &buffer) != 0) {
+    std::cerr << uhdmFile << ": File does not exist!" << std::endl;
+    return usage(argv[0]);
   }
+
   Serializer serializer;
-  std::cout << "Restore design from: " << fileName << std::endl;
-  std::vector<vpiHandle> restoredDesigns = serializer.Restore(fileName);
-  
-  std::string restored = visit_designs(restoredDesigns);
-  std::cout << restored;
+  std::cerr << uhdmFile << ": restoring from file" << std::endl;
+  std::vector<vpiHandle> restoredDesigns = serializer.Restore(uhdmFile);
+
+  if (restoredDesigns.empty()) {
+    std::cerr << uhdmFile << ": empty design." << std::endl;
+    return 1;
+  }
 
   if (elab) {
     ElaboratorListener* listener = new ElaboratorListener(&serializer, false);
     listen_designs(restoredDesigns, listener);
-    std::string restoredPostElab = visit_designs(restoredDesigns);
-    std::cout << "Restore design Post-Elab: " << std::endl;
-    std::cout << restoredPostElab;
+    std::cerr << uhdmFile << ": Restored design Post-Elab: " << std::endl;
+  } else {
+    std::cerr << uhdmFile << ": Restored design Pre-Elab: " << std::endl;
   }
-  
+
+  const std::string restored = visit_designs(restoredDesigns);
+  std::cout << restored;
+
+  if (!goldenFile.empty() && !CompareContentWithFile(restored, goldenFile)) {
+    return 2;
+  }
+
   return 0;
 };

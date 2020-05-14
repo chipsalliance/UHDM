@@ -217,7 +217,7 @@ add_dependencies(uhdm-dump uhdm)
 target_link_libraries(uhdm-dump ${ALL_LIBRARIES_FOR_UHDM})
 add_test(
   NAME uhdm-dump
-  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-dump
+  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-dump --elab surelog.uhdm
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(listener-elab ${PROJECT_SOURCE_DIR}/tests/listener_elab.cpp)
