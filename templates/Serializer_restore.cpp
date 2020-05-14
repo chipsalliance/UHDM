@@ -30,6 +30,8 @@
 
 #if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
   #include <io.h>
+  #pragma warning(push)
+  #pragma warning(disable : 4244)  // 'argument' : conversion from 'type1' to 'type2', possible loss of data
 #else
   #include <unistd.h>
 #endif
@@ -49,7 +51,7 @@
 
 using namespace UHDM;
 
-const std::vector<vpiHandle> Serializer::Restore(std::string file) {
+const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
   Purge();
   std::vector<vpiHandle> designs;
   int fileid = open(file.c_str(), O_RDONLY);
@@ -64,16 +66,20 @@ const std::vector<vpiHandle> Serializer::Restore(std::string file) {
   for (auto symbol : symbols) {
     symbolMaker.Make(symbol);
   }
- 
-<CAPNP_INIT_FACTORIES>  
-  
-<CAPNP_RESTORE_FACTORIES>  
-  
+
+<CAPNP_INIT_FACTORIES>
+
+<CAPNP_RESTORE_FACTORIES>
+
    for (auto d : designMaker.objects_) {
     vpiHandle designH = uhdm_handleMaker.Make(uhdmdesign, d);
     designs.push_back(designH);
   }
-   
-  close(fileid); 
+
+  close(fileid);
   return designs;
 }
+
+#if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+  #pragma warning(pop)
+#endif
