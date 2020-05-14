@@ -35,7 +35,8 @@ static bool ReadIntoString(const std::string &filename, std::string *content) {
 }
 
 static bool CompareContentWithFile(const std::string &content,
-                                   const std::string &filename) {
+                                   const std::string &filename,
+                                   bool verbose) {
   std::string expected;
   if (!ReadIntoString(filename, &expected)) {
     std::cerr << "Couldn't read '" << filename << "'" << std::endl;
@@ -45,7 +46,7 @@ static bool CompareContentWithFile(const std::string &content,
     std::cerr << "Dump does not match content of '"
               << filename << "'" << std::endl;
     return false;
-  } else {
+  } else if (verbose) {
     std::cerr << "Dump matches '" << filename << "'" << std::endl;
   }
   return true;
@@ -57,12 +58,14 @@ static int usage(const char *progname) {
           "tree is elaborated first.\n");
   fprintf(stderr, "Options:\n"
           "\t--elab          : Elaborate the restored design.\n"
+          "\t--verbose       : print diagnostic messages.\n"
           "\nIf golden file is given to compare, exit code represent if output matches.\n");
   return 1;
 }
 
 int main (int argc, char** argv) {
   bool elab = false;
+  bool verbose = false;
   std::string uhdmFile;
   std::string goldenFile;
 
@@ -71,6 +74,7 @@ int main (int argc, char** argv) {
     const std::string arg = argv[i];
     // Also supporting legacy long option with single dash
     if (arg == "-elab" || arg == "--elab") elab = true;
+    else if (arg == "--verbose") verbose = true;
     else if (uhdmFile.empty()) uhdmFile = arg;
     else if (goldenFile.empty()) goldenFile = arg;
     else return usage(argv[0]);
@@ -87,7 +91,7 @@ int main (int argc, char** argv) {
   }
 
   Serializer serializer;
-  std::cerr << uhdmFile << ": restoring from file" << std::endl;
+  if (verbose) std::cerr << uhdmFile << ": restoring from file" << std::endl;
   std::vector<vpiHandle> restoredDesigns = serializer.Restore(uhdmFile);
 
   if (restoredDesigns.empty()) {
@@ -98,15 +102,16 @@ int main (int argc, char** argv) {
   if (elab) {
     ElaboratorListener* listener = new ElaboratorListener(&serializer, false);
     listen_designs(restoredDesigns, listener);
-    std::cerr << uhdmFile << ": Restored design Post-Elab: " << std::endl;
+    if (verbose) std::cerr << uhdmFile << ": Restored design Post-Elab: " << std::endl;
   } else {
-    std::cerr << uhdmFile << ": Restored design Pre-Elab: " << std::endl;
+    if (verbose) std::cerr << uhdmFile << ": Restored design Pre-Elab: " << std::endl;
   }
 
   const std::string restored = visit_designs(restoredDesigns);
   std::cout << restored;
 
-  if (!goldenFile.empty() && !CompareContentWithFile(restored, goldenFile)) {
+  if (!goldenFile.empty()
+      && !CompareContentWithFile(restored, goldenFile, verbose)) {
     return 2;
   }
 
