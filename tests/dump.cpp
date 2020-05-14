@@ -100,19 +100,20 @@ int main (int argc, char** argv) {
   }
 
   std::cerr << uhdmFile << ": Restored design Pre-Elab: " << std::endl;
-  const std::string restored = visit_designs(restoredDesigns);
-  std::cout << restored;
+  visit_designs(restoredDesigns, std::cout);
 
-  if (!goldenFile.empty()
-      && !CompareContentWithFile(restored, goldenFile, verbose)) {
-    return 2;
+  if (!goldenFile.empty()) {
+    const std::string restored = visit_designs(restoredDesigns);
+    if (!CompareContentWithFile(restored, goldenFile, verbose)) {
+      return 2;
+    }
   }
 
   if (elab) {
     ElaboratorListener* listener = new ElaboratorListener(&serializer, false);
     listen_designs(restoredDesigns, listener);
     std::cerr << uhdmFile << ": Restored design Post-Elab: " << std::endl;
-    std::cout << visit_designs(restoredDesigns);
+    visit_designs(restoredDesigns, std::cout);
   }
 
   return 0;
