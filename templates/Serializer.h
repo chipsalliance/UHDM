@@ -36,12 +36,12 @@ namespace UHDM {
     Serializer() : incrId_(0), objId_(0) {symbolMaker.Make("");}
     void Save(std::string file);
     void Purge();
-    const std::vector<vpiHandle> Restore(std::string file);
-   
-<FACTORIES_METHODS> 
+    const std::vector<vpiHandle> Restore(const std::string& file);
+
+<FACTORIES_METHODS>
     std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
     vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) { return uhdm_handleMaker.Make(type, object); }
-    
+
     VectorOfanyFactory anyVectMaker;
     SymbolFactory symbolMaker;
     uhdm_handleFactory uhdm_handleMaker;
