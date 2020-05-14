@@ -320,7 +320,7 @@ proc printGetStrVisitor {classname type vpi card} {
     set vpi_get_str_body ""
     if {($card == 1) && ($type == "string") && ($vpi != "vpiFile")} {
         append vpi_get_str_body "    if (const char* s = vpi_get_str($vpi, obj_h))
-      result += spaces + std::string(\"|$vpi:\") + s + std::string(\"\\n\");
+      stream_indent(out, indent) << \"|$vpi:\" << s << \"\\n\";
 "
     }
     return $vpi_get_str_body
@@ -332,19 +332,19 @@ proc printGetVisitor {classname type vpi card} {
         append vpi_get_body "    s_vpi_value value;
     vpi_get_value(obj_h, \\&value);
     if (value.format) {
-      result += spaces + visit_value(\\&value);
+      stream_indent(out, indent) << visit_value(\\&value);
     }
 "
     } elseif {$vpi == "vpiDelay"} {
         append vpi_get_body "    s_vpi_delay delay;
     vpi_get_delays(obj_h, \\&delay);
     if (delay.da != nullptr) {
-      result += spaces + visit_delays(\\&delay);
+      stream_indent(out, indent) << visit_delays(\\&delay);
     }
 "
     } elseif {($card == 1) && ($type != "string") && ($vpi != "vpiLineNo") && ($vpi != "vpiType")} {
         append vpi_get_body "    if (const int n = vpi_get($vpi, obj_h))
-      result += spaces + std::string(\"|$vpi:\") + std::to_string(n) + std::string(\"\\n\");
+      stream_indent(out, indent) << \"|$vpi:\" << n << \"\\n\";
 "
     }
     return $vpi_get_body
@@ -396,7 +396,7 @@ proc printVpiListener {classname vpi type card} {
         # upward vpiModule relation (when card == 1, pointing to the parent obejct) creates loops
         return
     }
-    
+
     set vpi_listener ""
     if ![info exist VPI_LISTENERS($classname)] {
         set vpi_listener "    vpiHandle itr;
@@ -464,17 +464,17 @@ proc printVpiVisitor {classname vpi card} {
     if {$card == 1} {
         append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
     if (itr)
-      result += visit_object(itr, subobject_indent, \"$vpi\", visited);
+      visit_object(itr, subobject_indent, \"$vpi\", visited, out);
     vpi_free_object(itr);
 "
     } else {
         if {$classname == "design"} {
-            append vpi_visitor "    if (indent == 0) visited.clear();
+            append vpi_visitor "    if (indent == 0) visited->clear();
 "
         }
         append vpi_visitor "    itr = vpi_iterate($vpi,obj_h);
     while (vpiHandle obj = vpi_scan(itr) ) {
-      result += visit_object(obj, subobject_indent, \"$vpi\", visited);
+      visit_object(obj, subobject_indent, \"$vpi\", visited, out);
       vpi_free_object(obj);
     }
     vpi_free_object(itr);
@@ -712,7 +712,7 @@ proc write_vpi_visitor_cpp {} {
         append vpi_visitor "  if (objectType == $vpiName) {
 $VISITOR($classname)
 $relations
-    return result;
+    return;
   }
 "
     }

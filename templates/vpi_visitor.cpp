@@ -27,9 +27,10 @@
 
 #include <iostream>
 #include <map>
+#include <set>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <set>
 
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
@@ -42,7 +43,7 @@
 
 namespace UHDM {
 
-std::string visit_value(s_vpi_value* value) {
+static std::string visit_value(s_vpi_value* value) {
   if (value == nullptr)
     return "";
   switch (value->format) {
@@ -77,14 +78,14 @@ std::string visit_value(s_vpi_value* value) {
   case vpiScalarVal: {
     return std::string(std::string("|SCAL:") + std::to_string(value->value.scalar) + "\n");
     break;
-  } 
+  }
   default:
     break;
   }
   return "";
 }
 
-std::string visit_delays(s_vpi_delay* delay) {
+static std::string visit_delays(s_vpi_delay* delay) {
   if (delay == nullptr)
     return "";
   switch (delay->time_type) {
@@ -96,81 +97,86 @@ std::string visit_delays(s_vpi_delay* delay) {
     break;
   }
   return "";
-}  
+}
 
-std::string visit_object (vpiHandle obj_h, unsigned int indent, const std::string& relation, std::set<const BaseClass*>& visited) {
-  std::string result;
-  unsigned int subobject_indent = indent + 2;
-  std::string hspaces;
-  std::string rspaces;
+static std::ostream &stream_indent(std::ostream &out, int indent) {
+  out << std::string(indent, ' ');
+  return out;
+}
+
+static void visit_object (vpiHandle obj_h, int indent, const char *relation, std::set<const BaseClass*>* visited, std::ostream& out) {
+  static constexpr int kLevelIndent = 2;
+
+  unsigned int subobject_indent = indent + kLevelIndent;
   const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
   const BaseClass* const object = (const BaseClass*) handle->object;
-  bool alreadyVisited = false;
-  if (visited.find(object) != visited.end()) {
-    alreadyVisited = true;
-  }
-  visited.insert(object);
-  if (indent > 0) {
-    for (unsigned int i = 0; i < indent -2 ; i++) {
-      hspaces += " ";
+  const unsigned int objectType = vpi_get(vpiType, obj_h);
+  const bool alreadyVisited = visited->find(object) != visited->end();
+  visited->insert(object);
+
+  {
+    std::string hspaces;
+    std::string rspaces;
+    if (indent >= kLevelIndent) {
+      for (int i = 0; i < indent -2 ; i++) {
+        hspaces += " ";
+      }
+      rspaces = hspaces + "|";
+      hspaces += "\\_";
     }
-    rspaces = hspaces + "|";
-    hspaces += "\\_";
-  }
-  std::string spaces;
-  for (unsigned int i = 0; i < indent; i++)
-    spaces += " ";
-  std::string objectName = ""; // Instance name
-  std::string defName    = ""; // Definition name
-  std::string fileName = "";
-  std::string lineNo   = "";
-  std::string parent   = "";
-  std::string uhdmid   = ", id:" + std::to_string(object->UhdmId());
-  if (unsigned int l = vpi_get(vpiLineNo, obj_h)) {
-    lineNo = ", line:" + std::to_string(l);
-  }
-  const unsigned int objectType = vpi_get(vpiType, obj_h);				     
-  if (objectType == vpiModule || objectType == vpiProgram || objectType == vpiClassDefn || objectType == vpiPackage ||
-      objectType == vpiInterface || objectType == vpiUdp) {
-    if (const char* s = vpi_get_str(vpiFile, obj_h))
-      fileName = ", file:" +  std::string(s);
-  }
-  if (vpiHandle par = vpi_handle(vpiParent, obj_h)) {
-    if (const char* parentName = vpi_get_str(vpiName, par)) {
-      parent = ", parent:" + std::string(parentName);
+
+    if (strlen(relation) != 0) {
+      out << rspaces << relation << ":\n";
     }
-    vpi_free_object(par);
-  }
-  if (const char* s = vpi_get_str(vpiDefName, obj_h)) {
-    defName = s;
-  }
-  if (const char* s = vpi_get_str(vpiName, obj_h)) {
-    if (defName != "") {
-      defName += " ";
+    out << hspaces << UHDM::VpiTypeName(obj_h) << ": ";
+    bool needs_separator = false;
+    if (const char* s = vpi_get_str(vpiDefName, obj_h)) {  // defName
+      out << s;
+      needs_separator = true;
     }
-    objectName = std::string("(") + s + std::string(")");
+    if (const char* s = vpi_get_str(vpiName, obj_h)) {   // objectName
+      if (needs_separator) out << " ";
+      out << "(" << s << ")";  // objectName
+    }
+    out << ", id:" << object->UhdmId();
+    if (objectType == vpiModule || objectType == vpiProgram || objectType == vpiClassDefn || objectType == vpiPackage ||
+        objectType == vpiInterface || objectType == vpiUdp) {
+      if (const char* s = vpi_get_str(vpiFile, obj_h))
+        out << ", file:" << s;  // fileName
+    }
+    if (unsigned int l = vpi_get(vpiLineNo, obj_h)) {
+      out << ", line:" << l;
+    }
+    if (vpiHandle par = vpi_handle(vpiParent, obj_h)) {
+      if (const char* parentName = vpi_get_str(vpiName, par)) {
+        out << ", parent:" << parentName;
+      }
+      vpi_free_object(par);
+    }
+    out << "\n";
   }
-  if (relation != "") {
-    result += rspaces + relation + ":\n";
-  }
-  result += hspaces + UHDM::VpiTypeName(obj_h) + ": " + defName + objectName + uhdmid + fileName + lineNo + parent + "\n";
+
   if (alreadyVisited) {
-    return result;
+    return;
   }
-  if (relation == "vpiParent") {
-    return result;
+  if (strcmp(relation, "vpiParent") == 0) {
+    return;
   }
 <OBJECT_VISITORS>
-  return result;
+}
+
+// Public interface
+void visit_designs (const std::vector<vpiHandle>& designs, std::ostream &out) {
+  for (auto design : designs) {
+    std::set<const BaseClass*> visited;
+    visit_object(design, 0, "", &visited, out);
+  }
 }
 
 std::string visit_designs (const std::vector<vpiHandle>& designs) {
-  std::string result;
-  for (auto design : designs) {
-    std::set<const BaseClass*> visited;
-    result += visit_object(design, 0, "", visited);
-  }
-  return result;
+  std::stringstream out;
+  visit_designs(designs, out);
+  return out.str();
 }
 
 };
