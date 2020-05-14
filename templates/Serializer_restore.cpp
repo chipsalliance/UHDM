@@ -30,6 +30,8 @@
 
 #if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
   #include <io.h>
+  #pragma warning(push)
+  #pragma warning(disable : 4244)  // 'argument' : conversion from 'type1' to 'type2', possible loss of data
 #else
   #include <unistd.h>
 #endif
@@ -77,3 +79,7 @@ const std::vector<vpiHandle> Serializer::Restore(std::string file) {
   close(fileid); 
   return designs;
 }
+
+#if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+  #pragma warning(pop)
+#endif

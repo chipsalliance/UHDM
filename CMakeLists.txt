@@ -1,8 +1,5 @@
 # -*- mode:cmake -*-
-cmake_minimum_required(VERSION 3.13)
-
-set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
-add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
+cmake_minimum_required(VERSION 3.15)
 
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
@@ -24,6 +21,13 @@ option(
 project(UHDM)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+cmake_policy(SET CMP0091 NEW)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
+add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
 
 include_directories("${PROJECT_SOURCE_DIR}/include/")
 include_directories("${PROJECT_SOURCE_DIR}/")
@@ -32,27 +36,22 @@ include_directories("${PROJECT_SOURCE_DIR}/src/")
 include_directories("${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src/")
 include_directories("${PROJECT_SOURCE_DIR}/third_party/UHDM/src/")
 
-# Directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
-    ${CMAKE_BINARY_DIR}/dist/${CMAKE_BUILD_TYPE}/)
-set(CMAKE_BUILD_FILES_DIRECTORY ${dir})
-set(CMAKE_BUILD_DIRECTORY ${dir})
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
 
-if (UNIX)
+if(MSVC)
+  set(CMAKE_CXX_FLAGS_DEBUG
+      "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj /DPLI_DLLISPEC= ${MY_CXX_WARNING_FLAGS}"
+  )
+  set(CMAKE_CXX_FLAGS_RELEASE
+      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj /DPLI_DLLISPEC= ${MY_CXX_WARNING_FLAGS}"
+  )
+  set(CMAKE_EXE_LINKER_FLAGS /STACK:8388608)  # 8MB stack size
+else()
   set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -g ${MY_CXX_WARNING_FLAGS}"
   )
   set(CMAKE_CXX_FLAGS_RELEASE
       "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -DNDEBUG ${MY_CXX_WARNING_FLAGS}"
-  )
-elseif (WIN32)
-  set(CMAKE_CXX_FLAGS_DEBUG
-      "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} /W3 /DPLI_DLLISPEC= ${MY_CXX_WARNING_FLAGS}"
-  )
-  set(CMAKE_CXX_FLAGS_RELEASE
-      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /W3 /DPLI_DLLISPEC= ${MY_CXX_WARNING_FLAGS}"
   )
 endif()
 
@@ -74,7 +73,7 @@ add_custom_command(
   OUTPUT ${model-GENERATED_SRC}
   COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_BINARY_DIR}
-  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/../"
+  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst
           ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
@@ -124,123 +123,95 @@ set(UHDM_PUBLIC_HEADERS ${PROJECT_SOURCE_DIR}/headers/uhdm.h)
 
 add_library(uhdm STATIC ${uhdm_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER "${UHDM_PUBLIC_HEADERS}")
-
-add_dependencies(uhdm GenerateCode)
-
-set(ALL_CAPNP_LIBS capnp kj)
+target_link_libraries(uhdm PUBLIC capnp)
 
 if (UNIX)
-  set(ALL_LIBRARIES_FOR_UHDM
-      uhdm
-      ${ALL_CAPNP_LIBS}
-      dl
-      util
-      m
-      rt
-      pthread)
-elseif (WIN32)
-  set(ALL_LIBRARIES_FOR_UHDM
-      uhdm
-      ${ALL_CAPNP_LIBS})
+    target_link_libraries(uhdm
+        PUBLIC dl
+        PUBLIC util
+        PUBLIC m
+        PUBLIC rt
+        PUBLIC pthread)
 endif()
 
-add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp ${ALL_CAPNP_LIBS})
+add_dependencies(uhdm GenerateCode)
+add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
 
 enable_testing()
 
 add_executable(uhdm-test1 ${PROJECT_SOURCE_DIR}/tests/test1.cpp)
-set_target_properties(uhdm-test1 PROPERTIES OUTPUT_NAME uhdm-test1)
-add_dependencies(uhdm-test1 uhdm)
-target_link_libraries(uhdm-test1 ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(uhdm-test1 PRIVATE uhdm)
 add_test(
   NAME uhdm-test1
-  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test1
+  COMMAND uhdm-test1
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-test2 ${PROJECT_SOURCE_DIR}/tests/test2.cpp)
-set_target_properties(uhdm-test2 PROPERTIES OUTPUT_NAME uhdm-test2)
-add_dependencies(uhdm-test2 uhdm)
-target_link_libraries(uhdm-test2 ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(uhdm-test2 PRIVATE uhdm)
 add_test(
   NAME uhdm-test2
-  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test2
+  COMMAND uhdm-test2
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-test3 ${PROJECT_SOURCE_DIR}/tests/test3.cpp)
-set_target_properties(uhdm-test3 PROPERTIES OUTPUT_NAME uhdm-test3)
-add_dependencies(uhdm-test3 uhdm)
-target_link_libraries(uhdm-test3 ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(uhdm-test3 PRIVATE uhdm)
 add_test(
   NAME uhdm-test3
-  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test3
+  COMMAND uhdm-test3
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-test4 ${PROJECT_SOURCE_DIR}/tests/test4.cpp)
-set_target_properties(uhdm-test4 PROPERTIES OUTPUT_NAME uhdm-test4)
-add_dependencies(uhdm-test4 uhdm)
-target_link_libraries(uhdm-test4 ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(uhdm-test4 PRIVATE uhdm)
 add_test(
   NAME uhdm-test4
-  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test4
+  COMMAND uhdm-test4
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-test-tf-call ${PROJECT_SOURCE_DIR}/tests/test_tf_call.cpp)
-set_target_properties(uhdm-test-tf-call PROPERTIES OUTPUT_NAME uhdm-test-tf-call)
-add_dependencies(uhdm-test-tf-call uhdm)
-target_link_libraries(uhdm-test-tf-call ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(uhdm-test-tf-call PRIVATE uhdm)
 add_test(
   NAME uhdm-test-tf-call
-  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test-tf-call
+  COMMAND uhdm-test-tf-call
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-test-process ${PROJECT_SOURCE_DIR}/tests/test_process.cpp)
-set_target_properties(uhdm-test-process PROPERTIES OUTPUT_NAME uhdm-test-process)
-add_dependencies(uhdm-test-process uhdm)
-target_link_libraries(uhdm-test-process ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(uhdm-test-process PRIVATE uhdm)
 add_test(
   NAME uhdm-test-process
-  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-test-process
+  COMMAND uhdm-test-process
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-listener ${PROJECT_SOURCE_DIR}/tests/test_listener.cpp)
-set_target_properties(uhdm-listener PROPERTIES OUTPUT_NAME uhdm-listener)
-add_dependencies(uhdm-listener uhdm)
-target_link_libraries(uhdm-listener ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(uhdm-listener PRIVATE uhdm)
 add_test(
   NAME uhdm-listener
-  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-listener
+  COMMAND uhdm-listener
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/tests/dump.cpp)
-set_target_properties(uhdm-dump PROPERTIES OUTPUT_NAME uhdm-dump)
-add_dependencies(uhdm-dump uhdm)
-target_link_libraries(uhdm-dump ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(uhdm-dump PRIVATE uhdm)
 add_test(
   NAME uhdm-dump
-  COMMAND dist/${CMAKE_BUILD_TYPE}/uhdm-dump
+  COMMAND uhdm-dump
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(listener-elab ${PROJECT_SOURCE_DIR}/tests/listener_elab.cpp)
-set_target_properties(listener-elab PROPERTIES OUTPUT_NAME listener-elab)
-add_dependencies(listener-elab uhdm)
-target_link_libraries(listener-elab ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(listener-elab PRIVATE uhdm)
 add_test(
   NAME listener-elab
-  COMMAND dist/${CMAKE_BUILD_TYPE}/listener-elab
+  COMMAND listener-elab
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(full-elab ${PROJECT_SOURCE_DIR}/tests/full_elab.cpp)
-set_target_properties(full-elab PROPERTIES OUTPUT_NAME full-elab)
-add_dependencies(full-elab uhdm)
-target_link_libraries(full-elab ${ALL_LIBRARIES_FOR_UHDM})
+target_link_libraries(full-elab PRIVATE uhdm)
 add_test(
   NAME full-elab
-  COMMAND dist/${CMAKE_BUILD_TYPE}/full-elab
+  COMMAND full-elab
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 # Installation target
 install(
-  TARGETS uhdm ${ALL_CAPNP_LIBS}
+  TARGETS uhdm capnp kj
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/

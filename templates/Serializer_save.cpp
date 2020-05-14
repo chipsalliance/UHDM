@@ -30,6 +30,8 @@
 #if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
   #include <io.h>
   #define S_IRWXU (_S_IREAD | _S_IWRITE)
+  #pragma warning(push)
+  #pragma warning(disable : 4267)  // 'var' : conversion from 'size_t' to 'type', possible loss of data
 #else
   #include <unistd.h>
 #endif
@@ -117,3 +119,6 @@ void Serializer::Save(std::string file) {
   close(fileid);
 }
 
+#if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+  #pragma warning(pop)
+#endif
