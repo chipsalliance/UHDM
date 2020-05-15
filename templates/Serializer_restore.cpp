@@ -54,7 +54,7 @@ using namespace UHDM;
 const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
   Purge();
   std::vector<vpiHandle> designs;
-  int fileid = open(file.c_str(), O_RDONLY);
+  int fileid = open(file.c_str(), O_RDONLY | O_BINARY);
   ::capnp::ReaderOptions options;
   options.traversalLimitInWords = ULLONG_MAX;
   options.nestingLimit = 1024;

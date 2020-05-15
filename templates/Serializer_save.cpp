@@ -92,7 +92,7 @@ void Serializer::Purge() {
 }
 
 void Serializer::Save(std::string file) {
-  int fileid = open(file.c_str(), O_CREAT | O_WRONLY , S_IRWXU);
+  int fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
   ::capnp::MallocMessageBuilder message;
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
   unsigned long index = 0;

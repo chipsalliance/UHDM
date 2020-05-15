@@ -12,8 +12,9 @@ class MyVpiListener : public VpiListener {
 protected:
   void enterModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
+    const char* const parentName = vpi_get_str(vpiName, parentHandle);
     std::cout << "Module: " << object->VpiName()
-              << ", parent: " << vpi_get_str(vpiName, parentHandle)
+              << ", parent: " << ((parentName != nullptr) ? parentName : "")
               << std::endl;
     stack_.push(object);
   }
@@ -25,8 +26,9 @@ protected:
 
   void enterProgram(const program* object, const BaseClass* parent,
                     vpiHandle handle, vpiHandle parentHandle) override {
+    const char* const parentName = vpi_get_str(vpiName, parentHandle);
     std::cout << "Program: " << object->VpiName()
-              << ", parent: " << vpi_get_str(vpiName, parentHandle)
+              << ", parent: " << ((parentName != nullptr) ? parentName : "")
               << std::endl;
     stack_.push(object);
   }
