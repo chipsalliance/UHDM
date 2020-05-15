@@ -34,6 +34,7 @@
   #pragma warning(disable : 4244)  // 'argument' : conversion from 'type1' to 'type2', possible loss of data
 #else
   #include <unistd.h>
+  #define O_BINARY 0
 #endif
 
 #include <vector>
@@ -54,7 +55,7 @@ using namespace UHDM;
 const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
   Purge();
   std::vector<vpiHandle> designs;
-  int fileid = open(file.c_str(), O_RDONLY);
+  int fileid = open(file.c_str(), O_RDONLY | O_BINARY);
   ::capnp::ReaderOptions options;
   options.traversalLimitInWords = ULLONG_MAX;
   options.nestingLimit = 1024;
