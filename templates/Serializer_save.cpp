@@ -34,6 +34,7 @@
   #pragma warning(disable : 4267)  // 'var' : conversion from 'size_t' to 'type', possible loss of data
 #else
   #include <unistd.h>
+  #define O_BINARY 0
 #endif
 
 #include <vector>
