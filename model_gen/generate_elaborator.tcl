@@ -122,7 +122,7 @@ proc generate_elaborator { models } {
       }
     }
 "
-                            if {($rootclassname == "module") && ($method != "Ports")} {
+                            if {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets")} {
                                 # We don't want to override the elaborated instance ports by the module def ports
                                 append vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
