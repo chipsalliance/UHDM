@@ -118,10 +118,37 @@ proc printMethods { classname type vpi card {real_type ""} } {
 
 
         if {$type == "std::string"} {
-            append methods "\n    ${virtual}const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const$final;\n"
             append methods "\n    ${virtual}bool [string toupper ${vpi} 0 0](const ${type}${pointer}\\& data)$final;\n"
-            append methods_cpp "\n    const ${type}${pointer}\\& ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
-            append methods_cpp "\n    bool ${classname}::[string toupper ${vpi} 0 0](const ${type}${pointer}\\& data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n"
+            if {$vpi == "vpiFullName" } {
+                append methods "\n    ${virtual}const ${type}${pointer}\\&  [string toupper ${vpi} 0 0]() const$final;\n"
+                append methods_cpp "\nconst ${type}${pointer}\\&  ${classname}::[string toupper ${vpi} 0 0]() const { 
+  if (${vpi}_) {
+    return serializer_->symbolMaker.GetSymbol(${vpi}_); 
+  } else {
+    std::vector<std::string> names;
+    const BaseClass* parent = this;
+    while (parent) {
+      if (parent->UhdmType() == uhdmdesign) break;
+      names.push_back((parent->VpiName() != \"\") ? parent->VpiName() : parent->VpiDefName());
+      parent = parent->VpiParent();
+    }
+    std::string fullName;
+    unsigned int index = names.size() -1;
+    while(1) {
+      fullName += names\[index\];
+      if (index > 0) fullName += \".\";
+      if (index == 0) break;
+      index--;
+    }
+    ((${classname}*)this)->VpiFullName(fullName);
+    return serializer_->symbolMaker.GetSymbol(${vpi}_); 
+  }
+}\n"
+            } else {
+             append methods "\n    ${virtual}const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const$final;\n"
+             append methods_cpp "\nconst ${type}${pointer}\\& ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
+            }
+            append methods_cpp "\nbool ${classname}::[string toupper ${vpi} 0 0](const ${type}${pointer}\\& data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n"
         } else {
             append methods "\n    ${virtual}${const}${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"
             if {$vpi == "vpiParent"} {
