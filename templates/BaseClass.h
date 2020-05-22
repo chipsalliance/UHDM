@@ -69,6 +69,8 @@ namespace UHDM {
 
     virtual const std::string& VpiName() const { return nonamebaseclass; }
 
+    virtual const std::string& VpiDefName() const { return nonamebaseclass; }
+
     virtual unsigned int VpiType() const { return 0; }
 
     ClientData* Data() { return clientData_; }
