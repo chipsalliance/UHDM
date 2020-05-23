@@ -385,16 +385,31 @@ proc printGetVisitor {classname type vpi card} {
 proc printGetStrBody {classname type vpi card} {
     set vpi_get_str_body ""
     if {$card == 1 && ($type == "string")} {
-        append vpi_get_str_body "
+        if {$vpi == "vpiFullName"} {
+            append vpi_get_str_body "
   if (handle->type == uhdm${classname}) {
     if (property == $vpi) {
-      if ((($classname*)(obj))->[string toupper ${vpi} 0 0]() == \"\") {
+      if (((($classname*)(obj))->[string toupper ${vpi} 0 0]() == \"\") || ((($classname*)(obj))->[string toupper ${vpi} 0 0]() == (($classname*)(obj))->VpiName())) { 
         return 0;
       } else {
         return (PLI_BYTE8*) (($classname*)(obj))->[string toupper ${vpi} 0 0]().c_str();
       }
     }
-  }"
+  }
+"
+        } else {
+            append vpi_get_str_body "
+  if (handle->type == uhdm${classname}) {
+    if (property == $vpi) {
+      if ((($classname*)(obj))->[string toupper ${vpi} 0 0]() == \"\") { 
+        return 0;
+      } else {
+        return (PLI_BYTE8*) (($classname*)(obj))->[string toupper ${vpi} 0 0]().c_str();
+      }
+    }
+  }
+"
+        }
     }
     return $vpi_get_str_body
 }
