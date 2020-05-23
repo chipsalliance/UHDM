@@ -129,17 +129,21 @@ proc printMethods { classname type vpi card {real_type ""} } {
     const BaseClass* parent = this;
     while (parent) {
       if (parent->UhdmType() == uhdmdesign) break;
-      names.push_back((parent->VpiName() != \"\") ? parent->VpiName() : parent->VpiDefName());
+      const std::string\\& name = (parent->VpiName() != \"\") ? parent->VpiName() : parent->VpiDefName();
+      if (name != \"\") 
+        names.push_back(name);
       parent = parent->VpiParent();
     }
     std::string fullName;
-    unsigned int index = names.size() -1;
-    while(1) {
-      fullName += names\[index\];
-      if (index > 0) fullName += \".\";
-      if (index == 0) break;
-      index--;
-    }
+    if (names.size()) {
+      unsigned int index = names.size() -1;
+      while(1) {
+        fullName += names\[index\];
+        if (index > 0) fullName += \".\";
+        if (index == 0) break;
+        index--;
+      }
+    }  
     ((${classname}*)this)->VpiFullName(fullName);
     return serializer_->symbolMaker.GetSymbol(${vpi}_); 
   }
