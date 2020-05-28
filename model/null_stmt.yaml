@@ -1,4 +1,4 @@
-# Copyright 2020 Alain Dargelas
+# Copyright 2019 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "assign_stmt" formal description
+# Universal Hardware Data Model (UHDM) "null_stmt" formal description
  
-- obj_def: assign_stmt
+- obj_def: null_stmt
   - extends: atomic_stmt
-  - class_ref: rhs
-    name: rhs
-    vpi: vpiRhs
-    type: expr
-    card: 1
-  - class_ref: lhs
-    name: lhs
-    vpi: vpiLhs
-    type: expr
-    card: 1
+

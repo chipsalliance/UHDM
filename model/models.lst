@@ -40,6 +40,11 @@ pattern_expr_group.yaml
 case_stmt.yaml
 case_item.yaml
 force.yaml
+assign_stmt.yaml
+deassign.yaml
+release.yaml
+null_stmt.yaml
+expect_stmt.yaml
 foreach_stmt.yaml
 interf_prog_mod_group.yaml
 gen_scope.yaml
@@ -106,7 +111,6 @@ modport.yaml
 interface_tf_decl.yaml
 cont_assign.yaml
 cont_assign_bit.yaml
-assign_stmt.yaml
 expr_ref_obj_group.yaml
 ports.yaml
 port.yaml

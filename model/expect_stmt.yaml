@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "assign_stmt" formal description
+# Universal Hardware Data Model (UHDM) "expect_stmt" formal description
  
-- obj_def: assign_stmt
+- obj_def: expect_stmt
   - extends: atomic_stmt
-  - class_ref: rhs
-    name: rhs
-    vpi: vpiRhs
-    type: expr
+  - group_ref: stmt
+    name: stmt
+    vpi: vpiStmt
+    type: stmt
     card: 1
-  - class_ref: lhs
-    name: lhs
-    vpi: vpiLhs
-    type: expr
+  - group_ref: else_stmt
+    name: else stmt
+    vpi: vpiElseStmt
+    type: stmt
     card: 1
