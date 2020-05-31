@@ -41,11 +41,11 @@
     vpi: vpiForInitStmt
     type: stmt
     card: 1
-  - group_ref: vpiCondition
+  - class_ref: vpiCondition
     name: condition
     vpi: vpiCondition
-    type: stmt
-    card: any
+    type: expr
+    card: 1
   - group_ref: vpiForIncStmt
     name: inc stmt
     vpi: vpiForIncStmt
