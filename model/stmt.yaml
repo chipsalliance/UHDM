@@ -17,7 +17,7 @@
 - group_def: stmt
   - class_ref: scope
   - class_ref: atomic_stmt
-# See tf_call.yaml for explanation about this extension
-  - class_ref: tf_call
+  - class_ref: expr
   - class_ref: assertion
+  
 
