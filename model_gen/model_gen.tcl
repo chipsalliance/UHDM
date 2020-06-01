@@ -1096,8 +1096,10 @@ proc generate_code { models } {
                     set Vpi [string toupper $vpi 0 0]
                     regsub -all  {_} $Vpi "" Vpi
                     if {$type == "string" || $type == "value" || $type == "delay"} {
-                        append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->GetSerializer()->symbolMaker.Make(obj->[string toupper ${vpi} 0 0]()));\n"
-                        append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](symbolMaker.GetSymbol(obj.get${Vpi}()));\n"
+                        if {$Vpi != "VpiFullName"} {
+                          append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->GetSerializer()->symbolMaker.Make(obj->[string toupper ${vpi} 0 0]()));\n"
+                            append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](symbolMaker.GetSymbol(obj.get${Vpi}()));\n"
+                        }
                     } else {
                         append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->[string toupper ${vpi} 0 0]());\n"
                         append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](obj.get${Vpi}());\n"
