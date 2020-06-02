@@ -65,12 +65,18 @@ Universal Hardware Data Model
     * The Instance tree contains the Design Hierarchy and Elaborated Nets/Ports with High conn and Low conn connections done.
     * The module definitions contain the logic elements (non-elaborated)
     * To get the complete picture of the design one has to use both views (Example in [`listener_elab.cpp`](tests/listener_elab.cpp))
- * In contrast, The Standard VPI Data Model in Fully Elaborated.
+    * Applications where the UHDM data model is used as a precursor to another internal datastructure like a Synthesis or Simulator tool will prefer using the Folded Model.
+ * In contrast, The Standard VPI Data Model is Fully Elaborated.
+    * UHDM offers an optional Full elaboration step to fullfill this VPI Standard requirement.
+    * See [`full_elab.cpp`](tests/full_elab.cpp) and [`dump.cpp`](tests/dump.cpp)
+    * Applications where the UHDM data model is free standing and is the sole data structure for the design representation will prefer the Fully Elaborated Data Model, examples: Linters or Code Analyzers.
+
 
 # Model creation
  * The model creation task consists in converting the Object Model diagrams into their Yaml representation and invoking the creation of the concrete
  C++ classes, iterators, serialization code by invoking "make"
  * [How to create the model (presentation)](https://docs.google.com/presentation/d/1SGpgeeWmxJ-1AU8EKABrTyKwcfHOe-pfK8yXArTKIz8/edit?usp=sharing)
+
 
 # Actual Design creation
  * The design creation task consists in invoking:
@@ -80,24 +86,29 @@ Universal Hardware Data Model
    * invoking the serialization call
  * Read [`test1.cpp`](tests/test1.cpp)
 
+
 # Design Navigation
  * After Deserialization of the persisted design (Read [`test2.cpp`](tests/test2.cpp))
  * Client applications can use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`test_helper.h`](tests/test_helper.h))
  * Or use the Visitor (More like a Walker)
-   * An example Visitor is auto-generated to print the content of the data model (src/vpi_visitor.cpp)
+   * An example Visitor is auto-generated to print the content of the data model [`visitor.cpp`](src/vpi_visitor.cpp)
  * Or use the Listener Design Pattern
    * An example Listener is used as an example (tests/vpi_listener.cpp),
    * The listener enables client application development with minimum disruption while the data model evolves.
-   * An Elaborator example code uses the Listener Design Pattern in [`listener_elab.cpp`](tests/listener_elab.cpp)
- * The uhdm-dump executable creates a human readable view of the UHDM serialized data model.
+   * An Custom Elaborator example code uses the Listener Design Pattern in [`listener_elab.cpp`](tests/listener_elab.cpp)
+   * A Full Elaboration example is demostrated in [`full_elab.cpp`](tests/full_elab.cpp) and [`dump.cpp`](tests/dump.cpp)
+ * The uhdm-dump [`dump.cpp`](tests/dump.cpp) executable creates a human readable view of the UHDM serialized data model using the visitor [`visitor.cpp`](src/vpi_visitor.cpp) 
+
 
 # Linking libuhdm.a to your application
  * After instaling (`make install`), create your own executable (Read [`Makefile`](Makefile)) , ie:
  * `$(CXX) -std=c++14 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/uhdm/libuhdm.a /usr/local/lib/uhdm/libcapnp.a /usr/local/lib/uhdm/libkj.a -ldl -lutil -lm -lrt -lpthread -o test_inst`
 
+
 # Generating uhdm databases
  * Surelog generates natively UHDM databases (surelog.uhdm)
  * Other parsers are welcome to generate UHDM databases
+
 
 # Useful links
 * [Verilog_Object_Model.pdf](third_party/Verilog_Object_Model.pdf) - Object Model section of the IEEE_Std1800-2017_8299595.pdf (Practical for searches)
