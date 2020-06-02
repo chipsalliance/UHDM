@@ -6,7 +6,7 @@
 
 ### Development Environment Required:
 
-* Linux (Ubuntu or Centos)
+* Linux (Ubuntu or Centos) or Windows, cmake 3.15 and GCC/VS supporting c++17
 
 * Please install the following package updates:
 
