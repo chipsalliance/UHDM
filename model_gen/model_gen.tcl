@@ -507,9 +507,9 @@ proc printVpiVisitor {classname vpi card} {
         }
     }
 
-    if {$vpi == "vpiParent"} {
+   if {($vpi == "vpiParent") && ($classname !="part_select")} {
       return
-    }
+   }
 
     if {$card == 1} {
         append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
