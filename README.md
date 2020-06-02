@@ -91,18 +91,18 @@ Universal Hardware Data Model
  * After Deserialization of the persisted design (Read [`test2.cpp`](tests/test2.cpp))
  * Client applications can use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`test_helper.h`](tests/test_helper.h))
  * Or use the Visitor (More like a Walker)
-   * An example Visitor is auto-generated to print the content of the data model [`visitor.cpp`](src/vpi_visitor.cpp)
+   * An example Visitor is auto-generated to print the content of the data model [`visitor.cpp`](templates/vpi_visitor.cpp)
  * Or use the Listener Design Pattern
    * An example Listener is used as an example (tests/vpi_listener.cpp),
    * The listener enables client application development with minimum disruption while the data model evolves.
    * An Custom Elaborator example code uses the Listener Design Pattern in [`listener_elab.cpp`](tests/listener_elab.cpp)
    * A Full Elaboration example is demostrated in [`full_elab.cpp`](tests/full_elab.cpp) and [`dump.cpp`](tests/dump.cpp)
- * The uhdm-dump [`dump.cpp`](tests/dump.cpp) executable creates a human readable view of the UHDM serialized data model using the visitor [`visitor.cpp`](src/vpi_visitor.cpp) 
+ * The uhdm-dump [`dump.cpp`](tests/dump.cpp) executable creates a human readable view of the UHDM serialized data model using the visitor [`visitor.cpp`](templates/vpi_visitor.cpp) 
 
 
 # Linking libuhdm.a to your application
  * After instaling (`make install`), create your own executable (Read [`Makefile`](Makefile)) , ie:
- * `$(CXX) -std=c++14 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/uhdm/libuhdm.a /usr/local/lib/uhdm/libcapnp.a /usr/local/lib/uhdm/libkj.a -ldl -lutil -lm -lrt -lpthread -o test_inst`
+ * `$(CXX) -std=c++17 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/uhdm/libuhdm.a /usr/local/lib/uhdm/libcapnp.a /usr/local/lib/uhdm/libkj.a -ldl -lutil -lm -lrt -lpthread -o test_inst`
 
 
 # Generating uhdm databases
