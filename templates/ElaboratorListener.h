@@ -41,34 +41,41 @@ public:
 
   // Bind to a net in the current instance
   net* bindNet(const std::string& name) {
-    ComponentMap& netMap = instStack_.top().second.first;
-    ComponentMap::iterator netItr = netMap.find(name);
-    if (netItr != netMap.end()) {
-      return (net*) (*netItr).second;
+    if (instStack_.size()) {
+      ComponentMap& netMap = instStack_.top().second.first;
+      ComponentMap::iterator netItr = netMap.find(name);
+      if (netItr != netMap.end()) {
+        return (net*) (*netItr).second;
+      }
     }
     return nullptr;
   }
 
   // Bind to a net or parameter in the current instance
   any* bindAny(const std::string& name) {
-    ComponentMap& netMap = instStack_.top().second.first;
-    ComponentMap::iterator netItr = netMap.find(name);
-    if (netItr != netMap.end()) {
-      return (any*) (*netItr).second;
-    }
-    ComponentMap& paramMap = instStack_.top().second.second;
-    ComponentMap::iterator paramItr = paramMap.find(name);
-    if (paramItr != paramMap.end()) {
-      return (any*) (*paramItr).second;
+    if (instStack_.size()) {
+      ComponentMap& netMap = instStack_.top().second.first;
+      ComponentMap::iterator netItr = netMap.find(name);
+      if (netItr != netMap.end()) {
+        return (any*) (*netItr).second;
+      }
+  
+      ComponentMap& paramMap = instStack_.top().second.second;
+      ComponentMap::iterator paramItr = paramMap.find(name);
+      if (paramItr != paramMap.end()) {
+        return (any*) (*paramItr).second;
+      }
     }
     return nullptr;
   }
 
-   any* bindParam(const std::string& name) {
-    ComponentMap& paramMap = instStack_.top().second.second;
-    ComponentMap::iterator paramItr = paramMap.find(name);
-    if (paramItr != paramMap.end()) {
-      return (any*) (*paramItr).second;
+  any* bindParam(const std::string& name) {
+    if (instStack_.size()) {
+      ComponentMap& paramMap = instStack_.top().second.second;
+      ComponentMap::iterator paramItr = paramMap.find(name);
+      if (paramItr != paramMap.end()) {
+        return (any*) (*paramItr).second;
+      }
     }
     return nullptr;
   }
