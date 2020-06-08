@@ -16,4 +16,9 @@
  
 - obj_def: integer_typespec
   - extends: typespec
-
+  - property: vpi_get_value
+    name: vpi_get_value
+    vpi: vpiValue
+    type: value
+    card: 1
+ 
