@@ -70,8 +70,8 @@
     vpi: vpiLowConn
     type: expr_ref_obj_group
     card: 1
-  - class_ref: typespecs
-    name: typespecs
+  - class_ref: typespec
+    name: typespec
     vpi: vpiTypedef
     type: typespec
     card: 1
