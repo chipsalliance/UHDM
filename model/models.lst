@@ -59,6 +59,8 @@ immediate_assume.yaml
 immediate_cover.yaml
 pattern.yaml
 expr.yaml
+unsupported_expr.yaml
+unsupported_stmt.yaml
 property_expr_named_event_group.yaml
 property_expr.yaml
 property_inst.yaml
