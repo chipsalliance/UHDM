@@ -16,3 +16,14 @@
  
 - obj_def: foreach_stmt
   - extends: scope
+  - group_ref: vpiLoopVars
+    name: vpiLoopVars
+    vpi: vpiLoopVars
+    type: variables_operation_group
+    card: 1
+  - group_ref: vpiStmt
+    name: stmt
+    vpi: vpiStmt
+    type: stmt
+    card: 1
+ 
