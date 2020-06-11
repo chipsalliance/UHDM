@@ -45,6 +45,7 @@ deassign.yaml
 release.yaml
 null_stmt.yaml
 expect_stmt.yaml
+variables_operation_group.yaml
 foreach_stmt.yaml
 interf_prog_mod_group.yaml
 gen_scope.yaml
