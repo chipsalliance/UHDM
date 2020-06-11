@@ -42,6 +42,9 @@
 #define vpiLogicVar  3007
 #define vpiArrayVar  3008
 
+#define vpiUnsupportedStmt 4000
+#define vpiUnsupportedExpr 4001
+
 #include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
