@@ -16,6 +16,11 @@
  
 - obj_def: foreach_stmt
   - extends: scope
+  - class_ref: variable
+    name: variable
+    vpi: vpiVariables
+    type: variables
+    card: 1
   - group_ref: vpiLoopVars
     name: vpiLoopVars
     vpi: vpiLoopVars
