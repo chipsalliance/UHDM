@@ -16,4 +16,8 @@
  
 - obj_def: unsupported_stmt
   - extends: atomic_stmt
-
+  - property: vpi_get_value
+    name: vpi_get_value
+    vpi: vpiValue
+    type: value
+    card: 1
