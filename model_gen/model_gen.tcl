@@ -456,17 +456,20 @@ proc printVpiListener {classname vpi type card} {
 
     if {$card == 1} {
         append vpi_listener "    itr = vpi_handle($vpi,object);
-    if (itr)
+    if (itr) {
       listen_${type} (itr, listener);
-    vpi_free_object(itr);
+      vpi_free_object(itr);
+    }
 "
     } else {
         append vpi_listener "    itr = vpi_iterate($vpi,object);
-    while (vpiHandle obj = vpi_scan(itr) ) {
-      listen_${type} (obj, listener);
-      vpi_free_object(obj);
+    if (itr) {
+      while (vpiHandle obj = vpi_scan(itr) ) {
+        listen_${type} (obj, listener);
+        vpi_free_object(obj);
+      }
+      vpi_free_object(itr);
     }
-    vpi_free_object(itr);
 "
     }
 
@@ -512,23 +515,32 @@ proc printVpiVisitor {classname vpi card} {
    }
 
     if {$card == 1} {
-        append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
-    if (itr)
+        # Prevent loop in Standard VPI
+        if {($vpi != "vpiModule")} {
+            append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
+    if (itr) {
       visit_object(itr, subobject_indent, \"$vpi\", visited, out);
-    vpi_free_object(itr);
+      vpi_free_object(itr);
+    }
 "
+        }
     } else {
         if {$classname == "design"} {
             append vpi_visitor "    if (indent == 0) visited->clear();
 "
         }
+        # Prevent loop in Standard VPI
+        if {$vpi != "vpiUse"} {
         append vpi_visitor "    itr = vpi_iterate($vpi,obj_h);
-    while (vpiHandle obj = vpi_scan(itr) ) {
-      visit_object(obj, subobject_indent, \"$vpi\", visited, out);
-      vpi_free_object(obj);
+    if (itr) {
+      while (vpiHandle obj = vpi_scan(itr) ) {
+        visit_object(obj, subobject_indent, \"$vpi\", visited, out);
+        vpi_free_object(obj);
+      }
+      vpi_free_object(itr);
     }
-    vpi_free_object(itr);
 "
+        }
     }
 
     append VISITOR_RELATIONS($classname) $vpi_visitor
