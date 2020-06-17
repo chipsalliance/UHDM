@@ -18,7 +18,7 @@
 
 /*
  * File:   vpi_visitor.cpp
- * Author:
+ * Author: alain
  *
  * Created on December 14, 2019, 10:03 PM
  */
@@ -35,11 +35,46 @@
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
 
+#ifdef STANDARD_VPI
+
+// C++ 98 is default in Simulators compilers
+typedef std::set<vpiHandle> VisitedContainer;
+// Missing defines from vpi_user.h, sv_vpi_user.h, They are no-op in the Standard implementation.
+#define uhdmdesign 2569
+#define uhdmallPackages 2570
+#define uhdmallClasses 2571
+#define uhdmallInterfaces 2572
+#define uhdmallUdps 2573
+#define uhdmallPrograms 2574
+#define uhdmallModules 2575
+#define uhdmtopModules 2576
+#define vpiDesign 3000
+#define vpiInterfaceTypespec 3001
+#define vpiNets 3002
+#define vpiSimpleExpr 3003
+#define vpiParameters 3004
+#define vpiSequenceExpr 3005
+#define vpiUnsupportedStmt 4000
+#define vpiUnsupportedExpr 4001
+
+#else 
+
 #include "headers/uhdm_types.h"
 #include "headers/containers.h"
 #include "headers/vpi_uhdm.h"
 #include "headers/uhdm.h"
 #include "headers/Serializer.h"
+typedef  std::set<const UHDM::BaseClass*> VisitedContainer;
+
+#endif
+
+// UHDM implementation redefine these
+#ifndef vpiVarBit
+  #define vpiVarBit          vpiRegBit 
+  #define vpiLogicVar        vpiReg
+  #define vpiArrayVar        vpiRegArray
+#endif
+
 
 namespace UHDM {
 
@@ -104,16 +139,27 @@ static std::ostream &stream_indent(std::ostream &out, int indent) {
   return out;
 }
 
-static void visit_object (vpiHandle obj_h, int indent, const char *relation, std::set<const BaseClass*>* visited, std::ostream& out) {
-  static constexpr int kLevelIndent = 2;
+static void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out) {
 
-  unsigned int subobject_indent = indent + kLevelIndent;
+#ifdef STANDARD_VPI
+  
+  static int kLevelIndent = 2;
+  const bool alreadyVisited = visited->find(obj_h) != visited->end();
+  visited->insert(obj_h);
+
+#else
+  
+  static constexpr int kLevelIndent = 2;
   const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
   const BaseClass* const object = (const BaseClass*) handle->object;
-  const unsigned int objectType = vpi_get(vpiType, obj_h);
   const bool alreadyVisited = visited->find(object) != visited->end();
   visited->insert(object);
-
+  
+#endif
+  
+  unsigned int subobject_indent = indent + kLevelIndent;
+  const unsigned int objectType = vpi_get(vpiType, obj_h);
+ 
   {
     std::string hspaces;
     std::string rspaces;
@@ -128,7 +174,17 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, std
     if (strlen(relation) != 0) {
       out << rspaces << relation << ":\n";
     }
+    
+#ifdef STANDARD_VPI
+
+    out << hspaces << "vpiType: " << vpi_get(vpiType, obj_h) << ": ";
+
+#else
+
     out << hspaces << UHDM::VpiTypeName(obj_h) << ": ";
+
+#endif
+    
     bool needs_separator = false;
     if (const char* s = vpi_get_str(vpiDefName, obj_h)) {  // defName
       out << s;
@@ -138,7 +194,13 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, std
       if (needs_separator) out << " ";
       out << "(" << s << ")";  // objectName
     }
+
+#ifndef STANDARD_VPI
+
     out << ", id:" << object->UhdmId();
+
+#endif    
+
     if (objectType == vpiModule || objectType == vpiProgram || objectType == vpiClassDefn || objectType == vpiPackage ||
         objectType == vpiInterface || objectType == vpiUdp) {
       if (const char* s = vpi_get_str(vpiFile, obj_h))
@@ -168,7 +230,7 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, std
 // Public interface
 void visit_designs (const std::vector<vpiHandle>& designs, std::ostream &out) {
   for (auto design : designs) {
-    std::set<const BaseClass*> visited;
+    VisitedContainer visited;
     visit_object(design, 0, "", &visited, out);
   }
 }
@@ -180,3 +242,13 @@ std::string visit_designs (const std::vector<vpiHandle>& designs) {
 }
 
 };
+
+extern "C" { 
+  static std::stringstream the_output;
+  const char* vpi_decompiler (vpiHandle design) {
+    std::vector<vpiHandle> designs;
+    designs.push_back(design);
+    UHDM::visit_designs(designs, the_output);
+    return the_output.str().c_str();
+  }
+}
