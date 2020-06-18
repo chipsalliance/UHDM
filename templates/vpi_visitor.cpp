@@ -207,7 +207,7 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, Vis
       if (const char* s = vpi_get_str(vpiFile, obj_h))
         out << ", file:" << s;  // fileName
     }
-    if (unsigned int l = vpi_get(vpiLineNo, obj_h)) {
+    if (int l = vpi_get(vpiLineNo, obj_h)) {
       out << ", line:" << l;
     }
     if (vpiHandle par = vpi_handle(vpiParent, obj_h)) {

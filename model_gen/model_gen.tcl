@@ -917,9 +917,9 @@ proc write_vpi_visitor_cpp {} {
     close $fid
     set vpi_visitor ""
     foreach classname [array name VISITOR] {
-       # if [info exist filter($classname)] {
-       #     continue
-       # }
+        #if [info exist filter($classname)] {
+        #    continue
+        #}
         set vpiName [makeVpiName $classname]
         set relations ""
         if [info exist VISITOR_RELATIONS($classname)] {
@@ -1208,8 +1208,8 @@ proc generate_code { models } {
             append methods($classname) [printMethods $classname string vpiFile 1]
             append members($classname) [printMembers string vpiFile 1]
             lappend vpi_get_str_body_inst($classname) [list $classname string vpiFile 1]
-            append methods($classname) [printMethods $classname "unsigned int" vpiLineNo 1]
-            append members($classname) [printMembers "unsigned int" vpiLineNo 1]
+            append methods($classname) [printMethods $classname "int" vpiLineNo 1]
+            append members($classname) [printMembers "int" vpiLineNo 1]
             lappend vpi_get_body_inst($classname) [list $classname int vpiLineNo 1]
             append methods($classname) [printMethods $classname "unsigned int" uhdmId 1]
             append members($classname) [printMembers "unsigned int" uhdmId 1]
