@@ -520,7 +520,6 @@ proc printVpiVisitor {classname vpi card} {
             append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
     if (itr) {
       visit_object(itr, subobject_indent, \"$vpi\", visited, out);
-      vpi_free_object(itr);
     }
 "
         }
@@ -535,9 +534,7 @@ proc printVpiVisitor {classname vpi card} {
     if (itr) {
       while (vpiHandle obj = vpi_scan(itr) ) {
         visit_object(obj, subobject_indent, \"$vpi\", visited, out);
-        vpi_free_object(obj);
       }
-      vpi_free_object(itr);
     }
 "
         }
@@ -757,14 +754,172 @@ proc write_VpiListener_h {} {
     close $listenerId
 }
 
-proc write_vpi_visitor_cpp {} {
-    global VISITOR VISITOR_RELATIONS
+set SHORT_VISITOR_LIST { class_obj
+assertion
+immediate_assert
+tchk_term
+primitive
+clocked_property
+enum_const
+attribute
+task_call
+program_array
+chandle_var
+return_stmt
+switch_array
+cont_assign
+while_stmt
+property_typespec
+fork_stmt
+repeat
+assert_stmt
+logic_typespec
+property_inst
+gen_var
+bit_typespec
+packed_array_net
+byte_var
+break_stmt
+sys_func_call
+typespec
+modport
+enum_var
+event_typespec
+named_event
+int_typespec
+forever_stmt
+interface_tf_decl
+final_stmt
+repeat_control
+packed_array_typespec
+constant
+port_bit
+short_real_var
+let_decl
+immediate_assume
+union_typespec
+param_assign
+integer_var
+method_func_call
+user_systf
+prim_term
+string_var
+property_spec
+delay_control
+expect_stmt
+operation
+class_typespec
+short_int_var
+event_control
+case_item
+gen_scope
+path_term
+property_decl
+assign_stmt
+tf_call
+sequence_typespec
+net_bit
+udp_defn
+short_int_typespec
+function
+sequence_inst
+delay_term
+named_fork
+time_var
+byte_typespec
+ports
+distribution
+initial
+string_typespec
+int_var
+do_while
+case_stmt
+sys_task_call
+package
+mod_path
+real_var
+atomic_stmt
+if_stmt
+virtual_interface_var
+if_else
+foreach_stmt
+alias_stmt
+release
+type_parameter
+class_defn
+null_stmt
+time_typespec
+enum_net
+module_array
+continue_stmt
+method_task_call
+task_func
+packed_array_var
+for_stmt
+func_call
+def_param
+array_var
+force
+scope
+typespecs
+sequence_decl
+named_begin
+spec_param
+instance_array
+integer_net
+reg_array
+constraint
+interface_typespec
+begin
+void_typespec
+cont_assign_bit
+class_var
+deassign
+udp_array
+gate_array
+unsupported_expr
+real_typespec
+program
+unsupported_stmt
+union_var
+always
+gen_scope_array
+integer_typespec
+tchk
+long_int_var
+array_typespec
+task
+named_event_array
+clocking_block
+time_net
+multiclock_sequence_expr
+concurrent_assertions
+immediate_cover
+long_int_typespec
+short_real_typespec
+primitive_array
+interface_array
+io_decl
+var_bit
+bit_var
+}
 
+
+proc write_vpi_visitor_cpp {} {
+    global VISITOR VISITOR_RELATIONS SHORT_VISITOR_LIST 
+
+    foreach item $SHORT_VISITOR_LIST {
+        set filter($item) 1
+    }
+    
     set fid [open "[project_path]/templates/vpi_visitor.cpp"]
     set visitor_cpp [read $fid]
     close $fid
     set vpi_visitor ""
     foreach classname [array name VISITOR] {
+       # if [info exist filter($classname)] {
+       #     continue
+       # }
         set vpiName [makeVpiName $classname]
         set relations ""
         if [info exist VISITOR_RELATIONS($classname)] {
