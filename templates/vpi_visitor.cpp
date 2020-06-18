@@ -32,10 +32,9 @@
 #include <string>
 #include <vector>
 
-#include "include/sv_vpi_user.h"
-#include "include/vhpi_user.h"
-
 #ifdef STANDARD_VPI
+
+#include <sv_vpi_user.h>
 
 // C++ 98 is default in Simulators compilers
 typedef std::set<vpiHandle> VisitedContainer;
@@ -57,8 +56,10 @@ typedef std::set<vpiHandle> VisitedContainer;
 #define vpiUnsupportedStmt 4000
 #define vpiUnsupportedExpr 4001
 
-#else 
+#else
 
+#include "include/sv_vpi_user.h"
+#include "include/vhpi_user.h"
 #include "headers/uhdm_types.h"
 #include "headers/containers.h"
 #include "headers/vpi_uhdm.h"
@@ -243,12 +244,14 @@ std::string visit_designs (const std::vector<vpiHandle>& designs) {
 
 };
 
+
+static std::stringstream the_output;
+
 extern "C" { 
-  static std::stringstream the_output;
-  const char* vpi_decompiler (vpiHandle design) {
+  void vpi_decompiler (vpiHandle design) {
     std::vector<vpiHandle> designs;
     designs.push_back(design);
     UHDM::visit_designs(designs, the_output);
-    return the_output.str().c_str();
+    std::cout << the_output.str().c_str() << std::endl;
   }
 }
