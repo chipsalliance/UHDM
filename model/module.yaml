@@ -19,7 +19,7 @@
   - property: index
     name: index
     vpi: vpiIndex
-    type: unsigned int
+    type: int
     card: 1
   - property: type
     name: vpiModule

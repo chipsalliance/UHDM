@@ -41,8 +41,3 @@
     vpi: vpiElement
     type: enum_struct_packed_net_group
     card: any
-  - class_ref: expr
-    name: expr
-    vpi: vpiIndex
-    type: expr
-    card: any

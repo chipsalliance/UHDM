@@ -54,12 +54,12 @@
   - property: net_type
     name: net type
     vpi: vpiNetType
-    type: unsigned int
+    type: int
     card: 1
   - property: resolved_net_type
     name: resolved net type
     vpi: vpiResolvedNetType
-    type: unsigned int
+    type: int
     card: 1
   - property: scalar
     name: scalar
@@ -151,8 +151,8 @@
     vpi: vpiTchkTerm
     type: tchk_term
     card: any
-  - class_ref: sim_nets
-    name: sim nets
+  - class_ref: sim_net
+    name: sim net
     vpi: vpiSimNet
     type: nets
     card: 1
