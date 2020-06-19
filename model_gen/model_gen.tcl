@@ -360,8 +360,7 @@ proc printGetStrVisitor {classname type vpi card} {
 proc printGetVisitor {classname type vpi card} {
     set vpi_get_body ""
     if {$vpi == "vpiValue"} {
-        append vpi_get_body "
-    s_vpi_value value;
+        append vpi_get_body "    s_vpi_value value;
     vpi_get_value(obj_h, \\&value);
     if (value.format) {
       std::string val = visit_value(\\&value);
