@@ -360,10 +360,14 @@ proc printGetStrVisitor {classname type vpi card} {
 proc printGetVisitor {classname type vpi card} {
     set vpi_get_body ""
     if {$vpi == "vpiValue"} {
-        append vpi_get_body "    s_vpi_value value;
+        append vpi_get_body "
+    s_vpi_value value;
     vpi_get_value(obj_h, \\&value);
     if (value.format) {
-      stream_indent(out, indent) << visit_value(\\&value);
+      std::string val = visit_value(\\&value);
+      if (val != \"\") {
+        stream_indent(out, indent) << val;
+      }
     }
 "
     } elseif {$vpi == "vpiDelay"} {
