@@ -18,7 +18,7 @@
   - property: index
     name: index
     vpi: vpiPortIndex
-    type: unsigned int
+    type: int
     card: 1
   - property: name
     name: name
@@ -28,7 +28,7 @@
   - property: port_type
     name: port_type
     vpi: vpiPortType
-    type: unsigned int
+    type: int
     card: 1
   - property: scalar
     name: scalar
@@ -48,12 +48,12 @@
   - property: direction
     name: direction
     vpi: vpiDirection
-    type: unsigned int
+    type: int
     card: 1
   - property: size
     name: size
     vpi: vpiSize
-    type: unsigned int
+    type: int
     card: 1
   - property: explicitly_named
     name: name

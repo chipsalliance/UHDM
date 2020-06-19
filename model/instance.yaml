@@ -44,7 +44,7 @@
   - property: definition_location_line
     name: definition location line
     vpi: vpiDefLineNo
-    type: unsigned int
+    type: int
     card: 1 
   - property delay_mode
     name: delay mode

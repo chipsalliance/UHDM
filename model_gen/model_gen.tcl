@@ -375,12 +375,12 @@ proc printGetVisitor {classname type vpi card} {
 "
     } elseif {($card == 1) && ($type != "string") && ($vpi != "vpiLineNo") && ($vpi != "vpiType")} {
         append vpi_get_body "    if (const int n = vpi_get($vpi, obj_h))
-      stream_indent(out, indent) << \"|$vpi:\" << n << \"\\n\";
+      if (n != -1)
+        stream_indent(out, indent) << \"|$vpi:\" << n << \"\\n\";
 "
     }
     return $vpi_get_body
 }
-
 
 proc printGetStrBody {classname type vpi card} {
     set vpi_get_str_body ""

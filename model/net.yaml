@@ -26,4 +26,9 @@
     vpi: vpiAttribute
     type: attribute
     card: any
-
+  - class_ref: expr
+    name: expr
+    vpi: vpiIndex
+    type: expr
+    card: any
+ 

@@ -21,9 +21,3 @@
     vpi: vpiPackedArrayMember
     type: bool
     card: 1
-  - class_ref: expr
-    name: expr
-    vpi: vpiIndex
-    type: expr
-    card: any
-    
