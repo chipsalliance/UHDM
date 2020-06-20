@@ -36,3 +36,6 @@
 /src
 /CMakeBuilds
 /.vs
+
+# Build directory
+build/
