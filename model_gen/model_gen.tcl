@@ -521,9 +521,7 @@ proc printVpiVisitor {classname vpi card} {
         # Prevent loop in Standard VPI
         if {($vpi != "vpiModule")} {
             append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
-    if (itr) {
-      visit_object(itr, subobject_indent, \"$vpi\", visited, out);
-    }
+    visit_object(itr, subobject_indent, \"$vpi\", visited, out);
 "
         }
     } else {
@@ -534,10 +532,8 @@ proc printVpiVisitor {classname vpi card} {
         # Prevent loop in Standard VPI
         if {$vpi != "vpiUse"} {
         append vpi_visitor "    itr = vpi_iterate($vpi,obj_h);
-    if (itr) {
-      while (vpiHandle obj = vpi_scan(itr) ) {
-        visit_object(obj, subobject_indent, \"$vpi\", visited, out);
-      }
+    while (vpiHandle obj = vpi_scan(itr) ) {
+      visit_object(obj, subobject_indent, \"$vpi\", visited, out);
     }
 "
         }
@@ -766,6 +762,7 @@ clocked_property
 enum_const
 attribute
 task_call
+parameter
 program_array
 chandle_var
 return_stmt
@@ -795,7 +792,6 @@ interface_tf_decl
 final_stmt
 repeat_control
 packed_array_typespec
-constant
 port_bit
 short_real_var
 let_decl
@@ -905,6 +901,7 @@ interface_array
 io_decl
 var_bit
 bit_var
+design
 }
 
 
