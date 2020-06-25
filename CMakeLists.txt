@@ -17,6 +17,7 @@ option(
   WITH_LIBCXX
   "Building with clang++ and libc++(in Linux). To enable with: -DWITH_LIBCXX=On"
   On)
+option(UHDM_BIULD_TESTS "Enable testing." ON)
 
 project(UHDM)
 
@@ -150,77 +151,35 @@ endif()
 add_dependencies(uhdm GenerateCode)
 add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
 
-enable_testing()
+if (UHDM_BIULD_TESTS)
+  enable_testing()
 
-add_executable(uhdm-test1 ${PROJECT_SOURCE_DIR}/tests/test1.cpp)
-target_link_libraries(uhdm-test1 PRIVATE uhdm)
-add_test(
-  NAME uhdm-test1
-  COMMAND uhdm-test1
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+  function(register_tests)
+    foreach(test_cc_file IN LISTS ARGN)
+      # We create the binary name and test prefix from the cpp-filepath
+      get_filename_component(test_bin ${test_cc_file} NAME_WE)
+      get_filename_component(test_prefix ${test_cc_file} DIRECTORY)
 
-add_executable(uhdm-test2 ${PROJECT_SOURCE_DIR}/tests/test2.cpp)
-target_link_libraries(uhdm-test2 PRIVATE uhdm)
-add_test(
-  NAME uhdm-test2
-  COMMAND uhdm-test2
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
-add_executable(uhdm-test3 ${PROJECT_SOURCE_DIR}/tests/test3.cpp)
-target_link_libraries(uhdm-test3 PRIVATE uhdm)
-add_test(
-  NAME uhdm-test3
-  COMMAND uhdm-test3
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
-add_executable(uhdm-test4 ${PROJECT_SOURCE_DIR}/tests/test4.cpp)
-target_link_libraries(uhdm-test4 PRIVATE uhdm)
-add_test(
-  NAME uhdm-test4
-  COMMAND uhdm-test4
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
-add_executable(uhdm-test-tf-call ${PROJECT_SOURCE_DIR}/tests/test_tf_call.cpp)
-target_link_libraries(uhdm-test-tf-call PRIVATE uhdm)
-add_test(
-  NAME uhdm-test-tf-call
-  COMMAND uhdm-test-tf-call
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
-add_executable(uhdm-test-process ${PROJECT_SOURCE_DIR}/tests/test_process.cpp)
-target_link_libraries(uhdm-test-process PRIVATE uhdm)
-add_test(
-  NAME uhdm-test-process
-  COMMAND uhdm-test-process
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
-add_executable(uhdm-listener ${PROJECT_SOURCE_DIR}/tests/test_listener.cpp)
-target_link_libraries(uhdm-listener PRIVATE uhdm)
-add_test(
-  NAME uhdm-listener
-  COMMAND uhdm-listener
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
-add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/tests/dump.cpp)
-target_link_libraries(uhdm-dump PRIVATE uhdm)
-add_test(
-  NAME uhdm-dump
-  COMMAND uhdm-dump --elab surelog.uhdm
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
-add_executable(listener-elab ${PROJECT_SOURCE_DIR}/tests/listener_elab.cpp)
-target_link_libraries(listener-elab PRIVATE uhdm)
-add_test(
-  NAME listener-elab
-  COMMAND listener-elab
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
-add_executable(full-elab ${PROJECT_SOURCE_DIR}/tests/full_elab.cpp)
-target_link_libraries(full-elab PRIVATE uhdm)
-add_test(
-  NAME full-elab
-  COMMAND full-elab
-  WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+      add_executable(${test_bin} ${PROJECT_SOURCE_DIR}/${test_cc_file})
+      target_link_libraries(${test_bin} PRIVATE uhdm)
+      add_test(
+	NAME ${test_prefix}/${test_bin} COMMAND ${test_bin}
+	WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    endforeach()
+  endfunction()
+  register_tests(
+    tests/test1.cpp
+    tests/test2.cpp
+    tests/test3.cpp
+    tests/test4.cpp
+    tests/test_tf_call.cpp
+    tests/test_process.cpp
+    tests/test_listener.cpp
+    tests/dump.cpp
+    tests/listener_elab.cpp
+    tests/full_elab.cpp
+  )
+endif()
 
 # Installation target
 install(
