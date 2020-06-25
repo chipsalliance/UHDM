@@ -17,7 +17,7 @@ option(
   WITH_LIBCXX
   "Building with clang++ and libc++(in Linux). To enable with: -DWITH_LIBCXX=On"
   On)
-option(UHDM_BIULD_TESTS "Enable testing." ON)
+option(UHDM_BUILD_TESTS "Enable testing." ON)
 
 project(UHDM)
 
@@ -151,7 +151,7 @@ endif()
 add_dependencies(uhdm GenerateCode)
 add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
 
-if (UHDM_BIULD_TESTS)
+if (UHDM_BUILD_TESTS)
   enable_testing()
 
   function(register_tests)
