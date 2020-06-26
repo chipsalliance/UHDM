@@ -153,6 +153,9 @@ add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
 
 if (UHDM_BUILD_TESTS)
   enable_testing()
+  # All unit-tests are registered with this custom target as dependency, so
+  # just `make UnitTests` will build them all.
+  add_custom_target(UnitTests)
 
   function(register_tests)
     foreach(test_cc_file IN LISTS ARGN)
@@ -163,8 +166,11 @@ if (UHDM_BUILD_TESTS)
       add_executable(${test_bin} ${PROJECT_SOURCE_DIR}/${test_cc_file})
       target_link_libraries(${test_bin} PRIVATE uhdm)
       add_test(
-	NAME ${test_prefix}/${test_bin} COMMAND ${test_bin}
-	WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+        NAME ${test_prefix}/${test_bin} COMMAND ${test_bin}
+        WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+
+      # Now, add this binary to our UnitTests target that it builds this
+      add_dependencies(UnitTests ${test_bin})
     endforeach()
   endfunction()
   register_tests(
@@ -175,15 +181,19 @@ if (UHDM_BUILD_TESTS)
     tests/test_tf_call.cpp
     tests/test_process.cpp
     tests/test_listener.cpp
-    tests/dump.cpp
+    tests/test-dump.cpp
     tests/listener_elab.cpp
     tests/full_elab.cpp
   )
 endif()
 
+# A debugging binary
+add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/util/uhdm-dump.cpp)
+target_link_libraries(uhdm-dump PRIVATE uhdm)
+
 # Installation target
 install(
-  TARGETS uhdm capnp kj
+  TARGETS uhdm capnp kj uhdm-dump
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/

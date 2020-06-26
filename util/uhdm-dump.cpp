@@ -1,20 +1,37 @@
-#include <iostream>
-#include <sys/stat.h>
-#include <string.h>
-#include <limits.h> /* PATH_MAX */
+/*
+ * Copyright 2019 Alain Dargelas
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <errno.h>
-#include <stdlib.h>
-#include <iostream>
-#include <algorithm>
-#include <string>
+#include <limits.h> /* PATH_MAX */
 #include <stdio.h>
-#include <regex>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+
+#include <algorithm>
 #include <fstream>
+#include <iostream>
+#include <regex>
 #include <sstream>
+#include <string>
+
 
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
-  #include <dirent.h>
-  #include <unistd.h>
+#  include <dirent.h>
+#  include <unistd.h>
 #endif
 
 #include "headers/uhdm.h"
@@ -54,8 +71,9 @@ static bool CompareContentWithFile(const std::string &content,
 
 static int usage(const char *progname) {
   fprintf(stderr, "Usage:\n%s [options] <uhdm-file> [<golden-file-to-compare>]\n", progname);
-  fprintf(stderr, "Reads UHDM binary representation and prints tree. If --elab is given, the\n"
-          "tree is elaborated first.\n");
+  fprintf(stderr,
+          "Reads UHDM binary representation and prints tree. If --elab is "
+          "given, the\ntree is also elaborated.\n");
   fprintf(stderr, "Options:\n"
           "\t--elab          : Elaborate the restored design.\n"
           "\t--verbose       : print diagnostic messages.\n"
@@ -63,7 +81,7 @@ static int usage(const char *progname) {
   return 1;
 }
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
   bool elab = false;
   bool verbose = false;
   std::string uhdmFile;
@@ -81,7 +99,7 @@ int main (int argc, char** argv) {
   }
 
   if (uhdmFile.empty()) {
-    uhdmFile = "surelog.uhdm";
+    return usage(argv[0]);
   }
 
   struct stat buffer;
