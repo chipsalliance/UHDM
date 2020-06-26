@@ -1,5 +1,5 @@
 /*
- * simple dump test. Simplified from src/uhdm-dump.cpp
+ * simple dump test. Simplified from util/uhdm-dump.cpp
  */
 #include <iostream>
 #include <sys/stat.h>
