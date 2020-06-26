@@ -37,19 +37,19 @@ proc generate_elaborator { models } {
 
         append clone_cases "  case $vpiName: {
 "
-        
+
         if [regexp {Net} $vpiName] {
             append clone_cases "    $classname* clone_obj = dynamic_cast<$classname*>(elaborator->bindNet((($classname*)root)->VpiName()));
     if (clone_obj == nullptr) {
       clone_obj = s.Make${Classname}();
-    } 
-"   
+    }
+"
         } elseif [regexp {Parameter} $vpiName] {
             append clone_cases "    $classname* clone_obj = dynamic_cast<$classname*>(elaborator->bindParam((($classname*)root)->VpiName()));
     if (clone_obj == nullptr) {
       clone_obj = s.Make${Classname}();
-    } 
-"   
+    }
+"
         } else {
             append clone_cases "    $classname* clone_obj = s.Make${Classname}();
 "
@@ -67,7 +67,7 @@ proc generate_elaborator { models } {
             set Classname [string toupper $classname 0 0]
             set modeltype [dict get $data type]
             set MODEL_TYPE($classname) $modeltype
-            
+
             dict for {key val} $data {
                 if {$key == "properties"} {
                     dict for {prop conf} $val {
@@ -96,7 +96,7 @@ proc generate_elaborator { models } {
                                 append method "s"
                             }
                         }
-                        
+
                         if {$card == 1} {
                             append clone_cases "    clone_obj->${method}((${cast}*) clone_tree((($classname*)root)->${method}(), s, elaborator));
 "
@@ -105,15 +105,15 @@ proc generate_elaborator { models } {
                                     append clone_cases "    if (clone_obj->${method}() == nullptr) {
       clone_obj->${method}(elaborator->bindAny((($classname*)root)->VpiName()));
     }
-"  
-                                } 
+"
+                                }
                             }
-                            
+
                             if {$rootclassname == "module"} {
                                 append vpi_listener "          inst->${method}((${cast}*) clone_tree(defMod->${method}(), *serializer_, this));
 "
                             }
-                        } else {                          
+                        } else {
                             append clone_cases "    if (auto vec = (($classname*)root)->${method}()) {
       auto clone_vec = s.Make${Cast}Vec();
       clone_obj->${method}(clone_vec);
@@ -132,8 +132,8 @@ proc generate_elaborator { models } {
             }
           }
 "
-                                
-                            }  
+
+                            }
                         }
                     }
                 }
@@ -145,33 +145,33 @@ proc generate_elaborator { models } {
             } else {
                 set baseclass ""
             }
-            
-            
+
+
         }
 
         append clone_cases "    break;
   }
 "
- 
-   
+
+
     }
 
-    
+
     set fid [open "[project_path]/templates/ElaboratorListener.h"]
     set listener_content [read $fid]
     close $fid
-    
+
     regsub {<ELABORATOR_LISTENER>} $listener_content $vpi_listener listener_content
 
     set listenerId [open "[project_path]/headers/ElaboratorListener.h" "w"]
     puts $listenerId $listener_content
     close $listenerId
 
-    
+
     set fid [open "[project_path]/templates/clone_tree.h"]
     set clone_content [read $fid]
     close $fid
-    
+
     set cloneId [open "[project_path]/headers/clone_tree.h" "w"]
     puts $cloneId $clone_content
     close $cloneId
@@ -179,11 +179,11 @@ proc generate_elaborator { models } {
     set fid [open "[project_path]/templates/clone_tree.cpp"]
     set clone_content [read $fid]
     close $fid
-    
+
     regsub {<CLONE_CASES>} $clone_content $clone_cases clone_content
 
     set cloneId [open "[project_path]/src/clone_tree.cpp" "w"]
     puts $cloneId $clone_content
     close $cloneId
-    
+
 }
