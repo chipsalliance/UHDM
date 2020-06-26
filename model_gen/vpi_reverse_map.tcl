@@ -50,5 +50,3 @@ proc write_enum { file } {
 parse_define_file "../include/vpi_user.h"
 parse_define_file "../include/sv_vpi_user.h"
 write_enum "vpi_map.txt"
-
-
