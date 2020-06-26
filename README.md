@@ -97,7 +97,7 @@ Universal Hardware Data Model
    * The listener enables client application development with minimum disruption while the data model evolves.
    * An Custom Elaborator example code uses the Listener Design Pattern in [`listener_elab.cpp`](tests/listener_elab.cpp)
    * A Full Elaboration example is demostrated in [`full_elab.cpp`](tests/full_elab.cpp) and [`dump.cpp`](tests/dump.cpp)
- * The uhdm-dump [`dump.cpp`](tests/dump.cpp) executable creates a human readable view of the UHDM serialized data model using the visitor [`visitor.cpp`](templates/vpi_visitor.cpp) 
+ * The uhdm-dump [`uhdm-dump`](util/uhdm-dump.cpp) executable creates a human readable view of the UHDM serialized data model using the visitor [`visitor.cpp`](templates/vpi_visitor.cpp).
 
 
 # Linking libuhdm.a to your application
