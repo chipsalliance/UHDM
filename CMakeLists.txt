@@ -187,7 +187,7 @@ if (UHDM_BUILD_TESTS)
   )
 endif()
 
-# A debugging binary
+# A useful utility
 add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/util/uhdm-dump.cpp)
 target_link_libraries(uhdm-dump PRIVATE uhdm)
 
