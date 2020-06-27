@@ -76,7 +76,7 @@ s_vpi_value* String2VpiValue(const std::string& s) {
     scopy.erase(0,5);
     val->format = vpiRealVal;
     val->value.real = atol(scopy.c_str());
-  } 
+  }
   return val;
 }
 
@@ -129,7 +129,7 @@ std::string VpiValue2String(const s_vpi_value* value) {
   case vpiRealVal: {
     return std::string(std::string("REAL:") + std::to_string(value->value.real));
     break;
-  }   
+  }
   default:
     break;
   }
@@ -196,6 +196,7 @@ vpiHandle vpi_handle_multi (PLI_INT32 type,
 vpiHandle vpi_iterate (PLI_INT32 type, vpiHandle refHandle) {
   const uhdm_handle* const handle = (const uhdm_handle*) refHandle;
   const BaseClass* const object = (const BaseClass*) handle->object;
+
   <VPI_ITERATE_BODY>
   std::cout << "VPI ERROR: Bad usage of vpi_iterate" << std::endl;
   return 0;
@@ -226,10 +227,10 @@ PLI_INT32 vpi_get (PLI_INT32   property,
       std::cout << "VPI ERROR: Bad usage of vpi_get" << std::endl;
     return 0;
   }
-  uhdm_handle* handle = (uhdm_handle*) object;
-  BaseClass*  obj = (BaseClass*) handle->object;
-  <VPI_GET_BODY>
-  return 0;
+
+  // At this point, the implementation is exactly the same as for 64 bit,
+  // but we truncate.
+  return (PLI_INT32) vpi_get64(property, object);
 }
 
 PLI_INT64 vpi_get64 (PLI_INT32 property,
@@ -238,9 +239,21 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
       std::cout << "VPI ERROR: Bad usage of vpi_get64" << std::endl;
     return 0;
   }
-  uhdm_handle* handle = (uhdm_handle*) object;
-  BaseClass*  obj = (BaseClass*) handle->object;
-  <VPI_GET_BODY>
+
+  const uhdm_handle* const handle = (const uhdm_handle*) object;
+  const BaseClass*  const obj = (const BaseClass*) handle->object;
+
+  // Baseclass-handled properties; all the others still need to be handled
+  // separately, but this is a good start.
+  switch (property) {
+    case vpiLineNo: return obj->VpiLineNo();
+    case vpiType: return obj->VpiType();
+  }
+
+  // ... all other properties currently handled 'manually' for now
+  if (false) {}
+<VPI_GET_BODY>
+
   return 0;
 }
 
@@ -250,9 +263,33 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
     std::cout << "VPI ERROR: Bad usage of vpi_get_str" << std::endl;
     return 0;
   }
-  uhdm_handle* handle = (uhdm_handle*) object;
-  BaseClass*  obj = (BaseClass*) handle->object;
+  const uhdm_handle* const handle = (const uhdm_handle*) object;
+  const BaseClass*  const obj = (const BaseClass*) handle->object;
+
+  // Handle some easy cases first; these are handled in the BaseClass.
+  // TODO: add some specific property interfaces (VpiFullNameImplementor?)
+  // to access some other common properties.
+  switch (property) {
+    case vpiFile:
+      return (PLI_BYTE8*) (obj->VpiFile().empty()
+                           ? 0
+                           : obj->VpiFile().c_str());
+
+   case vpiName:
+     return (PLI_BYTE8*) (obj->VpiName().empty()
+                          ? 0
+                          : obj->VpiName().c_str());
+
+    case vpiDefName:
+      return (PLI_BYTE8*) (obj->VpiDefName().empty()
+                           ? 0
+                           : obj->VpiDefName().c_str());
+  }
+
+  // ... all other properties currently handled 'manually' for now
+  if (false) {}
   <VPI_GET_STR_BODY>
+
   return 0;
 }
 
@@ -264,8 +301,8 @@ void vpi_get_delays (vpiHandle object,
   if (!object) {
     std::cout << "VPI ERROR: Bad usage of vpi_get_delay" << std::endl;
   }
-  uhdm_handle* handle = (uhdm_handle*) object;
-  BaseClass*  obj = (BaseClass*) handle->object;
+  const uhdm_handle* const handle = (const uhdm_handle*) object;
+  const BaseClass*  const obj = (const BaseClass*) handle->object;
   delay_p->da = nullptr;
   <VPI_GET_DELAY_BODY>
 }
@@ -281,8 +318,8 @@ void vpi_get_value (vpiHandle vexpr,
   if (!vexpr) {
     std::cout << "VPI ERROR: Bad usage of vpi_get_value" << std::endl;
   }
-  uhdm_handle* handle = (uhdm_handle*) vexpr;
-  BaseClass*  obj = (BaseClass*) handle->object;
+  const uhdm_handle* const handle = (const uhdm_handle*) vexpr;
+  const BaseClass*  const obj = (const BaseClass*) handle->object;
   value_p->format = 0;
   <VPI_GET_VALUE_BODY>
 }
