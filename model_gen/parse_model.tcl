@@ -29,6 +29,7 @@ proc parse_model { file } {
         if {$line != ""} {
             set fid [open "[project_path]/model/$line"]
             set model [read $fid]
+            append content "#FILE:$line\n"  # remember what file this came from
             append content "$model\n"
             close $fid
         }
@@ -42,8 +43,20 @@ proc parse_model { file } {
     set obj_type ""
     set vpiType ""
     set vpiObj ""
+    set lineNo 0
+    set currentFilename ""
+    set any_error 0
     foreach line $lines {
-        if [regexp {^#} $line] {
+        # Get the original filename for error reporting.
+        if [regexp {^#FILE:([a-zA-Z0-9_.]+)} $line tmp currentFilename] {
+            set lineNo 0
+            continue
+        }
+        incr lineNo
+        if [regexp {^[ ]*#} $line] {      # comment
+            continue
+        }
+        if [regexp {^[ \t]*$} $line] {    # empty line
             continue
         }
         set spaces ""
@@ -64,8 +77,7 @@ proc parse_model { file } {
             lappend models obj_def$modelId
             set OBJ(curr) obj_def$modelId
             incr modelId
-        }
-        if [regexp {\- class_def: ([a-zA-Z0-9_]+)} $line tmp name] {
+        } elseif [regexp {\- class_def: ([a-zA-Z0-9_]+)} $line tmp name] {
             set vpiType ""
             set vpiObj  ""
             global obj_def$modelId
@@ -76,8 +88,7 @@ proc parse_model { file } {
             lappend models obj_def$modelId
             set OBJ(curr) obj_def$modelId
             incr modelId
-        }
-        if [regexp {\- group_def: ([a-zA-Z0-9_]+)} $line tmp name] {
+        } elseif [regexp {\- group_def: ([a-zA-Z0-9_]+)} $line tmp name] {
             set vpiType ""
             set vpiObj  ""
             global obj_def$modelId
@@ -88,60 +99,56 @@ proc parse_model { file } {
             lappend models obj_def$modelId
             set OBJ(curr) obj_def$modelId
             incr modelId
-        }
-        if [regexp {property: ([a-zA-Z0-9_]+)} $line tmp name] {
+        } elseif [regexp {property: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "properties" $name {}
             set obj_name $name
             set obj_type "properties"
-        }
-        if [regexp {class_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
+        } elseif [regexp {class_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "class_ref" $name {}
             set obj_name $name
             set obj_type "class_ref"
-        }
-        if [regexp {extends: ([a-zA-Z0-9_]+)} $line tmp name] {
+        } elseif [regexp {extends: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "extends" class_def $name
             set obj_name $name
             set obj_type "class_ref"
             set data [subst $$OBJ(curr)]
             set classname [dict get $data name]
             set BASECLASS($classname) $name
-        }
-        if [regexp {obj_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
+        } elseif [regexp {obj_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "obj_ref" $name {}
             set obj_name $name
             set obj_type "obj_ref"
-        }
-        if [regexp {group_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
+        } elseif [regexp {group_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "group_ref" $name {}
             set obj_name $name
             set obj_type "group_ref"
-        }
-        if [regexp {class: ([a-zA-Z0-9_]+)} $line tmp name] {
+        } elseif [regexp {class: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "class" $name {}
             set obj_name $name
             set obj_type "class"
-        }
-        if [regexp {type: (.*)} $line tmp type] {
+        } elseif [regexp {type: (.*)} $line tmp type] {
             dict set $OBJ(curr) $obj_type $obj_name type $type
-        }
-        if [regexp {vpi: ([a-zA-Z0-9_]+)} $line tmp vpiType] {
+        } elseif [regexp {vpi: ([a-zA-Z0-9_]+)} $line tmp vpiType] {
             dict set $OBJ(curr) $obj_type $obj_name vpi $vpiType
-        }
-        if [regexp {vpi_obj: ([a-zA-Z0-9_]+)} $line tmp vpiObj] {
+        } elseif [regexp {vpi_obj: ([a-zA-Z0-9_]+)} $line tmp vpiObj] {
             dict set $OBJ(curr) $obj_type $obj_name vpi $vpiObj
-        }
-        if [regexp {card: ([a-zA-Z0-9_]+)} $line tmp card] {
+        } elseif [regexp {card: ([a-zA-Z0-9_]+)} $line tmp card] {
             dict set $OBJ(curr) $obj_type $obj_name card $card
             foreach {id define} [defineType 0 $name $vpiType] {}
             if {$define != ""} {
                 append defines "$define\n"
             }
             dict set $OBJ(curr) $obj_type $obj_name "id" $id
-        }
-        if [regexp {name: ([a-zA-Z0-9_]*)} $line tmp name] {
+        } elseif [regexp {name: ([a-zA-Z0-9_]*)} $line tmp name] {
             dict set $OBJ(curr) $obj_type $obj_name name $name
+        } else {
+            puts "$currentFilename:$lineNo: Can't handle '$line'. Typo ?"
+            set any_error 1
         }
+    }
+
+    if {$any_error} {
+        exit 1
     }
 
     foreach classname [array names BASECLASS] {
