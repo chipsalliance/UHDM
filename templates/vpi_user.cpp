@@ -172,12 +172,30 @@ std::string VpiDelay2String(const s_vpi_delay* delay) {
   return result;
 }
 
-static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
-  return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
+vpiHandle NewVpiHandle (const UHDM::BaseClass* object) {
+  return reinterpret_cast<vpiHandle>(new uhdm_handle(object->UhdmType(), object));
 }
 
-vpiHandle NewVpiHandle (UHDM::BaseClass* object) {
-  return reinterpret_cast<vpiHandle>(new uhdm_handle(object->UhdmType(), object));
+/*
+ * TODO: this way of new-ing handles is problematic as we generate new
+ * objects that are never deleted, thus leaking memory.
+ *
+ * Goal should be to not have to allocate a shim-object but rather cast
+ * our internal implementation pointer to vpiHandle.
+ *
+ * For most cases already, UHDM::BaseClass* would already fit the bill to
+ * directly type-cast to vpiHandle which then is our opaque type we can cast
+ * back to UHDM::BaseClass.
+ *
+ * Alas, we also use NewHandle() in a case where we don't have an object of
+ * type BaseClass, thus we need the wrapper (see examples below in generated
+ * code).
+ *
+ * So once we get that also onto some sort of super-base class (just a class
+ * containing UhdmType() ?) we can fix this.
+ */
+static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
+  return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
 }
 
 vpiHandle vpi_handle_by_index (vpiHandle object,

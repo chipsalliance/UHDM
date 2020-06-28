@@ -42,10 +42,6 @@
 
 using namespace UHDM;
 
-static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
-  return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
-}
-
 <VPI_LISTENERS>
 
 void UHDM::listen_any(vpiHandle object, VpiListener* listener) {
@@ -62,4 +58,3 @@ void UHDM::listen_designs (const std::vector<vpiHandle>& designs, VpiListener* l
     listen_design(design_h, listener);
   }
 }
-

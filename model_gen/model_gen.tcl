@@ -238,12 +238,10 @@ proc printIterateBody { name classname vpi card } {
     set vpi_iterate_body ""
     if {$card == "any"} {
         append vpi_iterate_body "
-  if (handle->type == uhdm${classname}) {
-    if (type == $vpi) {
-      if ((($classname*)(object))->[string toupper ${name} 0 0]())
-       return NewHandle(uhdm${name}, (($classname*)(object))->[string toupper ${name} 0 0]());
-      else return 0;
-    }
+  if (handle->type == uhdm${classname} \\&\\& type == $vpi) {
+    if ((($classname*)(object))->[string toupper ${name} 0 0]())
+      return NewHandle(uhdm${name}, (($classname*)(object))->[string toupper ${name} 0 0]());
+    else return 0;
   }"
         printVpiVisitor $classname $vpi $card
         return $vpi_iterate_body
@@ -254,23 +252,20 @@ proc printGetHandleByNameBody { name classname vpi card } {
     if {$card == 1} {
         set vpi_handle_by_name_body "
   if (handle->type == uhdm${classname}) {
-    if ((($classname*)(object))->[string toupper ${name} 0 0]()) {
-      if ((($classname*)(object))->[string toupper ${name} 0 0]()->VpiName() == name) {
-        return NewHandle((($classname*)(object))->[string toupper ${name} 0 0]()->UhdmType(), (($classname*)(object))->[string toupper ${name} 0 0]());
-      }
+    const $classname* const obj = (const $classname*)(object);
+    if (obj->[string toupper ${name} 0 0]() \\&\\& obj->[string toupper ${name} 0 0]()->VpiName() == name) {
+      return NewVpiHandle(obj->[string toupper ${name} 0 0]());
     }
   }"
     } else {
         set vpi_handle_by_name_body "
   if (handle->type == uhdm${classname}) {
-    if ((($classname*)(object))->[string toupper ${name} 0 0]()) {
-      for (auto\\& obj : *(($classname*)(object))->[string toupper ${name} 0 0]()) {
-        if (obj->VpiName() == name) {
-          return NewHandle(obj->UhdmType(), obj);
-        }
+    const $classname* const obj_parent = (const $classname*)(object);
+    if (obj_parent->[string toupper ${name} 0 0]()) {
+      for (const BaseClass *obj : *obj_parent->[string toupper ${name} 0 0]())
+        if (obj->VpiName() == name) return NewVpiHandle(obj);
       }
-    }
-  }"
+    }"
     }
     return $vpi_handle_by_name_body
 }
@@ -346,12 +341,10 @@ proc printGetHandleBody { classname type vpi object card } {
             set casted_object2 "(($classname*)(object))"
         }
         append vpi_get_handle_body "
-  if (handle->type == uhdm${classname}) {
-     if (type == $vpi) {
-       if ($casted_object1->[string toupper ${object} 0 0]()))
-         return NewHandle($casted_object1->[string toupper ${object} 0 0]())->UhdmType(), $casted_object2->[string toupper ${object} 0 0]());
-       else return 0;
-     }
+  if (handle->type == uhdm${classname} \\&\\& type == $vpi) {
+     if ($casted_object1->[string toupper ${object} 0 0]()))
+       return NewHandle($casted_object1->[string toupper ${object} 0 0]())->UhdmType(), $casted_object2->[string toupper ${object} 0 0]());
+     else return 0;
   }"
         printVpiVisitor $classname $vpi $card
         #printVpiListener $classname $vpi $card
@@ -436,10 +429,7 @@ proc printVpiListener {classname vpi type card} {
         set VPI_LISTENERS($classname) "void UHDM::listen_${classname}(vpiHandle object, VpiListener* listener) \{
   ${classname}* d = (${classname}*) ((const uhdm_handle*)object)->object;
   const BaseClass* parent = d->VpiParent();
-  vpiHandle parent_h = 0;
-  if (parent) {
-    parent_h = NewHandle(parent->UhdmType(), parent);
-  }
+  vpiHandle parent_h = parent ? NewVpiHandle(parent) : 0;
   listener->enter[string toupper ${classname} 0 0](d, parent, object, parent_h);
 "
         return

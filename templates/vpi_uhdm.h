@@ -57,7 +57,7 @@ class uhdm_handleFactory {
 };
 
 /** Obtain a vpiHandle from a BaseClass (any) object */
-vpiHandle NewVpiHandle (UHDM::BaseClass* object);
+vpiHandle NewVpiHandle (const UHDM::BaseClass* object);
 
 s_vpi_value* String2VpiValue(const std::string& s);
 
