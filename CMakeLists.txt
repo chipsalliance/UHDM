@@ -88,6 +88,7 @@ add_custom_command(
           ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_CURRENT_BINARY_DIR}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
+          ${PROJECT_SOURCE_DIR}/model_gen/parse_model.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst
           ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
           ${yaml_SRC}
