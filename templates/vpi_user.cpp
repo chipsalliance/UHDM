@@ -23,6 +23,7 @@
  * Created on December 14, 2019, 10:03 PM
  */
 #include <string.h>
+#include <strings.h>
 
 #include <iostream>
 #include <map>
@@ -43,39 +44,58 @@
 using namespace UHDM;
 
 s_vpi_value* String2VpiValue(const std::string& s) {
-  std::string scopy = s;
   s_vpi_value* val = new s_vpi_value;
   val->format = 0;
   val->value.integer = 0;
   val->value.str = nullptr;
-  if (strstr(scopy.c_str(), "INT:")) {
-    scopy.erase(0,4);
+  size_t pos;
+  if ((pos = s.find("INT:")) != std::string::npos) {
     val->format = vpiIntVal;
-    val->value.integer = atoi(scopy.c_str());
-  } if (strstr(scopy.c_str(), "SCAL:")) {
-    scopy.erase(0,5);
+    val->value.integer = atoi(s.c_str() + pos + strlen("INT:"));
+  }
+  else if ((pos = s.find("SCAL:")) != std::string::npos) {
     val->format = vpiScalarVal;
-    val->value.integer = atoi(scopy.c_str());
-  }else if (strstr(scopy.c_str(), "BIN:")) {
-    scopy.erase(0,4);
+    const char *const parse_pos = s.c_str() + pos + strlen("SCAL:");
+    switch (parse_pos[0]) {
+    case 'Z': val->value.integer = vpiZ; break;
+    case 'X': val->value.integer = vpiX; break;
+    case 'H': val->value.integer = vpiH; break;
+    case 'L': val->value.integer = vpiL; break;
+      // Not really clear what the difference between X and DontCare is.
+      // Let's parse 'W'eak don't care as this one.
+    case 'W': val->value.integer = vpiDontCare; break;
+    default:
+      if (strcasecmp(parse_pos, "DontCare") == 0) {
+        val->value.integer = vpiDontCare;
+      }
+      else if (strcasecmp(parse_pos, "NoChange") == 0) {
+        val->value.integer = vpiNoChange;
+      }
+      else {
+        val->value.integer = atoi(parse_pos); // Maybe written numerically?
+      }
+      break;
+    }
+  }
+  else if ((pos = s.find("BIN:")) != std::string::npos) {
     val->format = vpiBinStrVal;
-    val->value.str = strdup(scopy.c_str());
-  } else if (strstr(scopy.c_str(), "HEX:")) {
-    scopy.erase(0,4);
+    val->value.str = strdup(s.c_str() + pos + strlen("BIN:"));
+  }
+  else if ((pos = s.find("HEX:")) != std::string::npos) {
     val->format = vpiHexStrVal;
-    val->value.str = strdup(scopy.c_str());
-  } else if (strstr(scopy.c_str(), "OCT:")) {
-    scopy.erase(0,4);
+    val->value.str = strdup(s.c_str() + pos + strlen("HEX:"));
+  }
+  else if ((pos = s.find("OCT:")) != std::string::npos) {
     val->format = vpiOctStrVal;
-    val->value.str = strdup(scopy.c_str());
-  } else if (strstr(scopy.c_str(), "STRING:")) {
-    scopy.erase(0,7);
+    val->value.str = strdup(s.c_str() + pos + strlen("OCT:"));
+  }
+  else if ((pos = s.find("STRING:")) != std::string::npos) {
     val->format = vpiStringVal;
-    val->value.str = strdup(scopy.c_str());
-  } else if (strstr(scopy.c_str(), "REAL:")) {
-    scopy.erase(0,5);
+    val->value.str = strdup(s.c_str() + pos + strlen("STRING:"));
+  }
+  else if ((pos = s.find("REAL:")) != std::string::npos) {
     val->format = vpiRealVal;
-    val->value.real = atof(scopy.c_str());
+    val->value.real = atof(s.c_str() + pos + strlen("REAL:"));
   }
   return val;
 }
@@ -98,42 +118,40 @@ s_vpi_delay* String2VpiDelays(const std::string& s) {
 
 
 std::string VpiValue2String(const s_vpi_value* value) {
-  std::string result;
-  if (value == nullptr)
-    return result;
+  static const std::string kIntPrefix("INT:");
+  static const std::string kScalPrefix("SCAL:");
+  static const std::string kStrPrefix("STRING:");
+  static const std::string kHexPrefix("HEX:");
+  static const std::string kOctPrefix("OCT:");
+  static const std::string kBinPrefix("BIN:");
+  static const std::string kRealPrefix("REAL:");
+
+  if (!value) return "";
   switch (value->format) {
-  case vpiIntVal: {
-    return std::string(std::string("INT:") + std::to_string(value->value.integer));
-    break;
-  }
+  case vpiIntVal: return kIntPrefix + std::to_string(value->value.integer);
   case vpiScalarVal: {
-    return std::string(std::string("SCAL:") + std::to_string(value->value.scalar));
-    break;
+    switch (value->value.scalar) {
+    case vpi0: return "SCAL:0";
+    case vpi1: return "SCAL:1";
+    case vpiZ: return "SCAL:Z";
+    case vpiX: return "SCAL:X";
+    case vpiH: return "SCAL:H";
+    case vpiL: return "SCAL:L";
+    case vpiDontCare: return "SCAL:DontCare";
+    case vpiNoChange: return "SCAL:NoChange";
+    default:
+      // mmh, some unknown number.
+      return kScalPrefix + std::to_string(value->value.scalar);
+    }
   }
-  case vpiStringVal: {
-    return std::string(std::string("STRING:") + value->value.str);
-    break;
+  case vpiStringVal: return kStrPrefix + value->value.str;
+  case vpiHexStrVal: return kHexPrefix + value->value.str;
+  case vpiOctStrVal: return kOctPrefix + value->value.str;
+  case vpiBinStrVal: return kBinPrefix + value->value.str;
+  case vpiRealVal:  return kRealPrefix + std::to_string(value->value.real);
   }
-  case vpiHexStrVal: {
-    return std::string(std::string("HEX:") + value->value.str);
-    break;
-  }
-  case vpiOctStrVal: {
-    return std::string(std::string("OCT:") + value->value.str);
-    break;
-  }
-  case vpiBinStrVal: {
-    return std::string(std::string("BIN:") + value->value.str);
-    break;
-  }
-  case vpiRealVal: {
-    return std::string(std::string("REAL:") + std::to_string(value->value.real));
-    break;
-  }
-  default:
-    break;
-  }
-  return result;
+
+  return "";
 }
 
 
