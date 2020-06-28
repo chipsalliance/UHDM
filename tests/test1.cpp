@@ -97,7 +97,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   m1->Instance_items(inst_items);
   MyPayLoad* pl = new MyPayLoad(10);
   m1->Data(pl);
-  
+
   vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
   designs.push_back(dh);
 
@@ -112,7 +112,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
       exit(1);
     }
   }
-  
+
   return designs;
 }
 

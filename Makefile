@@ -10,7 +10,8 @@ debug:
 	$(MAKE) -C build
 
 test: build
-	$(MAKE) -C build UnitTests test
+	$(MAKE) -C build UnitTests
+	cd build && ctest --output-on-failure
 
 test-junit: release
 	cd build && ctest --no-compress-output -T Test -C RelWithDebInfo --output-on-failure

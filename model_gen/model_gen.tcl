@@ -129,8 +129,8 @@ proc printMethods { classname type vpi card {real_type ""} } {
     const BaseClass* parent = this;
     while (parent) {
       if (parent->UhdmType() == uhdmdesign) break;
-      const std::string\\& name = (parent->VpiName() != \"\") ? parent->VpiName() : parent->VpiDefName();
-      if (name != \"\")
+      const std::string\\& name = (!parent->VpiName().empty()) ? parent->VpiName() : parent->VpiDefName();
+      if (!name.empty())
         names.push_back(name);
       parent = parent->VpiParent();
     }
@@ -275,15 +275,27 @@ proc printGetHandleByNameBody { name classname vpi card } {
     return $vpi_handle_by_name_body
 }
 
+proc printGetBodyPrefix {classname} {
+    return "  if (handle->type == uhdm${classname}) \{
+    switch (property) \{"
+}
+
+proc printGetBodySuffix {} {
+    return "
+    \}
+  \}
+"
+}
+
 proc printGetBody {classname type vpi card} {
+    # These are already handled by base class
+    if {$vpi == "vpiType"} return ""
+    if {$vpi == "vpiLineNo"} return ""
+
     set vpi_get_body ""
     if {($card == 1) && ($type != "string") && ($type != "value") && ($type != "delay")} {
         append vpi_get_body "
-  if (handle->type == uhdm${classname}) {
-    if (property == $vpi) {
-      return (($classname*)(obj))->[string toupper ${vpi} 0 0]();
-    }
-  }"
+      case $vpi: return ((const $classname*)(obj))->[string toupper ${vpi} 0 0]();"
     }
     return $vpi_get_body
 }
@@ -364,7 +376,7 @@ proc printGetVisitor {classname type vpi card} {
     vpi_get_value(obj_h, \\&value);
     if (value.format) {
       std::string val = visit_value(\\&value);
-      if (val != \"\") {
+      if (!val.empty()) {
         stream_indent(out, indent) << val;
       }
     }
@@ -386,32 +398,27 @@ proc printGetVisitor {classname type vpi card} {
 }
 
 proc printGetStrBody {classname type vpi card} {
+    # Already handled by the base class
+    if {$vpi == "vpiFile"} return ""
+    if {$vpi == "vpiName"} return ""
+    if {$vpi == "vpiDefName"} return ""
+
     set vpi_get_str_body ""
     if {$card == 1 && ($type == "string")} {
         if {$vpi == "vpiFullName"} {
             append vpi_get_str_body "
-  if (handle->type == uhdm${classname}) {
-    if (property == $vpi) {
-      if (((($classname*)(obj))->[string toupper ${vpi} 0 0]() == \"\") || ((($classname*)(obj))->[string toupper ${vpi} 0 0]() == (($classname*)(obj))->VpiName())) {
-        return 0;
-      } else {
-        return (PLI_BYTE8*) (($classname*)(obj))->[string toupper ${vpi} 0 0]().c_str();
-      }
-    }
-  }
-"
+  if (handle->type == uhdm${classname} \\&\\& property == $vpi) {
+    const $classname* const o = (const $classname*)(obj);
+    return (o->[string toupper ${vpi} 0 0]().empty() || o->[string toupper ${vpi} 0 0]() == o->VpiName())
+        ? 0
+        : (PLI_BYTE8*) o->[string toupper ${vpi} 0 0]().c_str();
+  }"
         } else {
             append vpi_get_str_body "
-  if (handle->type == uhdm${classname}) {
-    if (property == $vpi) {
-      if ((($classname*)(obj))->[string toupper ${vpi} 0 0]() == \"\") {
-        return 0;
-      } else {
-        return (PLI_BYTE8*) (($classname*)(obj))->[string toupper ${vpi} 0 0]().c_str();
-      }
-    }
-  }
-"
+  if (handle->type == uhdm${classname} \\&\\& property == $vpi) {
+    const $classname* const o = (const $classname*)(obj);
+    return (PLI_BYTE8*) (o->[string toupper ${vpi} 0 0]().empty() ? 0 : o->[string toupper ${vpi} 0 0]().c_str());
+  }"
         }
     }
     return $vpi_get_str_body
@@ -1013,8 +1020,18 @@ proc update_vpi_inst { baseclass classname lvl } {
         }
     }
     if [info exist vpi_get_body_inst_l($baseclass)] {
+
+        set vpi_case_body ""
         foreach inst $vpi_get_body_inst_l($baseclass) {
-            append vpi_get_body_l [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+            append vpi_case_body [printGetBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
+        }
+        # The case body can be empty if all propeerties have been handled
+        # in the base class. So only if non-empty, add the if/switch
+        if {$vpi_case_body != ""} {
+            append vpi_get_body_l [printGetBodyPrefix $classname] $vpi_case_body [printGetBodySuffix]
+        }
+
+        foreach inst $vpi_get_body_inst_l($baseclass) {
             append vpi_get_value_body_l [printGetValueBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
             append vpi_get_delay_body_l [printGetDelayBody $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
             append VISITOR($classname) [printGetVisitor $classname [lindex $inst 1] [lindex $inst 2] [lindex $inst 3]]
