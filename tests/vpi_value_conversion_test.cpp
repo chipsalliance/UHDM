@@ -21,10 +21,8 @@ static void TEST_vpivalue2string() {
   EXPECT_EQ(VpiValue2String(&value), "INT:42");
 
   value.format = vpiScalarVal;
-  value.value.integer = vpiX;   // value of 3
-  // This is currently not properly translated. vpi0, vpi1, vpiZ, vpiX,
-  // vpiH, vpiL and vpiDontCare would be expected.
-  EXPECT_EQ(VpiValue2String(&value), "SCAL:3");
+  value.value.integer = vpiX;
+  EXPECT_EQ(VpiValue2String(&value), "SCAL:X");
 
   value.format = vpiStringVal;
   value.value.str = (PLI_BYTE8*)"helloworld";
@@ -47,21 +45,66 @@ static void TEST_vpivalue2string() {
   EXPECT_EQ(VpiValue2String(&value), "REAL:3.141592");
 }
 
-// Test that a string converted to vpi_value and back looks the same.
-static bool ParseConvertBackRoundtrip(const std::string &str) {
+static std::string ParseAndRegenerateString(const std::string &str) {
   std::unique_ptr<s_vpi_value> val(String2VpiValue(str));
-  return VpiValue2String(val.get()) == str;
+  return VpiValue2String(val.get());
 }
 
+static bool ParseConvertBackRoundtrip(const std::string &str) {
+  return ParseAndRegenerateString(str) == str;
+}
+
+static void TEST_ParseValueFindPrefix() {
+  EXPECT_EQ(ParseAndRegenerateString("INT:42"), "INT:42");
+
+  // With Whitespace in front.
+  EXPECT_EQ(ParseAndRegenerateString("  INT:42"), "INT:42");
+
+  // .. or even other garbage in front.
+  EXPECT_EQ(ParseAndRegenerateString("unrelated stuff:43 INT:42"), "INT:42");
+}
+
+static void TEST_ParseScalarValue() {
+  // Zero and one are represented as integers
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:0"), "SCAL:0");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:1"), "SCAL:1");
+
+  // Symbolic scalar values
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:Z"), "SCAL:Z");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:X"), "SCAL:X");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:H"), "SCAL:H");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:L"), "SCAL:L");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:W"), "SCAL:DontCare");
+
+  // The longer symbols are case-insensitive
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:DontCare"), "SCAL:DontCare");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:dontcare"), "SCAL:DontCare");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:NoChange"), "SCAL:NoChange");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:nochange"), "SCAL:NoChange");
+
+  // Also parse numeric values
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:2"), "SCAL:Z");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:3"), "SCAL:X");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:4"), "SCAL:H");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:5"), "SCAL:L");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:6"), "SCAL:DontCare");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:7"), "SCAL:NoChange");
+
+  // (Q: What is the difference between X and DontCare ?)
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:6"), "SCAL:DontCare");
+  EXPECT_EQ(ParseAndRegenerateString("SCAL:7"), "SCAL:NoChange");
+}
+
+// Some smoke testing to see if a string we parse and regenerated is the same
 static void TEST_roundtrip() {
   EXPECT_TRUE(ParseConvertBackRoundtrip("INT:42"));
+
   EXPECT_TRUE(ParseConvertBackRoundtrip("SCAL:1"));
 
-  // These don't work yet. Document with EXPECT_FALSE()
-  EXPECT_FALSE(ParseConvertBackRoundtrip("SCAL:X"));
-  EXPECT_FALSE(ParseConvertBackRoundtrip("SCAL:Z"));
-  EXPECT_FALSE(ParseConvertBackRoundtrip("SCAL:H"));
-  EXPECT_FALSE(ParseConvertBackRoundtrip("SCAL:L"));
+  EXPECT_TRUE(ParseConvertBackRoundtrip("SCAL:X"));
+  EXPECT_TRUE(ParseConvertBackRoundtrip("SCAL:Z"));
+  EXPECT_TRUE(ParseConvertBackRoundtrip("SCAL:H"));
+  EXPECT_TRUE(ParseConvertBackRoundtrip("SCAL:L"));
 
   EXPECT_TRUE(ParseConvertBackRoundtrip("STRING:hello"));
   EXPECT_TRUE(ParseConvertBackRoundtrip("HEX:AFFE"));
@@ -73,6 +116,8 @@ static void TEST_roundtrip() {
 
 int main() {
   TEST_vpivalue2string();
+  TEST_ParseValueFindPrefix();
+  TEST_ParseScalarValue();
   TEST_roundtrip();
   return 0;
 }
