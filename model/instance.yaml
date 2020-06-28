@@ -46,7 +46,7 @@
     vpi: vpiDefLineNo
     type: int
     card: 1 
-  - property delay_mode
+  - property: delay_mode
     name: delay mode
     vpi: vpiDefDelayMode
     type: int

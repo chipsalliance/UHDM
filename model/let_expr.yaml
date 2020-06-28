@@ -14,6 +14,6 @@
 
 # Universal Hardware Data Model (UHDM) "let_expr" formal description
  
-- obj_decl: let_expr
+- obj_def: let_expr
   - extends: expr
 
