@@ -45,6 +45,7 @@ proc parse_model { file } {
     set vpiObj ""
     set lineNo 0
     set currentFilename ""
+    set any_error 0
     foreach line $lines {
         # Get the original filename for error reporting.
         if [regexp {^#FILE:([a-zA-Z0-9_.]+)} $line tmp currentFilename] {
@@ -142,8 +143,12 @@ proc parse_model { file } {
             dict set $OBJ(curr) $obj_type $obj_name name $name
         } else {
             puts "$currentFilename:$lineNo: Can't handle '$line'. Typo ?"
-            exit 1
+            set any_error 1
         }
+    }
+
+    if {$any_error} {
+        exit 1
     }
 
     foreach classname [array names BASECLASS] {
