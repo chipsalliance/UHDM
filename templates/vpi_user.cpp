@@ -75,7 +75,7 @@ s_vpi_value* String2VpiValue(const std::string& s) {
   } else if (strstr(scopy.c_str(), "REAL:")) {
     scopy.erase(0,5);
     val->format = vpiRealVal;
-    val->value.real = atol(scopy.c_str());
+    val->value.real = atof(scopy.c_str());
   }
   return val;
 }

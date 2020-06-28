@@ -28,11 +28,12 @@
 #define VPI_UHDM_H
 
 #include <unordered_map>
+#include <vector>
 
 #include "uhdm_types.h"
 
 namespace UHDM {
-  class Serializer;  
+  class Serializer;
 };
 
 struct uhdm_handle {

@@ -186,6 +186,7 @@ if (UHDM_BUILD_TESTS)
     tests/listener_elab.cpp
     tests/full_elab.cpp
     tests/vpi_get_test.cpp
+    tests/vpi_value_conversion_test.cpp
   )
 endif()
 
