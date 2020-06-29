@@ -393,6 +393,12 @@ static std::string vpiTypeName(vpiHandle h) {
 }
 
 #endif
+
+static void release_handle(vpiHandle obj_h) {
+#ifndef STANDARD_VPI
+  vpi_release_handle(obj_h);
+#endif
+}
   
 static std::string visit_value(s_vpi_value* value) {
   if (value == nullptr)
