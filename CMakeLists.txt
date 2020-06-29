@@ -64,16 +64,19 @@ else()
       "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -g ${MY_CXX_WARNING_FLAGS}"
   )
 
-  # A lot of the generated files are so large that the compiler takes a long
-  # time to compile. Leave that at no optimization for now.
   set(CMAKE_CXX_FLAGS_RELEASE
-      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -DNDEBUG ${MY_CXX_WARNING_FLAGS}"
+      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O3 -DNDEBUG ${MY_CXX_WARNING_FLAGS}"
   )
 
-  # Things relevant for performance and fast to compile with -O3
+  # Some of these files make the optimizer take so long, that we excempt some
+  # of these files and compile with reduced optimization.
+  # TODO: Reduce complexity/branches etc. whatever makes the optimizer freak
+  # out. The code-generation is pretty linear right now.
   set_property(SOURCE
-    ${PROJECT_SOURCE_DIR}/src/SymbolFactory.cpp
-    PROPERTY COMPILE_FLAGS -O3
+    ${PROJECT_SOURCE_DIR}/src/clone_tree.cpp
+    ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp
+    ${PROJECT_SOURCE_DIR}/src/Serializer_restore.cpp
+    PROPERTY COMPILE_FLAGS -O1
  )
 
 endif()
