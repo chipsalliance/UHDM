@@ -519,6 +519,7 @@ proc printVpiVisitor {classname vpi card} {
         if {($vpi != "vpiModule")} {
             append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
     visit_object(itr, subobject_indent, \"$vpi\", visited, out);
+    release_handle(itr);
 "
         }
     } else {
@@ -531,7 +532,9 @@ proc printVpiVisitor {classname vpi card} {
             append vpi_visitor "    itr = vpi_iterate($vpi,obj_h);
     while (vpiHandle obj = vpi_scan(itr) ) {
       visit_object(obj, subobject_indent, \"$vpi\", visited, out);
+      release_handle(obj);
     }
+    release_handle(itr);
 "
         }
     }
