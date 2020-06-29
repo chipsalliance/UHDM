@@ -76,7 +76,7 @@ else()
     ${PROJECT_SOURCE_DIR}/src/clone_tree.cpp
     ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp
     ${PROJECT_SOURCE_DIR}/src/Serializer_restore.cpp
-    PROPERTY COMPILE_FLAGS -O1
+    PROPERTY COMPILE_FLAGS -O0
  )
 
 endif()
