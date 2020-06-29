@@ -172,12 +172,12 @@ std::string VpiDelay2String(const s_vpi_delay* delay) {
   return result;
 }
 
-static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
-  return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
+vpiHandle NewVpiHandle (const UHDM::BaseClass* object) {
+  return reinterpret_cast<vpiHandle>(new uhdm_handle(object->UhdmType(), object));
 }
 
-vpiHandle NewVpiHandle (UHDM::BaseClass* object) {
-  return reinterpret_cast<vpiHandle>(new uhdm_handle(object->UhdmType(), object));
+static vpiHandle NewHandle (UHDM_OBJECT_TYPE type, const void *object) {
+  return reinterpret_cast<vpiHandle>(new uhdm_handle(type, object));
 }
 
 vpiHandle vpi_handle_by_index (vpiHandle object,
