@@ -1206,7 +1206,7 @@ proc generate_code { models } {
         regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
         foreach {id define} [defineType 1 uhdm${classname} ""] {}
         if {$define != ""} {
-            append defines "$define\n"
+            append defines "  $define\n"
         }
         printClassListener $classname
         printVpiListener $classname $classname $classname 0
@@ -1315,7 +1315,7 @@ proc generate_code { models } {
                     # define access properties (allModules...)
                     foreach {id define} [defineType 1 uhdm${name} ""] {}
                     if {$define != ""} {
-                        append defines "$define\n"
+                        append defines "  $define\n"
                     }
                     append methods($classname) [printMethods $classname $type $name $card $real_type]
                     printVpiListener $classname $vpi $type $card
