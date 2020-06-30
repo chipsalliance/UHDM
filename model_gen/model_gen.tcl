@@ -127,8 +127,10 @@ proc printMethods { classname type vpi card {real_type ""} } {
   } else {
     std::vector<std::string> names;
     const BaseClass* parent = this;
+    bool package = false;
     while (parent) {
       if (parent->UhdmType() == uhdmdesign) break;
+      if (parent->UhdmType() == uhdmpackage) package = true;
       const std::string\\& name = (!parent->VpiName().empty()) ? parent->VpiName() : parent->VpiDefName();
       if (!name.empty())
         names.push_back(name);
@@ -139,7 +141,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
       unsigned int index = names.size() -1;
       while(1) {
         fullName += names\[index\];
-        if (index > 0) fullName += \".\";
+        if (index > 0) fullName += (package) ? \"::\" : \".\";
         if (index == 0) break;
         index--;
       }
