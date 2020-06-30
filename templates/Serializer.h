@@ -34,7 +34,7 @@ namespace UHDM {
   class Serializer {
   public:
     Serializer() : incrId_(0), objId_(0) {symbolMaker.Make("");}
-    void Save(std::string file);
+    void Save(const std::string& file);
     void Purge();
     const std::vector<vpiHandle> Restore(const std::string& file);
 

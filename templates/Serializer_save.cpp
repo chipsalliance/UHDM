@@ -62,7 +62,7 @@ unsigned long Serializer::GetId(const BaseClass* p) {
     unsigned long tmp = incrId_;
     allIds_.insert(std::make_pair(p, incrId_));
     incrId_++;
-    return tmp;		  
+    return tmp;
   } else {
     return (*itr).second;
   }
@@ -92,14 +92,14 @@ void Serializer::Purge() {
 <FACTORY_PURGE>
 }
 
-void Serializer::Save(std::string file) {
-  int fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
+void Serializer::Save(const std::string& file) {
+  const int fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
   ::capnp::MallocMessageBuilder message;
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
   unsigned long index = 0;
 
 <CAPNP_ID>
-  
+
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designMaker.objects_.size());
   index = 0;
   for (auto design : designMaker.objects_) {
@@ -115,8 +115,8 @@ void Serializer::Save(std::string file) {
   }
 
 <CAPNP_SAVE>
-  
-  writePackedMessageToFd(fileid, message);   
+
+  writePackedMessageToFd(fileid, message);
   close(fileid);
 }
 
