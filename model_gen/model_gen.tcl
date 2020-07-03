@@ -52,20 +52,10 @@ proc project_path {} {
 file mkdir [project_path]/src
 file mkdir [project_path]/headers
 
+source [exec_path]/file_utils.tcl
 source [exec_path]/pdict.tcl
 source [exec_path]/parse_model.tcl
 source [exec_path]/generate_elaborator.tcl
-
-proc find_file { baseDir filename } {
-    set filepath [ file join $baseDir $filename ]
-    if { [file exists $filepath] } { return $filepath; }
-
-    set dirs [ glob -nocomplain -type d [ file join $baseDir * ] ]
-    foreach dir $dirs {
-        set filepath [ find_file $dir $filename ]
-        if { [file exists $filepath] } { return $filepath; }
-    }
-}
 
 proc parse_vpi_user_defines { } {
     global ID
@@ -654,7 +644,6 @@ proc generate_group_checker { model } {
         regsub -all {<GROUPNAME>} $template $groupname template
         regsub -all {<UPPER_GROUPNAME>} $template [string toupper $groupname] template
 
-        set oid [open "$output" "w"]
         set checktype ""
         dict for {key val} $data {
             if {($key == "obj_ref") || ($key == "class_ref")} {
@@ -681,8 +670,7 @@ proc generate_group_checker { model } {
             }
         }
         regsub -all {<CHECKTYPE>} $template $checktype template
-        puts $oid $template
-        close $oid
+        set_content_if_change $output $template
     }
 }
 
@@ -702,9 +690,8 @@ proc write_vpi_listener_cpp {} {
     }
     regsub {<VPI_LISTENERS>} $listener_cpp $vpi_listener listener_cpp
     regsub {<VPI_ANY_LISTENERS>} $listener_cpp $vpi_any_listener listener_cpp
-    set listenerId [open "[project_path]/src/vpi_listener.cpp" "w"]
-    puts $listenerId $listener_cpp
-    close $listenerId
+
+    set_content_if_change "[project_path]/src/vpi_listener.cpp" $listener_cpp
 }
 
 proc write_vpi_listener_h {} {
@@ -718,9 +705,8 @@ proc write_vpi_listener_h {} {
         append vpi_listener $VPI_LISTENERS_HEADER($classname)
     }
     regsub {<VPI_LISTENERS_HEADER>} $listener_h $vpi_listener listener_h
-    set listenerId [open "[project_path]/headers/vpi_listener.h" "w"]
-    puts $listenerId $listener_h
-    close $listenerId
+
+    set_content_if_change "[project_path]/headers/vpi_listener.h" $listener_h
 }
 
 proc write_uhdm_forward_decl {} {
@@ -734,9 +720,8 @@ proc write_uhdm_forward_decl {} {
         append forward_declaration "class $classname;\n"
     }
     regsub {<UHDM_FORWARD_DECL>} $uhdm_forward_h $forward_declaration uhdm_forward_h
-    set forwardId [open "[project_path]/headers/uhdm_forward_decl.h" "w"]
-    puts $forwardId $uhdm_forward_h
-    close $forwardId
+
+    set_content_if_change "[project_path]/headers/uhdm_forward_decl.h" $uhdm_forward_h
 }
 
 proc write_VpiListener_h {} {
@@ -750,9 +735,7 @@ proc write_VpiListener_h {} {
         append vpi_listener $CLASS_LISTENER($classname)
     }
     regsub {<VPI_LISTENER_METHODS>} $listener_content $vpi_listener listener_content
-    set listenerId [open "[project_path]/headers/VpiListener.h" "w"]
-    puts $listenerId $listener_content
-    close $listenerId
+    set_content_if_change "[project_path]/headers/VpiListener.h" $listener_content
 }
 
 set SHORT_VISITOR_LIST { class_obj
@@ -936,9 +919,7 @@ $relations
 "
     }
     regsub {<OBJECT_VISITORS>} $visitor_cpp $vpi_visitor visitor_cpp
-    set visitorId [open "[project_path]/src/vpi_visitor.cpp" "w"]
-    puts $visitorId $visitor_cpp
-    close $visitorId
+    set_content_if_change "[project_path]/src/vpi_visitor.cpp" $visitor_cpp
 }
 
 proc write_capnp { capnp_schema_all capnp_root_schema } {
@@ -947,9 +928,8 @@ proc write_capnp { capnp_schema_all capnp_root_schema } {
     close $fid
     regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema_all capnp_content
     regsub {<CAPNP_ROOT_SCHEMA>} $capnp_content $capnp_root_schema capnp_content
-    set capnpId [open "[project_path]/src/UHDM.capnp" "w"]
-    puts $capnpId $capnp_content
-    close $capnpId
+
+    return [set_content_if_change "[project_path]/src/UHDM.capnp" $capnp_content]
 }
 
 proc write_uhdm_h { headers} {
@@ -958,7 +938,6 @@ proc write_uhdm_h { headers} {
     set fid [open "[project_path]/templates/uhdm.h"]
     set uhdm_content [read $fid]
     close $fid
-    set uhdmId [open "[project_path]/headers/uhdm.h" "w"]
 
     set name_id_map "\nstd::string UHDM::UhdmName(UHDM_OBJECT_TYPE type) \{
       switch (type) \{
@@ -975,29 +954,23 @@ proc write_uhdm_h { headers} {
     append uhdm_name_map $name_id_map
 
     regsub -all {<INCLUDE_FILES>} $uhdm_content $headers uhdm_content
-    puts $uhdmId $uhdm_content
-    close $uhdmId
-
+    set_content_if_change "[project_path]/headers/uhdm.h" $uhdm_content
 }
 
 proc write_uhdm_types_h { defines } {
     set fid [open "[project_path]/templates/uhdm_types.h"]
     set uhdm_content [read $fid]
     close $fid
-    set uhdmId [open "[project_path]/headers/uhdm_types.h" "w"]
     regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
-    puts $uhdmId $uhdm_content
-    close $uhdmId
+    set_content_if_change "[project_path]/headers/uhdm_types.h" $uhdm_content
 }
 
 proc write_containers_h { containers } {
     set fid [open "[project_path]/templates/containers.h"]
     set container_content [read $fid]
     close $fid
-    set containerId [open "[project_path]/headers/containers.h" "w"]
     regsub -all {<CONTAINERS>} $container_content $containers container_content
-    puts $containerId $container_content
-    close $containerId
+    set_content_if_change "[project_path]/headers/containers.h" $container_content
 }
 
 proc update_vpi_inst { baseclass classname lvl } {
@@ -1201,7 +1174,6 @@ proc generate_code { models } {
         }
         lappend classes $classname
 
-        set oid [open "[project_path]/headers/$classname.h" "w"]
         regsub -all {<CLASSNAME>} $template $classname template
         regsub -all {<UPPER_CLASSNAME>} $template [string toupper $classname] template
         foreach {id define} [defineType 1 uhdm${classname} ""] {}
@@ -1399,8 +1371,7 @@ proc generate_code { models } {
         regsub -all {<MEMBERS>} $template $members($classname) template
         regsub -all {<EXTENDS>} $template BaseClass template
 
-        puts $oid $template
-        close $oid
+        set_content_if_change "[project_path]/headers/$classname.h" $template
 
         # VPI
         update_vpi_inst $classname $classname 1
@@ -1459,32 +1430,31 @@ proc generate_code { models } {
     regsub -all {<VPI_GET_DELAY_BODY>} $vpi_user $vpi_get_delay_body vpi_user
     regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
 
-    set vpi_userId [open "[project_path]/src/vpi_user.cpp" "w"]
-    puts $vpi_userId $vpi_user
-    close $vpi_userId
+    set_content_if_change "[project_path]/src/vpi_user.cpp" $vpi_user
 
     # UHDM.capnp
-    write_capnp $capnp_schema_all $capnp_root_schema
-    log "Generating Capnp schema..."
-    file delete -force [project_path]/src/UHDM.capnp.*
-    set capnp_path [find_file $working_dir "capnpc-c++$exeext"]
-    puts "capnp_path = $capnp_path"
-    set capnp_path [file dirname $capnp_path]
+    if {[write_capnp $capnp_schema_all $capnp_root_schema]} {
+        log "Generating Capnp schema..."
+        file delete -force [project_path]/src/UHDM.capnp.*
+        set capnp_path [find_file $working_dir "capnpc-c++$exeext"]
+        puts "capnp_path = $capnp_path"
+        set capnp_path [file dirname $capnp_path]
 
-    if { $tcl_platform(platform) == "windows" } {
-        exec -ignorestderr cmd /c "set PATH=$capnp_path;%PATH%; && cd /d [project_path]/src && $capnp_path/capnp.exe compile -oc++ UHDM.capnp"
-    } else {
-        exec -ignorestderr sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+        if { $tcl_platform(platform) == "windows" } {
+            exec -ignorestderr cmd /c "set PATH=$capnp_path;%PATH%; && cd /d [project_path]/src && $capnp_path/capnp.exe compile -oc++ UHDM.capnp"
+        } else {
+            exec -ignorestderr sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+        }
     }
 
     # BaseClass.h
-    file copy -force -- "[project_path]/templates/BaseClass.h" "[project_path]/headers/BaseClass.h"
+    file_copy_if_change "[project_path]/templates/BaseClass.h" "[project_path]/headers/BaseClass.h"
 
     # SymbolFactory.h
-    file copy -force -- "[project_path]/templates/SymbolFactory.h" "[project_path]/headers/SymbolFactory.h"
+    file_copy_if_change "[project_path]/templates/SymbolFactory.h" "[project_path]/headers/SymbolFactory.h"
 
     # SymbolFactory.cpp
-    file copy -force -- "[project_path]/templates/SymbolFactory.cpp" "[project_path]/src/SymbolFactory.cpp"
+    file_copy_if_change "[project_path]/templates/SymbolFactory.cpp" "[project_path]/src/SymbolFactory.cpp"
 
     # Serializer.cpp
     set files "Serializer_save.cpp Serializer_restore.cpp vpi_uhdm.h Serializer.h"
@@ -1560,16 +1530,14 @@ $RESTORE($class)
         regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
         regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
         if {$file == "vpi_uhdm.h" || $file == "Serializer.h"} {
-            set serializerId [open "[project_path]/headers/$file" "w"]
+            set_content_if_change "[project_path]/headers/$file" $serializer_content
         } else {
-            set serializerId [open "[project_path]/src/$file" "w"]
+            set_content_if_change "[project_path]/src/$file" $serializer_content
         }
-        puts $serializerId $serializer_content
-        close $serializerId
     }
 
     # vpi_visitor.h
-    file copy -force -- "[project_path]/templates/vpi_visitor.h" "[project_path]/headers/vpi_visitor.h"
+    file_copy_if_change "[project_path]/templates/vpi_visitor.h" "[project_path]/headers/vpi_visitor.h"
 
     # vpi_visitor.cpp
     write_vpi_visitor_cpp

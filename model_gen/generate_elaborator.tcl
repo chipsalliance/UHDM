@@ -163,18 +163,13 @@ proc generate_elaborator { models } {
 
     regsub {<ELABORATOR_LISTENER>} $listener_content $vpi_listener listener_content
 
-    set listenerId [open "[project_path]/headers/ElaboratorListener.h" "w"]
-    puts $listenerId $listener_content
-    close $listenerId
-
+    set_content_if_change "[project_path]/headers/ElaboratorListener.h" $listener_content
 
     set fid [open "[project_path]/templates/clone_tree.h"]
     set clone_content [read $fid]
     close $fid
 
-    set cloneId [open "[project_path]/headers/clone_tree.h" "w"]
-    puts $cloneId $clone_content
-    close $cloneId
+    set_content_if_change "[project_path]/headers/clone_tree.h" $clone_content
 
     set fid [open "[project_path]/templates/clone_tree.cpp"]
     set clone_content [read $fid]
@@ -182,8 +177,5 @@ proc generate_elaborator { models } {
 
     regsub {<CLONE_CASES>} $clone_content $clone_cases clone_content
 
-    set cloneId [open "[project_path]/src/clone_tree.cpp" "w"]
-    puts $cloneId $clone_content
-    close $cloneId
-
+    set_content_if_change "[project_path]/src/clone_tree.cpp" $clone_content
 }
