@@ -35,6 +35,8 @@
 #define vpiSimpleExpr 3003
 #define vpiParameters 3004
 #define vpiSequenceExpr 3005
+#define vpiWaits 3006
+#define vpiDisables 3007
 
 // These define where orinally aliased in sv_vpi_user.h
 // Aliasing makes it hard to distinguish in automatic generated code, assigning unique values.
