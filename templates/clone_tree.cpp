@@ -32,15 +32,8 @@ using namespace UHDM;
 namespace UHDM {
 
 BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener* elaborator) {
-  if (root == nullptr)
-    return nullptr;
-  BaseClass* clone = nullptr;
-  switch (root->VpiType()) {  
-<CLONE_CASES>
-  default:
-    break;
-  }
-  return clone;
+  return root ? root->DeepClone(&s, elaborator) : nullptr;
 }
+<CLONE_IMPLEMENTATIONS>
 
-};
+}  // UHDM namespace

@@ -1186,7 +1186,12 @@ proc generate_code { models } {
         }
         printClassListener $classname
         printVpiListener $classname $classname $classname 0
-        if {$modeltype != "class_def"} {
+
+
+        if {$modeltype == "class_def"} {
+            # DeepClone() not implemented for class_def; just declare to narrow the covariant return type.
+            append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener) const override = 0;\n"
+        } else {
             # Builtin properties do not need to be specified in each models
             # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo, Id" method and field
             append methods($classname) [printMethods $classname BaseClass vpiParent 1]
@@ -1201,6 +1206,7 @@ proc generate_code { models } {
             lappend vpi_get_body_inst($classname) [list $classname int vpiLineNo 1]
             append methods($classname) [printMethods $classname "unsigned int" uhdmId 1]
             append members($classname) [printMembers "unsigned int" uhdmId 1]
+            append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener) const override;\n"
             append vpi_handle_body($classname) [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
             lappend capnp_schema($classname) [list vpiParent UInt64]
             lappend capnp_schema($classname) [list uhdmParentType UInt64]

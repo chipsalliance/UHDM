@@ -18,7 +18,7 @@
 proc generate_elaborator { models } {
     global BASECLASS
     set vpi_listener ""
-    set clone_cases ""
+    set clone_implementations ""
 
     foreach model $models {
         global $model
@@ -35,30 +35,28 @@ proc generate_elaborator { models } {
 
         set baseclass $classname
 
-        append clone_cases "  case $vpiName: {
-"
+        set clone_impl "\n${classname}* ${classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator) const \{\n"
 
         if [regexp {Net} $vpiName] {
-            append clone_cases "    $classname* clone_obj = dynamic_cast<$classname*>(elaborator->bindNet((($classname*)root)->VpiName()));
-    if (clone_obj == nullptr) {
-      clone_obj = s.Make${Classname}();
-    }
+            append clone_impl "  $classname* clone = dynamic_cast<$classname*>(elaborator->bindNet(VpiName()));
+  if (clone == nullptr) {
+    clone = serializer->Make${Classname}();
+  }
 "
         } elseif [regexp {Parameter} $vpiName] {
-            append clone_cases "    $classname* clone_obj = dynamic_cast<$classname*>(elaborator->bindParam((($classname*)root)->VpiName()));
-    if (clone_obj == nullptr) {
-      clone_obj = s.Make${Classname}();
-    }
+            append clone_impl "  $classname* clone = dynamic_cast<$classname*>(elaborator->bindParam(VpiName()));
+  if (clone == nullptr) {
+    clone = serializer->Make${Classname}();
+  }
 "
         } else {
-            append clone_cases "    $classname* clone_obj = s.Make${Classname}();
+            append clone_impl "  $classname* const clone = serializer->Make${Classname}();
 "
         }
 
-        append clone_cases "    unsigned long id = clone_obj->UhdmId();
-    *clone_obj =  *(($classname*)root);
-    clone_obj->UhdmId(id);
-    clone = clone_obj;
+        append clone_impl "  const unsigned long id = clone->UhdmId();
+  *clone = *this;
+  clone->UhdmId(id);
 "
         set rootclassname $classname
         while {$baseclass != ""} {
@@ -98,29 +96,31 @@ proc generate_elaborator { models } {
                         }
 
                         if {$card == 1} {
-                            append clone_cases "    clone_obj->${method}((${cast}*) clone_tree((($classname*)root)->${method}(), s, elaborator));
+                            append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator));
 "
                             if {$classname == "ref_obj"} {
                                 if {$method == "Actual_group"} {
-                                    append clone_cases "    if (clone_obj->${method}() == nullptr) {
-      clone_obj->${method}(elaborator->bindAny((($classname*)root)->VpiName()));
+                                    append clone_impl "  if (clone->${method}() == nullptr) {
+      clone->${method}(elaborator->bindAny(VpiName()));
     }
 "
                                 }
                             }
 
                             if {$rootclassname == "module"} {
-                                append vpi_listener "          inst->${method}((${cast}*) clone_tree(defMod->${method}(), *serializer_, this));
+                                append vpi_listener "          if (auto obj = defMod->${method}()) {
+            inst->${method}(obj->DeepClone(serializer_, this));
+          }
 "
                             }
                         } else {
-                            append clone_cases "    if (auto vec = (($classname*)root)->${method}()) {
-      auto clone_vec = s.Make${Cast}Vec();
-      clone_obj->${method}(clone_vec);
-      for (auto obj : *vec) {
-        clone_vec->push_back((${cast}*) clone_tree(obj, s, elaborator));
-      }
+                            append clone_impl "  if (auto vec = ${method}()) {
+    auto clone_vec = serializer->Make${Cast}Vec();
+    clone->${method}(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator));
     }
+  }
 "
                             if {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets")} {
                                 # We don't want to override the elaborated instance ports by the module def ports
@@ -128,7 +128,7 @@ proc generate_elaborator { models } {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
-              clone_vec->push_back((${cast}*) clone_tree(obj, *serializer_, this));
+              clone_vec->push_back(obj->DeepClone(serializer_, this));
             }
           }
 "
@@ -149,11 +149,9 @@ proc generate_elaborator { models } {
 
         }
 
-        append clone_cases "    break;
-  }
-"
+        append clone_impl "\n  return clone;\n\}\n"
 
-
+        append clone_implementations $clone_impl
     }
 
 
@@ -175,7 +173,7 @@ proc generate_elaborator { models } {
     set clone_content [read $fid]
     close $fid
 
-    regsub {<CLONE_CASES>} $clone_content $clone_cases clone_content
+    regsub {<CLONE_IMPLEMENTATIONS>} $clone_content $clone_implementations clone_content
 
     set_content_if_change "[project_path]/src/clone_tree.cpp" $clone_content
 }
