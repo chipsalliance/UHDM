@@ -578,6 +578,8 @@ proc makeVpiName { classname } {
         set vpiName "vpiForever"
     } elseif {$vpiName == "vpiFinalStmt"} {
         set vpiName "vpiFinal"
+    } elseif {$vpiName == "vpiWaitStmt"} {
+        set vpiName "vpiWait"
     }
 
     return $vpiName
