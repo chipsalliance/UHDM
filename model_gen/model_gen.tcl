@@ -196,16 +196,18 @@ proc printMembers { type vpi card } {
     }
     if {$card == "1"} {
         set pointer ""
+        set default_assignment "0"
         if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string")} {
             set pointer "*"
+            set default_assignment "nullptr"
         }
         if {$type == "std::string"} {
-            append members "\n    SymbolFactory::ID ${vpi}_;\n"
+            append members "\n    SymbolFactory::ID ${vpi}_ = 0;\n"
         } else {
-            append members "\n    ${type}${pointer} ${vpi}_;\n"
+            append members "\n    ${type}${pointer} ${vpi}_ = ${default_assignment};\n"
         }
     } elseif {$card == "any"} {
-        append members "\n    VectorOf${type}* ${vpi}_;\n"
+        append members "\n    VectorOf${type}* ${vpi}_ = nullptr;\n"
     }
     return $members
 }
