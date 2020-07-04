@@ -73,7 +73,6 @@ else()
   # TODO: Reduce complexity/branches etc. whatever makes the optimizer freak
   # out. The code-generation is pretty linear right now.
   set_property(SOURCE
-    ${PROJECT_SOURCE_DIR}/src/clone_tree.cpp
     ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp
     ${PROJECT_SOURCE_DIR}/src/Serializer_restore.cpp
     PROPERTY COMPILE_FLAGS -O0

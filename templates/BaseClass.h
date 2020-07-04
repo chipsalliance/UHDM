@@ -31,20 +31,21 @@
 
 namespace UHDM {
   class Serializer;
+  class ElaboratorListener;
   static std::string nonamebaseclass ("");
 
   class ClientData {
   public:
     virtual ~ClientData(){};
   };
-  
+
   class BaseClass {
     friend Serializer;
 
   public:
     // Use implicit constructor to initialize all members
     // BaseClass()
-    
+
     virtual ~BaseClass(){}
 
     Serializer* GetSerializer() { return serializer_; }
@@ -81,17 +82,18 @@ namespace UHDM {
 
     virtual bool UhdmId(unsigned int id) = 0;
 
+    // Create a deep copy of this object.
+    virtual BaseClass* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener) const = 0;
+
   protected:
     void SetSerializer(Serializer* serial) { serializer_ = serial; }
-    
+
     Serializer* serializer_;
 
     ClientData* clientData_;
 
   };
-  
-};
 
-
+}  // namespace UHDM
 
 #endif
