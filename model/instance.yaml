@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Universal Hardware Data Model (UHDM) "instance" formal description
- 
+
 - class_def: instance
   - extends: scope
   - property: definition_name
@@ -45,7 +45,7 @@
     name: definition location line
     vpi: vpiDefLineNo
     type: int
-    card: 1 
+    card: 1
   - property: delay_mode
     name: delay mode
     vpi: vpiDefDelayMode
@@ -116,7 +116,7 @@
     vpi: vpiNet
     type: net
     card: any
-  - class_ref: array_net
+  - obj_ref: array_net
     name: array net
     vpi: vpiArrayNet
     type: array_net
@@ -131,7 +131,7 @@
     vpi: vpiAssertion
     type: assertion
     card: any
-  - class_ref: class_defn
+  - obj_ref: class_defn
     name: class defn
     vpi: vpiClassDefn
     type: class_defn

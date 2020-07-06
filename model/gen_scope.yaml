@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Universal Hardware Data Model (UHDM) "gen scope" formal description
- 
+
 - obj_def: gen_scope
   - extends: scope
   - class_ref: vpiIndex
@@ -35,13 +35,13 @@
     name: implicitly declared
     vpi: vpiImplicitDecl
     type: bool
-    card: 1  
+    card: 1
   - class_ref: net
     name: net
     vpi: vpiNet
     type: net
     card: any
-  - class_ref: array_net
+  - obj_ref: array_net
     name: array net
     vpi: vpiArrayNet
     type: array_net
@@ -118,4 +118,3 @@
     vpi: vpiClockingBlock
     type: clocking_block
     card: any
-  

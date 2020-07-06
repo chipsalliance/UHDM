@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Universal Hardware Data Model (UHDM) "tchk" formal description
- 
+
 - obj_def: tchk
   - obj_ref: module
     name: module
@@ -40,7 +40,7 @@
     type: tchk_term
     vpi: vpiTchkDataTerm
     card: 1
-  - class_ref: reg
+  - obj_ref: reg
     name: regs
     type: reg
     vpi: vpiTchkNotifier
