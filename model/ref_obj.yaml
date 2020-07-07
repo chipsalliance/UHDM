@@ -55,4 +55,10 @@
     name: task func
     vpi: vpiTaskFunc
     type: task_func
-    card: 1  
+    card: 1
+ # Non Standard: identify reference to a struct member {base : {10'h0, ...  }}
+  - property: is_struct_member
+    name: is struct member
+    vpi: vpiStructMember
+    type: bool
+    card: 1    

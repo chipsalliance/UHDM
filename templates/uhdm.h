@@ -44,6 +44,7 @@
 
 #define vpiWaits     3009
 #define vpiDisables  3010
+#define vpiStructMember 3011
 
 #define vpiUnsupportedStmt 4000
 #define vpiUnsupportedExpr 4001
