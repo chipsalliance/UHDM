@@ -32,6 +32,8 @@ forever.yaml
 expr_sequence_inst_group.yaml
 waits.yaml
 wait.yaml
+wait_fork.yaml
+ordered_wait.yaml
 task_func_named_begin_fork_group.yaml
 disables.yaml
 disable.yaml
