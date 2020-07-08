@@ -15,8 +15,44 @@
 # Universal Hardware Data Model (UHDM) "named event" formal description
  
 - obj_def: named_event
+  - property: array_member
+    name: array member
+    vpi: vpiArrayMember
+    type: bool
+    card: 1
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+  - property: lifetime
+    name: lifetime
+    vpi: vpiAutomatic
+    type: bool
+    card: 1
+  - property: memory_allocation
+    name: memory allocation
+    vpi: vpiAllocScheme
+    type: int
+    card: 1   
   - obj_ref: attributes
     name: attributes
     vpi: vpiAttribute
     type: attribute
     card: any
+  - class_ref: event_typespec
+    name: event typespec
+    vpi: vpiTypespec
+    type: event_typespec
+    card: 1
+  - obj_ref: threads
+    name: threads
+    vpi: vpiWaitingProcesses
+    type: thread_obj
+    card: any
+ 
