@@ -28,6 +28,8 @@ named_fork.yaml
 fork.yaml
 for.yaml
 if_stmt.yaml
+event_stmt.yaml
+thread_obj.yaml
 forever.yaml
 expr_sequence_inst_group.yaml
 waits.yaml
@@ -163,6 +165,7 @@ logic_net.yaml
 array_net.yaml
 enum_struct_packed_net_group.yaml
 packed_array_net.yaml
+event_typespec.yaml
 named_event.yaml
 named_event_array.yaml
 parameter.yaml
@@ -195,7 +198,6 @@ array_typespec.yaml
 void_typespec.yaml
 sequence_typespec.yaml
 property_typespec.yaml
-event_typespec.yaml
 interface_typespec.yaml
 type_parameter.yaml
 typespec_member.yaml

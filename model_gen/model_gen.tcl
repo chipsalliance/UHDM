@@ -582,6 +582,8 @@ proc makeVpiName { classname } {
         set vpiName "vpiFinal"
     } elseif {$vpiName == "vpiWaitStmt"} {
         set vpiName "vpiWait"
+    } elseif {$vpiName == "vpiThreadObj"} {
+        set vpiName "vpiThread"
     }
 
     return $vpiName
