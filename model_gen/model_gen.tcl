@@ -432,8 +432,8 @@ proc printVpiListener {classname vpi type card} {
         # To prevent infinite loops in visitors as these 2 relations are pointing upward in the tree
         return
     }
-    if {($vpi == "vpiModule") && ($card == 1)} {
-        # upward vpiModule relation (when card == 1, pointing to the parent obejct) creates loops
+    if {(($vpi == "vpiModule") || ($vpi == "vpiInterface")) && ($card == 1)} {
+        # upward vpiModule, vpiInterface relation (when card == 1, pointing to the parent object) creates loops in visitors
         return
     }
 
@@ -510,7 +510,7 @@ proc printVpiVisitor {classname vpi card} {
 
     if {$card == 1} {
         # Prevent loop in Standard VPI
-        if {($vpi != "vpiModule")} {
+        if {($vpi != "vpiModule") && ($vpi != "vpiInterface")} {
             append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
     visit_object(itr, subobject_indent, \"$vpi\", visited, out);
     release_handle(itr);
