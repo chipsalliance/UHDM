@@ -127,6 +127,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/expr_typespec_group.cpp
     ${PROJECT_SOURCE_DIR}/src/instance_item.cpp
     ${PROJECT_SOURCE_DIR}/src/interf_prog_mod_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/method_func_task_call_group.cpp
     ${PROJECT_SOURCE_DIR}/src/operand_group.cpp
     ${PROJECT_SOURCE_DIR}/src/parameters.cpp
     ${PROJECT_SOURCE_DIR}/src/pattern_expr_group.cpp
@@ -136,6 +137,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/ref_obj_interf_net_var_group.cpp
     ${PROJECT_SOURCE_DIR}/src/simple_expr_use_group.cpp
     ${PROJECT_SOURCE_DIR}/src/stmt.cpp
+    ${PROJECT_SOURCE_DIR}/src/sys_func_task_call_group.cpp
     ${PROJECT_SOURCE_DIR}/src/task_func_named_begin_fork_group.cpp
     ${PROJECT_SOURCE_DIR}/src/tf_call_args.cpp
     ${PROJECT_SOURCE_DIR}/src/variable_drivers_group.cpp
