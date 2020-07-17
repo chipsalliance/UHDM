@@ -1445,7 +1445,8 @@ proc generate_code { models } {
     set_content_if_change "[project_path]/src/vpi_user.cpp" $vpi_user
 
     # UHDM.capnp
-    if {[write_capnp $capnp_schema_all $capnp_root_schema]} {
+    if {[write_capnp $capnp_schema_all $capnp_root_schema]
+        || ![file exists "[project_path]/src/UHDM.capnp.h"]} {
         log "Generating Capnp schema..."
         file delete -force [project_path]/src/UHDM.capnp.*
         set capnp_path [find_file $working_dir "capnpc-c++$exeext"]
