@@ -632,14 +632,14 @@ proc defineType { def name vpiType } {
 }
 
 proc generate_group_checker { model } {
-    global $model BASECLASS ALL_CHILDREN
+    global $model BASECLASS ALL_CHILDREN GROUP_MEMBERS
     set data [subst $$model]
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
 
     set files [list [list "[project_path]/templates/group_header.h" "[project_path]/headers/${groupname}.h"] \
                    [list "[project_path]/templates/group_header.cpp" "[project_path]/src/${groupname}.cpp"]]
-
+    set GROUP_MEMBERS($groupname) ""
     foreach pair $files {
         foreach {input output} $pair {}
 
@@ -652,14 +652,26 @@ proc generate_group_checker { model } {
 
         set checktype ""
         dict for {key val} $data {
-            if {($key == "obj_ref") || ($key == "class_ref")} {
+            if {($key == "obj_ref") || ($key == "class_ref")  || ($key == "group_ref")} {
                 dict for {iter content} $val {
                     set name $iter
-                    if {$checktype != ""} {
-                        append checktype " \\&\\& "
-                    }
+                    lappend GROUP_MEMBERS($groupname) [list $name $key]
                     set uhdmclasstype uhdm$name
-                    append checktype "(uhdmtype != $uhdmclasstype)"
+                    if {$key == "group_ref"} {
+                        set members $GROUP_MEMBERS($name)
+                        foreach member $members {
+                            set uhdmgroupmember uhdm[lindex $member 0]
+                            if {$checktype != ""} {
+                                append checktype " \\&\\& "
+                            }
+                            append checktype "(uhdmtype != $uhdmgroupmember)"
+                        }
+                    } else {
+                        if {$checktype != ""} {
+                            append checktype " \\&\\& "
+                        }
+                        append checktype "(uhdmtype != $uhdmclasstype)"
+                    }
                     if {$key == "class_ref"} {
                         if [info exist ALL_CHILDREN($name)] {
                             foreach child $ALL_CHILDREN($name) {
@@ -671,7 +683,7 @@ proc generate_group_checker { model } {
                                 append checktype "(uhdmtype != $uhdmclasstype)"
                             }
                         }
-                    }
+                    } 
                 }
             }
         }
