@@ -18,6 +18,6 @@
   - obj_ref: any_pattern
   - obj_ref: tagged_pattern
   - obj_ref: struct_pattern
-  - obj_ref: expr
+  - class_ref: expr
 
 

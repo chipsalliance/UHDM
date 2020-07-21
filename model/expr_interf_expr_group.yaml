@@ -17,6 +17,6 @@
 - group_def: expr_interf_expr_group
   - class_ref: expr
   - group_ref: interface_expr
-  
+  - group_ref: pattern  
 
 
