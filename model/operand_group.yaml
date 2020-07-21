@@ -18,7 +18,7 @@
   - class_ref: expr
   - group_ref: interface_expr
   - obj_ref: range
-  - class_ref: pattern
+  - group_ref: pattern
   - class_ref: sequence_inst
   - class_ref: property_inst
   - group_ref: property_expr_group
