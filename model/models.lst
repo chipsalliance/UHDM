@@ -67,11 +67,11 @@ assert.yaml
 immediate_assert.yaml
 immediate_assume.yaml
 immediate_cover.yaml
+expr.yaml
 pattern.yaml
 any_pattern.yaml
 tagged_pattern.yaml
 struct_pattern.yaml
-expr.yaml
 unsupported_expr.yaml
 unsupported_stmt.yaml
 property_expr_named_event_group.yaml
