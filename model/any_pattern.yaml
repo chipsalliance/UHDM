@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "operand group" formal description
+# Universal Hardware Data Model (UHDM) "any pattern" formal description
  
-- group_def: operand_group
-  - class_ref: expr
-  - group_ref: interface_expr
-  - obj_ref: range
-  - group_ref: pattern
-  - class_ref: sequence_inst
-  - class_ref: property_inst
-  - group_ref: property_expr_group
+- obj_def: any_pattern
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+

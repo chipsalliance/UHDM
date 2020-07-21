@@ -143,7 +143,8 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/expr_constr_group.cpp
     ${PROJECT_SOURCE_DIR}/src/parameters.cpp
     ${PROJECT_SOURCE_DIR}/src/interf_prog_mod_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/variables_operation_group.cpp)
+    ${PROJECT_SOURCE_DIR}/src/variables_operation_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/pattern.cpp)
 
 foreach(src_file ${uhdm_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
