@@ -15,5 +15,5 @@
 # Universal Hardware Data Model (UHDM) "pattern_expr_group" formal description
  
 - group_def: pattern_expr_group
-  - class_ref: pattern
+  - group_ref: pattern
   - class_ref: expr

@@ -143,6 +143,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/variable_drivers_group.cpp
     ${PROJECT_SOURCE_DIR}/src/variable_loads_group.cpp
     ${PROJECT_SOURCE_DIR}/src/variables_operation_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/pattern.cpp
     ${PROJECT_SOURCE_DIR}/src/vpi_listener.cpp
     ${PROJECT_SOURCE_DIR}/src/vpi_user.cpp
     ${PROJECT_SOURCE_DIR}/src/vpi_visitor.cpp
