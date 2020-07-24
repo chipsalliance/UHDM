@@ -540,9 +540,9 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, Vis
         out << ", parent:" << parentName;
       }
       if (showIDs) {
-	 const uhdm_handle* const phandle = (const uhdm_handle*) par;
-	 const BaseClass* const pobject = (const BaseClass*) phandle->object;
-	 out << ", parID:" << pobject->UhdmId();
+        const uhdm_handle* const phandle = (const uhdm_handle*) par;
+        const BaseClass* const pobject = (const BaseClass*) phandle->object;
+        out << ", parID:" << pobject->UhdmId();
       }
       vpi_free_object(par);
     }
