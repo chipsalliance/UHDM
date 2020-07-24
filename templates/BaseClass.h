@@ -83,7 +83,7 @@ namespace UHDM {
     virtual bool UhdmId(unsigned int id) = 0;
 
     // Create a deep copy of this object.
-    virtual BaseClass* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener) const = 0;
+    virtual BaseClass* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const = 0;
 
   protected:
     void SetSerializer(Serializer* serial) { serializer_ = serial; }

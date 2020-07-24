@@ -35,7 +35,7 @@ proc generate_elaborator { models } {
 
         set baseclass $classname
 
-        set clone_impl "\n${classname}* ${classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator) const \{\n"
+        set clone_impl "\n${classname}* ${classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const \{\n"
 
         if [regexp {Net} $vpiName] {
             append clone_impl "  $classname* clone = dynamic_cast<$classname*>(elaborator->bindNet(VpiName()));
@@ -57,6 +57,7 @@ proc generate_elaborator { models } {
         append clone_impl "  const unsigned long id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
+  clone->VpiParent(parent);
 "
         set rootclassname $classname
         while {$baseclass != ""} {
@@ -96,7 +97,7 @@ proc generate_elaborator { models } {
                         }
 
                         if {$card == 1} {
-                            append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator));
+                            append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
 "
                             if {$classname == "ref_obj"} {
                                 if {$method == "Actual_group"} {
@@ -109,7 +110,7 @@ proc generate_elaborator { models } {
 
                             if {$rootclassname == "module"} {
                                 append vpi_listener "          if (auto obj = defMod->${method}()) {
-            inst->${method}(obj->DeepClone(serializer_, this));
+            inst->${method}(obj->DeepClone(serializer_, this, defMod));
           }
 "
                             }
@@ -118,7 +119,7 @@ proc generate_elaborator { models } {
     auto clone_vec = serializer->Make${Cast}Vec();
     clone->${method}(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator));
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
     }
   }
 "
@@ -128,7 +129,7 @@ proc generate_elaborator { models } {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
-              clone_vec->push_back(obj->DeepClone(serializer_, this));
+              clone_vec->push_back(obj->DeepClone(serializer_, this, defMod));
             }
           }
 "

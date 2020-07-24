@@ -32,7 +32,7 @@ using namespace UHDM;
 namespace UHDM {
 
 BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener* elaborator) {
-  return root ? root->DeepClone(&s, elaborator) : nullptr;
+  return root ? root->DeepClone(&s, elaborator, nullptr) : nullptr;
 }
 <CLONE_IMPLEMENTATIONS>
 
