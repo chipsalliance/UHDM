@@ -109,7 +109,7 @@ protected:
         }
       }
 
-      // Collect instance parameters
+      // Collect instance parameters, defparams 
       ComponentMap paramMap;
       if (object->Parameters()) {
         for (any* param : *object->Parameters()) {
@@ -121,12 +121,38 @@ protected:
           paramMap.insert(std::make_pair(param->VpiName(), param));
         }
       }
-           
+      if (object->Variables()) {
+        for (variables* var : *object->Variables()) {
+          paramMap.insert(std::make_pair(var->VpiName(), var));
+        }
+      }
+
+      // Check if Module instance has a definition, collect enums
+      ComponentMap::iterator itrDef = flatComponentMap_.find(defName);      
+      if (itrDef != flatComponentMap_.end()) {
+        const BaseClass* comp = (*itrDef).second;
+        int compType = comp->VpiType();
+        switch (compType) {
+          case vpiModule: {
+            module* defMod = (module*) comp;
+            if (defMod->Typespecs()) {
+              for (typespec* tps : *defMod->Typespecs()) {
+                if (tps->UhdmType() == uhdmenum_typespec) {
+                  enum_typespec* etps = (enum_typespec*)tps;
+                  for (enum_const* econst : * etps->Enum_consts()) {
+                    paramMap.insert(std::make_pair(econst->VpiName(), econst));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+       
       // Push instance context on the stack
       instStack_.push(std::make_pair(object, std::make_pair(netMap, paramMap)));
       
       // Check if Module instance has a definition
-      ComponentMap::iterator itrDef = flatComponentMap_.find(defName);      
       if (itrDef != flatComponentMap_.end()) {
         const BaseClass* comp = (*itrDef).second;
         int compType = comp->VpiType();
