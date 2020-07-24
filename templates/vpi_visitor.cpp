@@ -32,6 +32,8 @@
 #include <string>
 #include <vector>
 
+static bool showIDs = false;
+
 #ifdef STANDARD_VPI
 
 #include <sv_vpi_user.h>
@@ -520,7 +522,8 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, Vis
 
 #ifndef STANDARD_VPI
 
-    // out << ", id:" << object->UhdmId();
+    if (showIDs)
+      out << ", id:" << object->UhdmId();
 
 #endif    
 
@@ -535,6 +538,11 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, Vis
     if (vpiHandle par = vpi_handle(vpiParent, obj_h)) {
       if (const char* parentName = vpi_get_str(vpiName, par)) {
         out << ", parent:" << parentName;
+      }
+      if (showIDs) {
+	 const uhdm_handle* const phandle = (const uhdm_handle*) par;
+	 const BaseClass* const pobject = (const BaseClass*) phandle->object;
+	 out << ", parID:" << pobject->UhdmId();
       }
       vpi_free_object(par);
     }
