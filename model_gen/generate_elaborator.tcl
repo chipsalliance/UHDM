@@ -57,8 +57,12 @@ proc generate_elaborator { models } {
         append clone_impl "  const unsigned long id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
-  clone->VpiParent(parent);
 "
+        if {$classname != "part_select"} {            
+            append clone_impl "  clone->VpiParent(parent);
+"
+        }
+        
         set rootclassname $classname
         while {$baseclass != ""} {
             set data $DATA($baseclass)
