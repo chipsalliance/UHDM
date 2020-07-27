@@ -16,7 +16,7 @@
  
 - group_def: property_expr_group
   - obj_ref: operation
-  - class_ref: sequence_expr
+  - group_ref: sequence_expr_group
   - obj_ref: multiclock_sequence_expr
   - obj_ref: property_inst
   - obj_ref: clocked_property

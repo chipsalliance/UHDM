@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "sequence_expr" formal description
+# Universal Hardware Data Model (UHDM) "sequence_expr_group" formal description
  
-- class_def: sequence_expr
-
+- group_def: sequence_expr_group
+  - obj_ref: operation
+  - obj_ref: sequence_inst
+  - obj_ref: distribution
+  - class_ref: expr

@@ -20,5 +20,6 @@
   - obj_ref: range
   - group_ref: pattern
   - class_ref: sequence_inst
+  - group_ref: sequence_expr_group
   - class_ref: property_inst
   - group_ref: property_expr_group

@@ -15,8 +15,34 @@
 # Universal Hardware Data Model (UHDM) "sequence decl" formal description
  
 - obj_def: sequence_decl
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
   - obj_ref: attributes
     name: attributes
     vpi: vpiAttribute
     type: attribute
     card: any
+  - class_ref: variables
+    name: variables
+    vpi: vpiVariables
+    type: variables
+    card: any
+  - group_ref: sequence_expr_multiclock_group
+    name: sequence expr multiclock group
+    vpi: vpiExpr
+    type: sequence_expr_multiclock_group
+    card: 1
+  - obj_ref: seq_formal_decl
+    name: seq formal decl
+    vpi: vpiSeqFormalDecl
+    type: seq_formal_decl
+    card: any
+    

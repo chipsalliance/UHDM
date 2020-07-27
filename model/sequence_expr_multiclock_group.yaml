@@ -12,18 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "sequence_inst" formal description
+# Universal Hardware Data Model (UHDM) "sequence_expr_multiclock_group" formal description
  
-- obj_def: sequence_inst
-  - extends: assertion
-  - obj_ref: sequence_decl
-    name: sequence decl
-    vpi: vpiSequenceDecl
-    type: sequence_decl
-    card: 1
-  - group_ref: named_event_sequence_expr_group
-    name: named event sequence expr group
-    vpi: vpiArgument
-    type: named_event_sequence_expr_group
-    card: 1
-    
+- group_def: sequence_expr_multiclock_group
+  - group_ref: sequence_expr_group
+  - obj_ref: multiclock_sequence_expr
+
+

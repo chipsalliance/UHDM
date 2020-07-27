@@ -15,8 +15,34 @@
 # Universal Hardware Data Model (UHDM) "property decl" formal description
  
 - obj_def: property_decl
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
   - obj_ref: attributes
     name: attributes
     vpi: vpiAttribute
     type: attribute
     card: any
+  - obj_ref: prop_formal_decl
+    name: prop formal decl
+    vpi: vpiPropFormalDecl
+    type: prop_formal_decl
+    card: any
+  - class_ref: variables
+    name: variables
+    vpi: vpiVariables
+    type: variables
+    card: any
+  - obj_ref: property_spec 
+    name: property spec 
+    vpi: vpiPropertySpec
+    type: property_spec
+    card: 1
+ 
