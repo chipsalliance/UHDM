@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Alain Dargelas
+# Copyright 2019 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "sequence_inst" formal description
+# Universal Hardware Data Model (UHDM) "prop formal decl" formal description
  
-- obj_def: sequence_inst
-  - extends: assertion
-  - obj_ref: sequence_decl
-    name: sequence decl
-    vpi: vpiSequenceDecl
-    type: sequence_decl
+- obj_def: prop_formal_decl
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
     card: 1
-  - group_ref: named_event_sequence_expr_group
-    name: named event sequence expr group
-    vpi: vpiArgument
-    type: named_event_sequence_expr_group
+  - property: direction
+    name: direction
+    vpi: vpiDirection
+    type: int
     card: 1
-    
+  - group_ref: vpiExpr
+    name: vpiExpr
+    vpi: vpiExpr
+    type: property_expr_named_event_group
+    card: 1
+  - class_ref: vpiTypespec
+    name: vpiTypespec
+    vpi: vpiTypespec
+    type: typespec
+    card: 1
+ 

@@ -136,6 +136,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/property_inst_spec_group.cpp
     ${PROJECT_SOURCE_DIR}/src/ref_obj_interf_net_var_group.cpp
     ${PROJECT_SOURCE_DIR}/src/simple_expr_use_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/sequence_expr_group.cpp
     ${PROJECT_SOURCE_DIR}/src/stmt.cpp
     ${PROJECT_SOURCE_DIR}/src/sys_func_task_call_group.cpp
     ${PROJECT_SOURCE_DIR}/src/task_func_named_begin_fork_group.cpp
@@ -143,6 +144,8 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/variable_drivers_group.cpp
     ${PROJECT_SOURCE_DIR}/src/variable_loads_group.cpp
     ${PROJECT_SOURCE_DIR}/src/variables_operation_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/sequence_expr_multiclock_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/named_event_sequence_expr_group.cpp
     ${PROJECT_SOURCE_DIR}/src/pattern.cpp
     ${PROJECT_SOURCE_DIR}/src/vpi_listener.cpp
     ${PROJECT_SOURCE_DIR}/src/vpi_user.cpp

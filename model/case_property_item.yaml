@@ -12,18 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "sequence_inst" formal description
- 
-- obj_def: sequence_inst
-  - extends: assertion
-  - obj_ref: sequence_decl
-    name: sequence decl
-    vpi: vpiSequenceDecl
-    type: sequence_decl
+# Universal Hardware Data Model (UHDM) "case_property_item" formal description
+
+- obj_def: case_property_item
+  - class_ref: expressions
+    name: expressions
+    vpi: vpiExpr
+    type: expr
+    card: any   
+  - group_ref: property_expr
+    name: property expr
+    vpi: vpiPropertyExpr
+    type: property_expr_group
     card: 1
-  - group_ref: named_event_sequence_expr_group
-    name: named event sequence expr group
-    vpi: vpiArgument
-    type: named_event_sequence_expr_group
-    card: 1
-    
