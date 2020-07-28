@@ -14,7 +14,7 @@
 
 # Universal Hardware Data Model (UHDM) "assert_stmt" (assert is a C/C++ keyword) formal description
  
-- class_def: assert_stmt
+- obj_def: assert_stmt
   - extends: concurrent_assertions
   - group_ref: else_stmt
     name: else stmt
@@ -40,11 +40,6 @@
     name: end column
     vpi: vpiEndColumn
     type: int
-    card: 1
-  - property: assertion_name
-    name: assertion name
-    vpi: vpiName
-    type: string
     card: 1
   - obj_ref: clocking_block
     name: clocking block
