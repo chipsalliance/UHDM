@@ -16,4 +16,9 @@
  
 - obj_def: int_typespec
   - extends: typespec
-
+ # Non Standard, allows to model casts to integer values
+  - property: vpi_get_value
+    name: vpi_get_value
+    vpi: vpiValue
+    type: value
+    card: 1
