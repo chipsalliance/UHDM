@@ -29,4 +29,4 @@
     name: property expr
     vpi: vpiPropertyExpr
     type: property_expr_group
-    card: 1  
+    card: 1

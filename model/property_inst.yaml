@@ -15,7 +15,6 @@
 # Universal Hardware Data Model (UHDM) "property_inst" formal description
  
 - obj_def: property_inst
-  - extends: assertion
   - group_ref: vpiDisableCondition
     name: disable condition
     vpi: vpiDisableCondition
@@ -31,4 +30,33 @@
     vpi: vpiPropertyDecl
     type: property_decl
     card: 1
-  
+  - property: start_line
+    name: start line
+    vpi: vpiStartLine
+    type: int
+    card: 1
+  - property: column
+    name: column
+    vpi: vpiColumn
+    type: int
+    card: 1
+  - property: end_line
+    name: end line
+    vpi: vpiEndLine
+    type: int
+    card: 1
+  - property: end_column
+    name: end column
+    vpi: vpiEndColumn
+    type: int
+    card: 1
+  - property: assertion_name
+    name: assertion name
+    vpi: vpiName
+    type: string
+    card: 1
+  - obj_ref: clocking_block
+    name: clocking block
+    vpi: vpiClockingBlock
+    type: clocking_block
+    card: 1

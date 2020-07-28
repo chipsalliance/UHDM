@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "property_expr_group" formal description
- 
-- group_def: property_expr_group
-  - obj_ref: operation
-  - group_ref: sequence_expr_group
-  - obj_ref: multiclock_sequence_expr
-  - obj_ref: property_inst
-  - obj_ref: clocked_property
-  - obj_ref: case_property
-  
+# Universal Hardware Data Model (UHDM) "clocked_seq" formal description
+
+- obj_def: clocked_seq
+  - class_ref: vpiClockingEvent
+    name: clocking event
+    vpi: vpiClockingEvent
+    type: expr
+    card: 1   
+  - group_ref: vpiSequenceExpr
+    name: sequence expr
+    vpi: vpiSequenceExpr
+    type: sequence_expr_group
+    card: 1

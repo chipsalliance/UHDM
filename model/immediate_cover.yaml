@@ -15,7 +15,7 @@
 # Universal Hardware Data Model (UHDM) "immediate_cover" formal description
  
 - obj_def: immediate_cover
-  - extends: assertion
+  - extends: atomic_stmt
   - property: is_deferred
     name: is deferred
     vpi: vpiIsDeferred
@@ -36,3 +36,28 @@
     vpi: vpiStmt
     type: stmt
     card: 1  
+  - property: start_line
+    name: start line
+    vpi: vpiStartLine
+    type: int
+    card: 1
+  - property: column
+    name: column
+    vpi: vpiColumn
+    type: int
+    card: 1
+  - property: end_line
+    name: end line
+    vpi: vpiEndLine
+    type: int
+    card: 1
+  - property: end_column
+    name: end column
+    vpi: vpiEndColumn
+    type: int
+    card: 1
+  - obj_ref: clocking_block
+    name: clocking block
+    vpi: vpiClockingBlock
+    type: clocking_block
+    card: 1

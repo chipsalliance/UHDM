@@ -18,6 +18,6 @@
   - class_ref: scope
   - class_ref: atomic_stmt
   - class_ref: expr
-  - class_ref: assertion
+  - group_ref: assertion
   
 
