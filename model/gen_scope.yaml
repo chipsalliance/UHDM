@@ -95,7 +95,7 @@
     vpi: vpiProgramArray
     type: program
     card: any
-  - class_ref: assertion
+  - group_ref: assertion
     name: assertion
     vpi: vpiAssertion
     type: assertion

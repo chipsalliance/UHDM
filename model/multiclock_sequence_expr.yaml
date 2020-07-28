@@ -15,4 +15,9 @@
 # Universal Hardware Data Model (UHDM) "multiclock_sequence_expr" formal description
  
 - obj_def: multiclock_sequence_expr
+  - obj_ref: clocked_seq
+    name: clocked seq
+    vpi: vpiClockedSeq
+    type: clocked_seq
+    card: any
 
