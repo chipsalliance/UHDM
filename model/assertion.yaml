@@ -16,3 +16,16 @@
  
 - group_def: assertion
   - obj_ref: sequence_inst
+  - obj_ref: assert
+  - obj_ref: assume
+  - obj_ref: cover
+  - obj_ref: restrict
+  - obj_ref: property_inst
+  - obj_ref: immediate_assert
+  - obj_ref: immediate_assume
+  - obj_ref: immediate_cover
+  
+
+
+  
+  
