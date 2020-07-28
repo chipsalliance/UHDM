@@ -14,7 +14,7 @@
 
 # Universal Hardware Data Model (UHDM) "cover" formal description
  
-- class_def: cover
+- obj_def: cover
   - extends: concurrent_assertions
   - property: is_cover_sequence
     name: is cover sequence
@@ -40,11 +40,6 @@
     name: end column
     vpi: vpiEndColumn
     type: int
-    card: 1
-  - property: assertion_name
-    name: assertion name
-    vpi: vpiName
-    type: string
     card: 1
   - obj_ref: clocking_block
     name: clocking block

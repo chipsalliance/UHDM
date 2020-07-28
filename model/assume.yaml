@@ -14,7 +14,7 @@
 
 # Universal Hardware Data Model (UHDM) "assume" (assert is a C/C++ keyword) formal description
  
-- class_def: assume
+- obj_def: assume
   - extends: concurrent_assertions
   - property: start_line
     name: start line
@@ -35,11 +35,6 @@
     name: end column
     vpi: vpiEndColumn
     type: int
-    card: 1
-  - property: assertion_name
-    name: assertion name
-    vpi: vpiName
-    type: string
     card: 1
   - obj_ref: clocking_block
     name: clocking block

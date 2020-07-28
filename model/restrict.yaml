@@ -14,7 +14,7 @@
 
 # Universal Hardware Data Model (UHDM) "restrict" formal description
  
-- class_def: restrict
+- obj_def: restrict
   - extends: concurrent_assertions
   - property: start_line
     name: start line
@@ -35,11 +35,6 @@
     name: end column
     vpi: vpiEndColumn
     type: int
-    card: 1
-  - property: assertion_name
-    name: assertion name
-    vpi: vpiName
-    type: string
     card: 1
   - obj_ref: clocking_block
     name: clocking block
