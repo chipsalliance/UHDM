@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Universal Hardware Data Model (UHDM) "named event" formal description
- 
+
 - obj_def: named_event
   - property: array_member
     name: array member
@@ -39,13 +39,13 @@
     name: memory allocation
     vpi: vpiAllocScheme
     type: int
-    card: 1   
+    card: 1
   - obj_ref: attributes
     name: attributes
     vpi: vpiAttribute
     type: attribute
     card: any
-  - class_ref: event_typespec
+  - obj_ref: event_typespec
     name: event typespec
     vpi: vpiTypespec
     type: event_typespec
@@ -55,4 +55,3 @@
     vpi: vpiWaitingProcesses
     type: thread_obj
     card: any
- 
