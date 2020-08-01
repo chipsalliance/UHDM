@@ -64,15 +64,15 @@ namespace UHDM {
 
     virtual bool VpiFile(const std::string& data) = 0;
 
-    virtual int VpiLineNo() const = 0;
+    virtual int VpiLineNo() const final { return vpiLineNo_; }
 
-    virtual bool VpiLineNo(int data) = 0;
+    virtual bool VpiLineNo(int data) final { vpiLineNo_ = data; return true; }
 
     virtual const std::string& VpiName() const { return nonamebaseclass; }
 
     virtual const std::string& VpiDefName() const { return nonamebaseclass; }
 
-    virtual unsigned int VpiType() const { return 0; }
+    virtual unsigned int VpiType() const = 0;
 
     ClientData* Data() { return clientData_; }
 
@@ -91,6 +91,9 @@ namespace UHDM {
     Serializer* serializer_;
 
     ClientData* clientData_;
+
+  private:
+    int vpiLineNo_ = 0;
 
   };
 

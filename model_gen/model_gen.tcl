@@ -667,7 +667,7 @@ proc generate_group_checker { model } {
                             if {$checktype != ""} {
                                 append checktype " \\&\\& "
                             }
-                            append checktype "(uhdmtype != $uhdmgroupmember)"                            
+                            append checktype "(uhdmtype != $uhdmgroupmember)"
                         }
                     } else {
                         if {$checktype != ""} {
@@ -686,7 +686,7 @@ proc generate_group_checker { model } {
                                 append checktype "(uhdmtype != $uhdmclasstype)"
                             }
                         }
-                    } 
+                    }
                 }
             }
         }
@@ -1214,7 +1214,7 @@ proc generate_code { models } {
             append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override = 0;\n"
         } else {
             # Builtin properties do not need to be specified in each models
-            # Builtins: "vpiParent, Parent type, vpiFile, vpiLineNo, Id" method and field
+            # Builtins: "vpiParent, Parent type, vpiFile, Id" method and field
             append methods($classname) [printMethods $classname BaseClass vpiParent 1]
             append members($classname) [printMembers BaseClass vpiParent 1]
             append methods($classname) [printMethods $classname "unsigned int" uhdmParentType 1]
@@ -1222,9 +1222,6 @@ proc generate_code { models } {
             append methods($classname) [printMethods $classname string vpiFile 1]
             append members($classname) [printMembers string vpiFile 1]
             lappend vpi_get_str_body_inst($classname) [list $classname string vpiFile 1]
-            append methods($classname) [printMethods $classname "int" vpiLineNo 1]
-            append members($classname) [printMembers "int" vpiLineNo 1]
-            lappend vpi_get_body_inst($classname) [list $classname int vpiLineNo 1]
             append methods($classname) [printMethods $classname "unsigned int" uhdmId 1]
             append members($classname) [printMembers "unsigned int" uhdmId 1]
             append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
