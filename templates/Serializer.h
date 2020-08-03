@@ -26,16 +26,23 @@
 
 #ifndef SERIALIZER_UHDM_H
 #define SERIALIZER_UHDM_H
-
+#include <iostream>
+#include <functional>
 #include "uhdm.h"
 
 namespace UHDM {
 
+  typedef std::function<void(const std::string&)> ErrorHandler;
+
+  static void DefaultErrorHandler(const std::string& errorMsg) { std::cout << errorMsg << std::endl; }
+  
   class Serializer {
   public:
-    Serializer() : incrId_(0), objId_(0) {symbolMaker.Make("");}
+    Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {symbolMaker.Make("");}
     void Save(const std::string& file);
     void Purge();
+    void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
+    ErrorHandler GetErrorHandler() { return errorHandler; }
     const std::vector<vpiHandle> Restore(const std::string& file);
 
 <FACTORIES_METHODS>
@@ -55,6 +62,8 @@ namespace UHDM {
     std::unordered_map<const BaseClass*, unsigned long> allIds_;
     unsigned long incrId_; // Capnp id
     unsigned long objId_;  // ID for property annotations
+
+    ErrorHandler errorHandler;
   };
 };
 
