@@ -210,6 +210,7 @@ if (UHDM_BUILD_TESTS)
     tests/full_elab.cpp
     tests/vpi_get_test.cpp
     tests/vpi_value_conversion_test.cpp
+    tests/testErrorHandler.cpp
   )
 endif()
 

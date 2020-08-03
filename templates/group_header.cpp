@@ -37,7 +37,7 @@ namespace UHDM {
     BaseClass* the_item = (BaseClass*) item;
     UHDM_OBJECT_TYPE uhdmtype = the_item->UhdmType();
     if (<CHECKTYPE>) {
-      std::cout << "Internal Error: adding wrong object type (" << UhdmName(uhdmtype) << ") in a <GROUPNAME> group!\n";   
+      item->GetSerializer()->GetErrorHandler()("Internal Error: adding wrong object type (" + UhdmName(uhdmtype) + ") in a <GROUPNAME> group!\n");   
       return false;
     }
     return true;
