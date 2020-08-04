@@ -94,16 +94,18 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   return designs;
 }
 
-static bool issuedError = false;
-void MyErrorHandler(const std::string& errorMsg) {
-  std::cout << "My Error Handler: " << errorMsg << std::endl;
-  issuedError = true;
-}
-
 int main (int argc, char** argv) {
   std::cout << "Make design" << std::endl;
   Serializer serializer;
+
+  // Install a customer error handler
+  bool issuedError = false;
+  UHDM::ErrorHandler MyErrorHandler = [&](const std::string& msg) {
+    std::cout << "My Error Handler: " << msg << std::endl;
+    issuedError = true;
+  };
   serializer.SetErrorHandler(MyErrorHandler);
+
   std::string orig = visit_designs(build_designs(serializer));
 
   std::cout << orig;
