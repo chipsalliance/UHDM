@@ -1,5 +1,5 @@
-# UHDM
-Universal Hardware Data Model
+# Universal Hardware Data Model (UHDM)
+
 
 ![UHDM Overview](/images/UHDM.png)
 
