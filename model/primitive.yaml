@@ -12,17 +12,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "primitive.yaml" formal description
+# Universal Hardware Data Model (UHDM) "primitive" formal description
  
 - class_def: primitive
-  - property: vpi_get_value
-    name: vpi_get_value
-    vpi: vpiValue
-    type: value
+  - property: array_member
+    name: array member
+    vpi: vpiArrayMember
+    type: bool
     card: 1
+  - property: definition_name
+    name: definition name
+    vpi: vpiDefName
+    type: string
+    card: 1
+  - property: vpi_get_delays
+    name: vpi_get_delays
+    vpi: vpiDelay
+    type: delay
+    card: 1
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+  - property: primitive_type
+    name: primitive type
+    vpi: vpiPrimType
+    type: int
+    card: 1
+  - property: strength0
+    name: strength 0
+    vpi: vpiStrength0
+    type: int
+    card: 1
+  - property: strength1
+    name: strength 1
+    vpi: vpiStrength1
+    type: int
+    card: 1 
   - obj_ref: attributes
     name: attributes
     vpi: vpiAttribute
     type: attribute
     card: any
-    
+  - property: vpi_get_value
+    name: vpi_get_value
+    vpi: vpiValue
+    type: value
+    card: 1
+  - class_ref: delay
+    name: delay
+    vpi: vpiDelay
+    type: expr
+    card: 1
+  - class_ref: index
+    name: index
+    vpi: vpiIndex
+    type: expr
+    card: 1
+  - obj_ref: prim_term
+    name: prim term
+    vpi: vpiPrimTerm
+    type: prim_term
+    card: any

@@ -341,7 +341,6 @@ proc printGetHandleBody { classname type vpi object card } {
      else return 0;
   }"
         printVpiVisitor $classname $vpi $card
-        #printVpiListener $classname $vpi $card
     }
     return $vpi_get_handle_body
 }
@@ -584,6 +583,8 @@ proc makeVpiName { classname } {
         set vpiName "vpiWait"
     } elseif {$vpiName == "vpiThreadObj"} {
         set vpiName "vpiThread"
+    } elseif {$vpiName == "vpiSwitchTran"} {
+        set vpiName "vpiSwitch"
     }
 
     return $vpiName

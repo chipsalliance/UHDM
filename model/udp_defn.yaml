@@ -15,3 +15,39 @@
 # Universal Hardware Data Model (UHDM) "udp_defn" formal description
  
 - obj_def: udp_defn
+  - property: definition_name
+    name: definition name
+    vpi: vpiDefName
+    type: string
+    card: 1
+  - property: number_of_inputs
+    name: number of inputs
+    vpi: vpiSize
+    type: int
+    card: 1
+  - property: protected
+    name: protected
+    vpi: vpiProtected
+    type: bool
+    card: 1
+  - property: primitive_type
+    name: primitive type
+    vpi: vpiPrimType
+    type: int
+    card: 1
+  - obj_ref: io_decl
+    name: io decl
+    vpi: vpiIODecl
+    type: io_decl
+    card: any
+  - obj_ref: table_entry
+    name: table_entry
+    vpi: vpiTableEntry
+    type: table_entry
+    card: any
+  - obj_ref: initial
+    name: initial
+    vpi: vpiInitial
+    type: initial
+    card: 1
+    
