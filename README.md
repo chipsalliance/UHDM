@@ -1,6 +1,10 @@
 # UHDM
 Universal Hardware Data Model
 
+![UHDM Overview](/images/UHDM.png)
+
+![UHDM Roadmap](/images/UHDM_future.png)
+
 # Presentation
 * [UHDM Presentation](https://docs.google.com/presentation/d/1evu8aBWMFwi_UrK-DfWXowfsXM4Bp9knQuHV24lwkPc/edit#slide=id.p)
 
