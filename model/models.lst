@@ -145,11 +145,15 @@ ports.yaml
 port.yaml
 port_bit.yaml
 primitive.yaml
+gate.yaml
+switch.yaml
+udp.yaml
 mod_path.yaml
 expr_tchk_term_group.yaml
 tchk.yaml
 range.yaml
 udp_defn.yaml
+table_entry.yaml
 ref_obj_interf_net_var_group.yaml
 io_decl.yaml
 alias_stmt.yaml

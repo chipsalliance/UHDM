@@ -12,33 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "prim term" formal description
+# Universal Hardware Data Model (UHDM) "table_entry" formal description
  
-- obj_def: prim_term
-  - property: direction
-    name: direction
-    vpi: vpiDirection
+- obj_def: table_entry
+  - property: number_of_symbol_entries
+    name: number of symbol entries
+    vpi: vpiSize
     type: int
     card: 1
-  - property: index
-    name: index
-    vpi: vpiTermIndex
-    type: int
-    card: 1   
   - property: vpi_get_value
     name: vpi_get_value
     vpi: vpiValue
     type: value
     card: 1
-  - obj_ref: attributes
-    name: attributes
-    vpi: vpiAttribute
-    type: attribute
-    card: any
-  - class_ref: expr
-    name: expr
-    vpi: vpiExpr
-    type: expr
-    card: 1
 
-  
+    
