@@ -75,26 +75,3 @@
     vpi: vpiTypedef
     type: typespec
     card: 1
-  - class_ref: instance
-    name: instance
-    vpi: vpiInstance
-    type: instance
-    card: 1
-  - obj_ref: udp_defn
-    name: udm_defn
-    vpi: vpiUdpDefn
-    type: udp_defn
-    card: 1
-  - class_ref: task_func
-    name: task func
-    vpi: vpiTaskFunc
-    type: task_func
-    card: 1
-  - obj_ref: module
-    name: module
-    vpi: vpiModule
-    type: module
-    card: 1
-
-
- 
