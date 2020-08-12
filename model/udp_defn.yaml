@@ -35,6 +35,11 @@
     vpi: vpiPrimType
     type: int
     card: 1
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
+    card: any  
   - obj_ref: io_decl
     name: io decl
     vpi: vpiIODecl
