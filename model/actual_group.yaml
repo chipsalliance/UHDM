@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Universal Hardware Data Model (UHDM) "actual group" formal description
-# Parameters, enum_const are not in the actual group in the Standard, we add them to the group for binding convenience
+# Parameters, enum_const, io_decl are not in the actual group in the Standard, we add them to the group for binding convenience
  
 - group_def: actual_group
   - obj_ref: interface
@@ -26,6 +26,8 @@
   - obj_ref: part_select
   - obj_ref: parameter
   - obj_ref: enum_const
+  - obj_ref: io_decl
+ 
 
 
 
