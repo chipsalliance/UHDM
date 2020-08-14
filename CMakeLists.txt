@@ -163,7 +163,13 @@ add_library(uhdm STATIC ${uhdm_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER "${UHDM_PUBLIC_HEADERS}")
 target_link_libraries(uhdm PUBLIC capnp)
 
-if (UNIX)
+if(APPLE)
+  target_link_libraries(uhdm
+      PUBLIC dl
+      PUBLIC util
+      PUBLIC m
+      PUBLIC pthread)
+else(UNIX)
   target_link_libraries(uhdm
       PUBLIC dl
       PUBLIC util
