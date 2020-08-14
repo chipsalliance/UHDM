@@ -15,15 +15,15 @@
 # Universal Hardware Data Model (UHDM) "import_stmt" formal description
 
 - obj_def: import
-  - extends: atomic_stmt
+  - extends: typespec
   - property: type
     name: uhdmimport
     vpi: vpiType
     type: unsigned int
     card: 1
-  - obj_ref: items
-    name: items
+  - obj_ref: item
+    name: item
     vpi: vpiImport
     type: constant
-    card: any
+    card: 1
 
