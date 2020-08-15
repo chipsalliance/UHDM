@@ -57,6 +57,7 @@ typedef std::set<vpiHandle> VisitedContainer;
 #define vpiSequenceExpr 3005
 #define vpiUnsupportedStmt 4000
 #define vpiUnsupportedExpr 4001
+#define uhdmimport 2577
 
 #else
 
