@@ -101,9 +101,23 @@ proc generate_elaborator { models } {
                         }
 
                         if {$card == 1} {
-                            append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
+
+                            if {$classname == "func_call"} {
+                                if {$method == "Function"} {
+                                    append clone_impl "  if (auto obj = ${method}()) clone->${method}((function*) obj);
 "
-                            if {$classname == "ref_obj"} {
+                                }
+                            } elseif {$classname == "task_call"} {
+                                if {$method == "Task"} {
+                                    append clone_impl "  if (auto obj = ${method}()) clone->${method}((task*) obj);
+"
+                                }
+                            } else {
+                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
+"
+                            }
+                            
+                             if {$classname == "ref_obj"} {
                                 if {$method == "Actual_group"} {
                                     append clone_impl "  if (clone->${method}() == nullptr) {
       clone->${method}(elaborator->bindAny(VpiName()));
@@ -118,6 +132,7 @@ proc generate_elaborator { models } {
           }
 "
                             }
+                                                          
                         } else {
                             append clone_impl "  if (auto vec = ${method}()) {
     auto clone_vec = serializer->Make${Cast}Vec();
@@ -127,7 +142,18 @@ proc generate_elaborator { models } {
     }
   }
 "
-                            if {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets")} {
+
+                             if {($rootclassname == "module") && ($method == "Task_funcs")} {
+                                append vpi_listener "          if (auto vec = defMod->${method}()) {
+            auto clone_vec = serializer_->Make${Cast}Vec();
+            inst->${method}(clone_vec);
+            for (auto obj : *vec) {
+              clone_vec->push_back((task_func*) obj);
+            }
+          }
+"
+
+                            } elseif {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets")} {
                                 # We don't want to override the elaborated instance ports by the module def ports
                                 append vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
