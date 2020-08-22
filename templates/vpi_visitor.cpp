@@ -397,10 +397,6 @@ static std::string vpiTypeName(vpiHandle h) {
 
 #endif
 
-void vpi_show_ids(bool show) {
-  showIDs = show;
-}
-  
 static void release_handle(vpiHandle obj_h) {
 #ifndef STANDARD_VPI
   vpi_release_handle(obj_h);
@@ -579,6 +575,9 @@ std::string visit_designs (const std::vector<vpiHandle>& designs) {
 
 };
 
+void vpi_show_ids(bool show) {
+  showIDs = show;
+}
 
 static std::stringstream the_output;
 
@@ -589,4 +588,5 @@ extern "C" {
     UHDM::visit_designs(designs, the_output);
     std::cout << the_output.str().c_str() << std::endl;
   }
+  
 }
