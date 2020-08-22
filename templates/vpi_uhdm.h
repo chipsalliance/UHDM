@@ -67,4 +67,7 @@ std::string VpiValue2String(const s_vpi_value* value);
 
 std::string VpiDelay2String(const s_vpi_delay* delay);
 
+/** Shows unique IDs in vpi_visitor dump (uhdmdump) */
+void vpi_show_ids(bool show);
+
 #endif

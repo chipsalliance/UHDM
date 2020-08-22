@@ -397,6 +397,10 @@ static std::string vpiTypeName(vpiHandle h) {
 
 #endif
 
+void vpi_show_ids(bool show) {
+  showIDs = show;
+}
+  
 static void release_handle(vpiHandle obj_h) {
 #ifndef STANDARD_VPI
   vpi_release_handle(obj_h);
