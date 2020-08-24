@@ -119,10 +119,12 @@ proc printMethods { classname type vpi card {real_type ""} } {
     const BaseClass* parent = this;
     bool package = false;
     while (parent) {
+      const BaseClass* actual_parent = parent->VpiParent();
       if (parent->UhdmType() == uhdmdesign) break;
       if (parent->UhdmType() == uhdmpackage) package = true;
       const std::string\\& name = (!parent->VpiName().empty()) ? parent->VpiName() : parent->VpiDefName();
-      if (!name.empty())
+      bool skip_name = (actual_parent != nullptr) \\&\\& (actual_parent->UhdmType() == uhdmref_obj);
+      if ((!name.empty()) \\&\\& (!skip_name))
         names.push_back(name);
       parent = parent->VpiParent();
     }
