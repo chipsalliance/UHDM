@@ -112,20 +112,14 @@ proc generate_elaborator { models } {
                                     append clone_impl "  if (auto obj = ${method}()) clone->${method}((task*) obj);
 "
                                 }
+                            } elseif {($classname == "ref_obj") && ($method == "Actual_group")} {
+                                append clone_impl "  clone->${method}(elaborator->bindAny(VpiName()));
+"
                             } else {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
 "
                             }
                             
-                             if {$classname == "ref_obj"} {
-                                if {$method == "Actual_group"} {
-                                    append clone_impl "  if (clone->${method}() == nullptr) {
-      clone->${method}(elaborator->bindAny(VpiName()));
-    }
-"
-                                }
-                            }
-
                             if {$rootclassname == "module"} {
                                 append vpi_listener "          if (auto obj = defMod->${method}()) {
             inst->${method}(obj->DeepClone(serializer_, this, defMod));
