@@ -158,6 +158,8 @@ ref_obj_interf_net_var_group.yaml
 io_decl.yaml
 alias_stmt.yaml
 clocking_block.yaml
+nets_vars_ref_obj_group.yaml
+clocking_io_decl.yaml
 expr_typespec_group.yaml
 param_assign.yaml
 instance_array.yaml
