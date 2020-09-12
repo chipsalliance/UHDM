@@ -146,6 +146,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/variables_operation_group.cpp
     ${PROJECT_SOURCE_DIR}/src/sequence_expr_multiclock_group.cpp
     ${PROJECT_SOURCE_DIR}/src/named_event_sequence_expr_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/nets_vars_ref_obj_group.cpp
     ${PROJECT_SOURCE_DIR}/src/assertion.cpp
     ${PROJECT_SOURCE_DIR}/src/pattern.cpp
     ${PROJECT_SOURCE_DIR}/src/vpi_listener.cpp

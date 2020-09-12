@@ -12,10 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "clocking_block" formal description
+# Universal Hardware Data Model (UHDM) "clocking_io_decl" formal description
  
-- obj_def: clocking_block
-  - extends: scope
+- obj_def: clocking_io_decl
+  - property: direction
+    name: direction
+    vpi: vpiDirection
+    type: int
+    card: 1
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
   - property: input_edge
     name: input edge
     vpi: vpiInputEdge
@@ -36,30 +45,10 @@
     vpi: vpiOutputSkew
     type: delay_control
     card: 1
-  - obj_ref: clocking_event
-    name: clocking event
-    vpi: vpiClockingEvent
-    type: event_control
-    card: 1    
-  - class_ref: instance
-    name: instance
-    vpi: vpiInstance
-    type: instance
-    card: 1
-  - obj_ref: clocking_io_decl
-    name: clocking io decl
-    vpi: vpiClockingIODecl
-    type: clocking_io_decl
-    card: any
-  - obj_ref: prefix
-    name: prefix
-    vpi: vpiPrefix
-    type: virtual_interface_var
-    card: 1  
-  - obj_ref: actual
-    name: actual
-    vpi: vpiActual
-    type: clocking_block
+  - group_ref: expr
+    name: expr
+    vpi: vpiExpr
+    type: nets_vars_ref_obj_group
     card: 1
 
 

@@ -555,6 +555,8 @@ proc makeVpiName { classname } {
         set vpiName "vpiFor"
     } elseif {$vpiName == "vpiIoDecl"} {
         set vpiName "vpiIODecl"
+    } elseif {$vpiName == "vpiClockingIoDecl"} {
+        set vpiName "vpiClockingIODecl"
     } elseif {$vpiName == "vpiTfCall"} {
         set vpiName "vpiSysTfCall"
     } elseif {$vpiName == "vpiAtomicStmt"} {
