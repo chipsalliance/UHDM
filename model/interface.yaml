@@ -66,6 +66,10 @@
     vpi: vpiContAssign
     type: cont_assign
     card: any
+  - obj_ref: clocking_blocks
+    vpi: vpiClockingBlock
+    type: clocking_block
+    card: any  
   - obj_ref: interfaces
     name: interface
     vpi: vpiInterface
