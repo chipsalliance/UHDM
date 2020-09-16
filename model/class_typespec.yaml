@@ -17,4 +17,62 @@
 
 - obj_def: class_typespec
   - extends: typespec
-
+  - property: class_type
+    name: class type
+    vpi: vpiClassType
+    type: int
+    card: 1
+  - property: declared_lifetime
+    name: declared lifetime
+    vpi: vpiAutomatic
+    type: bool
+    card: 1
+  - obj_ref: class_typespec
+    name: class typespec
+    vpi: vpiExtends
+    type: class_typespec
+    card: 1    
+  - class_ref: variables
+    name: variables
+    vpi: vpiVariables
+    type: variables
+    card: any
+  - class_ref: task_func
+    name: task func
+    vpi: vpiTaskFunc
+    type: task_func
+    card: any
+  - obj_ref: constraint
+    name: constraint
+    vpi: vpiConstraint
+    type: constraint
+    card: any
+  - group_ref: parameters
+    name: parameters
+    vpi: vpiParameter
+    type: parameters
+    card: any
+  - obj_ref: param_assigns
+    vpi: vpiParamAssign
+    type: param_assign
+    card: any     
+  - obj_ref: virtual_interface_vars
+    name: virtual interface vars
+    vpi: vpiVirtualInterfaceVar
+    type: virtual_interface_var
+    card: any
+  - obj_ref: named_events
+    name: named event
+    vpi: vpiNamedEvent
+    type: named_event
+    card: any
+  - obj_ref: named_event_arrays
+    name: named event arrays
+    vpi: vpiNamedEventArray
+    type: named_event_array
+    card: any    
+  - class_ref: scopes
+    name: scopes
+    vpi: vpiInternalScope
+    type: scope
+    card: any    

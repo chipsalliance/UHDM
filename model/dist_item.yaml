@@ -12,32 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "class defn" formal description
+# Universal Hardware Data Model (UHDM) "dist item" formal description
  
-- obj_def: class_defn
-  - extends: scope
-  - property: virtual
-    name: virtual
-    vpi: vpiVirtual
-    type: bool
+- obj_def: dist_item
+  - property: distribution_type
+    name: distribution type
+    vpi: vpiDistType
+    type: int
     card: 1
-  - property: declared_lifetime
-    name: declared lifetime
-    vpi: vpiAutomatic
-    type: bool
-    card: 1   
-  - obj_ref: extends
-    name: extends
-    vpi: vpiExtends
-    type: extends
+  - group_ref: value_range
+    name: value range
+    vpi: vpiValueRange
+    type: expr_range_group
     card: 1
-  - class_ref: task_func
-    name: task func
-    vpi: vpiTaskFunc
-    type: task_func
-    card: any
-  - obj_ref: constraint
-    name: constraint
-    vpi: vpiConstraint
-    type: constraint
-    card: any
+  - class_ref: weight
+    name: weight
+    vpi: vpiWeight
+    type: expr
+    card: 1

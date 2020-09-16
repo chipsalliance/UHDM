@@ -15,4 +15,19 @@
 # Universal Hardware Data Model (UHDM) "distribution" formal description
  
 - obj_def: distribution
- 
+  - extends: constraint_expr
+  - property: soft_constraint
+    name: soft constraint
+    vpi: vpiSoft
+    type: bool
+    card: 1
+  - obj_ref: dist_item
+    name: dist item
+    vpi: vpiDistItem
+    type: dist_item
+    card: any
+  - class_ref: expr
+    name: expr
+    vpi: vpiExpr
+    type: expr
+    card: 1

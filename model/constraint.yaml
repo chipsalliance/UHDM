@@ -15,8 +15,49 @@
 # Universal Hardware Data Model (UHDM) "constraint" formal description
  
 - obj_def: constraint
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+  - property: virtual
+    name: virtual
+    vpi: vpiVirtual
+    type: bool
+    card: 1
+  - property: declared_lifetime
+    name: declared lifetime
+    vpi: vpiAutomatic
+    type: bool
+    card: 1
+  - property: memory_allocation
+    name: memory allocation
+    vpi: vpiAllocScheme
+    type: int
+    card: 1
+  - property: access
+    name: access
+    vpi: vpiAccessType
+    type: int
+    card: 1
   - obj_ref: attributes
     name: attributes
     vpi: vpiAttribute
     type: attribute
     card: any
+  - property: active
+    name: active
+    vpi: vpiIsConstraintEnabled
+    type: bool
+    card: 1
+  - group_ref: constraint_item
+    name: constraint item
+    vpi: vpiConstraintItem
+    type: constraint_item_group
+    card: any
+ 

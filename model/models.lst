@@ -99,7 +99,6 @@ simple_expr_use_group.yaml
 simple_expr.yaml
 constant.yaml
 let_expr.yaml
-distribution.yaml
 operand_group.yaml
 operation.yaml
 part_select.yaml
@@ -131,7 +130,6 @@ union_var.yaml
 enum_var.yaml
 string_var.yaml
 chandle_var.yaml
-class_var.yaml
 var_bit.yaml
 task_func.yaml
 task.yaml
@@ -193,8 +191,11 @@ named_event_array.yaml
 parameter.yaml
 def_param.yaml
 spec_param.yaml
+class_typespec.yaml
+extends.yaml
 class_defn.yaml
 class_obj.yaml
+class_var.yaml
 instance.yaml
 interface.yaml
 program.yaml
@@ -207,7 +208,6 @@ short_int_typespec.yaml
 int_typespec.yaml
 long_int_typespec.yaml
 integer_typespec.yaml
-class_typespec.yaml
 time_typespec.yaml
 enum_typespec.yaml
 string_typespec.yaml
@@ -237,6 +237,12 @@ method_func_call.yaml
 method_task_call.yaml
 func_call.yaml
 task_call.yaml
+constraint_expr.yaml
+constraint_ordering.yaml
+constraint_item_group.yaml
 constraint.yaml
 import.yaml
+expr_range_group.yaml
+dist_item.yaml
+distribution.yaml
 uhdm.yaml

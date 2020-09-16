@@ -16,6 +16,37 @@
  
 - obj_def: class_obj
   - extends: scope
+  - property: my_identity
+    name: my identity
+    vpi: vpiObjId
+    type: int
+    card: 1
+  - obj_ref: class_typespec
+    name: class typespec
+    vpi: vpiClassTypespec
+    type: class_typespec
+    card: 1
+  - obj_ref: threads
+    name: threads
+    vpi: vpiWaitingProcesses
+    type: thread_obj
+    card: any
+  - class_ref: messages
+    name: messages
+    vpi: vpiMessages
+    type: expr
+    card: any
+  - class_ref: task_func
+    name: task func
+    vpi: vpiTaskFunc
+    type: task_func
+    card: any
+  - obj_ref: constraint
+    name: constraint
+    vpi: vpiConstraint
+    type: constraint
+    card: any
 
 
+    
 
