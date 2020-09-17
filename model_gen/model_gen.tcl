@@ -581,6 +581,8 @@ proc makeVpiName { classname } {
         set vpiName "vpiProcess"
     } elseif {$vpiName == "vpiForeverStmt"} {
         set vpiName "vpiForever"
+    } elseif {$vpiName == "vpiConstrForeach"} {
+        set vpiName "vpiConstrForEach"
     } elseif {$vpiName == "vpiFinalStmt"} {
         set vpiName "vpiFinal"
     } elseif {$vpiName == "vpiWaitStmt"} {

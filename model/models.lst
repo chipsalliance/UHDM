@@ -245,4 +245,9 @@ import.yaml
 expr_range_group.yaml
 dist_item.yaml
 distribution.yaml
+implication.yaml
+constr_if.yaml
+constr_if_else.yaml
+constr_foreach.yaml
+soft_disable.yaml
 uhdm.yaml
