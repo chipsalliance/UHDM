@@ -516,7 +516,10 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, Vis
       out << s;
       needs_separator = true;
     }
-    if (const char* s = vpi_get_str(vpiName, obj_h)) {   // objectName
+    if (const char* s = vpi_get_str(vpiFullName, obj_h)) {   // objectName
+      if (needs_separator) out << " ";
+      out << "(" << s << ")";  // objectName
+    } else if (const char* s = vpi_get_str(vpiName, obj_h)) {   // objectName
       if (needs_separator) out << " ";
       out << "(" << s << ")";  // objectName
     }
@@ -537,7 +540,9 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, Vis
       out << ", line:" << l;
     }
     if (vpiHandle par = vpi_handle(vpiParent, obj_h)) {
-      if (const char* parentName = vpi_get_str(vpiName, par)) {
+      if (const char* parentName = vpi_get_str(vpiFullName, par)) {
+        out << ", parent:" << parentName;
+      } else if (const char* parentName = vpi_get_str(vpiName, par)) {
         out << ", parent:" << parentName;
       }
       if (showIDs) {
