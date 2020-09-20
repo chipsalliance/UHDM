@@ -41,3 +41,13 @@
     vpi: vpiConstraint
     type: constraint
     card: any
+  - obj_ref: derived
+    name: derived
+    vpi: vpiDerivedClasses
+    type: class_defn
+    card: any
+  - obj_ref: class_typespecs
+    name: class typespecs
+    vpi: vpiClassTypespec
+    type: class_typespec
+    card: any
