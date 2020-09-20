@@ -76,3 +76,9 @@
     vpi: vpiInternalScope
     type: scope
     card: any    
+  - obj_ref: class_defn
+    name: class defn
+    vpi: vpiClassDefn
+    type: class_defn
+    card: 1
+
