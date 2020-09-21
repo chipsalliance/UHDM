@@ -43,9 +43,14 @@
     card: 1
   - property: pure_dpi
     name: pure DPI
-    vpi: vpiDPIContext
+    vpi: vpiDPIPure
     type: bool
     card: 1
+  - property: context
+    name: context
+    vpi: vpiDPIContext
+    type: bool
+    card: 1    
   - property: dpi_qualifier
     name: DPI qualifier
     vpi: vpiDPICStr
