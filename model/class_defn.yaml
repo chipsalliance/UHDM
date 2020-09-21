@@ -33,7 +33,7 @@
     card: 1
   - class_ref: task_func
     name: task func
-    vpi: vpiTaskFunc
+    vpi: vpiMethod
     type: task_func
     card: any
   - obj_ref: constraint
