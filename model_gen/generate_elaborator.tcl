@@ -124,6 +124,10 @@ proc generate_elaborator { models } {
                             } elseif {($classname == "ref_obj") && ($method == "Actual_group")} {
                                 append clone_impl "  clone->${method}(elaborator->bindAny(VpiName()));
 "
+                            } elseif {($classname == "class_defn") && ($method == "Extends")} {
+                                # prevent loop
+                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((extends*)obj);
+"
                             } else {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
 "
