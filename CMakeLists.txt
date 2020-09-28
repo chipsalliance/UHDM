@@ -172,7 +172,7 @@ if(APPLE)
       PUBLIC util
       PUBLIC m
       PUBLIC pthread)
-else(UNIX)
+elseif(UNIX)
   target_link_libraries(uhdm
       PUBLIC dl
       PUBLIC util
