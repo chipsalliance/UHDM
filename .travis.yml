@@ -3,14 +3,11 @@ sudo: required
 # Enable C++ support
 language: cpp
 
-# Compiler selection
-compiler:
-  - gcc
-
 matrix:
   fast_finish: true
   include:
     - os: linux
+      compiler: gcc
       addons:
         apt:
           sources:
@@ -26,20 +23,35 @@ matrix:
             - tclsh
 
       env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - PATH=/usr/bin:$PATH
+        - CC=gcc-7
+        - CXX=g++-7
+        - PREFIX=/usr/include
 
+    - os: windows
+      language: shell
+      before_install:
+        - curl -L http://gnuwin32.sourceforge.net/downlinks/make-bin-zip.php > $TEMP/make-3.81-bin.zip
+        - 7z x -y -o"/c/make" $TEMP/make-3.81-bin.zip
+        - curl -L http://gnuwin32.sourceforge.net/downlinks/make-dep-zip.php > $TEMP/make-dep.zip
+        - 7z x -y -o"/c/make" $TEMP/make-dep.zip
+        - curl -L https://bitbucket.org/tombert/tcltk/downloads/tcltk87-8.7a3.3.tcl87.Win10.x86_64.tgz > $TEMP/tcltk87-8.7a3.3.tcl87.Win10.x86_64.tgz
+        - pushd $TEMP && 7z e -y $TEMP/tcltk87-8.7a3.3.tcl87.Win10.x86_64.tgz && popd
+        - pushd $TEMP && 7z x -y $TEMP/tcltk87-8.7a3.3.tcl87.Win10.x86_64.tar && popd
+        - mv "$TEMP/tcltk87-8.7a3.3.tcl87.Win10.x86_64" "/c/tcltk87"
 
-before_install:
-  - eval "${MATRIX_EVAL}"
-
-install:
-  - export PATH=/usr/bin:$PATH
+      env:
+        - PATH=/c/make/bin:/c/tcltk87/bin:$PATH
+        - PREFIX=$TRAVIS_BUILD_DIR/install
 
 # Build steps
 script:
   - cmake --version
+  - make --version
+  - echo 'puts [info patchlevel];exit 0' | tclsh
   - make clean
   - make
   - make test
-  - sudo make install
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then make install; fi;
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo make install; fi;
   - make test_install

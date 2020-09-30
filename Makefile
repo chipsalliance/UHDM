@@ -2,16 +2,16 @@
 PREFIX?=/usr/local
 
 release: build
-	$(MAKE) -C build
+	cmake --build build --config Release
 
 debug:
 	mkdir -p build
-	cd build; cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX)
-	$(MAKE) -C build
+	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B build
+	cmake --build build --config Debug
 
 test: build
-	$(MAKE) -C build UnitTests
-	cd build && ctest --output-on-failure
+	cmake --build build --target UnitTests --config Release
+	cd build && ctest -C Release --output-on-failure
 
 test-junit: release
 	cd build && ctest --no-compress-output -T Test -C RelWithDebInfo --output-on-failure
@@ -23,8 +23,7 @@ clean:
 	rm -rf build
 
 install: build
-	mkdir -p $(PREFIX)
-	$(MAKE) -C build install
+	cmake --install build --config Release
 
 uninstall:
 	rm -rf $(PREFIX)/lib/uhdm
@@ -32,9 +31,9 @@ uninstall:
 
 build:
 	mkdir -p build
-	cd build; cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX)
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B build
 
 # TODO: the following static libraries should probably be all distributed together in libuhdm.a (ar ADDLIB)
 test_install:
-	$(CXX) -std=c++14 -g tests/test1.cpp -I$(PREFIX)/include/uhdm -I$(PREFIX)/include/uhdm/include $(PREFIX)/lib/uhdm/libuhdm.a $(PREFIX)/lib/uhdm/libcapnp.a $(PREFIX)/lib/uhdm/libkj.a -ldl -lutil -lm -lrt -lpthread -o test_inst
-	./test_inst
+	cmake --build build --target test_inst --config Release
+	find build/bin -name test_inst* -exec {} \;

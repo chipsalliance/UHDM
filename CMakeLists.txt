@@ -1,5 +1,5 @@
 # -*- mode:cmake -*-
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
@@ -226,6 +226,24 @@ endif()
 # A useful utility
 add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/util/uhdm-dump.cpp)
 target_link_libraries(uhdm-dump PRIVATE uhdm)
+
+# Installation tester
+add_executable(test_inst EXCLUDE_FROM_ALL ${PROJECT_SOURCE_DIR}/tests/test1.cpp)
+set_property(TARGET test_inst PROPERTY INCLUDE_DIRECTORIES) # Clear the list of inherited include directories
+set_property(TARGET test_inst PROPERTY LINK_LIBRARIES) # Clear the list of inherited link libraries
+set_property(TARGET test_inst PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin) # Generate it in a known location
+target_include_directories(test_inst PRIVATE
+  ${CMAKE_INSTALL_PREFIX}/include/uhdm
+  ${CMAKE_INSTALL_PREFIX}/include/uhdm/include)
+target_link_libraries(test_inst PRIVATE
+  ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX}
+  ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}
+  ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}
+  $<$<PLATFORM_ID:Darwin>:dl>
+  $<$<PLATFORM_ID:Darwin>:util>
+  $<$<AND:$<PLATFORM_ID:Darwin>,$<NOT:$<PLATFORM_ID:Apple>>>:m>
+  $<$<PLATFORM_ID:Darwin>:rt>
+  $<$<PLATFORM_ID:Darwin>:pthread>)
 
 # Installation target
 install(
