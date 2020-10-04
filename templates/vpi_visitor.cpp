@@ -533,11 +533,17 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, Vis
 
     if (objectType == vpiModule || objectType == vpiProgram || objectType == vpiClassDefn || objectType == vpiPackage ||
         objectType == vpiInterface || objectType == vpiUdp) {
-      if (const char* s = vpi_get_str(vpiFile, obj_h))
-        out << ", file:" << s;  // fileName
-    }
-    if (int l = vpi_get(vpiLineNo, obj_h)) {
-      out << ", line:" << l;
+      if (const char* s = vpi_get_str(vpiFile, obj_h)) {
+	if (int l = vpi_get(vpiLineNo, obj_h)) {
+	  out << " " << s << ":" << l << ": ";  // fileName, line
+	} else {
+	   out << ", file:" << s;  // fileName
+	}
+      }
+    } else {
+      if (int l = vpi_get(vpiLineNo, obj_h)) {
+	out << ", line:" << l;
+      }
     }
     if (vpiHandle par = vpi_handle(vpiParent, obj_h)) {
       if (const char* parentName = vpi_get_str(vpiFullName, par)) {
