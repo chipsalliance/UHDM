@@ -154,12 +154,21 @@ proc parse_model { file } {
     foreach classname [array names BASECLASS] {
         set baseclass $BASECLASS($classname)
         append DIRECT_CHILDREN($baseclass) "$classname "
-        append ALL_CHILDREN($baseclass) "$classname "
-        if [info exist BASECLASS($baseclass)] {
-            append ALL_CHILDREN($BASECLASS($baseclass)) "$classname "
+        set tmpclass $classname
+        if [info exists BASECLASS($tmpclass)] {
+            set tmpclass $BASECLASS($tmpclass)
+        } else {
+            set tmpclass ""
         }
-
+        
+        while {$tmpclass != ""} {
+            append ALL_CHILDREN($tmpclass) "$classname "
+            if [info exists BASECLASS($tmpclass)] {
+                set tmpclass $BASECLASS($tmpclass)
+            } else {
+                set tmpclass ""
+            }
+        }
     }
-
     return $models
 }

@@ -15,8 +15,8 @@
 # Universal Hardware Data Model (UHDM) "var select" formal description
  
 - obj_def: var_select
- - extends: simple_expr
- - property: constant_selection
+  - extends: simple_expr
+  - property: constant_selection
     name: constant selection
     vpi: vpiConstantSelect
     type: bool
