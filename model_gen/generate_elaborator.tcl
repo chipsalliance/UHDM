@@ -162,8 +162,8 @@ proc generate_elaborator { models } {
           }
 "
 
-                            } elseif {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets")} {
-                                # We don't want to override the elaborated instance ports by the module def ports
+                            } elseif {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets") && ($method != "Parameters") && ($method != "Param_assigns")} {
+                                # We don't want to override the elaborated instance ports by the module def ports, same for nets, params and param_assigns
                                 append vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
