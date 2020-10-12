@@ -413,14 +413,17 @@ proc printGetStrBody {classname type vpi card} {
 }
 
 proc printVpiListener {classname vpi type card} {
-    global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS
+    global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS MODEL_TYPE
     if {$card == 0} {
         set VPI_LISTENERS_HEADER($classname) "void listen_${classname}(vpiHandle object, UHDM::VpiListener* listener);
 "
-        set VPI_ANY_LISTENERS($classname) "  case uhdm${classname} :
+        if {$MODEL_TYPE($classname) != "class_def"} {
+            set VPI_ANY_LISTENERS($classname) "  case uhdm${classname} :
     listen_${classname}(object, listener);
     break;
 "
+        }
+
         set VPI_LISTENERS($classname) "void UHDM::listen_${classname}(vpiHandle object, VpiListener* listener) \{
   ${classname}* d = (${classname}*) ((const uhdm_handle*)object)->object;
   const BaseClass* parent = d->VpiParent();
@@ -435,6 +438,10 @@ proc printVpiListener {classname vpi type card} {
     }
     if {(($vpi == "vpiModule") || ($vpi == "vpiInterface")) && ($card == 1)} {
         # upward vpiModule, vpiInterface relation (when card == 1, pointing to the parent object) creates loops in visitors
+        return
+    }
+    if {($classname == "func_call") && ($vpi == "vpiFunction") && ($card == 1)} {
+        # Prevent stepping inside functions while processing calls to them
         return
     }
 
@@ -506,6 +513,11 @@ proc printVpiVisitor {classname vpi card} {
     }
 
     if {($vpi == "vpiParent") && ($classname !="part_select")} {
+        return
+    }
+
+    # Don't step into function when visiting func calls
+    if {($classname == "func_call") && ($vpi == "vpiFunction") && ($card == 1)} {
         return
     }
 
@@ -919,7 +931,7 @@ set SHORT_VISITOR_LIST { class_obj
 
 
 proc write_vpi_visitor_cpp {} {
-    global VISITOR VISITOR_RELATIONS SHORT_VISITOR_LIST
+    global VISITOR VISITOR_RELATIONS SHORT_VISITOR_LIST MODEL_TYPE
 
     foreach item $SHORT_VISITOR_LIST {
         set filter($item) 1
@@ -933,6 +945,11 @@ proc write_vpi_visitor_cpp {} {
         #if [info exist filter($classname)] {
         #    continue
         #}
+        if {$MODEL_TYPE($classname) == "class_def"} {
+            # Skip all classes
+            continue
+        }
+
         set vpiName [makeVpiName $classname]
         set relations ""
         if [info exist VISITOR_RELATIONS($classname)] {
@@ -1114,7 +1131,7 @@ proc process_baseclass { baseclass classname modeltype capnpIndex } {
 
 proc generate_code { models } {
     global ID BASECLASS DEFINE_ID SAVE RESTORE working_dir methods_cpp VISITOR VISITOR_RELATIONS CLASS_LISTENER
-    global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS
+    global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS MODEL_TYPE
     global uhdm_name_map headers vpi_handle_body_all vpi_handle_body vpi_iterator vpi_iterate_body vpi_handle_by_name_body vpi_handle_by_name_body_all
     global tcl_platform
 
