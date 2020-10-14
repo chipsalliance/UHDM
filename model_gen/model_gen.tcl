@@ -123,7 +123,12 @@ proc printMethods { classname type vpi card {real_type ""} } {
       if (parent->UhdmType() == uhdmdesign) break;
       if (parent->UhdmType() == uhdmpackage) package = true;
       const std::string\\& name = (!parent->VpiName().empty()) ? parent->VpiName() : parent->VpiDefName();
-      bool skip_name = (actual_parent != nullptr) \\&\\& (actual_parent->UhdmType() == uhdmref_obj);
+      UHDM_OBJECT_TYPE parent_type = (parent != nullptr) ? parent->UhdmType() : uhdmunsupported_stmt;
+      UHDM_OBJECT_TYPE actual_parent_type = (actual_parent != nullptr) ? actual_parent->UhdmType() : uhdmunsupported_stmt;
+      bool skip_name = (actual_parent_type == uhdmref_obj) || (parent_type == uhdmmethod_func_call) || 
+                       (parent_type == uhdmmethod_task_call) || (parent_type == uhdmfunc_call) || 
+                       (parent_type == uhdmtask_call) || (parent_type == uhdmsys_func_call) || 
+                       (parent_type == uhdmsys_task_call);
       if ((!name.empty()) \\&\\& (!skip_name))
         names.push_back(name);
       parent = parent->VpiParent();
