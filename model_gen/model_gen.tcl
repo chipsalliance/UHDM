@@ -117,11 +117,11 @@ proc printMethods { classname type vpi card {real_type ""} } {
   } else {
     std::vector<std::string> names;
     const BaseClass* parent = this;
-    bool package = false;
+    bool column = false;
     while (parent) {
       const BaseClass* actual_parent = parent->VpiParent();
       if (parent->UhdmType() == uhdmdesign) break;
-      if (parent->UhdmType() == uhdmpackage) package = true;
+      if (parent->UhdmType() == uhdmpackage || parent->UhdmType() == uhdmclass_defn) column = true;
       const std::string\\& name = (!parent->VpiName().empty()) ? parent->VpiName() : parent->VpiDefName();
       UHDM_OBJECT_TYPE parent_type = (parent != nullptr) ? parent->UhdmType() : uhdmunsupported_stmt;
       UHDM_OBJECT_TYPE actual_parent_type = (actual_parent != nullptr) ? actual_parent->UhdmType() : uhdmunsupported_stmt;
@@ -138,12 +138,14 @@ proc printMethods { classname type vpi card {real_type ""} } {
       unsigned int index = names.size() -1;
       while(1) {
         fullName += names\[index\];
-        if (index > 0) fullName += (package) ? \"::\" : \".\";
+        if (index > 0) fullName += (column) ? \"::\" : \".\";
         if (index == 0) break;
         index--;
       }
     }
-    ((${classname}*)this)->VpiFullName(fullName);
+    if (!fullName.empty()) {
+      ((${classname}*)this)->VpiFullName(fullName);
+    } 
     return serializer_->symbolMaker.GetSymbol(${vpi}_);
   }
 }\n"
@@ -445,11 +447,14 @@ proc printVpiListener {classname vpi type card} {
         # upward vpiModule, vpiInterface relation (when card == 1, pointing to the parent object) creates loops in visitors
         return
     }
-    if {($classname == "func_call") && ($vpi == "vpiFunction") && ($card == 1)} {
-        # Prevent stepping inside functions while processing calls to them
+    if {[regexp {func_call} $classname] && ($vpi == "vpiFunction") && ($card == 1)} {
+        # Prevent stepping inside functions while processing calls (func_call, method_func_call) to them
         return
     }
-
+    if {[regexp {task_call} $classname] && ($vpi == "vpiTask") && ($card == 1)} {
+        # Prevent stepping inside tasks while processing calls (task_call, method_task_call) to them
+        return
+    }
     set vpi_listener ""
     if ![info exist VPI_LISTENERS($classname)] {
         set vpi_listener "    vpiHandle itr;
@@ -521,16 +526,21 @@ proc printVpiVisitor {classname vpi card} {
         return
     }
 
-    # Don't step into function when visiting func calls
-    if {($classname == "func_call") && ($vpi == "vpiFunction") && ($card == 1)} {
-        return
+    set shallowVisit ""
+    if {[regexp {func_call} $classname] && ($vpi == "vpiFunction") && ($card == 1)} {
+        # Prevent stepping inside functions while processing calls (func_call, method_func_call) to them
+        set shallowVisit ", true"
+    }
+    if {[regexp {task_call} $classname] && ($vpi == "vpiTask") && ($card == 1)} {
+        # Prevent stepping inside tasks while processing calls (task_call, method_task_call) to them
+        set shallowVisit ", true"
     }
 
     if {$card == 1} {
         # Prevent loop in Standard VPI
         if {($vpi != "vpiModule") && ($vpi != "vpiInterface")} {
             append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
-    visit_object(itr, subobject_indent, \"$vpi\", visited, out);
+    visit_object(itr, subobject_indent, \"$vpi\", visited, out $shallowVisit);
     release_handle(itr);
 "
         }
@@ -543,7 +553,7 @@ proc printVpiVisitor {classname vpi card} {
         if {$vpi != "vpiUse"} {
             append vpi_visitor "    itr = vpi_iterate($vpi,obj_h);
     while (vpiHandle obj = vpi_scan(itr) ) {
-      visit_object(obj, subobject_indent, \"$vpi\", visited, out);
+      visit_object(obj, subobject_indent, \"$vpi\", visited, out $shallowVisit);
       release_handle(obj);
     }
     release_handle(itr);
@@ -1304,10 +1314,8 @@ proc generate_code { models } {
                     set Vpi [string toupper $vpi 0 0]
                     regsub -all  {_} $Vpi "" Vpi
                     if {$type == "string" || $type == "value" || $type == "delay"} {
-                        if {$Vpi != "VpiFullName"} {
-                            append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->GetSerializer()->symbolMaker.Make(obj->[string toupper ${vpi} 0 0]()));\n"
-                            append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](symbolMaker.GetSymbol(obj.get${Vpi}()));\n"
-                        }
+                        append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->GetSerializer()->symbolMaker.Make(obj->[string toupper ${vpi} 0 0]()));\n"
+                        append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](symbolMaker.GetSymbol(obj.get${Vpi}()));\n"
                     } else {
                         append SAVE($classname) "    ${Classname}s\[index\].set${Vpi}(obj->[string toupper ${vpi} 0 0]());\n"
                         append RESTORE($classname) "    ${classname}Maker.objects_\[index\]->[string toupper ${vpi} 0 0](obj.get${Vpi}());\n"

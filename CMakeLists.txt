@@ -220,6 +220,7 @@ if (UHDM_BUILD_TESTS)
     tests/vpi_get_test.cpp
     tests/vpi_value_conversion_test.cpp
     tests/testErrorHandler.cpp
+    tests/test_classes.cpp
   )
 endif()
 

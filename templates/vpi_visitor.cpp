@@ -464,7 +464,7 @@ static std::ostream &stream_indent(std::ostream &out, int indent) {
   return out;
 }
 
-static void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out) {
+  static void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit = false) {
   if (!obj_h)
     return;
 #ifdef STANDARD_VPI
@@ -478,7 +478,7 @@ static void visit_object (vpiHandle obj_h, int indent, const char *relation, Vis
   static constexpr int kLevelIndent = 2;
   const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
   const BaseClass* const object = (const BaseClass*) handle->object;
-  const bool alreadyVisited = visited->find(object) != visited->end();
+  const bool alreadyVisited = (visited->find(object) != visited->end()) || shallowVisit;
   visited->insert(object);
   
 #endif
