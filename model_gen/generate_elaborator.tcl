@@ -17,7 +17,8 @@
 
 proc generate_elaborator { models } {
     global BASECLASS
-    set vpi_listener ""
+    set module_vpi_listener ""
+    set class_vpi_listener ""
     set clone_implementations ""
 
     foreach model $models {
@@ -111,22 +112,40 @@ proc generate_elaborator { models } {
 
                         if {$card == 1} {
 
-                            if {$classname == "func_call"} {
-                                if {$method == "Function"} {
-                                    append clone_impl "  if (auto obj = ${method}()) clone->${method}((function*) obj);
-"
-                                }
-                            } elseif {$classname == "task_call"} {
-                                if {$method == "Task"} {
-                                    append clone_impl "  if (auto obj = ${method}()) clone->${method}((task*) obj);
-"
-                                }
-                            } elseif {($classname == "ref_obj") && ($method == "Actual_group")} {
+                            if {($classname == "ref_obj") && ($method == "Actual_group")} {
                                 append clone_impl "  clone->${method}(elaborator->bindAny(VpiName()));
+"
+                            } elseif {($method == "Task")} {
+                                set prefix ""
+                                if [regexp {method_} $classname] {
+                                  append clone_impl "  const ref_obj* ref = dynamic_cast<const ref_obj*> (clone->Prefix());\n"
+                                  append clone_impl "  const class_var* prefix = nullptr;\n"
+                                  append clone_impl "  if (ref) prefix = dynamic_cast<const class_var*> (ref->Actual_group());\n"                                         
+                                  set prefix ", prefix"
+                                }
+                                append clone_impl "  if (task* t = dynamic_cast<task*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
+    clone->${method}(t);
+  }
+"
+                            } elseif {($method == "Function")} {
+                                set prefix ""
+                                if [regexp {method_} $classname] {
+                                  append clone_impl "  const ref_obj* ref = dynamic_cast<const ref_obj*> (clone->Prefix());\n"
+                                  append clone_impl "  const class_var* prefix = nullptr;\n"
+                                  append clone_impl "  if (ref) prefix = dynamic_cast<const class_var*> (ref->Actual_group());\n"                                
+                                  set prefix ", prefix"
+                                }
+                                append clone_impl "  if (function* f = dynamic_cast<function*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
+    clone->${method}(f);
+  }
 "
                             } elseif {($classname == "class_defn") && ($method == "Extends")} {
                                 # prevent loop
                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((extends*)obj);
+"
+                            } elseif {($rootclassname == "class_var") && ($method == "Typespec")} {
+                                # prevent loop
+                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((typespec*)obj);
 "
                             } else {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
@@ -134,12 +153,29 @@ proc generate_elaborator { models } {
                             }
                             
                             if {$rootclassname == "module"} {
-                                append vpi_listener "          if (auto obj = defMod->${method}()) {
+                                append module_vpi_listener "          if (auto obj = defMod->${method}()) {
             auto* stmt = obj->DeepClone(serializer_, this, defMod);
             stmt->VpiParent(inst);
             inst->${method}(stmt);
           }
 "
+                            }
+                            if {$rootclassname == "class_defn"} {
+                                if {$method == "Extends"} {
+                                    # Don't deep clone
+                                    append class_vpi_listener "          if (auto obj = cl->${method}()) {
+            auto* stmt = (extends*) obj;
+            cl->${method}(stmt);
+          }
+"                                   
+                                } else {
+                                    append class_vpi_listener "          if (auto obj = cl->${method}()) {
+            auto* stmt = obj->DeepClone(serializer_, this, cl);
+            stmt->VpiParent(cl);
+            cl->${method}(stmt);
+          }
+"
+                                }
                             }
                                                           
                         } else {
@@ -153,18 +189,44 @@ proc generate_elaborator { models } {
 "
 
                              if {($rootclassname == "module") && ($method == "Task_funcs")} {
-                                append vpi_listener "          if (auto vec = defMod->${method}()) {
+                                append module_vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
               clone_vec->push_back((task_func*) obj);
             }
           }
-"
+"                               
 
+                             } elseif {($rootclassname == "class_defn")} {
+                                 if {$method == "Deriveds"} {
+                                     # Don't deep clone
+                                     append class_vpi_listener "          if (auto vec = cl->${method}()) {
+            auto clone_vec = serializer_->Make${Cast}Vec();
+            cl->${method}(clone_vec);
+            for (auto obj : *vec) {
+              auto* stmt = obj;
+              clone_vec->push_back(stmt);
+            }
+          }
+"                                         
+                                 } else {
+                                 
+                                     append class_vpi_listener "          if (auto vec = cl->${method}()) {
+            auto clone_vec = serializer_->Make${Cast}Vec();
+            cl->${method}(clone_vec);
+            for (auto obj : *vec) {
+              auto* stmt = obj->DeepClone(serializer_, this, cl);
+              stmt->VpiParent(cl);
+              clone_vec->push_back(stmt);
+            }
+          }
+"      
+                             }
+                                 
                             } elseif {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets") && ($method != "Parameters") && ($method != "Param_assigns")} {
                                 # We don't want to override the elaborated instance ports by the module def ports, same for nets, params and param_assigns
-                                append vpi_listener "          if (auto vec = defMod->${method}()) {
+                                append module_vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
@@ -201,7 +263,8 @@ proc generate_elaborator { models } {
     set listener_content [read $fid]
     close $fid
 
-    regsub {<ELABORATOR_LISTENER>} $listener_content $vpi_listener listener_content
+    regsub {<MODULE_ELABORATOR_LISTENER>} $listener_content $module_vpi_listener listener_content
+    regsub {<CLASS_ELABORATOR_LISTENER>} $listener_content $class_vpi_listener listener_content
 
     set_content_if_change "[project_path]/headers/ElaboratorListener.h" $listener_content
 

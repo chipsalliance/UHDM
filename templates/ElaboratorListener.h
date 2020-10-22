@@ -42,7 +42,7 @@ public:
   // Bind to a net in the current instance
   net* bindNet(const std::string& name) {
     if (instStack_.size()) {
-      ComponentMap& netMap = instStack_.top().second.first;
+      ComponentMap& netMap = std::get<0>(instStack_.back().second);
       ComponentMap::iterator netItr = netMap.find(name);
       if (netItr != netMap.end()) {
         return (net*) (*netItr).second;
@@ -54,13 +54,13 @@ public:
   // Bind to a net or parameter in the current instance
   any* bindAny(const std::string& name) {
     if (instStack_.size()) {
-      ComponentMap& netMap = instStack_.top().second.first;
+      ComponentMap& netMap = std::get<0>(instStack_.back().second);
       ComponentMap::iterator netItr = netMap.find(name);
       if (netItr != netMap.end()) {
         return (any*) (*netItr).second;
       }
   
-      ComponentMap& paramMap = instStack_.top().second.second;
+      ComponentMap& paramMap = std::get<1>(instStack_.back().second);
       ComponentMap::iterator paramItr = paramMap.find(name);
       if (paramItr != paramMap.end()) {
         return (any*) (*paramItr).second;
@@ -69,12 +69,49 @@ public:
     return nullptr;
   }
 
+  // Bind to a param in the current instance
   any* bindParam(const std::string& name) {
     if (instStack_.size()) {
-      ComponentMap& paramMap = instStack_.top().second.second;
+      ComponentMap& paramMap = std::get<1>(instStack_.back().second);
       ComponentMap::iterator paramItr = paramMap.find(name);
       if (paramItr != paramMap.end()) {
         return (any*) (*paramItr).second;
+      }
+    }
+    return nullptr;
+  }
+
+  // Bind to a function or task in the current scope
+  any* bindTaskFunc(const std::string& name, const class_var* prefix = nullptr) {
+    if (instStack_.size()) {
+      for (InstStack::reverse_iterator i = instStack_.rbegin(); 
+        i != instStack_.rend(); ++i ) { 
+	      ComponentMap& funcMap = std::get<2>((*i).second);
+        ComponentMap::iterator funcItr = funcMap.find(name);
+        if (funcItr != funcMap.end()) {
+          return (any*) (*funcItr).second;
+        }
+      }
+    }
+    if (prefix) {
+      const typespec* tps = prefix->Typespec();
+      if (tps && tps->UhdmType() == uhdmclass_typespec) {
+        const class_defn* def = ((class_typespec*) tps)->Class_defn();
+        while (def) {
+          if (def->Task_funcs()) {
+            for (task_func* tf : *def->Task_funcs()) {
+              if (tf->VpiName() == name) 
+                return tf;
+            }
+          }
+          const UHDM::extends* ext = def->Extends();
+          if (ext) {
+            const class_typespec* tps = ext->Class_typespec();
+            def = tps->Class_defn();
+          } else {
+            break;
+          }
+        }
       }
     }
     return nullptr;
@@ -127,6 +164,14 @@ protected:
         }
       }
 
+      // Collect func and task declaration
+      ComponentMap funcMap;
+      if (object->Task_funcs()) {
+        for (task_func* var : *object->Task_funcs()) {
+          funcMap.insert(std::make_pair(var->VpiName(), var));
+        }
+      }
+
       // Check if Module instance has a definition, collect enums
       ComponentMap::iterator itrDef = flatComponentMap_.find(defName);      
       if (itrDef != flatComponentMap_.end()) {
@@ -150,7 +195,7 @@ protected:
       }
        
       // Push instance context on the stack
-      instStack_.push(std::make_pair(object, std::make_pair(netMap, paramMap)));
+      instStack_.push_back(std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
       
       // Check if Module instance has a definition
       if (itrDef != flatComponentMap_.end()) {
@@ -160,7 +205,7 @@ protected:
         case vpiModule: {
           module* defMod = (module*) comp;
 
-<ELABORATOR_LISTENER>
+<MODULE_ELABORATOR_LISTENER>
 
           break;
         }
@@ -179,13 +224,57 @@ protected:
                                                        ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
                                   // false when it is a module in a hierachy tree
     if (!flatModule) 
-      instStack_.pop();
+      instStack_.pop_back();
+  }
+
+  void enterClass_defn(const class_defn* object, const BaseClass* parent,
+                   vpiHandle handle, vpiHandle parentHandle) override {
+    class_defn* cl = (class_defn*) object;
+
+    // Collect instance elaborated nets
+    ComponentMap varMap;
+    if (object->Variables()) {
+      for (variables* var : *object->Variables()) {
+        varMap.insert(std::make_pair(var->VpiName(), var));
+      }
+    }
+
+    // Collect instance parameters, defparams 
+    ComponentMap paramMap;
+    if (object->Parameters()) {
+      for (any* param : *object->Parameters()) {
+        paramMap.insert(std::make_pair(param->VpiName(), param));
+      }
+    }
+
+    // Collect func and task declaration
+    ComponentMap funcMap;
+    if (object->Task_funcs()) {
+      for (task_func* var : *object->Task_funcs()) {
+        funcMap.insert(std::make_pair(var->VpiName(), var));
+      }
+    }
+
+    // Push class defn context on the stack
+    // Class context is going to be pushed in case of: 
+    //   - imbricated classes
+    //   - inheriting classes (Through the extends relation) 
+    instStack_.push_back(std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+
+<CLASS_ELABORATOR_LISTENER>
+    
+  }
+
+  void leaveClass_defn(const class_defn* object, const BaseClass* parent,
+                   vpiHandle handle, vpiHandle parentHandle) override {
+    instStack_.pop_back();
   }
 
 private:
 
   // Instance context stack
-  std::stack<std::pair<const BaseClass*, std::pair<ComponentMap, ComponentMap>>> instStack_;
+  typedef std::vector<std::pair<const BaseClass*, std::tuple<ComponentMap, ComponentMap, ComponentMap>>> InstStack;
+  InstStack instStack_;
 
   // Flat list of components (modules, udps, interfaces)
   ComponentMap flatComponentMap_;

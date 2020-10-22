@@ -30,4 +30,10 @@
     name: with
     type: expr_constr_group
     vpi: vpiWith
-    card: 1   
+    card: 1
+  - obj_ref: task
+    name: task
+    type: task
+    vpi: vpiTask
+    card: 1
+    
