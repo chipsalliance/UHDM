@@ -35,8 +35,12 @@ proc generate_elaborator { models } {
         set vpiName [makeVpiName $classname]
 
         set baseclass $classname
-
-        set clone_impl "\n${classname}* ${classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const \{\n"
+        if [regexp {_call} ${classname}] {
+         # Use hardcoded implementations  
+         continue
+        } else {
+          set clone_impl "\n${classname}* ${classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const \{\n"
+        }
 
         if [regexp {Net} $vpiName] {
             append clone_impl "  $classname* clone = dynamic_cast<$classname*>(elaborator->bindNet(VpiName()));
