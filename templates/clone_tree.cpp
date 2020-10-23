@@ -34,6 +34,333 @@ namespace UHDM {
 BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener* elaborator) {
   return root ? root->DeepClone(&s, elaborator, nullptr) : nullptr;
 }
+
+// Hardcoded implementations
+static bool is_function_call(const std::string& name, const expr* prefix, ElaboratorListener* elaborator) {
+  if (prefix) {
+    const ref_obj* ref = dynamic_cast<const ref_obj*> (prefix);
+    const class_var* vprefix = nullptr;
+    if (ref) vprefix = dynamic_cast<const class_var*> (ref->Actual_group());
+    any* func = elaborator->bindTaskFunc(name, vprefix);
+    if (func) {
+      if (func->UhdmType() == uhdmfunction) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+static bool is_task_call(const std::string& name, const expr* prefix, ElaboratorListener* elaborator) {
+  if (prefix) {
+    const ref_obj* ref = dynamic_cast<const ref_obj*> (prefix);
+    const class_var* vprefix = nullptr;
+    if (ref) vprefix = dynamic_cast<const class_var*> (ref->Actual_group());
+    any* func = elaborator->bindTaskFunc(name, vprefix);
+    if (func) {
+      if (func->UhdmType() == uhdmtask) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
+tf_call* sys_func_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  sys_func_call* const clone = serializer->MakeSys_func_call();
+  const unsigned long id = clone->UhdmId();
+  *clone = *this;
+  clone->UhdmId(id);
+  clone->VpiParent(parent);
+  if (auto obj = User_systf()) clone->User_systf(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Scope()) clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+  if (auto vec = Tf_call_args()) {
+    auto clone_vec = serializer->MakeAnyVec();
+    clone->Tf_call_args(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+
+  return clone;
+}
+
+tf_call* sys_task_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  sys_task_call* const clone = serializer->MakeSys_task_call();
+  const unsigned long id = clone->UhdmId();
+  *clone = *this;
+  clone->UhdmId(id);
+  clone->VpiParent(parent);
+  if (auto obj = User_systf()) clone->User_systf(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Scope()) clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+  if (auto vec = Tf_call_args()) {
+    auto clone_vec = serializer->MakeAnyVec();
+    clone->Tf_call_args(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+
+  return clone;
+}
+
+tf_call* method_func_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  const expr* prefix = Prefix();
+  if (prefix) {
+    prefix = prefix->DeepClone(serializer, elaborator, (BaseClass*) this);
+  }
+  bool is_function = is_function_call(VpiName(), prefix, elaborator);
+  tf_call* the_clone = nullptr;
+  if (is_function) {
+    method_func_call* const clone = serializer->MakeMethod_func_call();
+    the_clone = clone;
+    const unsigned long id = clone->UhdmId();
+    *clone = *this;
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (auto obj = Prefix())
+      clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
+    const ref_obj* ref = dynamic_cast<const ref_obj*>(clone->Prefix());
+    const class_var* prefix = nullptr;
+    if (ref) prefix = dynamic_cast<const class_var*>(ref->Actual_group());
+    if (function* f = dynamic_cast<function*>(
+            elaborator->bindTaskFunc(VpiName(), prefix))) {
+      clone->Function(f);
+    }
+    if (auto obj = With())
+      clone->With(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Scope())
+      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    if (auto vec = Tf_call_args()) {
+      auto clone_vec = serializer->MakeAnyVec();
+      clone->Tf_call_args(clone_vec);
+      for (auto obj : *vec) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      }
+    }
+    if (auto obj = Typespec())
+      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  } else {
+    method_task_call* const clone = serializer->MakeMethod_task_call();
+    the_clone = clone;
+    const unsigned long id = clone->UhdmId();
+    //*clone = *this;
+    clone->VpiName(VpiName());
+    clone->Tf_call_args(Tf_call_args());
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (auto obj = Prefix())
+      clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
+    const ref_obj* ref = dynamic_cast<const ref_obj*>(clone->Prefix());
+    const class_var* prefix = nullptr;
+    if (ref) prefix = dynamic_cast<const class_var*>(ref->Actual_group());
+    if (task* f = dynamic_cast<task*>(
+            elaborator->bindTaskFunc(VpiName(), prefix))) {
+      clone->Task(f);
+    }
+    if (auto obj = With())
+      clone->With(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Scope())
+      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    if (auto vec = Tf_call_args()) {
+      auto clone_vec = serializer->MakeAnyVec();
+      clone->Tf_call_args(clone_vec);
+      for (auto obj : *vec) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      }
+    }
+    if (auto obj = Typespec())
+      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  }
+  return the_clone;
+}
+
+tf_call* method_task_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  const expr* prefix = Prefix();
+  if (prefix) {
+    prefix = prefix->DeepClone(serializer, elaborator, (BaseClass*) this);
+  }
+  bool is_task = is_task_call(VpiName(), prefix, elaborator);
+  tf_call* the_clone = nullptr;
+  if (is_task) {
+    method_task_call* const clone = serializer->MakeMethod_task_call();
+    the_clone = clone;
+    const unsigned long id = clone->UhdmId();
+    *clone = *this;
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (auto obj = Prefix())
+      clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
+    const ref_obj* ref = dynamic_cast<const ref_obj*>(clone->Prefix());
+    const class_var* prefix = nullptr;
+    if (ref) prefix = dynamic_cast<const class_var*>(ref->Actual_group());
+    if (task* t =
+            dynamic_cast<task*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
+      clone->Task(t);
+    }
+    if (auto obj = With())
+      clone->With(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Scope())
+      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    if (auto vec = Tf_call_args()) {
+      auto clone_vec = serializer->MakeAnyVec();
+      clone->Tf_call_args(clone_vec);
+      for (auto obj : *vec) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      }
+    }
+    if (auto obj = Typespec())
+      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  } else {
+    method_func_call* const clone = serializer->MakeMethod_func_call();
+    the_clone = clone;
+    const unsigned long id = clone->UhdmId();
+    //*clone = *this;
+    clone->VpiName(VpiName());
+    clone->Tf_call_args(Tf_call_args());
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (auto obj = Prefix())
+      clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
+    const ref_obj* ref = dynamic_cast<const ref_obj*>(clone->Prefix());
+    const class_var* prefix = nullptr;
+    if (ref) prefix = dynamic_cast<const class_var*>(ref->Actual_group());
+    if (function* t =
+            dynamic_cast<function*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
+      clone->Function(t);
+    }
+    if (auto obj = With())
+      clone->With(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Scope())
+      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    if (auto vec = Tf_call_args()) {
+      auto clone_vec = serializer->MakeAnyVec();
+      clone->Tf_call_args(clone_vec);
+      for (auto obj : *vec) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      }
+    }
+    if (auto obj = Typespec())
+      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  }
+  return the_clone;
+}
+
+tf_call* func_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  bool is_function = is_function_call(VpiName(), nullptr, elaborator);
+  tf_call* the_clone = nullptr;
+  if (is_function) {
+    func_call* const clone = serializer->MakeFunc_call();
+    the_clone = clone;
+    const unsigned long id = clone->UhdmId();
+    *clone = *this;
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (function* f =
+            dynamic_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
+      clone->Function(f);
+    }
+    if (auto obj = Scope())
+      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    if (auto vec = Tf_call_args()) {
+      auto clone_vec = serializer->MakeAnyVec();
+      clone->Tf_call_args(clone_vec);
+      for (auto obj : *vec) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      }
+    }
+    if (auto obj = Typespec())
+      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  } else {
+    task_call* const clone = serializer->MakeTask_call();
+    the_clone = clone;
+    const unsigned long id = clone->UhdmId();
+    //*clone = *this;
+    clone->VpiName(VpiName());
+    clone->Tf_call_args(Tf_call_args());
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (task* f =
+            dynamic_cast<task*>(elaborator->bindTaskFunc(VpiName()))) {
+      clone->Task(f);
+    }
+    if (auto obj = Scope())
+      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    if (auto vec = Tf_call_args()) {
+      auto clone_vec = serializer->MakeAnyVec();
+      clone->Tf_call_args(clone_vec);
+      for (auto obj : *vec) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      }
+    }
+    if (auto obj = Typespec())
+      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  }
+
+  return the_clone;
+}
+
+tf_call* task_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  bool is_task = is_task_call(VpiName(), nullptr, elaborator);
+  tf_call* the_clone = nullptr;
+  if (is_task) {
+    task_call* const clone = serializer->MakeTask_call();
+    the_clone = clone;
+    const unsigned long id = clone->UhdmId();
+    *clone = *this;
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (task* t = dynamic_cast<task*>(elaborator->bindTaskFunc(VpiName()))) {
+      clone->Task(t);
+    }
+    if (auto obj = Scope())
+      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    if (auto vec = Tf_call_args()) {
+      auto clone_vec = serializer->MakeAnyVec();
+      clone->Tf_call_args(clone_vec);
+      for (auto obj : *vec) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      }
+    }
+    if (auto obj = Typespec())
+      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  } else {
+    func_call* const clone = serializer->MakeFunc_call();
+    the_clone = clone;
+    const unsigned long id = clone->UhdmId();
+    //*clone = *this;
+    clone->VpiName(VpiName());
+    clone->Tf_call_args(Tf_call_args());
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (function* t = dynamic_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
+      clone->Function(t);
+    }
+    if (auto obj = Scope())
+      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    if (auto vec = Tf_call_args()) {
+      auto clone_vec = serializer->MakeAnyVec();
+      clone->Tf_call_args(clone_vec);
+      for (auto obj : *vec) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      }
+    }
+    if (auto obj = Typespec())
+      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  }
+  return the_clone;
+}
+
+
+// Auto generate implementations
+
 <CLONE_IMPLEMENTATIONS>
 
 }  // UHDM namespace

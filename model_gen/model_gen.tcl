@@ -1263,7 +1263,11 @@ proc generate_code { models } {
             lappend vpi_get_str_body_inst($classname) [list $classname string vpiFile 1]
             append methods($classname) [printMethods $classname "unsigned int" uhdmId 1]
             append members($classname) [printMembers "unsigned int" uhdmId 1]
-            append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
+            if [regexp {_call} ${classname}] {
+              append methods($classname) "\n    tf_call* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
+            } else {
+              append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
+            }
             append vpi_handle_body($classname) [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
             lappend capnp_schema($classname) [list vpiParent UInt64]
             lappend capnp_schema($classname) [list uhdmParentType UInt64]
