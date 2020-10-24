@@ -36,12 +36,22 @@ BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener*
 }
 
 // Hardcoded implementations
-static bool is_function_call(const std::string& name, const expr* prefix, ElaboratorListener* elaborator) {
+bool ElaboratorListener::isFunctionCall(const std::string& name, const expr* prefix) {
+  if (instStack_.size()) {
+    for (InstStack::reverse_iterator i = instStack_.rbegin();
+         i != instStack_.rend(); ++i) {
+      ComponentMap& funcMap = std::get<2>((*i).second);
+      ComponentMap::iterator funcItr = funcMap.find(name);
+      if (funcItr != funcMap.end()) {
+        return ((*funcItr).second->UhdmType() == uhdmfunction);
+      }
+    }
+  }
   if (prefix) {
     const ref_obj* ref = dynamic_cast<const ref_obj*> (prefix);
     const class_var* vprefix = nullptr;
     if (ref) vprefix = dynamic_cast<const class_var*> (ref->Actual_group());
-    any* func = elaborator->bindTaskFunc(name, vprefix);
+    any* func = bindTaskFunc(name, vprefix);
     if (func) {
       if (func->UhdmType() == uhdmfunction) {
         return true;
@@ -53,12 +63,22 @@ static bool is_function_call(const std::string& name, const expr* prefix, Elabor
   return true;
 }
 
-static bool is_task_call(const std::string& name, const expr* prefix, ElaboratorListener* elaborator) {
+bool ElaboratorListener::isTaskCall(const std::string& name, const expr* prefix) {
+  if (instStack_.size()) {
+    for (InstStack::reverse_iterator i = instStack_.rbegin();
+         i != instStack_.rend(); ++i) {
+      ComponentMap& funcMap = std::get<2>((*i).second);
+      ComponentMap::iterator funcItr = funcMap.find(name);
+      if (funcItr != funcMap.end()) {
+        return ((*funcItr).second->UhdmType() == uhdmtask);
+      }
+    }
+  }
   if (prefix) {
     const ref_obj* ref = dynamic_cast<const ref_obj*> (prefix);
     const class_var* vprefix = nullptr;
     if (ref) vprefix = dynamic_cast<const class_var*> (ref->Actual_group());
-    any* func = elaborator->bindTaskFunc(name, vprefix);
+    any* func = bindTaskFunc(name, vprefix);
     if (func) {
       if (func->UhdmType() == uhdmtask) {
         return true;
@@ -116,7 +136,7 @@ tf_call* method_func_call::DeepClone(Serializer* serializer, ElaboratorListener*
   if (prefix) {
     prefix = prefix->DeepClone(serializer, elaborator, (BaseClass*) this);
   }
-  bool is_function = is_function_call(VpiName(), prefix, elaborator);
+  bool is_function = elaborator->isFunctionCall(VpiName(), prefix);
   tf_call* the_clone = nullptr;
   if (is_function) {
     method_func_call* const clone = serializer->MakeMethod_func_call();
@@ -187,7 +207,7 @@ tf_call* method_task_call::DeepClone(Serializer* serializer, ElaboratorListener*
   if (prefix) {
     prefix = prefix->DeepClone(serializer, elaborator, (BaseClass*) this);
   }
-  bool is_task = is_task_call(VpiName(), prefix, elaborator);
+  bool is_task = elaborator->isTaskCall(VpiName(), prefix);
   tf_call* the_clone = nullptr;
   if (is_task) {
     method_task_call* const clone = serializer->MakeMethod_task_call();
@@ -254,7 +274,7 @@ tf_call* method_task_call::DeepClone(Serializer* serializer, ElaboratorListener*
 }
 
 tf_call* func_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
-  bool is_function = is_function_call(VpiName(), nullptr, elaborator);
+  bool is_function = elaborator->isFunctionCall(VpiName(), nullptr);
   tf_call* the_clone = nullptr;
   if (is_function) {
     func_call* const clone = serializer->MakeFunc_call();
@@ -308,7 +328,7 @@ tf_call* func_call::DeepClone(Serializer* serializer, ElaboratorListener* elabor
 }
 
 tf_call* task_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
-  bool is_task = is_task_call(VpiName(), nullptr, elaborator);
+  bool is_task = elaborator->isTaskCall(VpiName(), nullptr);
   tf_call* the_clone = nullptr;
   if (is_task) {
     task_call* const clone = serializer->MakeTask_call();

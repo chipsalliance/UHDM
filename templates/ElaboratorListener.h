@@ -39,6 +39,10 @@ public:
   
   ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}
 
+  bool isFunctionCall(const std::string& name, const expr* prefix); 
+  
+  bool isTaskCall(const std::string& name, const expr* prefix); 
+
   // Bind to a net in the current instance
   net* bindNet(const std::string& name) {
     if (instStack_.size()) {
