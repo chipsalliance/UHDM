@@ -27,14 +27,16 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+#if defined(_MSC_VER)
   #include <io.h>
   #define S_IRWXU (_S_IREAD | _S_IWRITE)
   #pragma warning(push)
   #pragma warning(disable : 4267)  // 'var' : conversion from 'size_t' to 'type', possible loss of data
 #else
   #include <unistd.h>
-  #define O_BINARY 0
+  #if !(defined(__MINGW32__) || defined(__CYGWIN__))
+    #define O_BINARY 0
+  #endif
 #endif
 
 #include <vector>

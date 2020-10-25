@@ -1510,10 +1510,10 @@ proc generate_code { models } {
         puts "capnp_path = $capnp_path"
         set capnp_path [file dirname $capnp_path]
 
-        if { $tcl_platform(platform) == "windows" } {
+        if { ($tcl_platform(platform) == "windows") && (![info exists ::env(MSYSTEM)]) } {
             exec -ignorestderr cmd /c "set PATH=$capnp_path;%PATH%; && cd /d [project_path]/src && $capnp_path/capnp.exe compile -oc++ UHDM.capnp"
         } else {
-            exec -ignorestderr sh -c "export PATH=$capnp_path; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+            exec -ignorestderr sh -c "export PATH=$capnp_path:\$PATH; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
         }
     }
 

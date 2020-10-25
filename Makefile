@@ -1,16 +1,27 @@
 # UHDM top Makefile (Wrapper to cmake)
+
+# Use bash as the default shell
+SHELL := /bin/bash
+
+ifeq ($(CPU_CORES),)
+	CPU_CORES := $(shell nproc)
+	ifeq ($(CPU_CORES),)
+		CPU_CORES := 1
+	endif
+endif
+
 PREFIX?=/usr/local
 
 release: build
-	cmake --build build --config Release
+	cmake --build build -j $(CPU_CORES)
 
 debug:
 	mkdir -p build
 	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B build
-	cmake --build build --config Debug
+	cmake --build build -j $(CPU_CORES)
 
 test: build
-	cmake --build build --target UnitTests --config Release
+	cmake --build build --target UnitTests -j $(CPU_CORES)
 	cd build && ctest -C Release --output-on-failure
 
 test-junit: release
@@ -23,7 +34,7 @@ clean:
 	rm -rf build
 
 install: build
-	cmake --install build --config Release
+	cmake --install build
 
 uninstall:
 	rm -rf $(PREFIX)/lib/uhdm
@@ -33,7 +44,6 @@ build:
 	mkdir -p build
 	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B build
 
-# TODO: the following static libraries should probably be all distributed together in libuhdm.a (ar ADDLIB)
 test_install:
-	cmake --build build --target test_inst --config Release
+	cmake --build build --target test_inst  -j $(CPU_CORES)
 	find build/bin -name test_inst* -exec {} \;

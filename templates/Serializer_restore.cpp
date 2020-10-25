@@ -28,13 +28,15 @@
 #include <fcntl.h>
 #include <limits.h>
 
-#if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+#if defined(_MSC_VER)
   #include <io.h>
   #pragma warning(push)
   #pragma warning(disable : 4244)  // 'argument' : conversion from 'type1' to 'type2', possible loss of data
 #else
   #include <unistd.h>
-  #define O_BINARY 0
+  #if !(defined(__MINGW32__) || defined(__CYGWIN__))
+    #define O_BINARY 0
+  #endif
 #endif
 
 #include <vector>
