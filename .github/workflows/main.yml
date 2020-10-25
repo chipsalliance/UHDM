@@ -46,6 +46,7 @@ jobs:
         make test_install
 
   msys2-gcc:
+    if: false # disable for the time being until we figure out the reason for slow builds and intermittent link issues
     runs-on: windows-latest
     defaults:
       run:
