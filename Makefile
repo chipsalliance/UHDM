@@ -13,15 +13,15 @@ endif
 PREFIX?=/usr/local
 
 release: build
-	cmake --build build -j $(CPU_CORES)
+	cmake --build build --config Release -j $(CPU_CORES)
 
 debug:
 	mkdir -p build
 	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B build
-	cmake --build build -j $(CPU_CORES)
+	cmake --build build --config Debug -j $(CPU_CORES)
 
 test: build
-	cmake --build build --target UnitTests -j $(CPU_CORES)
+	cmake --build build --target UnitTests --config Release -j $(CPU_CORES)
 	cd build && ctest -C Release --output-on-failure
 
 test-junit: release
@@ -34,7 +34,7 @@ clean:
 	rm -rf build
 
 install: build
-	cmake --install build
+	cmake --install build --config Release
 
 uninstall:
 	rm -rf $(PREFIX)/lib/uhdm
@@ -45,5 +45,5 @@ build:
 	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B build
 
 test_install:
-	cmake --build build --target test_inst  -j $(CPU_CORES)
+	cmake --build build --target test_inst --config Release -j $(CPU_CORES)
 	find build/bin -name test_inst* -exec {} \;
