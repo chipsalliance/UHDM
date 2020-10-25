@@ -34,8 +34,10 @@
 # Project specific folders and files
 /headers
 /src
-/CMakeBuilds
-/.vs
 
 # Build directory
+.vs/
+.vscode/
 build/
+out/
+CMakeBuilds/

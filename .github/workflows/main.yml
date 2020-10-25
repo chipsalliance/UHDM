@@ -1,0 +1,143 @@
+name: 'main'
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux-gcc:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -qq
+        sudo apt install -y g++-9 build-essential cmake tclsh
+
+    - name: Git pull
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Configure shell
+      run: |
+        echo 'CC=gcc-9' >> $GITHUB_ENV
+        echo 'CXX=g++-9' >> $GITHUB_ENV
+        echo 'PREFIX=/usr/include' >> $GITHUB_ENV
+
+    - name: Show shell configuration
+      run: |
+        env
+        which cmake && cmake --version
+        which make && make --version
+        which tclsh && echo 'puts [info patchlevel];exit 0' | tclsh
+        which $CC && $CC --version
+        which $CXX && $CXX --version
+
+    - name: Build & Test
+      run: |
+        make release
+        make test
+        sudo make install
+        make test_install
+
+  msys2-gcc:
+    if: false # disable for the time being until we figure out the reason for slow builds and intermittent link issues
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - name: Setup Msys2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MSYS
+        update: true
+        install: make cmake ninja gcc
+      env:
+        MSYS2_PATH_TYPE: inherit
+
+    - name: Configure Git
+      run: git config --global core.autocrlf input
+      shell: bash
+
+    - name: Git pull
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Configure shell
+      run: |
+        echo 'CC=gcc' >> $GITHUB_ENV
+        echo 'CXX=g++' >> $GITHUB_ENV
+        echo 'PREFIX=$PWD/install' >> $GITHUB_ENV
+        echo 'CMAKE_GENERATOR=Ninja' >> $GITHUB_ENV
+        echo 'NO_TCMALLOC=On' >> $GITHUB_ENV
+
+    - name: Show shell configuration
+      run: |
+        env
+        where cmake && cmake --version
+        where make && make --version
+        where ninja && ninja --version
+        where tclsh && echo 'puts [info patchlevel];exit 0' | tclsh
+        where $CC && $CC --version
+        where $CXX && $CXX --version
+
+    - name: Build & Test
+      run: |
+        make release
+        make test
+        make install
+        make test_install
+
+  windows-msvc:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+    - name: Install Core Dependencies
+      run: |
+        choco install -y make
+
+    - run: git config --global core.autocrlf input
+      shell: bash
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Build & Test
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+
+        set CC=cl
+        set CXX=cl
+        set PREFIX=%GITHUB_WORKSPACE%\install
+        set CMAKE_GENERATOR=Ninja
+        set NO_TCMALLOC=On
+        set CPU_CORES=%NUMBER_OF_PROCESSORS%
+
+        set MAKE_DIR=C:\make\bin
+        set TCL_DIR=%PROGRAMFILES%\Git\mingw64\bin
+        set PATH=%MAKE_DIR%;%TCL_DIR%;%PATH%
+
+        set
+        where cmake && cmake --version
+        where make && make --version
+        where ninja && ninja --version
+
+        make release
+        make test
+        make install
+        make test_install

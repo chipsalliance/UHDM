@@ -60,12 +60,17 @@ if(MSVC)
   )
   set(CMAKE_EXE_LINKER_FLAGS /STACK:8388608)  # 8MB stack size
 else()
+  if(DEFINED ENV{MSYSTEM})
+    # Under MSYS some files are too large to build without additional flags
+    set(MSYS_COMPILE_OPTIONS "-m64 -Wa,-mbig-obj")
+  endif()
+
   set(CMAKE_CXX_FLAGS_DEBUG
-      "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -g ${MY_CXX_WARNING_FLAGS}"
+      "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -g ${MSYS_COMPILE_OPTIONS} ${MY_CXX_WARNING_FLAGS}"
   )
 
   set(CMAKE_CXX_FLAGS_RELEASE
-      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O3 -DNDEBUG ${MY_CXX_WARNING_FLAGS}"
+      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O3 -DNDEBUG ${MSYS_COMPILE_OPTIONS} ${MY_CXX_WARNING_FLAGS}"
   )
 
   # Some of these files make the optimizer take so long, that we excempt some
@@ -164,6 +169,9 @@ set(UHDM_PUBLIC_HEADERS ${PROJECT_SOURCE_DIR}/headers/uhdm.h)
 
 add_library(uhdm STATIC ${uhdm_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER "${UHDM_PUBLIC_HEADERS}")
+target_compile_definitions(uhdm
+  PUBLIC PLI_DLLISPEC=
+  PUBLIC PLI_DLLESPEC=)
 target_link_libraries(uhdm PUBLIC capnp)
 
 if(APPLE)
