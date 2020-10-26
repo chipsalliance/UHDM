@@ -47,8 +47,6 @@ include_directories("${PROJECT_SOURCE_DIR}/third_party/UHDM/src/")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
 
 if(MSVC)
-  add_compile_definitions(PLI_DLLISPEC=)
-
   set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj ${MY_CXX_WARNING_FLAGS}"
   )
@@ -241,6 +239,9 @@ add_executable(test_inst EXCLUDE_FROM_ALL ${PROJECT_SOURCE_DIR}/tests/test1.cpp)
 set_property(TARGET test_inst PROPERTY INCLUDE_DIRECTORIES) # Clear the list of inherited include directories
 set_property(TARGET test_inst PROPERTY LINK_LIBRARIES) # Clear the list of inherited link libraries
 set_property(TARGET test_inst PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin) # Generate it in a known location
+target_compile_definitions(test_inst
+  PUBLIC PLI_DLLISPEC=
+  PUBLIC PLI_DLLESPEC=)
 target_include_directories(test_inst PRIVATE
   ${CMAKE_INSTALL_PREFIX}/include/uhdm
   ${CMAKE_INSTALL_PREFIX}/include/uhdm/include)
