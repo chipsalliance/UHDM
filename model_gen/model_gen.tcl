@@ -125,9 +125,9 @@ proc printMethods { classname type vpi card {real_type ""} } {
       const std::string\\& name = (!parent->VpiName().empty()) ? parent->VpiName() : parent->VpiDefName();
       UHDM_OBJECT_TYPE parent_type = (parent != nullptr) ? parent->UhdmType() : uhdmunsupported_stmt;
       UHDM_OBJECT_TYPE actual_parent_type = (actual_parent != nullptr) ? actual_parent->UhdmType() : uhdmunsupported_stmt;
-      bool skip_name = (actual_parent_type == uhdmref_obj) || (parent_type == uhdmmethod_func_call) || 
-                       (parent_type == uhdmmethod_task_call) || (parent_type == uhdmfunc_call) || 
-                       (parent_type == uhdmtask_call) || (parent_type == uhdmsys_func_call) || 
+      bool skip_name = (actual_parent_type == uhdmref_obj) || (parent_type == uhdmmethod_func_call) ||
+                       (parent_type == uhdmmethod_task_call) || (parent_type == uhdmfunc_call) ||
+                       (parent_type == uhdmtask_call) || (parent_type == uhdmsys_func_call) ||
                        (parent_type == uhdmsys_task_call);
       if ((!name.empty()) \\&\\& (!skip_name))
         names.push_back(name);
@@ -145,7 +145,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
     }
     if (!fullName.empty()) {
       ((${classname}*)this)->VpiFullName(fullName);
-    } 
+    }
     return serializer_->symbolMaker.GetSymbol(${vpi}_);
   }
 }\n"
@@ -1513,7 +1513,11 @@ proc generate_code { models } {
         if { ($tcl_platform(platform) == "windows") && (![info exists ::env(MSYSTEM)]) } {
             exec -ignorestderr cmd /c "set PATH=$capnp_path;%PATH%; && cd /d [project_path]/src && $capnp_path/capnp.exe compile -oc++ UHDM.capnp"
         } else {
-            exec -ignorestderr sh -c "export PATH=$capnp_path:\$PATH; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+            if { $tcl_platform(platform) == "windows" } {
+                exec -ignorestderr sh -c "export PATH=\$(cygpath -u -a $capnp_path):\$PATH; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+            } else {
+                exec -ignorestderr sh -c "export PATH=$capnp_path:\$PATH; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+            }
         }
     }
 
