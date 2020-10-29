@@ -6,6 +6,7 @@
 ![UHDM Roadmap](/images/UHDM_future.png)
 
 # Presentation
+* [WOSET 2020 Paper and Presentation](https://woset-workshop.github.io/WOSET2020.html#article-10)
 * [UHDM Presentation](https://docs.google.com/presentation/d/1evu8aBWMFwi_UrK-DfWXowfsXM4Bp9knQuHV24lwkPc/edit#slide=id.p)
 
 # Purpose
