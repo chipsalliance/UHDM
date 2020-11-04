@@ -274,6 +274,12 @@ protected:
     instStack_.pop_back();
   }
 
+  void enterVariables(const variables* object, const BaseClass* parent,
+                   vpiHandle handle, vpiHandle parentHandle) override;
+
+  void leaveVariables(const variables* object, const BaseClass* parent,
+                   vpiHandle handle, vpiHandle parentHandle) override;
+
 private:
 
   // Instance context stack

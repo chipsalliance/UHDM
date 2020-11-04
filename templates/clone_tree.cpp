@@ -379,7 +379,104 @@ tf_call* task_call::DeepClone(Serializer* serializer, ElaboratorListener* elabor
 }
 
 
-// Auto generate implementations
+
+static void propagateParamAssign(param_assign* pass, const any* target) {
+  UHDM_OBJECT_TYPE targetType = target->UhdmType();
+  Serializer& s = *pass->GetSerializer();
+  switch (targetType) {
+    case uhdmclass_defn: {
+      class_defn* defn = (class_defn*) target;
+      const any* lhs = pass->Lhs();
+      const std::string& name = lhs->VpiName();
+      VectorOfany* params = defn->Parameters();
+      if (params) {
+          for (any* param : *params) {
+            if (param->VpiName() == name) {
+              VectorOfparam_assign* passigns = defn->Param_assigns();
+              if (passigns == nullptr) {
+                defn->Param_assigns(s.MakeParam_assignVec());
+                passigns = defn->Param_assigns();
+              }
+              param_assign* pa = s.MakeParam_assign();
+              pa->Lhs(param);
+              pa->Rhs((any*) pass->Rhs());
+              passigns->push_back(pa);
+            }
+         }
+      }
+      const UHDM::extends* extends = defn->Extends();
+      if (extends) {
+        propagateParamAssign(pass, extends->Class_typespec());
+      }
+      const auto vars = defn->Variables();
+      if (vars) {
+        for (auto var : *vars) {
+           propagateParamAssign(pass, var);
+        }
+      }
+      break;
+    }
+    case uhdmclass_var: {
+      class_var* var = (class_var*) target;
+      propagateParamAssign(pass, var->Typespec());
+      break;
+    }
+    case uhdmclass_typespec: {
+      class_typespec* defn = (class_typespec*) target;
+      const any* lhs = pass->Lhs();
+      const std::string& name = lhs->VpiName();
+      VectorOfany* params = defn->Parameters();
+      if (params) {
+          for (any* param : *params) {
+            if (param->VpiName() == name) {
+              VectorOfparam_assign* passigns = defn->Param_assigns();
+              if (passigns == nullptr) {
+                defn->Param_assigns(s.MakeParam_assignVec());
+                passigns = defn->Param_assigns();
+              }
+              param_assign* pa = s.MakeParam_assign();
+              pa->Lhs(param);
+              pa->Rhs((any*) pass->Rhs());
+              passigns->push_back(pa);
+            }
+         }
+      }
+      const class_defn* def = defn->Class_defn();
+      if (def) {
+         propagateParamAssign(pass, (class_defn*) def);
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+}
+
+void ElaboratorListener::enterVariables(const variables* object,
+                                        const BaseClass* parent,
+                                        vpiHandle handle,
+                                        vpiHandle parentHandle) {
+  if (object->UhdmType() == uhdmclass_var) {
+    const class_var* cv = (class_var*)object;
+    class_typespec* ctps = (class_typespec*)cv->Typespec();
+    if (ctps) {
+      VectorOfparam_assign* params = ctps->Param_assigns();
+      if (params) {
+        for (param_assign* pass : *params) {
+          propagateParamAssign(pass, ctps->Class_defn());
+        }
+      }
+    }
+  }
+}
+
+void ElaboratorListener::leaveVariables(const variables* object, const BaseClass* parent,
+                   vpiHandle handle, vpiHandle parentHandle) {
+
+}
+
+// Auto generated implementations
 
 <CLONE_IMPLEMENTATIONS>
 
