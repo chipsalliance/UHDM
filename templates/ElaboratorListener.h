@@ -141,7 +141,8 @@ protected:
       flatComponentMap_.insert(std::make_pair(object->VpiDefName(), object));
     } else {
       // Hierachical module list (elaborated)
-
+      inHierarchy_ = true;
+      
       // Collect instance elaborated nets
       ComponentMap netMap;
       if (object->Nets()) {
@@ -227,8 +228,12 @@ protected:
     bool flatModule             = (instName == "") && ((object->VpiParent() == 0) ||
                                                        ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
                                   // false when it is a module in a hierachy tree
-    if (!flatModule) 
+    if (!flatModule) {
       instStack_.pop_back();
+      if (instStack_.empty()) {
+	inHierarchy_ = false;
+      }
+    }
   }
 
   void enterClass_defn(const class_defn* object, const BaseClass* parent,
@@ -289,9 +294,9 @@ private:
   // Flat list of components (modules, udps, interfaces)
   ComponentMap flatComponentMap_;
 
-  Serializer* serializer_;
-
-  bool debug_;
+  Serializer* serializer_ = nullptr;
+  bool inHierarchy_ = false;
+  bool debug_ = false;
 };
 
 };

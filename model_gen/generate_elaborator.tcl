@@ -143,14 +143,6 @@ proc generate_elaborator { models } {
     clone->${method}(f);
   }
 "
-                            } elseif {($classname == "class_defn") && ($method == "Extends")} {
-                                # prevent loop
-                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((extends*)obj);
-"
-                            } elseif {($rootclassname == "class_var") && ($method == "Typespec")} {
-                                # prevent loop
-                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((typespec*)obj);
-"
                             } else {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
 "
@@ -165,25 +157,28 @@ proc generate_elaborator { models } {
 "
                             }
                             if {$rootclassname == "class_defn"} {
-                                if {$method == "Extends"} {
-                                    # Don't deep clone
-                                    append class_vpi_listener "          if (auto obj = cl->${method}()) {
-            auto* stmt = (extends*) obj;
-            cl->${method}(stmt);
-          }
-"                                   
-                                } else {
                                     append class_vpi_listener "          if (auto obj = cl->${method}()) {
             auto* stmt = obj->DeepClone(serializer_, this, cl);
             stmt->VpiParent(cl);
             cl->${method}(stmt);
           }
 "
-                                }
                             }
                                                           
                         } else {
-                            append clone_impl "  if (auto vec = ${method}()) {
+
+                            if {($rootclassname == "class_defn") && ($method == "Deriveds")} {
+                                # Don't deep clone
+                                append clone_impl "  if (auto vec = ${method}()) {
+    auto clone_vec = serializer->Make${Cast}Vec();
+    clone->${method}(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj);
+    }
+  }
+"     
+                            } else {
+                                append clone_impl "  if (auto vec = ${method}()) {
     auto clone_vec = serializer->Make${Cast}Vec();
     clone->${method}(clone_vec);
     for (auto obj : *vec) {
@@ -191,7 +186,8 @@ proc generate_elaborator { models } {
     }
   }
 "
-
+                            }
+                            
                              if {($rootclassname == "module") && ($method == "Task_funcs")} {
                                 append module_vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
