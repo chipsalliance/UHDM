@@ -143,6 +143,9 @@ proc generate_elaborator { models } {
     clone->${method}(f);
   }
 "
+                            } elseif {($rootclassname == "function") && ($method == "Return")} {
+                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((variables*)obj);
+"
                             } else {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
 "
