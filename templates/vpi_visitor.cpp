@@ -478,8 +478,9 @@ static std::ostream &stream_indent(std::ostream &out, int indent) {
   static constexpr int kLevelIndent = 2;
   const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
   const BaseClass* const object = (const BaseClass*) handle->object;
-  const bool alreadyVisited = (visited->find(object) != visited->end()) || shallowVisit;
-  visited->insert(object);
+  const bool alreadyVisited = (visited->find(object) != visited->end());
+  if (!shallowVisit)
+    visited->insert(object);
   
 #endif
   
@@ -561,7 +562,7 @@ static std::ostream &stream_indent(std::ostream &out, int indent) {
     out << "\n";
   }
 
-  if (alreadyVisited) {
+  if (alreadyVisited || shallowVisit) {
     return;
   }
   if (strcmp(relation, "vpiParent") == 0) {
