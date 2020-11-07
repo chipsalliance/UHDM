@@ -196,11 +196,15 @@ proc generate_elaborator { models } {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
-              clone_vec->push_back((task_func*) obj);
+              enterTask_func(obj, defMod, nullptr, nullptr);
+              auto* tf = obj->DeepClone(serializer_, this, defMod);
+              leaveTask_func(obj, defMod, nullptr, nullptr);
+              tf->VpiParent(inst);
+              clone_vec->push_back(tf);
             }
           }
 "                               
-
+ #   clone_vec->push_back((task_func*) obj);
                              } elseif {($rootclassname == "class_defn")} {
                                  if {$method == "Deriveds"} {
                                      # Don't deep clone
