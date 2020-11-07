@@ -36,6 +36,85 @@ BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener*
 }
 
 // Hardcoded implementations
+
+net* ElaboratorListener::bindNet(const std::string& name) {
+  for (InstStack::reverse_iterator i = instStack_.rbegin(); 
+       i != instStack_.rend(); ++i ) { 
+    ComponentMap& netMap = std::get<0>((*i).second);
+    ComponentMap::iterator netItr = netMap.find(name);
+    if (netItr != netMap.end()) {
+      return (net*) (*netItr).second;
+    }
+  }
+  return nullptr;
+}
+
+// Bind to a net or parameter in the current instance
+any* ElaboratorListener::bindAny(const std::string& name) {
+  for (InstStack::reverse_iterator i = instStack_.rbegin(); 
+       i != instStack_.rend(); ++i ) { 
+    ComponentMap& netMap = std::get<0>((*i).second);
+    ComponentMap::iterator netItr = netMap.find(name);
+    if (netItr != netMap.end()) {
+      return (any*) (*netItr).second;
+    }
+    
+    ComponentMap& paramMap = std::get<1>((*i).second);
+    ComponentMap::iterator paramItr = paramMap.find(name);
+    if (paramItr != paramMap.end()) {
+      return (any*) (*paramItr).second;
+    }
+  }
+  return nullptr;
+}
+
+// Bind to a param in the current instance
+any* ElaboratorListener::bindParam(const std::string& name) {
+  for (InstStack::reverse_iterator i = instStack_.rbegin(); 
+       i != instStack_.rend(); ++i ) { 
+    ComponentMap& paramMap = std::get<1>((*i).second);
+    ComponentMap::iterator paramItr = paramMap.find(name);
+    if (paramItr != paramMap.end()) {
+      return (any*) (*paramItr).second;
+    }
+  }
+  return nullptr;
+}
+
+// Bind to a function or task in the current scope
+any* ElaboratorListener::bindTaskFunc(const std::string& name, const class_var* prefix) {
+  for (InstStack::reverse_iterator i = instStack_.rbegin(); 
+       i != instStack_.rend(); ++i ) { 
+    ComponentMap& funcMap = std::get<2>((*i).second);
+    ComponentMap::iterator funcItr = funcMap.find(name);
+    if (funcItr != funcMap.end()) {
+      return (any*) (*funcItr).second;
+    }
+  }
+  if (prefix) {
+    const typespec* tps = prefix->Typespec();
+    if (tps && tps->UhdmType() == uhdmclass_typespec) {
+      const class_defn* def = ((class_typespec*) tps)->Class_defn();
+      while (def) {
+	if (def->Task_funcs()) {
+	  for (task_func* tf : *def->Task_funcs()) {
+	    if (tf->VpiName() == name) 
+	      return tf;
+	  }
+	}
+	const UHDM::extends* ext = def->Extends();
+	if (ext) {
+	  const class_typespec* tps = ext->Class_typespec();
+	  def = tps->Class_defn();
+	} else {
+	  break;
+	}
+      }
+    }
+  }
+  return nullptr;
+}
+  
 bool ElaboratorListener::isFunctionCall(const std::string& name, const expr* prefix) {
   if (instStack_.size()) {
     for (InstStack::reverse_iterator i = instStack_.rbegin();
@@ -480,6 +559,37 @@ void ElaboratorListener::enterVariables(const variables* object,
 void ElaboratorListener::leaveVariables(const variables* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) {
 
+}
+
+void ElaboratorListener::enterTask_func(const task_func* object, const BaseClass* parent,
+				       vpiHandle handle, vpiHandle parentHandle) {
+
+    // Collect instance elaborated nets
+    ComponentMap varMap;
+    if (object->Variables()) {
+      for (variables* var : *object->Variables()) {
+        varMap.insert(std::make_pair(var->VpiName(), var));
+      }
+    }
+    if (object->Io_decls()) {
+      for (io_decl* decl : *object->Io_decls()) {
+        if (decl->Expr()) {
+	        varMap.insert(std::make_pair(decl->VpiName(), decl->Expr()));
+	      }
+      }
+    }
+ 
+    ComponentMap paramMap;
+    
+    ComponentMap funcMap;
+    
+    instStack_.push_back(std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+  
+}
+  
+void ElaboratorListener::leaveTask_func(const task_func* object, const BaseClass* parent,
+				       vpiHandle handle, vpiHandle parentHandle) {
+    instStack_.pop_back();
 }
 
 // Auto generated implementations
