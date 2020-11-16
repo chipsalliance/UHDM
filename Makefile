@@ -16,9 +16,9 @@ release: build
 	cmake --build build --config Release -j $(CPU_CORES)
 
 debug:
-	mkdir -p build
-	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B build
-	cmake --build build --config Debug -j $(CPU_CORES)
+	mkdir -p dbuild
+	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B dbuild
+	cmake --build dbuild --config Debug -j $(CPU_CORES)
 
 test: build
 	cmake --build build --target UnitTests --config Release -j $(CPU_CORES)

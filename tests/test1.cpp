@@ -23,9 +23,17 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   module* m1 = s.MakeModule();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
+  m1->VpiFullName("top::M1");
   m1->VpiParent(d);
   m1->VpiFile("fake1.sv");
   m1->VpiLineNo(10);
+
+  auto vars = s.MakeVariablesVec();
+  m1->Variables(vars);
+  logic_var* lvar = s.MakeLogic_var();
+  vars->push_back(lvar);
+  lvar->VpiFullName("top::M1::v1");
+  
   // Module
   module* m2 = s.MakeModule();
   m2->VpiDefName("M2");
