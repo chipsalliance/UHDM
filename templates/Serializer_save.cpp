@@ -109,14 +109,19 @@ void Serializer::Save(const std::string& file) {
     index++;
   }
 
+<CAPNP_SAVE>
+
+  // Save the symbols after all save function have been invoked, some symbols are made doing so (VpiFullName)
+  // This is not ideal.
+  // Ideally, the save should not include the hierarchical nets that can be recreated on the fly.
+  // Something broke this mechanism that saved a lot of memory/disk space.
+  // Until that is repaired we go for the more disk-hungry and memory hungry method which gives correct results.
   ::capnp::List<::capnp::Text>::Builder symbols = cap_root.initSymbols(symbolMaker.id2SymbolMap_.size());
   index = 0;
   for (auto symbol : symbolMaker.id2SymbolMap_) {
     symbols.set(index,strdup(symbol.c_str()));
     index++;
   }
-
-<CAPNP_SAVE>
 
   writePackedMessageToFd(fileid, message);
   close(fileid);
