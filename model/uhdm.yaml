@@ -60,3 +60,14 @@
     vpi_obj: vpiModule
     vpi: uhdmtopModules
     card: any  
+  - class_ref: typespecs
+    name: typespecs
+    vpi: vpiTypedef
+    type: typespec
+    card: any
+  - obj_ref: let_decls
+    name: let decls
+    vpi: vpiLetDecl
+    type: let_decl
+    card: any
+    
