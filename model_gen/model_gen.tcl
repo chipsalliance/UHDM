@@ -21,6 +21,7 @@ puts "UHDM MODEL GENERATION"
 puts "Working dir: $working_dir"
 
 variable myLocation [file normalize [info script]]
+set myProjetPathNoNormalize [file dirname [file dirname [info script]]]
 
 set DEBUG 0
 
@@ -1148,7 +1149,7 @@ proc generate_code { models } {
     global ID BASECLASS DEFINE_ID SAVE RESTORE working_dir methods_cpp VISITOR VISITOR_RELATIONS CLASS_LISTENER
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS MODEL_TYPE
     global uhdm_name_map headers vpi_handle_body_all vpi_handle_body vpi_iterator vpi_iterate_body vpi_handle_by_name_body vpi_handle_by_name_body_all
-    global tcl_platform
+    global tcl_platform myProjetPathNoNormalize
 
     log "=========="
     file mkdir [exec_path]/src
@@ -1516,7 +1517,7 @@ proc generate_code { models } {
             if { $tcl_platform(platform) == "windows" } {
                 exec -ignorestderr sh -c "export PATH=\$(cygpath -u -a $capnp_path):\$PATH; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
             } else {
-                exec -ignorestderr sh -c "export PATH=$capnp_path:\$PATH; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+                exec -ignorestderr sh -c "export PATH=$capnp_path:\$PATH; $capnp_path/capnp compile -oc++:. $myProjetPathNoNormalize/src/UHDM.capnp"
             }
         }
     }
