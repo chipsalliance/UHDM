@@ -16,4 +16,19 @@
  
 - obj_def: interface_typespec
   - extends: typespec
+  - property: def_name
+    name: def name
+    vpi: vpiDefName
+    type: string
+    card: 1
+  - property: is_modport
+    name: is modport
+    vpi: vpiIsModPort
+    type: bool
+    card: 1
+  - obj_ref: param_assigns
+    name: param assigns
+    vpi: vpiParamAssign
+    type: param_assign
+    card: any
 
