@@ -52,6 +52,7 @@ s_vpi_value* String2VpiValue(const std::string& s) {
   s_vpi_value* val = new s_vpi_value;
   val->format = 0;
   val->value.integer = 0;
+  val->value.scalar = 0;
   val->value.str = nullptr;
   size_t pos;
   if ((pos = s.find("INT:")) != std::string::npos) {
@@ -62,22 +63,22 @@ s_vpi_value* String2VpiValue(const std::string& s) {
     val->format = vpiScalarVal;
     const char *const parse_pos = s.c_str() + pos + strlen("SCAL:");
     switch (parse_pos[0]) {
-    case 'Z': val->value.integer = vpiZ; break;
-    case 'X': val->value.integer = vpiX; break;
-    case 'H': val->value.integer = vpiH; break;
-    case 'L': val->value.integer = vpiL; break;
+    case 'Z': val->value.scalar = vpiZ; break;
+    case 'X': val->value.scalar = vpiX; break;
+    case 'H': val->value.scalar = vpiH; break;
+    case 'L': val->value.scalar = vpiL; break;
       // Not really clear what the difference between X and DontCare is.
       // Let's parse 'W'eak don't care as this one.
-    case 'W': val->value.integer = vpiDontCare; break;
+    case 'W': val->value.scalar = vpiDontCare; break;
     default:
       if (strcasecmp(parse_pos, "DontCare") == 0) {
-        val->value.integer = vpiDontCare;
+        val->value.scalar = vpiDontCare;
       }
       else if (strcasecmp(parse_pos, "NoChange") == 0) {
-        val->value.integer = vpiNoChange;
+        val->value.scalar = vpiNoChange;
       }
       else {
-        val->value.integer = atoi(parse_pos); // Maybe written numerically?
+        val->value.scalar = atoi(parse_pos); // Maybe written numerically?
       }
       break;
     }
