@@ -38,7 +38,7 @@
 #define vpiSoftDisable       3006
 #define vpiIsModPort         3007
 // These define where orinally aliased in sv_vpi_user.h
-// Aliasing makes it hard to distinguish in automatic generated code, assigning unique values.
+// Aliasing makes it hard to distinguish in automatically generated code, assigning unique values.
 #define vpiVarBit            3008
 #define vpiLogicVar          3009
 #define vpiArrayVar          3010
@@ -47,8 +47,10 @@
 #define vpiDisables          3012
 #define vpiStructMember      3013
 
+// Tags used to model unsupported nodes
 #define vpiUnsupportedStmt   4000
 #define vpiUnsupportedExpr   4001
+#define vpiUnsupportedTypespec 4002
 
 #include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"
