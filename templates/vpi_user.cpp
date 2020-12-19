@@ -103,6 +103,11 @@ s_vpi_value* String2VpiValue(const std::string& s) {
     val->format = vpiRealVal;
     val->value.real = atof(s.c_str() + pos + strlen("REAL:"));
   }
+  else if ((pos = s.find("DEC:")) != std::string::npos) {
+    val->format = vpiDecStrVal;
+    val->value.str = strdup(s.c_str() + pos + strlen("DEC:"));
+  }
+  
   return val;
 }
 
@@ -131,7 +136,8 @@ std::string VpiValue2String(const s_vpi_value* value) {
   static const std::string kOctPrefix("OCT:");
   static const std::string kBinPrefix("BIN:");
   static const std::string kRealPrefix("REAL:");
-
+  static const std::string kDecPrefix("DEC:");
+  
   if (!value) return "";
   switch (value->format) {
   case vpiIntVal: return kIntPrefix + std::to_string(value->value.integer);
@@ -154,6 +160,7 @@ std::string VpiValue2String(const s_vpi_value* value) {
   case vpiHexStrVal: return kHexPrefix + value->value.str;
   case vpiOctStrVal: return kOctPrefix + value->value.str;
   case vpiBinStrVal: return kBinPrefix + value->value.str;
+  case vpiDecStrVal: return kDecPrefix + value->value.str;
   case vpiRealVal:  return kRealPrefix + std::to_string(value->value.real);
   }
 

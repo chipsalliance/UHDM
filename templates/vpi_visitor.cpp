@@ -439,6 +439,11 @@ static std::string visit_value(s_vpi_value* value) {
     return std::string(std::string("|SCAL:") + std::to_string(value->value.scalar) + "\n");
     break;
   }
+  case vpiDecStrVal: {
+    const char* s = (const char*) value->value.str;
+    return std::string(std::string("|DEC:") + std::string(s) + "\n");
+    break;
+  }   
   default:
     break;
   }
