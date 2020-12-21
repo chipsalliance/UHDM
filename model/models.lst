@@ -105,6 +105,7 @@ part_select.yaml
 indexed_part_select.yaml
 actual_group.yaml
 ref_obj.yaml
+hier_path.yaml
 var_select.yaml
 bit_select.yaml
 variable_drivers_group.yaml

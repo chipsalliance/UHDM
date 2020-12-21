@@ -52,6 +52,9 @@
 #define vpiUnsupportedExpr   4001
 #define vpiUnsupportedTypespec 4002
 
+// Objects not in the Standard
+#define vpiHierPath         5000
+
 #include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
