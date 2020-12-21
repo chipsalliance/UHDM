@@ -12,23 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "actual group" formal description
-# Parameters, enum_const, io_decl are not in the actual group in the Standard, we add them to the group for binding convenience
- 
-- group_def: actual_group
-  - obj_ref: interface
-  - obj_ref: interface_array
-  - obj_ref: modport
-  - class_ref: nets
-  - class_ref: variables
-  - obj_ref: named_event
-  - obj_ref: named_event_array
-  - obj_ref: part_select
-  - obj_ref: bit_select
-  - obj_ref: parameter
-  - obj_ref: enum_const
-  - obj_ref: io_decl
- 
+# Universal Hardware Data Model (UHDM) "hier_path" formal description
+# Non-standard model used to model hierarchical path containing expressions
 
-
+- obj_def: hier_path
+  - extends: simple_expr
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
+  - property: full_name
+    name: full name
+    vpi: vpiFullName
+    type: string
+    card: 1
+  - group_ref: path_elems
+    name: path elems
+    vpi: vpiActual
+    type: actual_group
+    card: any
 
