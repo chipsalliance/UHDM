@@ -24,11 +24,13 @@
   - obj_ref: named_event
   - obj_ref: named_event_array
   - obj_ref: part_select
-  - obj_ref: bit_select
   - obj_ref: parameter
   - obj_ref: enum_const
   - obj_ref: io_decl
- 
+ # bit select and ref_obj added for hier_path
+  - obj_ref: bit_select
+  - obj_ref: ref_obj
+
 
 
 
