@@ -33,7 +33,7 @@
 
 namespace UHDM {
 
-  class <CLASSNAME> : public <EXTENDS> {
+  class <CLASSNAME> <FINAL_CLASS> : public <EXTENDS> {
   public:
     // Implicit constructor used to initialize all members,
     // comment: <CLASSNAME>();

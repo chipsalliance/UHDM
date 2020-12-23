@@ -1201,12 +1201,14 @@ proc generate_code { models } {
         set vpi_iterator($classname) ""
 
         if {$modeltype == "class_def"} {
+            regsub -all {<FINAL_CLASS>} $template "" template
             regsub -all {<FINAL_DESTRUCTOR>} $template "" template
             regsub -all {<VIRTUAL>} $template "virtual " template
             regsub -all {<OVERRIDE_OR_FINAL>}  $template "override" template
             regsub -all {<DISABLE_OBJECT_FACTORY>} $template "#if 0 // This class cannot be instantiated" template
             regsub -all {<END_DISABLE_OBJECT_FACTORY>} $template "#endif" template
         } else {
+            regsub -all {<FINAL_CLASS>} $template "final" template
             regsub -all {<FINAL_DESTRUCTOR>} $template "final" template
             regsub -all {<VIRTUAL>} $template "virtual " template
             regsub -all {<OVERRIDE_OR_FINAL>}  $template "final" template
