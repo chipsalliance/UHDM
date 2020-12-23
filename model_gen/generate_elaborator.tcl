@@ -235,7 +235,18 @@ proc generate_elaborator { models } {
                                }
 
                              } elseif {($rootclassname == "module") && ($method == "Cont_assigns")} {
-                                # We don't want to override the elaborated instance cont_assigns
+                                # We want to deep clone exisitng instance cont assign to perform binding
+                                append module_vpi_listener "          if (auto vec = inst->${method}()) {
+            auto clone_vec = serializer_->Make${Cast}Vec();
+            inst->${method}(clone_vec);
+            for (auto obj : *vec) {
+              auto* stmt = obj->DeepClone(serializer_, this, defMod);
+              stmt->VpiParent(inst);
+              clone_vec->push_back(stmt);
+            }
+         }
+"
+                                # We also want to clone the module cont assign
                                 append module_vpi_listener "          if (auto vec = defMod->${method}()) {
             if (inst->${method}() == nullptr) {
               auto clone_vec = serializer_->Make${Cast}Vec();
