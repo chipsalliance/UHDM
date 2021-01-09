@@ -81,7 +81,11 @@ std::string UHDM::VpiTypeName(vpiHandle h) {
 
 <METHODS_CPP>
 
+static constexpr unsigned int badIndex = -1;
+
 BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
+  if (index == badIndex)
+    return NULL;
   switch (objectType) {
 <FACTORY_OBJECT_TYPE_MAP>
   default:
