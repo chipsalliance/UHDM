@@ -46,7 +46,8 @@
 #define vpiWaits             3011
 #define vpiDisables          3012
 #define vpiStructMember      3013
-
+// Used to mark imported parameters
+#define  vpiImported         3014 
 // Tags used to model unsupported nodes
 #define vpiUnsupportedStmt   4000
 #define vpiUnsupportedExpr   4001

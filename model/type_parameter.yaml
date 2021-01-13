@@ -36,3 +36,9 @@
     vpi: vpiExpr
     type: typespec
     card: 1
+# Not standard, name of the package it is imported from     
+  - property: imported
+    name: imported
+    vpi: vpiImported
+    type: string
+    card: 1
