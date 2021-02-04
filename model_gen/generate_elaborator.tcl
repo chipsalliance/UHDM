@@ -146,8 +146,11 @@ proc generate_elaborator { models } {
                             } elseif {($rootclassname == "function") && ($method == "Return")} {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}((variables*)obj);
 "
-                            }  elseif {($rootclassname == "class_typespec") && ($method == "Class_defn")} {
+                            } elseif {($rootclassname == "class_typespec") && ($method == "Class_defn")} {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}((class_defn*)obj);
+"
+                            } elseif {[regexp {typespec} $rootclassname] && ($method == "Instance")} {
+                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((instance*)obj);
 "
                             } else {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
@@ -207,7 +210,6 @@ proc generate_elaborator { models } {
             }
           }
 "                               
- #   clone_vec->push_back((task_func*) obj);
                              } elseif {($rootclassname == "class_defn")} {
                                  if {$method == "Deriveds"} {
                                      # Don't deep clone
@@ -235,7 +237,7 @@ proc generate_elaborator { models } {
                                }
 
                              } elseif {($rootclassname == "module") && ($method == "Cont_assigns")} {
-                                # We want to deep clone exisitng instance cont assign to perform binding
+                                # We want to deep clone existing instance cont assign to perform binding
                                 append module_vpi_listener "          if (auto vec = inst->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);

@@ -441,7 +441,7 @@ proc printVpiListener {classname vpi type card} {
         return
     }
     if {($vpi == "vpiParent") || ($vpi == "vpiInstance") || ($vpi == "vpiExtends")} {
-        # To prevent infinite loops in visitors as these 2 relations are pointing upward in the tree
+        # To prevent infinite loops in visitors as these 3 relations are pointing upward in the tree
         return
     }
     if {(($vpi == "vpiModule") || ($vpi == "vpiInterface")) && ($card == 1)} {
