@@ -38,8 +38,6 @@ static bool showIDs = false;
 
 #include <sv_vpi_user.h>
 
-// C++ 98 is default in Simulators compilers
-typedef std::set<vpiHandle> VisitedContainer;
 // Missing defines from vpi_user.h, sv_vpi_user.h, They are no-op in the Standard implementation.
 #define uhdmdesign 2569
 #define uhdmallPackages 2570
@@ -68,9 +66,10 @@ typedef std::set<vpiHandle> VisitedContainer;
 #include "headers/vpi_uhdm.h"
 #include "headers/uhdm.h"
 #include "headers/Serializer.h"
-typedef  std::set<const UHDM::BaseClass*> VisitedContainer;
 
 #endif
+
+#include "vpi_visitor.h"
 
 // UHDM implementation redefine these
 #ifndef vpiVarBit
@@ -469,7 +468,7 @@ static std::ostream &stream_indent(std::ostream &out, int indent) {
   return out;
 }
 
-  static void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit = false) {
+void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit) {
   if (!obj_h)
     return;
 #ifdef STANDARD_VPI
