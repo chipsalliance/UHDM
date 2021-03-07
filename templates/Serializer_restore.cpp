@@ -51,7 +51,6 @@
 #include "headers/uhdm.h"
 #include "UHDM.capnp.h"
 #include "headers/Serializer.h"
-
 using namespace UHDM;
 
 const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {

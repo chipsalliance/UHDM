@@ -80,6 +80,21 @@ static bool showIDs = false;
 
 
 namespace UHDM {
+
+
+std::string decompile(UHDM::any* handle) {
+  UHDM::VisitedContainer visited;
+  if (handle == nullptr) {
+    std::cout << "NULL HANDLE\n";
+    return "NULL HANDLE";
+  }
+  vpiHandle dh = handle->GetSerializer()->MakeUhdmHandle(handle->UhdmType(), handle);
+  std::stringstream out;
+  visit_object(dh, 0, "decompile", &visited, out);
+  std::cout << out.str() << "\n";
+  return out.str();
+}
+
   
 #ifdef STANDARD_VPI
 
