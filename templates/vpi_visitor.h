@@ -38,7 +38,7 @@ typedef std::set<vpiHandle> VisitedContainer;
 #else
 typedef  std::set<const UHDM::BaseClass*> VisitedContainer;
 #endif
-  
+
 // Visit an object, dump to given stream. 
 void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit = false); 
 
@@ -48,6 +48,9 @@ void visit_designs (const std::vector<vpiHandle>& designs, std::ostream &out);
 // Visit designs, return string representation.
 std::string visit_designs (const std::vector<vpiHandle>& designs);
 
+// For debug use in GDB
+std::string decompile(UHDM::any* handle);
+  
 };
 
 #endif
