@@ -57,7 +57,7 @@ s_vpi_value* String2VpiValue(const std::string& s) {
   size_t pos;
   if ((pos = s.find("INT:")) != std::string::npos) {
     val->format = vpiIntVal;
-    val->value.integer = atoi(s.c_str() + pos + strlen("INT:"));
+    val->value.integer = std::strtoll(s.c_str() + pos + strlen("INT:"), 0, 10);
   }
   else if ((pos = s.find("SCAL:")) != std::string::npos) {
     val->format = vpiScalarVal;

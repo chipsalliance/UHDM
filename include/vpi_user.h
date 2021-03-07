@@ -645,7 +645,7 @@ typedef struct t_vpi_value
     {
       PLI_BYTE8                *str;       /* string value */
       PLI_INT32                 scalar;    /* vpi[0,1,X,Z] */
-      PLI_INT32                 integer;   /* integer value */
+      PLI_INT64                 integer;   /* integer value */ /* !!! NOT Standard!!! Changed type from PLI_INT32 to PLI_INT64 !!! */
       double                    real;      /* real value */
       struct t_vpi_time        *time;      /* time value */
       struct t_vpi_vecval      *vector;    /* vector value */
