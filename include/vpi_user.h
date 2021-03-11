@@ -490,6 +490,7 @@ typedef PLI_UINT32 *vpiHandle;
 #define vpiStringConst             6   /* string literal */
 #define vpiIntConst                7   /* integer constant (1364-2001) */
 #define vpiTimeConst               8   /* time constant */
+#define vpiUIntConst               9   /* unsigned integer constant !!! NOT Standard !!! */
 #define vpiBlocking              41   /* blocking assignment (Boolean) */
 #define vpiCaseType              42   /* case statement subtypes: */
 #define vpiCaseExact               1   /* exact match */
@@ -639,13 +640,14 @@ typedef struct t_vpi_strengthval
 
 typedef struct t_vpi_value
 {
-  PLI_INT32 format; /* vpi[[Bin,Oct,Dec,Hex]Str,Scalar,Int,Real,String,
+  PLI_INT32 format; /* vpi[[Bin,Oct,Dec,Hex]Str,Scalar,Int,UInt,Real,String,
                            Vector,Strength,Suppress,Time,ObjType]Val */
   union
     {
       PLI_BYTE8                *str;       /* string value */
       PLI_INT32                 scalar;    /* vpi[0,1,X,Z] */
-      PLI_INT64                 integer;   /* integer value */ /* !!! NOT Standard!!! Changed type from PLI_INT32 to PLI_INT64 !!! */
+      PLI_INT64                 integer;   /* integer value */  /* !!! NOT Standard!!! Changed type from PLI_INT32 to PLI_INT64 !!! */
+      PLI_UINT64                uint;      /* unsigned value */ /* !!! NOT Standard!!! Added UINT64 type !!! */
       double                    real;      /* real value */
       struct t_vpi_time        *time;      /* time value */
       struct t_vpi_vecval      *vector;    /* vector value */
@@ -680,6 +682,7 @@ typedef struct t_vpi_arrayvalue
 #define vpiHexStrVal          4
 #define vpiScalarVal          5
 #define vpiIntVal             6
+#define vpiUIntVal            19 
 #define vpiRealVal            7
 #define vpiStringVal          8
 #define vpiVectorVal          9
