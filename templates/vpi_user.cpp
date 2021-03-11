@@ -55,7 +55,11 @@ s_vpi_value* String2VpiValue(const std::string& s) {
   val->value.scalar = 0;
   val->value.str = nullptr;
   size_t pos;
-  if ((pos = s.find("INT:")) != std::string::npos) {
+  if ((pos = s.find("UINT:")) != std::string::npos) {
+    val->format = vpiUIntVal;
+    val->value.uint = std::strtoull(s.c_str() + pos + strlen("UINT:"), 0, 10);
+  }
+  else if ((pos = s.find("INT:")) != std::string::npos) {
     val->format = vpiIntVal;
     val->value.integer = std::strtoll(s.c_str() + pos + strlen("INT:"), 0, 10);
   }
@@ -130,6 +134,7 @@ s_vpi_delay* String2VpiDelays(const std::string& s) {
 
 std::string VpiValue2String(const s_vpi_value* value) {
   static const std::string kIntPrefix("INT:");
+  static const std::string kUIntPrefix("UINT:");
   static const std::string kScalPrefix("SCAL:");
   static const std::string kStrPrefix("STRING:");
   static const std::string kHexPrefix("HEX:");
@@ -141,6 +146,7 @@ std::string VpiValue2String(const s_vpi_value* value) {
   if (!value) return "";
   switch (value->format) {
   case vpiIntVal: return kIntPrefix + std::to_string(value->value.integer);
+  case vpiUIntVal: return kUIntPrefix + std::to_string(value->value.uint);  
   case vpiScalarVal: {
     switch (value->value.scalar) {
     case vpi0: return "SCAL:0";
