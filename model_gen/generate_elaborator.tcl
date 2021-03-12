@@ -149,7 +149,7 @@ proc generate_elaborator { models } {
                             } elseif {($rootclassname == "class_typespec") && ($method == "Class_defn")} {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}((class_defn*)obj);
 "
-                            } elseif {[regexp {typespec} $rootclassname] && ($method == "Instance")} {
+                            } elseif {([regexp {typespec} $rootclassname] || ($rootclassname == "function") || ($rootclassname == "task")) && ($method == "Instance")} {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}((instance*)obj);
 "
                             } else {
