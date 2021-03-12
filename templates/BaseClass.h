@@ -48,7 +48,7 @@ namespace UHDM {
 
     virtual ~BaseClass(){}
 
-    Serializer* GetSerializer() { return serializer_; }
+    Serializer* GetSerializer() const { return serializer_; }
 
     virtual UHDM_OBJECT_TYPE UhdmType() const = 0;
 
@@ -74,7 +74,7 @@ namespace UHDM {
 
     virtual unsigned int VpiType() const = 0;
 
-    ClientData* Data() { return clientData_; }
+    ClientData* Data() const { return clientData_; }
 
     void Data(ClientData* data) { clientData_ = data; }
 
