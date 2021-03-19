@@ -54,8 +54,8 @@
 #define vpiUnsupportedTypespec 4002
 
 // Objects not in the Standard
-#define vpiHierPath         5000
-
+#define vpiHierPath         5000 // Represents a hierarchical path 
+#define vpiReordered        5001 // Boolean for operations (pattern assign, concat) that has been reordered
 #include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
