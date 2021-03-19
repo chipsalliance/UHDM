@@ -21,6 +21,11 @@
     vpi: vpiOpType
     type: int
     card: 1
+  - property: reordered
+    name: reordered
+    vpi: vpiReordered
+    type: bool
+    card: 1  
   - property: operator_strength
     name: operator strength
     vpi: vpiOpStrong
