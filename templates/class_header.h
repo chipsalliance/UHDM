@@ -55,11 +55,11 @@ namespace UHDM {
   }
   void Erase(<CLASSNAME>* tps) {
     for (std::vector<<CLASSNAME>*>::iterator itr = objects_.begin(); itr != objects_.end(); itr++) {
-	if ((*itr) == tps) {
-          objects_.erase(itr);
-	  break;
-	}
-     }
+      if ((*itr) == tps) {
+        objects_.erase(itr);
+        break;
+      }
+    }
   }   
   private:
     std::vector<<CLASSNAME>*> objects_;
