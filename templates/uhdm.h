@@ -47,7 +47,8 @@
 #define vpiDisables          3012
 #define vpiStructMember      3013
 // Used to mark imported parameters
-#define  vpiImported         3014 
+#define  vpiImported         3014
+#define  vpiColumnNo         3015
 // Tags used to model unsupported nodes
 #define vpiUnsupportedStmt   4000
 #define vpiUnsupportedExpr   4001
