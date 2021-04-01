@@ -1284,11 +1284,13 @@ proc generate_code { models } {
             append SAVE($classname) "    ${Classname}s\[index\].setUhdmParentType(obj->UhdmParentType());\n"
             append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));\n"
             append SAVE($classname) "    ${Classname}s\[index\].setVpiLineNo(obj->VpiLineNo());\n"
+            append SAVE($classname) "    ${Classname}s\[index\].setVpiColumnNo(obj->VpiColumnNo());\n"
             append SAVE($classname) "    ${Classname}s\[index\].setUhdmId(obj->UhdmId());\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->UhdmParentType(obj.getUhdmParentType());\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiParent(GetObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiFile(symbolMaker.GetSymbol(obj.getVpiFile()));\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiLineNo(obj.getVpiLineNo());\n"
+            append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiColumnNo(obj.getVpiColumnNo());\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->UhdmId(obj.getUhdmId());\n"
         }
 
