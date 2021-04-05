@@ -49,6 +49,8 @@
 // Used to mark imported parameters
 #define  vpiImported         3014
 #define  vpiColumnNo         3015
+#define  vpiEndLineNo        3016
+#define  vpiEndColumnNo      3017
 // Tags used to model unsupported nodes
 #define vpiUnsupportedStmt   4000
 #define vpiUnsupportedExpr   4001

@@ -559,10 +559,14 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
         objectType == vpiInterface || objectType == vpiUdp) {
       if (const char* s = vpi_get_str(vpiFile, obj_h)) {
 	if (int l = vpi_get(vpiLineNo, obj_h)) {
+	  out << " " << s << ":" << l;  // fileName, line
 	  if (int c = vpi_get(vpiColumnNo, obj_h)) {
-	    out << " " << s << ":" << l << ":" << c << ": ";  // fileName, line, column
+	    out << ":" << c << ": ";  // , column
 	  } else {
-	    out << " " << s << ":" << l << ": ";  // fileName, line
+	    out << ": ";
+	  }
+	  if (int c = vpi_get(vpiEndLineNo, obj_h)) {
+	    out << ", endline:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h) << ": ";  // , endline, endCol
 	  }
 	} else {
 	   out << ", file:" << s;  // fileName
@@ -574,6 +578,9 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
 	  out << ", line:" << l << ", col:" << c;
 	} else {
 	  out << ", line:" << l;
+	}
+	if (int c = vpi_get(vpiEndLineNo, obj_h)) {
+	  out << ", endline:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h) << ": ";  // , endline, endCol
 	}
       }
     }

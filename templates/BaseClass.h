@@ -72,6 +72,14 @@ namespace UHDM {
 
     virtual bool VpiColumnNo(short int data) final { vpiColumnNo_ = data; return true; }
 
+    virtual int VpiEndLineNo() const final { return vpiEndLineNo_; }
+
+    virtual bool VpiEndLineNo(int data) final { vpiEndLineNo_ = data; return true; }
+
+    virtual short int VpiEndColumnNo() const final { return vpiEndColumnNo_; }
+
+    virtual bool VpiEndColumnNo(short int data) final { vpiEndColumnNo_ = data; return true; }
+
     virtual const std::string& VpiName() const { return nonamebaseclass; }
 
     virtual const std::string& VpiDefName() const { return nonamebaseclass; }
@@ -98,7 +106,9 @@ namespace UHDM {
 
   private:
     int vpiLineNo_ = 0;
+    int vpiEndLineNo_ = 0;
     short int vpiColumnNo_ = 0;
+    short int vpiEndColumnNo_ = 0;
 
   };
 
