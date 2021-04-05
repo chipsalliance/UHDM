@@ -91,7 +91,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
     }
     set final ""
     set virtual ""
-    if {$vpi == "vpiParent" || $vpi == "uhdmParentType" || $vpi == "uhdmType" || $vpi == "vpiLineNo" || $vpi == "vpiColumnNo" || $vpi == "vpiFile" } {
+    if {$vpi == "vpiParent" || $vpi == "uhdmParentType" || $vpi == "uhdmType" || $vpi == "vpiLineNo" || $vpi == "vpiColumnNo" || $vpi == "vpiEndLineNo" || $vpi == "vpiEndColumnNo" || $vpi == "vpiFile" } {
         set final " final"
         set virtual "virtual "
     }
@@ -291,6 +291,8 @@ proc printGetBody {classname type vpi card} {
     if {$vpi == "vpiType"} return ""
     if {$vpi == "vpiLineNo"} return ""
     if {$vpi == "vpiColumnNo"} return ""
+    if {$vpi == "vpiEndLineNo"} return ""
+    if {$vpi == "vpiEndColumnNo"} return ""
     set vpi_get_body ""
     if {($card == 1) && ($type != "string") && ($type != "value") && ($type != "delay")} {
         append vpi_get_body "
@@ -384,7 +386,7 @@ proc printGetVisitor {classname type vpi card} {
       stream_indent(out, indent) << visit_delays(\\&delay);
     }
 "
-    } elseif {($card == 1) && ($type != "string") && ($vpi != "vpiLineNo")  && ($vpi != "vpiColumnNo") && ($vpi != "vpiType")} {
+    } elseif {($card == 1) && ($type != "string") && ($vpi != "vpiLineNo") && ($vpi != "vpiColumnNo")  && ($vpi != "vpiEndLineNo") && ($vpi != "vpiEndColumnNo") && ($vpi != "vpiType")} {
         append vpi_get_body "    if (const int n = vpi_get($vpi, obj_h))
       if (n != -1)
         stream_indent(out, indent) << \"|$vpi:\" << n << \"\\n\";
@@ -1277,6 +1279,8 @@ proc generate_code { models } {
             lappend capnp_schema($classname) [list vpiFile UInt64]
             lappend capnp_schema($classname) [list vpiLineNo UInt32]
             lappend capnp_schema($classname) [list vpiColumnNo UInt16]
+            lappend capnp_schema($classname) [list vpiEndLineNo UInt32]
+            lappend capnp_schema($classname) [list vpiEndColumnNo UInt16]
             lappend capnp_schema($classname) [list uhdmId UInt64]
             append capnp_root_schema "  factory${Classname} @${capnpRootSchemaIndex} :List($Classname);\n"
             incr capnpRootSchemaIndex
@@ -1285,12 +1289,16 @@ proc generate_code { models } {
             append SAVE($classname) "    ${Classname}s\[index\].setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));\n"
             append SAVE($classname) "    ${Classname}s\[index\].setVpiLineNo(obj->VpiLineNo());\n"
             append SAVE($classname) "    ${Classname}s\[index\].setVpiColumnNo(obj->VpiColumnNo());\n"
+            append SAVE($classname) "    ${Classname}s\[index\].setVpiEndLineNo(obj->VpiEndLineNo());\n"
+            append SAVE($classname) "    ${Classname}s\[index\].setVpiEndColumnNo(obj->VpiEndColumnNo());\n"
             append SAVE($classname) "    ${Classname}s\[index\].setUhdmId(obj->UhdmId());\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->UhdmParentType(obj.getUhdmParentType());\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiParent(GetObject(obj.getUhdmParentType(),obj.getVpiParent()-1));\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiFile(symbolMaker.GetSymbol(obj.getVpiFile()));\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiLineNo(obj.getVpiLineNo());\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiColumnNo(obj.getVpiColumnNo());\n"
+            append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiEndLineNo(obj.getVpiEndLineNo());\n"
+            append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->VpiEndColumnNo(obj.getVpiEndColumnNo());\n"
             append RESTORE($classname) "   ${classname}Maker.objects_\[index\]->UhdmId(obj.getUhdmId());\n"
         }
 

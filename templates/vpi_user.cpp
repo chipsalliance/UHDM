@@ -285,6 +285,8 @@ PLI_INT64 vpi_get64 (PLI_INT32 property,
   switch (property) {
     case vpiLineNo: return obj->VpiLineNo();
     case vpiColumnNo: return obj->VpiColumnNo();
+    case vpiEndLineNo: return obj->VpiEndLineNo();
+    case vpiEndColumnNo: return obj->VpiEndColumnNo();
     case vpiType: return obj->VpiType();
   }
 
