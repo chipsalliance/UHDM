@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2021 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,3 +19,5 @@
   - obj_ref: interface_tf_decl
   - class_ref: nets
   - class_ref: variables
+# Non Standard, added to support expr as default args to io_decl  
+  - class_ref: expr
