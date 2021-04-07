@@ -25,3 +25,14 @@
     vpi: vpiValue
     type: value
     card: 1
+# Not Standard: adding the decompile and size properties    
+  - property: decompile
+    name: decompile
+    vpi: vpiDecompile
+    type: string
+    card: 1
+  - property: size
+    name: size
+    vpi: vpiSize
+    type: int
+    card: 1    
