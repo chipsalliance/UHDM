@@ -573,9 +573,7 @@ void ElaboratorListener::enterTask_func(const task_func* object, const BaseClass
     }
     if (object->Io_decls()) {
       for (io_decl* decl : *object->Io_decls()) {
-        if (decl->Expr()) {
-	        varMap.insert(std::make_pair(decl->VpiName(), decl->Expr()));
-	      }
+        varMap.insert(std::make_pair(decl->VpiName(), decl));
       }
     }
  
