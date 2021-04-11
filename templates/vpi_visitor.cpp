@@ -566,7 +566,7 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
 	    out << ": ";
 	  }
 	  if (int c = vpi_get(vpiEndLineNo, obj_h)) {
-	    out << ", endline:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h) << ": ";  // , endline, endCol
+	    out << ", endln:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
 	  }
 	} else {
 	   out << ", file:" << s;  // fileName
@@ -575,12 +575,12 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
     } else {
       if (int l = vpi_get(vpiLineNo, obj_h)) {
 	if (int c = vpi_get(vpiColumnNo, obj_h)) {
-	  out << ", line:" << l << ", col:" << c;
+	  out << ", line:" << l << ":" << c;
 	} else {
 	  out << ", line:" << l;
 	}
 	if (int c = vpi_get(vpiEndLineNo, obj_h)) {
-	  out << ", endline:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h) << ": ";  // , endline, endCol
+	  out << ", endln:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
 	}
       }
     }
