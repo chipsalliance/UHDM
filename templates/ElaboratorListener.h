@@ -34,7 +34,7 @@
 namespace UHDM {
   
 class ElaboratorListener : public VpiListener {
-  
+  friend function;
 public:
   
   ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}

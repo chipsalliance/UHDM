@@ -35,7 +35,7 @@ proc generate_elaborator { models } {
         set vpiName [makeVpiName $classname]
 
         set baseclass $classname
-        if [regexp {_call} ${classname}] {
+        if {[regexp {_call} ${classname}] || ($classname == "function")} {
          # Use hardcoded implementations  
          continue
         } else {
