@@ -94,15 +94,15 @@
 
 
 # Design Navigation
- * After Deserialization of the persisted design (Read [`test2.cpp`](tests/test2.cpp))
- * Client applications can use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`test_helper.h`](tests/test_helper.h))
+ * After Deserialization of the persisted design (elaborated or not) (Read [`test2.cpp`](tests/test2.cpp))
+ * Client applications can elaborate optionally and use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`test_helper.h`](tests/test_helper.h))
  * Or use the Visitor (More like a Walker)
    * An example Visitor is auto-generated to print the content of the data model [`visitor.cpp`](templates/vpi_visitor.cpp)
  * Or use the Listener Design Pattern
    * An example Listener is used as an example (tests/vpi_listener.cpp),
    * The listener enables client application development with minimum disruption while the data model evolves.
    * An Custom Elaborator example code uses the Listener Design Pattern in [`listener_elab.cpp`](tests/listener_elab.cpp)
-   * A Full Elaboration example is demostrated in [`full_elab.cpp`](tests/full_elab.cpp) and [`dump.cpp`](tests/dump.cpp)
+   * A Full Elaboration example is demonstrated in [`full_elab.cpp`](tests/full_elab.cpp) and [`dump.cpp`](tests/dump.cpp)
  * The uhdm-dump [`uhdm-dump`](util/uhdm-dump.cpp) executable creates a human readable view of the UHDM serialized data model using the visitor [`visitor.cpp`](templates/vpi_visitor.cpp).
 
 
