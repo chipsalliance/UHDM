@@ -58,6 +58,11 @@ public:
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
+  void leaveDesign(const design* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+    design* root = (design*) object;
+    root->VpiElaborated(true);
+  }
+  
   void enterModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
     module* inst = (module*) object;
