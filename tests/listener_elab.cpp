@@ -192,6 +192,11 @@ public:
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
+  void leaveDesign(const design* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+    design* root = (design*) object;
+    root->VpiElaborated(true);
+  }
+  
   void enterModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
     bool topLevelModule         = object->VpiTopModule();
@@ -355,9 +360,30 @@ int main (int argc, char** argv) {
   orig += "DUMP Design content:\n";
   orig += visit_designs(designs);
   std::cout << orig;
- 
-  MyElaboratorListener* listener = new MyElaboratorListener();
-  listen_designs(designs,listener);
+  bool elaborated = false;
+  for(auto design : designs) {
+    elaborated |= vpi_get(vpiElaborated, design);
+  }
+  if (!elaborated) {
+    std::cout << "Elaborating...\n";
+    MyElaboratorListener* listener = new MyElaboratorListener();
+    listen_designs(designs,listener);
+  }
+  std::string post_elab1 = visit_designs(designs);
+  for(auto design : designs) {
+    elaborated |= vpi_get(vpiElaborated, design);
+  }
+  // Make sure we are not elaborating twice
+  if (!elaborated) {
+    std::cout << "Elaborating...\n";
+    MyElaboratorListener* listener = new MyElaboratorListener();
+    listen_designs(designs,listener);
+  }
+  std::string post_elab2 = visit_designs(designs);
+  if ((!elaborated) || (post_elab1 != post_elab2)) {
+    std::cout << "ERROR: Elaborating twice!\n";
+    return 1;
+  }
   return 0;
 }
 
