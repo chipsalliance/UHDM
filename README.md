@@ -16,6 +16,7 @@
  * Auto generate a serialization/deserialization of the data model
  * Auto generate a Visitor (Walker) function that exercise the entire VPI interface (used in uhdm-dump executable)
  * Auto generate a C++ Listener Design Pattern that traverse the entire VPI data model (used in uhdm-listener executable)
+ * Auto generate an Elaborator that uniquifies nets, variables...
  * The generated Object Model can, for a given design, be:
     * Populated by parsers like [Surelog](https://github.com/alainmarcel/Surelog/) or [Verible](https://github.com/google/verible)
     * Consumed by tools like Yosys or Verilator

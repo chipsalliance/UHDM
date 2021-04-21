@@ -189,9 +189,15 @@ int main (int argc, char** argv) {
   std::cout << orig;
   
   std::cout << std::endl;
-  ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
-  listen_designs(designs,listener);
-  std::cout << std::endl;
+  bool elaborated = false;
+  for(auto design : designs) {
+    elaborated |= vpi_get(vpiElaborated, design);
+  }
+  if (!elaborated) {
+    ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
+    listen_designs(designs,listener);
+    std::cout << std::endl;
+  }
 
   orig = "DUMP Design content (Post elab):\n";
   orig += visit_designs(designs);
