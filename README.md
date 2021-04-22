@@ -27,7 +27,7 @@
  * git clone https://github.com/alainmarcel/UHDM.git
  * cd UHDM
  * git submodule update --init --recursive
- * make all
+ * make
 ```
 
 # Features
