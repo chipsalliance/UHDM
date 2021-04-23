@@ -16,6 +16,9 @@
   * git clone https://github.com/alainmarcel/UHDM.git
   * cd UHDM
   * git submodule update --init --recursive
+  * cd third_party/capnproto
+  * git reset --hard d4a3770
+
 * Build
   * make
   * make test
