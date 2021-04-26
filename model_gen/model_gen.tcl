@@ -1552,6 +1552,7 @@ proc generate_code { models } {
         set capnp_save ""
         set capnp_id ""
         set factory_purge ""
+        set factory_stats ""
 
         set fid [open "[project_path]/templates/$file"]
         set serializer_content [read $fid]
@@ -1604,7 +1605,12 @@ $RESTORE($class)
   }
   ${class}Maker.objects_.clear();
 "
+
+            append factory_stats "
+   stats.insert(std::make_pair(\"$class\", ${class}Maker.objects_.size()));
+"
         }
+       
 
         regsub {<FACTORIES>} $serializer_content $factories serializer_content
         regsub {<FACTORIES_METHODS>} $serializer_content $factories_methods serializer_content
@@ -1612,6 +1618,7 @@ $RESTORE($class)
 
         regsub {<UHDM_NAME_MAP>} $serializer_content $uhdm_name_map serializer_content
         regsub {<FACTORY_PURGE>} $serializer_content $factory_purge serializer_content
+        regsub {<FACTORY_STATS>} $serializer_content $factory_stats serializer_content
         regsub {<FACTORY_OBJECT_TYPE_MAP>} $serializer_content $factory_object_type_map serializer_content
         regsub {<CAPNP_ID>} $serializer_content $capnp_id serializer_content
         regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content

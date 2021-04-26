@@ -44,7 +44,8 @@ namespace UHDM {
     void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
     ErrorHandler GetErrorHandler() { return errorHandler; }
     const std::vector<vpiHandle> Restore(const std::string& file);
-
+    std::map<std::string, unsigned long> ObjectStats();
+    
 <FACTORIES_METHODS>
     std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
     vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) { return uhdm_handleMaker.Make(type, object); }

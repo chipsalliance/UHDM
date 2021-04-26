@@ -178,6 +178,16 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   return designs;
 }
 
+void dumpStats(Serializer& serializer) {
+  std::cout << "Stats:\n";
+  std::map<std::string, unsigned long> stats = serializer.ObjectStats();
+  for (auto stat : stats) {
+    if (stat.second) 
+      std::cout << stat.first << " " << stat.second << "\n";
+  }
+  std::cout << "\n";
+}
+
 
 int main (int argc, char** argv) {
 
@@ -193,6 +203,8 @@ int main (int argc, char** argv) {
   for(auto design : designs) {
     elaborated |= vpi_get(vpiElaborated, design);
   }
+
+  dumpStats(serializer);
   if (!elaborated) {
     ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
     listen_designs(designs,listener);

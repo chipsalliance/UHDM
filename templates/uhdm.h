@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #ifndef UHDM_H
 #define UHDM_H
 
