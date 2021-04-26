@@ -1,4 +1,4 @@
-# -*- mode: Tcl; c-basic-offset: 4; indent-tabs-mode: nil; -*-
+# -*- mode: Tcl; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 #
 # Copyright 2019-2020 Alain Dargelas
 #
@@ -113,7 +113,7 @@ proc generate_elaborator { models } {
                                 append method "s"
                             }
                         }
-
+			# Unary relations
                         if {$card == 1} {
 
                             if {($classname == "ref_obj") && ($method == "Actual_group")} {
@@ -176,10 +176,23 @@ proc generate_elaborator { models } {
           }
 "
                             }
-                                                          
+                        # N-ary relations                                   
                         } else {
 
-                            if {($rootclassname == "class_defn") && ($method == "Deriveds")} {
+                             if {($method == "Typespecs")} {
+                                append clone_impl "  if (auto vec = ${method}()) {
+    auto clone_vec = serializer->Make${Cast}Vec();
+    clone->${method}(clone_vec);
+    for (auto obj : *vec) {
+      if (elaborator->uniquifyTypespec()) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      } else {
+        clone_vec->push_back(obj);
+      }
+    }
+  }
+"     
+                            } elseif {($rootclassname == "class_defn") && ($method == "Deriveds")} {
                                 # Don't deep clone
                                 append clone_impl "  if (auto vec = ${method}()) {
     auto clone_vec = serializer->Make${Cast}Vec();
@@ -200,7 +213,7 @@ proc generate_elaborator { models } {
 "
                             }
                             
-                             if {($rootclassname == "module") && ($method == "Task_funcs")} {
+                            if {($rootclassname == "module") && ($method == "Task_funcs")} {
                                 append module_vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
@@ -213,8 +226,8 @@ proc generate_elaborator { models } {
             }
           }
 "                               
-                             } elseif {($rootclassname == "class_defn")} {
-                                 if {$method == "Deriveds"} {
+                            } elseif {($rootclassname == "class_defn")} {
+                                if {$method == "Deriveds"} {
                                      # Don't deep clone
                                      append class_vpi_listener "          if (auto vec = cl->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
@@ -237,9 +250,9 @@ proc generate_elaborator { models } {
             }
           }
 "      
-                               }
+                                 }
 
-                             } elseif {($rootclassname == "module") && (($method == "Cont_assigns") || ($method == "Gen_scope_arrays"))} {
+                            } elseif {($rootclassname == "module") && (($method == "Cont_assigns") || ($method == "Gen_scope_arrays"))} {
                                 # We want to deep clone existing instance cont assign to perform binding
                                 append module_vpi_listener "          if (auto vec = inst->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
@@ -266,7 +279,24 @@ proc generate_elaborator { models } {
           }
 "
                                  
-                            } elseif {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets") && ($method != "Parameters") && ($method != "Param_assigns")} {
+                            } elseif {($rootclassname == "module") && ($method == "Typespecs")} {
+                                # We don't want to override the elaborated instance ports by the module def ports, same for nets, params and param_assigns
+                                append module_vpi_listener "          if (auto vec = defMod->${method}()) {
+            auto clone_vec = serializer_->Make${Cast}Vec();
+            inst->${method}(clone_vec);
+            for (auto obj : *vec) {
+              if (uniquifyTypespec()) {
+                auto* stmt = obj->DeepClone(serializer_, this, defMod);
+                stmt->VpiParent(inst);
+                clone_vec->push_back(stmt);
+              } else { 
+                auto* stmt = obj;
+                clone_vec->push_back(stmt);
+              }
+            }
+          }
+"
+			    } elseif {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets") && ($method != "Parameters") && ($method != "Param_assigns")} {
                                 # We don't want to override the elaborated instance ports by the module def ports, same for nets, params and param_assigns
                                 append module_vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
