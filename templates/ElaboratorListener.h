@@ -38,7 +38,8 @@ class ElaboratorListener : public VpiListener {
 public:
   
   ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}
-
+  void uniquifyTypespec(bool uniquify) { uniquifyTypespec_ = uniquify; }
+  bool uniquifyTypespec() { return uniquifyTypespec_; }
   bool isFunctionCall(const std::string& name, const expr* prefix); 
   
   bool isTaskCall(const std::string& name, const expr* prefix); 
@@ -243,6 +244,7 @@ private:
   Serializer* serializer_ = nullptr;
   bool inHierarchy_ = false;
   bool debug_ = false;
+  bool uniquifyTypespec_ = true;
 };
 
 };
