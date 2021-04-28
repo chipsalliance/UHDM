@@ -160,7 +160,7 @@ proc parse_model { file } {
         } else {
             set tmpclass ""
         }
-        
+
         while {$tmpclass != ""} {
             append ALL_CHILDREN($tmpclass) "$classname "
             if [info exists BASECLASS($tmpclass)] {
