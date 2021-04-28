@@ -281,6 +281,36 @@ tf_call* method_func_call::DeepClone(Serializer* serializer, ElaboratorListener*
   return the_clone;
 }
 
+constant* constant::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  if (elaborator->uniquifyTypespec()) {
+    constant* const clone = serializer->MakeConstant();
+    const unsigned long id = clone->UhdmId();
+    *clone = *this;
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    return clone;
+  } else {
+    return (constant*) this;
+  }                             
+}
+  
+tagged_pattern* tagged_pattern::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  if (elaborator->uniquifyTypespec()) {
+    tagged_pattern* const clone = serializer->MakeTagged_pattern();
+    const unsigned long id = clone->UhdmId();
+    *clone = *this;
+    clone->UhdmId(id);
+    clone->VpiParent(parent);
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(serializer, elaborator, clone));                             
+    if (auto obj = Pattern()) clone->Pattern(obj->DeepClone(serializer, elaborator, clone));
+    return clone;
+  } else {
+    return (tagged_pattern*) this;
+  }  
+}
+
+  
 tf_call* method_task_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
   const expr* prefix = Prefix();
   if (prefix) {
@@ -501,7 +531,11 @@ function* function::DeepClone(Serializer* serializer, ElaboratorListener* elabor
     auto clone_vec = serializer->MakeTypespecVec();
     clone->Typespecs(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      if (elaborator->uniquifyTypespec()) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      } else {
+        clone_vec->push_back(obj);
+      }
     }
   }
   elaborator->enterTask_func(clone, parent, nullptr, nullptr);

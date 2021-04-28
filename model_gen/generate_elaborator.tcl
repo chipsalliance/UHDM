@@ -35,7 +35,7 @@ proc generate_elaborator { models } {
         set vpiName [makeVpiName $classname]
 
         set baseclass $classname
-        if {[regexp {_call} ${classname}] || ($classname == "function")} {
+        if {[regexp {_call} ${classname}] || ($classname == "function")  || ($classname == "constant") || ($classname == "tagged_pattern")} {
          # Use hardcoded implementations  
          continue
         } else {
@@ -155,7 +155,15 @@ proc generate_elaborator { models } {
                             } elseif {$method == "Module"} {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}((module*)obj);
 "
-                            } else {
+                            } elseif {$method == "Typespec"} {
+
+                                append clone_impl "  if (elaborator->uniquifyTypespec()) {
+    if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
+  } else {
+    if (auto obj = ${method}()) clone->${method}((typespec*)obj);
+  }                                
+"
+                           } else {
                                  append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
 "
                             }
