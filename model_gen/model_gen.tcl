@@ -1269,9 +1269,9 @@ proc generate_code { models } {
             append methods($classname) [printMethods $classname "unsigned int" uhdmId 1]
             append members($classname) [printMembers "unsigned int" uhdmId 1]
             if [regexp {_call} ${classname}] {
-              append methods($classname) "\n    tf_call* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
+                append methods($classname) "\n    tf_call* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
             } else {
-              append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
+                append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
             }
             append vpi_handle_body($classname) [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
             lappend capnp_schema($classname) [list vpiParent UInt64]
@@ -1610,7 +1610,7 @@ $RESTORE($class)
    stats.insert(std::make_pair(\"$class\", ${class}Maker.objects_.size()));
 "
         }
-       
+
 
         regsub {<FACTORIES>} $serializer_content $factories serializer_content
         regsub {<FACTORIES_METHODS>} $serializer_content $factories_methods serializer_content

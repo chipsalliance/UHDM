@@ -25,5 +25,3 @@ if [file exist "$modelName.yaml"] {
 set oid [open "$modelName.yaml" "w"]
 puts $oid $content
 close $oid
-
-

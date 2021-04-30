@@ -1,4 +1,4 @@
-# -*- mode: Tcl; c-basic-offset: 2; indent-tabs-mode: nil; -*-
+# -*- mode: Tcl; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 #
 # Copyright 2019-2020 Alain Dargelas
 #
@@ -36,10 +36,10 @@ proc generate_elaborator { models } {
 
         set baseclass $classname
         if {[regexp {_call} ${classname}] || ($classname == "function")  || ($classname == "constant") || ($classname == "tagged_pattern")} {
-         # Use hardcoded implementations  
-         continue
+            # Use hardcoded implementations
+            continue
         } else {
-          set clone_impl "\n${classname}* ${classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const \{\n"
+            set clone_impl "\n${classname}* ${classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const \{\n"
         }
 
         if [regexp {Net} $vpiName] {
@@ -63,7 +63,7 @@ proc generate_elaborator { models } {
   *clone = *this;
   clone->UhdmId(id);
 "
-        if {$classname != "part_select"} {            
+        if {$classname != "part_select"} {
             append clone_impl "  clone->VpiParent(parent);
 "
         } else {
@@ -76,7 +76,7 @@ proc generate_elaborator { models } {
   }
 "
         }
-        
+
         set rootclassname $classname
         while {$baseclass != ""} {
             set data $DATA($baseclass)
@@ -113,7 +113,7 @@ proc generate_elaborator { models } {
                                 append method "s"
                             }
                         }
-			# Unary relations
+                        # Unary relations
                         if {$card == 1} {
 
                             if {($classname == "ref_obj") && ($method == "Actual_group")} {
@@ -122,10 +122,10 @@ proc generate_elaborator { models } {
                             } elseif {($method == "Task")} {
                                 set prefix ""
                                 if [regexp {method_} $classname] {
-                                  append clone_impl "  const ref_obj* ref = dynamic_cast<const ref_obj*> (clone->Prefix());\n"
-                                  append clone_impl "  const class_var* prefix = nullptr;\n"
-                                  append clone_impl "  if (ref) prefix = dynamic_cast<const class_var*> (ref->Actual_group());\n"                                         
-                                  set prefix ", prefix"
+                                    append clone_impl "  const ref_obj* ref = dynamic_cast<const ref_obj*> (clone->Prefix());\n"
+                                    append clone_impl "  const class_var* prefix = nullptr;\n"
+                                    append clone_impl "  if (ref) prefix = dynamic_cast<const class_var*> (ref->Actual_group());\n"
+                                    set prefix ", prefix"
                                 }
                                 append clone_impl "  if (task* t = dynamic_cast<task*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
     clone->${method}(t);
@@ -134,26 +134,26 @@ proc generate_elaborator { models } {
                             } elseif {($method == "Function")} {
                                 set prefix ""
                                 if [regexp {method_} $classname] {
-                                  append clone_impl "  const ref_obj* ref = dynamic_cast<const ref_obj*> (clone->Prefix());\n"
-                                  append clone_impl "  const class_var* prefix = nullptr;\n"
-                                  append clone_impl "  if (ref) prefix = dynamic_cast<const class_var*> (ref->Actual_group());\n"                                
-                                  set prefix ", prefix"
+                                    append clone_impl "  const ref_obj* ref = dynamic_cast<const ref_obj*> (clone->Prefix());\n"
+                                    append clone_impl "  const class_var* prefix = nullptr;\n"
+                                    append clone_impl "  if (ref) prefix = dynamic_cast<const class_var*> (ref->Actual_group());\n"
+                                    set prefix ", prefix"
                                 }
                                 append clone_impl "  if (function* f = dynamic_cast<function*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
     clone->${method}(f);
   }
 "
                             } elseif {($rootclassname == "function") && ($method == "Return")} {
-                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((variables*)obj);
+                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((variables*)obj);
 "
                             } elseif {($rootclassname == "class_typespec") && ($method == "Class_defn")} {
-                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((class_defn*)obj);
+                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((class_defn*)obj);
 "
                             } elseif {$method == "Instance"} {
-                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((instance*)obj);
+                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((instance*)obj);
 "
                             } elseif {$method == "Module"} {
-                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((module*)obj);
+                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((module*)obj);
 "
                             } elseif {$method == "Typespec"} {
 
@@ -161,13 +161,13 @@ proc generate_elaborator { models } {
     if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
   } else {
     if (auto obj = ${method}()) clone->${method}((typespec*)obj);
-  }                                
+  }
 "
-                           } else {
-                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
+                            } else {
+                                append clone_impl "  if (auto obj = ${method}()) clone->${method}(obj->DeepClone(serializer, elaborator, clone));
 "
                             }
-                            
+
                             if {$rootclassname == "module"} {
                                 append module_vpi_listener "          if (auto obj = defMod->${method}()) {
             auto* stmt = obj->DeepClone(serializer_, this, defMod);
@@ -177,17 +177,17 @@ proc generate_elaborator { models } {
 "
                             }
                             if {$rootclassname == "class_defn"} {
-                                    append class_vpi_listener "          if (auto obj = cl->${method}()) {
+                                append class_vpi_listener "          if (auto obj = cl->${method}()) {
             auto* stmt = obj->DeepClone(serializer_, this, cl);
             stmt->VpiParent(cl);
             cl->${method}(stmt);
           }
 "
                             }
-                        # N-ary relations                                   
+                            # N-ary relations
                         } else {
 
-                             if {($method == "Typespecs")} {
+                            if {($method == "Typespecs")} {
                                 append clone_impl "  if (auto vec = ${method}()) {
     auto clone_vec = serializer->Make${Cast}Vec();
     clone->${method}(clone_vec);
@@ -199,7 +199,7 @@ proc generate_elaborator { models } {
       }
     }
   }
-"     
+"
                             } elseif {($rootclassname == "class_defn") && ($method == "Deriveds")} {
                                 # Don't deep clone
                                 append clone_impl "  if (auto vec = ${method}()) {
@@ -209,7 +209,7 @@ proc generate_elaborator { models } {
       clone_vec->push_back(obj);
     }
   }
-"     
+"
                             } else {
                                 append clone_impl "  if (auto vec = ${method}()) {
     auto clone_vec = serializer->Make${Cast}Vec();
@@ -220,7 +220,7 @@ proc generate_elaborator { models } {
   }
 "
                             }
-                            
+
                             if {($rootclassname == "module") && ($method == "Task_funcs")} {
                                 append module_vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
@@ -233,11 +233,11 @@ proc generate_elaborator { models } {
               clone_vec->push_back(tf);
             }
           }
-"                               
+"
                             } elseif {($rootclassname == "class_defn")} {
                                 if {$method == "Deriveds"} {
-                                     # Don't deep clone
-                                     append class_vpi_listener "          if (auto vec = cl->${method}()) {
+                                    # Don't deep clone
+                                    append class_vpi_listener "          if (auto vec = cl->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
             cl->${method}(clone_vec);
             for (auto obj : *vec) {
@@ -245,10 +245,10 @@ proc generate_elaborator { models } {
               clone_vec->push_back(stmt);
             }
           }
-"                                         
-                                 } else {
-                                 
-                                     append class_vpi_listener "          if (auto vec = cl->${method}()) {
+"
+                                } else {
+
+                                    append class_vpi_listener "          if (auto vec = cl->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
             cl->${method}(clone_vec);
             for (auto obj : *vec) {
@@ -257,8 +257,8 @@ proc generate_elaborator { models } {
               clone_vec->push_back(stmt);
             }
           }
-"      
-                                 }
+"
+                                }
 
                             } elseif {($rootclassname == "module") && (($method == "Cont_assigns") || ($method == "Gen_scope_arrays"))} {
                                 # We want to deep clone existing instance cont assign to perform binding
@@ -286,7 +286,7 @@ proc generate_elaborator { models } {
             }
           }
 "
-                                 
+
                             } elseif {($rootclassname == "module") && ($method == "Typespecs")} {
                                 # We don't want to override the elaborated instance ports by the module def ports, same for nets, params and param_assigns
                                 append module_vpi_listener "          if (auto vec = defMod->${method}()) {
@@ -297,14 +297,14 @@ proc generate_elaborator { models } {
                 auto* stmt = obj->DeepClone(serializer_, this, defMod);
                 stmt->VpiParent(inst);
                 clone_vec->push_back(stmt);
-              } else { 
+              } else {
                 auto* stmt = obj;
                 clone_vec->push_back(stmt);
               }
             }
           }
 "
-			    } elseif {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets") && ($method != "Parameters") && ($method != "Param_assigns")} {
+                            } elseif {($rootclassname == "module") && ($method != "Ports") && ($method != "Nets") && ($method != "Parameters") && ($method != "Param_assigns")} {
                                 # We don't want to override the elaborated instance ports by the module def ports, same for nets, params and param_assigns
                                 append module_vpi_listener "          if (auto vec = defMod->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
