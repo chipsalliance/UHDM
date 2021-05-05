@@ -62,9 +62,10 @@
 #define vpiReordered        5001 // Boolean for operations (pattern assign, concat) that has been reordered
 #define vpiElaborated       5002 // Boolean indicating UHDM has been elaborated/uniquified
 
+#include "../include/sv_vpi_user.h"
+#include "../include/vhpi_user.h"
+
 #include "headers/uhdm_types.h"
-#include "include/sv_vpi_user.h"
-#include "include/vhpi_user.h"
 #include "headers/vpi_uhdm.h"
 #include "headers/containers.h"
 

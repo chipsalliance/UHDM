@@ -27,7 +27,7 @@
 #define UHDM_TYPES_H
 
 #include <string>
-#include "vpi_user.h"
+#include "../include/vpi_user.h"
 
 namespace UHDM {
 class BaseClass;
