@@ -22,19 +22,21 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
-
-#include <string>
-#include <vector>
-#include "sv_vpi_user.h"
-
 #ifndef UHDM_CLONE_TREE_H
 #define UHDM_CLONE_TREE_H
 
-namespace UHDM {
-  class ElaboratorListener;
+#include <string>
+#include <vector>
 
-  BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener* elaborator = nullptr);
+#include "sv_vpi_user.h"
+
+namespace UHDM {
+class BaseClass;
+class ElaboratorListener;
+class Serializer;
+
+BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener* elaborator = nullptr);
 
 };
 
-#endif
+#endif  // UHDM_CLONE_TREE_H

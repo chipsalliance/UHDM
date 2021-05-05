@@ -22,6 +22,9 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
+#include "include/sv_vpi_user.h"
+#include "include/vhpi_user.h"
+
 #include <string.h>
 #if defined(_MSC_VER)
   #define strcasecmp _stricmp
@@ -35,14 +38,11 @@
 #include <string>
 #include <vector>
 
-#include "include/sv_vpi_user.h"
-#include "include/vhpi_user.h"
-
-#include "headers/uhdm_types.h"
-#include "headers/containers.h"
-#include "headers/vpi_uhdm.h"
-#include "headers/uhdm.h"
 #include "headers/Serializer.h"
+#include "headers/containers.h"
+#include "headers/uhdm.h"
+#include "headers/uhdm_types.h"
+#include "headers/vpi_uhdm.h"
 
 <HEADERS>
 
@@ -111,7 +111,7 @@ s_vpi_value* String2VpiValue(const std::string& s) {
     val->format = vpiDecStrVal;
     val->value.str = strdup(s.c_str() + pos + strlen("DEC:"));
   }
-  
+
   return val;
 }
 
@@ -142,11 +142,11 @@ std::string VpiValue2String(const s_vpi_value* value) {
   static const std::string kBinPrefix("BIN:");
   static const std::string kRealPrefix("REAL:");
   static const std::string kDecPrefix("DEC:");
-  
+
   if (!value) return "";
   switch (value->format) {
   case vpiIntVal: return kIntPrefix + std::to_string(value->value.integer);
-  case vpiUIntVal: return kUIntPrefix + std::to_string(value->value.uint);  
+  case vpiUIntVal: return kUIntPrefix + std::to_string(value->value.uint);
   case vpiScalarVal: {
     switch (value->value.scalar) {
     case vpi0: return "SCAL:0";

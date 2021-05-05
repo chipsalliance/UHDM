@@ -22,10 +22,10 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
-
-#include "uhdm.h"
 #include "clone_tree.h"
+
 #include "ElaboratorListener.h"
+#include "uhdm.h"
 
 using namespace UHDM;
 
@@ -38,8 +38,8 @@ BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener*
 // Hardcoded implementations
 
 net* ElaboratorListener::bindNet(const std::string& name) {
-  for (InstStack::reverse_iterator i = instStack_.rbegin(); 
-       i != instStack_.rend(); ++i ) { 
+  for (InstStack::reverse_iterator i = instStack_.rbegin();
+       i != instStack_.rend(); ++i ) {
     ComponentMap& netMap = std::get<0>((*i).second);
     ComponentMap::iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
@@ -51,14 +51,14 @@ net* ElaboratorListener::bindNet(const std::string& name) {
 
 // Bind to a net or parameter in the current instance
 any* ElaboratorListener::bindAny(const std::string& name) {
-  for (InstStack::reverse_iterator i = instStack_.rbegin(); 
-       i != instStack_.rend(); ++i ) { 
+  for (InstStack::reverse_iterator i = instStack_.rbegin();
+       i != instStack_.rend(); ++i ) {
     ComponentMap& netMap = std::get<0>((*i).second);
     ComponentMap::iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
       return (any*) (*netItr).second;
     }
-    
+
     ComponentMap& paramMap = std::get<1>((*i).second);
     ComponentMap::iterator paramItr = paramMap.find(name);
     if (paramItr != paramMap.end()) {
@@ -70,8 +70,8 @@ any* ElaboratorListener::bindAny(const std::string& name) {
 
 // Bind to a param in the current instance
 any* ElaboratorListener::bindParam(const std::string& name) {
-  for (InstStack::reverse_iterator i = instStack_.rbegin(); 
-       i != instStack_.rend(); ++i ) { 
+  for (InstStack::reverse_iterator i = instStack_.rbegin();
+       i != instStack_.rend(); ++i ) {
     ComponentMap& paramMap = std::get<1>((*i).second);
     ComponentMap::iterator paramItr = paramMap.find(name);
     if (paramItr != paramMap.end()) {
@@ -83,8 +83,8 @@ any* ElaboratorListener::bindParam(const std::string& name) {
 
 // Bind to a function or task in the current scope
 any* ElaboratorListener::bindTaskFunc(const std::string& name, const class_var* prefix) {
-  for (InstStack::reverse_iterator i = instStack_.rbegin(); 
-       i != instStack_.rend(); ++i ) { 
+  for (InstStack::reverse_iterator i = instStack_.rbegin();
+       i != instStack_.rend(); ++i ) {
     ComponentMap& funcMap = std::get<2>((*i).second);
     ComponentMap::iterator funcItr = funcMap.find(name);
     if (funcItr != funcMap.end()) {
@@ -98,7 +98,7 @@ any* ElaboratorListener::bindTaskFunc(const std::string& name, const class_var* 
       while (def) {
 	if (def->Task_funcs()) {
 	  for (task_func* tf : *def->Task_funcs()) {
-	    if (tf->VpiName() == name) 
+	    if (tf->VpiName() == name)
 	      return tf;
 	  }
 	}
@@ -114,7 +114,7 @@ any* ElaboratorListener::bindTaskFunc(const std::string& name, const class_var* 
   }
   return nullptr;
 }
-  
+
 bool ElaboratorListener::isFunctionCall(const std::string& name, const expr* prefix) {
   if (instStack_.size()) {
     for (InstStack::reverse_iterator i = instStack_.rbegin();
@@ -292,9 +292,9 @@ constant* constant::DeepClone(Serializer* serializer, ElaboratorListener* elabor
     return clone;
   } else {
     return (constant*) this;
-  }                             
+  }
 }
-  
+
 tagged_pattern* tagged_pattern::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
   if (elaborator->uniquifyTypespec()) {
     tagged_pattern* const clone = serializer->MakeTagged_pattern();
@@ -302,15 +302,15 @@ tagged_pattern* tagged_pattern::DeepClone(Serializer* serializer, ElaboratorList
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(serializer, elaborator, clone));                             
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
     if (auto obj = Pattern()) clone->Pattern(obj->DeepClone(serializer, elaborator, clone));
     return clone;
   } else {
     return (tagged_pattern*) this;
-  }  
+  }
 }
 
-  
+
 tf_call* method_task_call::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
   const expr* prefix = Prefix();
   if (prefix) {
@@ -752,15 +752,15 @@ void ElaboratorListener::enterTask_func(const task_func* object, const BaseClass
         varMap.insert(std::make_pair(decl->VpiName(), decl));
       }
     }
- 
+
     ComponentMap paramMap;
-    
+
     ComponentMap funcMap;
-    
+
     instStack_.push_back(std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
-  
+
 }
-  
+
 void ElaboratorListener::leaveTask_func(const task_func* object, const BaseClass* parent,
 				       vpiHandle handle, vpiHandle parentHandle) {
     instStack_.pop_back();

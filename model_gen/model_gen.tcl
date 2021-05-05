@@ -1002,7 +1002,7 @@ proc write_uhdm_h { headers} {
     set uhdm_content [read $fid]
     close $fid
 
-    set name_id_map "\nstd::string UHDM::UhdmName(UHDM_OBJECT_TYPE type) \{
+    set name_id_map "\nstd::string UhdmName(UHDM_OBJECT_TYPE type) \{
       switch (type) \{
 "
     foreach id [array names DEFINE_ID] {
