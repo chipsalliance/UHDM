@@ -75,7 +75,7 @@ proc parse_vpi_user_defines { } {
 set OBJECTID 2000
 
 proc printMethods { classname type vpi card {real_type ""} } {
-    global methods_cpp
+    global methods_cpp group_headers
     set methods ""
     if {$type == "string"} {
         set type "std::string"
@@ -97,6 +97,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
     }
     set check ""
     if {$type == "any"} {
+        append group_headers "#include \"${real_type}.h\"\n"
         set check "if (!${real_type}GroupCompliant(data)) return false;"
     }
     if {$card == "1"} {
@@ -109,9 +110,9 @@ proc printMethods { classname type vpi card {real_type ""} } {
 
 
         if {$type == "std::string"} {
-            append methods "\n    ${virtual}bool [string toupper ${vpi} 0 0](const ${type}${pointer}\\& data)$final;\n"
+            append methods "\n  ${virtual}bool [string toupper ${vpi} 0 0](const ${type}${pointer}\\& data)$final;\n"
             if {$vpi == "vpiFullName" } {
-                append methods "\n    ${virtual}const ${type}${pointer}\\&  [string toupper ${vpi} 0 0]() const$final;\n"
+                append methods "\n  ${virtual}const ${type}${pointer}\\&  [string toupper ${vpi} 0 0]() const$final;\n"
                 append methods_cpp "\nconst ${type}${pointer}\\&  ${classname}::[string toupper ${vpi} 0 0]() const {
   if (${vpi}_) {
     return serializer_->symbolMaker.GetSymbol(${vpi}_);
@@ -151,21 +152,21 @@ proc printMethods { classname type vpi card {real_type ""} } {
   }
 }\n"
             } else {
-                append methods "\n    ${virtual}const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const$final;\n"
+                append methods "\n  ${virtual}const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const$final;\n"
                 append methods_cpp "\nconst ${type}${pointer}\\& ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
             }
             append methods_cpp "\nbool ${classname}::[string toupper ${vpi} 0 0](const ${type}${pointer}\\& data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n"
         } else {
-            append methods "\n    ${virtual}${const}${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"
+            append methods "\n  ${virtual}${const}${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"
             if {$vpi == "vpiParent"} {
-                append methods "\n    virtual bool [string toupper ${vpi} 0 0](${type}${pointer} data) final {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->UhdmType(); return true;}\n"
+                append methods "\n  virtual bool [string toupper ${vpi} 0 0](${type}${pointer} data) final {${check} ${vpi}_ = data; if (data) uhdmParentType_ = data->UhdmType(); return true;}\n"
             } else {
-                append methods "\n    ${virtual}bool [string toupper ${vpi} 0 0](${type}${pointer} data)$final {${check} ${vpi}_ = data; return true;}\n"
+                append methods "\n  ${virtual}bool [string toupper ${vpi} 0 0](${type}${pointer} data)$final {${check} ${vpi}_ = data; return true;}\n"
             }
         }
     } elseif {$card == "any"} {
-        append methods "\n    VectorOf${type}* [string toupper ${vpi} 0 0]() const { return ${vpi}_; }\n"
-        append methods "\n    bool [string toupper ${vpi} 0 0](VectorOf${type}* data) {${check} ${vpi}_ = data; return true;}\n"
+        append methods "\n  VectorOf${type}* [string toupper ${vpi} 0 0]() const { return ${vpi}_; }\n"
+        append methods "\n  bool [string toupper ${vpi} 0 0](VectorOf${type}* data) {${check} ${vpi}_ = data; return true;}\n"
     }
     return $methods
 }
@@ -212,12 +213,12 @@ proc printMembers { type vpi card } {
             set default_assignment "nullptr"
         }
         if {$type == "std::string"} {
-            append members "\n    SymbolFactory::ID ${vpi}_ = 0;\n"
+            append members "\n  SymbolFactory::ID ${vpi}_ = 0;\n"
         } else {
-            append members "\n    ${type}${pointer} ${vpi}_ = ${default_assignment};\n"
+            append members "\n  ${type}${pointer} ${vpi}_ = ${default_assignment};\n"
         }
     } elseif {$card == "any"} {
-        append members "\n    VectorOf${type}* ${vpi}_ = nullptr;\n"
+        append members "\n  VectorOf${type}* ${vpi}_ = nullptr;\n"
     }
     return $members
 }
@@ -1002,7 +1003,7 @@ proc write_uhdm_h { headers} {
     set uhdm_content [read $fid]
     close $fid
 
-    set name_id_map "\nstd::string UHDM::UhdmName(UHDM_OBJECT_TYPE type) \{
+    set name_id_map "\nstd::string UhdmName(UHDM_OBJECT_TYPE type) \{
       switch (type) \{
 "
     foreach id [array names DEFINE_ID] {
@@ -1148,7 +1149,7 @@ proc process_baseclass { baseclass classname modeltype capnpIndex } {
 }
 
 proc generate_code { models } {
-    global ID BASECLASS DEFINE_ID SAVE RESTORE working_dir methods_cpp VISITOR VISITOR_RELATIONS CLASS_LISTENER
+    global ID BASECLASS DEFINE_ID SAVE RESTORE working_dir methods_cpp group_headers VISITOR VISITOR_RELATIONS CLASS_LISTENER
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS MODEL_TYPE
     global uhdm_name_map headers vpi_handle_body_all vpi_handle_body vpi_iterator vpi_iterate_body vpi_handle_by_name_body vpi_handle_by_name_body_all
     global tcl_platform myProjetPathNoNormalize
@@ -1196,6 +1197,7 @@ proc generate_code { models } {
         set baseclass ""
         set methods($classname) ""
         set members($classname) ""
+        set group_headers ""
         set SAVE($classname) ""
         set RESTORE($classname) ""
         set capnp_schema($classname) ""
@@ -1255,7 +1257,7 @@ proc generate_code { models } {
 
         if {$modeltype == "class_def"} {
             # DeepClone() not implemented for class_def; just declare to narrow the covariant return type.
-            append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override = 0;\n"
+            append methods($classname) "\n  ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override = 0;\n"
         } else {
             # Builtin properties do not need to be specified in each models
             # Builtins: "vpiParent, Parent type, vpiFile, Id" method and field
@@ -1269,9 +1271,9 @@ proc generate_code { models } {
             append methods($classname) [printMethods $classname "unsigned int" uhdmId 1]
             append members($classname) [printMembers "unsigned int" uhdmId 1]
             if [regexp {_call} ${classname}] {
-                append methods($classname) "\n    tf_call* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
+                append methods($classname) "\n  tf_call* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
             } else {
-                append methods($classname) "\n    ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
+                append methods($classname) "\n  ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
             }
             append vpi_handle_body($classname) [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
             lappend capnp_schema($classname) [list vpiParent UInt64]
@@ -1446,13 +1448,14 @@ proc generate_code { models } {
 
         if {($type_specified == 0) && ($modeltype == "obj_def")} {
             set vpiclasstype [makeVpiName $classname]
-            append methods($classname) "\n    unsigned int VpiType() const final { return $vpiclasstype; }\n"
+            append methods($classname) "\n  unsigned int VpiType() const final { return $vpiclasstype; }\n"
             lappend vpi_get_body_inst($classname) [list $classname "unsigned int" vpiType 1]
 
         }
         regsub -all {<METHODS>} $template $methods($classname) template
         regsub -all {<MEMBERS>} $template $members($classname) template
         regsub -all {<EXTENDS>} $template BaseClass template
+        regsub -all {<GROUP_HEADER_DEPENDENCY>} $template $group_headers template
 
         set_content_if_change "[project_path]/headers/$classname.h" $template
 

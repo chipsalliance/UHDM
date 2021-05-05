@@ -26,11 +26,13 @@
 #ifndef UHDM_<UPPER_GROUPNAME>_H
 #define UHDM_<UPPER_GROUPNAME>_H
 
+#include "headers/uhdm_forward_decl.h"
+
 namespace UHDM {
 
-  bool <GROUPNAME>GroupCompliant(any* item);
-  bool <GROUPNAME>GroupCompliant(VectorOfany* vec);
- 	     
-};
+bool <GROUPNAME>GroupCompliant(any* item);
+bool <GROUPNAME>GroupCompliant(VectorOfany* vec);
+
+}  // namespace UHDM
 
 #endif

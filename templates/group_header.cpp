@@ -22,34 +22,32 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
-
+#include "<GROUPNAME>.h"
 
 #include <iostream>
 #include "headers/uhdm.h"
-#include "<GROUPNAME>.h"
 
 namespace UHDM {
+bool <GROUPNAME>GroupCompliant(any* item) {
+  if (item == nullptr) {
+    return true;
+  }
+  BaseClass* the_item = (BaseClass*) item;
+  UHDM_OBJECT_TYPE uhdmtype = the_item->UhdmType();
+  if (<CHECKTYPE>) {
+    item->GetSerializer()->GetErrorHandler()("Internal Error: adding wrong object type (" + UhdmName(uhdmtype) + ") in a <GROUPNAME> group!\n");
+    return false;
+  }
+  return true;
+}
 
-  bool <GROUPNAME>GroupCompliant(any* item) {
-    if (item == nullptr) {
-      return true;
-    }
-    BaseClass* the_item = (BaseClass*) item;
-    UHDM_OBJECT_TYPE uhdmtype = the_item->UhdmType();
-    if (<CHECKTYPE>) {
-      item->GetSerializer()->GetErrorHandler()("Internal Error: adding wrong object type (" + UhdmName(uhdmtype) + ") in a <GROUPNAME> group!\n");   
+bool <GROUPNAME>GroupCompliant(VectorOfany* vec) {
+  for (auto item : *vec) {
+    if (!<GROUPNAME>GroupCompliant(item)) {
       return false;
     }
-    return true;
   }
+  return true;
+}
 
-  bool <GROUPNAME>GroupCompliant(VectorOfany* vec) {
-    for (auto item : *vec) {
-      if (!<GROUPNAME>GroupCompliant(item)) {
-	return false;
-      }
-    }
-    return true;
-  }
- 	     
-};
+}  // namespace UHDM

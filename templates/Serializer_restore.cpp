@@ -22,11 +22,12 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
+#include "headers/Serializer.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #if defined(_MSC_VER)
   #include <io.h>
@@ -39,20 +40,19 @@
   #endif
 #endif
 
-#include <vector>
-#include <map>
 #include <iostream>
+#include <map>
+#include <vector>
 
 #include <capnp/message.h>
 #include <capnp/serialize-packed.h>
 
-#include "headers/uhdm_types.h"
+#include "UHDM.capnp.h"
 #include "headers/containers.h"
 #include "headers/uhdm.h"
-#include "UHDM.capnp.h"
-#include "headers/Serializer.h"
-using namespace UHDM;
+#include "headers/uhdm_types.h"
 
+namespace UHDM {
 const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
   Purge();
   std::vector<vpiHandle> designs;
@@ -85,3 +85,4 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
 #if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
   #pragma warning(pop)
 #endif
+}  // namespace UHDM

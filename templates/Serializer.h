@@ -26,6 +26,11 @@
 
 #ifndef SERIALIZER_UHDM_H
 #define SERIALIZER_UHDM_H
+
+#include <string>
+#include <vector>
+#include <map>
+
 #include <iostream>
 #include <functional>
 #include "uhdm.h"
@@ -35,7 +40,7 @@ namespace UHDM {
   typedef std::function<void(const std::string&)> ErrorHandler;
 
   static void DefaultErrorHandler(const std::string& errorMsg) { std::cout << errorMsg << std::endl; }
-  
+
   class Serializer {
   public:
     Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {symbolMaker.Make("");}
@@ -45,7 +50,7 @@ namespace UHDM {
     ErrorHandler GetErrorHandler() { return errorHandler; }
     const std::vector<vpiHandle> Restore(const std::string& file);
     std::map<std::string, unsigned long> ObjectStats();
-    
+
 <FACTORIES_METHODS>
     std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
     vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) { return uhdm_handleMaker.Make(type, object); }

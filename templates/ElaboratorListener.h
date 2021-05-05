@@ -31,31 +31,36 @@
 #include "headers/VpiListener.h"
 #include "headers/clone_tree.h"
 
+// Since there is a lot of implementation happening inside this
+// header, we need to include this.
+// TODO: move implementation in ElaboratorListener.cpp
+#include "headers/Serializer.h"
+
 namespace UHDM {
-  
+
 class ElaboratorListener : public VpiListener {
   friend function;
 public:
-  
+
   ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}
   void uniquifyTypespec(bool uniquify) { uniquifyTypespec_ = uniquify; }
   bool uniquifyTypespec() { return uniquifyTypespec_; }
-  bool isFunctionCall(const std::string& name, const expr* prefix); 
-  
-  bool isTaskCall(const std::string& name, const expr* prefix); 
+  bool isFunctionCall(const std::string& name, const expr* prefix);
+
+  bool isTaskCall(const std::string& name, const expr* prefix);
 
   // Bind to a net in the current instance
   net* bindNet(const std::string& name);
-  
+
   // Bind to a net or parameter in the current instance
   any* bindAny(const std::string& name);
 
   // Bind to a param in the current instance
   any* bindParam(const std::string& name);
-  
+
   // Bind to a function or task in the current scope
   any* bindTaskFunc(const std::string& name, const class_var* prefix = nullptr);
-  
+
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
@@ -63,13 +68,13 @@ protected:
     design* root = (design*) object;
     root->VpiElaborated(true);
   }
-  
+
   void enterModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
     module* inst = (module*) object;
     bool topLevelModule         = object->VpiTopModule();
-    const std::string& instName = object->VpiName(); 
-    const std::string& defName  = object->VpiDefName(); 
+    const std::string& instName = object->VpiName();
+    const std::string& defName  = object->VpiDefName();
     bool flatModule             = (instName == "") && ((object->VpiParent() == 0) ||
                                                        ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
                                   // false when it is a module in a hierachy tree
@@ -82,7 +87,7 @@ protected:
     } else {
       // Hierachical module list (elaborated)
       inHierarchy_ = true;
-      
+
       // Collect instance elaborated nets
       ComponentMap netMap;
       if (object->Nets()) {
@@ -91,7 +96,7 @@ protected:
         }
       }
 
-      // Collect instance parameters, defparams 
+      // Collect instance parameters, defparams
       ComponentMap paramMap;
       if (object->Parameters()) {
         for (any* param : *object->Parameters()) {
@@ -118,7 +123,7 @@ protected:
       }
 
       // Check if Module instance has a definition, collect enums
-      ComponentMap::iterator itrDef = flatComponentMap_.find(defName);      
+      ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
       if (itrDef != flatComponentMap_.end()) {
         const BaseClass* comp = (*itrDef).second;
         int compType = comp->VpiType();
@@ -138,10 +143,10 @@ protected:
           }
         }
       }
-       
+
       // Push instance context on the stack
       instStack_.push_back(std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
-      
+
       // Check if Module instance has a definition
       if (itrDef != flatComponentMap_.end()) {
         const BaseClass* comp = (*itrDef).second;
@@ -158,20 +163,20 @@ protected:
           break;
         }
       }
-      
+
     }
   }
 
   void leaveModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
-    const std::string& instName = object->VpiName(); 
+    const std::string& instName = object->VpiName();
     bool flatModule             = (instName == "") && ((object->VpiParent() == 0) ||
                                                        ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
                                   // false when it is a module in a hierachy tree
     if (!flatModule) {
       instStack_.pop_back();
       if (instStack_.empty()) {
-	inHierarchy_ = false;
+        inHierarchy_ = false;
       }
     }
   }
@@ -188,7 +193,7 @@ protected:
       }
     }
 
-    // Collect instance parameters, defparams 
+    // Collect instance parameters, defparams
     ComponentMap paramMap;
     if (object->Parameters()) {
       for (any* param : *object->Parameters()) {
@@ -205,13 +210,13 @@ protected:
     }
 
     // Push class defn context on the stack
-    // Class context is going to be pushed in case of: 
+    // Class context is going to be pushed in case of:
     //   - imbricated classes
-    //   - inheriting classes (Through the extends relation) 
+    //   - inheriting classes (Through the extends relation)
     instStack_.push_back(std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
 
 <CLASS_ELABORATOR_LISTENER>
-    
+
   }
 
   void leaveClass_defn(const class_defn* object, const BaseClass* parent,
@@ -228,7 +233,7 @@ protected:
 
   void enterTask_func(const task_func* object, const BaseClass* parent,
 		   vpiHandle handle, vpiHandle parentHandle);
-  
+
   void leaveTask_func(const task_func* object, const BaseClass* parent,
 		   vpiHandle handle, vpiHandle parentHandle);
 

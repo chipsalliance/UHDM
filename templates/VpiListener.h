@@ -27,22 +27,21 @@
 #ifndef UHDM_VPILISTENER_CLASS_H
 #define UHDM_VPILISTENER_CLASS_H
 
+#include "headers/uhdm_forward_decl.h"
+#include "include/vpi_user.h"
+
 namespace UHDM {
-  
-  class VpiListener {
-  public:
-    // Use implicit constructor to initialize all members
-    // VpiListener()
-    
-    virtual ~VpiListener() {}
+class VpiListener {
+public:
+  // Use implicit constructor to initialize all members
+  // VpiListener()
+
+  virtual ~VpiListener() {}
 
 <VPI_LISTENER_METHODS>
-
-  protected:
-    
-  };
-  
 };
+
+}  // namespace UHDM
 
 
 #endif

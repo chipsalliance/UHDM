@@ -22,6 +22,7 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
+#include "headers/vpi_listener.h"
 
 #include <string.h>
 
@@ -33,12 +34,12 @@
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
 
-#include "headers/uhdm_types.h"
-#include "headers/containers.h"
-#include "headers/vpi_uhdm.h"
-#include "headers/uhdm.h"
 #include "headers/Serializer.h"
-#include "headers/vpi_listener.h"
+#include "headers/containers.h"
+#include "headers/uhdm.h"
+#include "headers/uhdm_types.h"
+#include "headers/vpi_uhdm.h"
+
 
 using namespace UHDM;
 

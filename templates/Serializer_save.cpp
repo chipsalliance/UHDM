@@ -22,10 +22,11 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
+#include "headers/Serializer.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #if defined(_MSC_VER)
   #include <io.h>
@@ -39,21 +40,20 @@
   #endif
 #endif
 
-#include <vector>
-#include <map>
 #include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 #include <capnp/message.h>
 #include <capnp/serialize-packed.h>
 
-#include "headers/uhdm_types.h"
+#include "UHDM.capnp.h"
 #include "headers/containers.h"
 #include "headers/uhdm.h"
-#include "UHDM.capnp.h"
-#include "headers/Serializer.h"
+#include "headers/uhdm_types.h"
 
-using namespace UHDM;
-
+namespace UHDM {
 void Serializer::SetId(const BaseClass* p, unsigned long id) {
   allIds_.insert(std::make_pair(p, id));
 }
@@ -72,7 +72,8 @@ unsigned long Serializer::GetId(const BaseClass* p) {
 
 <UHDM_NAME_MAP>
 
-std::string UHDM::VpiTypeName(vpiHandle h) {
+// From uhdm_types.h
+std::string VpiTypeName(vpiHandle h) {
   uhdm_handle* handle = (uhdm_handle*) h;
   BaseClass* obj = (BaseClass*) handle->object;
   return UhdmName(obj->UhdmType());
@@ -140,3 +141,4 @@ void Serializer::Save(const std::string& file) {
 #if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
   #pragma warning(pop)
 #endif
+}  // namespace UHDM

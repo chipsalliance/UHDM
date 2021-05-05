@@ -22,6 +22,7 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
+#include "vpi_visitor.h"
 
 #include <string.h>
 
@@ -69,11 +70,11 @@ static bool showIDs = false;
 
 #endif
 
-#include "vpi_visitor.h"
+
 
 // UHDM implementation redefine these
 #ifndef vpiVarBit
-  #define vpiVarBit          vpiRegBit 
+  #define vpiVarBit          vpiRegBit
   #define vpiLogicVar        vpiReg
   #define vpiArrayVar        vpiRegArray
 #endif
@@ -95,7 +96,7 @@ std::string decompile(UHDM::any* handle) {
   return out.str();
 }
 
-  
+
 #ifdef STANDARD_VPI
 
 static std::string vpiTypeName(vpiHandle h) {
@@ -416,7 +417,7 @@ static void release_handle(vpiHandle obj_h) {
   vpi_release_handle(obj_h);
 #endif
 }
-  
+
 static std::string visit_value(s_vpi_value* value) {
   if (value == nullptr)
     return "";
@@ -428,7 +429,7 @@ static std::string visit_value(s_vpi_value* value) {
   case vpiUIntVal: {
     return std::string(std::string("|UINT:") + std::to_string(value->value.uint) + "\n");
     break;
-  }  
+  }
   case vpiStringVal: {
     const char* s = (const char*) value->value.str;
     return std::string(std::string("|STRING:") + std::string(s) + "\n");
@@ -461,7 +462,7 @@ static std::string visit_value(s_vpi_value* value) {
     const char* s = (const char*) value->value.str;
     return std::string(std::string("|DEC:") + std::string(s) + "\n");
     break;
-  }   
+  }
   default:
     break;
   }
@@ -491,25 +492,25 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
   if (!obj_h)
     return;
 #ifdef STANDARD_VPI
-  
+
   static int kLevelIndent = 2;
   const bool alreadyVisited = visited->find(obj_h) != visited->end();
   visited->insert(obj_h);
 
 #else
-  
+
   static constexpr int kLevelIndent = 2;
   const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
   const BaseClass* const object = (const BaseClass*) handle->object;
   const bool alreadyVisited = (visited->find(object) != visited->end());
   if (!shallowVisit)
     visited->insert(object);
-  
+
 #endif
-  
+
   unsigned int subobject_indent = indent + kLevelIndent;
   const unsigned int objectType = vpi_get(vpiType, obj_h);
- 
+
   {
     std::string hspaces;
     std::string rspaces;
@@ -524,9 +525,9 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
     if (strlen(relation) != 0) {
       out << rspaces << relation << ":\n";
     }
-    
+
 #ifdef STANDARD_VPI
-    
+
     out << hspaces << vpiTypeName(obj_h) << "(" << vpi_get(vpiType, obj_h) << "): ";
 
 #else
@@ -534,7 +535,7 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
     out << hspaces << UHDM::VpiTypeName(obj_h) << ": ";
 
 #endif
-    
+
     bool needs_separator = false;
     if (const char* s = vpi_get_str(vpiDefName, obj_h)) {  // defName
       out << s;
@@ -553,7 +554,7 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
     if (showIDs)
       out << ", id:" << object->UhdmId();
 
-#endif    
+#endif
 
     if (objectType == vpiModule || objectType == vpiProgram || objectType == vpiClassDefn || objectType == vpiPackage ||
         objectType == vpiInterface || objectType == vpiUdp) {
@@ -631,12 +632,12 @@ void vpi_show_ids(bool show) {
 
 static std::stringstream the_output;
 
-extern "C" { 
+extern "C" {
   void vpi_decompiler (vpiHandle design) {
     std::vector<vpiHandle> designs;
     designs.push_back(design);
     UHDM::visit_designs(designs, the_output);
     std::cout << the_output.str().c_str() << std::endl;
   }
-  
+
 }
