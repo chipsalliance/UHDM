@@ -29,25 +29,26 @@
 #include "SymbolFactory.h"
 #include "BaseClass.h"
 #include "containers.h"
-#include "uhdm.h"
+
+#include "<EXTENDS>.h"
 
 namespace UHDM {
+class <CLASSNAME> <FINAL_CLASS> : public <EXTENDS> {
+public:
+  // Implicit constructor used to initialize all members,
+  // comment: <CLASSNAME>();
+  <VIRTUAL>~<CLASSNAME>() <FINAL_DESTRUCTOR> {}
+  <METHODS>
+  <VIRTUAL> UHDM_OBJECT_TYPE UhdmType() const <OVERRIDE_OR_FINAL> { return uhdm<CLASSNAME>; }
 
-  class <CLASSNAME> <FINAL_CLASS> : public <EXTENDS> {
-  public:
-    // Implicit constructor used to initialize all members,
-    // comment: <CLASSNAME>();
-    <VIRTUAL>~<CLASSNAME>() <FINAL_DESTRUCTOR> {}
-    <METHODS>
-   <VIRTUAL> UHDM_OBJECT_TYPE UhdmType() const <OVERRIDE_OR_FINAL> { return uhdm<CLASSNAME>; }   
-  private:
-    <MEMBERS>
-  };
+private:
+  <MEMBERS>
+};
 
- <DISABLE_OBJECT_FACTORY> 
-  class <CLASSNAME>Factory {
+<DISABLE_OBJECT_FACTORY>
+class <CLASSNAME>Factory {
   friend Serializer;
-  public:
+public:
   <CLASSNAME>* Make() {
     <CLASSNAME>* obj = new <CLASSNAME>();
     objects_.push_back(obj);
@@ -60,24 +61,25 @@ namespace UHDM {
         break;
       }
     }
-  }   
-  private:
-    std::vector<<CLASSNAME>*> objects_;
-  };
- <END_DISABLE_OBJECT_FACTORY> 
-  
-  class VectorOf<CLASSNAME>Factory {
-  friend Serializer;
-  public:
-  std::vector<<CLASSNAME>*>* Make() {
-    std::vector<<CLASSNAME>*>* obj = new std::vector<<CLASSNAME>*>();
-    objects_.push_back(obj);
-    return obj;
   }
-  private:
-  std::vector<std::vector<<CLASSNAME>*>*> objects_;
-  };
 
+private:
+  std::vector<<CLASSNAME>*> objects_;
 };
+<END_DISABLE_OBJECT_FACTORY>
+
+class VectorOf<CLASSNAME>Factory {
+  friend Serializer;
+ public:
+ std::vector<<CLASSNAME>*>* Make() {
+   std::vector<<CLASSNAME>*>* obj = new std::vector<<CLASSNAME>*>();
+   objects_.push_back(obj);
+   return obj;
+ }
+ private:
+ std::vector<std::vector<<CLASSNAME>*>*> objects_;
+};
+
+}  // namespace UHDM
 
 #endif
