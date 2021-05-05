@@ -70,13 +70,13 @@ private:
 
 class VectorOf<CLASSNAME>Factory {
   friend Serializer;
- public:
+public:
  std::vector<<CLASSNAME>*>* Make() {
    std::vector<<CLASSNAME>*>* obj = new std::vector<<CLASSNAME>*>();
    objects_.push_back(obj);
    return obj;
  }
- private:
+private:
  std::vector<std::vector<<CLASSNAME>*>*> objects_;
 };
 
