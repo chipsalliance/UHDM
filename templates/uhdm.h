@@ -22,12 +22,12 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
+#ifndef UHDM_H
+#define UHDM_H
 
 #include <string>
 #include <vector>
 #include <map>
-#ifndef UHDM_H
-#define UHDM_H
 
 // Missing defines from vpi_user.h, sv_vpi_user.h
 #define vpiDesign            3000
@@ -58,9 +58,10 @@
 #define vpiUnsupportedTypespec 4002
 
 // Objects not in the Standard
-#define vpiHierPath         5000 // Represents a hierarchical path 
+#define vpiHierPath         5000 // Represents a hierarchical path
 #define vpiReordered        5001 // Boolean for operations (pattern assign, concat) that has been reordered
 #define vpiElaborated       5002 // Boolean indicating UHDM has been elaborated/uniquified
+
 #include "headers/uhdm_types.h"
 #include "include/sv_vpi_user.h"
 #include "include/vhpi_user.h"
