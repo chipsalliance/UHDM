@@ -32,6 +32,8 @@
 
 #include "<EXTENDS>.h"
 
+<GROUP_HEADER_DEPENDENCY>
+
 namespace UHDM {
 class <CLASSNAME> <FINAL_CLASS> : public <EXTENDS> {
 public:
