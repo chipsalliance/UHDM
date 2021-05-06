@@ -27,7 +27,7 @@
 #include <vector>
 #include <set>
 
-#include "sv_vpi_user.h"
+#include "../include/sv_vpi_user.h"
 
 #include "headers/uhdm_forward_decl.h"
 
