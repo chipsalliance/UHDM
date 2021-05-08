@@ -20,7 +20,7 @@ proc generate_elaborator { models } {
     set module_vpi_listener ""
     set class_vpi_listener ""
     set clone_implementations ""
-
+    
     foreach model $models {
         global $model
         set data [subst $$model]
@@ -84,7 +84,7 @@ proc generate_elaborator { models } {
             set Classname [string toupper $classname 0 0]
             set modeltype [dict get $data type]
             set MODEL_TYPE($classname) $modeltype
-
+            
             dict for {key val} $data {
                 if {$key == "properties"} {
                     dict for {prop conf} $val {
@@ -151,6 +151,8 @@ proc generate_elaborator { models } {
 "
                             } elseif {$method == "Instance"} {
                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((instance*)obj);
+  if (instance* inst = dynamic_cast<instance*>(parent))
+    clone->Instance(inst);
 "
                             } elseif {$method == "Module"} {
                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((module*)obj);
@@ -227,7 +229,7 @@ proc generate_elaborator { models } {
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
               enterTask_func(obj, defMod, nullptr, nullptr);
-              auto* tf = obj->DeepClone(serializer_, this, defMod);
+              auto* tf = obj->DeepClone(serializer_, this, inst);
               leaveTask_func(obj, defMod, nullptr, nullptr);
               tf->VpiParent(inst);
               clone_vec->push_back(tf);
@@ -266,7 +268,7 @@ proc generate_elaborator { models } {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
-              auto* stmt = obj->DeepClone(serializer_, this, defMod);
+              auto* stmt = obj->DeepClone(serializer_, this, inst);
               stmt->VpiParent(inst);
               clone_vec->push_back(stmt);
             }
@@ -280,7 +282,7 @@ proc generate_elaborator { models } {
             }
             auto clone_vec = inst->${method}();
             for (auto obj : *vec) {
-              auto* stmt = obj->DeepClone(serializer_, this, defMod);
+              auto* stmt = obj->DeepClone(serializer_, this, inst);
               stmt->VpiParent(inst);
               clone_vec->push_back(stmt);
             }
@@ -294,7 +296,7 @@ proc generate_elaborator { models } {
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
               if (uniquifyTypespec()) {
-                auto* stmt = obj->DeepClone(serializer_, this, defMod);
+                auto* stmt = obj->DeepClone(serializer_, this, inst);
                 stmt->VpiParent(inst);
                 clone_vec->push_back(stmt);
               } else {
@@ -310,7 +312,7 @@ proc generate_elaborator { models } {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
-              auto* stmt = obj->DeepClone(serializer_, this, defMod);
+              auto* stmt = obj->DeepClone(serializer_, this, inst);
               stmt->VpiParent(inst);
               clone_vec->push_back(stmt);
             }
