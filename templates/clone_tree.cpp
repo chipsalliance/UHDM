@@ -488,6 +488,9 @@ tf_call* task_call::DeepClone(Serializer* serializer, ElaboratorListener* elabor
 }
 
 function* function::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  if (function* f = dynamic_cast<function*>( elaborator->bindTaskFunc(VpiName(), nullptr))) {
+    return f;
+  }
   function* const clone = serializer->MakeFunction();
   const unsigned long id = clone->UhdmId();
   *clone = *this;
@@ -497,6 +500,8 @@ function* function::DeepClone(Serializer* serializer, ElaboratorListener* elabor
   if (auto obj = Right_range()) clone->Right_range(obj->DeepClone(serializer, elaborator, clone));
   if (auto obj = Return()) clone->Return((variables*)obj);
   if (auto obj = Instance()) clone->Instance((instance*)obj);
+  if (instance* inst = dynamic_cast<instance*>(parent))
+    clone->Instance(inst);
   if (auto obj = Class_defn()) clone->Class_defn(obj->DeepClone(serializer, elaborator, clone));
   if (auto obj = Ref_obj()) clone->Ref_obj(obj->DeepClone(serializer, elaborator, clone));
   if (auto vec = Io_decls()) {
