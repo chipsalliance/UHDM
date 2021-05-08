@@ -20,7 +20,7 @@ proc generate_elaborator { models } {
     set module_vpi_listener ""
     set class_vpi_listener ""
     set clone_implementations ""
-    
+
     foreach model $models {
         global $model
         set data [subst $$model]
@@ -84,7 +84,7 @@ proc generate_elaborator { models } {
             set Classname [string toupper $classname 0 0]
             set modeltype [dict get $data type]
             set MODEL_TYPE($classname) $modeltype
-            
+
             dict for {key val} $data {
                 if {$key == "properties"} {
                     dict for {prop conf} $val {
