@@ -129,6 +129,8 @@ proc generate_elaborator { models } {
                                 }
                                 append clone_impl "  if (task* t = dynamic_cast<task*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
     clone->${method}(t);
+  } else {
+    elaborator->scheduleTaskFuncBinding(clone);
   }
 "
                             } elseif {($method == "Function")} {
@@ -141,6 +143,8 @@ proc generate_elaborator { models } {
                                 }
                                 append clone_impl "  if (function* f = dynamic_cast<function*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
     clone->${method}(f);
+  } else {
+    elaborator->scheduleTaskFuncBinding(clone);
   }
 "
                             } elseif {($rootclassname == "function") && ($method == "Return")} {
@@ -230,6 +234,8 @@ proc generate_elaborator { models } {
             for (auto obj : *vec) {
               enterTask_func(obj, defMod, nullptr, nullptr);
               auto* tf = obj->DeepClone(serializer_, this, inst);
+              ComponentMap\\& funcMap = std::get<2>((instStack_.at(instStack_.size()-2)).second);
+              funcMap.insert(std::make_pair(tf->VpiName(), tf));
               leaveTask_func(obj, defMod, nullptr, nullptr);
               tf->VpiParent(inst);
               clone_vec->push_back(tf);

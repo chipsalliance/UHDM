@@ -61,6 +61,8 @@ public:
   // Bind to a function or task in the current scope
   any* bindTaskFunc(const std::string& name, const class_var* prefix = nullptr);
 
+  void scheduleTaskFuncBinding(tf_call* clone) { scheduledTfCallBinding_.push_back(clone); }
+    
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
@@ -169,11 +171,19 @@ protected:
 
   void leaveModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
-    const std::string& instName = object->VpiName();
-    bool flatModule             = (instName == "") && ((object->VpiParent() == 0) ||
-                                                       ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
-                                  // false when it is a module in a hierachy tree
-    if (!flatModule) {
+    for (tf_call* call : scheduledTfCallBinding_) {
+      if (call->UhdmType() == uhdmfunc_call) {
+        if (function* f = dynamic_cast<function*>(bindTaskFunc(call->VpiName()))) {
+          ((func_call*)call)->Function(f);
+        }
+      } else {
+        if (task* f = dynamic_cast<task*>(bindTaskFunc(call->VpiName()))) {
+          ((task_call*)call)->Task(f);
+        }
+      }
+    }
+    scheduledTfCallBinding_.clear();
+    if (inHierarchy_) {
       instStack_.pop_back();
       if (instStack_.empty()) {
         inHierarchy_ = false;
@@ -250,6 +260,7 @@ private:
   bool inHierarchy_ = false;
   bool debug_ = false;
   bool uniquifyTypespec_ = true;
+  std::vector<tf_call*> scheduledTfCallBinding_;
 };
 
 };
