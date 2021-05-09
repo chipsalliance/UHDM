@@ -210,7 +210,7 @@ int main (int argc, char** argv) {
     listen_designs(designs,listener);
     std::cout << std::endl;
   }
-
+  serializer.Save("elab_test.uhdm");
   orig = "DUMP Design content (Post elab):\n";
   orig += visit_designs(designs);
   std::cout << orig;
