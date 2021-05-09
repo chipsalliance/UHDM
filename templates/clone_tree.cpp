@@ -395,6 +395,8 @@ tf_call* func_call::DeepClone(Serializer* serializer, ElaboratorListener* elabor
     if (function* f =
             dynamic_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
       clone->Function(f);
+    } else {
+      elaborator->scheduleTaskFuncBinding(clone);
     }
     if (auto obj = Scope())
       clone->Scope(obj->DeepClone(serializer, elaborator, clone));
