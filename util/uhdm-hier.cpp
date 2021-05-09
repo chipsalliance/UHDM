@@ -95,24 +95,32 @@ int main(int argc, char** argv) {
                 path += objectName + ".";
               }
               // Recursive tree traversal
-              vpiHandle subItr = vpi_iterate(vpiModule, obj_h);
-              while (vpiHandle sub_h = vpi_scan(subItr)) {
-                res += inst_visit(sub_h, path);
-                vpi_release_handle(sub_h);
+              if (vpi_get(vpiType, obj_h) == vpiModule ||
+                  vpi_get(vpiType, obj_h) == vpiGenScope) {
+                vpiHandle subItr = vpi_iterate(vpiModule, obj_h);
+                while (vpiHandle sub_h = vpi_scan(subItr)) {
+                  res += inst_visit(sub_h, path);
+                  vpi_release_handle(sub_h);
+                }
+                vpi_release_handle(subItr);
               }
-              vpi_release_handle(subItr);
-              subItr = vpi_iterate(vpiGenScopeArray, obj_h);
-              while (vpiHandle sub_h = vpi_scan(subItr)) {
-                res += inst_visit(sub_h, path);
-                vpi_release_handle(sub_h);
+              if (vpi_get(vpiType, obj_h) == vpiModule ||
+                  vpi_get(vpiType, obj_h) == vpiGenScope) {
+                vpiHandle subItr = vpi_iterate(vpiGenScopeArray, obj_h);
+                while (vpiHandle sub_h = vpi_scan(subItr)) {
+                  res += inst_visit(sub_h, path);
+                  vpi_release_handle(sub_h);
+                }
+                vpi_release_handle(subItr);
               }
-              vpi_release_handle(subItr);
-              subItr = vpi_iterate(vpiGenScope, obj_h);
-              while (vpiHandle sub_h = vpi_scan(subItr)) {
-                res += inst_visit(sub_h, path);
-                vpi_release_handle(sub_h);
+              if (vpi_get(vpiType, obj_h) == vpiGenScopeArray) {
+                vpiHandle subItr = vpi_iterate(vpiGenScope, obj_h);
+                while (vpiHandle sub_h = vpi_scan(subItr)) {
+                  res += inst_visit(sub_h, path);
+                  vpi_release_handle(sub_h);
+                }
+                vpi_release_handle(subItr);
               }
-              vpi_release_handle(subItr);
               return res;
             };
         result += inst_visit(obj_h, "");
