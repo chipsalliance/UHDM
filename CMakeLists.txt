@@ -101,6 +101,7 @@ add_custom_command(
   OUTPUT ${model-GENERATED_SRC}
   COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_CURRENT_BINARY_DIR}
+          ${PROJECT_SOURCE_DIR}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model_gen/generate_elaborator.tcl
