@@ -15,13 +15,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set model_files [lindex $argv 0]
-set working_dir [lindex $argv 1]
-puts "UHDM MODEL GENERATION"
-puts "Working dir: $working_dir"
-
 variable myLocation [file normalize [info script]]
 set myProjetPathNoNormalize [file dirname [file dirname [info script]]]
+
+proc project_path {} {
+    variable myLocation
+    return [file dirname [file dirname $myLocation]]
+}
+
+set model_files [lindex $argv 0]
+set working_dir [lindex $argv 1]
+set codegen_base [expr {$argc > 2} ? {[lindex $argv 2]} : {[project_path]}]
+
+proc codegen_base {} {
+    global codegen_base
+    return $codegen_base
+}
+
+puts "UHDM MODEL GENERATION"
+puts "Working dir: $working_dir; codegen_base: [codegen_base]"
 
 set DEBUG 0
 
@@ -44,14 +56,9 @@ proc exec_path {} {
     return [file dirname $myLocation]
 }
 
-proc project_path {} {
-    variable myLocation
-    return [file dirname [file dirname $myLocation]]
-}
 
-
-file mkdir [project_path]/src
-file mkdir [project_path]/headers
+file mkdir [codegen_base]/src
+file mkdir [codegen_base]/headers
 
 source [exec_path]/file_utils.tcl
 source [exec_path]/pdict.tcl
@@ -675,8 +682,8 @@ proc generate_group_checker { model } {
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
 
-    set files [list [list "[project_path]/templates/group_header.h" "[project_path]/headers/${groupname}.h"] \
-                   [list "[project_path]/templates/group_header.cpp" "[project_path]/src/${groupname}.cpp"]]
+    set files [list [list "[project_path]/templates/group_header.h" "[codegen_base]/headers/${groupname}.h"] \
+                   [list "[project_path]/templates/group_header.cpp" "[codegen_base]/src/${groupname}.cpp"]]
     set GROUP_MEMBERS($groupname) ""
     foreach pair $files {
         foreach {input output} $pair {}
@@ -750,7 +757,7 @@ proc write_vpi_listener_cpp {} {
     regsub {<VPI_LISTENERS>} $listener_cpp $vpi_listener listener_cpp
     regsub {<VPI_ANY_LISTENERS>} $listener_cpp $vpi_any_listener listener_cpp
 
-    set_content_if_change "[project_path]/src/vpi_listener.cpp" $listener_cpp
+    set_content_if_change "[codegen_base]/src/vpi_listener.cpp" $listener_cpp
 }
 
 proc write_vpi_listener_h {} {
@@ -765,7 +772,7 @@ proc write_vpi_listener_h {} {
     }
     regsub {<VPI_LISTENERS_HEADER>} $listener_h $vpi_listener listener_h
 
-    set_content_if_change "[project_path]/headers/vpi_listener.h" $listener_h
+    set_content_if_change "[codegen_base]/headers/vpi_listener.h" $listener_h
 }
 
 proc write_uhdm_forward_decl {} {
@@ -780,7 +787,7 @@ proc write_uhdm_forward_decl {} {
     }
     regsub {<UHDM_FORWARD_DECL>} $uhdm_forward_h $forward_declaration uhdm_forward_h
 
-    set_content_if_change "[project_path]/headers/uhdm_forward_decl.h" $uhdm_forward_h
+    set_content_if_change "[codegen_base]/headers/uhdm_forward_decl.h" $uhdm_forward_h
 }
 
 proc write_VpiListener_h {} {
@@ -794,7 +801,7 @@ proc write_VpiListener_h {} {
         append vpi_listener $CLASS_LISTENER($classname)
     }
     regsub {<VPI_LISTENER_METHODS>} $listener_content $vpi_listener listener_content
-    set_content_if_change "[project_path]/headers/VpiListener.h" $listener_content
+    set_content_if_change "[codegen_base]/headers/VpiListener.h" $listener_content
 }
 
 set SHORT_VISITOR_LIST { class_obj
@@ -983,7 +990,7 @@ $relations
 "
     }
     regsub {<OBJECT_VISITORS>} $visitor_cpp $vpi_visitor visitor_cpp
-    set_content_if_change "[project_path]/src/vpi_visitor.cpp" $visitor_cpp
+    set_content_if_change "[codegen_base]/src/vpi_visitor.cpp" $visitor_cpp
 }
 
 proc write_capnp { capnp_schema_all capnp_root_schema } {
@@ -993,7 +1000,7 @@ proc write_capnp { capnp_schema_all capnp_root_schema } {
     regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema_all capnp_content
     regsub {<CAPNP_ROOT_SCHEMA>} $capnp_content $capnp_root_schema capnp_content
 
-    return [set_content_if_change "[project_path]/src/UHDM.capnp" $capnp_content]
+    return [set_content_if_change "[codegen_base]/src/UHDM.capnp" $capnp_content]
 }
 
 proc write_uhdm_h { headers} {
@@ -1018,7 +1025,7 @@ proc write_uhdm_h { headers} {
     append uhdm_name_map $name_id_map
 
     regsub -all {<INCLUDE_FILES>} $uhdm_content $headers uhdm_content
-    set_content_if_change "[project_path]/headers/uhdm.h" $uhdm_content
+    set_content_if_change "[codegen_base]/headers/uhdm.h" $uhdm_content
 }
 
 proc write_uhdm_types_h { defines } {
@@ -1026,7 +1033,7 @@ proc write_uhdm_types_h { defines } {
     set uhdm_content [read $fid]
     close $fid
     regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
-    set_content_if_change "[project_path]/headers/uhdm_types.h" $uhdm_content
+    set_content_if_change "[codegen_base]/headers/uhdm_types.h" $uhdm_content
 }
 
 proc write_containers_h { containers } {
@@ -1034,7 +1041,7 @@ proc write_containers_h { containers } {
     set container_content [read $fid]
     close $fid
     regsub -all {<CONTAINERS>} $container_content $containers container_content
-    set_content_if_change "[project_path]/headers/containers.h" $container_content
+    set_content_if_change "[codegen_base]/headers/containers.h" $container_content
 }
 
 proc update_vpi_inst { baseclass classname lvl } {
@@ -1457,7 +1464,7 @@ proc generate_code { models } {
         regsub -all {<EXTENDS>} $template BaseClass template
         regsub -all {<GROUP_HEADER_DEPENDENCY>} $template $group_headers template
 
-        set_content_if_change "[project_path]/headers/$classname.h" $template
+        set_content_if_change "[codegen_base]/headers/$classname.h" $template
 
         # VPI
         update_vpi_inst $classname $classname 1
@@ -1516,22 +1523,22 @@ proc generate_code { models } {
     regsub -all {<VPI_GET_DELAY_BODY>} $vpi_user $vpi_get_delay_body vpi_user
     regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
 
-    set_content_if_change "[project_path]/src/vpi_user.cpp" $vpi_user
+    set_content_if_change "[codegen_base]/src/vpi_user.cpp" $vpi_user
 
     # UHDM.capnp
     if {[write_capnp $capnp_schema_all $capnp_root_schema]
-        || ![file exists "[project_path]/src/UHDM.capnp.h"]} {
+        || ![file exists "[codegen_base]/src/UHDM.capnp.h"]} {
         log "Generating Capnp schema..."
-        file delete -force [project_path]/src/UHDM.capnp.*
+        file delete -force [codegen_base]/src/UHDM.capnp.*
         set capnp_path [find_file $working_dir "capnpc-c++$exeext"]
         puts "capnp_path = $capnp_path"
         set capnp_path [file dirname $capnp_path]
 
         if { ($tcl_platform(platform) == "windows") && (![info exists ::env(MSYSTEM)]) } {
-            exec -ignorestderr cmd /c "set PATH=$capnp_path;%PATH%; && cd /d [project_path]/src && $capnp_path/capnp.exe compile -oc++ UHDM.capnp"
+            exec -ignorestderr cmd /c "set PATH=$capnp_path;%PATH%; && cd /d [codegen_base]/src && $capnp_path/capnp.exe compile -oc++ UHDM.capnp"
         } else {
             if { $tcl_platform(platform) == "windows" } {
-                exec -ignorestderr sh -c "export PATH=\$(cygpath -u -a $capnp_path):\$PATH; $capnp_path/capnp compile -oc++:. [project_path]/src/UHDM.capnp"
+                exec -ignorestderr sh -c "export PATH=\$(cygpath -u -a $capnp_path):\$PATH; $capnp_path/capnp compile -oc++:. [codegen_base]/src/UHDM.capnp"
             } else {
                 exec -ignorestderr sh -c "export PATH=$capnp_path:\$PATH; $capnp_path/capnp compile -oc++:. $myProjetPathNoNormalize/src/UHDM.capnp"
             }
@@ -1539,13 +1546,13 @@ proc generate_code { models } {
     }
 
     # BaseClass.h
-    file_copy_if_change "[project_path]/templates/BaseClass.h" "[project_path]/headers/BaseClass.h"
+    file_copy_if_change "[project_path]/templates/BaseClass.h" "[codegen_base]/headers/BaseClass.h"
 
     # SymbolFactory.h
-    file_copy_if_change "[project_path]/templates/SymbolFactory.h" "[project_path]/headers/SymbolFactory.h"
+    file_copy_if_change "[project_path]/templates/SymbolFactory.h" "[codegen_base]/headers/SymbolFactory.h"
 
     # SymbolFactory.cpp
-    file_copy_if_change "[project_path]/templates/SymbolFactory.cpp" "[project_path]/src/SymbolFactory.cpp"
+    file_copy_if_change "[project_path]/templates/SymbolFactory.cpp" "[codegen_base]/src/SymbolFactory.cpp"
 
     # Serializer.cpp
     set files "Serializer_save.cpp Serializer_restore.cpp vpi_uhdm.h Serializer.h"
@@ -1628,14 +1635,14 @@ $RESTORE($class)
         regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
         regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
         if {$file == "vpi_uhdm.h" || $file == "Serializer.h"} {
-            set_content_if_change "[project_path]/headers/$file" $serializer_content
+            set_content_if_change "[codegen_base]/headers/$file" $serializer_content
         } else {
-            set_content_if_change "[project_path]/src/$file" $serializer_content
+            set_content_if_change "[codegen_base]/src/$file" $serializer_content
         }
     }
 
     # vpi_visitor.h
-    file_copy_if_change "[project_path]/templates/vpi_visitor.h" "[project_path]/headers/vpi_visitor.h"
+    file_copy_if_change "[project_path]/templates/vpi_visitor.h" "[codegen_base]/headers/vpi_visitor.h"
 
     # vpi_visitor.cpp
     write_vpi_visitor_cpp
