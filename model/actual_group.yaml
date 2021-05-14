@@ -27,9 +27,10 @@
   - obj_ref: parameter
   - obj_ref: enum_const
   - obj_ref: io_decl
- # bit select and ref_obj added for hier_path
+ # bit select, indexed_part_select and ref_obj added for hier_path
   - obj_ref: bit_select
   - obj_ref: ref_obj
+  - obj_ref: indexed_part_select
 
 
 

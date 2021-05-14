@@ -87,11 +87,21 @@ int main(int argc, char** argv) {
             [&inst_visit](vpiHandle obj_h, std::string path) {
               std::string res;
               std::string objectName;
+              std::string defName;
+              std::string fileName;
               if (const char* s = vpi_get_str(vpiName, obj_h)) {
                 objectName = s;
               }
+              if (const char* s = vpi_get_str(vpiDefName, obj_h)) {
+                defName = s;
+              }
+              if (const char* s = vpi_get_str(vpiFile, obj_h)) {
+                fileName = s;
+              }
               if (objectName.size()) {
-                res += path + objectName + "\n";
+                std::string res = path + objectName + /*" (" + defName + " " + fileName +
+							":" + std::to_string(vpi_get(vpiLineNo, obj_h)) + ":)\n"*/ + "\n";
+                std::cout << res;
                 path += objectName + ".";
               }
               // Recursive tree traversal
