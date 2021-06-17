@@ -759,7 +759,8 @@ void ElaboratorListener::enterTask_func(const task_func* object, const BaseClass
         varMap.insert(std::make_pair(decl->VpiName(), decl));
       }
     }
-
+    varMap.insert(std::make_pair(object->VpiName(), object->Return()));
+    
     ComponentMap paramMap;
 
     ComponentMap funcMap;
