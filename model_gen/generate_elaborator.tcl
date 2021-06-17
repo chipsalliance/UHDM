@@ -354,13 +354,13 @@ proc generate_elaborator { models } {
     regsub {<MODULE_ELABORATOR_LISTENER>} $listener_content $module_vpi_listener listener_content
     regsub {<CLASS_ELABORATOR_LISTENER>} $listener_content $class_vpi_listener listener_content
 
-    set_content_if_change "[project_path]/headers/ElaboratorListener.h" $listener_content
+    set_content_if_change "[codegen_base]/headers/ElaboratorListener.h" $listener_content
 
     set fid [open "[project_path]/templates/clone_tree.h"]
     set clone_content [read $fid]
     close $fid
 
-    set_content_if_change "[project_path]/headers/clone_tree.h" $clone_content
+    set_content_if_change "[codegen_base]/headers/clone_tree.h" $clone_content
 
     set fid [open "[project_path]/templates/clone_tree.cpp"]
     set clone_content [read $fid]
@@ -368,5 +368,5 @@ proc generate_elaborator { models } {
 
     regsub {<CLONE_IMPLEMENTATIONS>} $clone_content $clone_implementations clone_content
 
-    set_content_if_change "[project_path]/src/clone_tree.cpp" $clone_content
+    set_content_if_change "[codegen_base]/src/clone_tree.cpp" $clone_content
 }
