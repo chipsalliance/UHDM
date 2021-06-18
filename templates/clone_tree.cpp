@@ -726,9 +726,9 @@ void ElaboratorListener::enterVariables(const variables* object,
     const class_var* cv = (class_var*)object;
     class_var* const rw_cv = (class_var*) cv;
     class_typespec* ctps = (class_typespec*)cv->Typespec();
-    ctps = ctps->DeepClone(s, this, rw_cv);
-    rw_cv->Typespec(ctps);
     if (ctps) {
+      ctps = ctps->DeepClone(s, this, rw_cv);
+      rw_cv->Typespec(ctps);
       VectorOfparam_assign* params = ctps->Param_assigns();
       if (params) {
         for (param_assign* pass : *params) {
