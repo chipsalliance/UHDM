@@ -17,3 +17,4 @@
 - group_def: expr_typespec_group
   - class_ref: expr
   - class_ref: typespec
+  - obj_ref: tagged_pattern
