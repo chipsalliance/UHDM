@@ -40,6 +40,7 @@ namespace UHDM {
 
 class ElaboratorListener : public VpiListener {
   friend function;
+  friend gen_scope_array;
 public:
 
   ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}
@@ -247,6 +248,12 @@ protected:
   void leaveTask_func(const task_func* object, const BaseClass* parent,
 		   vpiHandle handle, vpiHandle parentHandle);
 
+  void enterGen_scope(const gen_scope* object, const BaseClass* parent,
+		      vpiHandle handle, vpiHandle parentHandle);
+  
+  void leaveGen_scope(const gen_scope* object, const BaseClass* parent,
+		      vpiHandle handle, vpiHandle parentHandle);
+ 
 private:
 
   // Instance context stack

@@ -489,6 +489,29 @@ tf_call* task_call::DeepClone(Serializer* serializer, ElaboratorListener* elabor
   return the_clone;
 }
 
+gen_scope_array* gen_scope_array::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  gen_scope_array* const clone = serializer->MakeGen_scope_array();
+  const unsigned long id = clone->UhdmId();
+  *clone = *this;
+  clone->UhdmId(id);
+  clone->VpiParent(parent);
+  if (auto obj = Gen_var()) clone->Gen_var(obj->DeepClone(serializer, elaborator, clone));
+  if (auto vec = Gen_scopes()) {
+    auto clone_vec = serializer->MakeGen_scopeVec();
+    clone->Gen_scopes(clone_vec);
+    for (auto obj : *vec) {
+      elaborator->enterGen_scope(obj, parent, nullptr, nullptr);
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      elaborator->leaveGen_scope(obj, parent, nullptr, nullptr);
+    }
+  }
+  if (auto obj = VpiInstance()) clone->VpiInstance(obj->DeepClone(serializer, elaborator, clone));
+
+  return clone;
+}
+
+
+  
 function* function::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
   if (function* f = dynamic_cast<function*>( elaborator->bindTaskFunc(VpiName(), nullptr))) {
     return f;
@@ -747,33 +770,71 @@ void ElaboratorListener::leaveVariables(const variables* object, const BaseClass
 void ElaboratorListener::enterTask_func(const task_func* object, const BaseClass* parent,
 				       vpiHandle handle, vpiHandle parentHandle) {
 
-    // Collect instance elaborated nets
-    ComponentMap varMap;
-    if (object->Variables()) {
-      for (variables* var : *object->Variables()) {
-        varMap.insert(std::make_pair(var->VpiName(), var));
-      }
+  // Collect instance elaborated nets
+  ComponentMap varMap;
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
     }
-    if (object->Io_decls()) {
-      for (io_decl* decl : *object->Io_decls()) {
-        varMap.insert(std::make_pair(decl->VpiName(), decl));
-      }
+  }
+  if (object->Io_decls()) {
+    for (io_decl* decl : *object->Io_decls()) {
+      varMap.insert(std::make_pair(decl->VpiName(), decl));
     }
-    varMap.insert(std::make_pair(object->VpiName(), object->Return()));
-    
-    ComponentMap paramMap;
-
-    ComponentMap funcMap;
-
-    instStack_.push_back(std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+  }
+  varMap.insert(std::make_pair(object->VpiName(), object->Return()));
+  
+  ComponentMap paramMap;
+  
+  ComponentMap funcMap;
+  
+  instStack_.push_back(std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
 
 }
 
 void ElaboratorListener::leaveTask_func(const task_func* object, const BaseClass* parent,
 				       vpiHandle handle, vpiHandle parentHandle) {
-    instStack_.pop_back();
+  instStack_.pop_back();
 }
 
+void ElaboratorListener::enterGen_scope(const gen_scope* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+  // Collect instance elaborated nets
+
+  ComponentMap netMap;
+  if (object->Nets()) {
+    for (net* net : *object->Nets()) {
+      netMap.insert(std::make_pair(net->VpiName(), net));
+    }
+  }
+
+  // Collect instance parameters, defparams
+  ComponentMap paramMap;
+  if (object->Parameters()) {
+    for (any* param : *object->Parameters()) {
+      paramMap.insert(std::make_pair(param->VpiName(), param));
+    }
+  }
+  if (object->Def_params()) {
+    for (def_param* param : *object->Def_params()) {
+      paramMap.insert(std::make_pair(param->VpiName(), param));
+    }
+  }
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      paramMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  
+  ComponentMap funcMap;
+  
+  instStack_.push_back(std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
+}
+
+void ElaboratorListener::leaveGen_scope(const gen_scope* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+  instStack_.pop_back();
+}
+
+  
 // Auto generated implementations
 
 <CLONE_IMPLEMENTATIONS>

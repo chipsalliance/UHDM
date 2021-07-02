@@ -35,18 +35,19 @@ proc generate_elaborator { models } {
         set vpiName [makeVpiName $classname]
 
         set baseclass $classname
-        if {[regexp {_call} ${classname}] || ($classname == "function")  || ($classname == "constant") || ($classname == "tagged_pattern")} {
+        if {[regexp {_call} ${classname}] || ($classname == "function")  || ($classname == "constant") || ($classname == "tagged_pattern") || ($classname == "gen_scope_array")} {
             # Use hardcoded implementations
             continue
         } else {
             set clone_impl "\n${classname}* ${classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const \{\n"
         }
 
-        if [regexp {Net} $vpiName] {
+        if {[regexp {Net} $vpiName]} {
             append clone_impl "  $classname* clone = dynamic_cast<$classname*>(elaborator->bindNet(VpiName()));
-  if (clone == nullptr) {
-    clone = serializer->Make${Classname}();
+  if (clone != nullptr) {
+    return clone;
   }
+  clone = serializer->Make${Classname}();
 "
         } elseif [regexp {Parameter} $vpiName] {
             append clone_impl "  $classname* clone = dynamic_cast<$classname*>(elaborator->bindParam(VpiName()));
@@ -58,7 +59,6 @@ proc generate_elaborator { models } {
             append clone_impl "  $classname* const clone = serializer->Make${Classname}();
 "
         }
-
         append clone_impl "  const unsigned long id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
@@ -76,7 +76,12 @@ proc generate_elaborator { models } {
   }
 "
         }
-
+        if {[regexp {BitSelect} $vpiName]} {
+            append clone_impl "  if (net* n = (net*) elaborator->bindNet(VpiName())) {
+     clone->VpiFullName(n->VpiFullName());
+  }
+"
+        }
         set rootclassname $classname
         while {$baseclass != ""} {
             set data $DATA($baseclass)
