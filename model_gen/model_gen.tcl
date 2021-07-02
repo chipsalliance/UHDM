@@ -126,6 +126,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
   } else {
     std::vector<std::string> names;
     const BaseClass* parent = this;
+    const BaseClass* child = nullptr;
     bool column = false;
     while (parent) {
       const BaseClass* actual_parent = parent->VpiParent();
@@ -138,8 +139,18 @@ proc printMethods { classname type vpi card {real_type ""} } {
                        (parent_type == uhdmmethod_task_call) || (parent_type == uhdmfunc_call) ||
                        (parent_type == uhdmtask_call) || (parent_type == uhdmsys_func_call) ||
                        (parent_type == uhdmsys_task_call);
+      if (child) {
+        UHDM_OBJECT_TYPE child_type = child->UhdmType();
+        if (child_type == uhdmbit_select \\&\\& parent_type == uhdmport) {
+          skip_name = true;
+        }
+        if (child_type == uhdmref_obj \\&\\& parent_type == uhdmbit_select) {
+          skip_name = true;
+        }
+      }
       if ((!name.empty()) \\&\\& (!skip_name))
         names.push_back(name);
+      child = parent;
       parent = parent->VpiParent();
     }
     std::string fullName;
