@@ -806,7 +806,11 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object, const BaseClass
       netMap.insert(std::make_pair(net->VpiName(), net));
     }
   }
-
+  if (object->Array_nets()) {
+    for (array_net* net : *object->Array_nets()) {
+      netMap.insert(std::make_pair(net->VpiName(), net));
+    }
+  }
   // Collect instance parameters, defparams
   ComponentMap paramMap;
   if (object->Parameters()) {
