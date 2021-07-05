@@ -118,6 +118,7 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.c++
     ${PROJECT_SOURCE_DIR}/src/actual_group.cpp
     ${PROJECT_SOURCE_DIR}/src/clone_tree.cpp
+    ${PROJECT_SOURCE_DIR}/src/ExprEval.cpp
     ${PROJECT_SOURCE_DIR}/src/enum_struct_packed_net_group.cpp
     ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
     ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_var_group.cpp

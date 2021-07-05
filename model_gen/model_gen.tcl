@@ -1670,6 +1670,10 @@ $RESTORE($class)
     # uhdm_forward_decl.h
     write_uhdm_forward_decl
 
+    # ExprEval
+    file_copy_if_change "[project_path]/templates/ExprEval.h" "[codegen_base]/headers/ExprEval.h"
+    file_copy_if_change "[project_path]/templates/ExprEval.cpp" "[codegen_base]/src/ExprEval.cpp"
+   
 }
 
 proc debug_models { models } {
