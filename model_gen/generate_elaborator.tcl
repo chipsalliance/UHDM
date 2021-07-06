@@ -1,6 +1,6 @@
 # -*- mode: Tcl; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 #
-# Copyright 2019-2020 Alain Dargelas
+# Copyright 2019-2021 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ proc generate_elaborator { models } {
                         # Unary relations
                         if {$card == 1} {
 
-                            if {($classname == "ref_obj") && ($method == "Actual_group")} {
+                            if {(($classname == "ref_obj") || ($classname == "chandle_var")) && ($method == "Actual_group")} {
                                 append clone_impl "  clone->${method}(elaborator->bindAny(VpiName()));
 "
                             } elseif {($method == "Task")} {
