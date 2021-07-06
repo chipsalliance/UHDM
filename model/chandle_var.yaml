@@ -16,4 +16,8 @@
  
 - obj_def: chandle_var
   - extends: variables
-
+  - group_ref: actual_group
+    name: actual group
+    vpi: vpiActual
+    type: actual_group
+    card: 1
