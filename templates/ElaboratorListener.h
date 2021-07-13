@@ -40,6 +40,7 @@ namespace UHDM {
 
 class ElaboratorListener : public VpiListener {
   friend function;
+  friend task;
   friend gen_scope_array;
 public:
 

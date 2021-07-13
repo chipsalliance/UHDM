@@ -510,8 +510,6 @@ gen_scope_array* gen_scope_array::DeepClone(Serializer* serializer, ElaboratorLi
   return clone;
 }
 
-
-  
 function* function::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
   if (function* f = dynamic_cast<function*>( elaborator->bindTaskFunc(VpiName(), nullptr))) {
     return f;
@@ -665,6 +663,156 @@ function* function::DeepClone(Serializer* serializer, ElaboratorListener* elabor
   return clone;
 }
 
+task* task::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
+  task* const clone = serializer->MakeTask();
+  const unsigned long id = clone->UhdmId();
+  *clone = *this;
+  clone->UhdmId(id);
+  clone->VpiParent(parent);
+  if (auto obj = Left_range()) clone->Left_range(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Right_range()) clone->Right_range(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Return()) clone->Return(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Instance()) clone->Instance((instance*)obj);
+  if (instance* inst = dynamic_cast<instance*>(parent))
+    clone->Instance(inst);
+  if (auto obj = Class_defn()) clone->Class_defn(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Ref_obj()) clone->Ref_obj(obj->DeepClone(serializer, elaborator, clone));
+  if (auto vec = Io_decls()) {
+    auto clone_vec = serializer->MakeIo_declVec();
+    clone->Io_decls(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Variables()) {
+    auto clone_vec = serializer->MakeVariablesVec();
+    clone->Variables(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Scopes()) {
+    auto clone_vec = serializer->MakeScopeVec();
+    clone->Scopes(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Typespecs()) {
+    auto clone_vec = serializer->MakeTypespecVec();
+    clone->Typespecs(clone_vec);
+    for (auto obj : *vec) {
+      if (elaborator->uniquifyTypespec()) {
+        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      } else {
+        clone_vec->push_back(obj);
+      }
+    }
+  }
+  elaborator->enterTask_func(clone, parent, nullptr, nullptr);
+  if (auto vec = Concurrent_assertions()) {
+    auto clone_vec = serializer->MakeConcurrent_assertionsVec();
+    clone->Concurrent_assertions(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Property_decls()) {
+    auto clone_vec = serializer->MakeProperty_declVec();
+    clone->Property_decls(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Sequence_decls()) {
+    auto clone_vec = serializer->MakeSequence_declVec();
+    clone->Sequence_decls(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Named_events()) {
+    auto clone_vec = serializer->MakeNamed_eventVec();
+    clone->Named_events(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Named_event_arrays()) {
+    auto clone_vec = serializer->MakeNamed_event_arrayVec();
+    clone->Named_event_arrays(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Virtual_interface_vars()) {
+    auto clone_vec = serializer->MakeVirtual_interface_varVec();
+    clone->Virtual_interface_vars(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Logic_vars()) {
+    auto clone_vec = serializer->MakeLogic_varVec();
+    clone->Logic_vars(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Array_vars()) {
+    auto clone_vec = serializer->MakeArray_varVec();
+    clone->Array_vars(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Array_var_mems()) {
+    auto clone_vec = serializer->MakeArray_varVec();
+    clone->Array_var_mems(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Param_assigns()) {
+    auto clone_vec = serializer->MakeParam_assignVec();
+    clone->Param_assigns(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Let_decls()) {
+    auto clone_vec = serializer->MakeLet_declVec();
+    clone->Let_decls(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Attributes()) {
+    auto clone_vec = serializer->MakeAttributeVec();
+    clone->Attributes(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Parameters()) {
+    auto clone_vec = serializer->MakeAnyVec();
+    clone->Parameters(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto vec = Instance_items()) {
+    auto clone_vec = serializer->MakeAnyVec();
+    clone->Instance_items(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (auto obj = Stmt()) clone->Stmt(obj->DeepClone(serializer, elaborator, clone));
+  elaborator->leaveTask_func(clone, parent, nullptr, nullptr);
+  return clone;
+}
+  
 static void propagateParamAssign(param_assign* pass, const any* target) {
   UHDM_OBJECT_TYPE targetType = target->UhdmType();
   Serializer& s = *pass->GetSerializer();
