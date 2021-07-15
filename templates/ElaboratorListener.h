@@ -197,6 +197,50 @@ protected:
     }
   }
 
+  void enterPackage(const package* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+
+      ComponentMap netMap;
+      
+      // Collect instance parameters, defparams
+      ComponentMap paramMap;
+      if (object->Parameters()) {
+        for (any* param : *object->Parameters()) {
+          paramMap.insert(std::make_pair(param->VpiName(), param));
+        }
+      }
+      if (object->Variables()) {
+        for (variables* var : *object->Variables()) {
+          paramMap.insert(std::make_pair(var->VpiName(), var));
+        }
+      }
+
+      // Collect func and task declaration
+      ComponentMap funcMap;   
+      
+      // Push instance context on the stack
+      instStack_.push_back(std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
+
+
+      if (auto vec = object->Task_funcs()) {
+        auto clone_vec = serializer_->MakeTask_funcVec();
+        ((package*)object)->Task_funcs(clone_vec);
+        for (auto obj : *vec) {
+          enterTask_func(obj, object, nullptr, nullptr);
+          auto* tf = obj->DeepClone(serializer_, this, (package*) object);
+          ComponentMap& funcMap = std::get<2>((instStack_.at(instStack_.size()-2)).second);
+          funcMap.insert(std::make_pair(tf->VpiName(), tf));
+          leaveTask_func(obj, object, nullptr, nullptr);
+          tf->VpiParent((package*) object);
+          clone_vec->push_back(tf);
+        }
+      }
+
+  }
+  
+  void leavePackage(const package* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+     instStack_.pop_back();
+  }
+
   void enterClass_defn(const class_defn* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
     class_defn* cl = (class_defn*) object;
