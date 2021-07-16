@@ -35,6 +35,8 @@
 <GROUP_HEADER_DEPENDENCY>
 
 namespace UHDM {
+<TYPE_FORWARD_DECLARE>
+
 class <CLASSNAME> <FINAL_CLASS> : public <EXTENDS> {
 public:
   // Implicit constructor used to initialize all members,
