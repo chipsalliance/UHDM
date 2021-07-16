@@ -26,6 +26,9 @@
 #ifndef UHDM_<UPPER_CLASSNAME>_H
 #define UHDM_<UPPER_CLASSNAME>_H
 
+#include "../include/sv_vpi_user.h"
+#include "uhdm_vpi_user.h"
+
 #include "SymbolFactory.h"
 #include "BaseClass.h"
 #include "containers.h"
