@@ -112,19 +112,22 @@ add_custom_command(
           ${templates_SRC})
 
 set(uhdm_SRC
+    ${PROJECT_SOURCE_DIR}/src/ExprEval.cpp
     ${PROJECT_SOURCE_DIR}/src/Serializer_restore.cpp
     ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp
     ${PROJECT_SOURCE_DIR}/src/SymbolFactory.cpp
     ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.c++
     ${PROJECT_SOURCE_DIR}/src/actual_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/assertion.cpp
     ${PROJECT_SOURCE_DIR}/src/clone_tree.cpp
-    ${PROJECT_SOURCE_DIR}/src/ExprEval.cpp
+    ${PROJECT_SOURCE_DIR}/src/constraint_item_group.cpp
     ${PROJECT_SOURCE_DIR}/src/enum_struct_packed_net_group.cpp
     ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
     ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_var_group.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_constr_group.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_dist.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_interf_expr_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/expr_range_group.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_ref_obj_group.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_sequence_inst_group.cpp
     ${PROJECT_SOURCE_DIR}/src/expr_sequence_inst_named_event_group.cpp
@@ -133,15 +136,19 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/instance_item.cpp
     ${PROJECT_SOURCE_DIR}/src/interf_prog_mod_group.cpp
     ${PROJECT_SOURCE_DIR}/src/method_func_task_call_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/named_event_sequence_expr_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/nets_vars_ref_obj_group.cpp
     ${PROJECT_SOURCE_DIR}/src/operand_group.cpp
     ${PROJECT_SOURCE_DIR}/src/parameters.cpp
+    ${PROJECT_SOURCE_DIR}/src/pattern.cpp
     ${PROJECT_SOURCE_DIR}/src/pattern_expr_group.cpp
     ${PROJECT_SOURCE_DIR}/src/property_expr_group.cpp
     ${PROJECT_SOURCE_DIR}/src/property_expr_named_event_group.cpp
     ${PROJECT_SOURCE_DIR}/src/property_inst_spec_group.cpp
     ${PROJECT_SOURCE_DIR}/src/ref_obj_interf_net_var_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/simple_expr_use_group.cpp
     ${PROJECT_SOURCE_DIR}/src/sequence_expr_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/sequence_expr_multiclock_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/simple_expr_use_group.cpp
     ${PROJECT_SOURCE_DIR}/src/stmt.cpp
     ${PROJECT_SOURCE_DIR}/src/sys_func_task_call_group.cpp
     ${PROJECT_SOURCE_DIR}/src/task_func_named_begin_fork_group.cpp
@@ -149,13 +156,6 @@ set(uhdm_SRC
     ${PROJECT_SOURCE_DIR}/src/variable_drivers_group.cpp
     ${PROJECT_SOURCE_DIR}/src/variable_loads_group.cpp
     ${PROJECT_SOURCE_DIR}/src/variables_operation_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/sequence_expr_multiclock_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/named_event_sequence_expr_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/nets_vars_ref_obj_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/constraint_item_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_range_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/assertion.cpp
-    ${PROJECT_SOURCE_DIR}/src/pattern.cpp
     ${PROJECT_SOURCE_DIR}/src/vpi_listener.cpp
     ${PROJECT_SOURCE_DIR}/src/vpi_user.cpp
     ${PROJECT_SOURCE_DIR}/src/vpi_visitor.cpp
