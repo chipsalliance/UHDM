@@ -1559,6 +1559,9 @@ proc generate_code { models } {
     # BaseClass.h
     file_copy_if_change "[project_path]/templates/BaseClass.h" "[codegen_base]/headers/BaseClass.h"
 
+    # uhdm_vpi_user
+    file_copy_if_change "[project_path]/templates/uhdm_vpi_user.h" "[codegen_base]/headers/uhdm_vpi_user.h"
+
     # SymbolFactory.h
     file_copy_if_change "[project_path]/templates/SymbolFactory.h" "[codegen_base]/headers/SymbolFactory.h"
 
@@ -1673,7 +1676,7 @@ $RESTORE($class)
     # ExprEval
     file_copy_if_change "[project_path]/templates/ExprEval.h" "[codegen_base]/headers/ExprEval.h"
     file_copy_if_change "[project_path]/templates/ExprEval.cpp" "[codegen_base]/src/ExprEval.cpp"
-   
+
 }
 
 proc debug_models { models } {
