@@ -1216,6 +1216,7 @@ proc generate_code { models } {
         set methods($classname) ""
         set members($classname) ""
         set group_headers ""
+        set forward_declare ""
         set SAVE($classname) ""
         set RESTORE($classname) ""
         set capnp_schema($classname) ""
@@ -1386,6 +1387,10 @@ proc generate_code { models } {
                         set type "any"
                     }
 
+                    if {$type != "any" && $card == 1} {
+                        append forward_declare "class $type;\n"
+                    }
+
                     append containers [printTypeDefs $type $card]
                     # define access properties (allModules...)
                     foreach {id define} [defineType 1 uhdm${name} ""] {}
@@ -1474,6 +1479,8 @@ proc generate_code { models } {
         regsub -all {<MEMBERS>} $template $members($classname) template
         regsub -all {<EXTENDS>} $template BaseClass template
         regsub -all {<GROUP_HEADER_DEPENDENCY>} $template $group_headers template
+        regsub -all {<TYPE_FORWARD_DECLARE>} $template $forward_declare template
+
 
         set_content_if_change "[codegen_base]/headers/$classname.h" $template
 
@@ -1558,6 +1565,9 @@ proc generate_code { models } {
 
     # BaseClass.h
     file_copy_if_change "[project_path]/templates/BaseClass.h" "[codegen_base]/headers/BaseClass.h"
+
+    # uhdm_vpi_user
+    file_copy_if_change "[project_path]/templates/uhdm_vpi_user.h" "[codegen_base]/headers/uhdm_vpi_user.h"
 
     # SymbolFactory.h
     file_copy_if_change "[project_path]/templates/SymbolFactory.h" "[codegen_base]/headers/SymbolFactory.h"
@@ -1673,7 +1683,7 @@ $RESTORE($class)
     # ExprEval
     file_copy_if_change "[project_path]/templates/ExprEval.h" "[codegen_base]/headers/ExprEval.h"
     file_copy_if_change "[project_path]/templates/ExprEval.cpp" "[codegen_base]/src/ExprEval.cpp"
-   
+
 }
 
 proc debug_models { models } {

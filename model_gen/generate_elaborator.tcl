@@ -121,7 +121,7 @@ proc generate_elaborator { models } {
                         # Unary relations
                         if {$card == 1} {
 
-                            if {(($classname == "ref_obj") || ($classname == "chandle_var")) && ($method == "Actual_group")} {
+                            if {(($classname == "ref_obj") || ($classname == "ref_var")) && ($method == "Actual_group")} {
                                 append clone_impl "  clone->${method}(elaborator->bindAny(VpiName()));
 "
                             } elseif {($method == "Task")} {

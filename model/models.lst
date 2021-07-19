@@ -111,6 +111,7 @@ bit_select.yaml
 variable_drivers_group.yaml
 variable_loads_group.yaml
 variables.yaml
+ref_var.yaml
 short_real_var.yaml
 real_var.yaml
 byte_var.yaml
