@@ -39,6 +39,8 @@
 
 // Used to mark imported parameters
 #define  vpiImported         3014
+
+// Extra location information 
 #define  vpiColumnNo         3015
 #define  vpiEndLineNo        3016
 #define  vpiEndColumnNo      3017
@@ -52,5 +54,6 @@
 #define vpiHierPath         5000 // Represents a hierarchical path
 #define vpiReordered        5001 // Boolean for operations (pattern assign, concat) that has been reordered
 #define vpiElaborated       5002 // Boolean indicating UHDM has been elaborated/uniquified
+#define vpiRefVar           5003 // "variables" type reference object required for late binding during elaboration
 
 #endif  // UHDM_VPI_USER_H
