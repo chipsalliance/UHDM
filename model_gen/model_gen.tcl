@@ -98,7 +98,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
     }
     set final ""
     set virtual ""
-    if {$vpi == "vpiParent" || $vpi == "uhdmParentType" || $vpi == "uhdmType" || $vpi == "vpiLineNo" || $vpi == "vpiColumnNo" || $vpi == "vpiEndLineNo" || $vpi == "vpiEndColumnNo" || $vpi == "vpiFile" } {
+    if {$vpi == "vpiParent" || $vpi == "uhdmParentType" || $vpi == "uhdmType" || $vpi == "vpiLineNo" || $vpi == "vpiColumnNo" || $vpi == "vpiEndLineNo" || $vpi == "vpiEndColumnNo" || $vpi == "vpiFile" || $vpi == "vpiName" || $vpi == "vpiDefName" || $vpi == "uhdmId" } {
         set final " final"
         set virtual "virtual "
     }

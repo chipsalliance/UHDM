@@ -64,11 +64,11 @@ public:
   any* bindTaskFunc(const std::string& name, const class_var* prefix = nullptr);
 
   void scheduleTaskFuncBinding(tf_call* clone) { scheduledTfCallBinding_.push_back(clone); }
-    
+
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
-  void leaveDesign(const design* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+  void leaveDesign(const design* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) override {
     design* root = (design*) object;
     root->VpiElaborated(true);
   }
@@ -197,10 +197,10 @@ protected:
     }
   }
 
-  void enterPackage(const package* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+  void enterPackage(const package* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) override {
 
       ComponentMap netMap;
-      
+
       // Collect instance parameters, defparams
       ComponentMap paramMap;
       if (object->Parameters()) {
@@ -215,8 +215,8 @@ protected:
       }
 
       // Collect func and task declaration
-      ComponentMap funcMap;   
-      
+      ComponentMap funcMap;
+
       // Push instance context on the stack
       instStack_.push_back(std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
 
@@ -236,8 +236,8 @@ protected:
       }
 
   }
-  
-  void leavePackage(const package* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+
+  void leavePackage(const package* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) override {
      instStack_.pop_back();
   }
 
@@ -292,17 +292,17 @@ protected:
 
 
   void enterTask_func(const task_func* object, const BaseClass* parent,
-		   vpiHandle handle, vpiHandle parentHandle);
+                      vpiHandle handle, vpiHandle parentHandle) override;
 
   void leaveTask_func(const task_func* object, const BaseClass* parent,
-		   vpiHandle handle, vpiHandle parentHandle);
+                      vpiHandle handle, vpiHandle parentHandle) override;
 
   void enterGen_scope(const gen_scope* object, const BaseClass* parent,
-		      vpiHandle handle, vpiHandle parentHandle);
-  
+                      vpiHandle handle, vpiHandle parentHandle) override;
+
   void leaveGen_scope(const gen_scope* object, const BaseClass* parent,
-		      vpiHandle handle, vpiHandle parentHandle);
- 
+                      vpiHandle handle, vpiHandle parentHandle) override;
+
 private:
 
   // Instance context stack

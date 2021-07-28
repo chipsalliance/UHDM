@@ -94,7 +94,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     n->VpiName("o1");
     vn->push_back(n);
     m2->Nets(vn);
-  
+
     // M2 continuous assignment
     VectorOfcont_assign* assigns = s.MakeCont_assignVec();
     cont_assign* cassign = s.MakeCont_assign();
@@ -107,8 +107,8 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     cassign->Rhs(rhs);
     m2->Cont_assigns(assigns);
   }
-  
- 
+
+
   //-------------------------------------------
   // Instance tree (Elaborated tree)
   // Top level module
@@ -121,7 +121,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     m3->Modules(v1);
     m3->VpiParent(d);
   }
-  
+
   //-------------------------------------------
   // Sub Instance
   module* m4 = s.MakeModule();
@@ -156,15 +156,15 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     p2->Low_conn(low_conn);
     vn->push_back(n);
     m4->Nets(vn);
-    
+
   }
-  
+
   // Create parent-child relation in between the 2 modules in the instance tree
   v1->push_back(m4);
   m4->VpiParent(m3);
 
   //-------------------------------------------
-  // Create both non-elaborated and elaborated lists 
+  // Create both non-elaborated and elaborated lists
   VectorOfmodule* allModules = s.MakeModuleVec();
   d->AllModules(allModules);
   allModules->push_back(m1);
@@ -173,7 +173,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   VectorOfmodule* topModules = s.MakeModuleVec();
   d->TopModules(topModules);
   topModules->push_back(m3); // Only m3 goes there as it is the top level module
-  
+
   vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
   designs.push_back(dh);
 
@@ -188,20 +188,20 @@ class MyElaboratorListener : public VpiListener {
 
 public:
   MyElaboratorListener () {}
-    
+
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
-  void leaveDesign(const design* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+  void leaveDesign(const design* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) override {
     design* root = (design*) object;
     root->VpiElaborated(true);
   }
-  
+
   void enterModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
     bool topLevelModule         = object->VpiTopModule();
-    const std::string& instName = object->VpiName(); 
-    const std::string& defName  = object->VpiDefName(); 
+    const std::string& instName = object->VpiName();
+    const std::string& defName  = object->VpiDefName();
     bool flatModule             = (instName == "") && ((object->VpiParent() == 0) ||
                                                        ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
                                   // false when it is a module in a hierachy tree
@@ -220,12 +220,12 @@ protected:
           netMap.insert(std::make_pair(net->VpiName(), net));
         }
       }
-      
+
       // Push instance context on the stack
       instStack_.push(std::make_pair(object, netMap));
-      
+
       // Check if Module instance has a definition
-      ComponentMap::iterator itrDef = flatComponentMap_.find(defName);      
+      ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
       if (itrDef != flatComponentMap_.end()) {
         const BaseClass* comp = (*itrDef).second;
         int compType = comp->VpiType();
@@ -234,7 +234,7 @@ protected:
           module* defMod = (module*) comp;
 
           // 1) This section illustrates how one can walk the data model in the listener context
-          
+
           // Bind the cont assign lhs and rhs to elaborated nets
           if (defMod->Cont_assigns()) {
             for (cont_assign* assign : *defMod->Cont_assigns()) { // explicit walking
@@ -243,12 +243,12 @@ protected:
               const expr* lhs = assign->Lhs();
               if (lhs->VpiType() == vpiRefObj) {
                 ref_obj* lref = (ref_obj*) lhs;
-                lnet = bindNet_(lref->VpiName());                
+                lnet = bindNet_(lref->VpiName());
               }
               const expr* rhs = assign->Rhs();
               if (rhs->VpiType() == vpiRefObj) {
                 ref_obj* rref = (ref_obj*) rhs;
-                rnet = bindNet_(rref->VpiName());                
+                rnet = bindNet_(rref->VpiName());
               }
               // Client code has now access the cont assign and the hierarchical nets
               std::cout << "[2] assign " << lnet->VpiFullName() << " = " << rnet->VpiFullName() << "\n";
@@ -256,37 +256,37 @@ protected:
           }
 
           // Or
-          
-          // 2) This section illustrates how one can use the listener pattern all the way 
-          
+
+          // 2) This section illustrates how one can use the listener pattern all the way
+
           // Trigger a listener of the definition module with the instance context on the stack (hirarchical nets)
           // enterCont_assign listener method below will be trigerred to capture the same data as the walking above in (1)
           vpiHandle defModule = NewVpiHandle(defMod);
           listen_module(defModule, this);
           vpi_free_object(defModule);
-          
+
           break;
         }
         default:
           break;
         }
       }
-      
+
     }
   }
 
   void leaveModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
-    const std::string& instName = object->VpiName(); 
+    const std::string& instName = object->VpiName();
     bool flatModule             = (instName == "") && ((object->VpiParent() == 0) ||
                                                        ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
                                   // false when it is a module in a hierachy tree
-    if (!flatModule) 
+    if (!flatModule)
       instStack_.pop();
   }
 
   // Make full use of the listener pattern for all objects in a module, example with "cont assign":
-  void enterCont_assign(const cont_assign* assign, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+  void enterCont_assign(const cont_assign* assign, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) override {
     net* lnet = nullptr;
     net* rnet = nullptr;
     ref_obj* lref = nullptr;
@@ -299,17 +299,17 @@ protected:
     if (rhs->VpiType() == vpiRefObj) {
       rref = (ref_obj*) rhs;
     }
-    
+
     if (instStack_.size() == 0) {
       // Flat module traversal
       std::cout << "[1] assign " << lref->VpiName() << " = " << rref->VpiName() << "\n";
-      
+
     } else {
       // In the instance context (through the trigered listener)
- 
-      lnet = bindNet_(lref->VpiName());                 
-      rnet = bindNet_(rref->VpiName());                
-      
+
+      lnet = bindNet_(lref->VpiName());
+      rnet = bindNet_(rref->VpiName());
+
       // Client code has now access the cont assign and the hierarchical nets
       std::cout << "[3] assign " << lnet->VpiFullName() << " = " << rnet->VpiFullName() << "\n";
     }
@@ -317,8 +317,8 @@ protected:
   }
 
   // Listen to processes, stmts....
-  
-  
+
+
 private:
 
   // Bind to a net in the parent instace
@@ -333,7 +333,7 @@ private:
     }
     return nullptr;
   }
-    
+
   // Bind to a net in the current instace
   net* bindNet_(const std::string& name) {
     ComponentMap& netMap = instStack_.top().second;
@@ -386,4 +386,3 @@ int main (int argc, char** argv) {
   }
   return 0;
 }
-
