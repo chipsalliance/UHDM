@@ -63,7 +63,7 @@ proc generate_elaborator { models } {
   *clone = *this;
   clone->UhdmId(id);
 "
-        if {$classname != "part_select"} {
+        if {($classname != "part_select") && ($classname != "bit_select")} {
             append clone_impl "  clone->VpiParent(parent);
 "
         } else {
@@ -73,6 +73,7 @@ proc generate_elaborator { models } {
     clone->VpiParent(ref);
     ref->VpiName(VpiParent()->VpiName());
     ref->VpiParent(parent);
+    ref->Actual_group(elaborator->bindAny(ref->VpiName()));
   }
 "
         }

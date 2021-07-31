@@ -147,6 +147,9 @@ proc printMethods { classname type vpi card {real_type ""} } {
         if (child_type == uhdmref_obj \\&\\& parent_type == uhdmbit_select) {
           skip_name = true;
         }
+        if (child_type == uhdmref_obj \\&\\& parent_type == uhdmhier_path) {
+          skip_name = true;
+        }
       }
       if ((!name.empty()) \\&\\& (!skip_name))
         names.push_back(name);
