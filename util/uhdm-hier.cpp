@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
       result +=
           "Design name: " + std::string(vpi_get_str(vpiName, design)) + "\n";
       result += "Instance tree:\n";
-
+      std::cout << result;
       vpiHandle instItr = vpi_iterate(UHDM::uhdmtopModules, design);
       while (vpiHandle obj_h = vpi_scan(instItr)) {
         std::function<std::string(vpiHandle, std::string)> inst_visit =
@@ -113,6 +113,12 @@ int main(int argc, char** argv) {
                   vpi_release_handle(sub_h);
                 }
                 vpi_release_handle(subItr);
+                subItr = vpi_iterate(vpiInterface, obj_h);
+                while (vpiHandle sub_h = vpi_scan(subItr)) {
+                  res += inst_visit(sub_h, path);
+                  vpi_release_handle(sub_h);
+                }
+		vpi_release_handle(subItr);
               }
               if (vpi_get(vpiType, obj_h) == vpiModule ||
                   vpi_get(vpiType, obj_h) == vpiGenScope) {
@@ -139,6 +145,5 @@ int main(int argc, char** argv) {
       vpi_release_handle(instItr);
     }
   }
-  std::cout << result;
   return 0;
 };
