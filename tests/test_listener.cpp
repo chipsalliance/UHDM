@@ -6,6 +6,8 @@
 #include "headers/uhdm.h"
 #include "headers/vpi_listener.h"
 
+#include "tests/test-util.h"
+
 using namespace UHDM;
 
 class MyVpiListener : public VpiListener {
@@ -43,7 +45,7 @@ private:
 };
 
 int main (int argc, char** argv) {
-  std::string fileName = "surelog.uhdm";
+  std::string fileName = uhdm_test::getTmpDir() + "/surelog.uhdm";
   if (argc > 1) {
     fileName = argv[1];
   }

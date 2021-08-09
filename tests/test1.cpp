@@ -3,6 +3,8 @@
 #include "headers/uhdm.h"
 #include "headers/vpi_visitor.h"
 
+#include "tests/test-util.h"
+
 #include <iostream>
 
 using namespace UHDM;
@@ -33,7 +35,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   logic_var* lvar = s.MakeLogic_var();
   vars->push_back(lvar);
   lvar->VpiFullName("top::M1::v1");
-  
+
   // Module
   module* m2 = s.MakeModule();
   m2->VpiDefName("M2");
@@ -132,11 +134,12 @@ int main (int argc, char** argv) {
   orig += "VISITOR:\n";
   orig += visit_designs(designs);
   std::cout << orig;
+  const std::string filename = uhdm_test::getTmpDir() + "/surelog.uhdm";
   std::cout << "\nSave design" << std::endl;
-  serializer.Save("surelog.uhdm");
+  serializer.Save(filename);
 
   std::cout << "Restore design" << std::endl;
-  const std::vector<vpiHandle>& restoredDesigns = serializer.Restore("surelog.uhdm");
+  const std::vector<vpiHandle>& restoredDesigns = serializer.Restore(filename);
   std::string restored;
   restored += "VISITOR:\n";
   restored += visit_designs(restoredDesigns);
