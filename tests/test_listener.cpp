@@ -6,7 +6,7 @@
 #include "headers/uhdm.h"
 #include "headers/vpi_listener.h"
 
-#include "tests/test-util.h"
+#include "test-util.h"
 
 using namespace UHDM;
 

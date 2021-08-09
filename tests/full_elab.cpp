@@ -36,7 +36,7 @@
 #include "headers/vpi_visitor.h"
 #include "headers/ElaboratorListener.h"
 
-#include "tests/test-util.h"
+#include "test-util.h"
 
 using namespace UHDM;
 

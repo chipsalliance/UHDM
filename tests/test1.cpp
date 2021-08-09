@@ -3,7 +3,7 @@
 #include "headers/uhdm.h"
 #include "headers/vpi_visitor.h"
 
-#include "tests/test-util.h"
+#include "test-util.h"
 
 #include <iostream>
 

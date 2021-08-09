@@ -14,8 +14,11 @@ inline std::string getTmpDir();
 inline std::string uhdm_test::getTmpDir() {
   const char *tmpdir = getenv("TEST_TMPDIR");
   if (tmpdir && tmpdir[0]) return tmpdir;
-  tmpdir = getenv("TMPDIR");
+  tmpdir = getenv("TMPDIR");  // typical Unix env var
+  if (tmpdir && tmpdir[0]) return tmpdir;
+  tmpdir = getenv("TEMP");  // typical Windows env var
   if (tmpdir && tmpdir[0]) return tmpdir;
   return "/tmp";
 }
+
 #endif // UHDM_TEST_UTIL
