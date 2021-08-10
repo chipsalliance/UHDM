@@ -36,6 +36,8 @@
 #include "headers/vpi_visitor.h"
 #include "headers/ElaboratorListener.h"
 
+#include "test-util.h"
+
 using namespace UHDM;
 
 
@@ -92,7 +94,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     n->VpiName("o1");
     vn->push_back(n);
     m2->Nets(vn);
-  
+
     // M2 continuous assignment
     VectorOfcont_assign* assigns = s.MakeCont_assignVec();
     cont_assign* cassign = s.MakeCont_assign();
@@ -105,8 +107,8 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     cassign->Rhs(rhs);
     m2->Cont_assigns(assigns);
   }
-  
- 
+
+
   //-------------------------------------------
   // Instance tree (Elaborated tree)
   // Top level module
@@ -119,7 +121,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     m3->Modules(v1);
     m3->VpiParent(d);
   }
-  
+
   //-------------------------------------------
   // Sub Instance
   module* m4 = s.MakeModule();
@@ -154,15 +156,15 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     p2->Low_conn(low_conn);
     vn->push_back(n);
     m4->Nets(vn);
-    
+
   }
-  
+
   // Create parent-child relation in between the 2 modules in the instance tree
   v1->push_back(m4);
   m4->VpiParent(m3);
 
   //-------------------------------------------
-  // Create both non-elaborated and elaborated lists 
+  // Create both non-elaborated and elaborated lists
   VectorOfmodule* allModules = s.MakeModuleVec();
   d->AllModules(allModules);
   allModules->push_back(m1);
@@ -171,7 +173,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   VectorOfmodule* topModules = s.MakeModuleVec();
   d->TopModules(topModules);
   topModules->push_back(m3); // Only m3 goes there as it is the top level module
-  
+
   vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
   designs.push_back(dh);
 
@@ -182,7 +184,7 @@ void dumpStats(Serializer& serializer) {
   std::cout << "Stats:\n";
   std::map<std::string, unsigned long> stats = serializer.ObjectStats();
   for (auto stat : stats) {
-    if (stat.second) 
+    if (stat.second)
       std::cout << stat.first << " " << stat.second << "\n";
   }
   std::cout << "\n";
@@ -197,7 +199,7 @@ int main (int argc, char** argv) {
   orig += "DUMP Design content (Pre elab):\n";
   orig += visit_designs(designs);
   std::cout << orig;
-  
+
   std::cout << std::endl;
   bool elaborated = false;
   for(auto design : designs) {
@@ -210,11 +212,10 @@ int main (int argc, char** argv) {
     listen_designs(designs,listener);
     std::cout << std::endl;
   }
-  serializer.Save("elab_test.uhdm");
+  serializer.Save(uhdm_test::getTmpDir() + "/elab_test.uhdm");
   orig = "DUMP Design content (Post elab):\n";
   orig += visit_designs(designs);
   std::cout << orig;
-  
+
   return 0;
 }
-

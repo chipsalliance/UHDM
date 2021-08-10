@@ -6,6 +6,8 @@
 #include "headers/vpi_visitor.h"
 #include "headers/ElaboratorListener.h"
 
+#include "test-util.h"
+
 using namespace UHDM;
 
 std::vector<vpiHandle> build_designs (Serializer& s) {
@@ -90,7 +92,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   method_func_call* fcall2 = s.MakeMethod_func_call();
   f3->Stmt(fcall);
   fcall2->VpiName("f1"); // parent class function
-  
+
   VectorOfmodule* topModules = s.MakeModuleVec();
   d->TopModules(topModules);
   topModules->push_back(m1);
@@ -108,11 +110,12 @@ int main (int argc, char** argv) {
   orig += "VISITOR:\n";
   orig += visit_designs(designs);
   std::cout << orig;
+  const std::string filename = uhdm_test::getTmpDir() + "/test_classes.uhdm";
   std::cout << "\nSave design" << std::endl;
-  serializer.Save("test_classes.uhdm");
+  serializer.Save(filename);
 
   std::cout << "Restore design" << std::endl;
-  const std::vector<vpiHandle>& restoredDesigns = serializer.Restore("test_classes.uhdm");
+  const std::vector<vpiHandle>& restoredDesigns = serializer.Restore(filename);
   std::string restored;
   restored += "VISITOR:\n";
   restored += visit_designs(restoredDesigns);
@@ -123,6 +126,6 @@ int main (int argc, char** argv) {
   listen_designs(restoredDesigns,listener);
   std::cout << "Elaborated restored design:\n";
   std::cout << visit_designs(restoredDesigns);
-  
+
   return (orig != restored);
 }

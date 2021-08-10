@@ -5,6 +5,8 @@
 #include "headers/uhdm.h"
 #include "headers/vpi_visitor.h"
 
+#include "test-util.h"
+
 using namespace UHDM;
 
 #include "vpi_visitor.h"
@@ -37,7 +39,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   init->Stmt(begin_block);
   VectorOfany* statements = s.MakeAnyVec();
   ref_obj* lhs_rf = s.MakeRef_obj();
-  lhs_rf->VpiName("out");          
+  lhs_rf->VpiName("out");
   assignment* assign1 = s.MakeAssignment();
   assign1->Lhs(lhs_rf);
   constant* c1 = s.MakeConstant();
@@ -51,7 +53,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   c2->VpiValue("STRING:a string");
   assign2->Rhs(c2);
   statements->push_back(assign2);
-  
+
   delay_control* dc = s.MakeDelay_control();
   dc->VpiDelay("#100");
 
@@ -65,7 +67,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   assign3->Rhs(c3);
   dc->Stmt(assign3);
   statements->push_back(dc);
-  
+
   begin_block->Stmts(statements);
   m2->Process(processes);
 
@@ -103,10 +105,11 @@ int main (int argc, char** argv) {
 
   std::cout << orig;
   std::cout << "\nSave design" << std::endl;
-  serializer.Save("surelog3.uhdm");
+  const std::string filename = uhdm_test::getTmpDir() + "/surelog3.uhdm";
+  serializer.Save(filename);
 
   std::cout << "Restore design" << std::endl;
-  std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog3.uhdm");
+  std::vector<vpiHandle> restoredDesigns = serializer.Restore(filename);
 
   std::string restored = visit_designs(restoredDesigns);
   std::cout << restored;
