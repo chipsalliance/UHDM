@@ -37,13 +37,13 @@ BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener*
 
 // Hardcoded implementations
 
-net* ElaboratorListener::bindNet(const std::string& name) {
+any* ElaboratorListener::bindNet(const std::string& name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i ) {
     ComponentMap& netMap = std::get<0>((*i).second);
     ComponentMap::iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
-      return (net*) (*netItr).second;
+      return (any*) (*netItr).second;
     }
   }
   return nullptr;

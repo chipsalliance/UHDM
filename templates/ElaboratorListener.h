@@ -52,7 +52,7 @@ public:
   bool isTaskCall(const std::string& name, const expr* prefix);
 
   // Bind to a net in the current instance
-  net* bindNet(const std::string& name);
+  any* bindNet(const std::string& name);
 
   // Bind to a net or parameter in the current instance
   any* bindAny(const std::string& name);
