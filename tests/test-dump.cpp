@@ -25,6 +25,8 @@
 #include "headers/vpi_visitor.h"
 #include "headers/ElaboratorListener.h"
 
+#include "test-util.h"
+
 using namespace UHDM;
 
 static int usage(const char *progname) {
@@ -49,7 +51,7 @@ int main (int argc, char** argv) {
   }
 
   if (uhdmFile.empty()) {
-    uhdmFile = "surelog.uhdm";   // used by default in test.
+    uhdmFile = uhdm_test::getTmpDir() + "/surelog.uhdm";   // used by default in test.
   }
 
   struct stat buffer;

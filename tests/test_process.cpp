@@ -3,6 +3,8 @@
 #include "headers/uhdm.h"
 #include "headers/vpi_visitor.h"
 
+#include "test-util.h"
+
 using namespace UHDM;
 
 #include "vpi_visitor.h"
@@ -91,14 +93,14 @@ int main (int argc, char** argv) {
   std::string orig = visit_designs(build_designs(serializer));
 
   std::cout << orig;
+  const std::string filename = uhdm_test::getTmpDir() + "/surelog_process.uhdm";
   std::cout << "\nSave design" << std::endl;
-  serializer.Save("surelog_process.uhdm");
+  serializer.Save(filename);
 
   std::cout << "Restore design" << std::endl;
-  std::vector<vpiHandle> restoredDesigns = serializer.Restore("surelog_process.uhdm");
+  std::vector<vpiHandle> restoredDesigns = serializer.Restore(filename);
 
   std::string restored = visit_designs(restoredDesigns);
   std::cout << restored;
   return (orig != restored);
 }
-

@@ -78,8 +78,9 @@ proc generate_elaborator { models } {
 "
         }
         if {[regexp {BitSelect} $vpiName]} {
-            append clone_impl "  if (net* n = (net*) elaborator->bindNet(VpiName())) {
-     clone->VpiFullName(n->VpiFullName());
+            append clone_impl "  if (any* n = elaborator->bindNet(VpiName())) {
+     if (n->UhdmType() == uhdmnet)
+       clone->VpiFullName(((net*)n)->VpiFullName());
   }
 "
         }

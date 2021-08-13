@@ -78,6 +78,7 @@ jobs:
         echo 'PREFIX=$PWD/install' >> $GITHUB_ENV
         echo 'CMAKE_GENERATOR=Ninja' >> $GITHUB_ENV
         echo 'NO_TCMALLOC=On' >> $GITHUB_ENV
+        echo 'TEST_TMPDIR=C:\temp' >> $GITHUB_ENV
 
     - name: Show shell configuration
       run: |
@@ -130,6 +131,7 @@ jobs:
         set MAKE_DIR=C:\make\bin
         set TCL_DIR=%PROGRAMFILES%\Git\mingw64\bin
         set PATH=%MAKE_DIR%;%TCL_DIR%;%PATH%
+        set TEST_TMPDIR=C:\temp
 
         set
         where cmake && cmake --version
