@@ -37,13 +37,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
-include_directories("${PROJECT_SOURCE_DIR}/include/")
-include_directories("${PROJECT_SOURCE_DIR}/")
-include_directories("${PROJECT_SOURCE_DIR}/headers/")
-include_directories("${PROJECT_SOURCE_DIR}/src/")
-include_directories("${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src/")
-include_directories("${PROJECT_SOURCE_DIR}/third_party/UHDM/src/")
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
 
 if(MSVC)
@@ -165,10 +158,19 @@ foreach(src_file ${uhdm_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
 endforeach(src_file ${uhdm_SRC})
 
-set(UHDM_PUBLIC_HEADERS ${PROJECT_SOURCE_DIR}/headers/uhdm.h)
-
 add_library(uhdm STATIC ${uhdm_SRC})
-set_target_properties(uhdm PROPERTIES PUBLIC_HEADER "${UHDM_PUBLIC_HEADERS}")
+set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/headers/uhdm.h)
+target_include_directories(uhdm PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/headers>
+  $<INSTALL_INTERFACE:include/uhdm/include>
+  $<INSTALL_INTERFACE:include/uhdm>
+  $<INSTALL_INTERFACE:include/uhdm/headers>)
+target_include_directories(uhdm PRIVATE
+  ${PROJECT_SOURCE_DIR}/src
+  ${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src
+  ${PROJECT_SOURCE_DIR}/third_party/UHDM/src)
 target_compile_definitions(uhdm
   PUBLIC PLI_DLLISPEC=
   PUBLIC PLI_DLLESPEC=)
