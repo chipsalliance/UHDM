@@ -39,7 +39,7 @@
 using namespace UHDM;
 
 static int usage(const char* progname) {
-  fprintf(stderr, "Usage:\n%s [options] <uhdm-file>\n", progname);
+  fprintf(stderr, "Usage:\n%s [options] <uhdm-file> ?--line?\n", progname);
   fprintf(stderr,
           "Reads UHDM binary representation and prints hierarchy tree.\n");
   return 1;
@@ -47,11 +47,13 @@ static int usage(const char* progname) {
 
 int main(int argc, char** argv) {
   std::string uhdmFile;
-
+  bool printLineInfo = false;
   // Simple option parsing that works on all platforms.
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
-    if (uhdmFile.empty())
+    if (arg == "--line") {
+      printLineInfo = true;
+    } else if (uhdmFile.empty())
       uhdmFile = arg;
     else
       return usage(argv[0]);
@@ -84,7 +86,7 @@ int main(int argc, char** argv) {
       vpiHandle instItr = vpi_iterate(UHDM::uhdmtopModules, design);
       while (vpiHandle obj_h = vpi_scan(instItr)) {
         std::function<std::string(vpiHandle, std::string)> inst_visit =
-            [&inst_visit](vpiHandle obj_h, std::string path) {
+	  [&inst_visit,printLineInfo](vpiHandle obj_h, std::string path) {
               std::string res;
               std::string objectName;
               std::string defName;
@@ -99,8 +101,9 @@ int main(int argc, char** argv) {
                 fileName = s;
               }
               if (objectName.size()) {
-                std::string res = path + objectName + /*" (" + defName + " " + fileName +
-							":" + std::to_string(vpi_get(vpiLineNo, obj_h)) + ":)\n"*/ + "\n";
+		std::string lineInfo = printLineInfo ? std::string( " (" + defName + " " + fileName +
+								    ":" + std::to_string(vpi_get(vpiLineNo, obj_h)) + ":)") : "";
+                std::string res = path + objectName + lineInfo + "\n";
                 std::cout << res;
                 path += objectName + ".";
               }
