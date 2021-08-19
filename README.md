@@ -67,16 +67,22 @@
     * card: cardinality of the field
       * 1
       * any (0 or more)
- * When created by Surelog, the UHDM/VPI Data Model is a Folded Model:
+ * The Standard VPI Data Model is Fully Elaborated, in contrast:
+ * When created by Surelog, the UHDM/VPI Data Model is a Folded Model that we found most suitable for applications like Yosys and Verilator:
     * The Instance tree contains the Design Hierarchy and Elaborated Nets/Ports with High conn and Low conn connections done.
-    * The module definitions contain the logic elements (non-elaborated)
+    * The module definitions contain the logic elements (non-elaborated, and only outside generate statements)
+    * Generate statements and underlying logic are only visible in the elaborated model (topModules)
     * To get the complete picture of the design one has to use both views (Example in [`listener_elab.cpp`](tests/listener_elab.cpp))
     * Applications where the UHDM data model is used as a precursor to another internal datastructure like a Synthesis or Simulator tool will prefer using the Folded Model.
- * In contrast, The Standard VPI Data Model is Fully Elaborated.
-    * UHDM offers an optional Full elaboration step to fullfill this VPI Standard requirement.
+    * Nets, Ports, Variables in the flat module list (allModules) don't necessary have the correct data type as not enough elaboration steps were performed on them
+    * On the other hand, Nets, Ports, Variables have the correct type in the elaborated view (topModules)
+    * Lhs vs Rhs expression padding is not performed at this point (We welcome PR contributions)
+ * UHDM offers an optional Elaboration step that uniquifies nets, ports, variables and function by performing a deep cloning and ref_obj binding.
     * See [`full_elab.cpp`](tests/full_elab.cpp) and [`dump.cpp`](tests/dump.cpp)
     * Applications where the UHDM data model is free standing and is the sole data structure for the design representation will prefer the Fully Elaborated Data Model, examples: Linters or Code Analyzers.
-
+    * At this point, UHDM does not offer:
+       * the full bit blasted model available in the commercial EDA applications (We welcome contributions).
+       * an expression evaluator that operates on the UHDM expression tree (We welcome contribuitons).
 
 # Model creation
  * The model creation task consists in converting the Object Model diagrams into their Yaml representation and invoking the creation of the concrete
