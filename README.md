@@ -83,7 +83,8 @@
     * At this point, UHDM does not offer:
        * the full bit blasted model available in the commercial EDA applications (We welcome contributions).
        * an expression evaluator that operates on the UHDM expression tree (We welcome contribuitons).
-
+    * [Issue 319](https://github.com/chipsalliance/UHDM/issues/319) discusses more on the topic of elaboration
+    
 # Model creation
  * The model creation task consists in converting the Object Model diagrams into their Yaml representation and invoking the creation of the concrete
  C++ classes, iterators, serialization code by invoking "make"
