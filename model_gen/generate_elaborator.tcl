@@ -68,19 +68,26 @@ proc generate_elaborator { models } {
 "
         } else {
             append clone_impl "
-  if (VpiParent()) {
+  if (const any* parent = VpiParent()) {
     ref_obj* ref = serializer->MakeRef_obj();
     clone->VpiParent(ref);
-    ref->VpiName(VpiParent()->VpiName());
-    ref->VpiParent(parent);
+    ref->VpiName(parent->VpiName());
+    if (parent->UhdmType() == uhdmref_obj) {
+      ref->VpiFullName(((ref_obj*)VpiParent())->VpiFullName());
+    } 
+    ref->VpiParent((any*) parent);
     ref->Actual_group(elaborator->bindAny(ref->VpiName()));
+    if (!ref->Actual_group()) 
+      if (parent->UhdmType() == uhdmref_obj) {
+        ref->Actual_group((any*) ((ref_obj*)VpiParent())->Actual_group());
+      }
   }
 "
         }
         if {[regexp {BitSelect} $vpiName]} {
             append clone_impl "  if (any* n = elaborator->bindNet(VpiName())) {
-     if (n->UhdmType() == uhdmnet)
-       clone->VpiFullName(((net*)n)->VpiFullName());
+     if (net* nn = dynamic_cast<net*> (n))
+       clone->VpiFullName(nn->VpiFullName());
   }
 "
         }
@@ -125,6 +132,7 @@ proc generate_elaborator { models } {
 
                             if {(($classname == "ref_obj") || ($classname == "ref_var")) && ($method == "Actual_group")} {
                                 append clone_impl "  clone->${method}(elaborator->bindAny(VpiName()));
+    if (!clone->${method}()) clone->${method}((any*) this->${method}());
 "
                             } elseif {($method == "Task")} {
                                 set prefix ""
@@ -332,7 +340,19 @@ proc generate_elaborator { models } {
           }
 "
 
+                            } elseif {($rootclassname == "module") && ($method == "Ports")} {
+                                 append module_vpi_listener "          if (auto vec = inst->${method}()) {
+            auto clone_vec = serializer_->Make${Cast}Vec();
+            inst->${method}(clone_vec);
+            for (auto obj : *vec) {
+              auto* stmt = obj->DeepClone(serializer_, this, inst);
+              stmt->VpiParent(inst);
+              clone_vec->push_back(stmt);
+            }
+          }
+"
                             }
+                            
                         }
                     }
                 }
