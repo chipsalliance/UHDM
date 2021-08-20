@@ -29,17 +29,13 @@
 
 #include "../include/sv_vpi_user.h"
 
+#include "headers/BaseClass.h"
 #include "headers/uhdm_forward_decl.h"
 
 #ifndef UHDM_VPI_VISITOR_H
 #define UHDM_VPI_VISITOR_H
 
 namespace UHDM {
-#ifdef STANDARD_VPI
-typedef std::set<vpiHandle> VisitedContainer;
-#else
-typedef  std::set<const BaseClass*> VisitedContainer;
-#endif
 
 // Visit an object, dump to given stream.
 void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit = false);
