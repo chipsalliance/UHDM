@@ -26,7 +26,7 @@
 
 #ifndef UHDM_BASE_CLASS_H
 #define UHDM_BASE_CLASS_H
-
+#include <set>
 #include "uhdm_types.h"
 
 namespace UHDM {
@@ -112,6 +112,13 @@ namespace UHDM {
 
   };
 
+#ifdef STANDARD_VPI
+typedef std::set<vpiHandle> VisitedContainer;
+#else
+typedef  std::set<const BaseClass*> VisitedContainer;
+#endif
+
+  
 }  // namespace UHDM
 
 #endif

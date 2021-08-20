@@ -45,7 +45,7 @@ using namespace UHDM;
 
 <VPI_LISTENERS>
 
-void UHDM::listen_any(vpiHandle object, VpiListener* listener) {
+void UHDM::listen_any(vpiHandle object, VpiListener* listener, UHDM::VisitedContainer* visited) {
   unsigned int type = ((const uhdm_handle*)object)->type;
   switch (type) {
 <VPI_ANY_LISTENERS>
@@ -56,6 +56,7 @@ void UHDM::listen_any(vpiHandle object, VpiListener* listener) {
 
 void UHDM::listen_designs (const std::vector<vpiHandle>& designs, VpiListener* listener) {
   for (auto design_h : designs) {
-    listen_design(design_h, listener);
+    UHDM::VisitedContainer visited;
+    listen_design(design_h, listener, &visited);
   }
 }

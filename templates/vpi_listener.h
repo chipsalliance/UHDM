@@ -25,8 +25,9 @@
 
 #include <string>
 #include <vector>
+#include "headers/BaseClass.h"
 #include "../include/sv_vpi_user.h"
-#include "VpiListener.h"
+#include "headers/VpiListener.h"
 
 #ifndef UHDM_VPI_LISTENER_H
 #define UHDM_VPI_LISTENER_H
@@ -35,7 +36,7 @@ namespace UHDM {
 
 void listen_designs (const std::vector<vpiHandle>& designs, UHDM::VpiListener* listener);
 
-void listen_any(vpiHandle object, UHDM::VpiListener* listener);
+void listen_any(vpiHandle object, UHDM::VpiListener* listener, UHDM::VisitedContainer* visited);
 
 <VPI_LISTENERS_HEADER>
 

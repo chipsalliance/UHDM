@@ -27,6 +27,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <map>
 
 #include "../include/sv_vpi_user.h"

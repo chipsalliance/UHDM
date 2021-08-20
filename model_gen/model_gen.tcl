@@ -446,20 +446,23 @@ proc printGetStrBody {classname type vpi card} {
 proc printVpiListener {classname vpi type card} {
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS MODEL_TYPE
     if {$card == 0} {
-        set VPI_LISTENERS_HEADER($classname) "void listen_${classname}(vpiHandle object, UHDM::VpiListener* listener);
+        set VPI_LISTENERS_HEADER($classname) "void listen_${classname}(vpiHandle object, UHDM::VpiListener* listener, UHDM::VisitedContainer* visited);
 "
         if {$MODEL_TYPE($classname) != "class_def"} {
             set VPI_ANY_LISTENERS($classname) "  case uhdm${classname} :
-    listen_${classname}(object, listener);
+    listen_${classname}(object, listener, visited);
     break;
 "
         }
 
-        set VPI_LISTENERS($classname) "void UHDM::listen_${classname}(vpiHandle object, VpiListener* listener) \{
+        set VPI_LISTENERS($classname) "void UHDM::listen_${classname}(vpiHandle object, VpiListener* listener, UHDM::VisitedContainer* visited) \{
   ${classname}* d = (${classname}*) ((const uhdm_handle*)object)->object;
+  const bool alreadyVisited = (visited->find(d) != visited->end());
+  visited->insert(d);
   const BaseClass* parent = d->VpiParent();
   vpiHandle parent_h = parent ? NewVpiHandle(parent) : 0;
   listener->enter[string toupper ${classname} 0 0](d, parent, object, parent_h);
+  if (!alreadyVisited) \{
 "
         return
     }
@@ -493,7 +496,7 @@ proc printVpiListener {classname vpi type card} {
     if {$card == 1} {
         append vpi_listener "    itr = vpi_handle($vpi,object);
     if (itr) {
-      listen_${type} (itr, listener);
+      listen_any (itr, listener, visited);
       vpi_free_object(itr);
     }
 "
@@ -501,7 +504,7 @@ proc printVpiListener {classname vpi type card} {
         append vpi_listener "    itr = vpi_iterate($vpi,object);
     if (itr) {
       while (vpiHandle obj = vpi_scan(itr) ) {
-        listen_${type} (obj, listener);
+        listen_any (obj, listener, visited);
         vpi_free_object(obj);
       }
       vpi_free_object(itr);
@@ -514,7 +517,7 @@ proc printVpiListener {classname vpi type card} {
 
 proc closeVpiListener {classname} {
     global VPI_LISTENERS
-    append  VPI_LISTENERS($classname) "
+    append  VPI_LISTENERS($classname) "  \}
   listener->leave[string toupper ${classname} 0 0](d, parent, object, parent_h);
   vpi_release_handle(parent_h);
 \}

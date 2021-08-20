@@ -262,7 +262,8 @@ protected:
           // Trigger a listener of the definition module with the instance context on the stack (hirarchical nets)
           // enterCont_assign listener method below will be trigerred to capture the same data as the walking above in (1)
           vpiHandle defModule = NewVpiHandle(defMod);
-          listen_module(defModule, this);
+          VisitedContainer visited;
+          listen_module(defModule, this, &visited);
           vpi_free_object(defModule);
 
           break;
