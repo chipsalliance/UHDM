@@ -445,6 +445,9 @@ proc printGetStrBody {classname type vpi card} {
 
 proc printVpiListener {classname vpi type card} {
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS MODEL_TYPE
+    if {$classname == "assignment"} {
+        puts "vpilistener $classname: $vpi $type $card"
+    }
     if {$card == 0} {
         set VPI_LISTENERS_HEADER($classname) "void listen_${classname}(vpiHandle object, UHDM::VpiListener* listener, UHDM::VisitedContainer* visited);
 "
@@ -1330,10 +1333,22 @@ proc generate_code { models } {
 
         set indTmp 0
         set type_specified 0
+        set ordered [dict get $data "ordered"]
+        if [info exist TREATED] {
+            unset TREATED
+        }
+        foreach ord $ordered {
         dict for {key val} $data {
             if {$key == "properties"} {
                 dict for {prop conf} $val {
                     set name [dict get $conf name]
+                    if {$prop != $ord} {
+                        continue
+                    }
+                    if [info exist TREATED($prop)] {
+                        continue
+                    }
+                    set TREATED($prop) 1
                     set vpi  [dict get $conf vpi]
                     set type [dict get $conf type]
                     set card [dict get $conf card]
@@ -1375,6 +1390,13 @@ proc generate_code { models } {
             if {($key == "class") || ($key == "obj_ref") || ($key == "class_ref") || ($key == "group_ref")} {
                 dict for {iter content} $val {
                     set name $iter
+                    if {$name != $ord} {
+                        continue
+                    }
+                    if [info exist TREATED($name)] {
+                        continue
+                    }
+                    set TREATED($name) 1
                     set vpi  [dict get $content vpi]
                     set type [dict get $content type]
                     set card [dict get $content card]
@@ -1472,6 +1494,7 @@ proc generate_code { models } {
                     }
                 }
             }
+        }
         }
 
         if {($type_specified == 0) && ($modeltype == "obj_def")} {
