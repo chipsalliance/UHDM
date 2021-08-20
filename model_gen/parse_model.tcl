@@ -73,7 +73,7 @@ proc parse_model { file } {
 
             foreach {id define} [defineType 0 $name $vpiType] {}
 
-            set obj_def$modelId [dict create "name" $name "type" obj_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]
+            set obj_def$modelId [dict create "name" $name "type" obj_def "id" $id "properties" {} "ordered" {} "class_ref" {} "obj_ref" {}]
             lappend models obj_def$modelId
             set OBJ(curr) obj_def$modelId
             incr modelId
@@ -84,7 +84,7 @@ proc parse_model { file } {
 
             foreach {id define} [defineType 0 $name $vpiType] {}
 
-            set obj_def$modelId [dict create "name" $name "type" class_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]
+            set obj_def$modelId [dict create "name" $name "type" class_def "id" $id "properties" {} "ordered" {} "class_ref" {} "obj_ref" {}]
             lappend models obj_def$modelId
             set OBJ(curr) obj_def$modelId
             incr modelId
@@ -95,20 +95,23 @@ proc parse_model { file } {
 
             foreach {id define} [defineType 0 $name $vpiType] {}
 
-            set obj_def$modelId [dict create "name" $name "type" group_def "id" $id "properties" {} "class_ref" {} "obj_ref" {}]
+            set obj_def$modelId [dict create "name" $name "type" group_def "id" $id "properties" {} "ordered" {} "class_ref" {} "obj_ref" {}]
             lappend models obj_def$modelId
             set OBJ(curr) obj_def$modelId
             incr modelId
         } elseif [regexp {property: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "properties" $name {}
+            dict append $OBJ(curr) "ordered" "$name "
             set obj_name $name
             set obj_type "properties"
         } elseif [regexp {class_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "class_ref" $name {}
+            dict append $OBJ(curr) "ordered" "$name "
             set obj_name $name
             set obj_type "class_ref"
         } elseif [regexp {extends: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "extends" class_def $name
+            dict append $OBJ(curr) "ordered" "$name "
             set obj_name $name
             set obj_type "class_ref"
             set data [subst $$OBJ(curr)]
@@ -116,14 +119,17 @@ proc parse_model { file } {
             set BASECLASS($classname) $name
         } elseif [regexp {obj_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "obj_ref" $name {}
+            dict append $OBJ(curr) "ordered" "$name "
             set obj_name $name
             set obj_type "obj_ref"
         } elseif [regexp {group_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "group_ref" $name {}
+            dict append $OBJ(curr) "ordered" "$name "
             set obj_name $name
             set obj_type "group_ref"
         } elseif [regexp {class: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "class" $name {}
+            dict append $OBJ(curr) "ordered" "$name "
             set obj_name $name
             set obj_type "class"
         } elseif [regexp {type: (.*)} $line tmp type] {
