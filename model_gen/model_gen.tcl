@@ -445,9 +445,6 @@ proc printGetStrBody {classname type vpi card} {
 
 proc printVpiListener {classname vpi type card} {
     global VPI_LISTENERS VPI_LISTENERS_HEADER VPI_ANY_LISTENERS MODEL_TYPE
-    if {$classname == "assignment"} {
-        puts "vpilistener $classname: $vpi $type $card"
-    }
     if {$card == 0} {
         set VPI_LISTENERS_HEADER($classname) "void listen_${classname}(vpiHandle object, UHDM::VpiListener* listener, UHDM::VisitedContainer* visited);
 "
