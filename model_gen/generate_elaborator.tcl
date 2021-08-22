@@ -63,7 +63,7 @@ proc generate_elaborator { models } {
   *clone = *this;
   clone->UhdmId(id);
 "
-        if {($classname != "part_select") && ($classname != "bit_select")} {
+        if {($classname != "part_select") && ($classname != "bit_select") && ($classname != "indexed_part_select")} {
             append clone_impl "  clone->VpiParent(parent);
 "
         } else {
