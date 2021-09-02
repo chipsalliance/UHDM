@@ -48,6 +48,15 @@
 
 using namespace UHDM;
 
+UHDM::design* UhdmDesignFromVpiHandle(vpiHandle hdesign) {
+  if (!hdesign) return nullptr;
+  UHDM::any* tmp = (UHDM::any*) ((uhdm_handle*)hdesign)->object;
+  if (tmp->UhdmType() == uhdmdesign)
+    return (UHDM::design*)tmp;
+  else
+    return nullptr;
+}
+
 s_vpi_value* String2VpiValue(const std::string& s) {
   s_vpi_value* val = new s_vpi_value;
   val->format = 0;
