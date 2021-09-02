@@ -34,6 +34,7 @@
 
 namespace UHDM {
   class Serializer;
+  class design;
 };
 
 struct uhdm_handle {
@@ -66,6 +67,9 @@ s_vpi_delay* String2VpiDelays(const std::string& s);
 std::string VpiValue2String(const s_vpi_value* value);
 
 std::string VpiDelay2String(const s_vpi_delay* delay);
+
+/** Obtain a UHDM::design pointer from a vpiHandle */
+UHDM::design* UhdmDesignFromVpiHandle(vpiHandle hdesign);
 
 /** Shows unique IDs in vpi_visitor dump (uhdmdump) */
 void vpi_show_ids(bool show);
