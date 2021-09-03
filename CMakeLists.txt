@@ -231,6 +231,7 @@ if (UHDM_BUILD_TESTS)
     tests/vpi_value_conversion_test.cpp
     tests/testErrorHandler.cpp
     tests/test_classes.cpp
+    tests/test_garbage_collect.cpp
   )
 endif()
 
