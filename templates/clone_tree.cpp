@@ -812,30 +812,30 @@ task* task::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, Ba
   elaborator->leaveTask_func(clone, parent, nullptr, nullptr);
   return clone;
 }
-  
+
 static void propagateParamAssign(param_assign* pass, const any* target) {
   UHDM_OBJECT_TYPE targetType = target->UhdmType();
   Serializer& s = *pass->GetSerializer();
   switch (targetType) {
     case uhdmclass_defn: {
-      class_defn* defn = (class_defn*) target;
+      class_defn* defn = (class_defn*)target;
       const any* lhs = pass->Lhs();
       const std::string& name = lhs->VpiName();
       VectorOfany* params = defn->Parameters();
       if (params) {
-          for (any* param : *params) {
-            if (param->VpiName() == name) {
-              VectorOfparam_assign* passigns = defn->Param_assigns();
-              if (passigns == nullptr) {
-                defn->Param_assigns(s.MakeParam_assignVec());
-                passigns = defn->Param_assigns();
-              }
-              param_assign* pa = s.MakeParam_assign();
-              pa->Lhs(param);
-              pa->Rhs((any*) pass->Rhs());
-              passigns->push_back(pa);
+        for (any* param : *params) {
+          if (param->VpiName() == name) {
+            VectorOfparam_assign* passigns = defn->Param_assigns();
+            if (passigns == nullptr) {
+              defn->Param_assigns(s.MakeParam_assignVec());
+              passigns = defn->Param_assigns();
             }
-         }
+            param_assign* pa = s.MakeParam_assign();
+            pa->Lhs(param);
+            pa->Rhs((any*)pass->Rhs());
+            passigns->push_back(pa);
+          }
+        }
       }
       const UHDM::extends* extends = defn->Extends();
       if (extends) {
@@ -844,46 +844,45 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
       const auto vars = defn->Variables();
       if (vars) {
         for (auto var : *vars) {
-           propagateParamAssign(pass, var);
+          propagateParamAssign(pass, var);
         }
       }
       break;
     }
     case uhdmclass_var: {
-      class_var* var = (class_var*) target;
+      class_var* var = (class_var*)target;
       propagateParamAssign(pass, var->Typespec());
       break;
     }
     case uhdmclass_typespec: {
-      class_typespec* defn = (class_typespec*) target;
+      class_typespec* defn = (class_typespec*)target;
       const any* lhs = pass->Lhs();
       const std::string& name = lhs->VpiName();
       VectorOfany* params = defn->Parameters();
       if (params) {
-          for (any* param : *params) {
-            if (param->VpiName() == name) {
-              VectorOfparam_assign* passigns = defn->Param_assigns();
-              if (passigns == nullptr) {
-                defn->Param_assigns(s.MakeParam_assignVec());
-                passigns = defn->Param_assigns();
-              }
-              param_assign* pa = s.MakeParam_assign();
-              pa->Lhs(param);
-              pa->Rhs((any*) pass->Rhs());
-              passigns->push_back(pa);
+        for (any* param : *params) {
+          if (param->VpiName() == name) {
+            VectorOfparam_assign* passigns = defn->Param_assigns();
+            if (passigns == nullptr) {
+              defn->Param_assigns(s.MakeParam_assignVec());
+              passigns = defn->Param_assigns();
             }
-         }
+            param_assign* pa = s.MakeParam_assign();
+            pa->Lhs(param);
+            pa->Rhs((any*)pass->Rhs());
+            passigns->push_back(pa);
+          }
+        }
       }
       const class_defn* def = defn->Class_defn();
       if (def) {
-         propagateParamAssign(pass, (class_defn*) def);
+        propagateParamAssign(pass, (class_defn*)def);
       }
       break;
     }
     default:
       break;
   }
-
 }
 
 void ElaboratorListener::enterVariables(const variables* object,
@@ -986,7 +985,80 @@ void ElaboratorListener::leaveGen_scope(const gen_scope* object, const BaseClass
   instStack_.pop_back();
 }
 
-  
+hier_path* hier_path::DeepClone(Serializer* serializer,
+                                ElaboratorListener* elaborator,
+                                BaseClass* parent) const {
+  hier_path* const clone = serializer->MakeHier_path();
+  const unsigned long id = clone->UhdmId();
+  *clone = *this;
+  clone->UhdmId(id);
+  clone->VpiParent(parent);
+  if (auto vec = Path_elems()) {
+    auto clone_vec = serializer->MakeAnyVec();
+    clone->Path_elems(clone_vec);
+    any* previous = nullptr;
+    for (auto obj : *vec) {
+      any* current = nullptr;
+      current = obj->DeepClone(serializer, elaborator, clone);
+      clone_vec->push_back(current);
+      bool found = false;
+      if (previous) {
+        const std::string& name = obj->VpiName();
+        if (previous->UhdmType() == uhdmref_obj) {
+          ref_obj* ref = (ref_obj*)previous;
+          const any* actual = ref->Actual_group();
+          if (actual && (actual->UhdmType() == uhdmstruct_net)) {
+            struct_typespec* stpt =
+                (struct_typespec*)((struct_net*)actual)->Typespec();
+            for (typespec_member* member : *stpt->Members()) {
+              if (member->VpiName() == name) {
+                if (current->UhdmType() == uhdmref_obj) {
+                  ((ref_obj*)current)->Actual_group(member);
+                  previous = member;
+                  found = true;
+                  break;
+                }
+              }
+            }
+          }
+        } else if (previous->UhdmType() == uhdmtypespec_member) {
+          typespec_member* member = (typespec_member*)previous;
+          const typespec* tps = member->Typespec();
+          if (tps && (tps->UhdmType() == uhdmstruct_typespec)) {
+            struct_typespec* stpt = (struct_typespec*)tps;
+            for (typespec_member* member : *stpt->Members()) {
+              if (member->VpiName() == name) {
+                if (current->UhdmType() == uhdmref_obj) {
+                  ((ref_obj*)current)->Actual_group(member);
+                  previous = member;
+                  found = true;
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+      if (!found) previous = current;
+    }
+  }
+  if (auto vec = VpiUses()) {
+    auto clone_vec = serializer->MakeAnyVec();
+    clone->VpiUses(clone_vec);
+    for (auto obj : *vec) {
+      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+    }
+  }
+  if (elaborator->uniquifyTypespec()) {
+    if (auto obj = Typespec())
+      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  } else {
+    if (auto obj = Typespec()) clone->Typespec((typespec*)obj);
+  }
+
+  return clone;
+}
+
 // Auto generated implementations
 
 <CLONE_IMPLEMENTATIONS>
