@@ -32,7 +32,4 @@
   - obj_ref: bit_select
   - obj_ref: ref_obj
   - obj_ref: indexed_part_select
-
-
-
-
+  - obj_ref: typespec_member
