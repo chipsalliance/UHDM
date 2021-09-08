@@ -77,8 +77,8 @@ else()
 endif()
 
 # model_gen generated
-set(model-GENERATED_SRC ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.h
-                        ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.c++)
+set(model-GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.h
+                        ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.c++)
 
 # All the files the generator depends on.
 file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
@@ -94,7 +94,7 @@ add_custom_command(
   OUTPUT ${model-GENERATED_SRC}
   COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_CURRENT_BINARY_DIR}
-          ${PROJECT_SOURCE_DIR}
+          ${CMAKE_CURRENT_BINARY_DIR}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model_gen/generate_elaborator.tcl
@@ -104,66 +104,66 @@ add_custom_command(
           ${yaml_SRC}
           ${templates_SRC})
 
-set(uhdm_SRC
-    ${PROJECT_SOURCE_DIR}/src/ExprEval.cpp
-    ${PROJECT_SOURCE_DIR}/src/Serializer_restore.cpp
-    ${PROJECT_SOURCE_DIR}/src/Serializer_save.cpp
-    ${PROJECT_SOURCE_DIR}/src/SymbolFactory.cpp
-    ${PROJECT_SOURCE_DIR}/src/UHDM.capnp.c++
-    ${PROJECT_SOURCE_DIR}/src/actual_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/assertion.cpp
-    ${PROJECT_SOURCE_DIR}/src/clone_tree.cpp
-    ${PROJECT_SOURCE_DIR}/src/constraint_item_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/enum_struct_packed_net_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/enum_struct_union_packed_var_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_constr_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_dist.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_interf_expr_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_range_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_ref_obj_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_sequence_inst_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_sequence_inst_named_event_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_tchk_term_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/expr_typespec_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/instance_item.cpp
-    ${PROJECT_SOURCE_DIR}/src/interf_prog_mod_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/method_func_task_call_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/named_event_sequence_expr_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/nets_vars_ref_obj_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/operand_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/parameters.cpp
-    ${PROJECT_SOURCE_DIR}/src/pattern.cpp
-    ${PROJECT_SOURCE_DIR}/src/pattern_expr_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/property_expr_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/property_expr_named_event_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/property_inst_spec_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/ref_obj_interf_net_var_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/sequence_expr_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/sequence_expr_multiclock_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/simple_expr_use_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/stmt.cpp
-    ${PROJECT_SOURCE_DIR}/src/sys_func_task_call_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/task_func_named_begin_fork_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/tf_call_args.cpp
-    ${PROJECT_SOURCE_DIR}/src/variable_drivers_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/variable_loads_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/variables_operation_group.cpp
-    ${PROJECT_SOURCE_DIR}/src/vpi_listener.cpp
-    ${PROJECT_SOURCE_DIR}/src/vpi_user.cpp
-    ${PROJECT_SOURCE_DIR}/src/vpi_visitor.cpp
+set(uhdm-GENERATED_SRC
+    ${CMAKE_CURRENT_BINARY_DIR}/src/ExprEval.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/Serializer_restore.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/Serializer_save.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/SymbolFactory.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.c++
+    ${CMAKE_CURRENT_BINARY_DIR}/src/actual_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/assertion.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/clone_tree.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/constraint_item_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/enum_struct_packed_net_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/enum_struct_union_packed_var_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_constr_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_dist.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_interf_expr_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_range_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_ref_obj_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_sequence_inst_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_sequence_inst_named_event_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_tchk_term_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_typespec_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/instance_item.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/interf_prog_mod_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/method_func_task_call_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/named_event_sequence_expr_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/nets_vars_ref_obj_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/operand_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/parameters.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/pattern.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/pattern_expr_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/property_expr_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/property_expr_named_event_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/property_inst_spec_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/ref_obj_interf_net_var_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/sequence_expr_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/sequence_expr_multiclock_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/simple_expr_use_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/stmt.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/sys_func_task_call_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/task_func_named_begin_fork_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/tf_call_args.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/variable_drivers_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/variable_loads_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/variables_operation_group.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/vpi_listener.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/vpi_user.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/src/vpi_visitor.cpp
 )
 
-foreach(src_file ${uhdm_SRC})
+foreach(src_file ${uhdm-GENERATED_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
-endforeach(src_file ${uhdm_SRC})
+endforeach(src_file ${uhdm-GENERATED_SRC})
 
-add_library(uhdm STATIC ${uhdm_SRC})
-set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/headers/uhdm.h)
+add_library(uhdm STATIC ${uhdm-GENERATED_SRC})
+set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_BINARY_DIR}/headers/uhdm.h)
 target_include_directories(uhdm PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/headers>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>  # finding include/
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>  # finding headers/
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/headers>
   $<INSTALL_INTERFACE:include/uhdm/include>
   $<INSTALL_INTERFACE:include/uhdm>
   $<INSTALL_INTERFACE:include/uhdm/headers>)
@@ -269,5 +269,5 @@ install(
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/include)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/headers/
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/headers/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/headers/)

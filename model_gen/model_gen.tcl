@@ -1586,7 +1586,7 @@ proc generate_code { models } {
             if { $tcl_platform(platform) == "windows" } {
                 exec -ignorestderr sh -c "export PATH=\$(cygpath -u -a $capnp_path):\$PATH; $capnp_path/capnp compile -oc++:. [codegen_base]/src/UHDM.capnp"
             } else {
-                exec -ignorestderr sh -c "export PATH=$capnp_path:\$PATH; $capnp_path/capnp compile -oc++:. $myProjetPathNoNormalize/src/UHDM.capnp"
+                exec -ignorestderr sh -c "export PATH=$capnp_path:\$PATH; $capnp_path/capnp compile -oc++:. [codegen_base]/src/UHDM.capnp"
             }
         }
     }
