@@ -46,6 +46,8 @@ jobs:
         make test_install
 
   msys2-gcc:
+    # curently, runs out of memory compiling Serializer_save.cpp
+    if: false
     runs-on: windows-latest
     defaults:
       run:
