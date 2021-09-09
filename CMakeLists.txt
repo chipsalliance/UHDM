@@ -161,8 +161,7 @@ endforeach(src_file ${uhdm-GENERATED_SRC})
 add_library(uhdm STATIC ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_BINARY_DIR}/headers/uhdm.h)
 target_include_directories(uhdm PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>  # finding include/
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>  # finding headers/
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/headers>
   $<INSTALL_INTERFACE:include/uhdm/include>
   $<INSTALL_INTERFACE:include/uhdm>
@@ -267,7 +266,7 @@ install(
   TARGETS uhdm capnp kj uhdm-dump uhdm-hier
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/include)
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/headers/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/headers/)
