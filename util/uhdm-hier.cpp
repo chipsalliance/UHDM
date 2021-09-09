@@ -33,8 +33,8 @@
 #include <unistd.h>
 #endif
 
-#include "headers/uhdm.h"
-#include "headers/vpi_listener.h"
+#include <uhdm/uhdm.h>
+#include <uhdm/vpi_listener.h>
 
 using namespace UHDM;
 

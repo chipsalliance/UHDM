@@ -22,7 +22,7 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
-#include "SymbolFactory.h"
+#include <uhdm/SymbolFactory.h>
 
 namespace UHDM {
 

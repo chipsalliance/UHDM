@@ -27,10 +27,10 @@
 #include <vector>
 #include <set>
 
-#include "../include/sv_vpi_user.h"
+#include <uhdm/sv_vpi_user.h>
 
-#include "headers/BaseClass.h"
-#include "headers/uhdm_forward_decl.h"
+#include <uhdm/BaseClass.h>
+#include <uhdm/uhdm_forward_decl.h>
 
 #ifndef UHDM_VPI_VISITOR_H
 #define UHDM_VPI_VISITOR_H

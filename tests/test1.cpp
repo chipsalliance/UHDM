@@ -1,7 +1,7 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
-#include "headers/uhdm.h"
-#include "headers/vpi_visitor.h"
+#include <uhdm/uhdm.h>
+#include <uhdm/vpi_visitor.h>
 
 #include "test-util.h"
 

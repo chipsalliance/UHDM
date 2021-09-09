@@ -39,8 +39,9 @@ install: build
 	cmake --install build --config Release
 
 uninstall:
-	rm -rf $(PREFIX)/lib/uhdm
-	rm -rf $(PREFIX)/include/uhdm
+	$(RM) $(PREFIX)/bin/uhdm-dump $(PREFIX)/bin/uhdm-dump
+	$(RM) -r $(PREFIX)/lib/uhdm
+	$(RM) -r $(PREFIX)/include/uhdm
 
 build:
 	mkdir -p build

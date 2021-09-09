@@ -22,10 +22,10 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
-#include "<GROUPNAME>.h"
+#include <uhdm/<GROUPNAME>.h>
 
 #include <iostream>
-#include "headers/uhdm.h"
+#include <uhdm/uhdm.h>
 
 namespace UHDM {
 bool <GROUPNAME>GroupCompliant(any* item) {

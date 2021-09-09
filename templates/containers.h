@@ -25,7 +25,7 @@
 
 #include <vector>
 #include <unordered_map>
-#include "uhdm_types.h"
+#include <uhdm/uhdm_types.h>
 
 #ifndef UHDM_CONTAINERS_H
 #define UHDM_CONTAINERS_H

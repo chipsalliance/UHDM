@@ -22,7 +22,7 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
-#include "headers/Serializer.h"
+#include <uhdm/Serializer.h>
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -49,9 +49,9 @@
 #include <capnp/serialize-packed.h>
 
 #include "UHDM.capnp.h"
-#include "headers/containers.h"
-#include "headers/uhdm.h"
-#include "headers/uhdm_types.h"
+#include <uhdm/containers.h>
+#include <uhdm/uhdm.h>
+#include <uhdm/uhdm_types.h>
 
 namespace UHDM {
 void Serializer::SetId(const BaseClass* p, unsigned long id) {

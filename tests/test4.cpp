@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "headers/uhdm.h"
-#include "headers/vpi_visitor.h"
+#include <uhdm/uhdm.h>
+#include <uhdm/vpi_visitor.h>
 
 #include "test-util.h"
 

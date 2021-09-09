@@ -39,6 +39,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
 
+# Directory where code is generated into.
+set(GENDIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
+
 if(MSVC)
   set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj ${MY_CXX_WARNING_FLAGS}"
@@ -69,8 +72,8 @@ else()
   # TODO: Reduce complexity/branches etc. whatever makes the optimizer freak
   # out. The code-generation is pretty linear right now.
   set_property(SOURCE
-    ${CMAKE_CURRENT_BINARY_DIR}/src/Serializer_save.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/Serializer_restore.cpp
+    ${GENDIR}/src/Serializer_save.cpp
+    ${GENDIR}/src/Serializer_restore.cpp
     PROPERTY COMPILE_FLAGS -O0
  )
 
@@ -82,13 +85,13 @@ file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
 file(GLOB templates_SRC ${PROJECT_SOURCE_DIR}/templates/*.h
      ${PROJECT_SOURCE_DIR}/templates/*.cpp)
 
-set(model-GENERATED_UHDM ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp)
+set(model-GENERATED_UHDM ${GENDIR}/src/UHDM.capnp)
 set_source_files_properties(${model-GENERATED_UHDM} PROPERTIES GENERATED TRUE)
 add_custom_command(
   OUTPUT ${model-GENERATED_UHDM}
   COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_CURRENT_BINARY_DIR}
-          ${CMAKE_CURRENT_BINARY_DIR}
+          ${GENDIR}
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model_gen/generate_elaborator.tcl
@@ -98,8 +101,8 @@ add_custom_command(
           ${yaml_SRC}
           ${templates_SRC})
 
-set(model-GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.h
-                        ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.c++)
+set(model-GENERATED_SRC ${GENDIR}/src/UHDM.capnp.h
+                        ${GENDIR}/src/UHDM.capnp.c++)
 foreach(header_file ${model-GENERATED_SRC})
   set_source_files_properties(${header_file} PROPERTIES GENERATED TRUE)
 endforeach(header_file ${model-GENERATED_SRC})
@@ -113,53 +116,53 @@ add_custom_command(
 add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
 set(uhdm-GENERATED_SRC
-    ${CMAKE_CURRENT_BINARY_DIR}/src/ExprEval.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/Serializer_restore.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/Serializer_save.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/SymbolFactory.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.c++
-    ${CMAKE_CURRENT_BINARY_DIR}/src/actual_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/assertion.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/clone_tree.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/constraint_item_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/enum_struct_packed_net_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/enum_struct_union_packed_array_typespec_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/enum_struct_union_packed_var_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_constr_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_dist.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_interf_expr_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_range_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_ref_obj_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_sequence_inst_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_sequence_inst_named_event_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_tchk_term_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/expr_typespec_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/instance_item.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/interf_prog_mod_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/method_func_task_call_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/named_event_sequence_expr_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/nets_vars_ref_obj_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/operand_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/parameters.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/pattern.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/pattern_expr_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/property_expr_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/property_expr_named_event_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/property_inst_spec_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/ref_obj_interf_net_var_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/sequence_expr_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/sequence_expr_multiclock_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/simple_expr_use_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/stmt.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/sys_func_task_call_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/task_func_named_begin_fork_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/tf_call_args.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/variable_drivers_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/variable_loads_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/variables_operation_group.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/vpi_listener.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/vpi_user.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/src/vpi_visitor.cpp
+    ${GENDIR}/src/ExprEval.cpp
+    ${GENDIR}/src/Serializer_restore.cpp
+    ${GENDIR}/src/Serializer_save.cpp
+    ${GENDIR}/src/SymbolFactory.cpp
+    ${GENDIR}/src/UHDM.capnp.c++
+    ${GENDIR}/src/actual_group.cpp
+    ${GENDIR}/src/assertion.cpp
+    ${GENDIR}/src/clone_tree.cpp
+    ${GENDIR}/src/constraint_item_group.cpp
+    ${GENDIR}/src/enum_struct_packed_net_group.cpp
+    ${GENDIR}/src/enum_struct_union_packed_array_typespec_group.cpp
+    ${GENDIR}/src/enum_struct_union_packed_var_group.cpp
+    ${GENDIR}/src/expr_constr_group.cpp
+    ${GENDIR}/src/expr_dist.cpp
+    ${GENDIR}/src/expr_interf_expr_group.cpp
+    ${GENDIR}/src/expr_range_group.cpp
+    ${GENDIR}/src/expr_ref_obj_group.cpp
+    ${GENDIR}/src/expr_sequence_inst_group.cpp
+    ${GENDIR}/src/expr_sequence_inst_named_event_group.cpp
+    ${GENDIR}/src/expr_tchk_term_group.cpp
+    ${GENDIR}/src/expr_typespec_group.cpp
+    ${GENDIR}/src/instance_item.cpp
+    ${GENDIR}/src/interf_prog_mod_group.cpp
+    ${GENDIR}/src/method_func_task_call_group.cpp
+    ${GENDIR}/src/named_event_sequence_expr_group.cpp
+    ${GENDIR}/src/nets_vars_ref_obj_group.cpp
+    ${GENDIR}/src/operand_group.cpp
+    ${GENDIR}/src/parameters.cpp
+    ${GENDIR}/src/pattern.cpp
+    ${GENDIR}/src/pattern_expr_group.cpp
+    ${GENDIR}/src/property_expr_group.cpp
+    ${GENDIR}/src/property_expr_named_event_group.cpp
+    ${GENDIR}/src/property_inst_spec_group.cpp
+    ${GENDIR}/src/ref_obj_interf_net_var_group.cpp
+    ${GENDIR}/src/sequence_expr_group.cpp
+    ${GENDIR}/src/sequence_expr_multiclock_group.cpp
+    ${GENDIR}/src/simple_expr_use_group.cpp
+    ${GENDIR}/src/stmt.cpp
+    ${GENDIR}/src/sys_func_task_call_group.cpp
+    ${GENDIR}/src/task_func_named_begin_fork_group.cpp
+    ${GENDIR}/src/tf_call_args.cpp
+    ${GENDIR}/src/variable_drivers_group.cpp
+    ${GENDIR}/src/variable_loads_group.cpp
+    ${GENDIR}/src/variables_operation_group.cpp
+    ${GENDIR}/src/vpi_listener.cpp
+    ${GENDIR}/src/vpi_user.cpp
+    ${GENDIR}/src/vpi_visitor.cpp
 )
 
 foreach(src_file ${uhdm-GENERATED_SRC})
@@ -167,15 +170,15 @@ foreach(src_file ${uhdm-GENERATED_SRC})
 endforeach(src_file ${uhdm-GENERATED_SRC})
 
 add_library(uhdm STATIC ${uhdm-GENERATED_SRC})
-set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_BINARY_DIR}/headers/uhdm.h)
-target_include_directories(uhdm PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/headers>
-  $<INSTALL_INTERFACE:include/uhdm/include>
-  $<INSTALL_INTERFACE:include/uhdm>
-  $<INSTALL_INTERFACE:include/uhdm/headers>)
+set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
+
+# Our uhdm headers come with angle brackets (indicating system headers),
+# make sure that the compiler looks here first before finding an existing UHDM
+# installation. Hence we use SYSTEM
+target_include_directories(uhdm SYSTEM PUBLIC
+  $<BUILD_INTERFACE:${GENDIR}>
+  $<INSTALL_INTERFACE:include>)
 target_include_directories(uhdm PRIVATE
-  ${PROJECT_SOURCE_DIR}/src
   ${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src
   ${PROJECT_SOURCE_DIR}/third_party/UHDM/src)
 target_compile_definitions(uhdm
@@ -256,9 +259,8 @@ set_property(TARGET test_inst PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_
 target_compile_definitions(test_inst
   PUBLIC PLI_DLLISPEC=
   PUBLIC PLI_DLLESPEC=)
-target_include_directories(test_inst PRIVATE
-  ${CMAKE_INSTALL_PREFIX}/include/uhdm
-  ${CMAKE_INSTALL_PREFIX}/include/uhdm/include)
+target_include_directories(test_inst SYSTEM PRIVATE
+  ${CMAKE_INSTALL_PREFIX}/include)
 target_link_libraries(test_inst PRIVATE
   ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX}
   ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}
@@ -274,7 +276,7 @@ install(
   TARGETS uhdm capnp kj uhdm-dump uhdm-hier
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/include)
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/headers/
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/headers/)
+install(DIRECTORY ${GENDIR}/uhdm/
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/)
+install(FILES ${GENDIR}/src/UHDM.capnp
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm)

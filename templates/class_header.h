@@ -26,14 +26,14 @@
 #ifndef UHDM_<UPPER_CLASSNAME>_H
 #define UHDM_<UPPER_CLASSNAME>_H
 
-#include "../include/sv_vpi_user.h"
-#include "uhdm_vpi_user.h"
+#include <uhdm/sv_vpi_user.h>
+#include <uhdm/uhdm_vpi_user.h>
 
-#include "SymbolFactory.h"
-#include "BaseClass.h"
-#include "containers.h"
+#include <uhdm/SymbolFactory.h>
+#include <uhdm/BaseClass.h>
+#include <uhdm/containers.h>
 
-#include "<EXTENDS>.h"
+#include <uhdm/<EXTENDS>.h>
 
 <GROUP_HEADER_DEPENDENCY>
 

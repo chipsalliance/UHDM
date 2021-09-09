@@ -27,7 +27,7 @@
 #ifndef UHDM_BASE_CLASS_H
 #define UHDM_BASE_CLASS_H
 #include <set>
-#include "uhdm_types.h"
+#include <uhdm/uhdm_types.h>
 
 namespace UHDM {
   class Serializer;

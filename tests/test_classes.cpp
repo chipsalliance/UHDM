@@ -1,10 +1,10 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 #include <iostream>
 
-#include "headers/uhdm.h"
-#include "headers/vpi_listener.h"
-#include "headers/vpi_visitor.h"
-#include "headers/ElaboratorListener.h"
+#include <uhdm/uhdm.h>
+#include <uhdm/vpi_listener.h>
+#include <uhdm/vpi_visitor.h>
+#include <uhdm/ElaboratorListener.h>
 
 #include "test-util.h"
 

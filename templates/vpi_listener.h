@@ -25,9 +25,9 @@
 
 #include <string>
 #include <vector>
-#include "headers/BaseClass.h"
-#include "../include/sv_vpi_user.h"
-#include "headers/VpiListener.h"
+#include <uhdm/BaseClass.h>
+#include <uhdm/sv_vpi_user.h>
+#include <uhdm/VpiListener.h>
 
 #ifndef UHDM_VPI_LISTENER_H
 #define UHDM_VPI_LISTENER_H

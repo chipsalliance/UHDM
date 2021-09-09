@@ -22,10 +22,10 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
-#include "clone_tree.h"
+#include <uhdm/clone_tree.h>
 
-#include "ElaboratorListener.h"
-#include "uhdm.h"
+#include <uhdm/ElaboratorListener.h>
+#include <uhdm/uhdm.h>
 
 using namespace UHDM;
 

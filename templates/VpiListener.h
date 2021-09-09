@@ -27,8 +27,8 @@
 #ifndef UHDM_VPILISTENER_CLASS_H
 #define UHDM_VPILISTENER_CLASS_H
 
-#include "headers/uhdm_forward_decl.h"
-#include "include/vpi_user.h"
+#include <uhdm/uhdm_forward_decl.h>
+#include <uhdm/vpi_user.h>
 
 namespace UHDM {
 class VpiListener {

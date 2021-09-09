@@ -32,11 +32,11 @@
 #include <stack>
 
 // Verifies that the forward declaration header compiles
-#include "headers/uhdm_forward_decl.h"
+#include <uhdm/uhdm_forward_decl.h>
 
-#include "headers/uhdm.h"
-#include "headers/vpi_listener.h"
-#include "headers/vpi_visitor.h"
+#include <uhdm/uhdm.h>
+#include <uhdm/vpi_listener.h>
+#include <uhdm/vpi_visitor.h>
 
 using namespace UHDM;
 

@@ -28,13 +28,13 @@
 #include <stack>
 #include <iostream>
 
-#include "headers/VpiListener.h"
-#include "headers/clone_tree.h"
+#include <uhdm/VpiListener.h>
+#include <uhdm/clone_tree.h>
 
 // Since there is a lot of implementation happening inside this
 // header, we need to include this.
 // TODO: move implementation in ElaboratorListener.cpp
-#include "headers/Serializer.h"
+#include <uhdm/Serializer.h>
 
 namespace UHDM {
 
