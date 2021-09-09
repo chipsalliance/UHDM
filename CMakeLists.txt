@@ -25,9 +25,6 @@ project(UHDM)
 cmake_policy(SET CMP0091 NEW)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
-add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -76,9 +73,7 @@ else()
 
 endif()
 
-# model_gen generated
-set(model-GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.h
-                        ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.c++)
+find_package(CapnProto)
 
 # All the files the generator depends on.
 file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
@@ -86,12 +81,10 @@ file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
 file(GLOB templates_SRC ${PROJECT_SOURCE_DIR}/templates/*.h
      ${PROJECT_SOURCE_DIR}/templates/*.cpp)
 
-foreach(header_file ${model-GENERATED_SRC})
-  set_source_files_properties(${header_file} PROPERTIES GENERATED TRUE)
-endforeach(header_file ${model-GENERATED_SRC})
-add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
+set(model-GENERATED_UHDM ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp)
+set_source_files_properties(${model-GENERATED_UHDM} PROPERTIES GENERATED TRUE)
 add_custom_command(
-  OUTPUT ${model-GENERATED_SRC}
+  OUTPUT ${model-GENERATED_UHDM}
   COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_CURRENT_BINARY_DIR}
           ${CMAKE_CURRENT_BINARY_DIR}
@@ -103,6 +96,18 @@ add_custom_command(
           ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
           ${yaml_SRC}
           ${templates_SRC})
+
+set(model-GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.h
+                        ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.c++)
+foreach(header_file ${model-GENERATED_SRC})
+  set_source_files_properties(${header_file} PROPERTIES GENERATED TRUE)
+endforeach(header_file ${model-GENERATED_SRC})
+
+add_custom_command(
+  OUTPUT ${model-GENERATED_SRC}
+  COMMAND capnp compile -oc++ ${model-GENERATED_UHDM}
+  DEPENDS ${model-GENERATED_UHDM})
+add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
 set(uhdm-GENERATED_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/src/ExprEval.cpp
@@ -168,12 +173,11 @@ target_include_directories(uhdm PUBLIC
   $<INSTALL_INTERFACE:include/uhdm/headers>)
 target_include_directories(uhdm PRIVATE
   ${PROJECT_SOURCE_DIR}/src
-  ${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src
   ${PROJECT_SOURCE_DIR}/third_party/UHDM/src)
 target_compile_definitions(uhdm
   PUBLIC PLI_DLLISPEC=
   PUBLIC PLI_DLLESPEC=)
-target_link_libraries(uhdm PUBLIC capnp)
+target_link_libraries(uhdm PUBLIC CapnProto::capnp)
 
 if(APPLE)
   target_link_libraries(uhdm
@@ -191,7 +195,6 @@ elseif(UNIX)
 endif()
 
 add_dependencies(uhdm GenerateCode)
-add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
 
 if (UHDM_BUILD_TESTS)
   enable_testing()
@@ -253,17 +256,11 @@ target_include_directories(test_inst PRIVATE
   ${CMAKE_INSTALL_PREFIX}/include/uhdm/include)
 target_link_libraries(test_inst PRIVATE
   ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX}
-  ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}
-  ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}
-  $<$<PLATFORM_ID:Darwin>:dl>
-  $<$<PLATFORM_ID:Darwin>:util>
-  $<$<AND:$<PLATFORM_ID:Darwin>,$<NOT:$<PLATFORM_ID:Apple>>>:m>
-  $<$<PLATFORM_ID:Darwin>:rt>
-  $<$<PLATFORM_ID:Darwin>:pthread>)
+  CapnProto::capnp)
 
 # Installation target
 install(
-  TARGETS uhdm capnp kj uhdm-dump uhdm-hier
+  TARGETS uhdm uhdm-dump uhdm-hier
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/

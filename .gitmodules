@@ -1,4 +1,1 @@
-[submodule "third_party/capnproto"]
-	path = third_party/capnproto
-	url = https://github.com/capnproto/capnproto.git
 	

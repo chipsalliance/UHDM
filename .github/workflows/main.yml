@@ -15,7 +15,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -qq
-        sudo apt install -y g++-9 build-essential cmake tclsh
+        sudo apt install -y g++-9 build-essential cmake tclsh capnproto libcapnp-dev
 
     - name: Git pull
       uses: actions/checkout@v2
@@ -75,9 +75,9 @@ jobs:
     - name: Setup Msys2
       uses: msys2/setup-msys2@v2
       with:
-        msystem: MSYS
+        msystem: mingw64
         update: true
-        install: make cmake ninja gcc
+        install: make cmake ninja gcc mingw-w64-x86_64-capnproto
       env:
         MSYS2_PATH_TYPE: inherit
 
@@ -127,7 +127,7 @@ jobs:
     steps:
     - name: Install Core Dependencies
       run: |
-        choco install -y make
+        choco install -y make capnproto
 
     - run: git config --global core.autocrlf input
       shell: bash
