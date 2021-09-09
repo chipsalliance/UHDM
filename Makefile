@@ -6,6 +6,9 @@ SHELL := /bin/bash
 ifeq ($(CPU_CORES),)
 	CPU_CORES := $(shell nproc)
 	ifeq ($(CPU_CORES),)
+		CPU_CORES := $(shell sysctl -n hw.physicalcpu)
+	endif
+	ifeq ($(CPU_CORES),)
 		CPU_CORES := 1
 	endif
 endif
@@ -29,9 +32,8 @@ test-junit: release
 	xsltproc .github/kokoro/ctest2junit.xsl build/Testing/*/Test.xml > build/test_results.xml
 
 clean:
-	rm -f src/*
-	rm -rf headers/*
 	rm -rf build
+	rm -rf src/ headers/  # legacy location, not used anymore.
 
 install: build
 	cmake --install build --config Release
