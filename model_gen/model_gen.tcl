@@ -59,6 +59,7 @@ proc exec_path {} {
 
 file mkdir [codegen_base]/src
 file mkdir [codegen_base]/headers
+file mkdir [codegen_base]/include
 
 source [exec_path]/file_utils.tcl
 source [exec_path]/pdict.tcl
@@ -1596,6 +1597,11 @@ proc generate_code { models } {
 
     # uhdm_vpi_user
     file_copy_if_change "[project_path]/templates/uhdm_vpi_user.h" "[codegen_base]/headers/uhdm_vpi_user.h"
+
+    # All the files from the include dir
+    file_copy_if_change "[project_path]/include/sv_vpi_user.h" "[codegen_base]/include/sv_vpi_user.h"
+    file_copy_if_change "[project_path]/include/vhpi_user.h" "[codegen_base]/include/vhpi_user.h"
+    file_copy_if_change "[project_path]/include/vpi_user.h" "[codegen_base]/include/vpi_user.h"
 
     # SymbolFactory.h
     file_copy_if_change "[project_path]/templates/SymbolFactory.h" "[codegen_base]/headers/SymbolFactory.h"
