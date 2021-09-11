@@ -9,7 +9,7 @@ ifeq ($(CPU_CORES),)
 		CPU_CORES := $(shell sysctl -n hw.physicalcpu)
 	endif
 	ifeq ($(CPU_CORES),)
-		CPU_CORES := 1
+		CPU_CORES := 2
 	endif
 endif
 
