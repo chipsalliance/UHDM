@@ -45,6 +45,26 @@ jobs:
         sudo make install
         make test_install
 
+  macos:
+    runs-on: macos-latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+       brew update
+       brew install cmake capnp
+
+    - name: Git pull
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Build & Test
+      run: |
+        make release
+        make test
+
   msys2-gcc:
     runs-on: windows-latest
     defaults:
