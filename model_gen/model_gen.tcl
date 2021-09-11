@@ -1573,24 +1573,7 @@ proc generate_code { models } {
     set_content_if_change "[codegen_base]/src/vpi_user.cpp" $vpi_user
 
     # UHDM.capnp
-    if {[write_capnp $capnp_schema_all $capnp_root_schema]
-        || ![file exists "[codegen_base]/src/UHDM.capnp.h"]} {
-        log "Generating Capnp schema..."
-        file delete -force [codegen_base]/src/UHDM.capnp.*
-        set capnp_path [find_file $working_dir "capnpc-c++$exeext"]
-        puts "capnp_path = $capnp_path"
-        set capnp_path [file dirname $capnp_path]
-
-        if { ($tcl_platform(platform) == "windows") && (![info exists ::env(MSYSTEM)]) } {
-            exec -ignorestderr cmd /c "set PATH=$capnp_path;%PATH%; && cd /d [codegen_base]/src && $capnp_path/capnp.exe compile -oc++ UHDM.capnp"
-        } else {
-            if { $tcl_platform(platform) == "windows" } {
-                exec -ignorestderr sh -c "export PATH=\$(cygpath -u -a $capnp_path):\$PATH; $capnp_path/capnp compile -oc++:. [codegen_base]/src/UHDM.capnp"
-            } else {
-                exec -ignorestderr sh -c "export PATH=$capnp_path:\$PATH; $capnp_path/capnp compile -oc++:. [codegen_base]/src/UHDM.capnp"
-            }
-        }
-    }
+    write_capnp $capnp_schema_all $capnp_root_schema
 
     # BaseClass.h
     file_copy_if_change "[project_path]/templates/BaseClass.h" "[codegen_base]/headers/BaseClass.h"
