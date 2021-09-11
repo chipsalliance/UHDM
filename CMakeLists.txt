@@ -76,22 +76,16 @@ else()
 
 endif()
 
-# model_gen generated
-set(model-GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.h
-                        ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.c++)
-
 # All the files the generator depends on.
 file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
 
 file(GLOB templates_SRC ${PROJECT_SOURCE_DIR}/templates/*.h
      ${PROJECT_SOURCE_DIR}/templates/*.cpp)
 
-foreach(header_file ${model-GENERATED_SRC})
-  set_source_files_properties(${header_file} PROPERTIES GENERATED TRUE)
-endforeach(header_file ${model-GENERATED_SRC})
-add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
+set(model-GENERATED_UHDM ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp)
+set_source_files_properties(${model-GENERATED_UHDM} PROPERTIES GENERATED TRUE)
 add_custom_command(
-  OUTPUT ${model-GENERATED_SRC}
+  OUTPUT ${model-GENERATED_UHDM}
   COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
           ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_CURRENT_BINARY_DIR}
           ${CMAKE_CURRENT_BINARY_DIR}
@@ -103,6 +97,20 @@ add_custom_command(
           ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
           ${yaml_SRC}
           ${templates_SRC})
+
+set(model-GENERATED_SRC ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.h
+                        ${CMAKE_CURRENT_BINARY_DIR}/src/UHDM.capnp.c++)
+foreach(header_file ${model-GENERATED_SRC})
+  set_source_files_properties(${header_file} PROPERTIES GENERATED TRUE)
+endforeach(header_file ${model-GENERATED_SRC})
+
+set(CAPNP_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/capnproto/c++/src/capnp)
+
+add_custom_command(
+  OUTPUT ${model-GENERATED_SRC}
+  COMMAND ${CAPNP_DIR}/capnp compile -o${CAPNP_DIR}/capnpc-c++ ${model-GENERATED_UHDM}
+  DEPENDS capnpc capnpc_cpp ${model-GENERATED_UHDM})
+add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
 set(uhdm-GENERATED_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/src/ExprEval.cpp
