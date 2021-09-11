@@ -23,11 +23,17 @@ jobs:
         submodules: recursive
         fetch-depth: 0
 
+    - name: Use ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: linux-gcc-cache
+
     - name: Configure shell
       run: |
         echo 'CC=gcc-9' >> $GITHUB_ENV
         echo 'CXX=g++-9' >> $GITHUB_ENV
-        echo 'PREFIX=/usr/include' >> $GITHUB_ENV
+        echo 'PATH=/usr/lib/ccache:'"$PATH" >> $GITHUB_ENV
+        echo 'PREFIX=/tmp/uhdm-install' >> $GITHUB_ENV
 
     - name: Show shell configuration
       run: |
@@ -42,7 +48,7 @@ jobs:
       run: |
         make release
         make test
-        sudo make install
+        make install
         make test_install
 
   macos:
@@ -59,6 +65,15 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 0
+
+    - name: Use ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: macos-cache
+
+    - name: Configure shell
+      run: |
+        echo "PATH=$(brew --prefix)/opt/ccache/libexec:$PATH" >> $GITHUB_ENV
 
     - name: Build & Test
       run: |
