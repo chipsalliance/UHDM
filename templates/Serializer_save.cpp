@@ -102,6 +102,7 @@ std::map<std::string, unsigned long> Serializer::ObjectStats() {
 }
 
 void Serializer::Purge() {
+  allIds_.clear();
 <FACTORY_PURGE>
 }
 
