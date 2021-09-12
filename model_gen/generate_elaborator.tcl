@@ -132,7 +132,7 @@ proc generate_elaborator { models } {
 
                             if {(($classname == "ref_obj") || ($classname == "ref_var")) && ($method == "Actual_group")} {
                                 append clone_impl "  clone->${method}(elaborator->bindAny(VpiName()));
-    if (!clone->${method}()) clone->${method}((any*) this->${method}());
+  if (!clone->${method}()) clone->${method}((any*) this->${method}());
 "
                             } elseif {($method == "Task")} {
                                 set prefix ""

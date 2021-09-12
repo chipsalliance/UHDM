@@ -47,6 +47,8 @@ public:
   ElaboratorListener (Serializer* serializer, bool debug = false) : serializer_(serializer), debug_(debug) {}
   void uniquifyTypespec(bool uniquify) { uniquifyTypespec_ = uniquify; }
   bool uniquifyTypespec() { return uniquifyTypespec_; }
+  void bindOnly(bool bindOnly) { clone_ = !bindOnly; }
+  bool bindOnly() { return !clone_; }
   bool isFunctionCall(const std::string& name, const expr* prefix);
 
   bool isTaskCall(const std::string& name, const expr* prefix);
@@ -162,9 +164,9 @@ protected:
         switch (compType) {
         case vpiModule: {
           module* defMod = (module*) comp;
-
+          if (clone_) {
 <MODULE_ELABORATOR_LISTENER>
-
+          }
           break;
         }
         default:
@@ -220,18 +222,19 @@ protected:
       // Push instance context on the stack
       instStack_.push_back(std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
 
-
-      if (auto vec = object->Task_funcs()) {
-        auto clone_vec = serializer_->MakeTask_funcVec();
-        ((package*)object)->Task_funcs(clone_vec);
-        for (auto obj : *vec) {
-          enterTask_func(obj, object, nullptr, nullptr);
-          auto* tf = obj->DeepClone(serializer_, this, (package*) object);
-          ComponentMap& funcMap = std::get<2>((instStack_.at(instStack_.size()-2)).second);
-          funcMap.insert(std::make_pair(tf->VpiName(), tf));
-          leaveTask_func(obj, object, nullptr, nullptr);
-          tf->VpiParent((package*) object);
-          clone_vec->push_back(tf);
+      if (clone_) {
+        if (auto vec = object->Task_funcs()) {
+          auto clone_vec = serializer_->MakeTask_funcVec();
+          ((package*)object)->Task_funcs(clone_vec);
+          for (auto obj : *vec) {
+            enterTask_func(obj, object, nullptr, nullptr);
+            auto* tf = obj->DeepClone(serializer_, this, (package*) object);
+            ComponentMap& funcMap = std::get<2>((instStack_.at(instStack_.size()-2)).second);
+            funcMap.insert(std::make_pair(tf->VpiName(), tf));
+            leaveTask_func(obj, object, nullptr, nullptr);
+            tf->VpiParent((package*) object);
+            clone_vec->push_back(tf);
+          }
         }
       }
 
@@ -274,9 +277,9 @@ protected:
     //   - imbricated classes
     //   - inheriting classes (Through the extends relation)
     instStack_.push_back(std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
-
+    if (clone_) {
 <CLASS_ELABORATOR_LISTENER>
-
+    }
   }
 
   void leaveClass_defn(const class_defn* object, const BaseClass* parent,
@@ -303,6 +306,8 @@ protected:
   void leaveGen_scope(const gen_scope* object, const BaseClass* parent,
                       vpiHandle handle, vpiHandle parentHandle) override;
 
+  void leaveRef_obj(const ref_obj* object, const BaseClass* parent,
+		    vpiHandle handle, vpiHandle parentHandle) override;
 private:
 
   // Instance context stack
@@ -316,6 +321,7 @@ private:
   bool inHierarchy_ = false;
   bool debug_ = false;
   bool uniquifyTypespec_ = true;
+  bool clone_ = true;
   std::vector<tf_call*> scheduledTfCallBinding_;
 };
 
