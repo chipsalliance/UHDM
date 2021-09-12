@@ -2,11 +2,11 @@
 
 #include <iostream>
 
-#include "headers/uhdm.h"
-#include "headers/constant.h"
-#include "headers/vpi_uhdm.h"     // struct uhdm_handle
-#include "include/vhpi_user.h"    // vpi_user functions.
-#include "headers/uhdm_types.h"   // for uhdmconstant
+#include <uhdm/uhdm.h>
+#include <uhdm/constant.h>
+#include <uhdm/vpi_uhdm.h>     // struct uhdm_handle
+#include <uhdm/vhpi_user.h>    // vpi_user functions.
+#include <uhdm/uhdm_types.h>   // for uhdmconstant
 
 #include <stdlib.h>
 

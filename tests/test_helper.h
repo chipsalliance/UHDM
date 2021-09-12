@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "headers/uhdm_types.h"
-#include "include/sv_vpi_user.h"
+#include <uhdm/uhdm_types.h>
+#include <uhdm/sv_vpi_user.h>
 
 std::string print_designs (const std::vector<vpiHandle>& designs) {
   std::string result;

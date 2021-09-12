@@ -1,8 +1,8 @@
 @0xfff7299129556877;
 
 struct ObjIndexType {
-   index @0 : UInt64;
-   type  @1 : UInt32;
+  index @0 : UInt64;
+  type  @1 : UInt32;
 }
 
 struct UhdmRoot {
@@ -13,4 +13,3 @@ struct UhdmRoot {
 
 
 <CAPNP_SCHEMA>
-

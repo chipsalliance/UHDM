@@ -22,8 +22,8 @@
  * Created on July 3, 2021, 8:03 PM
  */
 
-#include "ExprEval.h"
-#include "uhdm.h"
+#include <uhdm/ExprEval.h>
+#include <uhdm/uhdm.h>
 
 using namespace UHDM;
 

@@ -31,7 +31,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "uhdm_types.h"
+#include <uhdm/uhdm_types.h>
 
 namespace UHDM {
 class Serializer;

@@ -32,6 +32,13 @@ proc codegen_base {} {
     return $codegen_base
 }
 
+proc gen_header_dir {} {
+    return [codegen_base]/uhdm
+}
+proc gen_src_dir {} {
+    return [codegen_base]/src
+}
+
 puts "UHDM MODEL GENERATION"
 puts "Working dir: $working_dir; codegen_base: [codegen_base]"
 
@@ -57,9 +64,8 @@ proc exec_path {} {
 }
 
 
-file mkdir [codegen_base]/src
-file mkdir [codegen_base]/headers
-file mkdir [codegen_base]/include
+file mkdir [gen_src_dir]
+file mkdir [gen_header_dir]
 
 source [exec_path]/file_utils.tcl
 source [exec_path]/pdict.tcl
@@ -105,7 +111,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
     }
     set check ""
     if {$type == "any"} {
-        append group_headers "#include \"${real_type}.h\"\n"
+        append group_headers "#include <uhdm/${real_type}.h>\n"
         set check "if (!${real_type}GroupCompliant(data)) return false;"
     }
     if {$card == "1"} {
@@ -702,8 +708,8 @@ proc generate_group_checker { model } {
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
 
-    set files [list [list "[project_path]/templates/group_header.h" "[codegen_base]/headers/${groupname}.h"] \
-                   [list "[project_path]/templates/group_header.cpp" "[codegen_base]/src/${groupname}.cpp"]]
+    set files [list [list "[project_path]/templates/group_header.h" "[gen_header_dir]/${groupname}.h"] \
+                   [list "[project_path]/templates/group_header.cpp" "[gen_src_dir]/${groupname}.cpp"]]
     set GROUP_MEMBERS($groupname) ""
     foreach pair $files {
         foreach {input output} $pair {}
@@ -777,7 +783,7 @@ proc write_vpi_listener_cpp {} {
     regsub {<VPI_LISTENERS>} $listener_cpp $vpi_listener listener_cpp
     regsub {<VPI_ANY_LISTENERS>} $listener_cpp $vpi_any_listener listener_cpp
 
-    set_content_if_change "[codegen_base]/src/vpi_listener.cpp" $listener_cpp
+    set_content_if_change "[gen_src_dir]/vpi_listener.cpp" $listener_cpp
 }
 
 proc write_vpi_listener_h {} {
@@ -792,7 +798,7 @@ proc write_vpi_listener_h {} {
     }
     regsub {<VPI_LISTENERS_HEADER>} $listener_h $vpi_listener listener_h
 
-    set_content_if_change "[codegen_base]/headers/vpi_listener.h" $listener_h
+    set_content_if_change "[gen_header_dir]/vpi_listener.h" $listener_h
 }
 
 proc write_uhdm_forward_decl {} {
@@ -807,7 +813,7 @@ proc write_uhdm_forward_decl {} {
     }
     regsub {<UHDM_FORWARD_DECL>} $uhdm_forward_h $forward_declaration uhdm_forward_h
 
-    set_content_if_change "[codegen_base]/headers/uhdm_forward_decl.h" $uhdm_forward_h
+    set_content_if_change "[gen_header_dir]/uhdm_forward_decl.h" $uhdm_forward_h
 }
 
 proc write_VpiListener_h {} {
@@ -821,7 +827,7 @@ proc write_VpiListener_h {} {
         append vpi_listener $CLASS_LISTENER($classname)
     }
     regsub {<VPI_LISTENER_METHODS>} $listener_content $vpi_listener listener_content
-    set_content_if_change "[codegen_base]/headers/VpiListener.h" $listener_content
+    set_content_if_change "[gen_header_dir]/VpiListener.h" $listener_content
 }
 
 set SHORT_VISITOR_LIST { class_obj
@@ -1010,7 +1016,7 @@ $relations
 "
     }
     regsub {<OBJECT_VISITORS>} $visitor_cpp $vpi_visitor visitor_cpp
-    set_content_if_change "[codegen_base]/src/vpi_visitor.cpp" $visitor_cpp
+    set_content_if_change "[gen_src_dir]/vpi_visitor.cpp" $visitor_cpp
 }
 
 proc write_capnp { capnp_schema_all capnp_root_schema } {
@@ -1020,7 +1026,7 @@ proc write_capnp { capnp_schema_all capnp_root_schema } {
     regsub {<CAPNP_SCHEMA>} $capnp_content $capnp_schema_all capnp_content
     regsub {<CAPNP_ROOT_SCHEMA>} $capnp_content $capnp_root_schema capnp_content
 
-    return [set_content_if_change "[codegen_base]/src/UHDM.capnp" $capnp_content]
+    return [set_content_if_change "[gen_src_dir]/UHDM.capnp" $capnp_content]
 }
 
 proc write_uhdm_h { headers} {
@@ -1045,7 +1051,7 @@ proc write_uhdm_h { headers} {
     append uhdm_name_map $name_id_map
 
     regsub -all {<INCLUDE_FILES>} $uhdm_content $headers uhdm_content
-    set_content_if_change "[codegen_base]/headers/uhdm.h" $uhdm_content
+    set_content_if_change "[gen_header_dir]/uhdm.h" $uhdm_content
 }
 
 proc write_uhdm_types_h { defines } {
@@ -1053,7 +1059,7 @@ proc write_uhdm_types_h { defines } {
     set uhdm_content [read $fid]
     close $fid
     regsub -all {<DEFINES>} $uhdm_content $defines uhdm_content
-    set_content_if_change "[codegen_base]/headers/uhdm_types.h" $uhdm_content
+    set_content_if_change "[gen_header_dir]/uhdm_types.h" $uhdm_content
 }
 
 proc write_containers_h { containers } {
@@ -1061,7 +1067,7 @@ proc write_containers_h { containers } {
     set container_content [read $fid]
     close $fid
     regsub -all {<CONTAINERS>} $container_content $containers container_content
-    set_content_if_change "[codegen_base]/headers/containers.h" $container_content
+    set_content_if_change "[gen_header_dir]/containers.h" $container_content
 }
 
 proc update_vpi_inst { baseclass classname lvl } {
@@ -1114,7 +1120,7 @@ proc process_baseclass { baseclass classname modeltype capnpIndex } {
         if {$modeltype != "class_def"} {
             foreach member $capnp_schema_l($baseclass) {
                 foreach {name type} $member {}
-                append capnp_schema_all_l "$name @$idx :$type;\n"
+                append capnp_schema_all_l "  $name @$idx :$type;\n"
                 incr idx
             }
         }
@@ -1250,7 +1256,7 @@ proc generate_code { models } {
         set Classname [string toupper $classname 0 0]
         regsub -all  {_} $Classname "" Classname
 
-        append headers "#include \"headers/$classname.h\"\n"
+        append headers "#include <uhdm/$classname.h>\n"
 
         if {$modeltype == "group_def"} {
             foreach {id define} [defineType 1 uhdm${classname} ""] {}
@@ -1511,7 +1517,7 @@ proc generate_code { models } {
         regsub -all {<TYPE_FORWARD_DECLARE>} $template $forward_declare template
 
 
-        set_content_if_change "[codegen_base]/headers/$classname.h" $template
+        set_content_if_change "[gen_header_dir]/$classname.h" $template
 
         # VPI
         update_vpi_inst $classname $classname 1
@@ -1521,7 +1527,7 @@ proc generate_code { models } {
             append capnp_schema_all "struct $Classname \{\n"
             foreach member $capnp_schema($classname) {
                 foreach {name type} $member {}
-                append capnp_schema_all "$name @$capnpIndex :$type;\n"
+                append capnp_schema_all "  $name @$capnpIndex :$type;\n"
                 incr capnpIndex
             }
         }
@@ -1570,27 +1576,27 @@ proc generate_code { models } {
     regsub -all {<VPI_GET_DELAY_BODY>} $vpi_user $vpi_get_delay_body vpi_user
     regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
 
-    set_content_if_change "[codegen_base]/src/vpi_user.cpp" $vpi_user
+    set_content_if_change "[gen_src_dir]/vpi_user.cpp" $vpi_user
 
     # UHDM.capnp
     write_capnp $capnp_schema_all $capnp_root_schema
 
     # BaseClass.h
-    file_copy_if_change "[project_path]/templates/BaseClass.h" "[codegen_base]/headers/BaseClass.h"
+    file_copy_if_change "[project_path]/templates/BaseClass.h" "[gen_header_dir]/BaseClass.h"
 
     # uhdm_vpi_user
-    file_copy_if_change "[project_path]/templates/uhdm_vpi_user.h" "[codegen_base]/headers/uhdm_vpi_user.h"
+    file_copy_if_change "[project_path]/templates/uhdm_vpi_user.h" "[gen_header_dir]/uhdm_vpi_user.h"
 
     # All the files from the include dir
-    file_copy_if_change "[project_path]/include/sv_vpi_user.h" "[codegen_base]/include/sv_vpi_user.h"
-    file_copy_if_change "[project_path]/include/vhpi_user.h" "[codegen_base]/include/vhpi_user.h"
-    file_copy_if_change "[project_path]/include/vpi_user.h" "[codegen_base]/include/vpi_user.h"
+    file_copy_if_change "[project_path]/include/sv_vpi_user.h" "[gen_header_dir]/sv_vpi_user.h"
+    file_copy_if_change "[project_path]/include/vhpi_user.h" "[gen_header_dir]/vhpi_user.h"
+    file_copy_if_change "[project_path]/include/vpi_user.h" "[gen_header_dir]/vpi_user.h"
 
     # SymbolFactory.h
-    file_copy_if_change "[project_path]/templates/SymbolFactory.h" "[codegen_base]/headers/SymbolFactory.h"
+    file_copy_if_change "[project_path]/templates/SymbolFactory.h" "[gen_header_dir]/SymbolFactory.h"
 
     # SymbolFactory.cpp
-    file_copy_if_change "[project_path]/templates/SymbolFactory.cpp" "[codegen_base]/src/SymbolFactory.cpp"
+    file_copy_if_change "[project_path]/templates/SymbolFactory.cpp" "[gen_src_dir]/SymbolFactory.cpp"
 
     # Serializer.cpp
     set files "Serializer_save.cpp Serializer_restore.cpp vpi_uhdm.h Serializer.h"
@@ -1673,14 +1679,14 @@ $RESTORE($class)
         regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
         regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
         if {$file == "vpi_uhdm.h" || $file == "Serializer.h"} {
-            set_content_if_change "[codegen_base]/headers/$file" $serializer_content
+            set_content_if_change "[gen_header_dir]/$file" $serializer_content
         } else {
-            set_content_if_change "[codegen_base]/src/$file" $serializer_content
+            set_content_if_change "[gen_src_dir]/$file" $serializer_content
         }
     }
 
     # vpi_visitor.h
-    file_copy_if_change "[project_path]/templates/vpi_visitor.h" "[codegen_base]/headers/vpi_visitor.h"
+    file_copy_if_change "[project_path]/templates/vpi_visitor.h" "[gen_header_dir]/vpi_visitor.h"
 
     # vpi_visitor.cpp
     write_vpi_visitor_cpp
@@ -1698,8 +1704,8 @@ $RESTORE($class)
     write_uhdm_forward_decl
 
     # ExprEval
-    file_copy_if_change "[project_path]/templates/ExprEval.h" "[codegen_base]/headers/ExprEval.h"
-    file_copy_if_change "[project_path]/templates/ExprEval.cpp" "[codegen_base]/src/ExprEval.cpp"
+    file_copy_if_change "[project_path]/templates/ExprEval.h" "[gen_header_dir]/ExprEval.h"
+    file_copy_if_change "[project_path]/templates/ExprEval.cpp" "[gen_src_dir]/ExprEval.cpp"
 
 }
 

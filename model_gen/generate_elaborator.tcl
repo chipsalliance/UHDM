@@ -74,10 +74,10 @@ proc generate_elaborator { models } {
     ref->VpiName(parent->VpiName());
     if (parent->UhdmType() == uhdmref_obj) {
       ref->VpiFullName(((ref_obj*)VpiParent())->VpiFullName());
-    } 
+    }
     ref->VpiParent((any*) parent);
     ref->Actual_group(elaborator->bindAny(ref->VpiName()));
-    if (!ref->Actual_group()) 
+    if (!ref->Actual_group())
       if (parent->UhdmType() == uhdmref_obj) {
         ref->Actual_group((any*) ((ref_obj*)VpiParent())->Actual_group());
       }
@@ -352,7 +352,7 @@ proc generate_elaborator { models } {
           }
 "
                             }
-                            
+
                         }
                     }
                 }
@@ -381,13 +381,13 @@ proc generate_elaborator { models } {
     regsub {<MODULE_ELABORATOR_LISTENER>} $listener_content $module_vpi_listener listener_content
     regsub {<CLASS_ELABORATOR_LISTENER>} $listener_content $class_vpi_listener listener_content
 
-    set_content_if_change "[codegen_base]/headers/ElaboratorListener.h" $listener_content
+    set_content_if_change "[gen_header_dir]/ElaboratorListener.h" $listener_content
 
     set fid [open "[project_path]/templates/clone_tree.h"]
     set clone_content [read $fid]
     close $fid
 
-    set_content_if_change "[codegen_base]/headers/clone_tree.h" $clone_content
+    set_content_if_change "[gen_header_dir]/clone_tree.h" $clone_content
 
     set fid [open "[project_path]/templates/clone_tree.cpp"]
     set clone_content [read $fid]

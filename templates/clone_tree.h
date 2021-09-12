@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#include "../include/sv_vpi_user.h"
+#include <uhdm/sv_vpi_user.h>
 
 namespace UHDM {
 class BaseClass;

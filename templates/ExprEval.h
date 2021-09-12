@@ -24,7 +24,7 @@
  * Created on July 3, 2021, 8:03 PM
  */
 
-#include "typespec.h"
+#include <uhdm/typespec.h>
 
 namespace UHDM {
 

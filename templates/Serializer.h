@@ -33,7 +33,7 @@
 
 #include <iostream>
 #include <functional>
-#include "uhdm.h"
+#include <uhdm/uhdm.h>
 
 namespace UHDM {
 

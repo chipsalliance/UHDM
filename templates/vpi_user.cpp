@@ -22,8 +22,8 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
-#include "include/sv_vpi_user.h"
-#include "include/vhpi_user.h"
+#include <uhdm/sv_vpi_user.h>
+#include <uhdm/vhpi_user.h>
 
 #include <string.h>
 #if defined(_MSC_VER)
@@ -38,11 +38,11 @@
 #include <string>
 #include <vector>
 
-#include "headers/Serializer.h"
-#include "headers/containers.h"
-#include "headers/uhdm.h"
-#include "headers/uhdm_types.h"
-#include "headers/vpi_uhdm.h"
+#include <uhdm/Serializer.h>
+#include <uhdm/containers.h>
+#include <uhdm/uhdm.h>
+#include <uhdm/uhdm_types.h>
+#include <uhdm/vpi_uhdm.h>
 
 <HEADERS>
 

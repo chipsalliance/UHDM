@@ -3,8 +3,8 @@
 #include <iostream>
 #include <memory>
 
-#include "headers/vpi_uhdm.h"     // struct uhdm_handle
-#include "include/vhpi_user.h"    // vpi_user functions.
+#include <uhdm/vpi_uhdm.h>     // struct uhdm_handle
+#include <uhdm/vhpi_user.h>    // vpi_user functions.
 
 
 #include <stdlib.h>
