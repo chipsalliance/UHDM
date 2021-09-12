@@ -1059,8 +1059,15 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
   return clone;
 }
 
+void ElaboratorListener::leaveRef_obj(const ref_obj* object, const BaseClass* parent,
+				      vpiHandle handle, vpiHandle parentHandle) {
+  if (!object->Actual_group())
+    ((ref_obj*)object)->Actual_group(bindAny(object->VpiName()));
+}
+
 // Auto generated implementations
 
 <CLONE_IMPLEMENTATIONS>
 
 }  // UHDM namespace
+
