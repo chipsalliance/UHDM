@@ -1007,16 +1007,40 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
         if (previous->UhdmType() == uhdmref_obj) {
           ref_obj* ref = (ref_obj*)previous;
           const any* actual = ref->Actual_group();
-          if (actual && (actual->UhdmType() == uhdmstruct_net)) {
-            struct_typespec* stpt =
-                (struct_typespec*)((struct_net*)actual)->Typespec();
-            for (typespec_member* member : *stpt->Members()) {
-              if (member->VpiName() == name) {
-                if (current->UhdmType() == uhdmref_obj) {
-                  ((ref_obj*)current)->Actual_group(member);
-                  previous = member;
-                  found = true;
-                  break;
+          if (actual) {
+            if (actual->UhdmType() == uhdmstruct_net) {
+              struct_typespec* stpt =
+                  (struct_typespec*)((struct_net*)actual)->Typespec();
+              for (typespec_member* member : *stpt->Members()) {
+                if (member->VpiName() == name) {
+                  if (current->UhdmType() == uhdmref_obj) {
+                    ((ref_obj*)current)->Actual_group(member);
+		  } else if (current->UhdmType() == uhdmbit_select) {
+		    const any* parent = current->VpiParent();
+		    if (parent && (parent->UhdmType() == uhdmref_obj))
+		      ((ref_obj*)parent)->Actual_group(member);
+		  }  
+		  previous = member;
+		  found = true;
+		  break;
+                }
+              }
+            } else if (actual->UhdmType() == uhdminterface) {
+              interface* interf = (interface*) actual;
+              if (interf->Variables()) {
+                for (variables* var : *interf->Variables()) {
+                  if (var->VpiName() == name) {
+		    if (current->UhdmType() == uhdmref_obj) {
+                      ((ref_obj*)current)->Actual_group(var);
+		    } else if (current->UhdmType() == uhdmbit_select) {
+		      const any* parent = current->VpiParent();
+		      if (parent && (parent->UhdmType() == uhdmref_obj))
+			((ref_obj*)parent)->Actual_group(var);
+		    }
+                    previous = var;
+                    found = true;
+                    break;
+                  }
                 }
               }
             }

@@ -106,6 +106,12 @@ protected:
           netMap.insert(std::make_pair(net->VpiName(), net));
         }
       }
+      if (object->Interfaces()) {
+	for (interface* inter : *object->Interfaces()) {
+          netMap.insert(std::make_pair(inter->VpiName(), inter));
+        }
+      }
+      
       // Collect instance parameters, defparams
       ComponentMap paramMap;
       if (object->Parameters()) {
