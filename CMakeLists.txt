@@ -18,12 +18,16 @@ option(
   "Building with clang++ and libc++(in Linux). To enable with: -DWITH_LIBCXX=On"
   On)
 option(UHDM_BUILD_TESTS "Enable testing." ON)
+option(WITH_PYTHON_GENERATOR "Use Python generator instead of TCL." OFF)
 
 project(UHDM)
 
 # NOTE: Policy changes has to happen before adding any subprojects
 cmake_policy(SET CMP0091 NEW)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+message(STATUS "Python3_EXECUTABLE = ${Python3_EXECUTABLE}")
 
 set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
 add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
@@ -47,7 +51,7 @@ if(MSVC)
       "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj ${MY_CXX_WARNING_FLAGS}"
   )
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO
-      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj ${MY_CXX_WARNING_FLAGS}"
+      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /Zi /W3 /bigobj ${MY_CXX_WARNING_FLAGS}"
   )
   set(CMAKE_CXX_FLAGS_RELEASE
       "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj ${MY_CXX_WARNING_FLAGS}"
@@ -62,7 +66,9 @@ else()
   set(CMAKE_CXX_FLAGS_DEBUG
       "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O0 -g ${MSYS_COMPILE_OPTIONS} ${MY_CXX_WARNING_FLAGS}"
   )
-
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO
+      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O3 -g ${MSYS_COMPILE_OPTIONS} ${MY_CXX_WARNING_FLAGS}"
+  )
   set(CMAKE_CXX_FLAGS_RELEASE
       "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O3 -DNDEBUG ${MSYS_COMPILE_OPTIONS} ${MY_CXX_WARNING_FLAGS}"
   )
@@ -81,25 +87,38 @@ endif()
 
 # All the files the generator depends on.
 file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
-
 file(GLOB templates_SRC ${PROJECT_SOURCE_DIR}/templates/*.h
      ${PROJECT_SOURCE_DIR}/templates/*.cpp)
 
 set(model-GENERATED_UHDM ${GENDIR}/src/UHDM.capnp)
 set_source_files_properties(${model-GENERATED_UHDM} PROPERTIES GENERATED TRUE)
-add_custom_command(
-  OUTPUT ${model-GENERATED_UHDM}
-  COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
-          ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_CURRENT_BINARY_DIR}
-          ${GENDIR}
-  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  DEPENDS ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
-          ${PROJECT_SOURCE_DIR}/model_gen/generate_elaborator.tcl
-          ${PROJECT_SOURCE_DIR}/model_gen/parse_model.tcl
-          ${PROJECT_SOURCE_DIR}/model/models.lst
-          ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
-          ${yaml_SRC}
-          ${templates_SRC})
+
+if (WITH_PYTHON_GENERATOR)
+  file(GLOB py_SRC ${PROJECT_SOURCE_DIR}/scripts/*.py)
+  add_custom_command(
+    OUTPUT ${model-GENERATED_UHDM}
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/generate.py --source-dirpath=${UHDM_SOURCE_DIR} -output-dirpath=${GENDIR}
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    DEPENDS ${PROJECT_SOURCE_DIR}/model/models.lst
+            ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
+            ${py_SRC}
+            ${yaml_SRC}
+            ${templates_SRC})
+else()
+  add_custom_command(
+    OUTPUT ${model-GENERATED_UHDM}
+    COMMAND tclsh ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
+            ${PROJECT_SOURCE_DIR}/model/models.lst ${CMAKE_CURRENT_BINARY_DIR}
+            ${GENDIR}
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    DEPENDS ${PROJECT_SOURCE_DIR}/model_gen/model_gen.tcl
+            ${PROJECT_SOURCE_DIR}/model_gen/generate_elaborator.tcl
+            ${PROJECT_SOURCE_DIR}/model_gen/parse_model.tcl
+            ${PROJECT_SOURCE_DIR}/model/models.lst
+            ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
+            ${yaml_SRC}
+            ${templates_SRC})
+endif()
 
 set(model-GENERATED_SRC ${GENDIR}/src/UHDM.capnp.h
                         ${GENDIR}/src/UHDM.capnp.c++)

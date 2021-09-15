@@ -23,16 +23,15 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
-#include <vector>
-#include <unordered_map>
-#include <uhdm/uhdm_types.h>
-
 #ifndef UHDM_CONTAINERS_H
 #define UHDM_CONTAINERS_H
 
+#include <vector>
+#include <unordered_map>
+#include <uhdm/uhdm_forward_decl.h>
+
 namespace UHDM {
-  typedef std::vector<any*> VectorOfany;
-  <CONTAINERS>
+<CONTAINERS>
 };
 
 #endif

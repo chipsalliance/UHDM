@@ -559,30 +559,30 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
     if (objectType == vpiModule || objectType == vpiProgram || objectType == vpiClassDefn || objectType == vpiPackage ||
         objectType == vpiInterface || objectType == vpiUdp) {
       if (const char* s = vpi_get_str(vpiFile, obj_h)) {
-	if (int l = vpi_get(vpiLineNo, obj_h)) {
-	  out << " " << s << ":" << l;  // fileName, line
-	  if (int c = vpi_get(vpiColumnNo, obj_h)) {
-	    out << ":" << c << ": ";  // , column
-	  } else {
-	    out << ": ";
-	  }
-	  if (int c = vpi_get(vpiEndLineNo, obj_h)) {
-	    out << ", endln:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
-	  }
-	} else {
-	   out << ", file:" << s;  // fileName
-	}
+        if (int l = vpi_get(vpiLineNo, obj_h)) {
+          out << " " << s << ":" << l;  // fileName, line
+          if (int c = vpi_get(vpiColumnNo, obj_h)) {
+            out << ":" << c << ": ";  // , column
+          } else {
+            out << ": ";
+          }
+          if (int c = vpi_get(vpiEndLineNo, obj_h)) {
+            out << ", endln:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
+          }
+        } else {
+           out << ", file:" << s;  // fileName
+        }
       }
     } else {
       if (int l = vpi_get(vpiLineNo, obj_h)) {
-	if (int c = vpi_get(vpiColumnNo, obj_h)) {
-	  out << ", line:" << l << ":" << c;
-	} else {
-	  out << ", line:" << l;
-	}
-	if (int c = vpi_get(vpiEndLineNo, obj_h)) {
-	  out << ", endln:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
-	}
+        if (int c = vpi_get(vpiColumnNo, obj_h)) {
+          out << ", line:" << l << ":" << c;
+        } else {
+          out << ", line:" << l;
+        }
+        if (int c = vpi_get(vpiEndLineNo, obj_h)) {
+          out << ", endln:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
+        }
       }
     }
     if (vpiHandle par = vpi_handle(vpiParent, obj_h)) {
@@ -607,6 +607,7 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
   if (strcmp(relation, "vpiParent") == 0) {
     return;
   }
+  vpiHandle itr;
 <OBJECT_VISITORS>
 }
 
@@ -639,5 +640,4 @@ extern "C" {
     UHDM::visit_designs(designs, the_output);
     std::cout << the_output.str().c_str() << std::endl;
   }
-
 }

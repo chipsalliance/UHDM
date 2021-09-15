@@ -30,62 +30,34 @@
 #include <uhdm/uhdm_vpi_user.h>
 
 #include <uhdm/SymbolFactory.h>
-#include <uhdm/BaseClass.h>
 #include <uhdm/containers.h>
-
 #include <uhdm/<EXTENDS>.h>
 
 <GROUP_HEADER_DEPENDENCY>
 
+
 namespace UHDM {
 <TYPE_FORWARD_DECLARE>
 
-class <CLASSNAME> <FINAL_CLASS> : public <EXTENDS> {
+class <CLASSNAME><FINAL_CLASS> : public <EXTENDS> {
 public:
   // Implicit constructor used to initialize all members,
   // comment: <CLASSNAME>();
-  <VIRTUAL>~<CLASSNAME>() <FINAL_DESTRUCTOR> {}
-  <METHODS>
+  <VIRTUAL>~<CLASSNAME>()<FINAL_DESTRUCTOR> = default;
+
+<METHODS>
+
   <VIRTUAL> UHDM_OBJECT_TYPE UhdmType() const <OVERRIDE_OR_FINAL> { return uhdm<CLASSNAME>; }
 
 private:
-  <MEMBERS>
+<MEMBERS>
 };
 
 <DISABLE_OBJECT_FACTORY>
-class <CLASSNAME>Factory {
-  friend Serializer;
-public:
-  <CLASSNAME>* Make() {
-    <CLASSNAME>* obj = new <CLASSNAME>();
-    objects_.push_back(obj);
-    return obj;
-  }
-  void Erase(<CLASSNAME>* tps) {
-    for (std::vector<<CLASSNAME>*>::iterator itr = objects_.begin(); itr != objects_.end(); itr++) {
-      if ((*itr) == tps) {
-        objects_.erase(itr);
-        break;
-      }
-    }
-  }
-
-private:
-  std::vector<<CLASSNAME>*> objects_;
-};
+typedef FactoryT<<CLASSNAME>> <CLASSNAME>Factory;
 <END_DISABLE_OBJECT_FACTORY>
 
-class VectorOf<CLASSNAME>Factory {
-  friend Serializer;
-public:
- std::vector<<CLASSNAME>*>* Make() {
-   std::vector<<CLASSNAME>*>* obj = new std::vector<<CLASSNAME>*>();
-   objects_.push_back(obj);
-   return obj;
- }
-private:
- std::vector<std::vector<<CLASSNAME>*>*> objects_;
-};
+typedef FactoryT<std::vector<<CLASSNAME> *>> VectorOf<CLASSNAME>Factory;
 
 }  // namespace UHDM
 
