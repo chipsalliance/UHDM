@@ -16,4 +16,4 @@
  
 - group_def: variables_operation_group
   - class_ref: variables
-  - class_ref: operation
+  - obj_ref: operation

@@ -19,7 +19,7 @@
   - obj_ref: program_array
   - class_ref: task_func
   - class_ref: net
-  - class_ref: array_net
+  - obj_ref: array_net
   - class_ref: variables
   - obj_ref: logic_var
   - obj_ref: array_var  
@@ -29,6 +29,6 @@
   - obj_ref: spec_param
   - group_ref: assertion
   - class_ref: typespec
-  - class_ref: class_defn
+  - obj_ref: class_defn
  
 

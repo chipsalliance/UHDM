@@ -20,6 +20,6 @@
   - obj_ref: tchk_term
   - obj_ref: delay_term
   - class_ref: ports
-  - class_ref: stmt
+  - group_ref: stmt
   - obj_ref: cont_assign
   - obj_ref: cont_assign_bit
