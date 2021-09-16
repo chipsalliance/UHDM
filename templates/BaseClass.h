@@ -26,7 +26,10 @@
 
 #ifndef UHDM_BASE_CLASS_H
 #define UHDM_BASE_CLASS_H
+
 #include <set>
+#include <vector>
+
 #include <uhdm/uhdm_types.h>
 
 namespace UHDM {
@@ -36,7 +39,7 @@ namespace UHDM {
 
   class ClientData {
   public:
-    virtual ~ClientData(){};
+    virtual ~ClientData() = default;
   };
 
   class BaseClass {
@@ -46,7 +49,7 @@ namespace UHDM {
     // Use implicit constructor to initialize all members
     // BaseClass()
 
-    virtual ~BaseClass(){}
+    virtual ~BaseClass() = default;
 
     Serializer* GetSerializer() const { return serializer_; }
 
@@ -100,9 +103,9 @@ namespace UHDM {
   protected:
     void SetSerializer(Serializer* serial) { serializer_ = serial; }
 
-    Serializer* serializer_;
+    Serializer* serializer_ = nullptr;
 
-    ClientData* clientData_;
+    ClientData* clientData_ = nullptr;
 
   private:
     int vpiLineNo_ = 0;
@@ -113,12 +116,38 @@ namespace UHDM {
   };
 
 #ifdef STANDARD_VPI
-typedef std::set<vpiHandle> VisitedContainer;
+  typedef std::set<vpiHandle> VisitedContainer;
 #else
-typedef  std::set<const BaseClass*> VisitedContainer;
+  typedef  std::set<const BaseClass*> VisitedContainer;
 #endif
 
-  
+  template<typename T>
+  class FactoryT {
+    friend Serializer;
+    typedef std::vector<T *> objects_t;
+
+   public:
+    T* Make() {
+      T* obj = new T;
+      objects_.push_back(obj);
+      return obj;
+    }
+
+    bool Erase(T* tps) {
+      for (typename objects_t::const_iterator itr = objects_.begin();
+           itr != objects_.end(); ++itr) {
+        if ((*itr) == tps) {
+          objects_.erase(itr);
+          return true;
+        }
+      }
+      return false;
+    }
+
+   private:
+    objects_t objects_;
+  };
+
 }  // namespace UHDM
 
 #endif

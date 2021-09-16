@@ -92,7 +92,7 @@ jobs:
       with:
         msystem: MSYS
         update: true
-        install: make cmake ninja gcc
+        install: make cmake ninja gcc python
       env:
         MSYS2_PATH_TYPE: inherit
 

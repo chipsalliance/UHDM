@@ -138,7 +138,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
     while (parent) {
       const BaseClass* actual_parent = parent->VpiParent();
       if (parent->UhdmType() == uhdmdesign) break;
-      if (parent->UhdmType() == uhdmpackage || parent->UhdmType() == uhdmclass_defn) column = true;
+      if ((parent->UhdmType() == uhdmpackage) || (parent->UhdmType() == uhdmclass_defn)) column = true;
       const std::string\\& name = (!parent->VpiName().empty()) ? parent->VpiName() : parent->VpiDefName();
       UHDM_OBJECT_TYPE parent_type = (parent != nullptr) ? parent->UhdmType() : uhdmunsupported_stmt;
       UHDM_OBJECT_TYPE actual_parent_type = (actual_parent != nullptr) ? actual_parent->UhdmType() : uhdmunsupported_stmt;
@@ -171,7 +171,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
       unsigned int index = names.size() -1;
       while(1) {
         fullName += names\[index\];
-        if (index > 0) fullName += (column) ? \"::\" : \".\";
+        if (index > 0) fullName += column ? \"::\" : \".\";
         if (index == 0) break;
         index--;
       }
@@ -274,7 +274,7 @@ proc printIterateBody { name classname vpi card } {
     set vpi_iterate_body ""
     if {$card == "any"} {
         append vpi_iterate_body "
-  if (handle->type == uhdm${classname} \\&\\& type == $vpi) {
+  if ((handle->type == uhdm${classname}) \\&\\& (type == $vpi)) {
     if ((($classname*)(object))->[string toupper ${name} 0 0]())
       return NewHandle(uhdm${name}, (($classname*)(object))->[string toupper ${name} 0 0]());
     else return 0;
@@ -379,7 +379,7 @@ proc printGetHandleBody { classname type vpi object card } {
             set casted_object2 "(($classname*)(object))"
         }
         append vpi_get_handle_body "
-  if (handle->type == uhdm${classname} \\&\\& type == $vpi) {
+  if ((handle->type == uhdm${classname}) \\&\\& (type == $vpi)) {
      if ($casted_object1->[string toupper ${object} 0 0]()))
        return NewHandle($casted_object1->[string toupper ${object} 0 0]())->UhdmType(), $casted_object2->[string toupper ${object} 0 0]());
      else return 0;
@@ -393,7 +393,7 @@ proc printGetStrVisitor {classname type vpi card} {
     set vpi_get_str_body ""
     if {($card == 1) && ($type == "string") && ($vpi != "vpiFile")} {
         append vpi_get_str_body "    if (const char* s = vpi_get_str($vpi, obj_h))
-      stream_indent(out, indent) << \"|$vpi:\" << s << \"\\n\";
+      stream_indent(out, indent) << \"|$vpi:\" << s << std::endl;
 "
     }
     return $vpi_get_str_body
@@ -420,7 +420,7 @@ proc printGetVisitor {classname type vpi card} {
 "
     } elseif {($card == 1) && ($type != "string") && ($vpi != "vpiLineNo") && ($vpi != "vpiColumnNo")  && ($vpi != "vpiEndLineNo") && ($vpi != "vpiEndColumnNo") && ($vpi != "vpiType")} {
         append vpi_get_body "    if (const int n = vpi_get($vpi, obj_h))
-      stream_indent(out, indent) << \"|$vpi:\" << n << \"\\n\";
+      stream_indent(out, indent) << \"|$vpi:\" << n << std::endl;
 "
     }
     return $vpi_get_body
@@ -436,7 +436,7 @@ proc printGetStrBody {classname type vpi card} {
     if {$card == 1 && ($type == "string")} {
         if {$vpi == "vpiFullName"} {
             append vpi_get_str_body "
-  if (handle->type == uhdm${classname} \\&\\& property == $vpi) {
+  if ((handle->type == uhdm${classname}) \\&\\& (property == $vpi)) {
     const $classname* const o = (const $classname*)(obj);
     return (o->[string toupper ${vpi} 0 0]().empty() || o->[string toupper ${vpi} 0 0]() == o->VpiName())
         ? 0
@@ -444,7 +444,7 @@ proc printGetStrBody {classname type vpi card} {
   }"
         } else {
             append vpi_get_str_body "
-  if (handle->type == uhdm${classname} \\&\\& property == $vpi) {
+  if ((handle->type == uhdm${classname}) \\&\\& (property == $vpi)) {
     const $classname* const o = (const $classname*)(obj);
     return (PLI_BYTE8*) (o->[string toupper ${vpi} 0 0]().empty() ? 0 : o->[string toupper ${vpi} 0 0]().c_str());
   }"
@@ -549,15 +549,15 @@ proc printVpiVisitor {classname vpi card} {
     global VISITOR_RELATIONS
 
     set vpi_visitor ""
-    if ![info exist VISITOR_RELATIONS($classname)] {
-        set vpi_visitor "    vpiHandle itr;
-"
-    } else {
-        if ![regexp "vpiHandle itr;" $VISITOR_RELATIONS($classname)] {
-            set vpi_visitor "    vpiHandle itr;
-"
-        }
-    }
+#    if ![info exist VISITOR_RELATIONS($classname)] {
+#        set vpi_visitor "    vpiHandle itr;
+#"
+#    } else {
+#        if ![regexp "vpiHandle itr;" $VISITOR_RELATIONS($classname)] {
+#            set vpi_visitor "    vpiHandle itr;
+#"
+#        }
+#    }
 
     if {($vpi == "vpiParent") && ($classname !="part_select")} {
         return
@@ -577,7 +577,7 @@ proc printVpiVisitor {classname vpi card} {
         # Prevent loop in Standard VPI
         if {($vpi != "vpiModule") && ($vpi != "vpiInterface")} {
             append vpi_visitor "    itr = vpi_handle($vpi,obj_h);
-    visit_object(itr, subobject_indent, \"$vpi\", visited, out $shallowVisit);
+    visit_object(itr, subobject_indent, \"$vpi\", visited, out$shallowVisit);
     release_handle(itr);
 "
         }
@@ -590,7 +590,7 @@ proc printVpiVisitor {classname vpi card} {
         if {$vpi != "vpiUse"} {
             append vpi_visitor "    itr = vpi_iterate($vpi,obj_h);
     while (vpiHandle obj = vpi_scan(itr) ) {
-      visit_object(obj, subobject_indent, \"$vpi\", visited, out $shallowVisit);
+      visit_object(obj, subobject_indent, \"$vpi\", visited, out$shallowVisit);
       release_handle(obj);
     }
     release_handle(itr);
@@ -1246,8 +1246,8 @@ proc generate_code { models } {
             regsub -all {<DISABLE_OBJECT_FACTORY>} $template "#if 0 // This class cannot be instantiated" template
             regsub -all {<END_DISABLE_OBJECT_FACTORY>} $template "#endif" template
         } else {
-            regsub -all {<FINAL_CLASS>} $template "final" template
-            regsub -all {<FINAL_DESTRUCTOR>} $template "final" template
+            regsub -all {<FINAL_CLASS>} $template " final" template
+            regsub -all {<FINAL_DESTRUCTOR>} $template " final" template
             regsub -all {<VIRTUAL>} $template "virtual " template
             regsub -all {<OVERRIDE_OR_FINAL>}  $template "final" template
             regsub -all {<DISABLE_OBJECT_FACTORY>} $template "" template
@@ -1291,7 +1291,7 @@ proc generate_code { models } {
 
         if {$modeltype == "class_def"} {
             # DeepClone() not implemented for class_def; just declare to narrow the covariant return type.
-            append methods($classname) "\n  ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override = 0;\n"
+            append methods($classname) "\n  virtual ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override = 0;\n"
         } else {
             # Builtin properties do not need to be specified in each models
             # Builtins: "vpiParent, Parent type, vpiFile, Id" method and field
@@ -1305,9 +1305,9 @@ proc generate_code { models } {
             append methods($classname) [printMethods $classname "unsigned int" uhdmId 1]
             append members($classname) [printMembers "unsigned int" uhdmId 1]
             if [regexp {_call} ${classname}] {
-                append methods($classname) "\n  tf_call* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
+                append methods($classname) "\n  virtual tf_call* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
             } else {
-                append methods($classname) "\n  ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
+                append methods($classname) "\n  virtual ${classname}* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const override;\n"
             }
             append vpi_handle_body($classname) [printGetHandleBody $classname BaseClass vpiParent vpiParent 1]
             lappend capnp_schema($classname) [list vpiParent UInt64]
@@ -1506,7 +1506,7 @@ proc generate_code { models } {
 
         if {($type_specified == 0) && ($modeltype == "obj_def")} {
             set vpiclasstype [makeVpiName $classname]
-            append methods($classname) "\n  unsigned int VpiType() const final { return $vpiclasstype; }\n"
+            append methods($classname) "\n  virtual unsigned int VpiType() const final { return $vpiclasstype; }\n"
             lappend vpi_get_body_inst($classname) [list $classname "unsigned int" vpiType 1]
 
         }

@@ -96,19 +96,19 @@ any* ElaboratorListener::bindTaskFunc(const std::string& name, const class_var* 
     if (tps && tps->UhdmType() == uhdmclass_typespec) {
       const class_defn* def = ((class_typespec*) tps)->Class_defn();
       while (def) {
-	if (def->Task_funcs()) {
-	  for (task_func* tf : *def->Task_funcs()) {
-	    if (tf->VpiName() == name)
-	      return tf;
-	  }
-	}
-	const UHDM::extends* ext = def->Extends();
-	if (ext) {
-	  const class_typespec* tps = ext->Class_typespec();
-	  def = tps->Class_defn();
-	} else {
-	  break;
-	}
+        if (def->Task_funcs()) {
+          for (task_func* tf : *def->Task_funcs()) {
+            if (tf->VpiName() == name)
+              return tf;
+          }
+        }
+        const UHDM::extends* ext = def->Extends();
+        if (ext) {
+          const class_typespec* tps = ext->Class_typespec();
+          def = tps->Class_defn();
+        } else {
+          break;
+        }
       }
     }
   }
@@ -910,12 +910,12 @@ void ElaboratorListener::enterVariables(const variables* object,
 }
 
 void ElaboratorListener::leaveVariables(const variables* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) {
+                                        vpiHandle handle, vpiHandle parentHandle) {
 
 }
 
 void ElaboratorListener::enterTask_func(const task_func* object, const BaseClass* parent,
-				       vpiHandle handle, vpiHandle parentHandle) {
+                                        vpiHandle handle, vpiHandle parentHandle) {
 
   // Collect instance elaborated nets
   ComponentMap varMap;
@@ -940,11 +940,12 @@ void ElaboratorListener::enterTask_func(const task_func* object, const BaseClass
 }
 
 void ElaboratorListener::leaveTask_func(const task_func* object, const BaseClass* parent,
-				       vpiHandle handle, vpiHandle parentHandle) {
+                                        vpiHandle handle, vpiHandle parentHandle) {
   instStack_.pop_back();
 }
 
-void ElaboratorListener::enterGen_scope(const gen_scope* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+void ElaboratorListener::enterGen_scope(const gen_scope* object, const BaseClass* parent,
+                                        vpiHandle handle, vpiHandle parentHandle) {
   // Collect instance elaborated nets
 
   ComponentMap netMap;
@@ -981,7 +982,8 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object, const BaseClass
   instStack_.push_back(std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
 }
 
-void ElaboratorListener::leaveGen_scope(const gen_scope* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {
+void ElaboratorListener::leaveGen_scope(const gen_scope* object, const BaseClass* parent,
+                                        vpiHandle handle, vpiHandle parentHandle) {
   instStack_.pop_back();
 }
 

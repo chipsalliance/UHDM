@@ -1,1 +1,10 @@
+# Environment cache folders & files
+__pycache__
+.vs
+.vscode
+*.user
+
+# Build directories
 build
+out
+CMakeBuilds
