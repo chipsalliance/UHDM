@@ -93,6 +93,7 @@ std::string decompile(UHDM::any* handle) {
   std::stringstream out;
   visit_object(dh, 0, "decompile", &visited, out);
   std::cout << out.str() << "\n";
+  vpi_release_handle(dh);
   return out.str();
 }
 

@@ -1658,6 +1658,10 @@ $RESTORE($class)
     delete obj;
   }
   ${class}Maker.objects_.clear();
+  for (auto obj : ${class}VectMaker.objects_) {
+    delete obj;
+  }
+  ${class}VectMaker.objects_.clear();
 "
 
             append factory_stats "
