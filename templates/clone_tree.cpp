@@ -1034,11 +1034,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   if (var->VpiName() == name) {
 		    if (current->UhdmType() == uhdmref_obj) {
                       ((ref_obj*)current)->Actual_group(var);
-		    } else if (current->UhdmType() == uhdmbit_select) {
-		      const any* parent = current->VpiParent();
-		      if (parent && (parent->UhdmType() == uhdmref_obj))
-			((ref_obj*)parent)->Actual_group(var);
-		    }
+                    } else if (current->UhdmType() == uhdmbit_select) {
+                      const any* parent = current->VpiParent();
+                      if (parent && (parent->UhdmType() == uhdmref_obj))
+                        ((ref_obj*)parent)->Actual_group(var);
+                    }
                     previous = var;
                     found = true;
                     break;
