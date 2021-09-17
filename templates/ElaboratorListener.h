@@ -107,7 +107,7 @@ protected:
         }
       }
       if (object->Interfaces()) {
-	for (interface* inter : *object->Interfaces()) {
+        for (interface* inter : *object->Interfaces()) {
           netMap.insert(std::make_pair(inter->VpiName(), inter));
         }
       }
