@@ -47,7 +47,10 @@ int main (int argc, char** argv) {
   const std::string filename = uhdm_test::getTmpDir() + "/surelog.uhdm";
   std::cout << "\nSave design" << std::endl;
   serializer.Save(filename);
-
+  for (vpiHandle design : designs) {
+    vpi_release_handle(design);
+  }
+                                  
   std::cout << "Restore design" << std::endl;
   const std::vector<vpiHandle>& restoredDesigns = serializer.Restore(filename);
   std::string restored;
@@ -62,6 +65,9 @@ int main (int argc, char** argv) {
     }
   }
   std::cout << restored;
-
+  for (vpiHandle design : restoredDesigns) {
+    vpi_release_handle(design);
+  }
+  serializer.Purge();
   return 0;
 }

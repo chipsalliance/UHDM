@@ -130,13 +130,20 @@ void Serializer::Save(const std::string& file) {
   // Until that is repaired we go for the more disk-hungry and memory hungry method which gives correct results.
   ::capnp::List<::capnp::Text>::Builder symbols = cap_root.initSymbols(symbolMaker.id2SymbolMap_.size());
   index = 0;
+  std::vector<char*> dups; 
   for (auto symbol : symbolMaker.id2SymbolMap_) {
-    symbols.set(index,strdup(symbol.c_str()));
+    char* dup = strdup(symbol.c_str());
+    dups.push_back(dup);
+    symbols.set(index,dup);
     index++;
   }
 
   writePackedMessageToFd(fileid, message);
   close(fileid);
+  for (auto dup : dups) {
+    free(dup);
+  }
+  
 }
 
 #if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
