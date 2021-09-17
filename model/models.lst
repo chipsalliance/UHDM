@@ -35,6 +35,7 @@ ordered_wait.yaml
 task_func_named_begin_fork_group.yaml
 disables.yaml
 disable.yaml
+disable_fork.yaml
 continue_stmt.yaml
 break_stmt.yaml
 return_stmt.yaml
