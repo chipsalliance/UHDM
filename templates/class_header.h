@@ -40,6 +40,7 @@ namespace UHDM {
 <TYPE_FORWARD_DECLARE>
 
 class <CLASSNAME><FINAL_CLASS> : public <EXTENDS> {
+  UHDM_IMPLEMENT_RTTI(<CLASSNAME>, <EXTENDS>)
 public:
   // Implicit constructor used to initialize all members,
   // comment: <CLASSNAME>();

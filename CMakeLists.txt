@@ -32,7 +32,7 @@ message(STATUS "Python3_EXECUTABLE = ${Python3_EXECUTABLE}")
 set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
 add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

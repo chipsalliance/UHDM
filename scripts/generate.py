@@ -124,6 +124,7 @@ def _main():
             config.get_template_filepath('clone_tree.h'): config.get_output_header_filepath('clone_tree.h'),
             config.get_template_filepath('ExprEval.h'): config.get_output_header_filepath('ExprEval.h'),
             config.get_template_filepath('ExprEval.cpp'): config.get_output_source_filepath('ExprEval.cpp'),
+            config.get_template_filepath('RTTI.h'): config.get_output_header_filepath('RTTI.h'),
             config.get_template_filepath('SymbolFactory.h'): config.get_output_header_filepath('SymbolFactory.h'),
             config.get_template_filepath('SymbolFactory.cpp'): config.get_output_source_filepath('SymbolFactory.cpp'),
             config.get_template_filepath('uhdm_vpi_user.h'): config.get_output_header_filepath('uhdm_vpi_user.h'),
