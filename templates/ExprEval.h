@@ -24,6 +24,9 @@
  * Created on July 3, 2021, 8:03 PM
  */
 
+#ifndef UHDM_EXPREVAL_H
+#define UHDM_EXPREVAL_H
+
 #include <uhdm/typespec.h>
 #include <uhdm/expr.h>
 
@@ -41,3 +44,4 @@ namespace UHDM {
   
 }
 
+#endif
