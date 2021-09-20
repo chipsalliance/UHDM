@@ -94,3 +94,29 @@ bool ExprEval::isFullySpecified(const UHDM::typespec* tps) {
   }
   return true;
 }
+
+expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
+                                          expr* exp) {
+  expr* result = exp;
+  if (exp && (exp->UhdmType() == uhdmoperation)) {
+    operation* op = (operation*)exp;
+    if (op->VpiOpType() != vpiAssignmentPatternOp) {
+      return result;
+    }
+    if (tps && (tps->UhdmType() != uhdmstruct_typespec)) {
+      return result;
+    }
+    /*
+    struct_typespec* stps = (struct_typespec*)tps;
+    std::vector<std::string> fieldNames;
+    for (typespec_member* memb : *stps->Members()) {
+      fieldNames.push_back(memb->VpiName());
+    }
+    VectorOfany* orig = op->Operands();
+    VectorOfany* ordered = s.MakeAnyVec();
+    std::vector<any*> tmp(fieldNames.size());
+    */
+
+  }
+  return result;
+}
