@@ -1581,6 +1581,9 @@ proc generate_code { models } {
     # UHDM.capnp
     write_capnp $capnp_schema_all $capnp_root_schema
 
+    # RTTI.h
+    file_copy_if_change "[project_path]/templates/RTTI.h" "[gen_header_dir]/RTTI.h"
+
     # BaseClass.h
     file_copy_if_change "[project_path]/templates/BaseClass.h" "[gen_header_dir]/BaseClass.h"
 

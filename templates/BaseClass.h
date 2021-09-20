@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <uhdm/uhdm_types.h>
+#include <uhdm/RTTI.h>
 
 namespace UHDM {
   class Serializer;
@@ -42,7 +43,8 @@ namespace UHDM {
     virtual ~ClientData() = default;
   };
 
-  class BaseClass {
+  class BaseClass : public RTTI {
+    UHDM_IMPLEMENT_RTTI(BaseClass, RTTI)
     friend Serializer;
 
   public:
@@ -149,5 +151,7 @@ namespace UHDM {
   };
 
 }  // namespace UHDM
+
+UHDM_IMPLEMENT_RTTI_CAST_FUNCTIONS(any_cast, UHDM::BaseClass)
 
 #endif

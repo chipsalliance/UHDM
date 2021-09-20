@@ -43,14 +43,14 @@ proc generate_elaborator { models } {
         }
 
         if {[regexp {Net} $vpiName]} {
-            append clone_impl "  $classname* clone = dynamic_cast<$classname*>(elaborator->bindNet(VpiName()));
+            append clone_impl "  $classname* clone = any_cast<$classname*>(elaborator->bindNet(VpiName()));
   if (clone != nullptr) {
     return clone;
   }
   clone = serializer->Make${Classname}();
 "
         } elseif [regexp {Parameter} $vpiName] {
-            append clone_impl "  $classname* clone = dynamic_cast<$classname*>(elaborator->bindParam(VpiName()));
+            append clone_impl "  $classname* clone = any_cast<$classname*>(elaborator->bindParam(VpiName()));
   if (clone == nullptr) {
     clone = serializer->Make${Classname}();
   }
@@ -74,10 +74,10 @@ proc generate_elaborator { models } {
     ref->VpiName(parent->VpiName());
     if (parent->UhdmType() == uhdmref_obj) {
       ref->VpiFullName(((ref_obj*)VpiParent())->VpiFullName());
-    }
+    } 
     ref->VpiParent((any*) parent);
     ref->Actual_group(elaborator->bindAny(ref->VpiName()));
-    if (!ref->Actual_group())
+    if (!ref->Actual_group()) 
       if (parent->UhdmType() == uhdmref_obj) {
         ref->Actual_group((any*) ((ref_obj*)VpiParent())->Actual_group());
       }
@@ -86,7 +86,7 @@ proc generate_elaborator { models } {
         }
         if {[regexp {BitSelect} $vpiName]} {
             append clone_impl "  if (any* n = elaborator->bindNet(VpiName())) {
-     if (net* nn = dynamic_cast<net*> (n))
+     if (net* nn = any_cast<net*> (n))
        clone->VpiFullName(nn->VpiFullName());
   }
 "
@@ -137,12 +137,12 @@ proc generate_elaborator { models } {
                             } elseif {($method == "Task")} {
                                 set prefix ""
                                 if [regexp {method_} $classname] {
-                                    append clone_impl "  const ref_obj* ref = dynamic_cast<const ref_obj*> (clone->Prefix());\n"
+                                    append clone_impl "  const ref_obj* ref = any_cast<const ref_obj*> (clone->Prefix());\n"
                                     append clone_impl "  const class_var* prefix = nullptr;\n"
-                                    append clone_impl "  if (ref) prefix = dynamic_cast<const class_var*> (ref->Actual_group());\n"
+                                    append clone_impl "  if (ref) prefix = any_cast<const class_var*> (ref->Actual_group());\n"
                                     set prefix ", prefix"
                                 }
-                                append clone_impl "  if (task* t = dynamic_cast<task*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
+                                append clone_impl "  if (task* t = any_cast<task*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
     clone->${method}(t);
   } else {
     elaborator->scheduleTaskFuncBinding(clone);
@@ -151,12 +151,12 @@ proc generate_elaborator { models } {
                             } elseif {($method == "Function")} {
                                 set prefix ""
                                 if [regexp {method_} $classname] {
-                                    append clone_impl "  const ref_obj* ref = dynamic_cast<const ref_obj*> (clone->Prefix());\n"
+                                    append clone_impl "  const ref_obj* ref = any_cast<const ref_obj*> (clone->Prefix());\n"
                                     append clone_impl "  const class_var* prefix = nullptr;\n"
-                                    append clone_impl "  if (ref) prefix = dynamic_cast<const class_var*> (ref->Actual_group());\n"
+                                    append clone_impl "  if (ref) prefix = any_cast<const class_var*> (ref->Actual_group());\n"
                                     set prefix ", prefix"
                                 }
-                                append clone_impl "  if (function* f = dynamic_cast<function*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
+                                append clone_impl "  if (function* f = any_cast<function*> (elaborator->bindTaskFunc(VpiName()$prefix))) {
     clone->${method}(f);
   } else {
     elaborator->scheduleTaskFuncBinding(clone);
@@ -170,7 +170,7 @@ proc generate_elaborator { models } {
 "
                             } elseif {$method == "Instance"} {
                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((instance*)obj);
-  if (instance* inst = dynamic_cast<instance*>(parent))
+  if (instance* inst = any_cast<instance*>(parent))
     clone->Instance(inst);
 "
                             } elseif {$method == "Module"} {
@@ -352,7 +352,7 @@ proc generate_elaborator { models } {
           }
 "
                             }
-
+                            
                         }
                     }
                 }

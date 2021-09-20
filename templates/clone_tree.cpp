@@ -127,9 +127,9 @@ bool ElaboratorListener::isFunctionCall(const std::string& name, const expr* pre
     }
   }
   if (prefix) {
-    const ref_obj* ref = dynamic_cast<const ref_obj*> (prefix);
+    const ref_obj* ref = any_cast<const ref_obj*>(prefix);
     const class_var* vprefix = nullptr;
-    if (ref) vprefix = dynamic_cast<const class_var*> (ref->Actual_group());
+    if (ref) vprefix = any_cast<const class_var*>(ref->Actual_group());
     any* func = bindTaskFunc(name, vprefix);
     if (func) {
       if (func->UhdmType() == uhdmfunction) {
@@ -154,9 +154,9 @@ bool ElaboratorListener::isTaskCall(const std::string& name, const expr* prefix)
     }
   }
   if (prefix) {
-    const ref_obj* ref = dynamic_cast<const ref_obj*> (prefix);
+    const ref_obj* ref = any_cast<const ref_obj*>(prefix);
     const class_var* vprefix = nullptr;
-    if (ref) vprefix = dynamic_cast<const class_var*> (ref->Actual_group());
+    if (ref) vprefix = any_cast<const class_var*>(ref->Actual_group());
     any* func = bindTaskFunc(name, vprefix);
     if (func) {
       if (func->UhdmType() == uhdmtask) {
@@ -226,10 +226,10 @@ tf_call* method_func_call::DeepClone(Serializer* serializer, ElaboratorListener*
     clone->VpiParent(parent);
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
-    const ref_obj* ref = dynamic_cast<const ref_obj*>(clone->Prefix());
+    const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
     const class_var* prefix = nullptr;
-    if (ref) prefix = dynamic_cast<const class_var*>(ref->Actual_group());
-    if (function* f = dynamic_cast<function*>(
+    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
+    if (function* f = any_cast<function*>(
             elaborator->bindTaskFunc(VpiName(), prefix))) {
       clone->Function(f);
     }
@@ -257,10 +257,10 @@ tf_call* method_func_call::DeepClone(Serializer* serializer, ElaboratorListener*
     clone->VpiParent(parent);
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
-    const ref_obj* ref = dynamic_cast<const ref_obj*>(clone->Prefix());
+    const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
     const class_var* prefix = nullptr;
-    if (ref) prefix = dynamic_cast<const class_var*>(ref->Actual_group());
-    if (task* f = dynamic_cast<task*>(
+    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
+    if (task* f = any_cast<task*>(
             elaborator->bindTaskFunc(VpiName(), prefix))) {
       clone->Task(f);
     }
@@ -327,11 +327,11 @@ tf_call* method_task_call::DeepClone(Serializer* serializer, ElaboratorListener*
     clone->VpiParent(parent);
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
-    const ref_obj* ref = dynamic_cast<const ref_obj*>(clone->Prefix());
+    const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
     const class_var* prefix = nullptr;
-    if (ref) prefix = dynamic_cast<const class_var*>(ref->Actual_group());
+    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
     if (task* t =
-            dynamic_cast<task*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
+            any_cast<task*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
       clone->Task(t);
     }
     if (auto obj = With())
@@ -358,11 +358,11 @@ tf_call* method_task_call::DeepClone(Serializer* serializer, ElaboratorListener*
     clone->VpiParent(parent);
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
-    const ref_obj* ref = dynamic_cast<const ref_obj*>(clone->Prefix());
+    const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
     const class_var* prefix = nullptr;
-    if (ref) prefix = dynamic_cast<const class_var*>(ref->Actual_group());
+    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
     if (function* t =
-            dynamic_cast<function*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
+            any_cast<function*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
       clone->Function(t);
     }
     if (auto obj = With())
@@ -393,7 +393,7 @@ tf_call* func_call::DeepClone(Serializer* serializer, ElaboratorListener* elabor
     clone->UhdmId(id);
     clone->VpiParent(parent);
     if (function* f =
-            dynamic_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
+            any_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
       clone->Function(f);
     } else {
       elaborator->scheduleTaskFuncBinding(clone);
@@ -418,8 +418,7 @@ tf_call* func_call::DeepClone(Serializer* serializer, ElaboratorListener* elabor
     clone->Tf_call_args(Tf_call_args());
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (task* f =
-            dynamic_cast<task*>(elaborator->bindTaskFunc(VpiName()))) {
+    if (task* f = any_cast<task*>(elaborator->bindTaskFunc(VpiName()))) {
       clone->Task(f);
     }
     if (auto obj = Scope())
@@ -448,7 +447,7 @@ tf_call* task_call::DeepClone(Serializer* serializer, ElaboratorListener* elabor
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (task* t = dynamic_cast<task*>(elaborator->bindTaskFunc(VpiName()))) {
+    if (task* t = any_cast<task*>(elaborator->bindTaskFunc(VpiName()))) {
       clone->Task(t);
     }
     if (auto obj = Scope())
@@ -471,7 +470,7 @@ tf_call* task_call::DeepClone(Serializer* serializer, ElaboratorListener* elabor
     clone->Tf_call_args(Tf_call_args());
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (function* t = dynamic_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
+    if (function* t = any_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
       clone->Function(t);
     }
     if (auto obj = Scope())
@@ -511,7 +510,7 @@ gen_scope_array* gen_scope_array::DeepClone(Serializer* serializer, ElaboratorLi
 }
 
 function* function::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
-  if (function* f = dynamic_cast<function*>( elaborator->bindTaskFunc(VpiName(), nullptr))) {
+  if (function* f = any_cast<function*>( elaborator->bindTaskFunc(VpiName(), nullptr))) {
     return f;
   }
   function* const clone = serializer->MakeFunction();
@@ -523,7 +522,7 @@ function* function::DeepClone(Serializer* serializer, ElaboratorListener* elabor
   if (auto obj = Right_range()) clone->Right_range(obj->DeepClone(serializer, elaborator, clone));
   if (auto obj = Return()) clone->Return((variables*)obj);
   if (auto obj = Instance()) clone->Instance((instance*)obj);
-  if (instance* inst = dynamic_cast<instance*>(parent))
+  if (instance* inst = any_cast<instance*>(parent))
     clone->Instance(inst);
   if (auto obj = Class_defn()) clone->Class_defn(obj->DeepClone(serializer, elaborator, clone));
   if (auto obj = Ref_obj()) clone->Ref_obj(obj->DeepClone(serializer, elaborator, clone));
@@ -673,7 +672,7 @@ task* task::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, Ba
   if (auto obj = Right_range()) clone->Right_range(obj->DeepClone(serializer, elaborator, clone));
   if (auto obj = Return()) clone->Return(obj->DeepClone(serializer, elaborator, clone));
   if (auto obj = Instance()) clone->Instance((instance*)obj);
-  if (instance* inst = dynamic_cast<instance*>(parent))
+  if (instance* inst = any_cast<instance*>(parent))
     clone->Instance(inst);
   if (auto obj = Class_defn()) clone->Class_defn(obj->DeepClone(serializer, elaborator, clone));
   if (auto obj = Ref_obj()) clone->Ref_obj(obj->DeepClone(serializer, elaborator, clone));
