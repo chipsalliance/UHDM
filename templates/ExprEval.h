@@ -25,6 +25,7 @@
  */
 
 #include <uhdm/typespec.h>
+#include <uhdm/expr.h>
 
 namespace UHDM {
 
@@ -32,7 +33,9 @@ namespace UHDM {
  
   public:
     
-    bool isFullySpecified(const UHDM::typespec* tps);
+    bool isFullySpecified(const typespec* tps);
+
+    expr* flattenPatternAssignments(Serializer& s, const typespec* tps, expr* assignExpr);
     
   };
   
