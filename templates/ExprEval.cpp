@@ -98,25 +98,62 @@ bool ExprEval::isFullySpecified(const UHDM::typespec* tps) {
 expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
                                           expr* exp) {
   expr* result = exp;
-  if (exp && (exp->UhdmType() == uhdmoperation)) {
+  if ((!exp) || (!tps)) {
+    return result;
+  } 
+  if (exp->UhdmType() == uhdmoperation) {
     operation* op = (operation*)exp;
     if (op->VpiOpType() != vpiAssignmentPatternOp) {
       return result;
     }
-    if (tps && (tps->UhdmType() != uhdmstruct_typespec)) {
+    if (tps->UhdmType() != uhdmstruct_typespec) {
       return result;
     }
-    /*
+    
     struct_typespec* stps = (struct_typespec*)tps;
     std::vector<std::string> fieldNames;
+    std::vector<const typespec*> fieldTypes;
     for (typespec_member* memb : *stps->Members()) {
       fieldNames.push_back(memb->VpiName());
+      fieldTypes.push_back(memb->Typespec());
     }
     VectorOfany* orig = op->Operands();
     VectorOfany* ordered = s.MakeAnyVec();
     std::vector<any*> tmp(fieldNames.size());
-    */
-
+    for(auto oper : *orig) {
+      if (oper->UhdmType() == uhdmtagged_pattern) {
+        tagged_pattern* tp = (tagged_pattern*) oper;
+        const typespec* ttp = tp->Typespec();
+        const std::string& tname = ttp->VpiName();
+        bool found = false;
+        for (unsigned int i = 0; i < fieldNames.size(); i++) {
+          if (tname == fieldNames[i]) {
+            tmp[i] = oper;
+            found = true;
+            break;
+          }
+        }
+        if (found == false) {
+          for (unsigned int i = 0; i < fieldTypes.size(); i++) {
+            if (ttp->UhdmType() == fieldTypes[i]->UhdmType()) {
+              tmp[i] = oper;
+              found = true;
+              break;
+            }
+          }
+        }
+        if (found == false) {
+          return result;
+        }
+      }
+    }
+    for (auto op : tmp) {
+      if (op == nullptr) {
+        return result;
+      }
+      ordered->push_back(op);
+    }
+    op->Operands(ordered);
   }
   return result;
 }
