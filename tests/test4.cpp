@@ -1,16 +1,16 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
-#include <iostream>
-
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_visitor.h>
+
+#include <iostream>
 
 #include "test-util.h"
 
 using namespace UHDM;
 
 // TODO: this test assumes that test1 and test3 have run before
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
   std::string fileName = uhdm_test::getTmpDir() + "/surelog.uhdm";
   if (argc > 1) {
     fileName = argv[1];

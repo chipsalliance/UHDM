@@ -1,7 +1,7 @@
-#include <iostream>
-
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_visitor.h>
+
+#include <iostream>
 
 #include "test-util.h"
 
@@ -9,7 +9,7 @@ using namespace UHDM;
 
 #include <uhdm/vpi_visitor.h>
 
-std::vector<vpiHandle> build_designs (Serializer& s) {
+std::vector<vpiHandle> build_designs(Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s.MakeDesign();
@@ -30,7 +30,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
 
   sys_func_call* display = s.MakeSys_func_call();
   display->VpiName("display");
-  VectorOfany *arguments = s.MakeAnyVec();
+  VectorOfany* arguments = s.MakeAnyVec();
   constant* cA = s.MakeConstant();
   cA->VpiValue("INT:0");
   arguments->push_back(cA);
@@ -44,7 +44,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   function* my_func = s.MakeFunction();
   my_func->VpiName("a_func");
   my_func_call->Function(my_func);
-  VectorOfany *arguments2 = s.MakeAnyVec();
+  VectorOfany* arguments2 = s.MakeAnyVec();
   constant* cA2 = s.MakeConstant();
   cA2->VpiValue("INT:1");
   arguments2->push_back(cA2);
@@ -70,7 +70,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   return designs;
 }
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
   std::cout << "Make design" << std::endl;
   Serializer serializer;
 

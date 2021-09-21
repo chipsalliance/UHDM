@@ -24,33 +24,31 @@
  * Created on May 4, 2020, 10:03 PM
  */
 
-
-#include <iostream>
-#include <string>
-#include <vector>
-#include <map>
-#include <stack>
-
+#include <uhdm/ElaboratorListener.h>
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_listener.h>
 #include <uhdm/vpi_visitor.h>
-#include <uhdm/ElaboratorListener.h>
+
+#include <iostream>
+#include <map>
+#include <stack>
+#include <string>
+#include <vector>
 
 #include "test-util.h"
 
 using namespace UHDM;
 
-
 //-------------------------------------------
-// This self-contained example demonstrate how one can navigate the Folded Model of UHDM
-// By extracting the complete information in between in the instance tree and the module definitions using the Listener Design Pattern
+// This self-contained example demonstrate how one can navigate the Folded Model
+// of UHDM By extracting the complete information in between in the instance
+// tree and the module definitions using the Listener Design Pattern
 //-------------------------------------------
-
 
 //-------------------------------------------
 // Unit test design
 
-std::vector<vpiHandle> build_designs (Serializer& s) {
+std::vector<vpiHandle> build_designs(Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s.MakeDesign();
@@ -108,15 +106,14 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     m2->Cont_assigns(assigns);
   }
 
-
   //-------------------------------------------
   // Instance tree (Elaborated tree)
   // Top level module
   module* m3 = s.MakeModule();
   VectorOfmodule* v1 = s.MakeModuleVec();
   {
-    m3->VpiDefName("M1"); // Points to the module def (by name)
-    m3->VpiName("M1");    // Instance name
+    m3->VpiDefName("M1");  // Points to the module def (by name)
+    m3->VpiName("M1");     // Instance name
     m3->VpiTopModule(true);
     m3->Modules(v1);
     m3->VpiParent(d);
@@ -126,10 +123,10 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   // Sub Instance
   module* m4 = s.MakeModule();
   {
-    m4->VpiDefName("M2"); // Points to the module def (by name)
-    m4->VpiName("inst1"); // Instance name
-    m4->VpiFullName("M1.inst1"); // Instance full name
-    VectorOfport* inst_vp = s.MakePortVec(); // Create elaborated ports
+    m4->VpiDefName("M2");         // Points to the module def (by name)
+    m4->VpiName("inst1");         // Instance name
+    m4->VpiFullName("M1.inst1");  // Instance full name
+    VectorOfport* inst_vp = s.MakePortVec();  // Create elaborated ports
     m4->Ports(inst_vp);
     port* p1 = s.MakePort();
     p1->VpiName("i1");
@@ -138,7 +135,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     p2->VpiName("o1");
     inst_vp->push_back(p2);
     // M2 Nets
-    VectorOfnet* vn = s.MakeNetVec(); // Create elaborated nets
+    VectorOfnet* vn = s.MakeNetVec();  // Create elaborated nets
     logic_net* n = s.MakeLogic_net();
     n->VpiName("i1");
     n->VpiFullName("M1.inst.i1");
@@ -156,7 +153,6 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
     p2->Low_conn(low_conn);
     vn->push_back(n);
     m4->Nets(vn);
-
   }
 
   // Create parent-child relation in between the 2 modules in the instance tree
@@ -172,7 +168,8 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
 
   VectorOfmodule* topModules = s.MakeModuleVec();
   d->TopModules(topModules);
-  topModules->push_back(m3); // Only m3 goes there as it is the top level module
+  topModules->push_back(
+      m3);  // Only m3 goes there as it is the top level module
 
   vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
   designs.push_back(dh);
@@ -184,15 +181,12 @@ void dumpStats(Serializer& serializer) {
   std::cout << "Stats:\n";
   std::map<std::string, unsigned long> stats = serializer.ObjectStats();
   for (auto stat : stats) {
-    if (stat.second)
-      std::cout << stat.first << " " << stat.second << "\n";
+    if (stat.second) std::cout << stat.first << " " << stat.second << "\n";
   }
   std::cout << "\n";
 }
 
-
-int main (int argc, char** argv) {
-
+int main(int argc, char** argv) {
   Serializer serializer;
   const std::vector<vpiHandle>& designs = build_designs(serializer);
   std::string orig;
@@ -202,14 +196,14 @@ int main (int argc, char** argv) {
 
   std::cout << std::endl;
   bool elaborated = false;
-  for(auto design : designs) {
+  for (auto design : designs) {
     elaborated |= vpi_get(vpiElaborated, design);
   }
 
   dumpStats(serializer);
   if (!elaborated) {
     ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
-    listen_designs(designs,listener);
+    listen_designs(designs, listener);
     std::cout << std::endl;
   }
   serializer.Save(uhdm_test::getTmpDir() + "/elab_test.uhdm");

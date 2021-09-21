@@ -1,9 +1,9 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
-#include <iostream>
-
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_visitor.h>
+
+#include <iostream>
 
 #include "test-util.h"
 
@@ -11,7 +11,7 @@ using namespace UHDM;
 
 #include <uhdm/vpi_visitor.h>
 
-std::vector<vpiHandle> build_designs (Serializer& s) {
+std::vector<vpiHandle> build_designs(Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s.MakeDesign();
@@ -61,7 +61,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   assign3->Lhs(lhs_rf);
   constant* c3 = s.MakeConstant();
   s_vpi_value val;
-  val.format  = vpiIntVal;
+  val.format = vpiIntVal;
   val.value.integer = 1;
   c3->VpiValue(VpiValue2String(&val));
   assign3->Rhs(c3);
@@ -97,7 +97,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   return designs;
 }
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
   std::cout << "Make design" << std::endl;
   Serializer serializer;
 

@@ -1,16 +1,16 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
-#include <iostream>
-
+#include <uhdm/ElaboratorListener.h>
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_listener.h>
 #include <uhdm/vpi_visitor.h>
-#include <uhdm/ElaboratorListener.h>
+
+#include <iostream>
 
 #include "test-util.h"
 
 using namespace UHDM;
 
-std::vector<vpiHandle> build_designs (Serializer& s) {
+std::vector<vpiHandle> build_designs(Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s.MakeDesign();
@@ -91,7 +91,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   funcs2->push_back(f3);
   method_func_call* fcall2 = s.MakeMethod_func_call();
   f3->Stmt(fcall);
-  fcall2->VpiName("f1"); // parent class function
+  fcall2->VpiName("f1");  // parent class function
 
   VectorOfmodule* topModules = s.MakeModuleVec();
   d->TopModules(topModules);
@@ -102,7 +102,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   return designs;
 }
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
   std::cout << "Make design" << std::endl;
   Serializer serializer;
   const std::vector<vpiHandle>& designs = build_designs(serializer);
@@ -123,7 +123,7 @@ int main (int argc, char** argv) {
 
   // Elaborate restored designs
   ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
-  listen_designs(restoredDesigns,listener);
+  listen_designs(restoredDesigns, listener);
   std::cout << "Elaborated restored design:\n";
   std::cout << visit_designs(restoredDesigns);
 

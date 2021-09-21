@@ -1,12 +1,11 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
+#include <stdlib.h>
+#include <uhdm/vhpi_user.h>  // vpi_user functions.
+#include <uhdm/vpi_uhdm.h>   // struct uhdm_handle
+
 #include <iostream>
 #include <memory>
-
-#include <uhdm/vpi_uhdm.h>     // struct uhdm_handle
-#include <uhdm/vhpi_user.h>    // vpi_user functions.
-
-#include <stdlib.h>
 
 #include "test-util.h"
 
@@ -22,19 +21,19 @@ static void TEST_vpivalue2string() {
   EXPECT_EQ(VpiValue2String(&value), "SCAL:X");
 
   value.format = vpiStringVal;
-  value.value.str = (PLI_BYTE8*)"helloworld";
+  value.value.str = (PLI_BYTE8 *)"helloworld";
   EXPECT_EQ(VpiValue2String(&value), "STRING:helloworld");
 
   value.format = vpiHexStrVal;
-  value.value.str = (PLI_BYTE8*)"FEEDCAFE";
+  value.value.str = (PLI_BYTE8 *)"FEEDCAFE";
   EXPECT_EQ(VpiValue2String(&value), "HEX:FEEDCAFE");
 
   value.format = vpiOctStrVal;
-  value.value.str = (PLI_BYTE8*)"007";
+  value.value.str = (PLI_BYTE8 *)"007";
   EXPECT_EQ(VpiValue2String(&value), "OCT:007");
 
   value.format = vpiBinStrVal;
-  value.value.str = (PLI_BYTE8*)"101010";
+  value.value.str = (PLI_BYTE8 *)"101010";
   EXPECT_EQ(VpiValue2String(&value), "BIN:101010");
 
   value.format = vpiRealVal;

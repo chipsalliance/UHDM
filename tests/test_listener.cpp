@@ -1,17 +1,17 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
-#include <iostream>
-#include <stack>
-
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_listener.h>
+
+#include <iostream>
+#include <stack>
 
 #include "test-util.h"
 
 using namespace UHDM;
 
 class MyVpiListener : public VpiListener {
-protected:
+ protected:
   void enterModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
     const char* const parentName = vpi_get_str(vpiName, parentHandle);
@@ -40,11 +40,11 @@ protected:
     stack_.pop();
   }
 
-private:
+ private:
   std::stack<const BaseClass*> stack_;
 };
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
   std::string fileName = uhdm_test::getTmpDir() + "/surelog.uhdm";
   if (argc > 1) {
     fileName = argv[1];
@@ -53,6 +53,6 @@ int main (int argc, char** argv) {
   std::cout << "Restore design from: " << fileName << std::endl;
   std::vector<vpiHandle> restoredDesigns = serializer1.Restore(fileName);
   MyVpiListener* listener = new MyVpiListener();
-  listen_designs(restoredDesigns,listener);
+  listen_designs(restoredDesigns, listener);
   return 0;
 }

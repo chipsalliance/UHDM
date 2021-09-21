@@ -3,20 +3,21 @@
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_visitor.h>
 
-#include "test-util.h"
-
 #include <iostream>
+
+#include "test-util.h"
 
 using namespace UHDM;
 
 class MyPayLoad : public ClientData {
-public:
+ public:
   MyPayLoad(int f) { foo_ = f; }
-private:
+
+ private:
   int foo_;
 };
 
-std::vector<vpiHandle> build_designs (Serializer& s) {
+std::vector<vpiHandle> build_designs(Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s.MakeDesign();
@@ -126,7 +127,7 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   return designs;
 }
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
   std::cout << "Make design" << std::endl;
   Serializer serializer;
   const std::vector<vpiHandle>& designs = build_designs(serializer);

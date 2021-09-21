@@ -3,18 +3,18 @@
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_visitor.h>
 
-#include "test-util.h"
-
 #include <iostream>
+
+#include "test-util.h"
 
 using namespace UHDM;
 
-std::vector<vpiHandle> build_designs (Serializer& s) {
+std::vector<vpiHandle> build_designs(Serializer& s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s.MakeDesign();
   d->VpiName("design1");
-  
+
   // Module
   module* m1 = s.MakeModule();
   m1->VpiTopModule(true);
@@ -25,18 +25,18 @@ std::vector<vpiHandle> build_designs (Serializer& s) {
   module* m2 = s.MakeModule();
   m2->VpiDefName("M2");
   m2->VpiName("u1");
-  
+
   VectorOfmodule* v1 = s.MakeModuleVec();
   v1->push_back(m1);
   d->TopModules(v1);
-  
+
   vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
   designs.push_back(dh);
 
   return designs;
 }
 
-int main (int argc, char** argv) {
+int main(int argc, char** argv) {
   std::cout << "Make design" << std::endl;
   Serializer serializer;
   const std::vector<vpiHandle>& designs = build_designs(serializer);
@@ -50,7 +50,7 @@ int main (int argc, char** argv) {
   for (vpiHandle design : designs) {
     vpi_release_handle(design);
   }
-                                  
+
   std::cout << "Restore design" << std::endl;
   const std::vector<vpiHandle>& restoredDesigns = serializer.Restore(filename);
   std::string restored;
@@ -61,7 +61,7 @@ int main (int argc, char** argv) {
   for (auto objIndexPair : serializer.AllObjects()) {
     if (objIndexPair.first) {
       restored += "OBJECT:\n";
-      restored += decompile((any*) objIndexPair.first);
+      restored += decompile((any*)objIndexPair.first);
     }
   }
   std::cout << restored;
