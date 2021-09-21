@@ -36,10 +36,14 @@
 #include <uhdm/uhdm.h>
 
 namespace UHDM {
+  enum ErrorType {
+    UHDM_WRONG_OBJECT_TYPE = 703,
+    UHDM_UNDEFINED_PATTERN_KEY = 712
+  };
 
-  typedef std::function<void(const std::string&)> ErrorHandler;
+  typedef std::function<void(ErrorType errType, const std::string&, any* object)> ErrorHandler;
 
-  static void DefaultErrorHandler(const std::string& errorMsg) { std::cout << errorMsg << std::endl; }
+  void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, any* object);
 
   class Serializer {
   public:

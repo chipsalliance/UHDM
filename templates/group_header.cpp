@@ -37,7 +37,7 @@ bool <GROUPNAME>GroupCompliant(any* item) {
   if (
 <CHECKTYPE>
   ) {
-    item->GetSerializer()->GetErrorHandler()("Internal Error: adding wrong object type (" + UhdmName(uhdmtype) + ") in a <GROUPNAME> group!");
+    item->GetSerializer()->GetErrorHandler()(ErrorType::UHDM_WRONG_OBJECT_TYPE, "Internal Error: adding wrong object type (" + UhdmName(uhdmtype) + ") in a <GROUPNAME> group!", the_item);
     return false;
   }
   return true;

@@ -101,6 +101,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
   if ((!exp) || (!tps)) {
     return result;
   } 
+  // Reordering
   if (exp->UhdmType() == uhdmoperation) {
     operation* op = (operation*)exp;
     if (op->VpiOpType() != vpiAssignmentPatternOp) {
