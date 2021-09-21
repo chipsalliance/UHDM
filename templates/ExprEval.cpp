@@ -100,7 +100,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
   expr* result = exp;
   if ((!exp) || (!tps)) {
     return result;
-  } 
+  }
   // Reordering
   if (exp->UhdmType() == uhdmoperation) {
     operation* op = (operation*)exp;
@@ -110,7 +110,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     if (tps->UhdmType() != uhdmstruct_typespec) {
       return result;
     }
-    
+
     struct_typespec* stps = (struct_typespec*)tps;
     std::vector<std::string> fieldNames;
     std::vector<const typespec*> fieldTypes;
@@ -121,9 +121,9 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     VectorOfany* orig = op->Operands();
     VectorOfany* ordered = s.MakeAnyVec();
     std::vector<any*> tmp(fieldNames.size());
-    for(auto oper : *orig) {
+    for (auto oper : *orig) {
       if (oper->UhdmType() == uhdmtagged_pattern) {
-        tagged_pattern* tp = (tagged_pattern*) oper;
+        tagged_pattern* tp = (tagged_pattern*)oper;
         const typespec* ttp = tp->Typespec();
         const std::string& tname = ttp->VpiName();
         bool found = false;
@@ -144,15 +144,21 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
           }
         }
         if (found == false) {
+          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, tname,
+                              exp);
           return result;
         }
       }
     }
+    int index = 0;
     for (auto op : tmp) {
       if (op == nullptr) {
+        s.GetErrorHandler()(ErrorType::UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN,
+                            fieldNames[index], exp);
         return result;
       }
       ordered->push_back(op);
+      index++;
     }
     op->Operands(ordered);
   }
