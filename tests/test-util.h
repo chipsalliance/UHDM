@@ -21,4 +21,8 @@ inline std::string uhdm_test::getTmpDir() {
   return "/tmp";
 }
 
+#define EXPECT_EQ(x, y) if ((x) == (y)) {} else { std::cerr << __LINE__ << ": " << #x << " == " << #y << "\n"; abort(); }
+#define EXPECT_TRUE(x) if ((x)) {} else { std::cerr << __LINE__ << ": " << #x << "\n"; abort(); }
+#define EXPECT_FALSE(x) if (!(x)) {} else { std::cerr << __LINE__ << ": " << #x << "\n"; abort(); }
+
 #endif // UHDM_TEST_UTIL

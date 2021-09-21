@@ -10,8 +10,7 @@
 
 #include <stdlib.h>
 
-#define EXPECT_TRUE(x) if ((x)) {} else { std::cerr << __LINE__ << ": " << #x << "\n"; abort(); }
-#define EXPECT_EQ(x, y) if ((x) == (y)) {} else { std::cerr << __LINE__ << ": " << #x << " == " << #y << "\n"; abort(); }
+#include "test-util.h"
 
 int main() {
   UHDM::Serializer serializer;

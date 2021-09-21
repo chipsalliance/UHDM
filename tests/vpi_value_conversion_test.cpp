@@ -6,12 +6,9 @@
 #include <uhdm/vpi_uhdm.h>     // struct uhdm_handle
 #include <uhdm/vhpi_user.h>    // vpi_user functions.
 
-
 #include <stdlib.h>
 
-#define EXPECT_TRUE(x) if ((x)) {} else { std::cerr << __LINE__ << ": " << #x << "\n"; abort(); }
-#define EXPECT_FALSE(x) if (!(x)) {} else { std::cerr << __LINE__ << ": " << #x << "\n"; abort(); }
-#define EXPECT_EQ(x, y) if ((x) == (y)) {} else { std::cerr << __LINE__ << ": " << #x << " == " << #y << "\n"; abort(); }
+#include "test-util.h"
 
 static void TEST_vpivalue2string() {
   s_vpi_value value;
