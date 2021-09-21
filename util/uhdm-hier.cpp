@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
       vpiHandle instItr = vpi_iterate(UHDM::uhdmtopModules, design);
       while (vpiHandle obj_h = vpi_scan(instItr)) {
         std::function<std::string(vpiHandle, std::string)> inst_visit =
-	  [&inst_visit,printLineInfo](vpiHandle obj_h, std::string path) {
+            [&inst_visit, printLineInfo](vpiHandle obj_h, std::string path) {
               std::string res;
               std::string objectName;
               std::string defName;
@@ -101,8 +101,12 @@ int main(int argc, char** argv) {
                 fileName = s;
               }
               if (objectName.size()) {
-		std::string lineInfo = printLineInfo ? std::string( " (" + defName + " " + fileName +
-								    ":" + std::to_string(vpi_get(vpiLineNo, obj_h)) + ":)") : "";
+                std::string lineInfo =
+                    printLineInfo
+                        ? std::string(
+                              " (" + defName + " " + fileName + ":" +
+                              std::to_string(vpi_get(vpiLineNo, obj_h)) + ":)")
+                        : "";
                 std::string res = path + objectName + lineInfo + "\n";
                 std::cout << res;
                 path += objectName + ".";
@@ -121,7 +125,7 @@ int main(int argc, char** argv) {
                   res += inst_visit(sub_h, path);
                   vpi_release_handle(sub_h);
                 }
-		vpi_release_handle(subItr);
+                vpi_release_handle(subItr);
               }
               if (vpi_get(vpiType, obj_h) == vpiModule ||
                   vpi_get(vpiType, obj_h) == vpiGenScope) {
