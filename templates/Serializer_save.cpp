@@ -54,6 +54,11 @@
 #include <uhdm/uhdm_types.h>
 
 namespace UHDM {
+
+void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, any* object) { 
+  std::cout << errorMsg << std::endl; 
+}
+
 void Serializer::SetId(const BaseClass* p, unsigned long id) {
   allIds_.insert(std::make_pair(p, id));
 }
