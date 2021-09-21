@@ -102,7 +102,8 @@ int main (int argc, char** argv) {
 
   // Install a customer error handler
   bool issuedError = false;
-  UHDM::ErrorHandler MyErrorHandler = [&](const std::string& msg) {
+  UHDM::ErrorHandler MyErrorHandler = [&](ErrorType errType, const std::string& msg,
+                                          any* object) {
     std::cout << "My Error Handler: " << msg << std::endl;
     issuedError = true;
   };

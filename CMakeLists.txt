@@ -20,6 +20,10 @@ option(
 option(UHDM_BUILD_TESTS "Enable testing." ON)
 option(WITH_PYTHON_GENERATOR "Use Python generator instead of TCL." OFF)
 
+if (DEFINED ENV{WITH_PYTHON_GENERATOR})
+  set(WITH_PYTHON_GENERATOR $ENV{WITH_PYTHON_GENERATOR})
+endif()
+
 project(UHDM)
 
 # NOTE: Policy changes has to happen before adding any subprojects
