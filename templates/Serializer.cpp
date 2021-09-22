@@ -27,6 +27,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <uhdm/containers.h>
@@ -63,7 +64,7 @@ unsigned long Serializer::GetId(const BaseClass* p) {
 <UHDM_NAME_MAP>
 
 // From uhdm_types.h
-std::string VpiTypeName(vpiHandle h) {
+std::string_view VpiTypeName(vpiHandle h) {
   uhdm_handle* handle = (uhdm_handle*) h;
   BaseClass* obj = (BaseClass*) handle->object;
   return UhdmName(obj->UhdmType());
@@ -83,8 +84,8 @@ BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
   }
 }
 
-std::map<std::string, unsigned long> Serializer::ObjectStats() const {
-  std::map<std::string, unsigned long> stats;
+std::map<std::string_view, unsigned long> Serializer::ObjectStats() const {
+  std::map<std::string_view, unsigned long> stats;
 <FACTORY_STATS>
   return stats;
 }

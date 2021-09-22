@@ -157,7 +157,7 @@ def generate(models):
         restore_adapters[classname].append('')
 
     uhdm_name_map = [
-        'std::string UhdmName(UHDM_OBJECT_TYPE type) {',
+        'std::string_view UhdmName(UHDM_OBJECT_TYPE type) {',
         '  switch (type) {'
     ]
     uhdm_name_map.extend([ f'  case {name} /* = {id} */: return "{name[4:]}";' for name, id in uhdm_types_h.get_type_map(models).items() ])

@@ -38,7 +38,7 @@ BaseClass* clone_tree(const BaseClass* root, Serializer& s,
 
 // Hardcoded implementations
 
-any* ElaboratorListener::bindNet(const std::string& name) {
+any* ElaboratorListener::bindNet(std::string_view name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
     ComponentMap& netMap = std::get<0>((*i).second);
@@ -51,7 +51,7 @@ any* ElaboratorListener::bindNet(const std::string& name) {
 }
 
 // Bind to a net or parameter in the current instance
-any* ElaboratorListener::bindAny(const std::string& name) {
+any* ElaboratorListener::bindAny(std::string_view name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
     ComponentMap& netMap = std::get<0>((*i).second);
@@ -70,7 +70,7 @@ any* ElaboratorListener::bindAny(const std::string& name) {
 }
 
 // Bind to a param in the current instance
-any* ElaboratorListener::bindParam(const std::string& name) {
+any* ElaboratorListener::bindParam(std::string_view name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
     ComponentMap& paramMap = std::get<1>((*i).second);
@@ -83,7 +83,7 @@ any* ElaboratorListener::bindParam(const std::string& name) {
 }
 
 // Bind to a function or task in the current scope
-any* ElaboratorListener::bindTaskFunc(const std::string& name,
+any* ElaboratorListener::bindTaskFunc(std::string_view name,
                                       const class_var* prefix) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
@@ -116,7 +116,7 @@ any* ElaboratorListener::bindTaskFunc(const std::string& name,
   return nullptr;
 }
 
-bool ElaboratorListener::isFunctionCall(const std::string& name,
+bool ElaboratorListener::isFunctionCall(std::string_view name,
                                         const expr* prefix) {
   if (instStack_.size()) {
     for (InstStack::reverse_iterator i = instStack_.rbegin();
@@ -144,7 +144,7 @@ bool ElaboratorListener::isFunctionCall(const std::string& name,
   return true;
 }
 
-bool ElaboratorListener::isTaskCall(const std::string& name,
+bool ElaboratorListener::isTaskCall(std::string_view name,
                                     const expr* prefix) {
   if (instStack_.size()) {
     for (InstStack::reverse_iterator i = instStack_.rbegin();
@@ -859,7 +859,7 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
     case uhdmclass_defn: {
       class_defn* defn = (class_defn*)target;
       const any* lhs = pass->Lhs();
-      const std::string& name = lhs->VpiName();
+      const std::string_view& name = lhs->VpiName();
       VectorOfany* params = defn->Parameters();
       if (params) {
         for (any* param : *params) {
@@ -896,7 +896,7 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
     case uhdmclass_typespec: {
       class_typespec* defn = (class_typespec*)target;
       const any* lhs = pass->Lhs();
-      const std::string& name = lhs->VpiName();
+      const std::string_view& name = lhs->VpiName();
       VectorOfany* params = defn->Parameters();
       if (params) {
         for (any* param : *params) {
@@ -1093,7 +1093,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
       clone_vec->push_back(current);
       bool found = false;
       if (previous) {
-        const std::string& name = obj->VpiName();
+        const std::string_view& name = obj->VpiName();
         if (previous->UhdmType() == uhdmref_obj) {
           ref_obj* ref = (ref_obj*)previous;
           const any* actual = ref->Actual_group();
@@ -1185,4 +1185,3 @@ void ElaboratorListener::leaveRef_obj(const ref_obj* object,
 <CLONE_IMPLEMENTATIONS>
 
 }  // UHDM namespace
-

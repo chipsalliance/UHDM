@@ -57,7 +57,7 @@ namespace UHDM {
     void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
     ErrorHandler GetErrorHandler() { return errorHandler; }
     const std::vector<vpiHandle> Restore(const std::string& file);
-    std::map<std::string, unsigned long> ObjectStats() const;
+    std::map<std::string_view, unsigned long> ObjectStats() const;
 
   private:
     template<typename T, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>

@@ -49,26 +49,26 @@ public:
   bool uniquifyTypespec() { return uniquifyTypespec_; }
   void bindOnly(bool bindOnly) { clone_ = !bindOnly; }
   bool bindOnly() { return !clone_; }
-  bool isFunctionCall(const std::string& name, const expr* prefix);
+  bool isFunctionCall(std::string_view name, const expr* prefix);
 
-  bool isTaskCall(const std::string& name, const expr* prefix);
+  bool isTaskCall(std::string_view name, const expr* prefix);
 
   // Bind to a net in the current instance
-  any* bindNet(const std::string& name);
+  any* bindNet(std::string_view name);
 
   // Bind to a net or parameter in the current instance
-  any* bindAny(const std::string& name);
+  any* bindAny(std::string_view name);
 
   // Bind to a param in the current instance
-  any* bindParam(const std::string& name);
+  any* bindParam(std::string_view name);
 
   // Bind to a function or task in the current scope
-  any* bindTaskFunc(const std::string& name, const class_var* prefix = nullptr);
+  any* bindTaskFunc(std::string_view name, const class_var* prefix = nullptr);
 
   void scheduleTaskFuncBinding(tf_call* clone) { scheduledTfCallBinding_.push_back(clone); }
 
 protected:
-  typedef std::map<std::string, const BaseClass*> ComponentMap;
+  typedef std::map<std::string_view, const BaseClass*> ComponentMap;
 
   void leaveDesign(const design* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) override {
     design* root = (design*) object;
@@ -78,11 +78,13 @@ protected:
   void enterModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
     module* inst = (module*) object;
-    bool topLevelModule         = object->VpiTopModule();
-    const std::string& instName = object->VpiName();
-    const std::string& defName  = object->VpiDefName();
-    bool flatModule             = (instName == "") && ((object->VpiParent() == 0) ||
-                                                       ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
+    bool topLevelModule = object->VpiTopModule();
+    const std::string_view& instName = object->VpiName();
+    const std::string_view& defName = object->VpiDefName();
+    bool flatModule =
+        (instName == "") && ((object->VpiParent() == 0) ||
+                             ((object->VpiParent() != 0) &&
+                              (object->VpiParent()->VpiType() != vpiModule)));
                                   // false when it is a module in a hierachy tree
     if (debug_)
       std::cout << "Module: " << defName << " (" << instName << ") Flat:"  << flatModule << ", Top:" << topLevelModule << std::endl;

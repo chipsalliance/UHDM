@@ -132,9 +132,9 @@ def _print_get_str_body(classname, type, vpi, card):
         if vpi == 'vpiFullName':
             content.append(f'    return (o->{Vpi_}().empty() || o->{Vpi_}() == o->VpiName())')
             content.append( '      ? 0')
-            content.append(f'      : (PLI_BYTE8*) o->{Vpi_}().c_str();')
+            content.append(f'      : (PLI_BYTE8*) o->{Vpi_}().data();')
         else:
-            content.append(f'    return (PLI_BYTE8*) (o->{Vpi_}().empty() ? 0 : o->{Vpi_}().c_str());')
+            content.append(f'    return (PLI_BYTE8*) (o->{Vpi_}().empty() ? 0 : o->{Vpi_}().data());')
         content.append( '  }')
     return content
 

@@ -115,9 +115,9 @@ void Serializer::Save(const std::string& file) {
   index = 0;
   std::vector<char*> dups; 
   for (auto symbol : symbolMaker.id2SymbolMap_) {
-    char* dup = strdup(symbol.c_str());
+    char* dup = strdup(symbol.data());
     dups.push_back(dup);
-    symbols.set(index,dup);
+    symbols.set(index, dup);
     index++;
   }
 

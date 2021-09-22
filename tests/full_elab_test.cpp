@@ -175,13 +175,13 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 }
 
 std::string dumpStats(const Serializer& serializer) {
-  std::string result;
-  std::map<std::string, unsigned long> stats = serializer.ObjectStats();
+  std::ostringstream result;
+  std::map<std::string_view, unsigned long> stats = serializer.ObjectStats();
   for (const auto& stat : stats) {
     if (!stat.second) continue;
-    result += stat.first + " " + std::to_string(stat.second) + "\n";
+    result << stat.first << " " << std::to_string(stat.second) << std::endl;
   }
-  return result;
+  return result.str();
 }
 
 // TODO: this is too coarse-grained.
@@ -191,8 +191,8 @@ TEST(FullElabTest, ElaborationRoundtrip) {
   const std::string before = visit_designs(designs);
 
   bool elaborated = false;
-  for (auto design : designs) {
-    elaborated |= vpi_get(vpiElaborated, design);
+  for(auto design : designs) {
+    elaborated = elaborated || vpi_get(vpiElaborated, design);
   }
   EXPECT_FALSE(elaborated);
 
@@ -209,7 +209,7 @@ TEST(FullElabTest, ElaborationRoundtrip) {
 
   elaborated = false;
   for (auto design : designs) {
-    elaborated |= vpi_get(vpiElaborated, design);
+    elaborated = elaborated || vpi_get(vpiElaborated, design);
   }
   EXPECT_TRUE(elaborated);
 

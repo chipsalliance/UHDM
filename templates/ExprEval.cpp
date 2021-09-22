@@ -112,7 +112,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     }
 
     struct_typespec* stps = (struct_typespec*)tps;
-    std::vector<std::string> fieldNames;
+    std::vector<std::string_view> fieldNames;
     std::vector<const typespec*> fieldTypes;
     for (typespec_member* memb : *stps->Members()) {
       fieldNames.push_back(memb->VpiName());
@@ -127,7 +127,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
       if (oper->UhdmType() == uhdmtagged_pattern) {
         tagged_pattern* tp = (tagged_pattern*)oper;
         const typespec* ttp = tp->Typespec();
-        const std::string& tname = ttp->VpiName();
+        const std::string_view tname = ttp->VpiName();
         bool found = false;
         if (tname == "default") {
           defaultOp = oper;
@@ -150,8 +150,8 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
           }
         }
         if (found == false) {
-          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, tname,
-                              exp);
+          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY,
+                              std::string(tname), exp);
           return result;
         }
       } else {
@@ -172,7 +172,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
       }
       if (op == nullptr) {
         s.GetErrorHandler()(ErrorType::UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN,
-                            fieldNames[index], exp);
+                            std::string(fieldNames[index]), exp);
         return result;
       }
       ordered->push_back(op);
@@ -249,7 +249,6 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
   }
   return result;
 }
-
 
 void ExprEval::prettyPrint(Serializer& s, const any* object, uint32_t indent, std::ostream &out) {
   if (object == nullptr)

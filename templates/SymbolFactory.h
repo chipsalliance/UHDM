@@ -27,6 +27,7 @@
 #ifndef UHDM_SYMBOL_FACTORY_H
 #define UHDM_SYMBOL_FACTORY_H
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -39,26 +40,38 @@ class Serializer;
 class SymbolFactory {
   friend Serializer;
 
+  static constexpr int kBufferCapacity = 1024 * 1024;
+  typedef std::vector<std::unique_ptr<std::string>> buffers_t;
+
 public:
   typedef unsigned int ID;
-  typedef std::vector<std::string> Id2SymbolMap;
-  typedef std::unordered_map<std::string, ID> Symbol2IdMap;
 
+private:
+  static constexpr SymbolFactory::ID kBadId = -1;  // setting all the bits.
+  static constexpr std::string_view kBadSymbol{"@@BAD_SYMBOL@@"};
+
+  typedef std::vector<std::string_view> Id2SymbolMap;
+  typedef std::unordered_map<std::string_view, ID> Symbol2IdMap;
+
+ public:
   // Register given "symbol" string as a symbol and return its id.
   // If this is an existing symbol, its ID is returned, otherwise a new one
   // is created.
-  ID Make(const std::string& symbol);
+  ID Make(std::string_view symbol);
 
   // Find id of given "symbol" or return "@@BAD_SYMBOL@@" if it doesn't exist.
-  const std::string& GetSymbol(ID id) const;
+  std::string_view GetSymbol(ID id) const;
 
   // Get symbol string identified by given ID or 0 (zero) if it doesn't exist
-  ID GetId(const std::string& symbol) const;
+  ID GetId(std::string_view symbol) const;
+
+  static std::string_view getBadSymbol() { return kBadSymbol; }
+  static ID getBadId() { return kBadId; }
 
 private:
-  ID idCounter_ = 0;
   Id2SymbolMap id2SymbolMap_;
   Symbol2IdMap symbol2IdMap_;
+  buffers_t buffers;
 };
 
 class VectorOfanyFactory {
@@ -74,6 +87,15 @@ public:
 private:
   std::vector<std::vector<UHDM::any*>*> objects_;
 };
+
+inline std::string_view SymbolFactory::GetSymbol(ID id) const {
+  return (id < id2SymbolMap_.size()) ? id2SymbolMap_[id] : getBadSymbol();
+}
+
+inline SymbolFactory::ID SymbolFactory::GetId(std::string_view symbol) const {
+  auto found = symbol2IdMap_.find(symbol);
+  return (found == symbol2IdMap_.end()) ? getBadId() : found->second;
+}
 
 };
 

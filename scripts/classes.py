@@ -6,13 +6,13 @@ import file_utils
 
 
 def _print_group_headers(type, real_type):
-    return [ f'#include "{real_type}.h"' ] if type == 'any' else []
+    return [ f'#include <uhdm/{real_type}.h>' ] if type == 'any' else []
 
 
 def _print_declaration(classname, type, vpi, card, real_type=''):
     content = []
     if type in ['string', 'value', 'delay']:
-        type = 'std::string'
+        type = 'std::string_view'
     if vpi == 'uhdmType':
         type = 'UHDM_OBJECT_TYPE'
 
@@ -32,13 +32,13 @@ def _print_declaration(classname, type, vpi, card, real_type=''):
     if card == '1':
         pointer = ''
         const = ''
-        if type not in ['unsigned int', 'int', 'bool', 'std::string']:
+        if type not in ['unsigned int', 'int', 'bool', 'std::string_view']:
             pointer = '*'
             const = 'const '
 
-        if type == 'std::string':
-            content.append(f'  {virtual}bool {Vpi_}(const {type}{pointer}& data){final};')
-            content.append(f'  {virtual}const {type}{pointer}& {Vpi_}() const{final};')
+        if type == 'std::string_view':
+            content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final};')
+            content.append(f'  {virtual}{type}{pointer} {Vpi_}() const{final};')
         else:
             content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
             if vpi == 'vpiParent':
@@ -58,36 +58,26 @@ def _print_implementation(classname, type, vpi, card, real_type=''):
         return content
 
     if type in ['string', 'value', 'delay']:
-        type = 'std::string'
+        type = 'std::string_view'
 
     if vpi == 'uhdmType':
         type = 'UHDM_OBJECT_TYPE'
 
-    final = ''
-    virtual = ''
-    if vpi in ['vpiParent', 'uhdmParentType', 'uhdmType', 'vpiLineNo', 'vpiColumnNo', 'vpiEndLineNo', 'vpiEndColumnNo', 'vpiFile', 'vpiName', 'vpiDefName', 'uhdmId']:
-        final = ' final'
-        virtual = 'virtual '
-
-    check = ''
-    if type == 'any':
-        check = f'if (!{real_type}GroupCompliant(data)) return false;'
-
     pointer = ''
     const = ''
-    if type not in ['unsigned int', 'int', 'bool', 'std::string']:
+    if type not in ['unsigned int', 'int', 'bool', 'std::string_view']:
         pointer = '*'
         const = 'const '
 
     Vpi_ = vpi[:1].upper() + vpi[1:]
 
-    if type == 'std::string':
+    if type == 'std::string_view':
         if vpi == 'vpiFullName':
-            content.append(f'const {type}{pointer}& {classname}::{Vpi_}() const {{')
+            content.append(f'{type}{pointer} {classname}::{Vpi_}() const {{')
             content.append(f'  if ({vpi}_) {{')
             content.append(f'    return serializer_->symbolMaker.GetSymbol({vpi}_);')
             content.append( '  } else {')
-            content.append( '    std::vector<std::string> names;')
+            content.append( '    std::vector<std::string_view> names;')
             content.append( '    const BaseClass* parent = this;')
             content.append( '    const BaseClass* child = nullptr;')
             content.append( '    bool column = false;')
@@ -95,7 +85,7 @@ def _print_implementation(classname, type, vpi, card, real_type=''):
             content.append( '      const BaseClass* actual_parent = parent->VpiParent();')
             content.append( '      if (parent->UhdmType() == uhdmdesign) break;')
             content.append( '      if ((parent->UhdmType() == uhdmpackage) || (parent->UhdmType() == uhdmclass_defn)) column = true;')
-            content.append( '      const std::string& name = parent->VpiName().empty() ? parent->VpiDefName() : parent->VpiName();')
+            content.append( '      const std::string_view name = parent->VpiName().empty() ? parent->VpiDefName() : parent->VpiName();')
             content.append( '      UHDM_OBJECT_TYPE parent_type = (parent != nullptr) ? parent->UhdmType() : uhdmunsupported_stmt;')
             content.append( '      UHDM_OBJECT_TYPE actual_parent_type = (actual_parent != nullptr) ? actual_parent->UhdmType() : uhdmunsupported_stmt;')
             content.append( '      bool skip_name = (actual_parent_type == uhdmref_obj) || (parent_type == uhdmmethod_func_call) ||')
@@ -126,8 +116,8 @@ def _print_implementation(classname, type, vpi, card, real_type=''):
             content.append( '    if (!names.empty()) {')
             content.append( '      size_t index = names.size() - 1;')
             content.append( '      while(1) {')
-            content.append( '        fullName += names[index];')
-            content.append( '        if (index > 0) fullName += column ? "::" : ".";')
+            content.append( '        fullName.append(names[index]);')
+            content.append( '        if (index > 0) fullName.append(column ? "::" : ".");')
             content.append( '        if (index == 0) break;')
             content.append( '        index--;')
             content.append( '      }')
@@ -139,9 +129,9 @@ def _print_implementation(classname, type, vpi, card, real_type=''):
             content.append( '  }')
             content.append( '}')
         else:
-            content.append(f'const {type}{pointer}& {classname}::{Vpi_}() const {{ return serializer_->symbolMaker.GetSymbol({vpi}_); }}')
+            content.append(f'{type}{pointer} {classname}::{Vpi_}() const {{ return serializer_->symbolMaker.GetSymbol({vpi}_); }}')
         content.append('')
-        content.append(f'bool {classname}::{Vpi_}(const {type}{pointer}& data) {{ {vpi}_ = serializer_->symbolMaker.Make(data); return true; }}')
+        content.append(f'bool {classname}::{Vpi_}({type}{pointer} data) {{ {vpi}_ = serializer_->symbolMaker.Make(data); return true; }}')
         content.append('')
 
     return content
@@ -151,16 +141,16 @@ def _print_data_member(type, vpi, card):
     content = []
 
     if type in ['string', 'value', 'delay']:
-        type = 'std::string'
+        type = 'std::string_view'
 
     if card == '1':
         pointer = ''
         default_assignment = '0'
-        if type not in ['unsigned int', 'int', 'bool', 'std::string']:
+        if type not in ['unsigned int', 'int', 'bool', 'std::string_view']:
             pointer = '*'
             default_assignment = 'nullptr'
 
-        if type == 'std::string':
+        if type == 'std::string_view':
             content.append(f'  SymbolFactory::ID {vpi}_ = 0;')
         else:
             content.append(f'  {type}{pointer} {vpi}_ = {default_assignment};')
