@@ -35,7 +35,6 @@ message(STATUS "Python3_EXECUTABLE = ${Python3_EXECUTABLE}")
 
 set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
 add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
-add_subdirectory(third_party/googletest EXCLUDE_FROM_ALL)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -229,6 +228,7 @@ add_dependencies(uhdm GenerateCode)
 add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
 
 if (UHDM_BUILD_TESTS)
+  add_subdirectory(third_party/googletest EXCLUDE_FROM_ALL)
   enable_testing()
   include(GoogleTest)
   # All unit-tests are registered with this custom target as dependency, so
