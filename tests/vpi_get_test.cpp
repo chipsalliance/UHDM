@@ -7,11 +7,9 @@
 #include <uhdm/vhpi_user.h>   // vpi_user functions.
 #include <uhdm/vpi_uhdm.h>    // struct uhdm_handle
 
-#include <iostream>
+#include "gtest/gtest.h"
 
-#include "test-util.h"
-
-int main() {
+TEST(VpiGetTest, WriteReadRoundtrip) {
   UHDM::Serializer serializer;
 
   // Let's choose a type that is multiple levels deep to see levels
@@ -35,6 +33,4 @@ int main() {
 
   EXPECT_EQ(vpi_get(vpiSize, vpi_handle), 12345);
   EXPECT_EQ(vpi_get_str(vpiDecompile, vpi_handle), std::string("decompile"));
-
-  return 0;
 }

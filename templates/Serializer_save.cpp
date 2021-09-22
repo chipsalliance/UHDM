@@ -100,7 +100,7 @@ BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
   return NULL;
 }
 
-std::map<std::string, unsigned long> Serializer::ObjectStats() {
+std::map<std::string, unsigned long> Serializer::ObjectStats() const {
   std::map<std::string, unsigned long> stats;
 <FACTORY_STATS>
   return stats;

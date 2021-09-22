@@ -1,5 +1,3 @@
-// -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
-
 /*
 
  Copyright 2020 Alain Dargelas
@@ -35,7 +33,7 @@
 #include <string>
 #include <vector>
 
-#include "test-util.h"
+#include "gtest/gtest.h"
 
 using namespace UHDM;
 
@@ -48,15 +46,15 @@ using namespace UHDM;
 //-------------------------------------------
 // Unit test design
 
-std::vector<vpiHandle> build_designs(Serializer& s) {
+std::vector<vpiHandle> build_designs(Serializer* s) {
   std::vector<vpiHandle> designs;
   // Design building
-  design* d = s.MakeDesign();
+  design* d = s->MakeDesign();
   d->VpiName("design1");
 
   //-------------------------------------------
   // Module definition M1 (non elaborated)
-  module* m1 = s.MakeModule();
+  module* m1 = s->MakeModule();
   {
     m1->VpiDefName("M1");
     m1->VpiParent(d);
@@ -66,39 +64,39 @@ std::vector<vpiHandle> build_designs(Serializer& s) {
 
   //-------------------------------------------
   // Module definition M2 (non elaborated)
-  module* m2 = s.MakeModule();
+  module* m2 = s->MakeModule();
   {
     m2->VpiDefName("M2");
     m2->VpiFile("fake2.sv");
     m2->VpiLineNo(20);
     m2->VpiParent(d);
     // M2 Ports
-    VectorOfport* vp = s.MakePortVec();
-    port* p = s.MakePort();
+    VectorOfport* vp = s->MakePortVec();
+    port* p = s->MakePort();
     p->VpiName("i1");
     p->VpiDirection(vpiInput);
     vp->push_back(p);
-    p = s.MakePort();
+    p = s->MakePort();
     p->VpiName("o1");
     p->VpiDirection(vpiOutput);
     vp->push_back(p);
     m2->Ports(vp);
     // M2 Nets
-    VectorOfnet* vn = s.MakeNetVec();
-    logic_net* n = s.MakeLogic_net();
+    VectorOfnet* vn = s->MakeNetVec();
+    logic_net* n = s->MakeLogic_net();
     n->VpiName("i1");
     vn->push_back(n);
-    n = s.MakeLogic_net();
+    n = s->MakeLogic_net();
     n->VpiName("o1");
     vn->push_back(n);
     m2->Nets(vn);
 
     // M2 continuous assignment
-    VectorOfcont_assign* assigns = s.MakeCont_assignVec();
-    cont_assign* cassign = s.MakeCont_assign();
+    VectorOfcont_assign* assigns = s->MakeCont_assignVec();
+    cont_assign* cassign = s->MakeCont_assign();
     assigns->push_back(cassign);
-    ref_obj* lhs = s.MakeRef_obj();
-    ref_obj* rhs = s.MakeRef_obj();
+    ref_obj* lhs = s->MakeRef_obj();
+    ref_obj* rhs = s->MakeRef_obj();
     lhs->VpiName("o1");
     rhs->VpiName("i1");
     cassign->Lhs(lhs);
@@ -109,8 +107,8 @@ std::vector<vpiHandle> build_designs(Serializer& s) {
   //-------------------------------------------
   // Instance tree (Elaborated tree)
   // Top level module
-  module* m3 = s.MakeModule();
-  VectorOfmodule* v1 = s.MakeModuleVec();
+  module* m3 = s->MakeModule();
+  VectorOfmodule* v1 = s->MakeModuleVec();
   {
     m3->VpiDefName("M1");  // Points to the module def (by name)
     m3->VpiName("M1");     // Instance name
@@ -121,33 +119,33 @@ std::vector<vpiHandle> build_designs(Serializer& s) {
 
   //-------------------------------------------
   // Sub Instance
-  module* m4 = s.MakeModule();
+  module* m4 = s->MakeModule();
   {
     m4->VpiDefName("M2");         // Points to the module def (by name)
     m4->VpiName("inst1");         // Instance name
     m4->VpiFullName("M1.inst1");  // Instance full name
-    VectorOfport* inst_vp = s.MakePortVec();  // Create elaborated ports
+    VectorOfport* inst_vp = s->MakePortVec();  // Create elaborated ports
     m4->Ports(inst_vp);
-    port* p1 = s.MakePort();
+    port* p1 = s->MakePort();
     p1->VpiName("i1");
     inst_vp->push_back(p1);
-    port* p2 = s.MakePort();
+    port* p2 = s->MakePort();
     p2->VpiName("o1");
     inst_vp->push_back(p2);
     // M2 Nets
-    VectorOfnet* vn = s.MakeNetVec();  // Create elaborated nets
-    logic_net* n = s.MakeLogic_net();
+    VectorOfnet* vn = s->MakeNetVec();  // Create elaborated nets
+    logic_net* n = s->MakeLogic_net();
     n->VpiName("i1");
     n->VpiFullName("M1.inst.i1");
-    ref_obj* low_conn = s.MakeRef_obj();
+    ref_obj* low_conn = s->MakeRef_obj();
     low_conn->Actual_group(n);
     low_conn->VpiName("i1");
     p1->Low_conn(low_conn);
     vn->push_back(n);
-    n = s.MakeLogic_net();
+    n = s->MakeLogic_net();
     n->VpiName("o1");
     n->VpiFullName("M1.inst.o1");
-    low_conn = s.MakeRef_obj();
+    low_conn = s->MakeRef_obj();
     low_conn->Actual_group(n);
     low_conn->VpiName("o1");
     p2->Low_conn(low_conn);
@@ -161,55 +159,63 @@ std::vector<vpiHandle> build_designs(Serializer& s) {
 
   //-------------------------------------------
   // Create both non-elaborated and elaborated lists
-  VectorOfmodule* allModules = s.MakeModuleVec();
+  VectorOfmodule* allModules = s->MakeModuleVec();
   d->AllModules(allModules);
   allModules->push_back(m1);
   allModules->push_back(m2);
 
-  VectorOfmodule* topModules = s.MakeModuleVec();
+  VectorOfmodule* topModules = s->MakeModuleVec();
   d->TopModules(topModules);
   topModules->push_back(
       m3);  // Only m3 goes there as it is the top level module
 
-  vpiHandle dh = s.MakeUhdmHandle(uhdmdesign, d);
+  vpiHandle dh = s->MakeUhdmHandle(uhdmdesign, d);
   designs.push_back(dh);
 
   return designs;
 }
 
-void dumpStats(Serializer& serializer) {
-  std::cout << "Stats:\n";
+std::string dumpStats(const Serializer& serializer) {
+  std::string result;
   std::map<std::string, unsigned long> stats = serializer.ObjectStats();
-  for (auto stat : stats) {
-    if (stat.second) std::cout << stat.first << " " << stat.second << "\n";
+  for (const auto& stat : stats) {
+    if (!stat.second) continue;
+    result += stat.first + " " + std::to_string(stat.second) + "\n";
   }
-  std::cout << "\n";
+  return result;
 }
 
-int main(int argc, char** argv) {
+// TODO: this is too coarse-grained.
+TEST(FullElabTest, ElaborationRoundtrip) {
   Serializer serializer;
-  const std::vector<vpiHandle>& designs = build_designs(serializer);
-  std::string orig;
-  orig += "DUMP Design content (Pre elab):\n";
-  orig += visit_designs(designs);
-  std::cout << orig;
+  const std::vector<vpiHandle>& designs = build_designs(&serializer);
+  const std::string before = visit_designs(designs);
 
-  std::cout << std::endl;
   bool elaborated = false;
   for (auto design : designs) {
     elaborated |= vpi_get(vpiElaborated, design);
   }
+  EXPECT_FALSE(elaborated);
 
-  dumpStats(serializer);
-  if (!elaborated) {
-    ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
-    listen_designs(designs, listener);
-    std::cout << std::endl;
+  EXPECT_EQ(dumpStats(serializer),
+            "cont_assign 1\n"
+            "design 1\n"
+            "logic_net 4\n"
+            "module 4\n"
+            "port 4\n"
+            "ref_obj 4\n");
+
+  ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
+  listen_designs(designs, listener);
+
+  elaborated = false;
+  for (auto design : designs) {
+    elaborated |= vpi_get(vpiElaborated, design);
   }
-  serializer.Save(uhdm_test::getTmpDir() + "/elab_test.uhdm");
-  orig = "DUMP Design content (Post elab):\n";
-  orig += visit_designs(designs);
-  std::cout << orig;
+  EXPECT_TRUE(elaborated);
 
-  return 0;
+  // TODO: this needs more fine-grained object-level inspection.
+
+  const std::string after = visit_designs(designs);
+  EXPECT_NE(before, after);  // We expect the elaboration to have some impact :)
 }

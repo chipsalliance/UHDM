@@ -7,9 +7,9 @@
 #include <iostream>
 #include <memory>
 
-#include "test-util.h"
+#include "gtest/gtest.h"
 
-static void TEST_vpivalue2string() {
+TEST(VpiValue, ToString) {
   s_vpi_value value;
 
   value.format = vpiIntVal;
@@ -50,7 +50,7 @@ static bool ParseConvertBackRoundtrip(const std::string &str) {
   return ParseAndRegenerateString(str) == str;
 }
 
-static void TEST_ParseValueFindPrefix() {
+TEST(VpiValue, ParseValueFindPrefix) {
   EXPECT_EQ(ParseAndRegenerateString("INT:42"), "INT:42");
 
   // With Whitespace in front.
@@ -60,7 +60,7 @@ static void TEST_ParseValueFindPrefix() {
   EXPECT_EQ(ParseAndRegenerateString("unrelated stuff:43 INT:42"), "INT:42");
 }
 
-static void TEST_ParseScalarValue() {
+TEST(VpiValue, ParseScalarValue) {
   // Zero and one are represented as integers
   EXPECT_EQ(ParseAndRegenerateString("SCAL:0"), "SCAL:0");
   EXPECT_EQ(ParseAndRegenerateString("SCAL:1"), "SCAL:1");
@@ -92,7 +92,7 @@ static void TEST_ParseScalarValue() {
 }
 
 // Some smoke testing to see if a string we parse and regenerated is the same
-static void TEST_roundtrip() {
+TEST(VpiValue, roundtrip) {
   EXPECT_TRUE(ParseConvertBackRoundtrip("INT:42"));
 
   EXPECT_TRUE(ParseConvertBackRoundtrip("SCAL:1"));
@@ -108,12 +108,4 @@ static void TEST_roundtrip() {
   EXPECT_TRUE(ParseConvertBackRoundtrip("BIN:11111"));
 
   EXPECT_TRUE(ParseConvertBackRoundtrip("REAL:3.141592"));
-}
-
-int main() {
-  TEST_vpivalue2string();
-  TEST_ParseValueFindPrefix();
-  TEST_ParseScalarValue();
-  TEST_roundtrip();
-  return 0;
 }
