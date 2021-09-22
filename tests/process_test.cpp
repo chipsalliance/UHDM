@@ -1,13 +1,12 @@
-#include <uhdm/uhdm.h>
-#include <uhdm/vpi_visitor.h>
-
 #include <iostream>
 
 #include "gtest/gtest.h"
+#include "uhdm/uhdm.h"
+#include "uhdm/vpi_visitor.h"
 
 using namespace UHDM;
 
-#include <uhdm/vpi_visitor.h>
+#include "uhdm/vpi_visitor.h"
 
 // This builds a simple design:
 // module m1;

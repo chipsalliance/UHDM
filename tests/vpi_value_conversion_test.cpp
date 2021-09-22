@@ -1,13 +1,13 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
 #include <stdlib.h>
-#include <uhdm/vhpi_user.h>  // vpi_user functions.
-#include <uhdm/vpi_uhdm.h>   // struct uhdm_handle
 
 #include <iostream>
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "uhdm/vhpi_user.h"  // vpi_user functions.
+#include "uhdm/vpi_uhdm.h"   // struct uhdm_handle
 
 TEST(VpiValue, ToString) {
   s_vpi_value value;

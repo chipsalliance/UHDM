@@ -1,12 +1,11 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
-#include <uhdm/ElaboratorListener.h>
-#include <uhdm/uhdm.h>
-#include <uhdm/vpi_listener.h>
-#include <uhdm/vpi_visitor.h>
-
 #include <iostream>
 
 #include "gtest/gtest.h"
+#include "uhdm/ElaboratorListener.h"
+#include "uhdm/uhdm.h"
+#include "uhdm/vpi_listener.h"
+#include "uhdm/vpi_visitor.h"
 
 using namespace UHDM;
 

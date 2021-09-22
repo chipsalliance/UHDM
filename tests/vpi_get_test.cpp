@@ -1,13 +1,13 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
 #include <stdlib.h>
-#include <uhdm/constant.h>
-#include <uhdm/uhdm.h>
-#include <uhdm/uhdm_types.h>  // for uhdmconstant
-#include <uhdm/vhpi_user.h>   // vpi_user functions.
-#include <uhdm/vpi_uhdm.h>    // struct uhdm_handle
 
 #include "gtest/gtest.h"
+#include "uhdm/constant.h"
+#include "uhdm/uhdm.h"
+#include "uhdm/uhdm_types.h"  // for uhdmconstant
+#include "uhdm/vhpi_user.h"   // vpi_user functions.
+#include "uhdm/vpi_uhdm.h"    // struct uhdm_handle
 
 TEST(VpiGetTest, WriteReadRoundtrip) {
   UHDM::Serializer serializer;

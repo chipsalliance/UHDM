@@ -1,10 +1,9 @@
 #include <iostream>
-#include <uhdm/uhdm.h>
-#include <uhdm/vpi_visitor.h>
-#include <uhdm/vpi_visitor.h>
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "uhdm/uhdm.h"
+#include "uhdm/vpi_visitor.h"
 
 using namespace UHDM;
 using testing::HasSubstr;

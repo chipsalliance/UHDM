@@ -1,14 +1,14 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
-#include <uhdm/uhdm.h>
-#include <uhdm/vpi_listener.h>
+#include "uhdm/vpi_listener.h"
 
 #include <iostream>
-#include <stack>
 #include <memory>
+#include <stack>
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "uhdm/uhdm.h"
 
 using namespace UHDM;
 using testing::ElementsAre;
@@ -39,17 +39,16 @@ class MyVpiListener : public VpiListener {
     stack_.pop();
   }
 
-public:
-  void CollectLine(const std::string& prefix,
-                   const BaseClass *object, vpiHandle parentHandle) {
+ public:
+  void CollectLine(const std::string& prefix, const BaseClass* object,
+                   vpiHandle parentHandle) {
     const char* const parentName = vpi_get_str(vpiName, parentHandle);
-    collected_.push_back(prefix + ": "
-                         + object->VpiName() + "/" + object->VpiDefName()
-                         + " parent: "
-                         + ((parentName != nullptr) ? parentName : "-"));
+    collected_.push_back(
+        prefix + ": " + object->VpiName() + "/" + object->VpiDefName() +
+        " parent: " + ((parentName != nullptr) ? parentName : "-"));
   }
 
-  const std::vector<std::string> &collected() const { return collected_; }
+  const std::vector<std::string>& collected() const { return collected_; }
 
  private:
   std::vector<std::string> collected_;
@@ -111,7 +110,7 @@ static std::vector<vpiHandle> buildModuleProg(Serializer* s) {
   inst_items->push_back(pr1);
   m1->Instance_items(inst_items);
 
-  return { s->MakeUhdmHandle(uhdmdesign, d) };
+  return {s->MakeUhdmHandle(uhdmdesign, d)};
 }
 
 TEST(VpiListenerTest, ProgramModule) {
@@ -121,10 +120,10 @@ TEST(VpiListenerTest, ProgramModule) {
   std::unique_ptr<MyVpiListener> listener(new MyVpiListener());
   listen_designs(design, listener.get());
   const std::vector<std::string> expected = {
-    "Module: /M1 parent: design1",
-    "Module: u1/M2 parent: -",
-    "Module: u2/M3 parent: -",
-    "Program: /PR1 parent: -",
+      "Module: /M1 parent: design1",
+      "Module: u1/M2 parent: -",
+      "Module: u2/M3 parent: -",
+      "Program: /PR1 parent: -",
   };
   EXPECT_EQ(listener->collected(), expected);
 }
