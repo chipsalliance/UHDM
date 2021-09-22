@@ -35,6 +35,7 @@ message(STATUS "Python3_EXECUTABLE = ${Python3_EXECUTABLE}")
 
 set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
 add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
+add_subdirectory(third_party/googletest EXCLUDE_FROM_ALL)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -229,6 +230,7 @@ add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
 
 if (UHDM_BUILD_TESTS)
   enable_testing()
+  include(GoogleTest)
   # All unit-tests are registered with this custom target as dependency, so
   # just `make UnitTests` will build them all.
   add_custom_target(UnitTests)
@@ -240,31 +242,33 @@ if (UHDM_BUILD_TESTS)
       get_filename_component(test_prefix ${test_cc_file} DIRECTORY)
 
       add_executable(${test_bin} ${PROJECT_SOURCE_DIR}/${test_cc_file})
-      target_link_libraries(${test_bin} PRIVATE uhdm)
+      target_include_directories(${test_bin} PRIVATE
+        third_party/googletest/googletest/include
+        third_party/googletest/googlemock/include)
+      target_link_libraries(${test_bin} PRIVATE uhdm gtest gmock gtest_main)
       add_test(
         NAME ${test_prefix}/${test_bin} COMMAND ${test_bin}
         WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-
+      gtest_discover_tests(${test_bin} TEST_PREFIX "${test_prefix}/")
       # Now, add this binary to our UnitTests target that it builds this
       add_dependencies(UnitTests ${test_bin})
     endforeach()
   endfunction()
   register_tests(
-    tests/test1.cpp
-    tests/test2.cpp
-    tests/test3.cpp
-    tests/test4.cpp
-    tests/test_tf_call.cpp
-    tests/test_process.cpp
-    tests/test_listener.cpp
-    tests/test-dump.cpp
-    tests/listener_elab.cpp
-    tests/full_elab.cpp
-    tests/vpi_get_test.cpp
+    # These are already gtest-ified, albeit some would need some finer
+    # grained testing.
+    tests/module-port_test.cpp
+    tests/statement_test.cpp
+    tests/tf_call_test.cpp
+    tests/process_test.cpp
+    tests/vpi_listener_test.cpp
     tests/vpi_value_conversion_test.cpp
-    tests/testErrorHandler.cpp
-    tests/test_classes.cpp
-    tests/test_garbage_collect.cpp
+    tests/vpi_get_test.cpp
+    tests/listener_elab_test.cpp
+    tests/full_elab_test.cpp
+    tests/error-handler_test.cpp
+    tests/classes_test.cpp
+    tests/garbage_collect_test.cpp
   )
 endif()
 
@@ -275,7 +279,7 @@ add_executable(uhdm-hier ${PROJECT_SOURCE_DIR}/util/uhdm-hier.cpp)
 target_link_libraries(uhdm-hier PRIVATE uhdm)
 
 # Installation tester
-add_executable(test_inst EXCLUDE_FROM_ALL ${PROJECT_SOURCE_DIR}/tests/test1.cpp)
+add_executable(test_inst EXCLUDE_FROM_ALL ${PROJECT_SOURCE_DIR}/util/uhdm-dump.cpp)
 set_property(TARGET test_inst PROPERTY INCLUDE_DIRECTORIES) # Clear the list of inherited include directories
 set_property(TARGET test_inst PROPERTY LINK_LIBRARIES) # Clear the list of inherited link libraries
 set_property(TARGET test_inst PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin) # Generate it in a known location
