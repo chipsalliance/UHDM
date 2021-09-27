@@ -185,7 +185,7 @@ class MyElaboratorListener : public VpiListener {
   MyElaboratorListener() {}
 
  protected:
-  typedef std::map<std::string, const BaseClass*> ComponentMap;
+  typedef std::map<std::string_view, const BaseClass*> ComponentMap;
 
   void leaveDesign(const design* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
@@ -196,8 +196,8 @@ class MyElaboratorListener : public VpiListener {
   void enterModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
     bool topLevelModule = object->VpiTopModule();
-    const std::string& instName = object->VpiName();
-    const std::string& defName = object->VpiDefName();
+    const std::string_view instName = object->VpiName();
+    const std::string_view defName = object->VpiDefName();
     bool flatModule =
         (instName == "") && ((object->VpiParent() == 0) ||
                              ((object->VpiParent() != 0) &&
@@ -284,7 +284,7 @@ class MyElaboratorListener : public VpiListener {
 
   void leaveModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override {
-    const std::string& instName = object->VpiName();
+    const std::string_view instName = object->VpiName();
     bool flatModule =
         (instName == "") && ((object->VpiParent() == 0) ||
                              ((object->VpiParent() != 0) &&
@@ -331,7 +331,7 @@ class MyElaboratorListener : public VpiListener {
 
  private:
   // Bind to a net in the parent instace
-  net* bindParentNet_(const std::string& name) {
+  net* bindParentNet_(std::string_view name) {
     std::pair<const BaseClass*, ComponentMap> mem = instStack_.top();
     instStack_.pop();
     ComponentMap& netMap = instStack_.top().second;
@@ -344,7 +344,7 @@ class MyElaboratorListener : public VpiListener {
   }
 
   // Bind to a net in the current instace
-  net* bindNet_(const std::string& name) {
+  net* bindNet_(std::string_view name) {
     ComponentMap& netMap = instStack_.top().second;
     ComponentMap::iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
@@ -370,7 +370,7 @@ TEST(ListenerElabTest, RoundTrip) {
   std::cout << orig;
   bool elaborated = false;
   for (auto design : designs) {
-    elaborated |= vpi_get(vpiElaborated, design);
+    elaborated = elaborated || vpi_get(vpiElaborated, design);
   }
   if (!elaborated) {
     std::cout << "Elaborating...\n";
@@ -379,7 +379,7 @@ TEST(ListenerElabTest, RoundTrip) {
   }
   std::string post_elab1 = visit_designs(designs);
   for (auto design : designs) {
-    elaborated |= vpi_get(vpiElaborated, design);
+    elaborated = elaborated || vpi_get(vpiElaborated, design);
   }
   EXPECT_TRUE(elaborated);
 

@@ -6,13 +6,13 @@ import file_utils
 
 
 def _print_group_headers(type, real_type):
-    return [ f'#include "{real_type}.h"' ] if type == 'any' else []
+    return [ f'#include <uhdm/{real_type}.h>' ] if type == 'any' else []
 
 
 def _print_methods(classname, type, vpi, card, real_type=''):
     content = []
     if type in ['string', 'value', 'delay']:
-        type = 'std::string'
+        type = 'std::string_view'
     if vpi == 'uhdmType':
         type = 'UHDM_OBJECT_TYPE'
 
@@ -32,13 +32,13 @@ def _print_methods(classname, type, vpi, card, real_type=''):
     if card == '1':
         pointer = ''
         const = ''
-        if type not in ['unsigned int', 'int', 'bool', 'std::string']:
+        if type not in ['unsigned int', 'int', 'bool', 'std::string_view']:
             pointer = '*'
             const = 'const '
 
-        if type == 'std::string':
-            content.append(f'  {virtual}bool {Vpi_}(const {type}{pointer}& data){final};')
-            content.append(f'  {virtual}const {type}{pointer}& {Vpi_}() const{final};')
+        if type == 'std::string_view':
+            content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final};')
+            content.append(f'  {virtual}{type}{pointer} {Vpi_}() const{final};')
         else:
             content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
             if vpi == 'vpiParent':
@@ -56,16 +56,16 @@ def _print_members(type, vpi, card):
     content = []
 
     if type in ['string', 'value', 'delay']:
-        type = 'std::string'
+        type = 'std::string_view'
 
     if card == '1':
         pointer = ''
         default_assignment = '0'
-        if type not in ['unsigned int', 'int', 'bool', 'std::string']:
+        if type not in ['unsigned int', 'int', 'bool', 'std::string_view']:
             pointer = '*'
             default_assignment = 'nullptr'
 
-        if type == 'std::string':
+        if type == 'std::string_view':
             content.append(f'  SymbolFactory::ID {vpi}_ = 0;')
         else:
             content.append(f'  {type}{pointer} {vpi}_ = {default_assignment};')

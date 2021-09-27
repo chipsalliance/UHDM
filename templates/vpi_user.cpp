@@ -57,7 +57,7 @@ UHDM::design* UhdmDesignFromVpiHandle(vpiHandle hdesign) {
     return nullptr;
 }
 
-s_vpi_value* String2VpiValue(const std::string& s) {
+s_vpi_value* String2VpiValue(std::string_view s) {
   s_vpi_value* val = new s_vpi_value;
   val->format = 0;
   val->value.integer = 0;
@@ -66,15 +66,15 @@ s_vpi_value* String2VpiValue(const std::string& s) {
   size_t pos;
   if ((pos = s.find("UINT:")) != std::string::npos) {
     val->format = vpiUIntVal;
-    val->value.uint = std::strtoull(s.c_str() + pos + strlen("UINT:"), 0, 10);
+    val->value.uint = std::strtoull(s.data() + pos + strlen("UINT:"), 0, 10);
   }
   else if ((pos = s.find("INT:")) != std::string::npos) {
     val->format = vpiIntVal;
-    val->value.integer = std::strtoll(s.c_str() + pos + strlen("INT:"), 0, 10);
+    val->value.integer = std::strtoll(s.data() + pos + strlen("INT:"), 0, 10);
   }
   else if ((pos = s.find("SCAL:")) != std::string::npos) {
     val->format = vpiScalarVal;
-    const char *const parse_pos = s.c_str() + pos + strlen("SCAL:");
+    const char *const parse_pos = s.data() + pos + strlen("SCAL:");
     switch (parse_pos[0]) {
     case 'Z': val->value.scalar = vpiZ; break;
     case 'X': val->value.scalar = vpiX; break;
@@ -98,43 +98,42 @@ s_vpi_value* String2VpiValue(const std::string& s) {
   }
   else if ((pos = s.find("BIN:")) != std::string::npos) {
     val->format = vpiBinStrVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("BIN:"));
+    val->value.str = strdup(s.data() + pos + strlen("BIN:"));
   }
   else if ((pos = s.find("HEX:")) != std::string::npos) {
     val->format = vpiHexStrVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("HEX:"));
+    val->value.str = strdup(s.data() + pos + strlen("HEX:"));
   }
   else if ((pos = s.find("OCT:")) != std::string::npos) {
     val->format = vpiOctStrVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("OCT:"));
+    val->value.str = strdup(s.data() + pos + strlen("OCT:"));
   }
   else if ((pos = s.find("STRING:")) != std::string::npos) {
     val->format = vpiStringVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("STRING:"));
+    val->value.str = strdup(s.data() + pos + strlen("STRING:"));
   }
   else if ((pos = s.find("REAL:")) != std::string::npos) {
     val->format = vpiRealVal;
-    val->value.real = atof(s.c_str() + pos + strlen("REAL:"));
+    val->value.real = atof(s.data() + pos + strlen("REAL:"));
   }
   else if ((pos = s.find("DEC:")) != std::string::npos) {
     val->format = vpiDecStrVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("DEC:"));
+    val->value.str = strdup(s.data() + pos + strlen("DEC:"));
   }
 
   return val;
 }
 
 
-s_vpi_delay* String2VpiDelays(const std::string& s) {
-  std::string scopy = s;
+s_vpi_delay* String2VpiDelays(std::string_view s) {
+  const char* const data = s.data();
   s_vpi_delay* delay = new s_vpi_delay;
   delay->da = nullptr;
-  if (strstr(scopy.c_str(), "#")) {
-    scopy.erase(0,1);
+  if (strstr(data, "#")) {
     delay->da = new t_vpi_time;
     delay->no_of_delays = 1;
     delay->time_type = vpiScaledRealTime;
-    delay->da[0].low  = atoi(scopy.c_str());
+    delay->da[0].low  = atoi(data + 1);
     delay->da[0].type = vpiScaledRealTime;
   }
   return delay;
@@ -142,20 +141,20 @@ s_vpi_delay* String2VpiDelays(const std::string& s) {
 
 
 std::string VpiValue2String(const s_vpi_value* value) {
-  static const std::string kIntPrefix("INT:");
-  static const std::string kUIntPrefix("UINT:");
-  static const std::string kScalPrefix("SCAL:");
-  static const std::string kStrPrefix("STRING:");
-  static const std::string kHexPrefix("HEX:");
-  static const std::string kOctPrefix("OCT:");
-  static const std::string kBinPrefix("BIN:");
-  static const std::string kRealPrefix("REAL:");
-  static const std::string kDecPrefix("DEC:");
+  static constexpr std::string_view kIntPrefix("INT:");
+  static constexpr std::string_view kUIntPrefix("UINT:");
+  static constexpr std::string_view kScalPrefix("SCAL:");
+  static constexpr std::string_view kStrPrefix("STRING:");
+  static constexpr std::string_view kHexPrefix("HEX:");
+  static constexpr std::string_view kOctPrefix("OCT:");
+  static constexpr std::string_view kBinPrefix("BIN:");
+  static constexpr std::string_view kRealPrefix("REAL:");
+  static constexpr std::string_view kDecPrefix("DEC:");
 
   if (!value) return "";
   switch (value->format) {
-  case vpiIntVal: return kIntPrefix + std::to_string(value->value.integer);
-  case vpiUIntVal: return kUIntPrefix + std::to_string(value->value.uint);
+  case vpiIntVal: return std::string(kIntPrefix).append(std::to_string(value->value.integer));
+  case vpiUIntVal: return std::string(kUIntPrefix).append(std::to_string(value->value.uint));
   case vpiScalarVal: {
     switch (value->value.scalar) {
     case vpi0: return "SCAL:0";
@@ -168,15 +167,15 @@ std::string VpiValue2String(const s_vpi_value* value) {
     case vpiNoChange: return "SCAL:NoChange";
     default:
       // mmh, some unknown number.
-      return kScalPrefix + std::to_string(value->value.scalar);
+      return std::string(kScalPrefix).append(std::to_string(value->value.scalar));
     }
   }
-  case vpiStringVal: return kStrPrefix + value->value.str;
-  case vpiHexStrVal: return kHexPrefix + value->value.str;
-  case vpiOctStrVal: return kOctPrefix + value->value.str;
-  case vpiBinStrVal: return kBinPrefix + value->value.str;
-  case vpiDecStrVal: return kDecPrefix + value->value.str;
-  case vpiRealVal:  return kRealPrefix + std::to_string(value->value.real);
+  case vpiStringVal: return std::string(kStrPrefix).append(value->value.str);
+  case vpiHexStrVal: return std::string(kHexPrefix).append(value->value.str);
+  case vpiOctStrVal: return std::string(kOctPrefix).append(value->value.str);
+  case vpiBinStrVal: return std::string(kBinPrefix).append(value->value.str);
+  case vpiDecStrVal: return std::string(kDecPrefix).append(value->value.str);
+  case vpiRealVal:  return std::string(kRealPrefix).append(std::to_string(value->value.real));
   }
 
   return "";
@@ -191,7 +190,7 @@ std::string VpiDelay2String(const s_vpi_delay* delay) {
     return result;
   switch (delay->time_type) {
   case vpiScaledRealTime: {
-    return std::string(std::string("#") + std::to_string(delay->da[0].low));
+    return std::string("#").append(std::to_string(delay->da[0].low));
     break;
   }
   default:
@@ -320,17 +319,17 @@ PLI_BYTE8 *vpi_get_str (PLI_INT32 property,
     case vpiFile:
       return (PLI_BYTE8*) (obj->VpiFile().empty()
                            ? 0
-                           : obj->VpiFile().c_str());
+                           : obj->VpiFile().data());
 
    case vpiName:
      return (PLI_BYTE8*) (obj->VpiName().empty()
                           ? 0
-                          : obj->VpiName().c_str());
+                          : obj->VpiName().data());
 
     case vpiDefName:
       return (PLI_BYTE8*) (obj->VpiDefName().empty()
                            ? 0
-                           : obj->VpiDefName().c_str());
+                           : obj->VpiDefName().data());
   }
 
   // ... all other properties currently handled 'manually' for now
