@@ -42,6 +42,7 @@
 
 #include <iostream>
 #include <map>
+#include <string_view>
 #include <vector>
 
 #include <capnp/message.h>
@@ -66,7 +67,7 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
 
   ::capnp::List<::capnp::Text>::Reader symbols = cap_root.getSymbols();
   for (auto symbol : symbols) {
-    symbolMaker.Make(symbol);
+    symbolMaker.Make(std::string(symbol));
   }
 
 <CAPNP_INIT_FACTORIES>
