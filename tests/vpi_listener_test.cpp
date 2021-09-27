@@ -40,12 +40,17 @@ class MyVpiListener : public VpiListener {
   }
 
  public:
-  void CollectLine(const std::string& prefix, const BaseClass* object,
+  void CollectLine(std::string_view prefix, const BaseClass* object,
                    vpiHandle parentHandle) {
     const char* const parentName = vpi_get_str(vpiName, parentHandle);
     collected_.push_back(
-        prefix + ": " + object->VpiName() + "/" + object->VpiDefName() +
-        " parent: " + ((parentName != nullptr) ? parentName : "-"));
+        std::string(prefix)
+            .append(": ")
+            .append(object->VpiName())
+            .append("/")
+            .append(object->VpiDefName())
+            .append(" parent: ")
+            .append(((parentName != nullptr) ? parentName : "-")));
   }
 
   const std::vector<std::string>& collected() const { return collected_; }
