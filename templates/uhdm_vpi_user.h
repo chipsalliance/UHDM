@@ -50,10 +50,11 @@
 #define vpiUnsupportedExpr   4001
 #define vpiUnsupportedTypespec 4002
 
-// Objects not in the Standard
+// Objects/properties not in the Standard
 #define vpiHierPath         5000 // Represents a hierarchical path
 #define vpiReordered        5001 // Boolean for operations (pattern assign, concat) that has been reordered
 #define vpiElaborated       5002 // Boolean indicating UHDM has been elaborated/uniquified
 #define vpiRefVar           5003 // "variables" type reference object required for late binding during elaboration
+#define vpiOverriden        5004 // Boolean indicating a param_assign is overriden (not default value)
 
 #endif  // UHDM_VPI_USER_H
