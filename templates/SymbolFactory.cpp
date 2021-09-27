@@ -27,34 +27,22 @@
 namespace UHDM {
 
 static constexpr SymbolFactory::ID kBadId = -1;  // setting all the bits.
-static constexpr std::string_view kBadSymbol{"@@BAD_SYMBOL@@"};
+static const std::string kBadSymbol = "@@BAD_SYMBOL@@";
 
-SymbolFactory::ID SymbolFactory::Make(std::string_view symbol) {
-  Symbol2IdMap::const_iterator it = symbol2IdMap_.find(symbol);
-  if (it == symbol2IdMap_.end()) {
-    if (buffers.empty() ||
-        (buffers.back().size() + symbol.length() + 1) > buffers.back().capacity()) {
-      buffers.push_back(buffers_t::value_type());
-      buffers.back().reserve(kBufferCapacity);
-    }
-
-    buffers_t::reference buffer = buffers.back();
-    size_t length = buffer.length();
-    buffer.append(symbol).append(1, '\0');
-    symbol = std::string_view(&buffer[length], symbol.length());
-
-    it = symbol2IdMap_.insert({symbol, idCounter_}).first;
+SymbolFactory::ID SymbolFactory::Make(const std::string& symbol) {
+  const auto inserted = symbol2IdMap_.insert({symbol, idCounter_});
+  if (inserted.second) {
     id2SymbolMap_.emplace_back(symbol);
     idCounter_++;
   }
-  return it->second;
+  return inserted.first->second;
 }
 
-std::string_view SymbolFactory::GetSymbol(ID id) const {
+const std::string& SymbolFactory::GetSymbol(ID id) const {
   return (id < id2SymbolMap_.size()) ? id2SymbolMap_[id] : kBadSymbol;
 }
 
-SymbolFactory::ID SymbolFactory::GetId(std::string_view symbol) const {
+SymbolFactory::ID SymbolFactory::GetId(const std::string& symbol) const {
   auto found = symbol2IdMap_.find(symbol);
   return (found == symbol2IdMap_.end()) ? kBadId : found->second;
 }

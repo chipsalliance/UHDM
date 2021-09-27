@@ -36,7 +36,7 @@
 namespace UHDM {
   class Serializer;
   class ElaboratorListener;
-  static constexpr std::string_view nonamebaseclass{""};
+  static std::string nonamebaseclass ("");
 
   class ClientData {
   public:
@@ -65,9 +65,9 @@ namespace UHDM {
 
     virtual bool UhdmParentType(unsigned int data) = 0;
 
-    virtual std::string_view VpiFile() const = 0;
+    virtual const std::string& VpiFile() const = 0;
 
-    virtual bool VpiFile(std::string_view data) = 0;
+    virtual bool VpiFile(const std::string& data) = 0;
 
     virtual int VpiLineNo() const final { return vpiLineNo_; }
 
@@ -85,9 +85,9 @@ namespace UHDM {
 
     virtual bool VpiEndColumnNo(short int data) final { vpiEndColumnNo_ = data; return true; }
 
-    virtual std::string_view VpiName() const { return nonamebaseclass; }
+    virtual const std::string& VpiName() const { return nonamebaseclass; }
 
-    virtual std::string_view VpiDefName() const { return nonamebaseclass; }
+    virtual const std::string& VpiDefName() const { return nonamebaseclass; }
 
     virtual unsigned int VpiType() const = 0;
 
