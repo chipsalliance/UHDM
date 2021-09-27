@@ -20,6 +20,11 @@
     vpi: vpiConnByName
     type: bool
     card: 1
+  - property: overriden
+    name: overriden
+    vpi: vpiOverriden
+    type: bool
+    card: 1
   - group_ref: rhs
     name: rhs
     vpi: vpiRhs

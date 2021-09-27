@@ -1,19 +1,15 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
+#include <stdlib.h>
+
 #include <iostream>
 #include <memory>
 
-#include <uhdm/vpi_uhdm.h>     // struct uhdm_handle
-#include <uhdm/vhpi_user.h>    // vpi_user functions.
+#include "gtest/gtest.h"
+#include "uhdm/vhpi_user.h"  // vpi_user functions.
+#include "uhdm/vpi_uhdm.h"   // struct uhdm_handle
 
-
-#include <stdlib.h>
-
-#define EXPECT_TRUE(x) if ((x)) {} else { std::cerr << __LINE__ << ": " << #x << "\n"; abort(); }
-#define EXPECT_FALSE(x) if (!(x)) {} else { std::cerr << __LINE__ << ": " << #x << "\n"; abort(); }
-#define EXPECT_EQ(x, y) if ((x) == (y)) {} else { std::cerr << __LINE__ << ": " << #x << " == " << #y << "\n"; abort(); }
-
-static void TEST_vpivalue2string() {
+TEST(VpiValue, ToString) {
   s_vpi_value value;
 
   value.format = vpiIntVal;
@@ -25,19 +21,19 @@ static void TEST_vpivalue2string() {
   EXPECT_EQ(VpiValue2String(&value), "SCAL:X");
 
   value.format = vpiStringVal;
-  value.value.str = (PLI_BYTE8*)"helloworld";
+  value.value.str = (PLI_BYTE8 *)"helloworld";
   EXPECT_EQ(VpiValue2String(&value), "STRING:helloworld");
 
   value.format = vpiHexStrVal;
-  value.value.str = (PLI_BYTE8*)"FEEDCAFE";
+  value.value.str = (PLI_BYTE8 *)"FEEDCAFE";
   EXPECT_EQ(VpiValue2String(&value), "HEX:FEEDCAFE");
 
   value.format = vpiOctStrVal;
-  value.value.str = (PLI_BYTE8*)"007";
+  value.value.str = (PLI_BYTE8 *)"007";
   EXPECT_EQ(VpiValue2String(&value), "OCT:007");
 
   value.format = vpiBinStrVal;
-  value.value.str = (PLI_BYTE8*)"101010";
+  value.value.str = (PLI_BYTE8 *)"101010";
   EXPECT_EQ(VpiValue2String(&value), "BIN:101010");
 
   value.format = vpiRealVal;
@@ -54,7 +50,7 @@ static bool ParseConvertBackRoundtrip(const std::string &str) {
   return ParseAndRegenerateString(str) == str;
 }
 
-static void TEST_ParseValueFindPrefix() {
+TEST(VpiValue, ParseValueFindPrefix) {
   EXPECT_EQ(ParseAndRegenerateString("INT:42"), "INT:42");
 
   // With Whitespace in front.
@@ -64,7 +60,7 @@ static void TEST_ParseValueFindPrefix() {
   EXPECT_EQ(ParseAndRegenerateString("unrelated stuff:43 INT:42"), "INT:42");
 }
 
-static void TEST_ParseScalarValue() {
+TEST(VpiValue, ParseScalarValue) {
   // Zero and one are represented as integers
   EXPECT_EQ(ParseAndRegenerateString("SCAL:0"), "SCAL:0");
   EXPECT_EQ(ParseAndRegenerateString("SCAL:1"), "SCAL:1");
@@ -96,7 +92,7 @@ static void TEST_ParseScalarValue() {
 }
 
 // Some smoke testing to see if a string we parse and regenerated is the same
-static void TEST_roundtrip() {
+TEST(VpiValue, roundtrip) {
   EXPECT_TRUE(ParseConvertBackRoundtrip("INT:42"));
 
   EXPECT_TRUE(ParseConvertBackRoundtrip("SCAL:1"));
@@ -112,12 +108,4 @@ static void TEST_roundtrip() {
   EXPECT_TRUE(ParseConvertBackRoundtrip("BIN:11111"));
 
   EXPECT_TRUE(ParseConvertBackRoundtrip("REAL:3.141592"));
-}
-
-int main() {
-  TEST_vpivalue2string();
-  TEST_ParseValueFindPrefix();
-  TEST_ParseScalarValue();
-  TEST_roundtrip();
-  return 0;
 }

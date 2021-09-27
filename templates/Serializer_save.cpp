@@ -43,6 +43,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <capnp/message.h>
@@ -78,7 +79,7 @@ unsigned long Serializer::GetId(const BaseClass* p) {
 <UHDM_NAME_MAP>
 
 // From uhdm_types.h
-std::string VpiTypeName(vpiHandle h) {
+std::string_view VpiTypeName(vpiHandle h) {
   uhdm_handle* handle = (uhdm_handle*) h;
   BaseClass* obj = (BaseClass*) handle->object;
   return UhdmName(obj->UhdmType());
@@ -100,8 +101,8 @@ BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
   return NULL;
 }
 
-std::map<std::string, unsigned long> Serializer::ObjectStats() {
-  std::map<std::string, unsigned long> stats;
+std::map<std::string_view, unsigned long> Serializer::ObjectStats() const {
+  std::map<std::string_view, unsigned long> stats;
 <FACTORY_STATS>
   return stats;
 }
@@ -137,7 +138,7 @@ void Serializer::Save(const std::string& file) {
   index = 0;
   std::vector<char*> dups; 
   for (auto symbol : symbolMaker.id2SymbolMap_) {
-    char* dup = strdup(symbol.c_str());
+    char* dup = strdup(symbol.data());
     dups.push_back(dup);
     symbols.set(index,dup);
     index++;

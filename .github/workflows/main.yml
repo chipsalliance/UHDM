@@ -6,10 +6,17 @@ on:
 
 jobs:
   linux-gcc:
+    name: ubuntu-with-${{ matrix.mode }}
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        mode:
+        - tclgen
+        - pygen
 
     steps:
     - name: Install dependencies
@@ -35,6 +42,12 @@ jobs:
         echo 'PATH=/usr/lib/ccache:'"$PATH" >> $GITHUB_ENV
         echo 'PREFIX=/tmp/uhdm-install' >> $GITHUB_ENV
 
+        if [[ "${{ matrix.mode }}" = "pygen" ]] ; then
+          echo 'WITH_PYTHON_GENERATOR=ON' >> $GITHUB_ENV
+        else
+          echo 'WITH_PYTHON_GENERATOR=OFF' >> $GITHUB_ENV
+        fi
+
     - name: Show shell configuration
       run: |
         env
@@ -52,7 +65,15 @@ jobs:
         make test_install
 
   macos:
+    name: macos-with-${{ matrix.mode }}
     runs-on: macos-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        mode:
+        - tclgen
+        - pygen
 
     steps:
     - name: Install dependencies
@@ -75,16 +96,29 @@ jobs:
       run: |
         echo "PATH=$(brew --prefix)/opt/ccache/libexec:$PATH" >> $GITHUB_ENV
 
+        if [[ "${{ matrix.mode }}" = "pygen" ]] ; then
+          echo 'WITH_PYTHON_GENERATOR=ON' >> $GITHUB_ENV
+        else
+          echo 'WITH_PYTHON_GENERATOR=OFF' >> $GITHUB_ENV
+        fi
+
     - name: Build & Test
       run: |
         make release
         make test
 
   msys2-gcc:
+    name: msys2-gcc-with-${{ matrix.mode }}
     runs-on: windows-latest
     defaults:
       run:
         shell: msys2 {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        mode:
+        - tclgen
+        - pygen
 
     steps:
     - name: Setup Msys2
@@ -115,6 +149,12 @@ jobs:
         echo 'NO_TCMALLOC=On' >> $GITHUB_ENV
         echo 'TEST_TMPDIR=C:\temp' >> $GITHUB_ENV
 
+        if [[ "${{ matrix.mode }}" = "pygen" ]] ; then
+          echo 'WITH_PYTHON_GENERATOR=ON' >> $GITHUB_ENV
+        else
+          echo 'WITH_PYTHON_GENERATOR=OFF' >> $GITHUB_ENV
+        fi
+
     - name: Show shell configuration
       run: |
         env
@@ -133,11 +173,18 @@ jobs:
         make test_install
 
   windows-msvc:
+    name: windows-with-${{ matrix.mode }}
     runs-on: windows-latest
 
     defaults:
       run:
         shell: cmd
+    strategy:
+      fail-fast: false
+      matrix:
+        mode:
+        - tclgen
+        - pygen
 
     steps:
     - name: Install Core Dependencies
@@ -167,6 +214,12 @@ jobs:
         set TCL_DIR=%PROGRAMFILES%\Git\mingw64\bin
         set PATH=%MAKE_DIR%;%TCL_DIR%;%PATH%
         set TEST_TMPDIR=C:\temp
+
+        if "${{ matrix.mode }}" == "pygen" (
+          set WITH_PYTHON_GENERATOR=ON
+        ) else (
+          set WITH_PYTHON_GENERATOR=OFF
+        )
 
         set
         where cmake && cmake --version

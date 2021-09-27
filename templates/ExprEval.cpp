@@ -112,7 +112,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     }
 
     struct_typespec* stps = (struct_typespec*)tps;
-    std::vector<std::string> fieldNames;
+    std::vector<std::string_view> fieldNames;
     std::vector<const typespec*> fieldTypes;
     for (typespec_member* memb : *stps->Members()) {
       fieldNames.push_back(memb->VpiName());
@@ -125,7 +125,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
       if (oper->UhdmType() == uhdmtagged_pattern) {
         tagged_pattern* tp = (tagged_pattern*)oper;
         const typespec* ttp = tp->Typespec();
-        const std::string& tname = ttp->VpiName();
+        const std::string_view& tname = ttp->VpiName();
         bool found = false;
         for (unsigned int i = 0; i < fieldNames.size(); i++) {
           if (tname == fieldNames[i]) {
@@ -144,7 +144,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
           }
         }
         if (found == false) {
-          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, tname,
+          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, std::string(tname),
                               exp);
           return result;
         }
@@ -154,13 +154,80 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     for (auto op : tmp) {
       if (op == nullptr) {
         s.GetErrorHandler()(ErrorType::UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN,
-                            fieldNames[index], exp);
+                            std::string(fieldNames[index]), exp);
         return result;
       }
       ordered->push_back(op);
       index++;
     }
     op->Operands(ordered);
+    // Flattening
+    index = 0;
+    VectorOfany* flattened = s.MakeAnyVec();
+    for (any* op : *ordered) {
+      if (op->UhdmType() == uhdmtagged_pattern) {
+        tagged_pattern* tp = (tagged_pattern*)op;
+        const typespec* ttp = tp->Typespec();
+        UHDM_OBJECT_TYPE ttpt = ttp->UhdmType();
+        switch (ttpt) {
+          case uhdmint_typespec: {
+            any* sop = (any*) tp->Pattern();
+            flattened->push_back(sop);
+            break;
+          }
+          case uhdmstring_typespec: {
+            any* sop = (any*) tp->Pattern();
+            UHDM_OBJECT_TYPE sopt = sop->UhdmType();
+            if (sopt == uhdmoperation) {
+              VectorOfany* operands = ((operation*)sop)->Operands();
+              for (auto op1 : *operands) {
+                bool substituted = false;
+                if (op1->UhdmType() == uhdmtagged_pattern) {
+                  tagged_pattern* tp1 = (tagged_pattern*)op1;
+                  const typespec* ttp1 = tp1->Typespec();
+                  UHDM_OBJECT_TYPE ttpt1 = ttp1->UhdmType();
+                  if (ttpt1 == uhdmstring_typespec) {
+                    if (ttp1->VpiName() == "default") {
+                      const any* patt = tp1->Pattern();
+                      const typespec* mold = fieldTypes[index];
+                      operation* subst = s.MakeOperation();
+                      VectorOfany* sops = s.MakeAnyVec();
+                      subst->Operands(sops);
+                      subst->VpiOpType(vpiConcatOp);
+                      flattened->push_back(subst);
+                      if (mold->UhdmType() == uhdmstruct_typespec) {
+                        struct_typespec* molds = (struct_typespec*) mold;
+                        for (auto mem : *molds->Members()) {
+                          if (mem)
+                            sops->push_back((any*)patt);
+                        }
+                      }
+                      substituted = true;
+                      break;
+                    }
+                  }
+                }
+                if (!substituted) {
+                  flattened->push_back(sop);
+                  break;
+                }
+              }
+            } else {
+              flattened->push_back(sop);
+            }
+            break;
+          }
+          default:
+            flattened->push_back(op);
+            break;
+        }
+      } else {
+        flattened->push_back(op);
+      }
+      index++;
+    }
+    op->Operands(flattened);
+
   }
   return result;
 }
