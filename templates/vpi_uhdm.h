@@ -60,9 +60,9 @@ class uhdm_handleFactory {
 /** Obtain a vpiHandle from a BaseClass (any) object */
 vpiHandle NewVpiHandle (const UHDM::BaseClass* object);
 
-s_vpi_value* String2VpiValue(std::string_view s);
+s_vpi_value* String2VpiValue(const std::string& s);
 
-s_vpi_delay* String2VpiDelays(std::string_view s);
+s_vpi_delay* String2VpiDelays(const std::string& s);
 
 std::string VpiValue2String(const s_vpi_value* value);
 
