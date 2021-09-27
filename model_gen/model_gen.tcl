@@ -92,13 +92,13 @@ proc printMethods { classname type vpi card {real_type ""} } {
     global methods_cpp group_headers
     set methods ""
     if {$type == "string"} {
-        set type "std::string_view"
+        set type "std::string"
     }
     if {$type == "value"} {
-        set type "std::string_view"
+        set type "std::string"
     }
     if {$type == "delay"} {
-        set type "std::string_view"
+        set type "std::string"
     }
     if {$vpi == "uhdmType"} {
         set type "UHDM_OBJECT_TYPE"
@@ -117,21 +117,21 @@ proc printMethods { classname type vpi card {real_type ""} } {
     if {$card == "1"} {
         set pointer ""
         set const ""
-        if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string_view")} {
+        if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string")} {
             set pointer "*"
             set const "const "
         }
 
 
-        if {$type == "std::string_view"} {
-            append methods "\n  ${virtual}bool [string toupper ${vpi} 0 0](${type}${pointer} data)$final;\n"
+        if {$type == "std::string"} {
+            append methods "\n  ${virtual}bool [string toupper ${vpi} 0 0](const ${type}${pointer}\\& data)$final;\n"
             if {$vpi == "vpiFullName" } {
-                append methods "\n  ${virtual}${type}${pointer} [string toupper ${vpi} 0 0]() const$final;\n"
-                append methods_cpp "\n${type}${pointer} ${classname}::[string toupper ${vpi} 0 0]() const {
+                append methods "\n  ${virtual}const ${type}${pointer}\\&  [string toupper ${vpi} 0 0]() const$final;\n"
+                append methods_cpp "\nconst ${type}${pointer}\\&  ${classname}::[string toupper ${vpi} 0 0]() const {
   if (${vpi}_) {
     return serializer_->symbolMaker.GetSymbol(${vpi}_);
   } else {
-    std::vector<std::string_view> names;
+    std::vector<std::string> names;
     const BaseClass* parent = this;
     const BaseClass* child = nullptr;
     bool column = false;
@@ -139,7 +139,7 @@ proc printMethods { classname type vpi card {real_type ""} } {
       const BaseClass* actual_parent = parent->VpiParent();
       if (parent->UhdmType() == uhdmdesign) break;
       if ((parent->UhdmType() == uhdmpackage) || (parent->UhdmType() == uhdmclass_defn)) column = true;
-      const std::string_view\\& name = (!parent->VpiName().empty()) ? parent->VpiName() : parent->VpiDefName();
+      const std::string\\& name = (!parent->VpiName().empty()) ? parent->VpiName() : parent->VpiDefName();
       UHDM_OBJECT_TYPE parent_type = (parent != nullptr) ? parent->UhdmType() : uhdmunsupported_stmt;
       UHDM_OBJECT_TYPE actual_parent_type = (actual_parent != nullptr) ? actual_parent->UhdmType() : uhdmunsupported_stmt;
       bool skip_name = (actual_parent_type == uhdmref_obj) || (parent_type == uhdmmethod_func_call) ||
@@ -170,8 +170,8 @@ proc printMethods { classname type vpi card {real_type ""} } {
     if (names.size()) {
       unsigned int index = names.size() -1;
       while(1) {
-        fullName.append(names\[index\]);
-        if (index > 0) fullName.append(column ? \"::\" : \".\");
+        fullName += names\[index\];
+        if (index > 0) fullName += column ? \"::\" : \".\";
         if (index == 0) break;
         index--;
       }
@@ -183,10 +183,10 @@ proc printMethods { classname type vpi card {real_type ""} } {
   }
 }\n"
             } else {
-                append methods "\n  ${virtual}${type}${pointer} [string toupper ${vpi} 0 0]() const$final;\n"
-                append methods_cpp "\n${type}${pointer} ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
+                append methods "\n  ${virtual}const ${type}${pointer}\\& [string toupper ${vpi} 0 0]() const$final;\n"
+                append methods_cpp "\nconst ${type}${pointer}\\& ${classname}::[string toupper ${vpi} 0 0]() const { return serializer_->symbolMaker.GetSymbol(${vpi}_); }\n"
             }
-            append methods_cpp "\nbool ${classname}::[string toupper ${vpi} 0 0](${type}${pointer} data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n"
+            append methods_cpp "\nbool ${classname}::[string toupper ${vpi} 0 0](const ${type}${pointer}\\& data) { ${vpi}_ = serializer_->symbolMaker.Make(data); return true; }\n"
         } else {
             append methods "\n  ${virtual}${const}${type}${pointer} [string toupper ${vpi} 0 0]() const$final { return ${vpi}_; }\n"
             if {$vpi == "vpiParent"} {
@@ -234,16 +234,16 @@ proc printCapnpSchema {type vpi card} {
 proc printMembers { type vpi card } {
     set members ""
     if {$type == "string" || $type == "value" || $type == "delay"} {
-        set type "std::string_view"
+        set type "std::string"
     }
     if {$card == "1"} {
         set pointer ""
         set default_assignment "0"
-        if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string_view")} {
+        if {($type != "unsigned int") && ($type != "int") && ($type != "bool") && ($type != "std::string")} {
             set pointer "*"
             set default_assignment "nullptr"
         }
-        if {$type == "std::string_view"} {
+        if {$type == "std::string"} {
             append members "\n  SymbolFactory::ID ${vpi}_ = 0;\n"
         } else {
             append members "\n  ${type}${pointer} ${vpi}_ = ${default_assignment};\n"
@@ -440,13 +440,13 @@ proc printGetStrBody {classname type vpi card} {
     const $classname* const o = (const $classname*)(obj);
     return (o->[string toupper ${vpi} 0 0]().empty() || o->[string toupper ${vpi} 0 0]() == o->VpiName())
         ? 0
-        : (PLI_BYTE8*) o->[string toupper ${vpi} 0 0]().data();
+        : (PLI_BYTE8*) o->[string toupper ${vpi} 0 0]().c_str();
   }"
         } else {
             append vpi_get_str_body "
   if ((handle->type == uhdm${classname}) \\&\\& (property == $vpi)) {
     const $classname* const o = (const $classname*)(obj);
-    return (PLI_BYTE8*) (o->[string toupper ${vpi} 0 0]().empty() ? 0 : o->[string toupper ${vpi} 0 0]().data());
+    return (PLI_BYTE8*) (o->[string toupper ${vpi} 0 0]().empty() ? 0 : o->[string toupper ${vpi} 0 0]().c_str());
   }"
         }
     }
@@ -1036,7 +1036,7 @@ proc write_uhdm_h { headers} {
     set uhdm_content [read $fid]
     close $fid
 
-    set name_id_map "\nstd::string_view UhdmName(UHDM_OBJECT_TYPE type) \{
+    set name_id_map "\nstd::string UhdmName(UHDM_OBJECT_TYPE type) \{
       switch (type) \{
 "
     foreach id [array names DEFINE_ID] {

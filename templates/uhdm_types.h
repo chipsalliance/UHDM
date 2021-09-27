@@ -26,7 +26,7 @@
 #ifndef UHDM_TYPES_H
 #define UHDM_TYPES_H
 
-#include <string_view>
+#include <string>
 #include <uhdm/vpi_user.h>
 
 namespace UHDM {
@@ -37,9 +37,9 @@ enum UHDM_OBJECT_TYPE {
 <DEFINES>
 };
 
-std::string_view UhdmName(UHDM_OBJECT_TYPE type);
+std::string UhdmName(UHDM_OBJECT_TYPE type);
 
-std::string_view VpiTypeName(vpiHandle h);
+std::string VpiTypeName(vpiHandle h);
 
 };
 
