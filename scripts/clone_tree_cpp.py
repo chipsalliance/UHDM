@@ -100,6 +100,9 @@ def generate(models):
                             implementations.append( '    elaborator->scheduleTaskFuncBinding(clone);')
                             implementations.append( '  }')
 
+                        elif classname == 'disable' and method == 'VpiExpr':
+                            implementations.append(f'  if (auto obj = {method}()) clone->{method}((expr*) obj);')
+
                         elif classname == 'function' and method == 'Return':
                             implementations.append(f'  if (auto obj = {method}()) clone->{method}((variables*) obj);')
 
