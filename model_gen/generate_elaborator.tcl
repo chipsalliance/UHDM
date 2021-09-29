@@ -162,6 +162,9 @@ proc generate_elaborator { models } {
     elaborator->scheduleTaskFuncBinding(clone);
   }
 "
+                            } elseif {($rootclassname == "disable") && ($method == "VpiExpr")} {
+                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((expr*)obj);
+"
                             } elseif {($rootclassname == "function") && ($method == "Return")} {
                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((variables*)obj);
 "
