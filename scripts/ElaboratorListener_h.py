@@ -29,7 +29,8 @@ def _generate_module_listeners(models):
                     listeners.append( '}')
 
                 elif method in ['Task_funcs']:
-                    listeners.append(f'if (auto vec = defMod->{method}()) {{')
+                    # We want to deep clone existing instance tasks and funcs
+                    listeners.append(f'if (auto vec = inst->{method}()) {{')
                     listeners.append(f'  auto clone_vec = serializer_->Make{Cast}Vec();')
                     listeners.append(f'  inst->{method}(clone_vec);')
                     listeners.append( '  for (auto obj : *vec) {')

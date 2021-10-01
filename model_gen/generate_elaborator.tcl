@@ -246,15 +246,16 @@ proc generate_elaborator { models } {
                             }
 
                             if {($rootclassname == "module") && ($method == "Task_funcs")} {
-                                append module_vpi_listener "          if (auto vec = defMod->${method}()) {
+                                # We want to deep clone existing instance tasks and funcs
+                                append module_vpi_listener "          if (auto vec = inst->${method}()) {
             auto clone_vec = serializer_->Make${Cast}Vec();
             inst->${method}(clone_vec);
             for (auto obj : *vec) {
-              enterTask_func(obj, defMod, nullptr, nullptr);
+              enterTask_func(obj, inst, nullptr, nullptr);
               auto* tf = obj->DeepClone(serializer_, this, inst);
               ComponentMap\\& funcMap = std::get<2>((instStack_.at(instStack_.size()-2)).second);
               funcMap.insert(std::make_pair(tf->VpiName(), tf));
-              leaveTask_func(obj, defMod, nullptr, nullptr);
+              leaveTask_func(obj, inst, nullptr, nullptr);
               tf->VpiParent(inst);
               clone_vec->push_back(tf);
             }
