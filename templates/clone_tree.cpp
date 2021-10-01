@@ -510,9 +510,6 @@ gen_scope_array* gen_scope_array::DeepClone(Serializer* serializer, ElaboratorLi
 }
 
 function* function::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {
-  if (function* f = any_cast<function*>( elaborator->bindTaskFunc(VpiName(), nullptr))) {
-    return f;
-  }
   function* const clone = serializer->MakeFunction();
   const unsigned long id = clone->UhdmId();
   *clone = *this;
