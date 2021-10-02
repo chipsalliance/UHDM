@@ -293,5 +293,13 @@ namespace UHDM {
 }
 
 std::string ExprEval::prettyPrint(UHDM::any* handle) {
-  return vPrint(handle);
+  if (handle == nullptr) {
+    std::cout << "NULL HANDLE\n";
+    return "NULL HANDLE";
+  }
+  ExprEval eval;
+  Serializer* s = handle->GetSerializer();
+  std::stringstream out;
+  eval.prettyPrint(*s, handle, 0, out);
+  return out.str();  
 }
