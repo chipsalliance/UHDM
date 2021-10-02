@@ -29,9 +29,11 @@
 
 #include <uhdm/typespec.h>
 #include <uhdm/expr.h>
+#include <iostream>
+#include <sstream>
 
 namespace UHDM {
-
+  class Serializer;
   class ExprEval {
  
   public:
@@ -39,9 +41,14 @@ namespace UHDM {
     bool isFullySpecified(const typespec* tps);
 
     expr* flattenPatternAssignments(Serializer& s, const typespec* tps, expr* assignExpr);
-    
+
+    void prettyPrint(Serializer& s, const any* tree, uint32_t indent, std::ostream &out);
+
+    std::string prettyPrint(UHDM::any* handle);
   };
   
+  std::string vPrint(UHDM::any* handle);
+
 }
 
 #endif

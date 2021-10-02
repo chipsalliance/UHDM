@@ -231,3 +231,67 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
   }
   return result;
 }
+
+
+void ExprEval::prettyPrint(Serializer& s, const any* object, uint32_t indent, std::ostream &out) {
+  if (object == nullptr)
+    return;
+  UHDM_OBJECT_TYPE type = object->UhdmType();
+  for (uint32_t i = 0; i < indent ; i++) {
+        out << " ";
+  }
+  switch (type) {
+    case uhdmconstant: {
+      constant* c = (constant*) object;
+      out << c->VpiDecompile();
+      break;
+    }
+    case uhdmoperation: {
+      operation* oper = (operation*) object;
+      int opType = oper->VpiOpType();
+      switch (opType) {
+        case vpiConcatOp: {
+          out << "{";
+          for (uint32_t i = 0; i < oper->Operands()->size(); i++) {
+            prettyPrint(s, oper->Operands()->at(i), 0, out);
+            if (i < oper->Operands()->size() - 1) {
+              out << ",";
+            }
+          }
+          out << "}";
+          break;
+        }
+        default:
+          break;
+      }
+      break;
+    }
+    case uhdmref_obj: {
+      out << object->VpiName();
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+
+}
+
+namespace UHDM {
+  std::string vPrint(UHDM::any* handle) {
+    if (handle == nullptr) {
+      std::cout << "NULL HANDLE\n";
+      return "NULL HANDLE";
+    }
+    ExprEval eval;
+    Serializer* s = handle->GetSerializer();
+    std::stringstream out;
+    eval.prettyPrint(*s, handle, 0, out);
+    std::cout << out.str() << "\n";
+    return out.str();
+  }
+}
+
+std::string ExprEval::prettyPrint(UHDM::any* handle) {
+  return vPrint(handle);
+}
