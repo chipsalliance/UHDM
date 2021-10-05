@@ -11,7 +11,7 @@ def generate(models):
             continue
 
         classname = model.get('name')
-        if '_call' in classname or classname in [ 'function', 'task', 'constant', 'tagged_pattern', 'gen_scope_array', 'hier_path' ]:
+        if '_call' in classname or classname in [ 'function', 'task', 'constant', 'tagged_pattern', 'gen_scope_array', 'hier_path', 'cont_assign' ]:
             continue  # Use hardcoded implementations
 
         Classname = classname[0].upper() + classname[1:]
