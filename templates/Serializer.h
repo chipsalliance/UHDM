@@ -46,6 +46,9 @@ namespace UHDM {
 
   void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, any* object);
 
+  template<typename T>
+  class FactoryT;
+
   class Serializer {
   public:
     Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {symbolMaker.Make("");}
@@ -56,6 +59,21 @@ namespace UHDM {
     const std::vector<vpiHandle> Restore(const std::string& file);
     std::map<std::string, unsigned long> ObjectStats() const;
 
+  private:
+    template<typename T, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    T *Make(FactoryT<T> *const factory) {
+      T* const obj = factory->Make();
+      obj->SetSerializer(this);
+      obj->UhdmId(objId_++);
+      return obj;
+    }
+
+    template<typename T, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    std::vector<T*>* Make(FactoryT<std::vector<T*>> *const factory) {
+      return factory->Make();
+    }
+
+  public:
 <FACTORIES_METHODS>
     std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
     vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) { return uhdm_handleMaker.Make(type, object); }
@@ -66,6 +84,37 @@ namespace UHDM {
 <FACTORIES>
 
     std::unordered_map<const BaseClass*, unsigned long>& AllObjects() { return allIds_; }
+
+  private:
+    template<typename T, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    void SetSaveId_(FactoryT<T>* const factory);
+
+    template<typename T, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    void SetRestoreId_(FactoryT<T>* const factory, unsigned long count);
+
+    template<
+      typename T, typename U,
+      typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    struct AnySaveAdapter {};
+    template<typename, typename, typename> friend struct AnySaveAdapter;
+
+    template<
+      typename T, typename U,
+      typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    struct VectorOfanySaveAdapter {};
+    template<typename, typename, typename> friend struct VectorOfanySaveAdapter;
+
+    template<
+      typename T, typename U,
+      typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    struct AnyRestoreAdapter {};
+    template<typename, typename, typename> friend struct AnyRestoreAdapter;
+
+    template<
+      typename T, typename U,
+      typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
+    struct VectorOfanyRestoreAdapter {};
+    template<typename, typename, typename> friend struct VectorOfanyRestoreAdapter;
 
   private:
     BaseClass* GetObject(unsigned int objectType, unsigned int index);

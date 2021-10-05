@@ -4,13 +4,13 @@ import os
 
 def set_content_if_changed(filename, content):
     if os.path.exists(filename):
-        with open(filename, 'rb') as strm:
+        with open(filename, 'r+t') as strm:
             orig_content = strm.read()
 
         if orig_content == content:
             return False
 
-    with open(filename, 'wt') as strm:
+    with open(filename, 'w+t') as strm:
         strm.write(content)
 
     return True
