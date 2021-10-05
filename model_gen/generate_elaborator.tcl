@@ -35,7 +35,8 @@ proc generate_elaborator { models } {
         set vpiName [makeVpiName $classname]
 
         set baseclass $classname
-        if {[regexp {_call} ${classname}] || ($classname == "function") || ($classname == "task") || ($classname == "constant") || ($classname == "tagged_pattern") || ($classname == "gen_scope_array") || ($classname == "hier_path")} {
+        if {[regexp {_call} ${classname}] || ($classname == "function") || ($classname == "task") || ($classname == "constant") || ($classname == "tagged_pattern") || \
+            ($classname == "gen_scope_array") || ($classname == "hier_path") || ($classname == "cont_assign")} {
             # Use hardcoded implementations
             continue
         } else {
