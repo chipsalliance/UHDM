@@ -29,10 +29,10 @@ def _get_schema(type, vpi, card):
 
 
 def generate(models):
-    capnp_schema = {}
-    capnp_schema_all = []
-    capnpRootSchemaIndex = 2
-    capnp_root_schema = []
+    individual_model_schemas = {}
+    flattened_model_schemas = []
+    root_schema_index = 2
+    root_schema = []
 
     for model in models.values():
         modeltype = model['type']
@@ -40,23 +40,23 @@ def generate(models):
             continue
 
         classname = model['name']
-        capnp_schema[classname] = []
+        individual_model_schemas[classname] = []
 
         Classname_ = classname[:1].upper() + classname[1:]
         Classname = Classname_.replace('_', '')
 
         if modeltype != 'class_def':
-            capnp_schema[classname].append(('vpiParent', 'UInt64'))
-            capnp_schema[classname].append(('uhdmParentType', 'UInt64'))
-            capnp_schema[classname].append(('vpiFile', 'UInt64'))
-            capnp_schema[classname].append(('vpiLineNo', 'UInt32'))
-            capnp_schema[classname].append(('vpiColumnNo', 'UInt16'))
-            capnp_schema[classname].append(('vpiEndLineNo', 'UInt32'))
-            capnp_schema[classname].append(('vpiEndColumnNo', 'UInt16'))
-            capnp_schema[classname].append(('uhdmId', 'UInt64'))
+            individual_model_schemas[classname].append(('uhdmId', 'UInt64'))
+            individual_model_schemas[classname].append(('vpiParent', 'UInt64'))
+            individual_model_schemas[classname].append(('uhdmParentType', 'UInt64'))
+            individual_model_schemas[classname].append(('vpiFile', 'UInt64'))
+            individual_model_schemas[classname].append(('vpiLineNo', 'UInt32'))
+            individual_model_schemas[classname].append(('vpiEndLineNo', 'UInt32'))
+            individual_model_schemas[classname].append(('vpiColumnNo', 'UInt16'))
+            individual_model_schemas[classname].append(('vpiEndColumnNo', 'UInt16'))
 
-            capnp_root_schema.append(f'  factory{Classname} @{capnpRootSchemaIndex} :List({Classname});')
-            capnpRootSchemaIndex += 1
+            root_schema.append(f'  factory{Classname} @{root_schema_index} :List({Classname});')
+            root_schema_index += 1
 
         for key, value in model.allitems():
             if key == 'property':
@@ -64,7 +64,7 @@ def generate(models):
                     vpi = value.get('vpi')
                     type = value.get('type')
                     card = value.get('card')
-                    capnp_schema[classname].append(_get_schema(type, vpi, card))
+                    individual_model_schemas[classname].append(_get_schema(type, vpi, card))
 
             elif key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
                 name = value.get('name')
@@ -77,34 +77,33 @@ def generate(models):
                 name = name.replace('_', '')
 
                 obj_key = 'ObjIndexType' if key in ['class_ref', 'group_ref'] else 'UInt64'
-                capnp_schema[classname].append(_get_schema(obj_key, name, card))
+                individual_model_schemas[classname].append(_get_schema(obj_key, name, card))
 
         if modeltype != 'class_def':
-            capnpIndex = 0
-            capnp_schema_all.append(f'struct {Classname} {{')
-            for name, type in capnp_schema[classname]:
-                if name and type:
-                    capnp_schema_all.append(f'  {name} @{capnpIndex} :{type};')
-                    capnpIndex += 1
-
-            # process baseclass recursively
-            baseclass = model['extends']
-            while baseclass:
-                for name, type in capnp_schema[baseclass]:
-                    if name and type:
-                        capnp_schema_all.append(f'  {name} @{capnpIndex} :{type};')
-                        capnpIndex += 1
-
+            # Process the hierarchy tree top-down
+            stack = []
+            baseclass = classname
+            while (baseclass):
+                stack.append(baseclass)
                 baseclass = models[baseclass]['extends']
 
-            capnp_schema_all.append('}')
-            capnp_schema_all.append('')
+            capnpIndex = 0
+            flattened_model_schemas.append(f'struct {Classname} {{')
+
+            while stack:
+                for name, type in individual_model_schemas[stack.pop()]:
+                    if name and type:
+                        flattened_model_schemas.append(f'  {name} @{capnpIndex} :{type};')
+                        capnpIndex += 1
+
+            flattened_model_schemas.append('}')
+            flattened_model_schemas.append('')
 
     with open(config.get_template_filepath('UHDM.capnp'), 'r+t') as strm:
         file_content = strm.read()
 
-    file_content = file_content.replace('<CAPNP_SCHEMA>', '\n'.join(capnp_schema_all))
-    file_content = file_content.replace('<CAPNP_ROOT_SCHEMA>', '\n'.join(capnp_root_schema))
+    file_content = file_content.replace('<CAPNP_SCHEMA>', '\n'.join(flattened_model_schemas))
+    file_content = file_content.replace('<CAPNP_ROOT_SCHEMA>', '\n'.join(root_schema))
     file_utils.set_content_if_changed(config.get_output_source_filepath('UHDM.capnp'), file_content)
 
     return True

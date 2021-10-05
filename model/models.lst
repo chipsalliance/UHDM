@@ -4,10 +4,10 @@ let_decl.yaml
 assertion.yaml
 stmt.yaml
 property_inst_spec_group.yaml
-concurrent_assertion.yaml
-process.yaml
+concurrent_assertions.yaml
+process_stmt.yaml
 always.yaml
-final.yaml
+final_stmt.yaml
 initial.yaml
 atomic_stmt.yaml
 delay_control.yaml
@@ -21,15 +21,15 @@ scope.yaml
 begin.yaml
 named_begin.yaml
 named_fork.yaml
-fork.yaml
-for.yaml
+fork_stmt.yaml
+for_stmt.yaml
 if_stmt.yaml
 event_stmt.yaml
 thread_obj.yaml
-forever.yaml
+forever_stmt.yaml
 expr_sequence_inst_group.yaml
 waits.yaml
-wait.yaml
+wait_stmt.yaml
 wait_fork.yaml
 ordered_wait.yaml
 task_func_named_begin_fork_group.yaml
@@ -39,7 +39,7 @@ disable_fork.yaml
 continue_stmt.yaml
 break_stmt.yaml
 return_stmt.yaml
-while.yaml
+while_stmt.yaml
 repeat.yaml
 do_while.yaml
 if_else.yaml
@@ -56,8 +56,8 @@ interf_prog_mod_group.yaml
 gen_scope.yaml
 gen_var.yaml
 gen_scope_array.yaml
-expr_dist_group.yaml
-assert.yaml
+expr_dist.yaml
+assert_stmt.yaml
 cover.yaml
 assume.yaml
 restrict.yaml
@@ -77,14 +77,14 @@ struct_pattern.yaml
 unsupported_expr.yaml
 unsupported_stmt.yaml
 
-sequence_expr.yaml
+sequence_expr_group.yaml
 sequence_expr_multiclock_group.yaml
 named_event_sequence_expr_group.yaml
 sequence_inst.yaml
 seq_formal_decl.yaml
 sequence_decl.yaml
 
-property_expr.yaml
+property_expr_group.yaml
 property_expr_named_event_group.yaml
 prop_formal_decl.yaml
 property_inst.yaml
@@ -147,7 +147,7 @@ port.yaml
 port_bit.yaml
 primitive.yaml
 gate.yaml
-switch.yaml
+switch_tran.yaml
 udp.yaml
 mod_path.yaml
 expr_tchk_term_group.yaml
@@ -255,4 +255,4 @@ constr_if.yaml
 constr_if_else.yaml
 constr_foreach.yaml
 soft_disable.yaml
-uhdm.yaml
+design.yaml

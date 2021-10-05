@@ -52,7 +52,40 @@
 #include <uhdm/uhdm.h>
 #include <uhdm/uhdm_types.h>
 
+
 namespace UHDM {
+template<typename T, typename>
+void Serializer::SetRestoreId_(FactoryT<T>* const factory, unsigned long count) {
+  for (unsigned int i = 0; i < count; ++i) {
+    SetId(Make<T>(factory), i);
+  }
+}
+
+template<typename U>
+struct Serializer::AnyRestoreAdapter<BaseClass, U> {
+  void operator()(const U &reader, Serializer *serializer, BaseClass *obj) const {
+    obj->UhdmParentType(reader.getUhdmParentType());
+    obj->VpiParent(serializer->GetObject(reader.getUhdmParentType(), reader.getVpiParent() - 1));
+    obj->VpiFile(serializer->symbolMaker.GetSymbol(reader.getVpiFile()));
+    obj->VpiLineNo(reader.getVpiLineNo());
+    obj->VpiColumnNo(reader.getVpiColumnNo());
+    obj->VpiEndLineNo(reader.getVpiEndLineNo());
+    obj->VpiEndColumnNo(reader.getVpiEndColumnNo());
+    obj->UhdmId(reader.getUhdmId());
+  }
+};
+
+<CAPNP_RESTORE_ADAPTERS>
+
+template<typename T, typename U>
+struct Serializer::VectorOfanyRestoreAdapter<T, U> {
+  void operator()(typename ::capnp::List<U>::Reader reader, Serializer *serializer, std::vector<T*> &objects) const {
+    unsigned long index = 0;
+    for (typename U::Reader obj : reader)
+      AnyRestoreAdapter<T, typename U::Reader>()(obj, serializer, objects[index++]);
+  }
+};
+
 const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
   Purge();
   std::vector<vpiHandle> designs;

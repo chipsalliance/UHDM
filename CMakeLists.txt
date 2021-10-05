@@ -45,6 +45,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+  ${PROJECT_SOURCE_DIR}/model/models.lst
+)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
 
 # Directory where code is generated into.
@@ -77,16 +81,17 @@ else()
       "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O3 -DNDEBUG ${MSYS_COMPILE_OPTIONS} ${MY_CXX_WARNING_FLAGS}"
   )
 
-  # Some of these files make the optimizer take so long, that we excempt some
-  # of these files and compile with reduced optimization.
-  # TODO: Reduce complexity/branches etc. whatever makes the optimizer freak
-  # out. The code-generation is pretty linear right now.
-  set_property(SOURCE
-    ${GENDIR}/src/Serializer_save.cpp
-    ${GENDIR}/src/Serializer_restore.cpp
-    PROPERTY COMPILE_FLAGS -O0
- )
-
+  if (NOT WITH_PYTHON_GENERATOR)
+    # Some of these files make the optimizer take so long, that we excempt some
+    # of these files and compile with reduced optimization.
+    # TODO: Reduce complexity/branches etc. whatever makes the optimizer freak
+    # out. The code-generation is pretty linear right now.
+    set_property(SOURCE
+      ${GENDIR}/src/Serializer_save.cpp
+      ${GENDIR}/src/Serializer_restore.cpp
+      PROPERTY COMPILE_FLAGS -O0
+   )
+ endif()
 endif()
 
 # All the files the generator depends on.
@@ -138,55 +143,77 @@ add_custom_command(
   DEPENDS capnpc capnpc_cpp ${model-GENERATED_UHDM})
 add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
-set(uhdm-GENERATED_SRC
-    ${GENDIR}/src/ExprEval.cpp
-    ${GENDIR}/src/Serializer_restore.cpp
-    ${GENDIR}/src/Serializer_save.cpp
-    ${GENDIR}/src/SymbolFactory.cpp
-    ${GENDIR}/src/UHDM.capnp.c++
-    ${GENDIR}/src/actual_group.cpp
-    ${GENDIR}/src/assertion.cpp
-    ${GENDIR}/src/clone_tree.cpp
-    ${GENDIR}/src/constraint_item_group.cpp
-    ${GENDIR}/src/enum_struct_packed_net_group.cpp
-    ${GENDIR}/src/enum_struct_union_packed_array_typespec_group.cpp
-    ${GENDIR}/src/enum_struct_union_packed_var_group.cpp
-    ${GENDIR}/src/expr_constr_group.cpp
-    ${GENDIR}/src/expr_dist.cpp
-    ${GENDIR}/src/expr_interf_expr_group.cpp
-    ${GENDIR}/src/expr_range_group.cpp
-    ${GENDIR}/src/expr_ref_obj_group.cpp
-    ${GENDIR}/src/expr_sequence_inst_group.cpp
-    ${GENDIR}/src/expr_sequence_inst_named_event_group.cpp
-    ${GENDIR}/src/expr_tchk_term_group.cpp
-    ${GENDIR}/src/expr_typespec_group.cpp
-    ${GENDIR}/src/instance_item.cpp
-    ${GENDIR}/src/interf_prog_mod_group.cpp
-    ${GENDIR}/src/method_func_task_call_group.cpp
-    ${GENDIR}/src/named_event_sequence_expr_group.cpp
-    ${GENDIR}/src/nets_vars_ref_obj_group.cpp
-    ${GENDIR}/src/operand_group.cpp
-    ${GENDIR}/src/parameters.cpp
-    ${GENDIR}/src/pattern.cpp
-    ${GENDIR}/src/pattern_expr_group.cpp
-    ${GENDIR}/src/property_expr_group.cpp
-    ${GENDIR}/src/property_expr_named_event_group.cpp
-    ${GENDIR}/src/property_inst_spec_group.cpp
-    ${GENDIR}/src/ref_obj_interf_net_var_group.cpp
-    ${GENDIR}/src/sequence_expr_group.cpp
-    ${GENDIR}/src/sequence_expr_multiclock_group.cpp
-    ${GENDIR}/src/simple_expr_use_group.cpp
-    ${GENDIR}/src/stmt.cpp
-    ${GENDIR}/src/sys_func_task_call_group.cpp
-    ${GENDIR}/src/task_func_named_begin_fork_group.cpp
-    ${GENDIR}/src/tf_call_args.cpp
-    ${GENDIR}/src/variable_drivers_group.cpp
-    ${GENDIR}/src/variable_loads_group.cpp
-    ${GENDIR}/src/variables_operation_group.cpp
-    ${GENDIR}/src/vpi_listener.cpp
-    ${GENDIR}/src/vpi_user.cpp
-    ${GENDIR}/src/vpi_visitor.cpp
-)
+if (WITH_PYTHON_GENERATOR)
+  set(uhdm-GENERATED_SRC
+      ${GENDIR}/src/ExprEval.cpp
+      ${GENDIR}/src/Serializer.cpp
+      ${GENDIR}/src/Serializer_restore.cpp
+      ${GENDIR}/src/Serializer_save.cpp
+      ${GENDIR}/src/SymbolFactory.cpp
+      ${GENDIR}/src/UHDM.capnp.c++
+      ${GENDIR}/src/clone_tree.cpp
+      ${GENDIR}/src/vpi_listener.cpp
+      ${GENDIR}/src/vpi_user.cpp
+      ${GENDIR}/src/vpi_visitor.cpp
+  )
+
+  file(STRINGS "${PROJECT_SOURCE_DIR}/model/models.lst" LIST_OF_MODELS)
+  foreach(MODEL_FILENAME ${LIST_OF_MODELS})
+    get_filename_component(MODEL_NAME ${MODEL_FILENAME} NAME_WE)
+    list(APPEND uhdm-GENERATED_SRC "${GENDIR}/src/${MODEL_NAME}.cpp")
+  endforeach()
+else()
+  set(uhdm-GENERATED_SRC
+      ${GENDIR}/src/ExprEval.cpp
+      ${GENDIR}/src/Serializer.cpp
+      ${GENDIR}/src/Serializer_restore.cpp
+      ${GENDIR}/src/Serializer_save.cpp
+      ${GENDIR}/src/SymbolFactory.cpp
+      ${GENDIR}/src/UHDM.capnp.c++
+      ${GENDIR}/src/actual_group.cpp
+      ${GENDIR}/src/assertion.cpp
+      ${GENDIR}/src/clone_tree.cpp
+      ${GENDIR}/src/constraint_item_group.cpp
+      ${GENDIR}/src/enum_struct_packed_net_group.cpp
+      ${GENDIR}/src/enum_struct_union_packed_array_typespec_group.cpp
+      ${GENDIR}/src/enum_struct_union_packed_var_group.cpp
+      ${GENDIR}/src/expr_constr_group.cpp
+      ${GENDIR}/src/expr_dist.cpp
+      ${GENDIR}/src/expr_interf_expr_group.cpp
+      ${GENDIR}/src/expr_range_group.cpp
+      ${GENDIR}/src/expr_ref_obj_group.cpp
+      ${GENDIR}/src/expr_sequence_inst_group.cpp
+      ${GENDIR}/src/expr_sequence_inst_named_event_group.cpp
+      ${GENDIR}/src/expr_tchk_term_group.cpp
+      ${GENDIR}/src/expr_typespec_group.cpp
+      ${GENDIR}/src/instance_item.cpp
+      ${GENDIR}/src/interf_prog_mod_group.cpp
+      ${GENDIR}/src/method_func_task_call_group.cpp
+      ${GENDIR}/src/named_event_sequence_expr_group.cpp
+      ${GENDIR}/src/nets_vars_ref_obj_group.cpp
+      ${GENDIR}/src/operand_group.cpp
+      ${GENDIR}/src/parameters.cpp
+      ${GENDIR}/src/pattern.cpp
+      ${GENDIR}/src/pattern_expr_group.cpp
+      ${GENDIR}/src/property_expr_group.cpp
+      ${GENDIR}/src/property_expr_named_event_group.cpp
+      ${GENDIR}/src/property_inst_spec_group.cpp
+      ${GENDIR}/src/ref_obj_interf_net_var_group.cpp
+      ${GENDIR}/src/sequence_expr_group.cpp
+      ${GENDIR}/src/sequence_expr_multiclock_group.cpp
+      ${GENDIR}/src/simple_expr_use_group.cpp
+      ${GENDIR}/src/stmt.cpp
+      ${GENDIR}/src/sys_func_task_call_group.cpp
+      ${GENDIR}/src/task_func_named_begin_fork_group.cpp
+      ${GENDIR}/src/tf_call_args.cpp
+      ${GENDIR}/src/variable_drivers_group.cpp
+      ${GENDIR}/src/variable_loads_group.cpp
+      ${GENDIR}/src/variables_operation_group.cpp
+      ${GENDIR}/src/vpi_listener.cpp
+      ${GENDIR}/src/vpi_user.cpp
+      ${GENDIR}/src/vpi_visitor.cpp
+  )
+endif()
 
 foreach(src_file ${uhdm-GENERATED_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)

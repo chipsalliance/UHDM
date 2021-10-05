@@ -17,37 +17,16 @@
  */
 
 /*
- * File:   <GROUPNAME>.cpp
+ * File:   <CLASSNAME>.cpp
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
-#include <uhdm/<GROUPNAME>.h>
 
-#include <iostream>
-#include <uhdm/uhdm.h>
+#include <uhdm/<CLASSNAME>.h>
+#include <uhdm/ElaboratorListener.h>
+#include <uhdm/Serializer.h>
 
 namespace UHDM {
-bool <GROUPNAME>GroupCompliant(any* item) {
-  if (item == nullptr) {
-    return true;
-  }
-  BaseClass* the_item = (BaseClass*) item;
-  UHDM_OBJECT_TYPE uhdmtype = the_item->UhdmType();
-  if (<CHECKTYPE>) {
-    item->GetSerializer()->GetErrorHandler()(ErrorType::UHDM_WRONG_OBJECT_TYPE, "Internal Error: adding wrong object type (" + UhdmName(uhdmtype) + ") in a <GROUPNAME> group!", the_item);
-    return false;
-  }
-  return true;
-}
-
-bool <GROUPNAME>GroupCompliant(VectorOfany* vec) {
-  for (auto item : *vec) {
-    if (!<GROUPNAME>GroupCompliant(item)) {
-      return false;
-    }
-  }
-  return true;
-}
-
+<METHODS>
 }  // namespace UHDM

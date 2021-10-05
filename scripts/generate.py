@@ -8,7 +8,7 @@ import loader
 
 import capnp
 import class_hierarchy
-import classes_h
+import classes
 import clone_tree_cpp
 import containers_h
 import ElaboratorListener_h
@@ -34,8 +34,8 @@ def _worker(params):
     elif key == 'class_hierarchy':
         return class_hierarchy.generate(*args)
 
-    elif key == 'classes_h':
-        return classes_h.generate(*args)
+    elif key == 'classes':
+        return classes.generate(*args)
 
     elif key == 'clone_tree_cpp':
         return clone_tree_cpp.generate(*args)
@@ -115,7 +115,7 @@ def _main():
     params = [
         ('capnp', [models]),
         ('class_hierarchy', [models]),
-        ('classes_h', [models]),
+        ('classes', [models]),
         ('clone_tree_cpp', [models]),
         ('containers_h', [models]),
         ('ElaboratorListener_h', [models]),

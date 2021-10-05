@@ -1602,7 +1602,7 @@ proc generate_code { models } {
     file_copy_if_change "[project_path]/templates/SymbolFactory.cpp" "[gen_src_dir]/SymbolFactory.cpp"
 
     # Serializer.cpp
-    set files "Serializer_save.cpp Serializer_restore.cpp vpi_uhdm.h Serializer.h"
+    set files "Serializer_save.cpp Serializer_restore.cpp vpi_uhdm.h Serializer.h Serializer.cpp"
     foreach file $files {
         set capnp_init_factories ""
         set capnp_restore_factories ""
@@ -1683,6 +1683,8 @@ $RESTORE($class)
         regsub {<FACTORY_OBJECT_TYPE_MAP>} $serializer_content $factory_object_type_map serializer_content
         regsub {<CAPNP_ID>} $serializer_content $capnp_id serializer_content
         regsub {<CAPNP_SAVE>} $serializer_content $capnp_save serializer_content
+        regsub {<CAPNP_SAVE_ADAPTERS>} $serializer_content "" serializer_content
+        regsub {<CAPNP_RESTORE_ADAPTERS>} $serializer_content "" serializer_content
         regsub {<CAPNP_INIT_FACTORIES>} $serializer_content $capnp_init_factories serializer_content
         regsub {<CAPNP_RESTORE_FACTORIES>} $serializer_content $capnp_restore_factories serializer_content
         if {$file == "vpi_uhdm.h" || $file == "Serializer.h"} {

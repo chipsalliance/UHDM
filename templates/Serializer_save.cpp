@@ -53,71 +53,49 @@
 #include <uhdm/uhdm.h>
 #include <uhdm/uhdm_types.h>
 
+
 namespace UHDM {
-
-void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, any* object) { 
-  std::cout << errorMsg << std::endl; 
-}
-
-void Serializer::SetId(const BaseClass* p, unsigned long id) {
-  allIds_.insert(std::make_pair(p, id));
-}
-
-unsigned long Serializer::GetId(const BaseClass* p) {
-  std::unordered_map<const BaseClass*, unsigned long>::iterator itr = allIds_.find(p);
-  if (itr == allIds_.end()) {
-    unsigned long tmp = incrId_;
-    allIds_.insert(std::make_pair(p, incrId_));
-    incrId_++;
-    return tmp;
-  } else {
-    return (*itr).second;
+template <typename T, typename>
+void Serializer::SetSaveId_(FactoryT<T> *const factory) {
+  unsigned long index = 0;
+  for (auto obj : factory->objects_) {
+    SetId(obj, ++index);
   }
 }
 
-<UHDM_NAME_MAP>
-
-// From uhdm_types.h
-std::string VpiTypeName(vpiHandle h) {
-  uhdm_handle* handle = (uhdm_handle*) h;
-  BaseClass* obj = (BaseClass*) handle->object;
-  return UhdmName(obj->UhdmType());
-}
-
-
-<METHODS_CPP>
-
-static constexpr unsigned int badIndex = -1;
-
-BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
-  if (index == badIndex)
-    return NULL;
-  switch (objectType) {
-<FACTORY_OBJECT_TYPE_MAP>
-  default:
-    return NULL;
+template<typename U>
+struct Serializer::AnySaveAdapter<BaseClass, U> {
+  void operator()(const BaseClass *const obj, Serializer *serializer, U builder) const {
+    builder.setVpiParent(serializer->GetId(obj->VpiParent()));
+    builder.setUhdmParentType(obj->UhdmParentType());
+    builder.setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));
+    builder.setVpiLineNo(obj->VpiLineNo());
+    builder.setVpiColumnNo(obj->VpiColumnNo());
+    builder.setVpiEndLineNo(obj->VpiEndLineNo());
+    builder.setVpiEndColumnNo(obj->VpiEndColumnNo());
+    builder.setUhdmId(obj->UhdmId());
   }
-  return NULL;
-}
+};
 
-std::map<std::string, unsigned long> Serializer::ObjectStats() const {
-  std::map<std::string, unsigned long> stats;
-<FACTORY_STATS>
-  return stats;
-}
+<CAPNP_SAVE_ADAPTERS>
 
-void Serializer::Purge() {
-  allIds_.clear();
-<FACTORY_PURGE>
-}
+template<typename T, typename U>
+struct Serializer::VectorOfanySaveAdapter<T, U> {
+  void operator()(const std::vector<T*> &objects, Serializer *serializer, typename ::capnp::List<U>::Builder builder) const {
+    unsigned long index = 0;
+    for (const T* obj : objects)
+      AnySaveAdapter<T, typename U::Builder>()(obj, serializer, builder[index++]);
+  }
+};
 
 void Serializer::Save(const std::string& file) {
-  const int fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
-  ::capnp::MallocMessageBuilder message;
-  UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
   unsigned long index = 0;
 
 <CAPNP_ID>
+
+  const int fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
+  ::capnp::MallocMessageBuilder message;
+  UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
 
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designMaker.objects_.size());
   index = 0;
@@ -147,8 +125,7 @@ void Serializer::Save(const std::string& file) {
   close(fileid);
   for (auto dup : dups) {
     free(dup);
-  }
-  
+  }  
 }
 
 #if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
