@@ -100,9 +100,11 @@ namespace UHDM {
     virtual bool UhdmId(unsigned int id) = 0;
 
     // Create a deep copy of this object.
-    virtual BaseClass* DeepClone(Serializer* serializer, ElaboratorListener* elab_listener, BaseClass* parent) const = 0;
+    virtual BaseClass* DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const = 0;
 
   protected:
+    void DeepCopy(BaseClass* clone, Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const;
+
     void SetSerializer(Serializer* serial) { serializer_ = serial; }
 
     Serializer* serializer_ = nullptr;
@@ -117,6 +119,9 @@ namespace UHDM {
 
   };
 
+  inline BaseClass* BaseClass::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {}
+  inline void BaseClass::DeepCopy(BaseClass* clone, Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {}
+
 #ifdef STANDARD_VPI
   typedef std::set<vpiHandle> VisitedContainer;
 #else
@@ -124,30 +129,37 @@ namespace UHDM {
 #endif
 
   template<typename T>
-  class FactoryT {
+  class FactoryT final {
     friend Serializer;
     typedef std::vector<T *> objects_t;
 
-   public:
-    T* Make() {
-      T* obj = new T;
-      objects_.push_back(obj);
-      return obj;
-    }
-
-    bool Erase(T* tps) {
-      for (typename objects_t::const_iterator itr = objects_.begin();
-           itr != objects_.end(); ++itr) {
-        if ((*itr) == tps) {
-          objects_.erase(itr);
-          return true;
-        }
+    public:
+      T* Make() {
+        T* obj = new T;
+        objects_.push_back(obj);
+        return obj;
       }
-      return false;
-    }
 
-   private:
-    objects_t objects_;
+      bool Erase(T* tps) {
+        for (typename objects_t::const_iterator itr = objects_.begin();
+             itr != objects_.end(); ++itr) {
+          if ((*itr) == tps) {
+            objects_.erase(itr);
+            return true;
+          }
+        }
+        return false;
+      }
+
+      void Purge() {
+        for (typename objects_t::reference obj : objects_) {
+          delete obj;
+        }
+        objects_.clear();
+      }
+
+    private:
+      objects_t objects_;
   };
 
 }  // namespace UHDM

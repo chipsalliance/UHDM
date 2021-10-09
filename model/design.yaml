@@ -75,4 +75,8 @@
     vpi: vpiLetDecl
     type: let_decl
     card: any
-    
+  - class_ref: task_func
+    name: task func
+    vpi: vpiTaskFunc
+    type: task_func
+    card: any
