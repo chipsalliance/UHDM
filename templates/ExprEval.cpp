@@ -121,12 +121,17 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     VectorOfany* orig = op->Operands();
     VectorOfany* ordered = s.MakeAnyVec();
     std::vector<any*> tmp(fieldNames.size());
+    any* defaultOp = nullptr;
     for (auto oper : *orig) {
       if (oper->UhdmType() == uhdmtagged_pattern) {
         tagged_pattern* tp = (tagged_pattern*)oper;
         const typespec* ttp = tp->Typespec();
         const std::string& tname = ttp->VpiName();
         bool found = false;
+        if (tname == "default") {
+          defaultOp = oper;
+          found = true;
+        }
         for (unsigned int i = 0; i < fieldNames.size(); i++) {
           if (tname == fieldNames[i]) {
             tmp[i] = oper;
@@ -152,6 +157,11 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     }
     int index = 0;
     for (auto op : tmp) {
+       if (defaultOp) {
+        if (op == nullptr) {
+          op = defaultOp;
+        }
+      }
       if (op == nullptr) {
         s.GetErrorHandler()(ErrorType::UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN,
                             fieldNames[index], exp);
