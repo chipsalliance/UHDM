@@ -122,6 +122,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     VectorOfany* ordered = s.MakeAnyVec();
     std::vector<any*> tmp(fieldNames.size());
     any* defaultOp = nullptr;
+    int index = 0;
     for (auto oper : *orig) {
       if (oper->UhdmType() == uhdmtagged_pattern) {
         tagged_pattern* tp = (tagged_pattern*)oper;
@@ -153,9 +154,12 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
                               exp);
           return result;
         }
+      } else {
+        tmp[index] = oper;
       }
+      index++;
     }
-    int index = 0;
+    index = 0;
     for (auto op : tmp) {
        if (defaultOp) {
         if (op == nullptr) {
