@@ -119,11 +119,20 @@ TEST(VpiListenerTest, ProgramModule) {
 
   std::unique_ptr<MyVpiListener> listener(new MyVpiListener());
   listen_designs(design, listener.get());
+#if PYGEN_ENABLED
+  const std::vector<std::string> expected = {
+      "Module: /M1 parent: design1",
+      "Program: /PR1 parent: -",
+      "Module: u1/M2 parent: -",
+      "Module: u2/M3 parent: -",
+  };
+#else
   const std::vector<std::string> expected = {
       "Module: /M1 parent: design1",
       "Module: u1/M2 parent: -",
       "Module: u2/M3 parent: -",
       "Program: /PR1 parent: -",
   };
+#endif
   EXPECT_EQ(listener->collected(), expected);
 }

@@ -222,6 +222,10 @@ endforeach(src_file ${uhdm-GENERATED_SRC})
 add_library(uhdm STATIC ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
 
+if(WITH_PYTHON_GENERATOR)
+  target_compile_definitions(uhdm PUBLIC PYGEN_ENABLED=1)
+endif()
+
 # Our uhdm headers come with angle brackets (indicating system headers),
 # make sure that the compiler looks here first before finding an existing UHDM
 # installation. Hence we use SYSTEM
@@ -276,6 +280,9 @@ if (UHDM_BUILD_TESTS)
       add_test(
         NAME ${test_prefix}/${test_bin} COMMAND ${test_bin}
         WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+      if(WITH_PYTHON_GENERATOR)
+        target_compile_definitions(${test_bin} PUBLIC PYGEN_ENABLED=1)
+      endif()
       gtest_discover_tests(${test_bin} TEST_PREFIX "${test_prefix}/")
       # Now, add this binary to our UnitTests target that it builds this
       add_dependencies(UnitTests ${test_bin})

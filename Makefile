@@ -14,13 +14,14 @@ ifeq ($(CPU_CORES),)
 endif
 
 PREFIX?=/usr/local
+ADDITIONAL_CMAKE_OPTIONS ?=
 
 release: build
 	cmake --build build --config Release -j $(CPU_CORES)
 
 debug:
 	mkdir -p dbuild
-	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B dbuild
+	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) $(ADDITIONAL_CMAKE_OPTIONS) -S . -B dbuild
 	cmake --build dbuild --config Debug -j $(CPU_CORES)
 
 test: build
@@ -45,7 +46,7 @@ uninstall:
 
 build:
 	mkdir -p build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) -S . -B build
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) $(ADDITIONAL_CMAKE_OPTIONS) -S . -B build
 
 test_install:
 	cmake --build build --target test_inst --config Release -j $(CPU_CORES)

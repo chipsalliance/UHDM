@@ -460,7 +460,7 @@ proc printVpiListener {classname vpi type card} {
 "
         if {$MODEL_TYPE($classname) != "class_def"} {
             set VPI_ANY_LISTENERS($classname) "  case uhdm${classname} :
-    listen_${classname}(object, listener, visited);
+    listen_${classname}(handle, listener, visited);
     break;
 "
         }
@@ -992,7 +992,8 @@ proc write_vpi_visitor_cpp {} {
     set fid [open "[project_path]/templates/vpi_visitor.cpp"]
     set visitor_cpp [read $fid]
     close $fid
-    set vpi_visitor ""
+    set vpi_visitor "  vpiHandle itr;
+"
     foreach classname [array name VISITOR] {
         #if [info exist filter($classname)] {
         #    continue
@@ -1016,6 +1017,7 @@ $relations
 "
     }
     regsub {<OBJECT_VISITORS>} $visitor_cpp $vpi_visitor visitor_cpp
+    regsub {<PRIVATE_OBJECT_VISITORS>} $visitor_cpp "" visitor_cpp
     set_content_if_change "[gen_src_dir]/vpi_visitor.cpp" $visitor_cpp
 }
 
@@ -1553,6 +1555,56 @@ proc generate_code { models } {
 
     } ; #foreach model
 
+    append vpi_handle_by_name_body_all "  return 0;"
+    append vpi_handle_body_all "  std::cout << \"VPI ERROR: Bad usage of vpi_handle\" << std::endl;\n"
+    append vpi_handle_body_all "  return 0;"
+    append vpi_iterate_body_all "  std::cout << \"VPI ERROR: Bad usage of vpi_iterate\" << std::endl;\n"
+    append vpi_iterate_body_all "  return 0;"
+    append vpi_scan_body "  return 0;"
+
+    set vpi_get_body_all "
+  // Baseclass-handled properties; all the others still need to be handled
+  // separately, but this is a good start.
+  switch (property) {
+  case vpiLineNo:
+    return obj->VpiLineNo();
+  case vpiColumnNo:
+    return obj->VpiColumnNo();
+  case vpiEndLineNo:
+    return obj->VpiEndLineNo();
+  case vpiEndColumnNo:
+    return obj->VpiEndColumnNo();
+  case vpiType:
+    return obj->VpiType();
+  }
+  
+  // ... all other properties currently handled 'manually' for now
+"
+    append vpi_get_body_all $vpi_get_body
+    append vpi_get_body_all "  return 0;"
+
+    set vpi_get_str_body_all "
+  // Handle some easy cases first; these are handled in the BaseClass.
+  // TODO: add some specific property interfaces (VpiFullNameImplementor?)
+  // to access some other common properties.
+  switch (property) {
+    case vpiFile:
+      return (PLI_BYTE8*)(obj->VpiFile().empty() ? 0 : obj->VpiFile().c_str());
+
+    case vpiName:
+      return (PLI_BYTE8*)(obj->VpiName().empty() ? 0 : obj->VpiName().c_str());
+
+    case vpiDefName:
+      return (PLI_BYTE8*)(obj->VpiDefName().empty()
+                              ? 0
+                              : obj->VpiDefName().c_str());
+  }
+
+  // ... all other properties currently handled 'manually' for now
+"
+    append vpi_get_str_body_all $vpi_get_str_body
+    append vpi_get_str_body_all "  return 0;"
+
     # uhdm.h
     write_uhdm_h $headers
 
@@ -1571,10 +1623,10 @@ proc generate_code { models } {
     regsub {<VPI_ITERATE_BODY>} $vpi_user $vpi_iterate_body_all vpi_user
     regsub {<VPI_SCAN_BODY>} $vpi_user $vpi_scan_body vpi_user
     regsub {<VPI_HANDLE_BODY>} $vpi_user $vpi_handle_body_all vpi_user
-    regsub -all {<VPI_GET_BODY>} $vpi_user $vpi_get_body vpi_user
+    regsub -all {<VPI_GET_BODY>} $vpi_user $vpi_get_body_all vpi_user
     regsub -all {<VPI_GET_VALUE_BODY>} $vpi_user $vpi_get_value_body vpi_user
     regsub -all {<VPI_GET_DELAY_BODY>} $vpi_user $vpi_get_delay_body vpi_user
-    regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body vpi_user
+    regsub {<VPI_GET_STR_BODY>} $vpi_user $vpi_get_str_body_all vpi_user
 
     set_content_if_change "[gen_src_dir]/vpi_user.cpp" $vpi_user
 

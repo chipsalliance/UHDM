@@ -34,6 +34,8 @@
 #include <vector>
 
 static bool showIDs = false;
+static constexpr int kLevelIndent = 2;
+
 
 #ifdef STANDARD_VPI
 
@@ -423,49 +425,42 @@ static std::string visit_value(s_vpi_value* value) {
   if (value == nullptr)
     return "";
   switch (value->format) {
-  case vpiIntVal: {
-    return std::string(std::string("|INT:") + std::to_string(value->value.integer) + "\n");
-    break;
-  }
-  case vpiUIntVal: {
-    return std::string(std::string("|UINT:") + std::to_string(value->value.uint) + "\n");
-    break;
-  }
-  case vpiStringVal: {
-    const char* s = (const char*) value->value.str;
-    return std::string(std::string("|STRING:") + std::string(s) + "\n");
-    break;
-  }
-  case vpiBinStrVal: {
-    const char* s = (const char*) value->value.str;
-    return std::string(std::string("|BIN:") + std::string(s) + "\n");
-    break;
-  }
-  case vpiHexStrVal: {
-    const char* s = (const char*) value->value.str;
-    return std::string(std::string("|HEX:") + std::string(s) + "\n");
-    break;
-  }
-  case vpiOctStrVal: {
-    const char* s = (const char*) value->value.str;
-    return std::string(std::string("|OCT:") + std::string(s) + "\n");
-    break;
-  }
-  case vpiRealVal: {
-    return std::string(std::string("|REAL:") + std::to_string(value->value.real) + "\n");
-    break;
-  }
-  case vpiScalarVal: {
-    return std::string(std::string("|SCAL:") + std::to_string(value->value.scalar) + "\n");
-    break;
-  }
-  case vpiDecStrVal: {
-    const char* s = (const char*) value->value.str;
-    return std::string(std::string("|DEC:") + std::string(s) + "\n");
-    break;
-  }
-  default:
-    break;
+  case vpiIntVal:
+      return std::string("|INT:")
+          .append(std::to_string(value->value.integer))
+          .append("\n");
+  case vpiUIntVal:
+    return std::string("|UINT:")
+        .append(std::to_string(value->value.uint))
+        .append("\n");
+  case vpiStringVal:
+    return std::string("|STRING:")
+        .append((const char*)value->value.str)
+        .append("\n");
+  case vpiBinStrVal:
+    return std::string("|BIN:")
+        .append((const char*)value->value.str)
+        .append("\n");
+  case vpiHexStrVal:
+    return std::string("|HEX:")
+        .append((const char*)value->value.str)
+        .append("\n");
+  case vpiOctStrVal:
+    return std::string("|OCT:")
+        .append((const char*)value->value.str)
+        .append("\n");
+  case vpiRealVal:
+    return std::string("|REAL:")
+        .append(std::to_string(value->value.real))
+        .append("\n");
+  case vpiScalarVal:
+    return std::string("|SCAL:")
+        .append(std::to_string(value->value.scalar))
+        .append("\n");
+  case vpiDecStrVal:
+    return std::string("|DEC:")
+        .append((const char*)value->value.str)
+        .append("\n");
   }
   return "";
 }
@@ -474,12 +469,8 @@ static std::string visit_delays(s_vpi_delay* delay) {
   if (delay == nullptr)
     return "";
   switch (delay->time_type) {
-  case vpiScaledRealTime: {
-    return std::string(std::string("|#") + std::to_string(delay->da[0].low) + "\n");
-    break;
-  }
-  default:
-    break;
+  case vpiScaledRealTime:
+    return std::string("|#").append(std::to_string(delay->da[0].low)).append("\n");
   }
   return "";
 }
@@ -489,18 +480,17 @@ static std::ostream &stream_indent(std::ostream &out, int indent) {
   return out;
 }
 
-void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit) {
+<PRIVATE_OBJECT_VISITORS>
+void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit) {
   if (!obj_h)
     return;
 #ifdef STANDARD_VPI
 
-  static int kLevelIndent = 2;
   const bool alreadyVisited = visited->find(obj_h) != visited->end();
   visited->insert(obj_h);
 
 #else
 
-  static constexpr int kLevelIndent = 2;
   const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
   const BaseClass* const object = (const BaseClass*) handle->object;
   const bool alreadyVisited = (visited->find(object) != visited->end());
@@ -516,11 +506,9 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
     std::string hspaces;
     std::string rspaces;
     if (indent >= kLevelIndent) {
-      for (int i = 0; i < indent -2 ; i++) {
-        hspaces += " ";
-      }
-      rspaces = hspaces + "|";
-      hspaces += "\\_";
+      hspaces = std::string(indent - 2, ' ');
+      rspaces.assign(hspaces).append("|");
+      hspaces.append("\\_");
     }
 
     if (strlen(relation) != 0) {
@@ -608,7 +596,6 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
   if (strcmp(relation, "vpiParent") == 0) {
     return;
   }
-  vpiHandle itr;
 <OBJECT_VISITORS>
 }
 
@@ -632,13 +619,11 @@ void vpi_show_ids(bool show) {
   showIDs = show;
 }
 
-static std::stringstream the_output;
-
 extern "C" {
   void vpi_decompiler (vpiHandle design) {
     std::vector<vpiHandle> designs;
     designs.push_back(design);
-    UHDM::visit_designs(designs, the_output);
-    std::cout << the_output.str().c_str() << std::endl;
+    UHDM::visit_designs(designs, std::cout);
+    std::cout << std::endl;
   }
 }

@@ -28,6 +28,7 @@
 
 #include <string>
 #include <uhdm/vpi_user.h>
+#include <uhdm/uhdm_vpi_user.h>
 
 namespace UHDM {
 class BaseClass;

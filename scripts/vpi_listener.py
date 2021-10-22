@@ -1,6 +1,5 @@
 import config
 import file_utils
-from collections import defaultdict
 
 
 def _get_listeners(classname, vpi, type, card):
@@ -22,40 +21,28 @@ def _get_listeners(classname, vpi, type, card):
           # Prevent stepping inside tasks while processing calls (task_call, method_task_call) to them
           return listeners
 
-        listeners.append(f'    itr = vpi_handle({vpi}, object);')
-        listeners.append( '    if (itr) {')
-        listeners.append(f'      listen_any(itr, listener, visited);')
-        listeners.append( '      vpi_free_object(itr);')
-        listeners.append( '    }')
+        listeners.append(f'  if (vpiHandle itr = vpi_handle({vpi}, handle)) {{')
+        listeners.append(f'    listen_any(itr, listener, visited);')
+        listeners.append( '    vpi_free_object(itr);')
+        listeners.append( '  }')
 
     else:
-        listeners.append(f'    itr = vpi_iterate({vpi}, object);')
-        listeners.append( '    if (itr) {')
-        listeners.append( '      while (vpiHandle obj = vpi_scan(itr)) {')
-        listeners.append(f'        listen_any(obj, listener, visited);')
-        listeners.append( '        vpi_free_object(obj);')
-        listeners.append( '      }')
-        listeners.append( '      vpi_free_object(itr);')
+        listeners.append(f'  if (vpiHandle itr = vpi_iterate({vpi}, handle)) {{')
+        listeners.append( '    while (vpiHandle obj = vpi_scan(itr)) {')
+        listeners.append(f'      listen_any(obj, listener, visited);')
+        listeners.append( '      vpi_free_object(obj);')
         listeners.append( '    }')
+        listeners.append( '    vpi_free_object(itr);')
+        listeners.append( '  }')
 
     return listeners
 
 
 def generate(models):
     declarations = []
-    iterators = {}
-    implementations = []
+    private_implementations = []
+    public_implementations = []
     classnames = set()
-
-    decl_appended = False
-    def _append_iterators(iterators):
-        nonlocal decl_appended
-        nonlocal implementations
-        if iterators:
-            if not decl_appended:
-                implementations.append( '    vpiHandle itr;')
-                decl_appended = True
-            implementations.extend(iterators)
 
     for model in models.values():
         modeltype = model['type']
@@ -65,22 +52,16 @@ def generate(models):
         classname = model['name']
         Classname_ = classname[:1].upper() + classname[1:]
 
-        iterators[classname] = []
-        declarations.append(f'void listen_{classname}(vpiHandle object, UHDM::VpiListener* listener, UHDM::VisitedContainer* visited);')
-
-        implementations.append(f'void UHDM::listen_{classname}(vpiHandle object, VpiListener* listener, UHDM::VisitedContainer* visited) {{')
-        implementations.append(f'  {classname}* d = ({classname}*) ((const uhdm_handle*)object)->object;')
-        implementations.append( '  const bool alreadyVisited = (visited->find(d) != visited->end());')
-        implementations.append( '  visited->insert(d);')
-        implementations.append( '  const BaseClass* parent = d->VpiParent();')
-        implementations.append( '  vpiHandle parent_h = parent ? NewVpiHandle(parent) : 0;')
-        implementations.append(f'  listener->enter{Classname_}(d, parent, object, parent_h);')
-        implementations.append( '  if (!alreadyVisited) {')
-
         if modeltype != 'class_def':
             classnames.add(classname)
 
-        decl_appended = False
+        baseclass = model.get('extends')
+
+        declarations.append(f'void listen_{classname}(vpiHandle handle, UHDM::VpiListener* listener, UHDM::VisitedContainer* visited);')
+
+        private_implementations.append(f'static void listen_{classname}_(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle, VpiListener* listener, UHDM::VisitedContainer* visited) {{')
+        if baseclass:
+            private_implementations.append(f'  listen_{baseclass}_(object, parent, handle, parentHandle, listener, visited);')
 
         for key, value in model.allitems():
             if key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
@@ -91,23 +72,23 @@ def generate(models):
                 if key == 'group_ref':
                     type = 'any'
 
-                _append_iterators(_get_listeners(classname, vpi, type, card))
-                iterators[classname].append((vpi, type, card))
+                private_implementations.extend(_get_listeners(classname, vpi, type, card))
 
-        # process baseclass recursively
-        baseclass = model['extends']
-        while baseclass:
-            for vpi, type, card in iterators[baseclass]:
-                _append_iterators(_get_listeners(classname, vpi, type, card))
+        private_implementations.append( '}')
+        private_implementations.append( '')
 
-            baseclass = models[baseclass]['extends']
-
-        implementations.append( '  }')
-        implementations.append(f'  listener->leave{Classname_}(d, parent, object, parent_h);')
-        implementations.append( '  vpi_release_handle(parent_h);')
-        implementations.append( '}')
-        implementations.append( '')
-
+        public_implementations.append(f'void UHDM::listen_{classname}(vpiHandle handle, VpiListener* listener, UHDM::VisitedContainer* visited) {{')
+        public_implementations.append(f'  const {classname}* object = (const {classname}*) ((const uhdm_handle*)handle)->object;')
+        public_implementations.append( '  const BaseClass* parent = object->VpiParent();')
+        public_implementations.append( '  vpiHandle parentHandle = (parent != nullptr) ? NewVpiHandle(parent) : nullptr;')
+        public_implementations.append(f'  listener->enter{Classname_}(object, parent, handle, parentHandle);')
+        public_implementations.append( '  if (visited->insert(object).second) {')
+        public_implementations.append(f'    listen_{classname}_(object, parent, handle, parentHandle, listener, visited);')
+        public_implementations.append( '  }')
+        public_implementations.append(f'  listener->leave{Classname_}(object, parent, handle, parentHandle);')
+        public_implementations.append( '  vpi_release_handle(parentHandle);')
+        public_implementations.append(f'}}')
+        public_implementations.append( '')
 
    # vpi_listener.h
     with open(config.get_template_filepath('vpi_listener.h'), 'r+t') as strm:
@@ -116,11 +97,11 @@ def generate(models):
     file_content = file_content.replace('<VPI_LISTENERS_HEADER>', '\n'.join(declarations))
     file_utils.set_content_if_changed(config.get_output_header_filepath('vpi_listener.h'), file_content)
 
-    any_implementation = []
-    for classname in sorted(classnames):
-        any_implementation.append(f'  case uhdm{classname}:')
-        any_implementation.append(f'    listen_{classname}(object, listener, visited);')
-        any_implementation.append( '    break;')
+    implementations = private_implementations + public_implementations
+    any_implementation = [
+      f'  case uhdm{classname}: listen_{classname}(handle, listener, visited); break;'
+          for classname in sorted(classnames)
+    ]
 
     # vpi_listener.cpp
     with open(config.get_template_filepath('vpi_listener.cpp'), 'r+t') as strm:
