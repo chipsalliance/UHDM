@@ -114,6 +114,11 @@ protected:
       
       // Collect instance parameters, defparams
       ComponentMap paramMap;
+      if (object->Param_assigns()) {
+        for (param_assign* passign : *object->Param_assigns()) {
+          paramMap.insert(std::make_pair(passign->Lhs()->VpiName(), passign->Rhs()));
+        }
+      }
       if (object->Parameters()) {
         for (any* param : *object->Parameters()) {
           paramMap.insert(std::make_pair(param->VpiName(), param));
