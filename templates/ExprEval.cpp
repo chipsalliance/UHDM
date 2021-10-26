@@ -155,7 +155,11 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
           return result;
         }
       } else {
-        tmp[index] = oper;
+        if (index < (int) tmp.size())
+          tmp[index] = oper;
+        else 
+         s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, "Out of bound!",
+                              exp); 
       }
       index++;
     }
