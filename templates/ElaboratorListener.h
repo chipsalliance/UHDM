@@ -29,14 +29,11 @@
 #include <iostream>
 
 #include <uhdm/VpiListener.h>
-#include <uhdm/clone_tree.h>
 
-// Since there is a lot of implementation happening inside this
-// header, we need to include this.
-// TODO: move implementation in ElaboratorListener.cpp
-#include <uhdm/Serializer.h>
 
 namespace UHDM {
+
+class Serializer;
 
 class ElaboratorListener : public VpiListener {
   friend function;
@@ -70,233 +67,26 @@ public:
 protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
-  void leaveDesign(const design* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) override {
-    design* root = (design*) object;
-    root->VpiElaborated(true);
-  }
+  void leaveDesign(const design* object, const BaseClass* parent,
+                   vpiHandle handle, vpiHandle parentHandle) override;
 
   void enterModule(const module* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override {
-    module* inst = (module*) object;
-    bool topLevelModule         = object->VpiTopModule();
-    const std::string& instName = object->VpiName();
-    const std::string& defName  = object->VpiDefName();
-    bool flatModule             = (instName == "") && ((object->VpiParent() == 0) ||
-                                                       ((object->VpiParent() != 0) && (object->VpiParent()->VpiType() != vpiModule)));
-                                  // false when it is a module in a hierachy tree
-    if (debug_)
-      std::cout << "Module: " << defName << " (" << instName << ") Flat:"  << flatModule << ", Top:" << topLevelModule << std::endl;
-
-    if (flatModule) {
-      // Flat list of module (unelaborated)
-      flatComponentMap_.insert(std::make_pair(object->VpiDefName(), object));
-    } else {
-      // Hierachical module list (elaborated)
-      inHierarchy_ = true;
-
-      // Collect instance elaborated nets
-      ComponentMap netMap;
-      if (object->Nets()) {
-        for (net* net : *object->Nets()) {
-          netMap.insert(std::make_pair(net->VpiName(), net));
-        }
-      }
-      if (object->Array_nets()) {
-        for (array_net* net : *object->Array_nets()) {
-          netMap.insert(std::make_pair(net->VpiName(), net));
-        }
-      }
-      if (object->Interfaces()) {
-        for (interface* inter : *object->Interfaces()) {
-          netMap.insert(std::make_pair(inter->VpiName(), inter));
-        }
-      }
-      
-      // Collect instance parameters, defparams
-      ComponentMap paramMap;
-      if (object->Param_assigns()) {
-        for (param_assign* passign : *object->Param_assigns()) {
-          paramMap.insert(std::make_pair(passign->Lhs()->VpiName(), passign->Rhs()));
-        }
-      }
-      if (object->Parameters()) {
-        for (any* param : *object->Parameters()) {
-          paramMap.insert(std::make_pair(param->VpiName(), param));
-        }
-      }
-      if (object->Def_params()) {
-        for (def_param* param : *object->Def_params()) {
-          paramMap.insert(std::make_pair(param->VpiName(), param));
-        }
-      }
-      if (object->Variables()) {
-        for (variables* var : *object->Variables()) {
-          paramMap.insert(std::make_pair(var->VpiName(), var));
-        }
-      }
-
-      // Collect func and task declaration
-      ComponentMap funcMap;
-      if (object->Task_funcs()) {
-        for (task_func* var : *object->Task_funcs()) {
-          funcMap.insert(std::make_pair(var->VpiName(), var));
-        }
-      }
-
-      // Check if Module instance has a definition, collect enums
-      ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
-      if (itrDef != flatComponentMap_.end()) {
-        const BaseClass* comp = (*itrDef).second;
-        int compType = comp->VpiType();
-        switch (compType) {
-          case vpiModule: {
-            module* defMod = (module*) comp;
-            if (defMod->Typespecs()) {
-              for (typespec* tps : *defMod->Typespecs()) {
-                if (tps->UhdmType() == uhdmenum_typespec) {
-                  enum_typespec* etps = (enum_typespec*)tps;
-                  for (enum_const* econst : * etps->Enum_consts()) {
-                    paramMap.insert(std::make_pair(econst->VpiName(), econst));
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Push instance context on the stack
-      instStack_.push_back(std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
-
-      // Check if Module instance has a definition
-      if (itrDef != flatComponentMap_.end()) {
-        const BaseClass* comp = (*itrDef).second;
-        int compType = comp->VpiType();
-        switch (compType) {
-        case vpiModule: {
-          module* defMod = (module*) comp;
-          if (clone_) {
-<MODULE_ELABORATOR_LISTENER>
-          }
-          break;
-        }
-        default:
-          break;
-        }
-      }
-
-    }
-  }
+                   vpiHandle handle, vpiHandle parentHandle) override;
 
   void leaveModule(const module* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override {
-    for (tf_call* call : scheduledTfCallBinding_) {
-      if (call->UhdmType() == uhdmfunc_call) {
-        if (function* f = dynamic_cast<function*>(bindTaskFunc(call->VpiName()))) {
-          ((func_call*)call)->Function(f);
-        }
-      } else {
-        if (task* f = dynamic_cast<task*>(bindTaskFunc(call->VpiName()))) {
-          ((task_call*)call)->Task(f);
-        }
-      }
-    }
-    scheduledTfCallBinding_.clear();
-    if (inHierarchy_) {
-      instStack_.pop_back();
-      if (instStack_.empty()) {
-        inHierarchy_ = false;
-      }
-    }
-  }
+                   vpiHandle handle, vpiHandle parentHandle) override;
 
-  void enterPackage(const package* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) override {
+  void enterPackage(const package* object, const BaseClass* parent,
+                    vpiHandle handle, vpiHandle parentHandle) override;
 
-      ComponentMap netMap;
-
-      // Collect instance parameters, defparams
-      ComponentMap paramMap;
-      if (object->Parameters()) {
-        for (any* param : *object->Parameters()) {
-          paramMap.insert(std::make_pair(param->VpiName(), param));
-        }
-      }
-      if (object->Variables()) {
-        for (variables* var : *object->Variables()) {
-          paramMap.insert(std::make_pair(var->VpiName(), var));
-        }
-      }
-
-      // Collect func and task declaration
-      ComponentMap funcMap;
-
-      // Push instance context on the stack
-      instStack_.push_back(std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
-
-      if (clone_) {
-        if (auto vec = object->Task_funcs()) {
-          auto clone_vec = serializer_->MakeTask_funcVec();
-          ((package*)object)->Task_funcs(clone_vec);
-          for (auto obj : *vec) {
-            enterTask_func(obj, object, nullptr, nullptr);
-            auto* tf = obj->DeepClone(serializer_, this, (package*) object);
-            ComponentMap& funcMap = std::get<2>((instStack_.at(instStack_.size()-2)).second);
-            funcMap.insert(std::make_pair(tf->VpiName(), tf));
-            leaveTask_func(obj, object, nullptr, nullptr);
-            tf->VpiParent((package*) object);
-            clone_vec->push_back(tf);
-          }
-        }
-      }
-
-  }
-
-  void leavePackage(const package* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) override {
-     instStack_.pop_back();
-  }
+  void leavePackage(const package* object, const BaseClass* parent,
+                    vpiHandle handle, vpiHandle parentHandle) override;
 
   void enterClass_defn(const class_defn* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override {
-    class_defn* cl = (class_defn*) object;
-
-    // Collect instance elaborated nets
-    ComponentMap varMap;
-    if (object->Variables()) {
-      for (variables* var : *object->Variables()) {
-        varMap.insert(std::make_pair(var->VpiName(), var));
-      }
-    }
-
-    // Collect instance parameters, defparams
-    ComponentMap paramMap;
-    if (object->Parameters()) {
-      for (any* param : *object->Parameters()) {
-        paramMap.insert(std::make_pair(param->VpiName(), param));
-      }
-    }
-
-    // Collect func and task declaration
-    ComponentMap funcMap;
-    if (object->Task_funcs()) {
-      for (task_func* var : *object->Task_funcs()) {
-        funcMap.insert(std::make_pair(var->VpiName(), var));
-      }
-    }
-
-    // Push class defn context on the stack
-    // Class context is going to be pushed in case of:
-    //   - imbricated classes
-    //   - inheriting classes (Through the extends relation)
-    instStack_.push_back(std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
-    if (clone_) {
-<CLASS_ELABORATOR_LISTENER>
-    }
-  }
+                       vpiHandle handle, vpiHandle parentHandle) override;
 
   void leaveClass_defn(const class_defn* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override {
-    instStack_.pop_back();
-  }
+                       vpiHandle handle, vpiHandle parentHandle) override;
 
   void enterVariables(const variables* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override;
@@ -318,8 +108,9 @@ protected:
                       vpiHandle handle, vpiHandle parentHandle) override;
 
   void leaveRef_obj(const ref_obj* object, const BaseClass* parent,
-		    vpiHandle handle, vpiHandle parentHandle) override;
-private:
+                    vpiHandle handle, vpiHandle parentHandle) override;
+
+ private:
 
   // Instance context stack
   typedef std::vector<std::pair<const BaseClass*, std::tuple<ComponentMap, ComponentMap, ComponentMap>>> InstStack;
