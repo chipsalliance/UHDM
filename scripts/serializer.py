@@ -1,5 +1,4 @@
 import os
-from collections import OrderedDict
 
 import config
 import file_utils
@@ -15,11 +14,11 @@ def generate(models):
 
     save_ids = []
     save_objects = []
-    saves_adapters = OrderedDict()
+    saves_adapters = []
 
     restore_ids = []
     restore_objects = []
-    restore_adapters = OrderedDict()
+    restore_adapters = []
 
     type_map = uhdm_types_h.get_type_map(models)
 
@@ -51,18 +50,15 @@ def generate(models):
         factory_declarations.append(f'    VectorOf{classname}Factory {classname}VectMaker;')
         factory_methods.append(f'    std::vector<{classname}*>* Make{Classname_}Vec() {{ return Make<{classname}>(&{classname}VectMaker); }}')
 
-        saves_adapters[classname] = []
-        restore_adapters[classname] = []
+        saves_adapters.append(f'template<typename U>')
+        saves_adapters.append(f'struct Serializer::AnySaveAdapter<{classname}, U> {{')
+        saves_adapters.append(f'  void operator()(const {classname} *const obj, Serializer *const serializer, U builder) const {{')
+        saves_adapters.append(f'    AnySaveAdapter<{baseclass}, U>()(static_cast<const {baseclass}*>(obj), serializer, builder);')
 
-        saves_adapters[classname].append(f'template<typename U>')
-        saves_adapters[classname].append(f'struct Serializer::AnySaveAdapter<{classname}, U> {{')
-        saves_adapters[classname].append(f'  void operator()(const {classname} *const obj, Serializer *const serializer, U builder) const {{')
-        saves_adapters[classname].append(f'    AnySaveAdapter<{baseclass}, U>()(static_cast<const {baseclass}*>(obj), serializer, builder);')
-
-        restore_adapters[classname].append(f'template<typename U>')
-        restore_adapters[classname].append(f'struct Serializer::AnyRestoreAdapter<{classname}, U> {{')
-        restore_adapters[classname].append(f'  void operator()(U reader, Serializer *const serializer, {classname} *const obj) const {{')
-        restore_adapters[classname].append(f'    AnyRestoreAdapter<{baseclass}, U>()(reader, serializer, static_cast<{baseclass}*>(obj));')
+        restore_adapters.append(f'template<typename U>')
+        restore_adapters.append(f'struct Serializer::AnyRestoreAdapter<{classname}, U> {{')
+        restore_adapters.append(f'  void operator()(U reader, Serializer *const serializer, {classname} *const obj) const {{')
+        restore_adapters.append(f'    AnyRestoreAdapter<{baseclass}, U>()(reader, serializer, static_cast<{baseclass}*>(obj));')
 
         for key, value in model.allitems():
             if key == 'property':
@@ -78,11 +74,11 @@ def generate(models):
                 Vpi = Vpi_.replace('_', '')
 
                 if type in ['string', 'value', 'delay']:
-                    saves_adapters[classname].append(f'    builder.set{Vpi}(serializer->symbolMaker.Make(obj->{Vpi_}()));')
-                    restore_adapters[classname].append(f'    obj->{Vpi_}(serializer->symbolMaker.GetSymbol(reader.get{Vpi}()));')
+                    saves_adapters.append(f'    builder.set{Vpi}(serializer->symbolMaker.Make(obj->{Vpi_}()));')
+                    restore_adapters.append(f'    obj->{Vpi_}(serializer->symbolMaker.GetSymbol(reader.get{Vpi}()));')
                 else:
-                    saves_adapters[classname].append(f'    builder.set{Vpi}(obj->{Vpi_}());')
-                    restore_adapters[classname].append(f'    obj->{Vpi_}(reader.get{Vpi}());')
+                    saves_adapters.append(f'    builder.set{Vpi}(obj->{Vpi_}());')
+                    restore_adapters.append(f'    obj->{Vpi_}(reader.get{Vpi}());')
             
             elif key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
                 name = value.get('name')
@@ -105,56 +101,56 @@ def generate(models):
 
                 if card == '1':
                     if key in ['class_ref', 'group_ref']:
-                        saves_adapters[classname].append(f'    if (obj->{Name_}() != nullptr) {{')
-                        saves_adapters[classname].append(f'      ::ObjIndexType::Builder tmp = builder.get{Name}();')
-                        saves_adapters[classname].append(f'      tmp.setIndex(serializer->GetId(obj->{Name_}()));')
-                        saves_adapters[classname].append(f'      tmp.setType((obj->{Name_}())->UhdmType());')
-                        saves_adapters[classname].append( '    }')
+                        saves_adapters.append(f'    if (obj->{Name_}() != nullptr) {{')
+                        saves_adapters.append(f'      ::ObjIndexType::Builder tmp = builder.get{Name}();')
+                        saves_adapters.append(f'      tmp.setIndex(serializer->GetId(obj->{Name_}()));')
+                        saves_adapters.append(f'      tmp.setType((obj->{Name_}())->UhdmType());')
+                        saves_adapters.append( '    }')
 
-                        restore_adapters[classname].append(f'    obj->{Name_}(({type}*)serializer->GetObject(reader.get{Name}().getType(), reader.get{Name}().getIndex() - 1));')
+                        restore_adapters.append(f'    obj->{Name_}(({type}*)serializer->GetObject(reader.get{Name}().getType(), reader.get{Name}().getIndex() - 1));')
                     else:
-                        saves_adapters[classname].append(f'    builder.set{Name}(serializer->GetId(obj->{Name_}()));')
+                        saves_adapters.append(f'    builder.set{Name}(serializer->GetId(obj->{Name_}()));')
 
-                        restore_adapters[classname].append(f'    if (reader.get{Name}()) {{')
-                        restore_adapters[classname].append(f'      obj->{Name_}(serializer->{type}Maker.objects_[reader.get{Name}() - 1]);')
-                        restore_adapters[classname].append( '    }')
+                        restore_adapters.append(f'    if (reader.get{Name}()) {{')
+                        restore_adapters.append(f'      obj->{Name_}(serializer->{type}Maker.objects_[reader.get{Name}() - 1]);')
+                        restore_adapters.append( '    }')
 
                 else:
                     obj_key = '::ObjIndexType' if key in ['class_ref', 'group_ref'] else '::uint64_t'
 
-                    saves_adapters[classname].append(f'    if (obj->{Name_}() != nullptr) {{')
-                    saves_adapters[classname].append(f'      ::capnp::List<{obj_key}>::Builder {Name}s = builder.init{Name}(obj->{Name_}()->size());')
-                    saves_adapters[classname].append(f'      for (unsigned int i = 0, n = obj->{Name_}()->size(); i < n; ++i) {{')
+                    saves_adapters.append(f'    if (obj->{Name_}() != nullptr) {{')
+                    saves_adapters.append(f'      ::capnp::List<{obj_key}>::Builder {Name}s = builder.init{Name}(obj->{Name_}()->size());')
+                    saves_adapters.append(f'      for (unsigned int i = 0, n = obj->{Name_}()->size(); i < n; ++i) {{')
 
-                    restore_adapters[classname].append(f'    if (reader.get{Name}().size() > 0) {{')
-                    restore_adapters[classname].append(f'      std::vector<{type}*>* vect = serializer->{type}VectMaker.Make();')
-                    restore_adapters[classname].append(f'      for (unsigned int i = 0, n = reader.get{Name}().size(); i < n; ++i) {{')
+                    restore_adapters.append(f'    if (reader.get{Name}().size() > 0) {{')
+                    restore_adapters.append(f'      std::vector<{type}*>* vect = serializer->{type}VectMaker.Make();')
+                    restore_adapters.append(f'      for (unsigned int i = 0, n = reader.get{Name}().size(); i < n; ++i) {{')
 
                     if key in ['class_ref', 'group_ref']:
-                        saves_adapters[classname].append(f'        ::ObjIndexType::Builder tmp = {Name}s[i];')
-                        saves_adapters[classname].append(f'        tmp.setIndex(serializer->GetId((*obj->{Name_}())[i]));')
-                        saves_adapters[classname].append(f'        tmp.setType(((BaseClass*)((*obj->{Name_}())[i]))->UhdmType());')
+                        saves_adapters.append(f'        ::ObjIndexType::Builder tmp = {Name}s[i];')
+                        saves_adapters.append(f'        tmp.setIndex(serializer->GetId((*obj->{Name_}())[i]));')
+                        saves_adapters.append(f'        tmp.setType(((BaseClass*)((*obj->{Name_}())[i]))->UhdmType());')
 
-                        restore_adapters[classname].append(f'        vect->push_back(({type}*)serializer->GetObject(reader.get{Name}()[i].getType(), reader.get{Name}()[i].getIndex() - 1));')
+                        restore_adapters.append(f'        vect->push_back(({type}*)serializer->GetObject(reader.get{Name}()[i].getType(), reader.get{Name}()[i].getIndex() - 1));')
                     else:
-                        saves_adapters[classname].append(f'        {Name}s.set(i, serializer->GetId((*obj->{Name_}())[i]));')
+                        saves_adapters.append(f'        {Name}s.set(i, serializer->GetId((*obj->{Name_}())[i]));')
 
-                        restore_adapters[classname].append(f'        vect->push_back(serializer->{type}Maker.objects_[reader.get{Name}()[i] - 1]);')
+                        restore_adapters.append(f'        vect->push_back(serializer->{type}Maker.objects_[reader.get{Name}()[i] - 1]);')
 
-                    saves_adapters[classname].append('      }')
-                    saves_adapters[classname].append('    }')
+                    saves_adapters.append('      }')
+                    saves_adapters.append('    }')
 
-                    restore_adapters[classname].append( '      }')
-                    restore_adapters[classname].append(f'      obj->{Name_}(vect);')
-                    restore_adapters[classname].append( '    }')
+                    restore_adapters.append( '      }')
+                    restore_adapters.append(f'      obj->{Name_}(vect);')
+                    restore_adapters.append( '    }')
 
-        saves_adapters[classname].append('  }')
-        saves_adapters[classname].append('};')
-        saves_adapters[classname].append('')
+        saves_adapters.append('  }')
+        saves_adapters.append('};')
+        saves_adapters.append('')
 
-        restore_adapters[classname].append('  }')
-        restore_adapters[classname].append('};')
-        restore_adapters[classname].append('')
+        restore_adapters.append('  }')
+        restore_adapters.append('};')
+        restore_adapters.append('')
 
     uhdm_name_map = [
         'std::string UhdmName(UHDM_OBJECT_TYPE type) {',
@@ -190,7 +186,7 @@ def generate(models):
 
     file_content = file_content.replace('<CAPNP_ID>', '\n'.join(save_ids))
     file_content = file_content.replace('<CAPNP_SAVE>', '\n'.join(save_objects))
-    file_content = file_content.replace('<CAPNP_SAVE_ADAPTERS>', '\n'.join(['\n'.join(value) for value in saves_adapters.values()]))
+    file_content = file_content.replace('<CAPNP_SAVE_ADAPTERS>', '\n'.join(saves_adapters))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer_save.cpp'), file_content)
 
     # Serializer_restore.cpp
@@ -199,7 +195,7 @@ def generate(models):
 
     file_content = file_content.replace('<CAPNP_INIT_FACTORIES>', '\n'.join(restore_ids))
     file_content = file_content.replace('<CAPNP_RESTORE_FACTORIES>', '\n'.join(restore_objects))
-    file_content = file_content.replace('<CAPNP_RESTORE_ADAPTERS>', '\n'.join(['\n'.join(value) for value in restore_adapters.values()]))
+    file_content = file_content.replace('<CAPNP_RESTORE_ADAPTERS>', '\n'.join(restore_adapters))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer_restore.cpp'), file_content)
 
     return True

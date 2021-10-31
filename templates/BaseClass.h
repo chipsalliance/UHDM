@@ -28,6 +28,9 @@
 #define UHDM_BASE_CLASS_H
 
 #include <set>
+#include <string_view>
+#include <tuple>
+#include <variant>
 #include <vector>
 
 #include <uhdm/uhdm_types.h>
@@ -99,11 +102,24 @@ namespace UHDM {
 
     virtual bool UhdmId(unsigned int id) = 0;
 
+    // TODO: Make the next three functions pure-virtual after transition to pygen.
+    virtual const BaseClass* GetByVpiName(std::string_view name) const;
+
+    virtual std::tuple<const BaseClass*, UHDM_OBJECT_TYPE,
+                       const std::vector<const BaseClass*>*>
+    GetByVpiType(int type) const;
+
+    typedef std::variant<int64_t, const char*> vpi_property_value_t;
+    virtual vpi_property_value_t GetVpiPropertyValue(int property) const;
+
     // Create a deep copy of this object.
-    virtual BaseClass* DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const = 0;
+    virtual BaseClass* DeepClone(Serializer* serializer,
+                                 ElaboratorListener* elaborator,
+                                 BaseClass* parent) const = 0;
 
   protected:
-    void DeepCopy(BaseClass* clone, Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const;
+    void DeepCopy(BaseClass* clone, Serializer* serializer,
+                  ElaboratorListener* elaborator, BaseClass* parent) const;
 
     void SetSerializer(Serializer* serial) { serializer_ = serial; }
 
@@ -119,8 +135,58 @@ namespace UHDM {
 
   };
 
-  inline BaseClass* BaseClass::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {}
-  inline void BaseClass::DeepCopy(BaseClass* clone, Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {}
+  inline const BaseClass* BaseClass::GetByVpiName(std::string_view name) const {
+    return nullptr;
+  }
+
+  inline std::tuple<const BaseClass*, UHDM_OBJECT_TYPE,
+                    const std::vector<const BaseClass*>*>
+  BaseClass::GetByVpiType(int type) const {
+    return std::make_tuple(nullptr, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);
+  }
+
+  inline BaseClass::vpi_property_value_t BaseClass::GetVpiPropertyValue(
+      int property) const {
+    switch (property) {
+      case vpiLineNo:
+        return vpi_property_value_t(vpiLineNo_);
+      case vpiColumnNo:
+        return vpi_property_value_t(vpiColumnNo_);
+      case vpiEndLineNo:
+        return vpi_property_value_t(vpiEndLineNo_);
+      case vpiEndColumnNo:
+        return vpi_property_value_t(vpiEndColumnNo_);
+      case vpiType:
+        return vpi_property_value_t(VpiType());
+      case vpiFile: {
+        const std::string& file = VpiFile();
+        if (!file.empty()) {
+          return vpi_property_value_t(file.c_str());
+        }
+      } break;
+      case vpiName: {
+        const std::string& name = VpiName();
+        if (!name.empty()) {
+          return vpi_property_value_t(name.c_str());
+        }
+      } break;
+      case vpiDefName: {
+        const std::string& defname = VpiDefName();
+        if (!defname.empty()) {
+          return vpi_property_value_t(defname.c_str());
+        }
+      } break;
+    }
+    return vpi_property_value_t();
+  }
+
+  inline BaseClass* BaseClass::DeepClone(Serializer* serializer,
+                                         ElaboratorListener* elaborator,
+                                         BaseClass* parent) const {}
+
+  inline void BaseClass::DeepCopy(BaseClass* clone, Serializer* serializer,
+                                  ElaboratorListener* elaborator,
+                                  BaseClass* parent) const {}
 
 #ifdef STANDARD_VPI
   typedef std::set<vpiHandle> VisitedContainer;
