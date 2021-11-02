@@ -645,8 +645,6 @@ def generate(models):
         classname = model['name']
         modeltype = model['type']
 
-        config.log(f'> Generating {classname}.h/cpp')
-
         if modeltype == 'group_def':
             _generate_group_checker(model, models, templates)
         else:

@@ -379,14 +379,15 @@ proc generate_elaborator { models } {
     }
 
 
-    set fid [open "[project_path]/templates/ElaboratorListener.h"]
+    set fid [open "[project_path]/templates/ElaboratorListener.cpp"]
     set listener_content [read $fid]
     close $fid
 
     regsub {<MODULE_ELABORATOR_LISTENER>} $listener_content $module_vpi_listener listener_content
     regsub {<CLASS_ELABORATOR_LISTENER>} $listener_content $class_vpi_listener listener_content
 
-    set_content_if_change "[gen_header_dir]/ElaboratorListener.h" $listener_content
+    set_content_if_change "[gen_src_dir]/ElaboratorListener.cpp" $listener_content
+    file_copy_if_change "[project_path]/templates/ElaboratorListener.h" "[gen_header_dir]/ElaboratorListener.h"
 
     set fid [open "[project_path]/templates/clone_tree.h"]
     set clone_content [read $fid]

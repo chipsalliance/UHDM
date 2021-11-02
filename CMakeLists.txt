@@ -152,6 +152,7 @@ add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
 if (WITH_PYTHON_GENERATOR)
   set(uhdm-GENERATED_SRC
+      ${GENDIR}/src/ElaboratorListener.cpp
       ${GENDIR}/src/ExprEval.cpp
       ${GENDIR}/src/Serializer.cpp
       ${GENDIR}/src/Serializer_restore.cpp
@@ -171,6 +172,7 @@ if (WITH_PYTHON_GENERATOR)
   endforeach()
 else()
   set(uhdm-GENERATED_SRC
+      ${GENDIR}/src/ElaboratorListener.cpp
       ${GENDIR}/src/ExprEval.cpp
       ${GENDIR}/src/Serializer.cpp
       ${GENDIR}/src/Serializer_restore.cpp
