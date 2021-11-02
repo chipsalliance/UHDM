@@ -228,6 +228,9 @@ namespace UHDM {
       objects_t objects_;
   };
 
+  typedef FactoryT<std::vector<BaseClass*>> VectorOfBaseClassFactory;
+  typedef FactoryT<std::vector<BaseClass*>> VectorOfanyFactory;
+
 }  // namespace UHDM
 
 UHDM_IMPLEMENT_RTTI_CAST_FUNCTIONS(any_cast, UHDM::BaseClass)
