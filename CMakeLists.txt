@@ -90,7 +90,14 @@ else()
       ${GENDIR}/src/Serializer_save.cpp
       ${GENDIR}/src/Serializer_restore.cpp
       PROPERTY COMPILE_FLAGS -O0
-   )
+    )
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+      set_source_files_properties(
+        ${GENDIR}/src/Serializer_save.cpp
+        ${GENDIR}/src/Serializer_restore.cpp
+        PROPERTIES SKIP_PRECOMPILE_HEADERS ON
+      )
+    endif()
  endif()
 endif()
 
@@ -226,6 +233,10 @@ if(WITH_PYTHON_GENERATOR)
   target_compile_definitions(uhdm PUBLIC PYGEN_ENABLED=1)
 endif()
 
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+  target_precompile_headers(uhdm PRIVATE ${GENDIR}/uhdm/uhdm.h)
+endif()
+
 # Our uhdm headers come with angle brackets (indicating system headers),
 # make sure that the compiler looks here first before finding an existing UHDM
 # installation. Hence we use SYSTEM
@@ -273,6 +284,9 @@ if (UHDM_BUILD_TESTS)
       get_filename_component(test_prefix ${test_cc_file} DIRECTORY)
 
       add_executable(${test_bin} ${PROJECT_SOURCE_DIR}/${test_cc_file})
+      if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+        target_precompile_headers(${test_bin} REUSE_FROM uhdm)
+      endif()
       target_include_directories(${test_bin} PRIVATE
         third_party/googletest/googletest/include
         third_party/googletest/googlemock/include)
@@ -311,6 +325,11 @@ add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/util/uhdm-dump.cpp)
 target_link_libraries(uhdm-dump PRIVATE uhdm)
 add_executable(uhdm-hier ${PROJECT_SOURCE_DIR}/util/uhdm-hier.cpp)
 target_link_libraries(uhdm-hier PRIVATE uhdm)
+
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.16")
+  target_precompile_headers(uhdm-dump REUSE_FROM uhdm)
+  target_precompile_headers(uhdm-hier REUSE_FROM uhdm)
+endif()
 
 # Installation tester
 add_executable(test_inst EXCLUDE_FROM_ALL ${PROJECT_SOURCE_DIR}/util/uhdm-dump.cpp)
