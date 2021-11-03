@@ -47,14 +47,18 @@ struct uhdm_handle {
 
 class uhdm_handleFactory {
   friend UHDM::Serializer;
-  public:
+
+ public:
   vpiHandle Make(UHDM::UHDM_OBJECT_TYPE type, const void* object) {
-    uhdm_handle* obj = new uhdm_handle(type, object);
-    objects_.push_back(obj);
-    return (vpiHandle) obj;
+    return (vpiHandle) new uhdm_handle(type, object);
   }
-  private:
-    std::vector<uhdm_handle*> objects_;
+
+  bool Erase(vpiHandle handle) {
+    delete (uhdm_handle*)handle;
+    return true;
+  }
+
+  void Purge() {}
 };
 
 /** Obtain a vpiHandle from a BaseClass (any) object */

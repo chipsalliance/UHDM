@@ -47,4 +47,10 @@ SymbolFactory::ID SymbolFactory::GetId(const std::string& symbol) const {
   return (found == symbol2IdMap_.end()) ? kBadId : found->second;
 }
 
+void SymbolFactory::Purge() {
+  Symbol2IdMap().swap(symbol2IdMap_);
+  Id2SymbolMap().swap(id2SymbolMap_);
+  idCounter_ = 0;
+}
+
 }  // namespace UHDM

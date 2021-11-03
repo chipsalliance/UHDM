@@ -91,6 +91,9 @@ std::map<std::string, unsigned long> Serializer::ObjectStats() const {
 
 void Serializer::Purge() {
   allIds_.clear();
+  anyVectMaker.Purge();
+  symbolMaker.Purge();
+  uhdm_handleMaker.Purge();
 <FACTORY_PURGE>
 }
 }  // namespace UHDM
