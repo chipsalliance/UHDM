@@ -56,5 +56,6 @@
 #define vpiElaborated       5002 // Boolean indicating UHDM has been elaborated/uniquified
 #define vpiRefVar           5003 // "variables" type reference object required for late binding during elaboration
 #define vpiOverriden        5004 // Boolean indicating a param_assign is overriden (not default value)
+#define vpiFlattened        5005 // Boolean indicating an operation (pattern assign) has already been flattened
 
 #endif  // UHDM_VPI_USER_H

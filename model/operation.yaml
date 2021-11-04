@@ -25,7 +25,12 @@
     name: reordered
     vpi: vpiReordered
     type: bool
-    card: 1  
+    card: 1
+  - property: flattened
+    name: flattened
+    vpi: vpiFlattened
+    type: bool
+    card: 1 
   - property: operator_strength
     name: operator strength
     vpi: vpiOpStrong

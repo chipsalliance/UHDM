@@ -11,7 +11,7 @@ import class_hierarchy
 import classes
 import clone_tree_cpp
 import containers_h
-import ElaboratorListener_h
+import ElaboratorListener_cpp
 import serializer
 import uhdm_forward_decl_h
 import uhdm_h
@@ -26,7 +26,7 @@ import VpiListenerTracer_h
 def _worker(params):
     key, args = params
 
-    config.log(f' ... {key}')
+    config.log(f'   ... {key}')
 
     if key == 'capnp':
         return capnp.generate(*args)
@@ -48,8 +48,8 @@ def _worker(params):
           file_utils.copy_file_if_changed(source, destination)
         return True
 
-    elif key == 'ElaboratorListener_h':
-        return ElaboratorListener_h.generate(*args)
+    elif key == 'ElaboratorListener_cpp':
+        return ElaboratorListener_cpp.generate(*args)
 
     elif key == 'serializer':
         return serializer.generate(*args)
@@ -118,10 +118,11 @@ def _main():
         ('classes', [models]),
         ('clone_tree_cpp', [models]),
         ('containers_h', [models]),
-        ('ElaboratorListener_h', [models]),
+        ('ElaboratorListener_cpp', [models]),
         ('Copier', [{
             config.get_template_filepath('BaseClass.h'): config.get_output_header_filepath('BaseClass.h'),
             config.get_template_filepath('clone_tree.h'): config.get_output_header_filepath('clone_tree.h'),
+            config.get_template_filepath('ElaboratorListener.h'): config.get_output_header_filepath('ElaboratorListener.h'),
             config.get_template_filepath('ExprEval.h'): config.get_output_header_filepath('ExprEval.h'),
             config.get_template_filepath('ExprEval.cpp'): config.get_output_source_filepath('ExprEval.cpp'),
             config.get_template_filepath('RTTI.h'): config.get_output_header_filepath('RTTI.h'),
@@ -151,6 +152,7 @@ def _main():
             results = list(executor.map(_worker, params))
     else:
         results = [_worker(args) for args in params]
+    print('... all done!')
 
     result = sum([0 if r else 1 for r in results])
     if result:

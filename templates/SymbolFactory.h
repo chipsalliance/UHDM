@@ -55,26 +55,15 @@ public:
   // Get symbol string identified by given ID or 0 (zero) if it doesn't exist
   ID GetId(const std::string& symbol) const;
 
+  // Remove all symbols
+  void Purge();
+
 private:
   ID idCounter_ = 0;
   Id2SymbolMap id2SymbolMap_;
   Symbol2IdMap symbol2IdMap_;
 };
 
-class VectorOfanyFactory {
-  friend Serializer;
-
-public:
-  std::vector<UHDM::any*>* Make() {
-    std::vector<UHDM::any*>* obj = new std::vector<UHDM::any*>();
-    objects_.push_back(obj);
-    return obj;
-  }
-
-private:
-  std::vector<std::vector<UHDM::any*>*> objects_;
-};
-
-};
+} // namespace UHDM
 
 #endif

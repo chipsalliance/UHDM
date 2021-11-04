@@ -44,17 +44,15 @@
 using namespace UHDM;
 
 <VPI_LISTENERS>
-
-void UHDM::listen_any(vpiHandle object, VpiListener* listener, UHDM::VisitedContainer* visited) {
-  unsigned int type = ((const uhdm_handle*)object)->type;
+void UHDM::listen_any(vpiHandle handle, VpiListener* listener, UHDM::VisitedContainer* visited) {
+  unsigned int type = ((const uhdm_handle*)handle)->type;
   switch (type) {
 <VPI_ANY_LISTENERS>
-  default:
-    break;
+  default: break;
   }
 }
 
-void UHDM::listen_designs (const std::vector<vpiHandle>& designs, VpiListener* listener) {
+void UHDM::listen_designs(const std::vector<vpiHandle>& designs, VpiListener* listener) {
   for (auto design_h : designs) {
     UHDM::VisitedContainer visited;
     listen_design(design_h, listener, &visited);
