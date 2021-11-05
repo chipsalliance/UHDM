@@ -95,6 +95,75 @@ bool ExprEval::isFullySpecified(const UHDM::typespec* tps) {
   return true;
 }
 
+static void recursiveFlattening(Serializer& s, VectorOfany* flattened, const VectorOfany* ordered, std::vector<const typespec*> fieldTypes) {
+  // Flattening
+  int index = 0;
+  for (any* op : *ordered) {
+    if (op->UhdmType() == uhdmtagged_pattern) {
+      tagged_pattern* tp = (tagged_pattern*)op;
+      const typespec* ttp = tp->Typespec();
+      UHDM_OBJECT_TYPE ttpt = ttp->UhdmType();
+      switch (ttpt) {
+        case uhdmint_typespec: {
+          any* sop = (any*)tp->Pattern();
+          flattened->push_back(sop);
+          break;
+        }
+        case uhdmstring_typespec: {
+          any* sop = (any*)tp->Pattern();
+          UHDM_OBJECT_TYPE sopt = sop->UhdmType();
+          if (sopt == uhdmoperation) {
+            VectorOfany* operands = ((operation*)sop)->Operands();
+            for (auto op1 : *operands) {
+              bool substituted = false;
+              if (op1->UhdmType() == uhdmtagged_pattern) {
+                tagged_pattern* tp1 = (tagged_pattern*)op1;
+                const typespec* ttp1 = tp1->Typespec();
+                UHDM_OBJECT_TYPE ttpt1 = ttp1->UhdmType();
+                if (ttpt1 == uhdmstring_typespec) {
+                  if (ttp1->VpiName() == "default") {
+                    const any* patt = tp1->Pattern();
+                    const typespec* mold = fieldTypes[index];
+                    operation* subst = s.MakeOperation();
+                    VectorOfany* sops = s.MakeAnyVec();
+                    subst->Operands(sops);
+                    subst->VpiOpType(vpiConcatOp);
+                    flattened->push_back(subst);
+                    if (mold->UhdmType() == uhdmstruct_typespec) {
+                      struct_typespec* molds = (struct_typespec*)mold;
+                      for (auto mem : *molds->Members()) {
+                        if (mem) sops->push_back((any*)patt);
+                      }
+                    }
+                    substituted = true;
+                    break;
+                  }
+                }
+              } else if (op1->UhdmType() == uhdmoperation) {
+//                recursiveFlattening(s, flattened, ((operation*)op1)->Operands(), fieldTypes);
+//                substituted = true;
+              }
+              if (!substituted) {
+                flattened->push_back(sop);
+                break;
+              }
+            }
+          } else {
+            flattened->push_back(sop);
+          }
+          break;
+        }
+        default:
+          flattened->push_back(op);
+          break;
+      }
+    } else {
+      flattened->push_back(op);
+    }
+    index++;
+  }
+}
+
 expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
                                           expr* exp) {
   expr* result = exp;
@@ -110,7 +179,9 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     if (tps->UhdmType() != uhdmstruct_typespec) {
       return result;
     }
-
+    if (op->VpiFlattened()) {
+      return result;
+    }
     struct_typespec* stps = (struct_typespec*)tps;
     std::vector<std::string> fieldNames;
     std::vector<const typespec*> fieldTypes;
@@ -125,6 +196,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     int index = 0;
     for (auto oper : *orig) {
       if (oper->UhdmType() == uhdmtagged_pattern) {
+        op->VpiFlattened(true);
         tagged_pattern* tp = (tagged_pattern*)oper;
         const typespec* ttp = tp->Typespec();
         const std::string& tname = ttp->VpiName();
@@ -180,72 +252,9 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     }
     op->Operands(ordered);
     // Flattening
-    index = 0;
     VectorOfany* flattened = s.MakeAnyVec();
-    for (any* op : *ordered) {
-      if (op->UhdmType() == uhdmtagged_pattern) {
-        tagged_pattern* tp = (tagged_pattern*)op;
-        const typespec* ttp = tp->Typespec();
-        UHDM_OBJECT_TYPE ttpt = ttp->UhdmType();
-        switch (ttpt) {
-          case uhdmint_typespec: {
-            any* sop = (any*) tp->Pattern();
-            flattened->push_back(sop);
-            break;
-          }
-          case uhdmstring_typespec: {
-            any* sop = (any*) tp->Pattern();
-            UHDM_OBJECT_TYPE sopt = sop->UhdmType();
-            if (sopt == uhdmoperation) {
-              VectorOfany* operands = ((operation*)sop)->Operands();
-              for (auto op1 : *operands) {
-                bool substituted = false;
-                if (op1->UhdmType() == uhdmtagged_pattern) {
-                  tagged_pattern* tp1 = (tagged_pattern*)op1;
-                  const typespec* ttp1 = tp1->Typespec();
-                  UHDM_OBJECT_TYPE ttpt1 = ttp1->UhdmType();
-                  if (ttpt1 == uhdmstring_typespec) {
-                    if (ttp1->VpiName() == "default") {
-                      const any* patt = tp1->Pattern();
-                      const typespec* mold = fieldTypes[index];
-                      operation* subst = s.MakeOperation();
-                      VectorOfany* sops = s.MakeAnyVec();
-                      subst->Operands(sops);
-                      subst->VpiOpType(vpiConcatOp);
-                      flattened->push_back(subst);
-                      if (mold->UhdmType() == uhdmstruct_typespec) {
-                        struct_typespec* molds = (struct_typespec*) mold;
-                        for (auto mem : *molds->Members()) {
-                          if (mem)
-                            sops->push_back((any*)patt);
-                        }
-                      }
-                      substituted = true;
-                      break;
-                    }
-                  }
-                }
-                if (!substituted) {
-                  flattened->push_back(sop);
-                  break;
-                }
-              }
-            } else {
-              flattened->push_back(sop);
-            }
-            break;
-          }
-          default:
-            flattened->push_back(op);
-            break;
-        }
-      } else {
-        flattened->push_back(op);
-      }
-      index++;
-    }
+    recursiveFlattening(s, flattened, ordered, fieldTypes);
     op->Operands(flattened);
-
   }
   return result;
 }
