@@ -24,6 +24,7 @@
 
 #include <uhdm/ExprEval.h>
 #include <uhdm/uhdm.h>
+#include <string.h>
 
 using namespace UHDM;
 
@@ -95,6 +96,50 @@ bool ExprEval::isFullySpecified(const UHDM::typespec* tps) {
   return true;
 }
 
+uint64_t getValue(const UHDM::expr* expr) {
+  uint64_t result = 0;
+  if (expr && expr->UhdmType() == UHDM::uhdmconstant) {
+    UHDM::constant* c = (UHDM::constant*)expr;
+    const std::string& v = c->VpiValue();
+    int type = c->VpiConstType();
+    switch (type) {
+      case vpiBinaryConst: {
+        result = std::strtoll(v.c_str() + strlen("BIN:"), 0, 2);
+        break;
+      }
+      case vpiDecConst: {
+        result = std::strtoll(v.c_str() + strlen("DEC:"), 0, 10);
+        break;
+      }
+      case vpiHexConst: {
+        result = std::strtoll(v.c_str() + strlen("HEX:"), 0, 16);
+        break;
+      }
+      case vpiOctConst: {
+        result = std::strtoll(v.c_str() + strlen("OCT:"), 0, 8);
+        break;
+      }
+      case vpiIntConst: {
+        result = std::strtoll(v.c_str() + strlen("INT:"), 0, 10);
+        break;
+      }
+      case vpiUIntConst: {
+        result = std::strtoull(v.c_str() + strlen("UINT:"), 0, 10);
+        break;
+      }
+      default: {
+        if (strstr(v.c_str(), "UINT:")) {
+          result = std::strtoull(v.c_str() + strlen("UINT:"), 0, 10);
+        } else {
+          result = std::strtoll(v.c_str() + strlen("INT:"), 0, 10);
+        }
+        break;
+      }
+    }
+  }
+  return result;
+}
+
 static void recursiveFlattening(Serializer& s, VectorOfany* flattened, const VectorOfany* ordered, std::vector<const typespec*> fieldTypes) {
   // Flattening
   int index = 0;
@@ -129,10 +174,26 @@ static void recursiveFlattening(Serializer& s, VectorOfany* flattened, const Vec
                     subst->Operands(sops);
                     subst->VpiOpType(vpiConcatOp);
                     flattened->push_back(subst);
-                    if (mold->UhdmType() == uhdmstruct_typespec) {
+                    UHDM_OBJECT_TYPE moldtype = mold->UhdmType();
+                    if (moldtype == uhdmstruct_typespec) {
                       struct_typespec* molds = (struct_typespec*)mold;
                       for (auto mem : *molds->Members()) {
                         if (mem) sops->push_back((any*)patt);
+                      }
+                    } else if (moldtype == uhdmlogic_typespec) {
+                      logic_typespec* molds = (logic_typespec*)mold;
+                      VectorOfrange* ranges = molds->Ranges();
+                      for (range* r : *ranges) {
+                        uint64_t from = getValue(r->Left_expr());
+                        uint64_t to = getValue(r->Right_expr());
+                        if (from > to) {
+                          std::swap(from,to);
+                        }
+                        for (uint64_t i = from; i <= to; i++) {
+                          sops->push_back((any*)patt);
+                        }
+                        // TODO: Multidimension
+                        break;
                       }
                     }
                     substituted = true;
