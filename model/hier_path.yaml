@@ -32,4 +32,11 @@
     vpi: vpiActual
     type: actual_group
     card: any
+  - class_ref: root_value
+    name: root value
+    vpi: vpiExpr
+    type: expr
+    card: 1
+
+  
 
