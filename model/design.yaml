@@ -80,3 +80,12 @@
     vpi: vpiTaskFunc
     type: task_func
     card: any
+  - group_ref: parameters
+    name: parameters
+    vpi: vpiParameter
+    type: parameters
+    card: any
+  - obj_ref: param_assigns
+    vpi: vpiParamAssign
+    type: param_assign
+    card: any
