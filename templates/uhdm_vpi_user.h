@@ -57,5 +57,9 @@
 #define vpiRefVar           5003 // "variables" type reference object required for late binding during elaboration
 #define vpiOverriden        5004 // Boolean indicating a param_assign is overriden (not default value)
 #define vpiFlattened        5005 // Boolean indicating an operation (pattern assign) has already been flattened
+#define vpiCheckerDecl      5006 // Handle to checker_def
+#define vpiCheckerInst      5007 // Handle to checker_inst
+#define vpiCheckerPort      5008 // Handle to checker_port
+#define vpiCheckerInstPort  5009 // Handle to checker_inst_port
 
 #endif  // UHDM_VPI_USER_H

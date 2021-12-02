@@ -145,6 +145,8 @@ expr_ref_obj_group.yaml
 ports.yaml
 port.yaml
 port_bit.yaml
+checker_port.yaml
+checker_inst_port.yaml
 primitive.yaml
 gate.yaml
 switch_tran.yaml
@@ -204,6 +206,8 @@ interface.yaml
 program.yaml
 package.yaml
 module.yaml
+checker_decl.yaml
+checker_inst.yaml
 short_real_typespec.yaml
 real_typespec.yaml
 byte_typespec.yaml
