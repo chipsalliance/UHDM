@@ -21,4 +21,7 @@
   - obj_ref: property_inst
   - obj_ref: clocked_property
   - obj_ref: case_property
+  - obj_ref: ref_obj
+  - obj_ref: hier_path
+
   
