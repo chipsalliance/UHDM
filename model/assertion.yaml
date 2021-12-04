@@ -24,7 +24,9 @@
   - obj_ref: immediate_assert
   - obj_ref: immediate_assume
   - obj_ref: immediate_cover
-  
+  - obj_ref: checker_inst
+
+
 
 
   
