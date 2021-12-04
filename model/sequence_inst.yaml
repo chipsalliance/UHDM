@@ -24,7 +24,7 @@
     name: named event sequence expr group
     vpi: vpiArgument
     type: named_event_sequence_expr_group
-    card: 1
+    card: any
   - property: start_line
     name: start line
     vpi: vpiStartLine
