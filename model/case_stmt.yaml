@@ -21,6 +21,11 @@
     vpi: vpiType
     type: unsigned int
     card: 1
+  - property: randtype
+    name: rand type
+    vpi: vpiRandType
+    type: unsigned int
+    card: 1  
   - property: case_type
     name: case type
     vpi: vpiCaseType
