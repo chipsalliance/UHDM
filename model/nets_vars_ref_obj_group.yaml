@@ -19,6 +19,8 @@
   - class_ref: variables
   - obj_ref: ref_obj
   - obj_ref: hier_path
+  - obj_ref: operation
+
 
   
 
