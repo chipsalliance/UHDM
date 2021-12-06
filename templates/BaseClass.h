@@ -182,7 +182,7 @@ namespace UHDM {
 
   inline BaseClass* BaseClass::DeepClone(Serializer* serializer,
                                          ElaboratorListener* elaborator,
-                                         BaseClass* parent) const {}
+                                         BaseClass* parent) const { return nullptr; }
 
   inline void BaseClass::DeepCopy(BaseClass* clone, Serializer* serializer,
                                   ElaboratorListener* elaborator,
