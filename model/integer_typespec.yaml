@@ -21,4 +21,8 @@
     vpi: vpiValue
     type: value
     card: 1
- 
+  - class_ref: expr
+    name: expr
+    vpi: vpiExpr
+    type: expr
+    card: 1 
