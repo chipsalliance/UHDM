@@ -22,3 +22,9 @@
     vpi: vpiValue
     type: value
     card: 1
+ # Or cast to expression
+  - class_ref: cast_to_expr
+    name: cast to expr
+    vpi: vpiExpr
+    type: expr
+    card: 1
