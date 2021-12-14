@@ -166,6 +166,9 @@ proc generate_elaborator { models } {
                             } elseif {($rootclassname == "disable") && ($method == "VpiExpr")} {
                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((expr*)obj);
 "
+                            } elseif {($rootclassname == "int_typespec") && ($method == "Cast_to_expr")} {
+                                append clone_impl "  if (auto obj = ${method}()) clone->${method}((expr*)obj);
+"
                             } elseif {($rootclassname == "function") && ($method == "Return")} {
                                 append clone_impl "  if (auto obj = ${method}()) clone->${method}((variables*)obj);
 "

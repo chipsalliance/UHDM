@@ -236,6 +236,9 @@ def _get_clone_implementation(model, models):
                 elif classname == 'disable' and method == 'VpiExpr':
                     content.append(f'  if (auto obj = {method}()) clone->{method}((expr*) obj);')
 
+                elif classname == 'int_typespec' and method == 'Cast_to_expr':
+                    content.append(f'  if (auto obj = {method}()) clone->{method}((variables*) obj);')
+
                 elif classname == 'function' and method == 'Return':
                     content.append(f'  if (auto obj = {method}()) clone->{method}((variables*) obj);')
 
