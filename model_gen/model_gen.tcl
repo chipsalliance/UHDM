@@ -708,6 +708,7 @@ proc recurse_generate_group_checker { model } {
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
     set checktype ""
+    puts "   $groupname"
     if [info exist VISITED_GROUP($model)] {
         return ""
     }
