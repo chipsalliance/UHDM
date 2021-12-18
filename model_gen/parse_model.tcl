@@ -15,7 +15,7 @@
 # limitations under the License.
 
 proc parse_model { file } {
-    global ID OBJECTID BASECLASS DIRECT_CHILDREN ALL_CHILDREN
+    global ID OBJECTID BASECLASS DIRECT_CHILDREN ALL_CHILDREN NAME_TO_MODEL GROUP_MEMBERS
     set models {}
     set fid [open "$file"]
     set modellist [read $fid]
@@ -75,6 +75,8 @@ proc parse_model { file } {
 
             set obj_def$modelId [dict create "name" $name "type" obj_def "id" $id "properties" {} "ordered" {} "class_ref" {} "obj_ref" {}]
             lappend models obj_def$modelId
+            set NAME_TO_MODEL($name) obj_def$modelId
+            set groupname ""
             set OBJ(curr) obj_def$modelId
             incr modelId
         } elseif [regexp {\- class_def: ([a-zA-Z0-9_]+)} $line tmp name] {
@@ -86,6 +88,8 @@ proc parse_model { file } {
 
             set obj_def$modelId [dict create "name" $name "type" class_def "id" $id "properties" {} "ordered" {} "class_ref" {} "obj_ref" {}]
             lappend models obj_def$modelId
+            set NAME_TO_MODEL($name) obj_def$modelId
+            set groupname ""
             set OBJ(curr) obj_def$modelId
             incr modelId
         } elseif [regexp {\- group_def: ([a-zA-Z0-9_]+)} $line tmp name] {
@@ -97,6 +101,9 @@ proc parse_model { file } {
 
             set obj_def$modelId [dict create "name" $name "type" group_def "id" $id "properties" {} "ordered" {} "class_ref" {} "obj_ref" {}]
             lappend models obj_def$modelId
+            set NAME_TO_MODEL($name) obj_def$modelId
+            set groupname $name
+            set GROUP_MEMBERS($groupname) ""
             set OBJ(curr) obj_def$modelId
             incr modelId
         } elseif [regexp {property: ([a-zA-Z0-9_]+)} $line tmp name] {
@@ -109,6 +116,7 @@ proc parse_model { file } {
             dict append $OBJ(curr) "ordered" "$name "
             set obj_name $name
             set obj_type "class_ref"
+            lappend GROUP_MEMBERS($groupname) [list $name class_ref]
         } elseif [regexp {extends: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "extends" class_def $name
             dict append $OBJ(curr) "ordered" "$name "
@@ -122,11 +130,13 @@ proc parse_model { file } {
             dict append $OBJ(curr) "ordered" "$name "
             set obj_name $name
             set obj_type "obj_ref"
+            lappend GROUP_MEMBERS($groupname) [list $name obj_ref]
         } elseif [regexp {group_ref: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "group_ref" $name {}
             dict append $OBJ(curr) "ordered" "$name "
             set obj_name $name
             set obj_type "group_ref"
+            lappend GROUP_MEMBERS($groupname) [list $name group_ref]
         } elseif [regexp {class: ([a-zA-Z0-9_]+)} $line tmp name] {
             dict set $OBJ(curr) "class" $name {}
             dict append $OBJ(curr) "ordered" "$name "

@@ -702,6 +702,48 @@ proc defineType { def name vpiType } {
     return [list $id $define]
 }
 
+proc recurse_generate_group_checker { model } {
+    global $model BASECLASS ALL_CHILDREN GROUP_MEMBERS NAME_TO_MODEL
+    set data [subst $$model]
+    set groupname [dict get $data name]
+    set modeltype [dict get $data type]
+    set checktype ""
+    dict for {key val} $data {
+        if {($key == "obj_ref") || ($key == "class_ref")  || ($key == "group_ref")} {
+            dict for {iter content} $val {
+                set name $iter
+                set uhdmclasstype uhdm$name
+                if {$key == "group_ref"} {
+                    if ![info exist GROUP_MEMBERS($name)] {
+                        puts "ERROR: Group $name unknown while processing group $groupname"
+                    }
+                    set members $GROUP_MEMBERS($name)
+                    foreach member $members {
+                        set uhdmgroupmember uhdm[lindex $member 0]
+                        append checktype " $uhdmgroupmember"
+                        set member_name [lindex $member 0]
+                        if [info exist GROUP_MEMBERS($member_name)] {
+                            append checktype [recurse_generate_group_checker $NAME_TO_MODEL($member_name)]
+                        }
+                    }
+                } else {
+                    append checktype " $uhdmclasstype"
+                }
+                if {$key == "class_ref"} {
+                    if [info exist ALL_CHILDREN($name)] {
+                        foreach child $ALL_CHILDREN($name) {
+                            set name $child
+                            set uhdmclasstype uhdm$name
+                            append checktype " $uhdmclasstype"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return $checktype
+}
+
 proc generate_group_checker { model } {
     global $model BASECLASS ALL_CHILDREN GROUP_MEMBERS
     set data [subst $$model]
@@ -710,7 +752,6 @@ proc generate_group_checker { model } {
 
     set files [list [list "[project_path]/templates/group_header.h" "[gen_header_dir]/${groupname}.h"] \
                    [list "[project_path]/templates/group_header.cpp" "[gen_src_dir]/${groupname}.cpp"]]
-    set GROUP_MEMBERS($groupname) ""
     foreach pair $files {
         foreach {input output} $pair {}
 
@@ -722,44 +763,12 @@ proc generate_group_checker { model } {
         regsub -all {<UPPER_GROUPNAME>} $template [string toupper $groupname] template
 
         set checktype ""
-        dict for {key val} $data {
-            if {($key == "obj_ref") || ($key == "class_ref")  || ($key == "group_ref")} {
-                dict for {iter content} $val {
-                    set name $iter
-                    lappend GROUP_MEMBERS($groupname) [list $name $key]
-                    set uhdmclasstype uhdm$name
-                    if {$key == "group_ref"} {
-                        if ![info exist GROUP_MEMBERS($name)] {
-                            puts "ERROR: Group $name unknown while processing group $groupname"
-                        }
-                        set members $GROUP_MEMBERS($name)
-                        foreach member $members {
-                            set uhdmgroupmember uhdm[lindex $member 0]
-                            if {$checktype != ""} {
-                                append checktype " \\&\\& "
-                            }
-                            append checktype "(uhdmtype != $uhdmgroupmember)"
-                        }
-                    } else {
-                        if {$checktype != ""} {
-                            append checktype " \\&\\& "
-                        }
-                        append checktype "(uhdmtype != $uhdmclasstype)"
-                    }
-                    if {$key == "class_ref"} {
-                        if [info exist ALL_CHILDREN($name)] {
-                            foreach child $ALL_CHILDREN($name) {
-                                set name $child
-                                if {$checktype != ""} {
-                                    append checktype " \\&\\& "
-                                }
-                                set uhdmclasstype uhdm$name
-                                append checktype "(uhdmtype != $uhdmclasstype)"
-                            }
-                        }
-                    }
-                }
+        set checktypes [recurse_generate_group_checker $model]
+        foreach type $checktypes {
+            if {$checktype != ""} {
+                append checktype " \\&\\& "
             }
+            append checktype "(uhdmtype != $type)"
         }
         regsub -all {<CHECKTYPE>} $template $checktype template
         set_content_if_change $output $template
