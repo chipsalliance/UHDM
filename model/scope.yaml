@@ -70,7 +70,7 @@
     vpi: vpiRegArray
     type: array_var
     card: any
-  - obj_ref: array_var_mem
+  - obj_ref: array_var_mems
     name: mem var
     vpi: vpiMemory
     type: array_var
