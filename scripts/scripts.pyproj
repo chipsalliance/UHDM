@@ -33,11 +33,10 @@
     <Compile Include="clone_tree_cpp.py" />
     <Compile Include="config.py" />
     <Compile Include="containers_h.py" />
-    <Compile Include="ElaboratorListener_h.py" />
+    <Compile Include="ElaboratorListener_cpp.py" />
     <Compile Include="file_utils.py" />
     <Compile Include="generate.py" />
     <Compile Include="loader.py" />
-    <Compile Include="multimap.py" />
     <Compile Include="serializer.py" />
     <Compile Include="uhdm_forward_decl_h.py" />
     <Compile Include="uhdm_h.py" />
