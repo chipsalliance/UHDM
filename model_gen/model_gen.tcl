@@ -703,28 +703,35 @@ proc defineType { def name vpiType } {
 }
 
 proc recurse_generate_group_checker { model } {
-    global $model BASECLASS ALL_CHILDREN GROUP_MEMBERS NAME_TO_MODEL
+    global $model BASECLASS ALL_CHILDREN GROUP_MEMBERS NAME_TO_MODEL VISITED_GROUP
     set data [subst $$model]
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
     set checktype ""
+    if [info exist VISITED_GROUP($model)] {
+        return ""
+    }
+    set VISITED_GROUP($model) 1
+
     dict for {key val} $data {
         if {($key == "obj_ref") || ($key == "class_ref")  || ($key == "group_ref")} {
             dict for {iter content} $val {
                 set name $iter
                 set uhdmclasstype uhdm$name
                 if {$key == "group_ref"} {
-                    if ![info exist GROUP_MEMBERS($name)] {
-                        puts "ERROR: Group $name unknown while processing group $groupname"
+
+                    if [info exist GROUP_MEMBERS($name)] {
+                        set members $GROUP_MEMBERS($name)
+                    } else {
+                        set members ""
                     }
-                    set members $GROUP_MEMBERS($name)
+
                     foreach member $members {
                         set uhdmgroupmember uhdm[lindex $member 0]
                         append checktype " $uhdmgroupmember"
                         set member_name [lindex $member 0]
-                        if [info exist GROUP_MEMBERS($member_name)] {
-                            append checktype [recurse_generate_group_checker $NAME_TO_MODEL($member_name)]
-                        }
+                        set member_type [lindex $member 1]
+                        append checktype [recurse_generate_group_checker $NAME_TO_MODEL($member_name)]
                     }
                 } else {
                     append checktype " $uhdmclasstype"
@@ -738,6 +745,9 @@ proc recurse_generate_group_checker { model } {
                         }
                     }
                 }
+                if {$key == "obj_ref"} {
+                    append checktype " $uhdmclasstype"
+                }
             }
         }
     }
@@ -745,7 +755,7 @@ proc recurse_generate_group_checker { model } {
 }
 
 proc generate_group_checker { model } {
-    global $model BASECLASS ALL_CHILDREN GROUP_MEMBERS
+    global $model BASECLASS ALL_CHILDREN GROUP_MEMBERS VISITED_GROUP
     set data [subst $$model]
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
@@ -761,14 +771,22 @@ proc generate_group_checker { model } {
 
         regsub -all {<GROUPNAME>} $template $groupname template
         regsub -all {<UPPER_GROUPNAME>} $template [string toupper $groupname] template
-
         set checktype ""
+        if [info exist VISITED_GROUP] {
+            unset VISITED_GROUP
+        }
         set checktypes [recurse_generate_group_checker $model]
-        foreach type $checktypes {
-            if {$checktype != ""} {
-                append checktype " \\&\\& "
+        if [info exist USED] {
+            unset USED
+        }
+        foreach type [lsort -dictionary $checktypes] {
+            if ![info exist USED($type)] {
+                if {$checktype != ""} {
+                    append checktype " \\&\\& "
+                }
+                append checktype "(uhdmtype != $type)"
             }
-            append checktype "(uhdmtype != $type)"
+            set USED($type) 1
         }
         regsub -all {<CHECKTYPE>} $template $checktype template
         set_content_if_change $output $template
