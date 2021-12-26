@@ -1,8 +1,8 @@
+import orderedmultidict
 import os
+import pprint
 import re
 from collections import OrderedDict
-from multimap import MutableMultiMap
-import pprint
 
 import config
 
@@ -32,7 +32,7 @@ def _load_one_model(filepath):
             key = m.group('key').strip()
             value = m.group('value').strip()
             if key in [ 'obj_def', 'class_def', 'group_def' ]:
-                top_def = MutableMultiMap([
+                top_def = orderedmultidict.omdict([
                     ('type', key),
                     ('name', value),
                     ('extends', None),
@@ -47,11 +47,11 @@ def _load_one_model(filepath):
                 top_def[key] = value
 
             elif key in ['property', 'class_ref', 'obj_ref', 'group_ref', 'class']:
-                cur_def = MutableMultiMap([
+                cur_def = orderedmultidict.omdict([
                     ('type', key),
                     ('name', value),
                 ])
-                top_def.append((key, cur_def))
+                top_def.add(key, cur_def)
 
             elif key in ['type', 'card', 'vpi', 'vpi_obj']:
                 cur_def[key] = value

@@ -19,16 +19,17 @@ jobs:
         - pygen
 
     steps:
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        architecture: x64
+
     - name: Install dependencies
       run: |
         sudo apt-get update -qq
         sudo apt install -y g++-9 build-essential cmake tclsh
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-        architecture: x64
+        python -m pip install orderedmultidict
 
     - name: Git pull
       uses: actions/checkout@v2
@@ -55,17 +56,16 @@ jobs:
           echo 'WITH_PYTHON_GENERATOR=OFF' >> $GITHUB_ENV
         fi
 
-    - name: Show shell configuration
+    - name: Build & Test
       run: |
         env
         which cmake && cmake --version
         which make && make --version
         which tclsh && echo 'puts [info patchlevel];exit 0' | tclsh
+        which python && python --version
         which $CC && $CC --version
         which $CXX && $CXX --version
 
-    - name: Build & Test
-      run: |
         make release
         make test
         make install
@@ -83,10 +83,17 @@ jobs:
         - pygen
 
     steps:
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        architecture: x64
+
     - name: Install dependencies
       run: |
        brew update
        brew install cmake capnp
+
+       pip3 install orderedmultidict
 
     - name: Git pull
       uses: actions/checkout@v2
@@ -102,6 +109,7 @@ jobs:
     - name: Configure shell
       run: |
         echo "PATH=$(brew --prefix)/opt/ccache/libexec:$PATH" >> $GITHUB_ENV
+        echo 'ADDITIONAL_CMAKE_OPTIONS=-DPython3_ROOT_DIR=${pythonLocation}' >> $GITHUB_ENV
 
         if [[ "${{ matrix.mode }}" = "pygen" ]] ; then
           echo 'WITH_PYTHON_GENERATOR=ON' >> $GITHUB_ENV
@@ -111,6 +119,14 @@ jobs:
 
     - name: Build & Test
       run: |
+        env
+        which cmake && cmake --version
+        which make && make --version
+        which tclsh && echo 'puts [info patchlevel];exit 0' | tclsh
+        which python && python --version
+        which $CC && $CC --version
+        which $CXX && $CXX --version
+
         make release
         make test
 
@@ -128,6 +144,15 @@ jobs:
         - pygen
 
     steps:
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        architecture: x64
+
+    - name: Setup Python Packages
+      shell: cmd
+      run: pip3 install orderedmultidict
+
     - name: Setup Msys2
       uses: msys2/setup-msys2@v2
       with:
@@ -137,10 +162,6 @@ jobs:
       env:
         MSYS2_PATH_TYPE: inherit
 
-    - name: Configure Git
-      run: git config --global core.autocrlf input
-      shell: bash
-
     - name: Git pull
       uses: actions/checkout@v2
       with:
@@ -149,12 +170,16 @@ jobs:
 
     - name: Configure shell
       run: |
+        export Py3_ROOT_DIR=`cygpath -u $pythonLocation`
+
         echo 'CC=gcc' >> $GITHUB_ENV
         echo 'CXX=g++' >> $GITHUB_ENV
         echo 'PREFIX=$PWD/install' >> $GITHUB_ENV
         echo 'CMAKE_GENERATOR=Ninja' >> $GITHUB_ENV
         echo 'NO_TCMALLOC=On' >> $GITHUB_ENV
         echo 'TEST_TMPDIR=C:\temp' >> $GITHUB_ENV
+        echo "Py3_ROOT_DIR=$Py3_ROOT_DIR" >> $GITHUB_ENV
+        echo "ADDITIONAL_CMAKE_OPTIONS=-DPython3_ROOT_DIR=$Py3_ROOT_DIR" >> $GITHUB_ENV
 
         if [[ "${{ matrix.mode }}" = "pygen" ]] ; then
           echo 'WITH_PYTHON_GENERATOR=ON' >> $GITHUB_ENV
@@ -162,18 +187,21 @@ jobs:
           echo 'WITH_PYTHON_GENERATOR=OFF' >> $GITHUB_ENV
         fi
 
-    - name: Show shell configuration
+        echo "$Py3_ROOT_DIR" >> $GITHUB_PATH
+
+    - name: Build & Test
       run: |
+        export PATH=$Py3_ROOT_DIR:$PATH
+
         env
         where cmake && cmake --version
         where make && make --version
         where ninja && ninja --version
+        where python && python --version
         where tclsh && echo 'puts [info patchlevel];exit 0' | tclsh
         where $CC && $CC --version
         where $CXX && $CXX --version
 
-    - name: Build & Test
-      run: |
         make release
         make test
         make install
@@ -194,15 +222,15 @@ jobs:
         - pygen
 
     steps:
-    - name: Install Core Dependencies
-      run: |
-        choco install -y make
-
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
         architecture: x64
+
+    - name: Install Core Dependencies
+      run: |
+        choco install -y make
+        python -m pip install orderedmultidict
 
     - run: git config --global core.autocrlf input
       shell: bash
@@ -239,6 +267,7 @@ jobs:
         where cmake && cmake --version
         where make && make --version
         where ninja && ninja --version
+        where python && python --version
 
         make release
         make test
