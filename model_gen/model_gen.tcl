@@ -718,7 +718,15 @@ proc recurse_generate_group_checker { model } {
             dict for {iter content} $val {
                 set name $iter
                 set uhdmclasstype uhdm$name
-                if {$key == "group_ref"} {
+                if {$key == "class_ref"} {
+                    if [info exist ALL_CHILDREN($name)] {
+                        foreach child $ALL_CHILDREN($name) {
+                            set name $child
+                            set uhdmclasstype uhdm$name
+                            append checktype " $uhdmclasstype"
+                        }
+                    }
+                } elseif {$key == "group_ref"} {
 
                     if [info exist GROUP_MEMBERS($name)] {
                         set members $GROUP_MEMBERS($name)
@@ -731,21 +739,22 @@ proc recurse_generate_group_checker { model } {
                         append checktype " $uhdmgroupmember"
                         set member_name [lindex $member 0]
                         set member_type [lindex $member 1]
-                        append checktype [recurse_generate_group_checker $NAME_TO_MODEL($member_name)]
-                    }
-                } else {
-                    append checktype " $uhdmclasstype"
-                }
-                if {$key == "class_ref"} {
-                    if [info exist ALL_CHILDREN($name)] {
-                        foreach child $ALL_CHILDREN($name) {
-                            set name $child
-                            set uhdmclasstype uhdm$name
+                        if {$member_type == "group_ref"} {
+                            append checktype [recurse_generate_group_checker $NAME_TO_MODEL($member_name)]
+                        } elseif {$member_type == "class_ref"} {
+                            if [info exist ALL_CHILDREN($member_name)] {
+                                foreach child $ALL_CHILDREN($member_name) {
+                                    set name $child
+                                    set uhdmclasstype uhdm$name
+                                    append checktype " $uhdmclasstype"
+                                }
+                            }
+                        } else {
+                            set uhdmclasstype uhdm$member_name
                             append checktype " $uhdmclasstype"
                         }
                     }
-                }
-                if {$key == "obj_ref"} {
+                } else {
                     append checktype " $uhdmclasstype"
                 }
             }
