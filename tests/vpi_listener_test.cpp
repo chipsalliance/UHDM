@@ -9,6 +9,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "uhdm/uhdm.h"
+#include "uhdm/VpiListener.h"
 
 using namespace UHDM;
 using testing::ElementsAre;

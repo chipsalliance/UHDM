@@ -24,8 +24,8 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef SERIALIZER_UHDM_H
-#define SERIALIZER_UHDM_H
+#ifndef UHDM_SERIALIZER_H
+#define UHDM_SERIALIZER_H
 
 #include <string>
 #include <vector>

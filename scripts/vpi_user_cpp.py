@@ -63,6 +63,7 @@ def generate(models):
     ] + [
         f'    case uhdm{classname}: v = String2VpiValue((({classname}*)obj)->VpiValue()); break;' for classname in sorted(vpi_get_value_classes)
     ] + [
+         '    default: break;',
         f'  }}',
         f'  if (v != nullptr) *value_p = *v;'
     ] if vpi_get_value_classes else []
@@ -73,6 +74,7 @@ def generate(models):
     ] + [
         f'    case uhdm{classname}: v = String2VpiDelays((({classname}*)obj)->VpiDelay()); break;' for classname in sorted(vpi_get_delay_classes)
     ] + [
+         '    default: break;',
         f'  }}',
         f'  if (v != nullptr) *delay_p = *v;'
     ] if vpi_get_delay_classes else []

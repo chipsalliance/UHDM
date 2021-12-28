@@ -192,7 +192,7 @@ TEST(FullElabTest, ElaborationRoundtrip) {
 
   bool elaborated = false;
   for (auto design : designs) {
-    elaborated |= vpi_get(vpiElaborated, design);
+    elaborated = vpi_get(vpiElaborated, design) || elaborated;
   }
   EXPECT_FALSE(elaborated);
 
@@ -206,10 +206,11 @@ TEST(FullElabTest, ElaborationRoundtrip) {
 
   ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
   listen_designs(designs, listener);
+  delete listener;
 
   elaborated = false;
   for (auto design : designs) {
-    elaborated |= vpi_get(vpiElaborated, design);
+    elaborated = vpi_get(vpiElaborated, design) || elaborated;
   }
   EXPECT_TRUE(elaborated);
 
