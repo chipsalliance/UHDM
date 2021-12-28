@@ -703,7 +703,7 @@ proc defineType { def name vpiType } {
 }
 
 proc recurse_generate_group_checker { model } {
-    global $model BASECLASS ALL_CHILDREN GROUP_MEMBERS NAME_TO_MODEL VISITED_GROUP
+    global $model BASECLASS ALL_CHILDREN NAME_TO_MODEL VISITED_GROUP
     set data [subst $$model]
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
@@ -718,6 +718,8 @@ proc recurse_generate_group_checker { model } {
             dict for {iter content} $val {
                 set name $iter
                 set uhdmclasstype uhdm$name
+                append checktype " $uhdmclasstype"
+
                 if {$key == "class_ref"} {
                     if [info exist ALL_CHILDREN($name)] {
                         foreach child $ALL_CHILDREN($name) {
@@ -727,35 +729,7 @@ proc recurse_generate_group_checker { model } {
                         }
                     }
                 } elseif {$key == "group_ref"} {
-
-                    if [info exist GROUP_MEMBERS($name)] {
-                        set members $GROUP_MEMBERS($name)
-                    } else {
-                        set members ""
-                    }
-
-                    foreach member $members {
-                        set uhdmgroupmember uhdm[lindex $member 0]
-                        append checktype " $uhdmgroupmember"
-                        set member_name [lindex $member 0]
-                        set member_type [lindex $member 1]
-                        if {$member_type == "group_ref"} {
-                            append checktype [recurse_generate_group_checker $NAME_TO_MODEL($member_name)]
-                        } elseif {$member_type == "class_ref"} {
-                            if [info exist ALL_CHILDREN($member_name)] {
-                                foreach child $ALL_CHILDREN($member_name) {
-                                    set name $child
-                                    set uhdmclasstype uhdm$name
-                                    append checktype " $uhdmclasstype"
-                                }
-                            }
-                        } else {
-                            set uhdmclasstype uhdm$member_name
-                            append checktype " $uhdmclasstype"
-                        }
-                    }
-                } else {
-                    append checktype " $uhdmclasstype"
+                    append checktype [recurse_generate_group_checker $NAME_TO_MODEL($name)]
                 }
             }
         }
@@ -764,10 +738,33 @@ proc recurse_generate_group_checker { model } {
 }
 
 proc generate_group_checker { model } {
-    global $model BASECLASS ALL_CHILDREN GROUP_MEMBERS VISITED_GROUP
+    global $model BASECLASS ALL_CHILDREN VISITED_GROUP
     set data [subst $$model]
     set groupname [dict get $data name]
     set modeltype [dict get $data type]
+
+    set checktype ""
+    if [info exist VISITED_GROUP] {
+        unset VISITED_GROUP
+    }
+    set checktypes [recurse_generate_group_checker $model]
+    if [info exist USED] {
+        unset USED
+    }
+    foreach type [lsort -dictionary $checktypes] {
+        if ![info exist USED($type)] {
+            if {$checktype != ""} {
+                append checktype " \\&\\&\n      "
+            }
+            append checktype "(uhdmtype != $type)"
+        }
+        set USED($type) 1
+    }
+
+    # interface_expr has no members!!
+    if {$checktype == ""} {
+        set checktype "false"
+    }
 
     set files [list [list "[project_path]/templates/group_header.h" "[gen_header_dir]/${groupname}.h"] \
                    [list "[project_path]/templates/group_header.cpp" "[gen_src_dir]/${groupname}.cpp"]]
@@ -780,23 +777,6 @@ proc generate_group_checker { model } {
 
         regsub -all {<GROUPNAME>} $template $groupname template
         regsub -all {<UPPER_GROUPNAME>} $template [string toupper $groupname] template
-        set checktype ""
-        if [info exist VISITED_GROUP] {
-            unset VISITED_GROUP
-        }
-        set checktypes [recurse_generate_group_checker $model]
-        if [info exist USED] {
-            unset USED
-        }
-        foreach type [lsort -dictionary $checktypes] {
-            if ![info exist USED($type)] {
-                if {$checktype != ""} {
-                    append checktype " \\&\\& "
-                }
-                append checktype "(uhdmtype != $type)"
-            }
-            set USED($type) 1
-        }
         regsub -all {<CHECKTYPE>} $template $checktype template
         set_content_if_change $output $template
     }

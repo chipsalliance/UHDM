@@ -467,40 +467,50 @@ def _get_GetVpiPropertyValue_implementation(model):
 
     return content
 
-_members = {}
-def _generate_group_checker(model, models, templates):
+
+_cached_members = {}
+def _get_group_members_recursively(model, models):
+    global _cached_members
+
     groupname = model.get('name')
-    modeltype = model.get('type')
+    if groupname in _cached_members:
+        return _cached_members[groupname]
+
+    checktype = set()
+    _cached_members[groupname] = set()
+    for key, value in model.allitems():
+        if key in ['obj_ref', 'class_ref', 'group_ref'] and value:
+            name = value.get('name')
+            if name not in models:
+                name = value.get('type')
+
+            checktype.add(name)
+            if key == 'group_ref':
+                checktype.update(_get_group_members_recursively(models[name], models))
+            elif key == 'class_ref':
+                checktype.update(models[name]['subclasses'])
+
+    _cached_members[groupname] = checktype
+    return checktype
+
+
+def _generate_group_checker(model, models, templates):
+    global _cached_members
+
+    groupname = model.get('name')
+    checktype = _get_group_members_recursively(model, models)
+
+    if checktype:
+        checktype = (' &&\n' + (' ' * 6)).join([f'(uhdmtype != uhdm{member})' for member in sorted(checktype)])
+    else:
+        checktype = 'false'
 
     files = {
         'group_header.h': config.get_output_header_filepath(f'{groupname}.h'),
         'group_header.cpp': config.get_output_source_filepath(f'{groupname}.cpp'),
     }
 
-    _members[groupname] = set()
     for input, output in files.items():
-        checktype = set()
-        for key, value in model.allitems():
-            if key in ['obj_ref', 'class_ref', 'group_ref'] and value:
-                name = value.get('name')
-                _members[groupname].add(name)
-
-                if key == 'group_ref':
-                    if name not in _members:
-                        print(f'ERROR: Group {name} unknown while processing group {groupname}')
-                    else:
-                        checktype.update([f'(uhdmtype != uhdm{member})' for member in _members[name]])
-                else:
-                    checktype.add(f'(uhdmtype != uhdm{name})')
-
-                if key == 'class_ref':
-                    checktype.update([f'(uhdmtype != uhdm{subclass})' for subclass in models[name]['subclasses']])
-
-        if checktype:
-            checktype = (' &&\n' + (' ' * 6)).join(sorted(checktype))
-        else:
-            checktype = 'false'
-
         file_content = templates[input]
         file_content = file_content.replace('<GROUPNAME>', groupname)
         file_content = file_content.replace('<UPPER_GROUPNAME>', groupname.upper())
