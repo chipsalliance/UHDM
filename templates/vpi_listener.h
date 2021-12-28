@@ -23,20 +23,18 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
-#include <string>
-#include <vector>
-#include <uhdm/BaseClass.h>
-#include <uhdm/sv_vpi_user.h>
-#include <uhdm/VpiListener.h>
-
 #ifndef UHDM_VPI_LISTENER_H
 #define UHDM_VPI_LISTENER_H
 
+#include <uhdm/BaseClass.h>
+#include <uhdm/sv_vpi_user.h>
+
 namespace UHDM {
 
-void listen_designs (const std::vector<vpiHandle>& designs, UHDM::VpiListener* listener);
+class VpiListener;
+void listen_designs (const std::vector<vpiHandle>& designs, VpiListener* listener);
 
-void listen_any(vpiHandle object, UHDM::VpiListener* listener, UHDM::VisitedContainer* visited);
+void listen_any(vpiHandle object, VpiListener* listener, VisitedContainer* visited);
 
 <VPI_LISTENERS_HEADER>
 

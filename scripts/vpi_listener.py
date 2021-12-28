@@ -39,7 +39,7 @@ def _get_listeners(classname, vpi, type, card):
 
 
 def generate(models):
-    declarations = []
+    declarations = ['void listen_any(vpiHandle handle, VpiListener* listener);']
     private_implementations = []
     public_implementations = []
     classnames = set()
@@ -57,9 +57,10 @@ def generate(models):
 
         baseclass = model.get('extends')
 
-        declarations.append(f'void listen_{classname}(vpiHandle handle, UHDM::VpiListener* listener, UHDM::VisitedContainer* visited);')
+        declarations.append(f'void listen_{classname}(vpiHandle handle, VpiListener* listener);')
+        declarations.append(f'void listen_{classname}(vpiHandle handle, VpiListener* listener, VisitedContainer* visited);')
 
-        private_implementations.append(f'static void listen_{classname}_(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle, VpiListener* listener, UHDM::VisitedContainer* visited) {{')
+        private_implementations.append(f'static void listen_{classname}_(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle, VpiListener* listener, VisitedContainer* visited) {{')
         if baseclass:
             private_implementations.append(f'  listen_{baseclass}_(object, parent, handle, parentHandle, listener, visited);')
 
@@ -77,7 +78,7 @@ def generate(models):
         private_implementations.append( '}')
         private_implementations.append( '')
 
-        public_implementations.append(f'void UHDM::listen_{classname}(vpiHandle handle, VpiListener* listener, UHDM::VisitedContainer* visited) {{')
+        public_implementations.append(f'void UHDM::listen_{classname}(vpiHandle handle, VpiListener* listener, VisitedContainer* visited) {{')
         public_implementations.append(f'  const {classname}* object = (const {classname}*) ((const uhdm_handle*)handle)->object;')
         public_implementations.append( '  const BaseClass* parent = object->VpiParent();')
         public_implementations.append( '  vpiHandle parentHandle = (parent != nullptr) ? NewVpiHandle(parent) : nullptr;')
@@ -89,6 +90,11 @@ def generate(models):
         public_implementations.append( '  vpi_release_handle(parentHandle);')
         public_implementations.append(f'}}')
         public_implementations.append( '')
+        public_implementations.append(f'void UHDM::listen_{classname}(vpiHandle handle, VpiListener* listener) {{')
+        public_implementations.append( '  VisitedContainer visited;')
+        public_implementations.append(f'  listen_{classname}(handle, listener, &visited);')
+        public_implementations.append(f'}}')
+        public_implementations.append( '')
 
    # vpi_listener.h
     with open(config.get_template_filepath('vpi_listener.h'), 'r+t') as strm:
@@ -97,7 +103,13 @@ def generate(models):
     file_content = file_content.replace('<VPI_LISTENERS_HEADER>', '\n'.join(declarations))
     file_utils.set_content_if_changed(config.get_output_header_filepath('vpi_listener.h'), file_content)
 
-    implementations = private_implementations + public_implementations
+    implementations = private_implementations + public_implementations + [
+        'void UHDM::listen_any(vpiHandle handle, VpiListener* listener) {',
+        '  VisitedContainer visited;',
+        '  listen_any(handle, listener, &visited);',
+        '}',
+        ''
+    ]
     any_implementation = [
       f'  case uhdm{classname}: listen_{classname}(handle, listener, visited); break;'
           for classname in sorted(classnames)
