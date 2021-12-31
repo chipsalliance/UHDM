@@ -221,7 +221,7 @@ foreach(src_file ${uhdm-GENERATED_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
 endforeach(src_file ${uhdm-GENERATED_SRC})
 
-add_library(uhdm STATIC ${uhdm-GENERATED_SRC})
+add_library(uhdm ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
 
 if(WITH_PYTHON_GENERATOR)
