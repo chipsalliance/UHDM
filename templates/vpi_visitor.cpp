@@ -499,7 +499,6 @@ void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedCont
 
 #endif
 
-  unsigned int subobject_indent = indent + kLevelIndent;
   const unsigned int objectType = vpi_get(vpiType, obj_h);
 
   {
