@@ -39,7 +39,8 @@ namespace UHDM {
   enum ErrorType {
     UHDM_WRONG_OBJECT_TYPE = 703,
     UHDM_UNDEFINED_PATTERN_KEY = 712,
-    UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN = 713
+    UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN = 713,
+    UHDM_NO_REAL_TYPE_AS_SELECT = 714 
   };
 
   typedef std::function<void(ErrorType errType, const std::string&, any* object)> ErrorHandler;
