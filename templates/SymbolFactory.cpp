@@ -25,9 +25,10 @@
 #include <uhdm/SymbolFactory.h>
 
 namespace UHDM {
-
-static constexpr SymbolFactory::ID kBadId = -1;  // setting all the bits.
-static const std::string kBadSymbol = "@@BAD_SYMBOL@@";
+const std::string& SymbolFactory::getBadSymbol() {
+  static const std::string kBadSymbol = "@@BAD_SYMBOL@@";
+  return kBadSymbol;
+}
 
 SymbolFactory::ID SymbolFactory::Make(const std::string& symbol) {
   const auto inserted = symbol2IdMap_.insert({symbol, idCounter_});
@@ -39,7 +40,7 @@ SymbolFactory::ID SymbolFactory::Make(const std::string& symbol) {
 }
 
 const std::string& SymbolFactory::GetSymbol(ID id) const {
-  return (id < id2SymbolMap_.size()) ? id2SymbolMap_[id] : kBadSymbol;
+  return (id < id2SymbolMap_.size()) ? id2SymbolMap_[id] : getBadSymbol();
 }
 
 SymbolFactory::ID SymbolFactory::GetId(const std::string& symbol) const {

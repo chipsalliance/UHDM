@@ -29,7 +29,6 @@
 #include <uhdm/sv_vpi_user.h>
 #include <uhdm/uhdm_vpi_user.h>
 
-#include <uhdm/SymbolFactory.h>
 #include <uhdm/containers.h>
 #include <uhdm/<EXTENDS>.h>
 
