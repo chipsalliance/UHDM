@@ -36,6 +36,7 @@
 #include "uhdm/uhdm_forward_decl.h"
 #include "uhdm/vpi_listener.h"
 #include "uhdm/vpi_visitor.h"
+#include "uhdm/VpiListener.h"
 
 using namespace UHDM;
 
@@ -370,16 +371,17 @@ TEST(ListenerElabTest, RoundTrip) {
   std::cout << orig;
   bool elaborated = false;
   for (auto design : designs) {
-    elaborated |= vpi_get(vpiElaborated, design);
+    elaborated = vpi_get(vpiElaborated, design) || elaborated;
   }
   if (!elaborated) {
     std::cout << "Elaborating...\n";
     MyElaboratorListener* listener = new MyElaboratorListener();
     listen_designs(designs, listener);
+    delete listener;
   }
   std::string post_elab1 = visit_designs(designs);
   for (auto design : designs) {
-    elaborated |= vpi_get(vpiElaborated, design);
+    elaborated = vpi_get(vpiElaborated, design) || elaborated;
   }
   EXPECT_TRUE(elaborated);
 
@@ -387,6 +389,7 @@ TEST(ListenerElabTest, RoundTrip) {
   {
     MyElaboratorListener* listener = new MyElaboratorListener();
     listen_designs(designs, listener);
+    delete listener;
   }
   std::string post_elab2 = visit_designs(designs);
   EXPECT_EQ(post_elab1, post_elab2);

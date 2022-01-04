@@ -22,8 +22,8 @@
  *
  * Created on December 14, 2019, 10:03 PM
  */
-#ifndef UHDM_H
-#define UHDM_H
+#ifndef UHDM_UHDM_H
+#define UHDM_UHDM_H
 
 #include <string>
 #include <vector>
@@ -42,4 +42,4 @@
 
 #include <uhdm/Serializer.h>
 
-#endif
+#endif  // UHDM_UHDM_H

@@ -39,7 +39,7 @@
 #include <uhdm/uhdm.h>
 #include <uhdm/uhdm_types.h>
 #include <uhdm/vpi_uhdm.h>
-
+#include <uhdm/VpiListener.h>
 
 using namespace UHDM;
 

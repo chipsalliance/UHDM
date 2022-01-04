@@ -24,8 +24,8 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef SERIALIZER_UHDM_H
-#define SERIALIZER_UHDM_H
+#ifndef UHDM_SERIALIZER_H
+#define UHDM_SERIALIZER_H
 
 #include <string>
 #include <vector>
@@ -39,7 +39,8 @@ namespace UHDM {
   enum ErrorType {
     UHDM_WRONG_OBJECT_TYPE = 703,
     UHDM_UNDEFINED_PATTERN_KEY = 712,
-    UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN = 713
+    UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN = 713,
+    UHDM_NO_REAL_TYPE_AS_SELECT = 714 
   };
 
   typedef std::function<void(ErrorType errType, const std::string&, any* object)> ErrorHandler;

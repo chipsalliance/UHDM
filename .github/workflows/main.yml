@@ -6,17 +6,11 @@ on:
 
 jobs:
   linux-gcc:
-    name: ubuntu-with-${{ matrix.mode }}
+    name: ubuntu-gcc
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
-    strategy:
-      fail-fast: false
-      matrix:
-        mode:
-        - tclgen
-        - pygen
 
     steps:
     - name: Setup Python
@@ -27,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -qq
-        sudo apt install -y g++-9 build-essential cmake tclsh
+        sudo apt install -y g++-9 build-essential cmake
 
         python -m pip install orderedmultidict
 
@@ -50,18 +44,11 @@ jobs:
         echo 'ADDITIONAL_CMAKE_OPTIONS=-DPython3_ROOT_DIR=$pythonLocation' >> $GITHUB_ENV
         echo 'PATH=/usr/lib/ccache:'"$pythonLocation""$PATH" >> $GITHUB_ENV
 
-        if [[ "${{ matrix.mode }}" = "pygen" ]] ; then
-          echo 'WITH_PYTHON_GENERATOR=ON' >> $GITHUB_ENV
-        else
-          echo 'WITH_PYTHON_GENERATOR=OFF' >> $GITHUB_ENV
-        fi
-
     - name: Build & Test
       run: |
         env
         which cmake && cmake --version
         which make && make --version
-        which tclsh && echo 'puts [info patchlevel];exit 0' | tclsh
         which python && python --version
         which $CC && $CC --version
         which $CXX && $CXX --version
@@ -72,15 +59,8 @@ jobs:
         make test_install
 
   macos:
-    name: macos-with-${{ matrix.mode }}
+    name: macos-gcc
     runs-on: macos-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        mode:
-        - tclgen
-        - pygen
 
     steps:
     - name: Setup Python
@@ -111,18 +91,11 @@ jobs:
         echo "PATH=$(brew --prefix)/opt/ccache/libexec:$PATH" >> $GITHUB_ENV
         echo 'ADDITIONAL_CMAKE_OPTIONS=-DPython3_ROOT_DIR=${pythonLocation}' >> $GITHUB_ENV
 
-        if [[ "${{ matrix.mode }}" = "pygen" ]] ; then
-          echo 'WITH_PYTHON_GENERATOR=ON' >> $GITHUB_ENV
-        else
-          echo 'WITH_PYTHON_GENERATOR=OFF' >> $GITHUB_ENV
-        fi
-
     - name: Build & Test
       run: |
         env
         which cmake && cmake --version
         which make && make --version
-        which tclsh && echo 'puts [info patchlevel];exit 0' | tclsh
         which python && python --version
         which $CC && $CC --version
         which $CXX && $CXX --version
@@ -131,17 +104,11 @@ jobs:
         make test
 
   msys2-gcc:
-    name: msys2-gcc-with-${{ matrix.mode }}
+    name: msys2-gcc
     runs-on: windows-latest
     defaults:
       run:
         shell: msys2 {0}
-    strategy:
-      fail-fast: false
-      matrix:
-        mode:
-        - tclgen
-        - pygen
 
     steps:
     - name: Setup Python
@@ -181,12 +148,6 @@ jobs:
         echo "Py3_ROOT_DIR=$Py3_ROOT_DIR" >> $GITHUB_ENV
         echo "ADDITIONAL_CMAKE_OPTIONS=-DPython3_ROOT_DIR=$Py3_ROOT_DIR" >> $GITHUB_ENV
 
-        if [[ "${{ matrix.mode }}" = "pygen" ]] ; then
-          echo 'WITH_PYTHON_GENERATOR=ON' >> $GITHUB_ENV
-        else
-          echo 'WITH_PYTHON_GENERATOR=OFF' >> $GITHUB_ENV
-        fi
-
         echo "$Py3_ROOT_DIR" >> $GITHUB_PATH
 
     - name: Build & Test
@@ -198,7 +159,6 @@ jobs:
         where make && make --version
         where ninja && ninja --version
         where python && python --version
-        where tclsh && echo 'puts [info patchlevel];exit 0' | tclsh
         where $CC && $CC --version
         where $CXX && $CXX --version
 
@@ -208,18 +168,11 @@ jobs:
         make test_install
 
   windows-msvc:
-    name: windows-with-${{ matrix.mode }}
+    name: windows-cl
     runs-on: windows-latest
-
     defaults:
       run:
         shell: cmd
-    strategy:
-      fail-fast: false
-      matrix:
-        mode:
-        - tclgen
-        - pygen
 
     steps:
     - name: Setup Python
@@ -252,16 +205,9 @@ jobs:
         set CPU_CORES=%NUMBER_OF_PROCESSORS%
 
         set MAKE_DIR=C:\make\bin
-        set TCL_DIR=%PROGRAMFILES%\Git\mingw64\bin
         set TEST_TMPDIR=C:\temp
         set ADDITIONAL_CMAKE_OPTIONS=-DPython3_ROOT_DIR=%pythonLocation%
-        set PATH=%pythonLocation%;%MAKE_DIR%;%TCL_DIR%;%PATH%
-
-        if "${{ matrix.mode }}" == "pygen" (
-          set WITH_PYTHON_GENERATOR=ON
-        ) else (
-          set WITH_PYTHON_GENERATOR=OFF
-        )
+        set PATH=%pythonLocation%;%MAKE_DIR%;%PATH%
 
         set
         where cmake && cmake --version
