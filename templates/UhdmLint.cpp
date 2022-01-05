@@ -28,24 +28,67 @@
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
-// #include <uhdm/Serializer.h>
-
 namespace UHDM {
 
-void UhdmLint::leaveBit_select(const bit_select* object, const BaseClass* parent,
-                    vpiHandle handle, vpiHandle parentHandle) {
+void UhdmLint::leaveBit_select(const bit_select* object,
+                               const BaseClass* parent, vpiHandle handle,
+                               vpiHandle parentHandle) {
   const expr* index = object->VpiIndex();
   if (index) {
     if (index->UhdmType() == uhdmref_obj) {
-      ref_obj* ref = (ref_obj*) index;
+      ref_obj* ref = (ref_obj*)index;
       const any* act = ref->Actual_group();
       if (act && act->UhdmType() == uhdmreal_var) {
-        serializer_->GetErrorHandler()(ErrorType::UHDM_NO_REAL_TYPE_AS_SELECT, act->VpiName(),
-                              ref); 
+        serializer_->GetErrorHandler()(ErrorType::UHDM_REAL_TYPE_AS_SELECT,
+                                       act->VpiName(), ref);
+      }
+    }
+  }
+}
+
+static const any* returnWithValue(const any* stmt) {
+  switch (stmt->UhdmType()) {
+    case uhdmreturn_stmt: {
+      return_stmt* ret = (return_stmt*)stmt;
+      if (const any* r = ret->VpiCondition()) return r;
+      break;
+    }
+    case uhdmbegin: {
+      begin* st = (begin*)stmt;
+      for (auto s : *st->Stmts()) {
+        if (const any* r = returnWithValue(s)) return r;
+      }
+      break;
+    }
+    case uhdmif_stmt: {
+      if_stmt* st = (if_stmt*) stmt;
+      if (const any* r = returnWithValue(st->VpiStmt())) return r;
+      break;
+    }
+    case uhdmif_else: {
+      if_else* st = (if_else*) stmt;
+      if (const any* r = returnWithValue(st->VpiStmt())) return r;
+      if (const any* r = returnWithValue(st->VpiElseStmt())) return r;
+      break;
+    }
+    default:
+      break;
+  }
+  return nullptr;
+}
+
+void UhdmLint::leaveFunction(const function* object, const BaseClass* parent,
+                     vpiHandle handle, vpiHandle parentHandle) {
+  if (object->Return() == nullptr) {
+    if (const any* st = object->Stmt()) {
+      const any* ret = returnWithValue(st);
+      if (ret) {
+        serializer_->GetErrorHandler()(ErrorType::UHDM_RETURN_VALUE_VOID_FUNCTION,
+                                       object->VpiName(), ret);
       }
     }
   }
 
 }
 
-} // namespace UHDM
+}  // namespace UHDM

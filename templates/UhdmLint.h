@@ -35,20 +35,21 @@
 #include <uhdm/VpiListener.h>
 
 namespace UHDM {
-  class Serializer;
-  class UhdmLint : public VpiListener {
- 
-  public:
-     UhdmLint (Serializer* serializer) : serializer_(serializer) {}
+class Serializer;
+class UhdmLint : public VpiListener {
+ public:
+  UhdmLint(Serializer* serializer) : serializer_(serializer) {}
 
-    void leaveBit_select(const bit_select* object, const BaseClass* parent,
-                    vpiHandle handle, vpiHandle parentHandle) override;
-  private:
-    Serializer* serializer_ = nullptr;
-  };
-  
-  
+  void leaveBit_select(const bit_select* object, const BaseClass* parent,
+                       vpiHandle handle, vpiHandle parentHandle) override;
 
-}
+  void leaveFunction(const function* object, const BaseClass* parent,
+                     vpiHandle handle, vpiHandle parentHandle) override;
+
+ private:
+  Serializer* serializer_ = nullptr;
+};
+
+}  // namespace UHDM
 
 #endif
