@@ -40,7 +40,7 @@
 
 namespace UHDM {
 
-void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, any* object) { 
+void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const any* object) { 
   std::cout << errorMsg << std::endl; 
 }
 
