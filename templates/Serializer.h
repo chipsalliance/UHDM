@@ -40,12 +40,13 @@ namespace UHDM {
     UHDM_WRONG_OBJECT_TYPE = 703,
     UHDM_UNDEFINED_PATTERN_KEY = 712,
     UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN = 713,
-    UHDM_NO_REAL_TYPE_AS_SELECT = 714 
+    UHDM_REAL_TYPE_AS_SELECT = 714,
+    UHDM_RETURN_VALUE_VOID_FUNCTION = 715
   };
 
-  typedef std::function<void(ErrorType errType, const std::string&, any* object)> ErrorHandler;
+  typedef std::function<void(ErrorType errType, const std::string&, const any* object)> ErrorHandler;
 
-  void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, any* object);
+  void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const any* object);
 
   template<typename T>
   class FactoryT;
