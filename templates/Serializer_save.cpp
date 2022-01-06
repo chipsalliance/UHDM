@@ -68,7 +68,7 @@ struct Serializer::AnySaveAdapter<BaseClass, U> {
   void operator()(const BaseClass *const obj, Serializer *serializer, U builder) const {
     builder.setVpiParent(serializer->GetId(obj->VpiParent()));
     builder.setUhdmParentType(obj->UhdmParentType());
-    builder.setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));
+    builder.setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile().string()));
     builder.setVpiLineNo(obj->VpiLineNo());
     builder.setVpiColumnNo(obj->VpiColumnNo());
     builder.setVpiEndLineNo(obj->VpiEndLineNo());

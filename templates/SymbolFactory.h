@@ -44,6 +44,10 @@ public:
   typedef std::vector<std::string> Id2SymbolMap;
   typedef std::unordered_map<std::string, ID> Symbol2IdMap;
 
+private:
+  static constexpr ID kBadId = -1;  // setting all the bits.
+
+public:
   // Register given "symbol" string as a symbol and return its id.
   // If this is an existing symbol, its ID is returned, otherwise a new one
   // is created.
@@ -57,6 +61,9 @@ public:
 
   // Remove all symbols
   void Purge();
+
+  static const std::string& getBadSymbol();
+  static ID getBadId() { return kBadId; }
 
 private:
   ID idCounter_ = 0;

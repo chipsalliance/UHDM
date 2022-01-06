@@ -100,7 +100,7 @@ TEST(ErrorHandlerTest, ErrorHandlerIsCalled) {
   bool issuedError = false;
   std::string last_msg;
   UHDM::ErrorHandler MyErrorHandler = [&](ErrorType errType,
-                                          const std::string& msg, any* object) {
+                                          const std::string& msg, const any* object) {
     last_msg = msg;
     issuedError = true;
   };

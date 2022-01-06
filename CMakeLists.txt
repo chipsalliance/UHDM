@@ -111,6 +111,7 @@ add_custom_command(
 add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
 set(uhdm-GENERATED_SRC
+    ${GENDIR}/src/BaseClass.cpp
     ${GENDIR}/src/ElaboratorListener.cpp
     ${GENDIR}/src/ExprEval.cpp
     ${GENDIR}/src/UhdmLint.cpp

@@ -27,6 +27,7 @@
 #ifndef UHDM_BASE_CLASS_H
 #define UHDM_BASE_CLASS_H
 
+#include <filesystem>
 #include <set>
 #include <string_view>
 #include <tuple>
@@ -35,11 +36,14 @@
 
 #include <uhdm/uhdm_types.h>
 #include <uhdm/RTTI.h>
+#include <uhdm/SymbolFactory.h>
+
+namespace fs = std::filesystem;
 
 namespace UHDM {
   class Serializer;
   class ElaboratorListener;
-  static std::string nonamebaseclass ("");
+  static inline std::string nonamebaseclass ("");
 
   class ClientData {
   public:
@@ -68,9 +72,10 @@ namespace UHDM {
 
     virtual bool UhdmParentType(unsigned int data) = 0;
 
-    virtual const std::string& VpiFile() const = 0;
+    virtual fs::path VpiFile() const = 0;
+    virtual SymbolFactory::ID VpiFileId() const = 0;
 
-    virtual bool VpiFile(const std::string& data) = 0;
+    virtual bool VpiFile(const fs::path& data) = 0;
 
     virtual int VpiLineNo() const final { return vpiLineNo_; }
 
@@ -134,59 +139,6 @@ namespace UHDM {
     short int vpiEndColumnNo_ = 0;
 
   };
-
-  inline const BaseClass* BaseClass::GetByVpiName(std::string_view name) const {
-    return nullptr;
-  }
-
-  inline std::tuple<const BaseClass*, UHDM_OBJECT_TYPE,
-                    const std::vector<const BaseClass*>*>
-  BaseClass::GetByVpiType(int type) const {
-    return std::make_tuple(nullptr, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);
-  }
-
-  inline BaseClass::vpi_property_value_t BaseClass::GetVpiPropertyValue(
-      int property) const {
-    switch (property) {
-      case vpiLineNo:
-        return vpi_property_value_t(vpiLineNo_);
-      case vpiColumnNo:
-        return vpi_property_value_t(vpiColumnNo_);
-      case vpiEndLineNo:
-        return vpi_property_value_t(vpiEndLineNo_);
-      case vpiEndColumnNo:
-        return vpi_property_value_t(vpiEndColumnNo_);
-      case vpiType:
-        return vpi_property_value_t(VpiType());
-      case vpiFile: {
-        const std::string& file = VpiFile();
-        if (!file.empty()) {
-          return vpi_property_value_t(file.c_str());
-        }
-      } break;
-      case vpiName: {
-        const std::string& name = VpiName();
-        if (!name.empty()) {
-          return vpi_property_value_t(name.c_str());
-        }
-      } break;
-      case vpiDefName: {
-        const std::string& defname = VpiDefName();
-        if (!defname.empty()) {
-          return vpi_property_value_t(defname.c_str());
-        }
-      } break;
-    }
-    return vpi_property_value_t();
-  }
-
-  inline BaseClass* BaseClass::DeepClone(Serializer* serializer,
-                                         ElaboratorListener* elaborator,
-                                         BaseClass* parent) const { return nullptr; }
-
-  inline void BaseClass::DeepCopy(BaseClass* clone, Serializer* serializer,
-                                  ElaboratorListener* elaborator,
-                                  BaseClass* parent) const {}
 
 #ifdef STANDARD_VPI
   typedef std::set<vpiHandle> VisitedContainer;
