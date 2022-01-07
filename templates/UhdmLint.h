@@ -46,6 +46,10 @@ class UhdmLint : public VpiListener {
   void leaveFunction(const function* object, const BaseClass* parent,
                      vpiHandle handle, vpiHandle parentHandle) override;
 
+  void leaveStruct_typespec(const struct_typespec* object,
+                            const BaseClass* parent, vpiHandle handle,
+                            vpiHandle parentHandle) override;
+
  private:
   Serializer* serializer_ = nullptr;
 };
