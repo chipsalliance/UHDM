@@ -41,7 +41,8 @@ namespace UHDM {
     UHDM_UNDEFINED_PATTERN_KEY = 712,
     UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN = 713,
     UHDM_REAL_TYPE_AS_SELECT = 714,
-    UHDM_RETURN_VALUE_VOID_FUNCTION = 715
+    UHDM_RETURN_VALUE_VOID_FUNCTION = 715,
+    UHDM_ILLEGAL_DEFAULT_VALUE = 716
   };
 
   typedef std::function<void(ErrorType errType, const std::string&, const any* object)> ErrorHandler;
