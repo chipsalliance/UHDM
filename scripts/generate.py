@@ -121,6 +121,7 @@ def _main():
         ('ElaboratorListener_cpp', [models]),
         ('Copier', [{
             config.get_template_filepath('BaseClass.h'): config.get_output_header_filepath('BaseClass.h'),
+            config.get_template_filepath('BaseClass.cpp'): config.get_output_source_filepath('BaseClass.cpp'),
             config.get_template_filepath('clone_tree.h'): config.get_output_header_filepath('clone_tree.h'),
             config.get_template_filepath('ElaboratorListener.h'): config.get_output_header_filepath('ElaboratorListener.h'),
             config.get_template_filepath('ExprEval.h'): config.get_output_header_filepath('ExprEval.h'),

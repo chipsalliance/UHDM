@@ -91,4 +91,20 @@ void UhdmLint::leaveFunction(const function* object, const BaseClass* parent,
 
 }
 
+void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
+                                    const BaseClass* parent, vpiHandle handle,
+                                    vpiHandle parentHandle) {
+  if (object->VpiPacked()) {
+    if (object->Members()) {
+      for (typespec_member* member : *object->Members()) {
+        if (member->Default_value()) {
+          serializer_->GetErrorHandler()(ErrorType::UHDM_ILLEGAL_DEFAULT_VALUE,
+                                         std::string(""),
+                                         member->Default_value());
+        }
+      }
+    }
+  }
+}
+
 }  // namespace UHDM
