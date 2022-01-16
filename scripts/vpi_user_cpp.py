@@ -80,7 +80,7 @@ def generate(models):
     ] if vpi_get_delay_classes else []
 
     # vpi_user.cpp
-    with open(config.get_template_filepath('vpi_user.cpp'), 'r+t') as strm:
+    with open(config.get_template_filepath('vpi_user.cpp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<HEADERS>', '\n'.join(headers))

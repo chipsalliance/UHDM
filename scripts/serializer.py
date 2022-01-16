@@ -165,7 +165,7 @@ def generate(models):
     uhdm_name_map.append('}')
 
     # Serializer.h
-    with open(config.get_template_filepath('Serializer.h'), 'r+t') as strm:
+    with open(config.get_template_filepath('Serializer.h'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<FACTORIES>', '\n'.join(factory_declarations))
@@ -173,7 +173,7 @@ def generate(models):
     file_utils.set_content_if_changed(config.get_output_header_filepath('Serializer.h'), file_content)
 
     # Serializer.cpp
-    with open(config.get_template_filepath('Serializer.cpp'), 'r+t') as strm:
+    with open(config.get_template_filepath('Serializer.cpp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<METHODS_CPP>', '') # Deprecated
@@ -184,7 +184,7 @@ def generate(models):
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer.cpp'), file_content)
 
     # Serializer_save.cpp
-    with open(config.get_template_filepath('Serializer_save.cpp'), 'r+t') as strm:
+    with open(config.get_template_filepath('Serializer_save.cpp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<CAPNP_ID>', '\n'.join(save_ids))
@@ -193,7 +193,7 @@ def generate(models):
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer_save.cpp'), file_content)
 
     # Serializer_restore.cpp
-    with open(config.get_template_filepath('Serializer_restore.cpp'), 'r+t') as strm:
+    with open(config.get_template_filepath('Serializer_restore.cpp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<CAPNP_INIT_FACTORIES>', '\n'.join(restore_ids))

@@ -29,7 +29,7 @@ def generate(models):
         containers.append('')
     containers = '\n'.join(containers)
 
-    with open(config.get_template_filepath('containers.h'), 'r+t') as strm:
+    with open(config.get_template_filepath('containers.h'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<CONTAINERS>', containers)

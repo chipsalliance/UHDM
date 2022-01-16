@@ -11,7 +11,7 @@ def _load_one_model(filepath):
     lineNo = 0
     top_def = None
     cur_def = None
-    with open(filepath, 'r+t') as strm:
+    with open(filepath, 'rt') as strm:
         for line in strm:
             lineNo += 1
 
@@ -67,7 +67,7 @@ def load_models():
     base_dirpath = os.path.dirname(list_filepath)
 
     models = OrderedDict()
-    with open(list_filepath, 'r+t') as strm:
+    with open(list_filepath, 'rt') as strm:
         for model_filename in strm:
             pos = model_filename.find('#')
             if pos >= 0:
