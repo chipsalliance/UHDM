@@ -6,7 +6,7 @@ def generate(models):
     classnames = [ model['name'] for model in models.values() ]
     headers = '\n'.join([ f'#include "uhdm/{classname}.h"' for classname in classnames ])
 
-    with open(config.get_template_filepath('uhdm.h'), 'r+t') as strm:
+    with open(config.get_template_filepath('uhdm.h'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<INCLUDE_FILES>', headers)

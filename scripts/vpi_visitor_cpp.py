@@ -135,7 +135,7 @@ def generate(models):
     visitors = [ f'  switch (objectType) {{' ] + sorted(visit_object_body) + [ f'  }}' ]
 
     # vpi_visitor.cpp
-    with open(config.get_template_filepath('vpi_visitor.cpp'), 'r+t') as strm:
+    with open(config.get_template_filepath('vpi_visitor.cpp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<OBJECT_VISITORS>', '\n'.join(visitors))

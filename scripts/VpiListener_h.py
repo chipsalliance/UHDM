@@ -19,7 +19,7 @@ def get_methods(models, enter, leave):
 def generate(models):
     methods = get_methods(models, '', '')
 
-    with open(config.get_template_filepath('VpiListener.h'), 'r+t') as strm:
+    with open(config.get_template_filepath('VpiListener.h'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<VPI_LISTENER_METHODS>', '\n'.join(methods))

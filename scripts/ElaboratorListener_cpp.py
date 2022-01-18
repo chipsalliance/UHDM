@@ -180,7 +180,7 @@ def generate(models):
     module_listeners = _generate_module_listeners(models)
     class_listeners = _generate_class_listeners(models)
 
-    with open(config.get_template_filepath('ElaboratorListener.cpp'), 'r+t') as strm:
+    with open(config.get_template_filepath('ElaboratorListener.cpp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<MODULE_ELABORATOR_LISTENER>', (' ' * 10) + ('\n' + (' ' * 10)).join(module_listeners))

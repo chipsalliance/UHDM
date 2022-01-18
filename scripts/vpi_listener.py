@@ -97,7 +97,7 @@ def generate(models):
         public_implementations.append( '')
 
    # vpi_listener.h
-    with open(config.get_template_filepath('vpi_listener.h'), 'r+t') as strm:
+    with open(config.get_template_filepath('vpi_listener.h'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<VPI_LISTENERS_HEADER>', '\n'.join(declarations))
@@ -116,7 +116,7 @@ def generate(models):
     ]
 
     # vpi_listener.cpp
-    with open(config.get_template_filepath('vpi_listener.cpp'), 'r+t') as strm:
+    with open(config.get_template_filepath('vpi_listener.cpp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<VPI_LISTENERS>', '\n'.join(implementations))
