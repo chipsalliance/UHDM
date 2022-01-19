@@ -41,9 +41,17 @@
 namespace fs = std::filesystem;
 
 namespace UHDM {
+  class BaseClass;
   class Serializer;
   class ElaboratorListener;
   static inline std::string nonamebaseclass ("");
+
+#ifdef STANDARD_VPI
+  typedef std::set<vpiHandle> VisitedContainer;
+#else
+  typedef std::set<const BaseClass*> VisitedContainer;
+#endif
+  typedef std::set<const BaseClass*> AnySet;
 
   class ClientData {
   public:
@@ -122,6 +130,9 @@ namespace UHDM {
                                  ElaboratorListener* elaborator,
                                  BaseClass* parent) const = 0;
 
+    virtual int Compare(const BaseClass* const other, AnySet& visited) const;
+    int Compare(const BaseClass* const other) const;
+
   protected:
     void DeepCopy(BaseClass* clone, Serializer* serializer,
                   ElaboratorListener* elaborator, BaseClass* parent) const;
@@ -137,14 +148,7 @@ namespace UHDM {
     int vpiEndLineNo_ = 0;
     short int vpiColumnNo_ = 0;
     short int vpiEndColumnNo_ = 0;
-
   };
-
-#ifdef STANDARD_VPI
-  typedef std::set<vpiHandle> VisitedContainer;
-#else
-  typedef  std::set<const BaseClass*> VisitedContainer;
-#endif
 
   template<typename T>
   class FactoryT final {

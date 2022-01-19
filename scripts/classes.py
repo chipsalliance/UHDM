@@ -8,7 +8,7 @@ def _get_group_headers(type, real_type):
     return [ f'#include "{real_type}.h"' ] if type == 'any' else []
 
 
-def _get_declaration(classname, type, vpi, card, real_type=''):
+def _get_declarations(classname, type, vpi, card, real_type=''):
     content = []
     if type in ['string', 'value', 'delay']:
         type = 'std::string'
@@ -55,7 +55,7 @@ def _get_declaration(classname, type, vpi, card, real_type=''):
     return content
 
 
-def _get_implementation(classname, type, vpi, card, real_type=''):
+def _get_implementations(classname, type, vpi, card, real_type=''):
     content = []
     if card != '1':
         return content
@@ -490,6 +490,94 @@ def _get_GetVpiPropertyValue_implementation(model):
     return content
 
 
+def _get_Compare_implementation(model):
+    classname = model['name']
+    modeltype = model['type']
+
+    content = [
+        f'int {classname}::Compare(const BaseClass *const other, AnySet& visited) const {{',
+         '  int r = 0;',
+         '  if (!visited.insert(this).second) return r;',
+         '',
+         '  AnySet local;',
+         '  if ((r = basetype_t::Compare(other, local)) != 0) return r;',
+         '  visited.merge(local);',
+         '',
+         '  const thistype_t *const lhs = this;',
+         '  const thistype_t *const rhs = (const thistype_t *)other;',
+         ''
+    ]
+
+    for key, value in model.allitems():
+        if key not in ['property', 'obj_ref', 'class_ref']:
+            continue
+
+        vpi = value.get('vpi')
+        if vpi in ['vpiParent', 'uhdmParentType', 'uhdmType', 'vpiLineNo', 'vpiColumnNo', 'vpiEndLineNo', 'vpiEndColumnNo', 'vpiFile', 'vpiFullName', 'uhdmId']:
+            continue
+
+        type = value.get('type')
+        if type in ['value', 'delay']:
+            continue
+
+        name = value.get('name')
+        card = value.get('card')
+        Vpi_ = vpi[:1].upper() + vpi[1:]
+
+        if card == '1':
+            if type == 'string':
+                content.append(f'  if ((r = lhs->{Vpi_}().compare(rhs->{Vpi_}())) != 0) return r;')
+            elif type in ['unsigned int', 'int']:
+                content.append(f'  if ((r = lhs->{Vpi_}() - rhs->{Vpi_}()) != 0) return r;')
+            elif type == 'bool':
+                content.append(f'  if ((r = (lhs->{Vpi_}() == rhs->{Vpi_}()) ? 0 : (lhs->{Vpi_}() ? 1 : -1)) != 0) return r;')
+            else:
+                Name = name[:1].upper() + name[1:]
+                content.extend([
+                   '',
+                  f'  auto lhs_{name} = lhs->{Name}();',
+                  f'  auto rhs_{name} = rhs->{Name}();',
+                  f'  if ((lhs_{name} != nullptr) && (rhs_{name} != nullptr)) {{',
+                  f'    if ((r = lhs_{name}->Compare(rhs_{name}, local)) != 0) return r;',
+                   '    visited.merge(local);',
+                  f'  }} else if ((lhs_{name} != nullptr) && (rhs_{name} == nullptr)) {{',
+                   '    return 1;',
+                  f'  }} else if ((lhs_{name} == nullptr) && (rhs_{name} != nullptr)) {{',
+                   '    return -1;',
+                   '  }'
+                ])
+        else:
+            if not name.endswith('s'):
+                name += 's'
+
+            Name = name[:1].upper() + name[1:]
+            content.extend([
+                 '',
+                f'  auto lhs_{name} = lhs->{Name}();',
+                f'  auto rhs_{name} = rhs->{Name}();',
+                f'  if ((lhs_{name} != nullptr) && (rhs_{name} != nullptr)) {{',
+                f'    if ((r = static_cast<int>(lhs_{name}->size() - rhs_{name}->size())) != 0) return r;',
+                 '',
+                f'    for (size_t i = 0, n = lhs_{name}->size(); i < n; ++i) {{',
+                f'      if ((r = lhs_{name}->at(i)->Compare(rhs_{name}->at(i), local)) != 0) return r;',
+                 '      visited.merge(local);',
+                 '    }',
+                f'  }} else if ((lhs_{name} != nullptr) && (rhs_{name} == nullptr)) {{',
+                 '    return 1;',
+                f'  }} else if ((lhs_{name} == nullptr) && (rhs_{name} != nullptr)) {{',
+                 '    return -1;',
+                 '  }',
+            ])
+
+    content.extend([
+        '  return r;',
+        '}',
+        ''
+    ])
+
+    return content
+
+
 _cached_members = {}
 def _get_group_members_recursively(model, models):
     global _cached_members
@@ -560,20 +648,20 @@ def _generate_one_class(model, models, templates):
         # Builtin properties do not need to be specified in each models
         # Builtins: "vpiParent, Parent type, vpiFile, Id" method and field
         data_members.extend(_get_data_member('BaseClass', 'vpiParent', '1'))
-        declarations.extend(_get_declaration(classname, 'BaseClass', 'vpiParent', '1'))
-        implementations.extend(_get_implementation(classname, 'BaseClass', 'vpiParent', '1'))
+        declarations.extend(_get_declarations(classname, 'BaseClass', 'vpiParent', '1'))
+        implementations.extend(_get_implementations(classname, 'BaseClass', 'vpiParent', '1'))
 
         data_members.extend(_get_data_member('unsigned int', 'uhdmParentType', '1'))
-        declarations.extend(_get_declaration(classname, 'unsigned int', 'uhdmParentType', '1'))
-        implementations.extend(_get_implementation(classname, 'unsigned int', 'uhdmParentType', '1'))
+        declarations.extend(_get_declarations(classname, 'unsigned int', 'uhdmParentType', '1'))
+        implementations.extend(_get_implementations(classname, 'unsigned int', 'uhdmParentType', '1'))
 
         data_members.extend(_get_data_member('string', 'vpiFile', '1'))
-        declarations.extend(_get_declaration(classname, 'string','vpiFile', '1'))
-        implementations.extend(_get_implementation(classname, 'string','vpiFile', '1'))
+        declarations.extend(_get_declarations(classname, 'string','vpiFile', '1'))
+        implementations.extend(_get_implementations(classname, 'string','vpiFile', '1'))
 
         data_members.extend(_get_data_member('unsigned int', 'uhdmId', '1'))
-        declarations.extend(_get_declaration(classname, 'unsigned int', 'uhdmId', '1'))
-        implementations.extend(_get_implementation(classname, 'unsigned int', 'uhdmId', '1'))
+        declarations.extend(_get_declarations(classname, 'unsigned int', 'uhdmId', '1'))
+        implementations.extend(_get_implementations(classname, 'unsigned int', 'uhdmId', '1'))
 
     type_specified = False
     for key, value in model.allitems():
@@ -590,8 +678,8 @@ def _generate_one_class(model, models, templates):
                 declarations.append(f'  {type} {Vpi}() const final {{ return {value.get("vpiname")}; }}')
             else: # properties are already defined in vpi_user.h, no need to redefine them
                 data_members.extend(_get_data_member(type, vpi, card))
-                declarations.extend(_get_declaration(classname, type, vpi, card))
-                implementations.extend(_get_implementation(classname, type, vpi, card))
+                declarations.extend(_get_declarations(classname, type, vpi, card))
+                implementations.extend(_get_implementations(classname, type, vpi, card))
 
         elif key == 'extends' and value:
             header_file_content = header_file_content.replace('<EXTENDS>', value)
@@ -615,8 +703,8 @@ def _generate_one_class(model, models, templates):
 
             group_headers.update(_get_group_headers(type, real_type))
             data_members.extend(_get_data_member(type, name, card))
-            declarations.extend(_get_declaration(classname, type, name, card, real_type))
-            implementations.extend(_get_implementation(classname, type, name, card, real_type))
+            declarations.extend(_get_declarations(classname, type, name, card, real_type))
+            implementations.extend(_get_implementations(classname, type, name, card, real_type))
 
     if not type_specified and (modeltype == 'obj_def'):
         vpiclasstype = config.make_vpi_name(classname)
@@ -632,11 +720,13 @@ def _generate_one_class(model, models, templates):
     declarations.append('  virtual const BaseClass* GetByVpiName(std::string_view name) const override;')
     declarations.append('  virtual std::tuple<const BaseClass*, UHDM_OBJECT_TYPE, const std::vector<const BaseClass*>*> GetByVpiType(int type) const override;')
     declarations.append('  virtual vpi_property_value_t GetVpiPropertyValue(int property) const override;')
+    declarations.append('  virtual int Compare(const BaseClass* const other, AnySet& visited) const override;')
 
     implementations.extend(_get_clone_implementation(model, models))
     implementations.extend(_get_GetByVpiName_implementation(model))
     implementations.extend(_get_GetByVpiType_implementation(model))
     implementations.extend(_get_GetVpiPropertyValue_implementation(model))
+    implementations.extend(_get_Compare_implementation(model))
 
     if modeltype == 'class_def':
         header_file_content = header_file_content.replace('<FINAL_CLASS>', '')
