@@ -234,7 +234,10 @@ PLI_INT32 vpi_compare_objects(vpiHandle handle1, vpiHandle handle2) {
       (const BaseClass*)((const uhdm_handle*)handle1)->object;
   const BaseClass* const object2 =
       (const BaseClass*)((const uhdm_handle*)handle2)->object;
-  return (object1 == object2) ? 0 : object1->Compare(object2);
+  // NOTE: As per the standard, this API is expected to return a 1 for equal.
+  // And, yes that is counter intuitive. But BaseClass::Compare returns a 0
+  // for equal. Negate the result here to meet standard requirements.
+  return (object1 == object2) ? 1 : ((object1->Compare(object2) == 0) ? 1 : 0);
 }
 
 vpiHandle vpi_scan(vpiHandle iterator) {
