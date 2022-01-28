@@ -3,7 +3,7 @@ import file_utils
 
 
 def generate(models):
-    with open(config.get_template_filepath('clone_tree.cpp'), 'r+t') as strm:
+    with open(config.get_template_filepath('clone_tree.cpp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<CLONE_IMPLEMENTATIONS>', '')

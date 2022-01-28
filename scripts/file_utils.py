@@ -4,7 +4,7 @@ import os
 
 def set_content_if_changed(filename, content):
     if os.path.exists(filename):
-        with open(filename, 'r+t') as strm:
+        with open(filename, 'rt') as strm:
             orig_content = strm.read()
 
         if orig_content == content:

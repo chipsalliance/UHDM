@@ -5,7 +5,7 @@ import VpiListener_h
 def generate(models):
     methods = VpiListener_h.get_methods(models, ' TRACE_ENTER; ', ' TRACE_LEAVE; ')
 
-    with open(config.get_template_filepath('VpiListenerTracer.h'), 'r+t') as strm:
+    with open(config.get_template_filepath('VpiListenerTracer.h'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<VPI_LISTENER_TRACER_METHODS>', '\n'.join(methods))

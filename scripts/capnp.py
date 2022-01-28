@@ -99,7 +99,7 @@ def generate(models):
             flattened_model_schemas.append('}')
             flattened_model_schemas.append('')
 
-    with open(config.get_template_filepath('UHDM.capnp'), 'r+t') as strm:
+    with open(config.get_template_filepath('UHDM.capnp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<CAPNP_SCHEMA>', '\n'.join(flattened_model_schemas))

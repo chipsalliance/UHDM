@@ -12,6 +12,9 @@
 
    * sudo apt-get install build-essential cmake git tclsh
 
+* To generate the code, we need python orderedmultidict
+   * pip3 install orderedmultidict
+
 * UHDM Source code
   * git clone https://github.com/alainmarcel/UHDM.git
   * cd UHDM

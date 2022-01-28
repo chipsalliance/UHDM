@@ -23,6 +23,7 @@
  *
  * Created on Jan 3, 2022, 9:03 PM
  */
+#include <string.h>
 
 #include <uhdm/UhdmLint.h>
 #include <uhdm/clone_tree.h>
@@ -40,7 +41,7 @@ void UhdmLint::leaveBit_select(const bit_select* object,
       const any* act = ref->Actual_group();
       if (act && act->UhdmType() == uhdmreal_var) {
         serializer_->GetErrorHandler()(ErrorType::UHDM_REAL_TYPE_AS_SELECT,
-                                       act->VpiName(), ref);
+                                       act->VpiName(), ref, nullptr);
       }
     }
   }
@@ -84,7 +85,7 @@ void UhdmLint::leaveFunction(const function* object, const BaseClass* parent,
       const any* ret = returnWithValue(st);
       if (ret) {
         serializer_->GetErrorHandler()(ErrorType::UHDM_RETURN_VALUE_VOID_FUNCTION,
-                                       object->VpiName(), ret);
+                                       object->VpiName(), ret, nullptr);
       }
     }
   }
@@ -100,7 +101,78 @@ void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
         if (member->Default_value()) {
           serializer_->GetErrorHandler()(ErrorType::UHDM_ILLEGAL_DEFAULT_VALUE,
                                          std::string(""),
-                                         member->Default_value());
+                                         member->Default_value(), nullptr);
+        }
+      }
+    }
+  }
+}
+
+void UhdmLint::leaveModule(const module* object, const BaseClass* parent,
+                           vpiHandle handle, vpiHandle parentHandle) {
+  if (auto assigns = object->Cont_assigns()) {
+    checkMultiContAssign(assigns);
+  }
+}
+
+void UhdmLint::checkMultiContAssign(
+    const std::vector<UHDM::cont_assign*>* assigns) {
+  for (unsigned int i = 0; i < assigns->size() - 1; i++) {
+    cont_assign* cassign = assigns->at(i);
+    const expr* lhs_exp = cassign->Lhs();
+    const expr* rhs_exp = cassign->Rhs();
+    if (rhs_exp->UhdmType() == uhdmoperation) {
+      operation* op = (operation*)rhs_exp;
+      bool triStatedOp = false;
+      for (auto operand : *op->Operands()) {
+        if (operand->UhdmType() == uhdmconstant) {
+          constant* c = (constant*)operand;
+          if (strstr(c->VpiValue().c_str(), "z")) {
+            triStatedOp = true;
+            break;
+          }
+        }
+      }
+      if (triStatedOp) continue;
+    }
+    for (unsigned int j = i + 1; j < assigns->size(); j++) {
+      cont_assign* as = assigns->at(j);
+      const UHDM::expr* lhs = as->Lhs();
+      const UHDM::expr* rhs = as->Rhs();
+      if (lhs->UhdmType() == uhdmref_obj) {
+        const std::string& n = lhs->VpiName();
+        if (n == lhs_exp->VpiName()) {
+          ref_obj* ref = (ref_obj*)lhs;
+          const any* actual = ref->Actual_group();
+          if (actual) {
+            if (actual->UhdmType() == uhdmlogic_net) {
+              logic_net* net = (logic_net*)actual;
+              int nettype = net->VpiNetType();
+              if (nettype == vpiWor || nettype == vpiWand ||
+                  nettype == vpiTri || nettype == vpiTriAnd ||
+                  nettype == vpiTriOr || nettype == vpiTri0 ||
+                  nettype == vpiTri1 || nettype == vpiTriReg)
+                continue;
+            }
+          }
+          if (as->VpiStrength0() || cassign->VpiStrength0()) continue;
+          if (as->VpiStrength1() || cassign->VpiStrength1()) continue;
+          if (rhs->UhdmType() == uhdmoperation) {
+            operation* op = (operation*)rhs;
+            bool triStatedOp = false;
+            for (auto operand : *op->Operands()) {
+              if (operand->UhdmType() == uhdmconstant) {
+                constant* c = (constant*)operand;
+                if (strstr(c->VpiValue().c_str(), "z")) {
+                  triStatedOp = true;
+                  break;
+                }
+              }
+            }
+            if (triStatedOp) continue;
+          }
+          serializer_->GetErrorHandler()(ErrorType::UHDM_MULTIPLE_CONT_ASSIGN,
+                                         lhs_exp->VpiName(), lhs_exp, lhs);
         }
       }
     }

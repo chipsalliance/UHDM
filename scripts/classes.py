@@ -673,7 +673,7 @@ def generate(models):
     templates = {}
     for filename in [ 'class_header.h', 'class_source.cpp', 'group_header.h', 'group_header.cpp' ]:
         template_filepath = config.get_template_filepath(filename)
-        with open(template_filepath, 'r+t') as strm:
+        with open(template_filepath, 'rt') as strm:
             templates[filename] = strm.read()
 
     for model in models.values():
