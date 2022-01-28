@@ -284,7 +284,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
         }
         if (found == false) {
           s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, tname,
-                              exp);
+                              exp, nullptr);
           return result;
         }
       } else {
@@ -292,7 +292,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
           tmp[index] = oper;
         else 
          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, "Out of bound!",
-                              exp); 
+                              exp, nullptr); 
       }
       index++;
     }
@@ -305,7 +305,7 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
       }
       if (op == nullptr) {
         s.GetErrorHandler()(ErrorType::UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN,
-                            fieldNames[index], exp);
+                            fieldNames[index], exp, nullptr);
         return result;
       }
       ordered->push_back(op);
