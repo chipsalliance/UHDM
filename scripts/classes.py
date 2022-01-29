@@ -36,9 +36,9 @@ def _get_declaration(classname, type, vpi, card, real_type=''):
             const = 'const '
 
         if vpi in ['vpiFile', 'vpiDefFile']:
-            content.append(f'  {virtual}bool {Vpi_}(const fs::path& data){final};')
+            content.append(f'  {virtual}bool {Vpi_}(const std::filesystem::path& data){final};')
             content.append(f'  {virtual}SymbolFactory::ID {Vpi_}Id() const{final} {{ return {vpi}_; }}')
-            content.append(f'  {virtual}fs::path {Vpi_}() const{final};')
+            content.append(f'  {virtual}std::filesystem::path {Vpi_}() const{final};')
         elif type == 'std::string':
             content.append(f'  {virtual}bool {Vpi_}(const std::string& data){final};')
             content.append(f'  {virtual}const std::string& {Vpi_}() const{final};')
@@ -135,16 +135,16 @@ def _get_implementation(classname, type, vpi, card, real_type=''):
         content.append( '  }')
         content.append( '}')
     elif vpi in ['vpiFile', 'vpiDefFile']:
-        content.append(f'fs::path {classname}::{Vpi_}() const {{')
+        content.append(f'std::filesystem::path {classname}::{Vpi_}() const {{')
         content.append(f'  const std::string &symbol = serializer_->symbolMaker.GetSymbol({vpi}_);')
-        content.append( '  return (symbol.empty() || (symbol == SymbolFactory::getBadSymbol())) ? fs::path() : fs::path(symbol);')
+        content.append( '  return (symbol.empty() || (symbol == SymbolFactory::getBadSymbol())) ? std::filesystem::path() : std::filesystem::path(symbol);')
         content.append(f'}}')
     else:
         content.append(f'const {type}{pointer}& {classname}::{Vpi_}() const {{ return serializer_->symbolMaker.GetSymbol({vpi}_); }}')
 
     content.append('')
     if vpi in ['vpiFile', 'vpiDefFile']:
-        content.append(f'bool {classname}::{Vpi_}(const fs::path& data) {{ {vpi}_ = serializer_->symbolMaker.Make(data.string()); return true; }}')
+        content.append(f'bool {classname}::{Vpi_}(const std::filesystem::path& data) {{ {vpi}_ = serializer_->symbolMaker.Make(data.string()); return true; }}')
     else:
         content.append(f'bool {classname}::{Vpi_}(const {type}{pointer}& data) {{ {vpi}_ = serializer_->symbolMaker.Make(data); return true; }}')
     content.append('')

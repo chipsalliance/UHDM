@@ -38,8 +38,6 @@
 #include <uhdm/RTTI.h>
 #include <uhdm/SymbolFactory.h>
 
-namespace fs = std::filesystem;
-
 namespace UHDM {
   class Serializer;
   class ElaboratorListener;
@@ -72,10 +70,10 @@ namespace UHDM {
 
     virtual bool UhdmParentType(unsigned int data) = 0;
 
-    virtual fs::path VpiFile() const = 0;
+    virtual std::filesystem::path VpiFile() const = 0;
     virtual SymbolFactory::ID VpiFileId() const = 0;
 
-    virtual bool VpiFile(const fs::path& data) = 0;
+    virtual bool VpiFile(const std::filesystem::path& data) = 0;
 
     virtual int VpiLineNo() const final { return vpiLineNo_; }
 
