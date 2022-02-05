@@ -306,6 +306,11 @@ tf_call* func_call::DeepClone(Serializer* serializer,
     clone->Tf_call_args(Tf_call_args());
     clone->UhdmId(id);
     clone->VpiParent(parent);
+    clone->VpiFile(VpiFile());
+    clone->VpiLineNo(VpiLineNo());
+    clone->VpiColumnNo(VpiColumnNo());
+    clone->VpiEndLineNo(VpiEndLineNo());
+    clone->VpiEndColumnNo(VpiEndColumnNo());
     if (task* f = any_cast<task*>(elaborator->bindTaskFunc(VpiName()))) {
       clone->Task(f);
     }
@@ -357,6 +362,11 @@ tf_call* task_call::DeepClone(Serializer* serializer,
     const unsigned long id = clone->UhdmId();
     //*clone = *this;
     clone->VpiName(VpiName());
+    clone->VpiFile(VpiFile());
+    clone->VpiLineNo(VpiLineNo());
+    clone->VpiColumnNo(VpiColumnNo());
+    clone->VpiEndLineNo(VpiEndLineNo());
+    clone->VpiEndColumnNo(VpiEndColumnNo());
     clone->Tf_call_args(Tf_call_args());
     clone->UhdmId(id);
     clone->VpiParent(parent);
