@@ -66,7 +66,7 @@ struct Serializer::AnyRestoreAdapter<BaseClass, U> {
   void operator()(const U &reader, Serializer *serializer, BaseClass *obj) const {
     obj->UhdmParentType(reader.getUhdmParentType());
     obj->VpiParent(serializer->GetObject(reader.getUhdmParentType(), reader.getVpiParent() - 1));
-    obj->VpiFile(fs::path(serializer->symbolMaker.GetSymbol(reader.getVpiFile())));
+    obj->VpiFile(std::filesystem::path(serializer->symbolMaker.GetSymbol(reader.getVpiFile())));
     obj->VpiLineNo(reader.getVpiLineNo());
     obj->VpiColumnNo(reader.getVpiColumnNo());
     obj->VpiEndLineNo(reader.getVpiEndLineNo());

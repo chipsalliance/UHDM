@@ -24,7 +24,6 @@
  * Created on Jan 3, 2022, 9:03 PM
  */
 #include <string.h>
-
 #include <uhdm/UhdmLint.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
@@ -62,12 +61,12 @@ static const any* returnWithValue(const any* stmt) {
       break;
     }
     case uhdmif_stmt: {
-      if_stmt* st = (if_stmt*) stmt;
+      if_stmt* st = (if_stmt*)stmt;
       if (const any* r = returnWithValue(st->VpiStmt())) return r;
       break;
     }
     case uhdmif_else: {
-      if_else* st = (if_else*) stmt;
+      if_else* st = (if_else*)stmt;
       if (const any* r = returnWithValue(st->VpiStmt())) return r;
       if (const any* r = returnWithValue(st->VpiElseStmt())) return r;
       break;
@@ -79,17 +78,17 @@ static const any* returnWithValue(const any* stmt) {
 }
 
 void UhdmLint::leaveFunction(const function* object, const BaseClass* parent,
-                     vpiHandle handle, vpiHandle parentHandle) {
+                             vpiHandle handle, vpiHandle parentHandle) {
   if (object->Return() == nullptr) {
     if (const any* st = object->Stmt()) {
       const any* ret = returnWithValue(st);
       if (ret) {
-        serializer_->GetErrorHandler()(ErrorType::UHDM_RETURN_VALUE_VOID_FUNCTION,
-                                       object->VpiName(), ret, nullptr);
+        serializer_->GetErrorHandler()(
+            ErrorType::UHDM_RETURN_VALUE_VOID_FUNCTION, object->VpiName(), ret,
+            nullptr);
       }
     }
   }
-
 }
 
 void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
@@ -174,6 +173,35 @@ void UhdmLint::checkMultiContAssign(
           serializer_->GetErrorHandler()(ErrorType::UHDM_MULTIPLE_CONT_ASSIGN,
                                          lhs_exp->VpiName(), lhs_exp, lhs);
         }
+      }
+    }
+  }
+}
+
+void UhdmLint::leaveAssignment(const assignment* object,
+                               const BaseClass* parent, vpiHandle handle,
+                               vpiHandle parentHandle) {
+  const any* lhs = object->Lhs();
+  if (!lhs) return;
+  if (lhs->UhdmType() == uhdmref_obj) {
+    ref_obj* ref = (ref_obj*)lhs;
+    const any* actual = ref->Actual_group();
+    if (!actual) return;
+    if (actual->UhdmType() == uhdmlogic_net) {
+      logic_net* n = (logic_net*)actual;
+      if (n->VpiNetType() == vpiWire) {
+        bool inProcess = false;
+        const any* tmp = object;
+        while (tmp) {
+          if (tmp->UhdmType() == uhdmalways || tmp->UhdmType() == uhdminitial) {
+            inProcess = true;
+            break;
+          }
+          tmp = tmp->VpiParent();
+        }
+        if (inProcess)
+          serializer_->GetErrorHandler()(ErrorType::UHDM_ILLEGAL_WIRE_LHS,
+                                         lhs->VpiName(), lhs, 0);
       }
     }
   }

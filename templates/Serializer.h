@@ -36,100 +36,119 @@
 #include <uhdm/uhdm.h>
 
 namespace UHDM {
-  enum ErrorType {
-    UHDM_WRONG_OBJECT_TYPE = 703,
-    UHDM_UNDEFINED_PATTERN_KEY = 712,
-    UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN = 713,
-    UHDM_REAL_TYPE_AS_SELECT = 714,
-    UHDM_RETURN_VALUE_VOID_FUNCTION = 715,
-    UHDM_ILLEGAL_DEFAULT_VALUE = 716,
-    UHDM_MULTIPLE_CONT_ASSIGN = 717
-  };
-
-  typedef std::function<void(ErrorType errType, const std::string&, const any* object1, const any* object2)> ErrorHandler;
-
-  void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const any* object1, const any* object2);
-
-  template<typename T>
-  class FactoryT;
-
-  class Serializer {
-  public:
-    Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {symbolMaker.Make("");}
-    void Save(const std::string& file);
-    void Purge();
-    void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
-    ErrorHandler GetErrorHandler() { return errorHandler; }
-    const std::vector<vpiHandle> Restore(const std::string& file);
-    std::map<std::string, unsigned long> ObjectStats() const;
-
-  private:
-    template<typename T, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-    T *Make(FactoryT<T> *const factory) {
-      T* const obj = factory->Make();
-      obj->SetSerializer(this);
-      obj->UhdmId(objId_++);
-      return obj;
-    }
-
-    template<typename T, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-    std::vector<T*>* Make(FactoryT<std::vector<T*>> *const factory) {
-      return factory->Make();
-    }
-
-  public:
-<FACTORIES_METHODS>
-    std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
-    vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) { return uhdm_handleMaker.Make(type, object); }
-
-    VectorOfanyFactory anyVectMaker;
-    SymbolFactory symbolMaker;
-    uhdm_handleFactory uhdm_handleMaker;
-<FACTORIES>
-
-    std::unordered_map<const BaseClass*, unsigned long>& AllObjects() { return allIds_; }
-
-  private:
-    template<typename T, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-    void SetSaveId_(FactoryT<T>* const factory);
-
-    template<typename T, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-    void SetRestoreId_(FactoryT<T>* const factory, unsigned long count);
-
-    template<
-      typename T, typename U,
-      typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-    struct AnySaveAdapter {};
-    template<typename, typename, typename> friend struct AnySaveAdapter;
-
-    template<
-      typename T, typename U,
-      typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-    struct VectorOfanySaveAdapter {};
-    template<typename, typename, typename> friend struct VectorOfanySaveAdapter;
-
-    template<
-      typename T, typename U,
-      typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-    struct AnyRestoreAdapter {};
-    template<typename, typename, typename> friend struct AnyRestoreAdapter;
-
-    template<
-      typename T, typename U,
-      typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-    struct VectorOfanyRestoreAdapter {};
-    template<typename, typename, typename> friend struct VectorOfanyRestoreAdapter;
-
-  private:
-    BaseClass* GetObject(unsigned int objectType, unsigned int index);
-    void SetId(const BaseClass* p, unsigned long id);
-    unsigned long GetId(const BaseClass* p) ;
-    std::unordered_map<const BaseClass*, unsigned long> allIds_;
-    unsigned long incrId_; // Capnp id
-    unsigned long objId_;  // ID for property annotations
-
-    ErrorHandler errorHandler;
-  };
+enum ErrorType {
+  UHDM_WRONG_OBJECT_TYPE = 703,
+  UHDM_UNDEFINED_PATTERN_KEY = 712,
+  UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN = 713,
+  UHDM_REAL_TYPE_AS_SELECT = 714,
+  UHDM_RETURN_VALUE_VOID_FUNCTION = 715,
+  UHDM_ILLEGAL_DEFAULT_VALUE = 716,
+  UHDM_MULTIPLE_CONT_ASSIGN = 717,
+  UHDM_ILLEGAL_WIRE_LHS = 718
 };
+
+typedef std::function<void(ErrorType errType, const std::string&,
+                           const any* object1, const any* object2)>
+    ErrorHandler;
+
+void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg,
+                         const any* object1, const any* object2);
+
+template <typename T>
+class FactoryT;
+
+class Serializer {
+ public:
+  Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {
+    symbolMaker.Make("");
+  }
+  void Save(const std::string& file);
+  void Purge();
+  void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
+  ErrorHandler GetErrorHandler() { return errorHandler; }
+  const std::vector<vpiHandle> Restore(const std::string& file);
+  std::map<std::string, unsigned long> ObjectStats() const;
+
+ private:
+  template <typename T, typename = typename std::enable_if<
+                            std::is_base_of<BaseClass, T>::value>::type>
+  T* Make(FactoryT<T>* const factory) {
+    T* const obj = factory->Make();
+    obj->SetSerializer(this);
+    obj->UhdmId(objId_++);
+    return obj;
+  }
+
+  template <typename T, typename = typename std::enable_if<
+                            std::is_base_of<BaseClass, T>::value>::type>
+  std::vector<T*>* Make(FactoryT<std::vector<T*>>* const factory) {
+    return factory->Make();
+  }
+
+ public:
+  <FACTORIES_METHODS> std::vector<any*>* MakeAnyVec() {
+    return anyVectMaker.Make();
+  }
+  vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) {
+    return uhdm_handleMaker.Make(type, object);
+  }
+
+  VectorOfanyFactory anyVectMaker;
+  SymbolFactory symbolMaker;
+  uhdm_handleFactory uhdm_handleMaker;
+  <FACTORIES>
+
+      std::unordered_map<const BaseClass*, unsigned long>& AllObjects() {
+    return allIds_;
+  }
+
+ private:
+  template <typename T, typename = typename std::enable_if<
+                            std::is_base_of<BaseClass, T>::value>::type>
+  void SetSaveId_(FactoryT<T>* const factory);
+
+  template <typename T, typename = typename std::enable_if<
+                            std::is_base_of<BaseClass, T>::value>::type>
+  void SetRestoreId_(FactoryT<T>* const factory, unsigned long count);
+
+  template <typename T, typename U,
+            typename = typename std::enable_if<
+                std::is_base_of<BaseClass, T>::value>::type>
+  struct AnySaveAdapter {};
+  template <typename, typename, typename>
+  friend struct AnySaveAdapter;
+
+  template <typename T, typename U,
+            typename = typename std::enable_if<
+                std::is_base_of<BaseClass, T>::value>::type>
+  struct VectorOfanySaveAdapter {};
+  template <typename, typename, typename>
+  friend struct VectorOfanySaveAdapter;
+
+  template <typename T, typename U,
+            typename = typename std::enable_if<
+                std::is_base_of<BaseClass, T>::value>::type>
+  struct AnyRestoreAdapter {};
+  template <typename, typename, typename>
+  friend struct AnyRestoreAdapter;
+
+  template <typename T, typename U,
+            typename = typename std::enable_if<
+                std::is_base_of<BaseClass, T>::value>::type>
+  struct VectorOfanyRestoreAdapter {};
+  template <typename, typename, typename>
+  friend struct VectorOfanyRestoreAdapter;
+
+ private:
+  BaseClass* GetObject(unsigned int objectType, unsigned int index);
+  void SetId(const BaseClass* p, unsigned long id);
+  unsigned long GetId(const BaseClass* p);
+  std::unordered_map<const BaseClass*, unsigned long> allIds_;
+  unsigned long incrId_;  // Capnp id
+  unsigned long objId_;   // ID for property annotations
+
+  ErrorHandler errorHandler;
+};
+};  // namespace UHDM
 
 #endif
