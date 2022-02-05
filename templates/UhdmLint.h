@@ -40,8 +40,7 @@ class UhdmLint : public VpiListener {
  public:
   UhdmLint(Serializer* serializer) : serializer_(serializer) {}
 
-  private:
-
+ private:
   void leaveBit_select(const bit_select* object, const BaseClass* parent,
                        vpiHandle handle, vpiHandle parentHandle) override;
 
@@ -54,6 +53,9 @@ class UhdmLint : public VpiListener {
 
   void leaveModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) override;
+
+  void leaveAssignment(const assignment* object, const BaseClass* parent,
+                       vpiHandle handle, vpiHandle parentHandle);
 
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 
