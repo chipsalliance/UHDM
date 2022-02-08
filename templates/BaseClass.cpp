@@ -81,4 +81,20 @@ BaseClass* BaseClass::DeepClone(Serializer* serializer,
 void BaseClass::DeepCopy(BaseClass* clone, Serializer* serializer,
                          ElaboratorListener* elaborator,
                          BaseClass* parent) const {}
+
+int BaseClass::Compare(const BaseClass* const other, AnySet& visited) const {
+  int r = 0;
+
+  if ((r = VpiType() - other->VpiType()) != 0) return r;
+  if ((r = VpiName().compare(other->VpiName())) != 0) return r;
+  if ((r = VpiDefName().compare(other->VpiDefName())) != 0) return r;
+
+  return r;
+}
+
+int BaseClass::Compare(const BaseClass *const other) const {
+  AnySet visited;
+  return Compare(other, visited);
+}
+
 }  // namespace UHDM

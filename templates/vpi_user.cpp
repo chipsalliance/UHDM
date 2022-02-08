@@ -200,13 +200,19 @@ vpiHandle vpi_handle_by_index(vpiHandle object, PLI_INT32 indx) { return 0; }
 vpiHandle vpi_handle_by_name(PLI_BYTE8* name, vpiHandle refHandle) {
   const uhdm_handle* const handle = (const uhdm_handle*)refHandle;
   const BaseClass* const object = (const BaseClass*)handle->object;
-<VPI_HANDLE_BY_NAME_BODY>
+  if (object->GetSerializer()->symbolMaker.GetId(name) ==
+      static_cast<SymbolFactory::ID>(-1)) {
+    return nullptr;
+  }
+  const BaseClass *const ref = object->GetByVpiName(std::string_view(name));
+  return (ref != nullptr) ? NewVpiHandle(ref) : nullptr;
 }
 
 vpiHandle vpi_handle(PLI_INT32 type, vpiHandle refHandle) {
   const uhdm_handle* const handle = (const uhdm_handle*)refHandle;
   const BaseClass* const object = (const BaseClass*)handle->object;
-<VPI_HANDLE_BODY>
+  auto [ref, ignored1, ignored2] = object->GetByVpiType(type);
+  return (ref != nullptr) ? NewHandle(ref->UhdmType(), ref) : nullptr;
 }
 
 vpiHandle vpi_handle_multi(PLI_INT32 type, vpiHandle refHandle1,
@@ -219,13 +225,26 @@ vpiHandle vpi_handle_multi(PLI_INT32 type, vpiHandle refHandle1,
 vpiHandle vpi_iterate(PLI_INT32 type, vpiHandle refHandle) {
   const uhdm_handle* const handle = (const uhdm_handle*)refHandle;
   const BaseClass* const object = (const BaseClass*)handle->object;
-<VPI_ITERATE_BODY>
+  auto [ignored, refType, refVector] = object->GetByVpiType(type);
+  return (refVector != nullptr) ? NewHandle(refType, refVector) : nullptr;
+}
+
+PLI_INT32 vpi_compare_objects(vpiHandle handle1, vpiHandle handle2) {
+  const BaseClass* const object1 =
+      (const BaseClass*)((const uhdm_handle*)handle1)->object;
+  const BaseClass* const object2 =
+      (const BaseClass*)((const uhdm_handle*)handle2)->object;
+  // NOTE: As per the standard, this API is expected to return a 1 for equal.
+  // And, yes that is counter intuitive. But BaseClass::Compare returns a 0
+  // for equal. Negate the result here to meet standard requirements.
+  return (object1 == object2) ? 1 : ((object1->Compare(object2) == 0) ? 1 : 0);
 }
 
 vpiHandle vpi_scan(vpiHandle iterator) {
   if (!iterator) return 0;
   uhdm_handle* handle = (uhdm_handle*)iterator;
-  const std::vector<const BaseClass*>* vect = (const std::vector<const BaseClass*>*)handle->object;
+  const std::vector<const BaseClass*>* vect =
+      (const std::vector<const BaseClass*>*)handle->object;
   if (handle->index < vect->size()) {
     const BaseClass* const object = vect->at(handle->index);
     uhdm_handle* h = new uhdm_handle(object->UhdmType(), object);
@@ -265,7 +284,8 @@ PLI_INT64 vpi_get64(PLI_INT32 property, vpiHandle object) {
 
   const uhdm_handle* const handle = (const uhdm_handle*)object;
   const BaseClass* const obj = (const BaseClass*)handle->object;
-<VPI_GET_BODY>
+  BaseClass::vpi_property_value_t value = obj->GetVpiPropertyValue(property);
+  return std::holds_alternative<int64_t>(value) ? std::get<int64_t>(value) : 0;
 }
 
 PLI_BYTE8* vpi_get_str(PLI_INT32 property, vpiHandle object) {
@@ -275,7 +295,10 @@ PLI_BYTE8* vpi_get_str(PLI_INT32 property, vpiHandle object) {
   }
   const uhdm_handle* const handle = (const uhdm_handle*)object;
   const BaseClass* const obj = (const BaseClass*)handle->object;
-<VPI_GET_STR_BODY>
+  BaseClass::vpi_property_value_t value = obj->GetVpiPropertyValue(property);
+  return std::holds_alternative<const char *>(value)
+      ? const_cast<char *>(std::get<const char *>(value))
+      : nullptr;
 }
 
 /* delay processing */

@@ -30,7 +30,6 @@
     <Compile Include="capnp.py" />
     <Compile Include="classes.py" />
     <Compile Include="class_hierarchy.py" />
-    <Compile Include="clone_tree_cpp.py" />
     <Compile Include="config.py" />
     <Compile Include="containers_h.py" />
     <Compile Include="ElaboratorListener_cpp.py" />
