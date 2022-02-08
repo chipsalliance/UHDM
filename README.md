@@ -72,13 +72,13 @@
     * The Instance tree contains the Design Hierarchy and Elaborated Nets/Ports with High conn and Low conn connections done.
     * The module definitions contain the logic elements (non-elaborated, and only outside generate statements)
     * Generate statements and underlying logic are only visible in the elaborated model (topModules)
-    * To get the complete picture of the design one has to use both views (Example in [`listener_elab.cpp`](tests/listener_elab.cpp))
+    * To get the complete picture of the design one has to use both views (Example in [`listener_elab_test.cpp`](tests/listener_elab_test.cpp))
     * Applications where the UHDM data model is used as a precursor to another internal datastructure like a Synthesis or Simulator tool will prefer using the Folded Model.
     * Nets, Ports, Variables in the flat module list (allModules) don't necessary have the correct data type as not enough elaboration steps were performed on them
     * On the other hand, Nets, Ports, Variables have the correct type in the elaborated view (topModules)
     * Lhs vs Rhs expression padding is not performed at this point (We welcome PR contributions)
  * UHDM offers an optional Elaboration step that uniquifies nets, ports, variables and function by performing a deep cloning and ref_obj binding.
-    * See [`full_elab.cpp`](tests/full_elab.cpp) and [`dump.cpp`](tests/dump.cpp)
+    * See [`full_elab_test.cpp`](tests/full_elab_test.cpp) and [`uhdm-dump.cpp`](util/uhdm-dump.cpp)
     * Applications where the UHDM data model is free standing and is the sole data structure for the design representation will prefer the Fully Elaborated Data Model, examples: Linters or Code Analyzers.
     * At this point, UHDM does not offer:
        * the full bit blasted model available in the commercial EDA applications (We welcome contributions).
@@ -97,19 +97,19 @@
    * populate the properties to the obtained objects
    * assemble the model by creating legal object relations (compile time and runtime checking) following the IEEE standard
    * invoking the serialization call
- * Read [`test1.cpp`](tests/test1.cpp)
+ * Read [`module-port_test.cpp`](tests/module-port_test.cpp)
 
 
 # Design Navigation
- * After Deserialization of the persisted design (elaborated or not) (Read [`test2.cpp`](tests/test2.cpp))
- * Client applications can elaborate optionally and use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`test_helper.h`](tests/test_helper.h))
+ * After Deserialization of the persisted design (elaborated or not) (Read [`module-port_test.cpp`](tests/module-port_test.cpp))
+ * Client applications can elaborate optionally and use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`tests/listener_elab_test.cpp`](tests/listener_elab_test.cpp))
  * Or use the Visitor (More like a Walker)
    * An example Visitor is auto-generated to print the content of the data model [`visitor.cpp`](templates/vpi_visitor.cpp)
  * Or use the Listener Design Pattern
    * An example Listener is used as an example (tests/vpi_listener.cpp),
    * The listener enables client application development with minimum disruption while the data model evolves.
-   * An Custom Elaborator example code uses the Listener Design Pattern in [`listener_elab.cpp`](tests/listener_elab.cpp)
-   * A Full Elaboration example is demonstrated in [`full_elab.cpp`](tests/full_elab.cpp) and [`dump.cpp`](tests/dump.cpp)
+   * An Custom Elaborator example code uses the Listener Design Pattern in [`listener_elab_test.cpp`](tests/listener_elab_test.cpp)
+   * A Full Elaboration example is demonstrated in [`full_elab_test.cpp`](tests/full_elab_test.cpp) and [`uhdm-dump.cpp`](util/uhdm-dump.cpp)
  * The uhdm-dump [`uhdm-dump`](util/uhdm-dump.cpp) executable creates a human readable view of the UHDM serialized data model using the visitor [`visitor.cpp`](templates/vpi_visitor.cpp).
 
 

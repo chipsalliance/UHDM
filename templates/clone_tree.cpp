@@ -864,10 +864,5 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
 
   return clone;
 }
-
-// Auto generated implementations
-
-<CLONE_IMPLEMENTATIONS>
-
 }  // UHDM namespace
 

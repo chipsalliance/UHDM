@@ -9,7 +9,6 @@ import loader
 import capnp
 import class_hierarchy
 import classes
-import clone_tree_cpp
 import containers_h
 import ElaboratorListener_cpp
 import serializer
@@ -36,9 +35,6 @@ def _worker(params):
 
     elif key == 'classes':
         return classes.generate(*args)
-
-    elif key == 'clone_tree_cpp':
-        return clone_tree_cpp.generate(*args)
 
     elif key == 'containers_h':
         return containers_h.generate(*args)
@@ -116,13 +112,13 @@ def _main():
         ('capnp', [models]),
         ('class_hierarchy', [models]),
         ('classes', [models]),
-        ('clone_tree_cpp', [models]),
         ('containers_h', [models]),
         ('ElaboratorListener_cpp', [models]),
         ('Copier', [{
             config.get_template_filepath('BaseClass.h'): config.get_output_header_filepath('BaseClass.h'),
             config.get_template_filepath('BaseClass.cpp'): config.get_output_source_filepath('BaseClass.cpp'),
             config.get_template_filepath('clone_tree.h'): config.get_output_header_filepath('clone_tree.h'),
+            config.get_template_filepath('clone_tree.cpp'): config.get_output_source_filepath('clone_tree.cpp'),
             config.get_template_filepath('ElaboratorListener.h'): config.get_output_header_filepath('ElaboratorListener.h'),
             config.get_template_filepath('ExprEval.h'): config.get_output_header_filepath('ExprEval.h'),
             config.get_template_filepath('ExprEval.cpp'): config.get_output_source_filepath('ExprEval.cpp'),

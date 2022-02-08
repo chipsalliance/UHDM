@@ -20,42 +20,13 @@ def generate(models):
 
                     if type == 'value':
                         vpi_get_value_classes.add(classname)
-
-                    if type == 'delay':
+                    elif type == 'delay':
                         vpi_get_delay_classes.add(classname)
 
             baseclass = models[baseclass]['extends']
 
     # headers = [ f"#include <uhdm/{model['name']}.h>" for model in models.values() ]
     headers = [ f"#include <uhdm/{name}.h>" for name in sorted(set.union(vpi_get_value_classes, vpi_get_delay_classes)) ]
-
-    vpi_handle_by_name_body = [
-        f'  if (object->GetSerializer()->symbolMaker.GetId(name) == static_cast<SymbolFactory::ID>(-1)) {{',
-         '    return nullptr;',
-         '  }',
-         '  const BaseClass *const ref = object->GetByVpiName(std::string_view(name));',
-         '  return (ref != nullptr) ? NewVpiHandle(ref) : nullptr;'
-    ]
-
-    vpi_handle_body = [
-        '  auto [ref, ignored1, ignored2] = object->GetByVpiType(type);',
-        '  return (ref != nullptr) ? NewHandle(ref->UhdmType(), ref) : nullptr;'
-    ]
-
-    vpi_iterate_body = [
-        '  auto [ignored, refType, refVector] = object->GetByVpiType(type);',
-        '  return (refVector != nullptr) ? NewHandle(refType, refVector) : nullptr;'
-    ]
-
-    vpi_get_body = [
-        '  BaseClass::vpi_property_value_t value = obj->GetVpiPropertyValue(property);',
-        '  return std::holds_alternative<int64_t>(value) ? std::get<int64_t>(value) : 0;'
-    ]
-
-    vpi_get_str_body = [
-        '  BaseClass::vpi_property_value_t value = obj->GetVpiPropertyValue(property);',
-        '  return std::holds_alternative<const char *>(value) ? const_cast<char *>(std::get<const char *>(value)) : nullptr;'
-    ]
 
     vpi_get_value_body = [
         f'  const s_vpi_value* v = nullptr;',
@@ -84,12 +55,6 @@ def generate(models):
         file_content = strm.read()
 
     file_content = file_content.replace('<HEADERS>', '\n'.join(headers))
-    file_content = file_content.replace('<VPI_HANDLE_BY_NAME_BODY>', '\n'.join(vpi_handle_by_name_body))
-    file_content = file_content.replace('<VPI_HANDLE_BODY>', '\n'.join(vpi_handle_body))
-    file_content = file_content.replace('<VPI_ITERATE_BODY>', '\n'.join(vpi_iterate_body))
-    file_content = file_content.replace('<VPI_SCAN_BODY>', '')
-    file_content = file_content.replace('<VPI_GET_BODY>', '\n'.join(vpi_get_body))
-    file_content = file_content.replace('<VPI_GET_STR_BODY>', '\n'.join(vpi_get_str_body))
     file_content = file_content.replace('<VPI_GET_VALUE_BODY>', '\n'.join(vpi_get_value_body))
     file_content = file_content.replace('<VPI_GET_DELAY_BODY>', '\n'.join(vpi_get_delay_body))
     file_utils.set_content_if_changed(config.get_output_source_filepath('vpi_user.cpp'), file_content)
