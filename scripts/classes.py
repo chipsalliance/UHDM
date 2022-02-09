@@ -503,11 +503,9 @@ def _get_Compare_implementation(model):
          '  if ((r = basetype_t::Compare(other, local)) != 0) return r;',
          '  visited.merge(local);',
          '',
-         '  const thistype_t *const lhs = this;',
-         '  const thistype_t *const rhs = (const thistype_t *)other;',
          ''
     ]
-
+    varDeclared = 0
     for key, value in model.allitems():
         if key not in ['property', 'obj_ref', 'class_ref']:
             continue
@@ -524,6 +522,10 @@ def _get_Compare_implementation(model):
         card = value.get('card')
         Vpi_ = vpi[:1].upper() + vpi[1:]
 
+        if varDeclared == 0:
+            varDeclared = 1
+            content.append(f'  const thistype_t *const lhs = this;')
+            content.append(f'  const thistype_t *const rhs = (const thistype_t *)other;')
         if card == '1':
             if type == 'string':
                 content.append(f'  if ((r = lhs->{Vpi_}().compare(rhs->{Vpi_}())) != 0) return r;')
