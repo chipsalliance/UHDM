@@ -25,10 +25,12 @@
  */
 
 #include <uhdm/ElaboratorListener.h>
+
+#include <iostream>
+
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
-// #include <uhdm/Serializer.h>
 
 namespace UHDM {
 

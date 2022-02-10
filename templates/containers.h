@@ -27,7 +27,6 @@
 #define UHDM_CONTAINERS_H
 
 #include <vector>
-#include <unordered_map>
 #include <uhdm/uhdm_forward_decl.h>
 
 namespace UHDM {
