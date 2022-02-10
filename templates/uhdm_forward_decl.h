@@ -24,16 +24,23 @@
  * Created on May 06, 2020, 10:03 PM
  */
 
-#ifndef UHDM_FORWARD_DECL_CLASS_H
-#define UHDM_FORWARD_DECL_CLASS_H
+#ifndef UHDM_FORWARD_DECL_H
+#define UHDM_FORWARD_DECL_H
 
 #include <vector>
+
+#include <uhdm/BaseClass.h>
 
 namespace UHDM {
 class BaseClass;
 typedef BaseClass any;
-typedef std::vector<BaseClass*> VectorOfany;
-<UHDM_FORWARD_DECL>
+
+<UHDM_CLASSES_FORWARD_DECL>
+
+<UHDM_FACTORIES_FORWARD_DECL>
+
+typedef FactoryT<std::vector<BaseClass*>> VectorOfanyFactory;
+<UHDM_CONTAINER_FACTORIES_FORWARD_DECL>
 };
 
 
