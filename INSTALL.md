@@ -3,17 +3,13 @@
 
 ### Library uhdm.a
 
-
 ### Development Environment Required:
 
 * Linux (Ubuntu or Centos) or Windows, cmake 3.15 and GCC/VS supporting c++17
 
 * Please install the following package updates:
 
-   * sudo apt-get install build-essential cmake git tclsh
-
-* To generate the code, we need python orderedmultidict
-   * pip3 install orderedmultidict
+   * sudo apt-get install build-essential cmake git python3 python3-orderedmultidict
 
 * UHDM Source code
   * git clone https://github.com/alainmarcel/UHDM.git
