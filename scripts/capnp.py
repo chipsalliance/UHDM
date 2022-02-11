@@ -46,6 +46,15 @@ def generate(models):
         Classname = Classname_.replace('_', '')
 
         if modeltype != 'class_def':
+            individual_model_schemas[classname].append(('uhdmId', 'UInt64'))
+            individual_model_schemas[classname].append(('vpiParent', 'UInt64'))
+            individual_model_schemas[classname].append(('uhdmParentType', 'UInt64'))
+            individual_model_schemas[classname].append(('vpiFile', 'UInt64'))
+            individual_model_schemas[classname].append(('vpiLineNo', 'UInt32'))
+            individual_model_schemas[classname].append(('vpiEndLineNo', 'UInt32'))
+            individual_model_schemas[classname].append(('vpiColumnNo', 'UInt16'))
+            individual_model_schemas[classname].append(('vpiEndColumnNo', 'UInt16'))
+
             root_schema.append(f'  factory{Classname} @{root_schema_index} :List({Classname});')
             root_schema_index += 1
 
@@ -74,20 +83,12 @@ def generate(models):
             # Process the hierarchy tree top-down
             stack = []
             baseclass = classname
-            while baseclass:
+            while (baseclass):
                 stack.append(baseclass)
                 baseclass = models[baseclass]['extends']
 
+            capnpIndex = 0
             flattened_model_schemas.append(f'struct {Classname} {{')
-            flattened_model_schemas.append(f'  uhdmId @0 :UInt64;')
-            flattened_model_schemas.append(f'  vpiParent @1 :UInt64;')
-            flattened_model_schemas.append(f'  uhdmParentType @2 :UInt64;')
-            flattened_model_schemas.append(f'  vpiFile @3 :UInt64;')
-            flattened_model_schemas.append(f'  vpiLineNo @4 :UInt32;')
-            flattened_model_schemas.append(f'  vpiEndLineNo @5 :UInt32;')
-            flattened_model_schemas.append(f'  vpiColumnNo @6 :UInt16;')
-            flattened_model_schemas.append(f'  vpiEndColumnNo @7 :UInt16;')
-            capnpIndex = 8
 
             while stack:
                 for name, type in individual_model_schemas[stack.pop()]:

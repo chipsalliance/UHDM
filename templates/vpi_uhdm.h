@@ -27,6 +27,9 @@
 #ifndef VPI_UHDM_H
 #define VPI_UHDM_H
 
+#include <unordered_map>
+#include <vector>
+
 #include <uhdm/uhdm_types.h>
 
 namespace UHDM {
