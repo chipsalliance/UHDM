@@ -24,9 +24,10 @@
  * Created on May 6, 2020, 10:03 PM
  */
 
+#ifndef UHDM_ELABORATORLISTENER_H
+#define UHDM_ELABORATORLISTENER_H
+
 #include <map>
-#include <stack>
-#include <iostream>
 
 #include <uhdm/VpiListener.h>
 
@@ -128,3 +129,5 @@ protected:
 };
 
 };
+
+#endif  // UHDM_ELABORATORLISTENER_H
