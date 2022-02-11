@@ -24,8 +24,8 @@
  * Created on October 11, 2020, 9:00 PM
  */
 
-#ifndef UHDM_VPILISTENERTRACER_H
-#define UHDM_VPILISTENERTRACER_H
+#ifndef UHDM_VPILISTENERTRACER_CLASS_H
+#define UHDM_VPILISTENERTRACER_CLASS_H
 
 #include "VpiListener.h"
 

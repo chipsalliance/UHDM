@@ -26,7 +26,7 @@
 #ifndef UHDM_<UPPER_GROUPNAME>_H
 #define UHDM_<UPPER_GROUPNAME>_H
 
-#include <uhdm/containers.h>
+#include <uhdm/uhdm_forward_decl.h>
 
 namespace UHDM {
 

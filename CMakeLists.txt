@@ -126,16 +126,12 @@ set(uhdm-GENERATED_SRC
     ${GENDIR}/src/vpi_visitor.cpp
 )
 
-# Apparently, compiling each file individually generates a huge
-# library file that is hard to work with. Use bulk-build as a workaround.
-#
-# file(STRINGS "${PROJECT_SOURCE_DIR}/model/models.lst" LIST_OF_MODELS)
-# foreach(MODEL_FILENAME ${LIST_OF_MODELS})
-#   get_filename_component(MODEL_NAME ${MODEL_FILENAME} NAME_WE)
-#   list(APPEND uhdm-GENERATED_SRC "${GENDIR}/src/${MODEL_NAME}.cpp")
-# endforeach()
+file(STRINGS "${PROJECT_SOURCE_DIR}/model/models.lst" LIST_OF_MODELS)
+foreach(MODEL_FILENAME ${LIST_OF_MODELS})
+  get_filename_component(MODEL_NAME ${MODEL_FILENAME} NAME_WE)
+  list(APPEND uhdm-GENERATED_SRC "${GENDIR}/src/${MODEL_NAME}.cpp")
+endforeach()
 
-list(APPEND uhdm-GENERATED_SRC "${GENDIR}/src/classes.cpp")
 foreach(src_file ${uhdm-GENERATED_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
 endforeach(src_file ${uhdm-GENERATED_SRC})

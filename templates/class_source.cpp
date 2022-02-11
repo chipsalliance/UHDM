@@ -24,9 +24,8 @@
  */
 
 #include <uhdm/<CLASSNAME>.h>
-
-<INCLUDES>
-
+#include <uhdm/ElaboratorListener.h>
+#include <uhdm/Serializer.h>
 
 namespace UHDM {
 <METHODS>
