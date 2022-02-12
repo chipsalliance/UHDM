@@ -29,9 +29,7 @@
 #include <string>
 #include <vector>
 
-#include <uhdm/containers.h>
 #include <uhdm/uhdm.h>
-#include <uhdm/uhdm_types.h>
 
 #if defined(_MSC_VER)
   #pragma warning(push)
@@ -40,8 +38,8 @@
 
 namespace UHDM {
 
-void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const any* object1, const any* object2) { 
-  std::cout << errorMsg << std::endl; 
+void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const any* object1, const any* object2) {
+  std::cerr << errorMsg << std::endl;
 }
 
 void Serializer::SetId(const BaseClass* p, unsigned long id) {
@@ -68,8 +66,6 @@ std::string VpiTypeName(vpiHandle h) {
   BaseClass* obj = (BaseClass*) handle->object;
   return UhdmName(obj->UhdmType());
 }
-
-<METHODS_CPP>
 
 static constexpr unsigned int badIndex = -1;
 

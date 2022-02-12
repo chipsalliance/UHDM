@@ -25,9 +25,6 @@
 #ifndef UHDM_CLONE_TREE_H
 #define UHDM_CLONE_TREE_H
 
-#include <string>
-#include <vector>
-
 #include <uhdm/sv_vpi_user.h>
 
 namespace UHDM {

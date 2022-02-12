@@ -23,6 +23,9 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
+#ifndef UHDM_VPI_VISITOR_H
+#define UHDM_VPI_VISITOR_H
+
 #include <string>
 #include <vector>
 #include <set>
@@ -31,9 +34,6 @@
 
 #include <uhdm/BaseClass.h>
 #include <uhdm/uhdm_forward_decl.h>
-
-#ifndef UHDM_VPI_VISITOR_H
-#define UHDM_VPI_VISITOR_H
 
 namespace UHDM {
 
