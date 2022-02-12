@@ -27,17 +27,13 @@
 #ifndef UHDM_SERIALIZER_H
 #define UHDM_SERIALIZER_H
 
-
-#include <functional>
-#include <iostream>
-#include <map>
 #include <string>
 #include <vector>
+#include <map>
 
-#include <uhdm/containers.h>
-#include <uhdm/vpi_uhdm.h>
-#include <uhdm/SymbolFactory.h>
-
+#include <iostream>
+#include <functional>
+#include <uhdm/uhdm.h>
 
 namespace UHDM {
 enum ErrorType {
@@ -48,8 +44,7 @@ enum ErrorType {
   UHDM_RETURN_VALUE_VOID_FUNCTION = 715,
   UHDM_ILLEGAL_DEFAULT_VALUE = 716,
   UHDM_MULTIPLE_CONT_ASSIGN = 717,
-  UHDM_ILLEGAL_WIRE_LHS = 718,
-  UHDM_ILLEGAL_PACKED_DIMENSION = 719
+  UHDM_ILLEGAL_WIRE_LHS = 718
 };
 
 typedef std::function<void(ErrorType errType, const std::string&,
@@ -75,16 +70,25 @@ class Serializer {
   std::map<std::string, unsigned long> ObjectStats() const;
 
  private:
-  template <typename T>
-  T* Make(FactoryT<T>* const factory);
+  template <typename T, typename = typename std::enable_if<
+                            std::is_base_of<BaseClass, T>::value>::type>
+  T* Make(FactoryT<T>* const factory) {
+    T* const obj = factory->Make();
+    obj->SetSerializer(this);
+    obj->UhdmId(objId_++);
+    return obj;
+  }
 
-  template <typename T>
-  std::vector<T*>* Make(FactoryT<std::vector<T*>>* const factory);
+  template <typename T, typename = typename std::enable_if<
+                            std::is_base_of<BaseClass, T>::value>::type>
+  std::vector<T*>* Make(FactoryT<std::vector<T*>>* const factory) {
+    return factory->Make();
+  }
 
  public:
-<FACTORY_FUNCTION_DECLARATIONS>
-  std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
-
+  <FACTORIES_METHODS> std::vector<any*>* MakeAnyVec() {
+    return anyVectMaker.Make();
+  }
   vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) {
     return uhdm_handleMaker.Make(type, object);
   }
@@ -92,9 +96,9 @@ class Serializer {
   VectorOfanyFactory anyVectMaker;
   SymbolFactory symbolMaker;
   uhdm_handleFactory uhdm_handleMaker;
-<FACTORY_DATA_MEMBERS>
+  <FACTORIES>
 
-  std::unordered_map<const BaseClass*, unsigned long>& AllObjects() {
+      std::unordered_map<const BaseClass*, unsigned long>& AllObjects() {
     return allIds_;
   }
 

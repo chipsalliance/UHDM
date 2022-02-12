@@ -24,8 +24,8 @@
  * Created on December 14, 2019, 10:03 PM
  */
 
-#ifndef UHDM_VPILISTENER_H
-#define UHDM_VPILISTENER_H
+#ifndef UHDM_VPILISTENER_CLASS_H
+#define UHDM_VPILISTENER_CLASS_H
 
 #include <uhdm/uhdm_forward_decl.h>
 #include <uhdm/vpi_user.h>
@@ -36,7 +36,7 @@ public:
   // Use implicit constructor to initialize all members
   // VpiListener()
 
-  virtual ~VpiListener() = default;
+  virtual ~VpiListener() {}
 
 <VPI_LISTENER_METHODS>
 };

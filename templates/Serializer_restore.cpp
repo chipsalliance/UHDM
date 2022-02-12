@@ -48,26 +48,12 @@
 #include <capnp/serialize-packed.h>
 
 #include "UHDM.capnp.h"
+#include <uhdm/containers.h>
 #include <uhdm/uhdm.h>
+#include <uhdm/uhdm_types.h>
 
 
 namespace UHDM {
-template <typename T>
-inline T* Serializer::Make(FactoryT<T>* const factory) {
-  T* const obj = factory->Make();
-  obj->SetSerializer(this);
-  obj->UhdmId(objId_++);
-  return obj;
-}
-
-template <typename T>
-inline std::vector<T*>* Serializer::Make(
-    FactoryT<std::vector<T*>>* const factory) {
-  return factory->Make();
-}
-
-<FACTORY_FUNCTION_IMPLEMENTATIONS>
-
 template<typename T, typename>
 void Serializer::SetRestoreId_(FactoryT<T>* const factory, unsigned long count) {
   for (unsigned int i = 0; i < count; ++i) {
