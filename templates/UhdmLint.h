@@ -57,6 +57,9 @@ class UhdmLint : public VpiListener {
   void leaveAssignment(const assignment* object, const BaseClass* parent,
                        vpiHandle handle, vpiHandle parentHandle);
 
+  void leaveLogic_net(const logic_net* object, const BaseClass* parent,
+                      vpiHandle handle, vpiHandle parentHandle);
+
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 
   Serializer* serializer_ = nullptr;

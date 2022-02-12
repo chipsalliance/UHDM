@@ -207,4 +207,21 @@ void UhdmLint::leaveAssignment(const assignment* object,
   }
 }
 
+void UhdmLint::leaveLogic_net(const logic_net* object, const BaseClass* parent,
+                      vpiHandle handle, vpiHandle parentHandle) {
+  VectorOfrange* ranges = object->Ranges();
+  if (ranges) {
+    range* r0 = ranges->at(0);
+    const expr* rhs = r0->Right_expr();
+    if (rhs->UhdmType() == uhdmconstant) {
+      constant* c = (constant*) rhs;
+      if (c->VpiValue() == "STRING:unsized") {
+        serializer_->GetErrorHandler()(ErrorType::UHDM_ILLEGAL_PACKED_DIMENSION,
+                                         object->VpiName(), c, 0);
+      }
+    }
+  }
+
+}
+
 }  // namespace UHDM
