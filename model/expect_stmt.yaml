@@ -26,3 +26,8 @@
     vpi: vpiElseStmt
     type: stmt
     card: 1
+  - obj_ref: property_spec
+    name: property spec
+    vpi: vpiPropertySpec
+    type: property_spec
+    card: 1
