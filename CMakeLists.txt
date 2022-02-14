@@ -28,6 +28,16 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 message(STATUS "Python3_EXECUTABLE = ${Python3_EXECUTABLE}")
 
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import orderedmultidict"
+  RESULT_VARIABLE EXIT_CODE
+  OUTPUT_QUIET)
+if (NOT ${EXIT_CODE} EQUAL 0)
+  message(FATAL_ERROR
+    "The \"orderedmultidict\" Python3 package is not installed. "
+    "To install use following command: \"pip3 install orderedmultidict\".")
+endif()
+
 set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
 add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
 
