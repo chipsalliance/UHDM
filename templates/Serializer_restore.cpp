@@ -61,23 +61,21 @@ inline T* Serializer::Make(FactoryT<T>* const factory) {
 }
 
 template <typename T>
-inline std::vector<T*>* Serializer::Make(
-    FactoryT<std::vector<T*>>* const factory) {
+inline std::vector<T*>* Serializer::Make(FactoryT<std::vector<T*>>* const factory) {
   return factory->Make();
 }
 
 <FACTORY_FUNCTION_IMPLEMENTATIONS>
 
 template<typename T, typename>
-void Serializer::SetRestoreId_(FactoryT<T>* const factory, unsigned long count) {
+inline void Serializer::SetRestoreId_(FactoryT<T>* const factory, unsigned long count) {
   for (unsigned int i = 0; i < count; ++i) {
     SetId(Make<T>(factory), i);
   }
 }
 
-template<typename U>
-struct Serializer::AnyRestoreAdapter<BaseClass, U> {
-  void operator()(const U &reader, Serializer *serializer, BaseClass *obj) const {
+struct Serializer::RestoreAdapter {
+  void operator()(Any::Reader reader, Serializer *const serializer, BaseClass *const obj) const {
     obj->UhdmParentType(reader.getUhdmParentType());
     obj->VpiParent(serializer->GetObject(reader.getUhdmParentType(), reader.getVpiParent() - 1));
     obj->VpiFile(std::filesystem::path(serializer->symbolMaker.GetSymbol(reader.getVpiFile())));
@@ -86,17 +84,15 @@ struct Serializer::AnyRestoreAdapter<BaseClass, U> {
     obj->VpiEndLineNo(reader.getVpiEndLineNo());
     obj->VpiEndColumnNo(reader.getVpiEndColumnNo());
     obj->UhdmId(reader.getUhdmId());
-  }
-};
+  };
 
 <CAPNP_RESTORE_ADAPTERS>
 
-template<typename T, typename U>
-struct Serializer::VectorOfanyRestoreAdapter<T, U> {
+  template<typename T, typename U, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
   void operator()(typename ::capnp::List<U>::Reader reader, Serializer *serializer, std::vector<T*> &objects) const {
     unsigned long index = 0;
     for (typename U::Reader obj : reader)
-      AnyRestoreAdapter<T, typename U::Reader>()(obj, serializer, objects[index++]);
+      operator()(obj, serializer, objects[index++]);
   }
 };
 
@@ -116,6 +112,8 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
   }
 
 <CAPNP_INIT_FACTORIES>
+
+  RestoreAdapter adapter;
 <CAPNP_RESTORE_FACTORIES>
 
    for (auto d : designMaker.objects_) {

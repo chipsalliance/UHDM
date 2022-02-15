@@ -63,9 +63,8 @@ void Serializer::SetSaveId_(FactoryT<T> *const factory) {
   }
 }
 
-template<typename U>
-struct Serializer::AnySaveAdapter<BaseClass, U> {
-  void operator()(const BaseClass *const obj, Serializer *serializer, U builder) const {
+struct Serializer::SaveAdapter {
+  void operator()(const BaseClass *const obj, Serializer *const serializer, Any::Builder builder) const {
     builder.setVpiParent(serializer->GetId(obj->VpiParent()));
     builder.setUhdmParentType(obj->UhdmParentType());
     builder.setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile().string()));
@@ -75,16 +74,14 @@ struct Serializer::AnySaveAdapter<BaseClass, U> {
     builder.setVpiEndColumnNo(obj->VpiEndColumnNo());
     builder.setUhdmId(obj->UhdmId());
   }
-};
 
 <CAPNP_SAVE_ADAPTERS>
 
-template<typename T, typename U>
-struct Serializer::VectorOfanySaveAdapter<T, U> {
+  template<typename T, typename U, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
   void operator()(const std::vector<T*> &objects, Serializer *serializer, typename ::capnp::List<U>::Builder builder) const {
     unsigned long index = 0;
     for (const T* obj : objects)
-      AnySaveAdapter<T, typename U::Builder>()(obj, serializer, builder[index++]);
+      operator()(obj, serializer, builder[index++]);
   }
 };
 
@@ -104,6 +101,7 @@ void Serializer::Save(const std::string& file) {
     index++;
   }
 
+  SaveAdapter adapter;
 <CAPNP_SAVE>
 
   // Save the symbols after all save function have been invoked, some symbols are made doing so (VpiFullName)
