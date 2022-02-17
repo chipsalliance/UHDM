@@ -125,6 +125,7 @@ set(uhdm-GENERATED_SRC
     ${GENDIR}/src/ElaboratorListener.cpp
     ${GENDIR}/src/ExprEval.cpp
     ${GENDIR}/src/UhdmLint.cpp
+    ${GENDIR}/src/SynthSubset.cpp
     ${GENDIR}/src/Serializer.cpp
     ${GENDIR}/src/Serializer_restore.cpp
     ${GENDIR}/src/Serializer_save.cpp
