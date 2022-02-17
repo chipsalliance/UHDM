@@ -107,33 +107,11 @@ class Serializer {
                             std::is_base_of<BaseClass, T>::value>::type>
   void SetRestoreId_(FactoryT<T>* const factory, unsigned long count);
 
-  template <typename T, typename U,
-            typename = typename std::enable_if<
-                std::is_base_of<BaseClass, T>::value>::type>
-  struct AnySaveAdapter {};
-  template <typename, typename, typename>
-  friend struct AnySaveAdapter;
+  struct SaveAdapter;
+  friend struct SaveAdapter;
 
-  template <typename T, typename U,
-            typename = typename std::enable_if<
-                std::is_base_of<BaseClass, T>::value>::type>
-  struct VectorOfanySaveAdapter {};
-  template <typename, typename, typename>
-  friend struct VectorOfanySaveAdapter;
-
-  template <typename T, typename U,
-            typename = typename std::enable_if<
-                std::is_base_of<BaseClass, T>::value>::type>
-  struct AnyRestoreAdapter {};
-  template <typename, typename, typename>
-  friend struct AnyRestoreAdapter;
-
-  template <typename T, typename U,
-            typename = typename std::enable_if<
-                std::is_base_of<BaseClass, T>::value>::type>
-  struct VectorOfanyRestoreAdapter {};
-  template <typename, typename, typename>
-  friend struct VectorOfanyRestoreAdapter;
+  struct RestoreAdapter;
+  friend struct RestoreAdapter;
 
  private:
   BaseClass* GetObject(unsigned int objectType, unsigned int index);

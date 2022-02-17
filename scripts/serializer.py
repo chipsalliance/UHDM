@@ -29,10 +29,11 @@ def generate(models):
             continue
 
         classname = model['name']
+        basename = model.get('extends', 'BaseClass') or 'BaseClass'
+
         Classname_ = classname[:1].upper() + classname[1:]
         Classname = Classname_.replace('_', '')
-
-        baseclass = model.get('extends', 'BaseClass') or 'BaseClass'
+        Basename = basename[:1].upper() + basename[1:].replace('_', '')
 
         if modeltype != 'class_def':
             factory_data_members.append(f'  {classname}Factory {classname}Maker;')
@@ -40,11 +41,11 @@ def generate(models):
             factory_function_implementations.append(f'{classname}* Serializer::Make{Classname_}() {{ return Make<{classname}>(&{classname}Maker); }}')
             factory_object_type_map.append(f'  case uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.objects_[index];')
 
-            save_ids.append(f'  SetSaveId_(&{classname}Maker);')
-            save_objects.append(f'  VectorOfanySaveAdapter<{classname}, {Classname}>()({classname}Maker.objects_, this, cap_root.initFactory{Classname}({classname}Maker.objects_.size()));')
+            save_ids.append(f'  SetSaveId_<{classname}>(&{classname}Maker);')
+            save_objects.append(f'  adapter.template operator()<{classname}, {Classname}>({classname}Maker.objects_, this, cap_root.initFactory{Classname}({classname}Maker.objects_.size()));')
 
-            restore_ids.append(f'  SetRestoreId_(&{classname}Maker, cap_root.getFactory{Classname}().size());')
-            restore_objects.append(f'  VectorOfanyRestoreAdapter<{classname}, {Classname}>()(cap_root.getFactory{Classname}(), this, {classname}Maker.objects_);')
+            restore_ids.append(f'  SetRestoreId_<{classname}>(&{classname}Maker, cap_root.getFactory{Classname}().size());')
+            restore_objects.append(f'  adapter.template operator()<{classname}, {Classname}>(cap_root.getFactory{Classname}(), this, {classname}Maker.objects_);')
 
             factory_purge.append(f'  {classname}Maker.Purge();')
             factory_stats.append(f'  stats.insert(std::make_pair("{classname}", {classname}Maker.objects_.size()));')
@@ -53,15 +54,11 @@ def generate(models):
         factory_function_declarations.append(f'  std::vector<{classname}*>* Make{Classname_}Vec();')
         factory_function_implementations.append(f'std::vector<{classname}*>* Serializer::Make{Classname_}Vec() {{ return Make<{classname}>(&{classname}VectMaker); }}')
 
-        saves_adapters.append(f'template<typename U>')
-        saves_adapters.append(f'struct Serializer::AnySaveAdapter<{classname}, U> {{')
-        saves_adapters.append(f'  void operator()(const {classname} *const obj, Serializer *const serializer, U builder) const {{')
-        saves_adapters.append(f'    AnySaveAdapter<{baseclass}, U>()(static_cast<const {baseclass}*>(obj), serializer, builder);')
+        saves_adapters.append(f'  void operator()(const {classname} *const obj, Serializer *const serializer, {Classname}::Builder builder) const {{')
+        saves_adapters.append(f'    operator()(static_cast<const {basename}*>(obj), serializer, builder.getBase());')
 
-        restore_adapters.append(f'template<typename U>')
-        restore_adapters.append(f'struct Serializer::AnyRestoreAdapter<{classname}, U> {{')
-        restore_adapters.append(f'  void operator()(U reader, Serializer *const serializer, {classname} *const obj) const {{')
-        restore_adapters.append(f'    AnyRestoreAdapter<{baseclass}, U>()(reader, serializer, static_cast<{baseclass}*>(obj));')
+        restore_adapters.append(f'  void operator()({Classname}::Reader reader, Serializer *const serializer, {classname} *const obj) const {{')
+        restore_adapters.append(f'    operator()(reader.getBase(), serializer, static_cast<{basename}*>(obj));')
 
         for key, value in model.allitems():
             if key == 'property':
@@ -152,11 +149,9 @@ def generate(models):
                     restore_adapters.append( '    }')
 
         saves_adapters.append('  }')
-        saves_adapters.append('};')
         saves_adapters.append('')
 
         restore_adapters.append('  }')
-        restore_adapters.append('};')
         restore_adapters.append('')
 
     uhdm_name_map = [

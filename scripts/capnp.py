@@ -29,10 +29,21 @@ def _get_schema(type, vpi, card):
 
 
 def generate(models):
-    individual_model_schemas = {}
-    flattened_model_schemas = []
     root_schema_index = 2
     root_schema = []
+    model_schemas = [
+      'struct Any {',
+      '  uhdmId @0 :UInt64;',
+      '  vpiParent @1 :UInt64;',
+      '  uhdmParentType @2 :UInt64;',
+      '  vpiFile @3 :UInt64;',
+      '  vpiLineNo @4 :UInt32;',
+      '  vpiEndLineNo @5 :UInt32;',
+      '  vpiColumnNo @6 :UInt16;',
+      '  vpiEndColumnNo @7 :UInt16;',
+      '}',
+      ''
+    ]
 
     for model in models.values():
         modeltype = model['type']
@@ -40,14 +51,18 @@ def generate(models):
             continue
 
         classname = model['name']
-        individual_model_schemas[classname] = []
+        basename = model.get('extends', 'Any') or 'Any'
 
-        Classname_ = classname[:1].upper() + classname[1:]
-        Classname = Classname_.replace('_', '')
+        Classname = classname[:1].upper() + classname[1:].replace('_', '')
+        Basename = basename[:1].upper() + basename[1:].replace('_', '')
 
         if modeltype != 'class_def':
             root_schema.append(f'  factory{Classname} @{root_schema_index} :List({Classname});')
             root_schema_index += 1
+
+        field_index = 1
+        model_schemas.append(f'struct {Classname} {{')
+        model_schemas.append(f'  base @0: {Basename};')
 
         for key, value in model.allitems():
             if key == 'property':
@@ -55,7 +70,11 @@ def generate(models):
                     vpi = value.get('vpi')
                     type = value.get('type')
                     card = value.get('card')
-                    individual_model_schemas[classname].append(_get_schema(type, vpi, card))
+
+                    field_name, field_type = _get_schema(type, vpi, card)
+                    if field_name and field_type:
+                        model_schemas.append(f'  {field_name} @{field_index}: {field_type};')
+                        field_index += 1
 
             elif key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
                 name = value.get('name')
@@ -68,40 +87,19 @@ def generate(models):
                 name = name.replace('_', '')
 
                 obj_key = 'ObjIndexType' if key in ['class_ref', 'group_ref'] else 'UInt64'
-                individual_model_schemas[classname].append(_get_schema(obj_key, name, card))
 
-        if modeltype != 'class_def':
-            # Process the hierarchy tree top-down
-            stack = []
-            baseclass = classname
-            while baseclass:
-                stack.append(baseclass)
-                baseclass = models[baseclass]['extends']
+                field_name, field_type = _get_schema(obj_key, name, card)
+                if field_name and field_type:
+                    model_schemas.append(f'  {field_name} @{field_index}: {field_type};')
+                    field_index += 1
 
-            flattened_model_schemas.append(f'struct {Classname} {{')
-            flattened_model_schemas.append(f'  uhdmId @0 :UInt64;')
-            flattened_model_schemas.append(f'  vpiParent @1 :UInt64;')
-            flattened_model_schemas.append(f'  uhdmParentType @2 :UInt64;')
-            flattened_model_schemas.append(f'  vpiFile @3 :UInt64;')
-            flattened_model_schemas.append(f'  vpiLineNo @4 :UInt32;')
-            flattened_model_schemas.append(f'  vpiEndLineNo @5 :UInt32;')
-            flattened_model_schemas.append(f'  vpiColumnNo @6 :UInt16;')
-            flattened_model_schemas.append(f'  vpiEndColumnNo @7 :UInt16;')
-            capnpIndex = 8
-
-            while stack:
-                for name, type in individual_model_schemas[stack.pop()]:
-                    if name and type:
-                        flattened_model_schemas.append(f'  {name} @{capnpIndex} :{type};')
-                        capnpIndex += 1
-
-            flattened_model_schemas.append('}')
-            flattened_model_schemas.append('')
+        model_schemas.append('}')
+        model_schemas.append('')
 
     with open(config.get_template_filepath('UHDM.capnp'), 'rt') as strm:
         file_content = strm.read()
 
-    file_content = file_content.replace('<CAPNP_SCHEMA>', '\n'.join(flattened_model_schemas))
+    file_content = file_content.replace('<CAPNP_SCHEMA>', '\n'.join(model_schemas))
     file_content = file_content.replace('<CAPNP_ROOT_SCHEMA>', '\n'.join(root_schema))
     file_utils.set_content_if_changed(config.get_output_source_filepath('UHDM.capnp'), file_content)
 
