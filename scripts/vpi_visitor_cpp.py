@@ -26,8 +26,6 @@ def _get_implementation(classname, vpi, card):
             content.append( '  release_handle(itr);')
 
     else:
-        if classname == 'design':
-            content.append('  if (indent == 0) visited->clear();')
 
         # Prevent loop in Standard VPI
         if vpi != 'vpiUse':
