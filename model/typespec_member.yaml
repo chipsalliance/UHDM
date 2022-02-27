@@ -35,3 +35,28 @@
     vpi: vpiExpr
     type: expr
     card: 1
+  - property: ref_file
+    name: ref location file
+    vpi: vpiRefFile
+    type: string
+    card: 1
+  - property: ref_line
+    name: ref location line
+    vpi: vpiRefLineNo
+    type: int
+    card: 1
+  - property: ref_column
+    name: ref location column
+    vpi: vpiRefColumnNo
+    type: int
+    card: 1
+  - property: ref_end_line
+    name: ref location end line
+    vpi: vpiRefEndLineNo
+    type: int
+    card: 1
+  - property: ref_end_column
+    name: ref location end column
+    vpi: vpiRefEndColumnNo
+    type: int
+    card: 1

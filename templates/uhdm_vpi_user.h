@@ -45,6 +45,12 @@
 #define  vpiEndLineNo        3016
 #define  vpiEndColumnNo      3017
 
+#define  vpiRefFile          3018
+#define  vpiRefLineNo        3019
+#define  vpiRefColumnNo      3020
+#define  vpiRefEndLineNo     3021
+#define  vpiRefEndColumnNo   3022
+
 // Tags used to model unsupported nodes
 #define vpiUnsupportedStmt   4000
 #define vpiUnsupportedExpr   4001
