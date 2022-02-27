@@ -35,6 +35,11 @@
     vpi_obj: vpiPackage
     vpi: uhdmallPackages
     card: any
+  - class: topPackages
+    type: package
+    vpi_obj: vpiPackage
+    vpi: uhdmtopPackages
+    card: any  
   - class: allClasses
     type: class_defn
     vpi_obj: vpiClassDefn

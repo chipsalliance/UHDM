@@ -87,6 +87,7 @@ namespace UHDM {
 
 std::string decompile(UHDM::any* handle) {
   UHDM::VisitedContainer visited;
+  vpi_show_ids(true);
   if (handle == nullptr) {
     std::cout << "NULL HANDLE\n";
     return "NULL HANDLE";
