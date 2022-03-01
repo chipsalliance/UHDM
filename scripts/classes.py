@@ -3,7 +3,6 @@ import os
 import config
 import file_utils
 
-
 def _get_group_headers(type, real_type):
     return [ f'#include "{real_type}.h"' ] if type == 'any' else []
 
@@ -518,6 +517,20 @@ def _get_GetVpiPropertyValue_implementation(model):
 
 
 def _get_Compare_implementation(model):
+    vpi_blacklist = [
+        'uhdmId',
+        'uhdmParentType',
+        'uhdmType',
+        'vpiColumnNo',
+        'vpiEndColumnNo',
+        'vpiEndLineNo',
+        'vpiFile',
+        'vpiFullName',
+        'vpiInstance',
+        'vpiLineNo',
+        'vpiParent',
+    ]
+
     classname = model['name']
     modeltype = model['type']
 
@@ -539,7 +552,7 @@ def _get_Compare_implementation(model):
             continue
 
         vpi = value.get('vpi')
-        if vpi in ['vpiParent', 'uhdmParentType', 'uhdmType', 'vpiLineNo', 'vpiColumnNo', 'vpiEndLineNo', 'vpiEndColumnNo', 'vpiFile', 'vpiFullName', 'uhdmId']:
+        if vpi in vpi_blacklist:
             continue
 
         type = value.get('type')
