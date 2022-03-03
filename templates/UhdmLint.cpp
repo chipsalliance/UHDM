@@ -27,6 +27,7 @@
 #include <uhdm/UhdmLint.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
+#include <uhdm/ExprEval.h>
 
 namespace UHDM {
 
@@ -221,7 +222,31 @@ void UhdmLint::leaveLogic_net(const logic_net* object, const BaseClass* parent,
       }
     }
   }
+}
 
+void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
+                                  const BaseClass* parent, vpiHandle handle,
+                                  vpiHandle parentHandle) {
+  const typespec* baseType = object->Base_typespec();
+  if (!baseType) return;
+  ExprEval eval;
+  bool invalidValue = false;
+  uint64_t baseSize = eval.size(baseType, invalidValue, object->Instance(), object->VpiParent(), true);
+  for (auto c : *object->Enum_consts()) {
+    const std::string& val = c->VpiDecompile();
+    if (c->VpiSize() == -1)
+      continue;
+    if (!strstr(val.c_str(), "'"))
+      continue;
+    uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
+                                object->VpiParent(), true);
+    if (invalidValue == false) {
+      if (baseSize != c_size) {
+        serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_CONST_SIZE_MISMATCH,
+                                       c->VpiName(), c, baseType);
+      }
+    }
+  }
 }
 
 }  // namespace UHDM

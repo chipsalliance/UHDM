@@ -55,10 +55,13 @@ class UhdmLint : public VpiListener {
                    vpiHandle handle, vpiHandle parentHandle) override;
 
   void leaveAssignment(const assignment* object, const BaseClass* parent,
-                       vpiHandle handle, vpiHandle parentHandle);
+                       vpiHandle handle, vpiHandle parentHandle) override;
 
   void leaveLogic_net(const logic_net* object, const BaseClass* parent,
-                      vpiHandle handle, vpiHandle parentHandle);
+                      vpiHandle handle, vpiHandle parentHandle) override;
+
+  void leaveEnum_typespec(const enum_typespec* object, const BaseClass* parent,
+                          vpiHandle handle, vpiHandle parentHandle) override;
 
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 
