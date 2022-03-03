@@ -37,16 +37,47 @@ namespace UHDM {
   class ExprEval {
  
   public:
-    
-    bool isFullySpecified(const typespec* tps);
+   bool isFullySpecified(const typespec* tps);
 
-    expr* flattenPatternAssignments(Serializer& s, const typespec* tps, expr* assignExpr);
+   uint64_t size(
+       const any* object, bool& invalidValue, const instance* inst,
+       const any* pexpr,
+       bool full /* false: use only last range size, true: use all ranges */);
 
-    void prettyPrint(Serializer& s, const any* tree, uint32_t indent, std::ostream &out);
+   expr* reduceExpr(const any* object, bool& invalidValue, const instance* inst, const any* pexpr);
 
-    std::string prettyPrint(UHDM::any* handle);
+   uint64_t getValue(const UHDM::expr* expr);
+
+   any* getValue(const std::string& name, const instance* inst, const any* pexpr);
+
+   any* getObject(const std::string& name, const instance* inst, const any* pexpr);
+
+   int64_t get_value(bool& invalidValue, const UHDM::expr* expr);
+
+   uint64_t get_uvalue(bool& invalidValue, const UHDM::expr* expr);
+
+  long double get_double(bool& invalidValue, const UHDM::expr* expr);
+
+   expr* flattenPatternAssignments(Serializer& s, const typespec* tps,
+                                   expr* assignExpr);
+
+   void prettyPrint(Serializer& s, const any* tree, uint32_t indent,
+                    std::ostream& out);
+
+   std::string prettyPrint(UHDM::any* handle);
+
+  private:
+   expr* reduceCompOp(operation* op, bool& invalidValue, const instance* inst,
+                      const any* pexpr);
+
+   expr* reduceBitSelect(expr* op, unsigned int index_val, bool& invalidValue,
+                         const instance* inst, const any* pexpr);
+
+   void recursiveFlattening(Serializer& s, VectorOfany* flattened,
+                            const VectorOfany* ordered,
+                            std::vector<const typespec*> fieldTypes);
   };
-  
+
   std::string vPrint(UHDM::any* handle);
 
 }
