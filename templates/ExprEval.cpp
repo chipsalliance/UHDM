@@ -1,6 +1,6 @@
 /*
 
- Copyright 2019-2021 Alain Dargelas
+ Copyright 2019-2022 Alain Dargelas
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,15 +22,14 @@
  * Created on July 3, 2021, 8:03 PM
  */
 
-#include <cmath>
-#include <cstring>
-
+#include <string.h>
 #include <uhdm/ExprEval.h>
 #include <uhdm/uhdm.h>
-#include <string.h>
 
 #include <algorithm>
 #include <bitset>
+#include <cmath>
+#include <cstring>
 #include <iostream>
 #include <locale>
 #include <regex>
@@ -38,59 +37,53 @@
 
 using namespace UHDM;
 
-bool ExprEval::isFullySpecified(const UHDM::typespec* tps) {
-  VectorOfrange* ranges = nullptr;
+bool ExprEval::isFullySpecified(const UHDM::typespec *tps) {
+  VectorOfrange *ranges = nullptr;
   UHDM_OBJECT_TYPE type = tps->UhdmType();
   switch (type) {
     case uhdmlogic_typespec: {
-      logic_typespec* ltps = (logic_typespec*)tps;
+      logic_typespec *ltps = (logic_typespec *)tps;
       ranges = ltps->Ranges();
       break;
     }
     case uhdmarray_typespec: {
-      array_typespec* ltps = (array_typespec*)tps;
-      const typespec* elem = ltps->Elem_typespec();
-      if (!isFullySpecified(elem))
-        return false;
+      array_typespec *ltps = (array_typespec *)tps;
+      const typespec *elem = ltps->Elem_typespec();
+      if (!isFullySpecified(elem)) return false;
       ranges = ltps->Ranges();
       break;
     }
     case uhdmbit_typespec: {
-      bit_typespec* ltps = (bit_typespec*)tps;
+      bit_typespec *ltps = (bit_typespec *)tps;
       ranges = ltps->Ranges();
       break;
     }
     case uhdmenum_typespec: {
-      enum_typespec* ltps = (enum_typespec*) tps;
-      const typespec* base = ltps->Base_typespec();
-      if (base && (!isFullySpecified(base)))
-        return false;
+      enum_typespec *ltps = (enum_typespec *)tps;
+      const typespec *base = ltps->Base_typespec();
+      if (base && (!isFullySpecified(base))) return false;
       break;
     }
     case uhdmstruct_typespec: {
-      struct_typespec* ltps = (struct_typespec*) tps;
-      for (typespec_member* member : *ltps->Members()) {
-        if (!isFullySpecified(member->Typespec()))
-          return false;
-      } 
+      struct_typespec *ltps = (struct_typespec *)tps;
+      for (typespec_member *member : *ltps->Members()) {
+        if (!isFullySpecified(member->Typespec())) return false;
+      }
       break;
     }
     case uhdmunion_typespec: {
-      union_typespec* ltps = (union_typespec*) tps;
-      for (typespec_member* member : *ltps->Members()) {
-        if (!isFullySpecified(member->Typespec()))
-          return false;
-      } 
+      union_typespec *ltps = (union_typespec *)tps;
+      for (typespec_member *member : *ltps->Members()) {
+        if (!isFullySpecified(member->Typespec())) return false;
+      }
       break;
     }
     case uhdmpacked_array_typespec: {
-      packed_array_typespec* ltps = (packed_array_typespec*)tps;
-      const typespec* elem = (const typespec*) ltps->Elem_typespec();
-      if (!isFullySpecified(elem))
-        return false;
-      const typespec* ttps = ltps->Typespec();
-      if (ttps && (!isFullySpecified(ttps)))
-        return false;
+      packed_array_typespec *ltps = (packed_array_typespec *)tps;
+      const typespec *elem = (const typespec *)ltps->Elem_typespec();
+      if (!isFullySpecified(elem)) return false;
+      const typespec *ttps = ltps->Typespec();
+      if (ttps && (!isFullySpecified(ttps))) return false;
       ranges = ltps->Ranges();
       break;
     }
@@ -106,9 +99,8 @@ bool ExprEval::isFullySpecified(const UHDM::typespec* tps) {
   return true;
 }
 
-void tokenizeMulti(std::string_view str,
-                                std::string_view separator,
-                                std::vector<std::string>& result) {
+void tokenizeMulti(std::string_view str, std::string_view separator,
+                   std::vector<std::string> &result) {
   std::string tmp;
   const unsigned int sepSize = separator.size();
   const unsigned int stringSize = str.size();
@@ -136,19 +128,19 @@ void tokenizeMulti(std::string_view str,
   }
 }
 
-any *ExprEval::getValue(const std::string &name, const instance *inst,
+any *ExprEval::getValue(const std::string &name, const any *inst,
                         const any *pexpr) {
   Serializer &s = *inst->GetSerializer();
   any *result = nullptr;
-  const any* root = inst;
-  const any* tmp = inst;
+  const any *root = inst;
+  const any *tmp = inst;
   while (tmp) {
     root = tmp;
     tmp = tmp->VpiParent();
   }
-  const design* des = any_cast<design*> (root);
+  const design *des = any_cast<design *>(root);
   std::string the_name = name;
-  const instance* the_instance = inst;
+  const any *the_instance = inst;
   if (des && (name.find("::") != std::string::npos)) {
     std::vector<std::string> res;
     tokenizeMulti(name, "::", res);
@@ -156,7 +148,7 @@ any *ExprEval::getValue(const std::string &name, const instance *inst,
       const std::string &packName = res[0];
       const std::string &varName = res[1];
       the_name = varName;
-      package* pack = nullptr;
+      package *pack = nullptr;
       if (des->TopPackages()) {
         for (auto p : *des->TopPackages()) {
           if (p->VpiName() == packName) {
@@ -170,8 +162,18 @@ any *ExprEval::getValue(const std::string &name, const instance *inst,
   }
 
   while (the_instance) {
-    if (the_instance->Param_assigns()) {
-      for (auto p : *the_instance->Param_assigns()) {
+    UHDM::VectorOfparam_assign *param_assigns = nullptr;
+    UHDM::VectorOftypespec *typespecs = nullptr;
+    if (the_instance->UhdmType() == uhdmgen_scope_array) {
+    } else if (the_instance->UhdmType() == uhdmdesign) {
+      param_assigns = ((design *)the_instance)->Param_assigns();
+      typespecs = ((design *)the_instance)->Typespecs();
+    } else {
+      param_assigns = ((scope *)the_instance)->Param_assigns();
+      typespecs = ((scope *)the_instance)->Typespecs();
+    }
+    if (param_assigns) {
+      for (auto p : *param_assigns) {
         if (p->Lhs()->VpiName() == the_name) {
           result = (any *)p->Rhs();
           break;
@@ -179,8 +181,8 @@ any *ExprEval::getValue(const std::string &name, const instance *inst,
       }
     }
     if (result == nullptr) {
-      if (the_instance->Typespecs()) {
-        for (auto p : *the_instance->Typespecs()) {
+      if (typespecs) {
+        for (auto p : *typespecs) {
           if (p->UhdmType() == uhdmenum_typespec) {
             enum_typespec *e = (enum_typespec *)p;
             for (auto c : *e->Enum_consts()) {
@@ -203,9 +205,9 @@ any *ExprEval::getValue(const std::string &name, const instance *inst,
         eval.flattenPatternAssignments(s, op->Typespec(), (UHDM::expr *)result);
       }
     }
-    if (result) 
-      break;
-    the_instance = the_instance->Instance();
+    if (result) break;
+
+    the_instance = the_instance->VpiParent();
   }
 
   if (result) {
@@ -227,7 +229,7 @@ any *ExprEval::getValue(const std::string &name, const instance *inst,
   return result;
 }
 
-any *ExprEval::getObject(const std::string &name, const instance *inst,
+any *ExprEval::getObject(const std::string &name, const any *inst,
                          const any *pexpr) {
   any *result = nullptr;
   while (pexpr) {
@@ -256,32 +258,47 @@ any *ExprEval::getObject(const std::string &name, const instance *inst,
   }
   if (result == nullptr) {
     while (inst) {
-      if ((result == nullptr) && inst->Array_nets()) {
-        for (auto o : *inst->Array_nets()) {
+      UHDM::VectorOfparam_assign *param_assigns = nullptr;
+      UHDM::VectorOfvariables *variables = nullptr;
+      UHDM::VectorOfarray_net *array_nets = nullptr;
+      UHDM::VectorOfnet *nets = nullptr;
+      if (inst->UhdmType() == uhdmgen_scope_array) {
+      } else if (inst->UhdmType() == uhdmdesign) {
+        param_assigns = ((design *)inst)->Param_assigns();
+      } else {
+        param_assigns = ((scope *)inst)->Param_assigns();
+        variables = ((scope *)inst)->Variables();
+        if (const instance *in = any_cast<instance *>(inst)) {
+          array_nets = in->Array_nets();
+          nets = in->Nets();
+        }
+      }
+      if ((result == nullptr) && array_nets) {
+        for (auto o : *array_nets) {
           if (o->VpiName() == name) {
             result = o;
             break;
           }
         }
       }
-      if ((result == nullptr) && inst->Nets()) {
-        for (auto o : *inst->Nets()) {
+      if ((result == nullptr) && nets) {
+        for (auto o : *nets) {
           if (o->VpiName() == name) {
             result = o;
             break;
           }
         }
       }
-      if ((result == nullptr) && inst->Variables()) {
-        for (auto o : *inst->Variables()) {
+      if ((result == nullptr) && variables) {
+        for (auto o : *variables) {
           if (o->VpiName() == name) {
             result = o;
             break;
           }
         }
       }
-      if ((result == nullptr) && inst->Param_assigns()) {
-        for (auto o : *inst->Param_assigns()) {
+      if ((result == nullptr) && param_assigns) {
+        for (auto o : *param_assigns) {
           const std::string &pname = o->Lhs()->VpiName();
           if (pname == name) {
             result = o;
@@ -300,7 +317,7 @@ any *ExprEval::getObject(const std::string &name, const instance *inst,
         if (inst->UhdmType() == uhdmmodule) {
           break;
         } else {
-          inst = inst->Instance();
+          inst = inst->VpiParent();
         }
       }
     }
@@ -309,8 +326,7 @@ any *ExprEval::getObject(const std::string &name, const instance *inst,
   if (result && (result->UhdmType() == uhdmref_obj)) {
     ref_obj *ref = (ref_obj *)result;
     const std::string &refname = ref->VpiName();
-    if (refname != name)
-      result = getObject(refname, inst, pexpr);
+    if (refname != name) result = getObject(refname, inst, pexpr);
     if (result) {
       if (UHDM::param_assign *passign = any_cast<param_assign *>(result)) {
         result = (any *)passign->Rhs();
@@ -342,11 +358,11 @@ long double ExprEval::get_double(bool &invalidValue, const UHDM::expr *expr) {
   return result;
 }
 
-uint64_t ExprEval::getValue(const UHDM::expr* expr) {
+uint64_t ExprEval::getValue(const UHDM::expr *expr) {
   uint64_t result = 0;
   if (expr && expr->UhdmType() == UHDM::uhdmconstant) {
-    UHDM::constant* c = (UHDM::constant*)expr;
-    const std::string& v = c->VpiValue();
+    UHDM::constant *c = (UHDM::constant *)expr;
+    const std::string &v = c->VpiValue();
     int type = c->VpiConstType();
     switch (type) {
       case vpiBinaryConst: {
@@ -386,57 +402,59 @@ uint64_t ExprEval::getValue(const UHDM::expr* expr) {
   return result;
 }
 
-void ExprEval::recursiveFlattening(Serializer& s, VectorOfany* flattened, const VectorOfany* ordered, std::vector<const typespec*> fieldTypes) {
+void ExprEval::recursiveFlattening(Serializer &s, VectorOfany *flattened,
+                                   const VectorOfany *ordered,
+                                   std::vector<const typespec *> fieldTypes) {
   // Flattening
   int index = 0;
-  for (any* op : *ordered) {
+  for (any *op : *ordered) {
     if (op->UhdmType() == uhdmtagged_pattern) {
-      tagged_pattern* tp = (tagged_pattern*)op;
-      const typespec* ttp = tp->Typespec();
+      tagged_pattern *tp = (tagged_pattern *)op;
+      const typespec *ttp = tp->Typespec();
       UHDM_OBJECT_TYPE ttpt = ttp->UhdmType();
       switch (ttpt) {
         case uhdmint_typespec: {
-          any* sop = (any*)tp->Pattern();
+          any *sop = (any *)tp->Pattern();
           flattened->push_back(sop);
           break;
         }
         case uhdmstring_typespec: {
-          any* sop = (any*)tp->Pattern();
+          any *sop = (any *)tp->Pattern();
           UHDM_OBJECT_TYPE sopt = sop->UhdmType();
           if (sopt == uhdmoperation) {
-            VectorOfany* operands = ((operation*)sop)->Operands();
+            VectorOfany *operands = ((operation *)sop)->Operands();
             for (auto op1 : *operands) {
               bool substituted = false;
               if (op1->UhdmType() == uhdmtagged_pattern) {
-                tagged_pattern* tp1 = (tagged_pattern*)op1;
-                const typespec* ttp1 = tp1->Typespec();
+                tagged_pattern *tp1 = (tagged_pattern *)op1;
+                const typespec *ttp1 = tp1->Typespec();
                 UHDM_OBJECT_TYPE ttpt1 = ttp1->UhdmType();
                 if (ttpt1 == uhdmstring_typespec) {
                   if (ttp1->VpiName() == "default") {
-                    const any* patt = tp1->Pattern();
-                    const typespec* mold = fieldTypes[index];
-                    operation* subst = s.MakeOperation();
-                    VectorOfany* sops = s.MakeAnyVec();
+                    const any *patt = tp1->Pattern();
+                    const typespec *mold = fieldTypes[index];
+                    operation *subst = s.MakeOperation();
+                    VectorOfany *sops = s.MakeAnyVec();
                     subst->Operands(sops);
                     subst->VpiOpType(vpiConcatOp);
                     flattened->push_back(subst);
                     UHDM_OBJECT_TYPE moldtype = mold->UhdmType();
                     if (moldtype == uhdmstruct_typespec) {
-                      struct_typespec* molds = (struct_typespec*)mold;
+                      struct_typespec *molds = (struct_typespec *)mold;
                       for (auto mem : *molds->Members()) {
-                        if (mem) sops->push_back((any*)patt);
+                        if (mem) sops->push_back((any *)patt);
                       }
                     } else if (moldtype == uhdmlogic_typespec) {
-                      logic_typespec* molds = (logic_typespec*)mold;
-                      VectorOfrange* ranges = molds->Ranges();
-                      for (range* r : *ranges) {
+                      logic_typespec *molds = (logic_typespec *)mold;
+                      VectorOfrange *ranges = molds->Ranges();
+                      for (range *r : *ranges) {
                         uint64_t from = getValue(r->Left_expr());
                         uint64_t to = getValue(r->Right_expr());
                         if (from > to) {
-                          std::swap(from,to);
+                          std::swap(from, to);
                         }
                         for (uint64_t i = from; i <= to; i++) {
-                          sops->push_back((any*)patt);
+                          sops->push_back((any *)patt);
                         }
                         // TODO: Multidimension
                         break;
@@ -447,8 +465,9 @@ void ExprEval::recursiveFlattening(Serializer& s, VectorOfany* flattened, const 
                   }
                 }
               } else if (op1->UhdmType() == uhdmoperation) {
-//                recursiveFlattening(s, flattened, ((operation*)op1)->Operands(), fieldTypes);
-//                substituted = true;
+                //                recursiveFlattening(s, flattened,
+                //                ((operation*)op1)->Operands(), fieldTypes);
+                //                substituted = true;
               }
               if (!substituted) {
                 flattened->push_back(sop);
@@ -471,15 +490,15 @@ void ExprEval::recursiveFlattening(Serializer& s, VectorOfany* flattened, const 
   }
 }
 
-expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
-                                          expr* exp) {
-  expr* result = exp;
+expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
+                                          expr *exp) {
+  expr *result = exp;
   if ((!exp) || (!tps)) {
     return result;
   }
   // Reordering
   if (exp->UhdmType() == uhdmoperation) {
-    operation* op = (operation*)exp;
+    operation *op = (operation *)exp;
     if (op->VpiOpType() != vpiAssignmentPatternOp) {
       return result;
     }
@@ -489,24 +508,24 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     if (op->VpiFlattened()) {
       return result;
     }
-    struct_typespec* stps = (struct_typespec*)tps;
+    struct_typespec *stps = (struct_typespec *)tps;
     std::vector<std::string> fieldNames;
-    std::vector<const typespec*> fieldTypes;
-    for (typespec_member* memb : *stps->Members()) {
+    std::vector<const typespec *> fieldTypes;
+    for (typespec_member *memb : *stps->Members()) {
       fieldNames.push_back(memb->VpiName());
       fieldTypes.push_back(memb->Typespec());
     }
-    VectorOfany* orig = op->Operands();
-    VectorOfany* ordered = s.MakeAnyVec();
-    std::vector<any*> tmp(fieldNames.size());
-    any* defaultOp = nullptr;
+    VectorOfany *orig = op->Operands();
+    VectorOfany *ordered = s.MakeAnyVec();
+    std::vector<any *> tmp(fieldNames.size());
+    any *defaultOp = nullptr;
     int index = 0;
     for (auto oper : *orig) {
       if (oper->UhdmType() == uhdmtagged_pattern) {
         op->VpiFlattened(true);
-        tagged_pattern* tp = (tagged_pattern*)oper;
-        const typespec* ttp = tp->Typespec();
-        const std::string& tname = ttp->VpiName();
+        tagged_pattern *tp = (tagged_pattern *)oper;
+        const typespec *ttp = tp->Typespec();
+        const std::string &tname = ttp->VpiName();
         bool found = false;
         if (tname == "default") {
           defaultOp = oper;
@@ -529,22 +548,22 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
           }
         }
         if (found == false) {
-          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, tname,
-                              exp, nullptr);
+          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, tname, exp,
+                              nullptr);
           return result;
         }
       } else {
-        if (index < (int) tmp.size())
+        if (index < (int)tmp.size())
           tmp[index] = oper;
-        else 
-         s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, "Out of bound!",
-                              exp, nullptr); 
+        else
+          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY,
+                              "Out of bound!", exp, nullptr);
       }
       index++;
     }
     index = 0;
     for (auto op : tmp) {
-       if (defaultOp) {
+      if (defaultOp) {
         if (op == nullptr) {
           op = defaultOp;
         }
@@ -559,29 +578,28 @@ expr* ExprEval::flattenPatternAssignments(Serializer& s, const typespec* tps,
     }
     op->Operands(ordered);
     // Flattening
-    VectorOfany* flattened = s.MakeAnyVec();
+    VectorOfany *flattened = s.MakeAnyVec();
     recursiveFlattening(s, flattened, ordered, fieldTypes);
     op->Operands(flattened);
   }
   return result;
 }
 
-
-void ExprEval::prettyPrint(Serializer& s, const any* object, uint32_t indent, std::ostream &out) {
-  if (object == nullptr)
-    return;
+void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
+                           std::ostream &out) {
+  if (object == nullptr) return;
   UHDM_OBJECT_TYPE type = object->UhdmType();
-  for (uint32_t i = 0; i < indent ; i++) {
-        out << " ";
+  for (uint32_t i = 0; i < indent; i++) {
+    out << " ";
   }
   switch (type) {
     case uhdmconstant: {
-      constant* c = (constant*) object;
+      constant *c = (constant *)object;
       out << c->VpiDecompile();
       break;
     }
     case uhdmoperation: {
-      operation* oper = (operation*) object;
+      operation *oper = (operation *)object;
       int opType = oper->VpiOpType();
       switch (opType) {
         case vpiConcatOp: {
@@ -610,18 +628,15 @@ void ExprEval::prettyPrint(Serializer& s, const any* object, uint32_t indent, st
   }
 }
 
-uint64_t ExprEval::size(
-       const any* typespec, bool& invalidValue, const instance* inst,
-       const any* pexpr,
-       bool full ) {
-
+uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
+                        const any *inst, const any *pexpr, bool full) {
   uint64_t bits = 0;
-  UHDM::VectorOfrange* ranges = nullptr;
+  UHDM::VectorOfrange *ranges = nullptr;
   if (typespec) {
     UHDM_OBJECT_TYPE ttps = typespec->UhdmType();
     switch (ttps) {
       case UHDM::uhdmarray_typespec: {
-        array_typespec* lts = (array_typespec*)typespec;
+        array_typespec *lts = (array_typespec *)typespec;
         ranges = lts->Ranges();
         bits = size(lts->Elem_typespec(), invalidValue, inst, pexpr, full);
         break;
@@ -651,7 +666,7 @@ uint64_t ExprEval::size(
         break;
       }
       case UHDM::uhdminteger_typespec: {
-        integer_typespec* itps = (integer_typespec*)typespec;
+        integer_typespec *itps = (integer_typespec *)typespec;
         if (itps->VpiValue().find("UINT:") != std::string::npos) {
           bits = std::strtoull(
               itps->VpiValue().c_str() + std::string_view("UINT:").length(),
@@ -665,31 +680,31 @@ uint64_t ExprEval::size(
       }
       case UHDM::uhdmbit_typespec: {
         bits = 1;
-        UHDM::bit_typespec* lts = (UHDM::bit_typespec*)typespec;
+        UHDM::bit_typespec *lts = (UHDM::bit_typespec *)typespec;
         ranges = lts->Ranges();
         break;
       }
       case UHDM::uhdmlogic_typespec: {
         bits = 1;
-        UHDM::logic_typespec* lts = (UHDM::logic_typespec*)typespec;
+        UHDM::logic_typespec *lts = (UHDM::logic_typespec *)typespec;
         ranges = lts->Ranges();
         break;
       }
       case UHDM::uhdmlogic_net: {
         bits = 1;
-        UHDM::logic_net* lts = (UHDM::logic_net*)typespec;
+        UHDM::logic_net *lts = (UHDM::logic_net *)typespec;
         ranges = lts->Ranges();
         break;
       }
       case UHDM::uhdmlogic_var: {
         bits = 1;
-        UHDM::logic_var* lts = (UHDM::logic_var*)typespec;
+        UHDM::logic_var *lts = (UHDM::logic_var *)typespec;
         ranges = lts->Ranges();
         break;
       }
       case UHDM::uhdmbit_var: {
         bits = 1;
-        UHDM::bit_var* lts = (UHDM::bit_var*)typespec;
+        UHDM::bit_var *lts = (UHDM::bit_var *)typespec;
         ranges = lts->Ranges();
         break;
       }
@@ -698,37 +713,39 @@ uint64_t ExprEval::size(
         break;
       }
       case UHDM::uhdmstruct_var: {
-        const UHDM::typespec* tp = ((struct_var*)typespec)->Typespec();
+        const UHDM::typespec *tp = ((struct_var *)typespec)->Typespec();
         bits += size(tp, invalidValue, inst, pexpr, full);
         break;
       }
       case UHDM::uhdmstruct_net: {
-        const UHDM::typespec* tp = ((struct_net*)typespec)->Typespec();
-        bits += size(tp,invalidValue, inst, pexpr,  full);
+        const UHDM::typespec *tp = ((struct_net *)typespec)->Typespec();
+        bits += size(tp, invalidValue, inst, pexpr, full);
         break;
       }
       case UHDM::uhdmstruct_typespec: {
-        UHDM::struct_typespec* sts = (UHDM::struct_typespec*)typespec;
-        UHDM::VectorOftypespec_member* members = sts->Members();
+        UHDM::struct_typespec *sts = (UHDM::struct_typespec *)typespec;
+        UHDM::VectorOftypespec_member *members = sts->Members();
         if (members) {
-          for (UHDM::typespec_member* member : *members) {
-            bits += size(member->Typespec(),invalidValue, inst, pexpr,  full);
+          for (UHDM::typespec_member *member : *members) {
+            bits += size(member->Typespec(), invalidValue, inst, pexpr, full);
           }
         }
         break;
       }
       case UHDM::uhdmenum_typespec: {
-        const UHDM::enum_typespec* sts =
-            any_cast<const UHDM::enum_typespec*>(typespec);
-        if (sts) bits = size(sts->Base_typespec(),invalidValue, inst, pexpr,  full);
+        const UHDM::enum_typespec *sts =
+            any_cast<const UHDM::enum_typespec *>(typespec);
+        if (sts)
+          bits = size(sts->Base_typespec(), invalidValue, inst, pexpr, full);
         break;
       }
       case UHDM::uhdmunion_typespec: {
-        UHDM::union_typespec* sts = (UHDM::union_typespec*)typespec;
-        UHDM::VectorOftypespec_member* members = sts->Members();
+        UHDM::union_typespec *sts = (UHDM::union_typespec *)typespec;
+        UHDM::VectorOftypespec_member *members = sts->Members();
         if (members) {
-          for (UHDM::typespec_member* member : *members) {
-            unsigned int max = size(member->Typespec(),invalidValue, inst, pexpr,  full);
+          for (UHDM::typespec_member *member : *members) {
+            unsigned int max =
+                size(member->Typespec(), invalidValue, inst, pexpr, full);
             if (max > bits) bits = max;
           }
         }
@@ -737,49 +754,49 @@ uint64_t ExprEval::size(
       case uhdmunsupported_typespec:
         break;
       case uhdmconstant: {
-        constant* c = (constant*)typespec;
+        constant *c = (constant *)typespec;
         bits = c->VpiSize();
         break;
       }
       case uhdmenum_const: {
-        enum_const* c = (enum_const*)typespec;
+        enum_const *c = (enum_const *)typespec;
         bits = c->VpiSize();
         break;
       }
       case uhdmref_obj: {
-        ref_obj* ref = (ref_obj*)typespec;
-        if (const any* act = ref->Actual_group()) {
-          bits = size(act,invalidValue, inst, pexpr,  full);
+        ref_obj *ref = (ref_obj *)typespec;
+        if (const any *act = ref->Actual_group()) {
+          bits = size(act, invalidValue, inst, pexpr, full);
         }
         break;
       }
       case uhdmoperation: {
-        operation* op = (operation*)typespec;
+        operation *op = (operation *)typespec;
         if (op->VpiOpType() == vpiConcatOp) {
           if (auto ops = op->Operands()) {
             for (auto op : *ops) {
-              bits += size(op,invalidValue, inst, pexpr,  full);
+              bits += size(op, invalidValue, inst, pexpr, full);
             }
           }
         }
         break;
       }
       case uhdmpacked_array_typespec: {
-        packed_array_typespec* tmp = (packed_array_typespec*)typespec;
-        const UHDM::typespec* tps = (UHDM::typespec*)tmp->Elem_typespec();
-        bits += size(tps,invalidValue, inst, pexpr,  full);
+        packed_array_typespec *tmp = (packed_array_typespec *)typespec;
+        const UHDM::typespec *tps = (UHDM::typespec *)tmp->Elem_typespec();
+        bits += size(tps, invalidValue, inst, pexpr, full);
         ranges = tmp->Ranges();
         break;
       }
       case uhdmtypespec_member: {
-        typespec_member* tmp = (typespec_member*)typespec;
-        bits += size(tmp->Typespec(),invalidValue, inst, pexpr,  full);
+        typespec_member *tmp = (typespec_member *)typespec;
+        bits += size(tmp->Typespec(), invalidValue, inst, pexpr, full);
         break;
       }
       case uhdmio_decl: {
-        io_decl* decl = (io_decl*)typespec;
-        const UHDM::typespec* tps = decl->Typespec();
-        bits += size(tps,invalidValue, inst, pexpr,  full);
+        io_decl *decl = (io_decl *)typespec;
+        const UHDM::typespec *tps = decl->Typespec();
+        bits += size(tps, invalidValue, inst, pexpr, full);
         break;
       }
       default:
@@ -788,12 +805,12 @@ uint64_t ExprEval::size(
   }
   if (ranges) {
     if (!full) {
-      UHDM::range* last_range = nullptr;
-      for (UHDM::range* ran : *ranges) {
+      UHDM::range *last_range = nullptr;
+      for (UHDM::range *ran : *ranges) {
         last_range = ran;
       }
-      expr* lexpr = (expr*)last_range->Left_expr();
-      expr* rexpr = (expr*)last_range->Right_expr();
+      expr *lexpr = (expr *)last_range->Left_expr();
+      expr *rexpr = (expr *)last_range->Right_expr();
       int64_t lv = getValue(reduceExpr(lexpr, invalidValue, inst, pexpr));
 
       int64_t rv = getValue(reduceExpr(rexpr, invalidValue, inst, pexpr));
@@ -803,9 +820,9 @@ uint64_t ExprEval::size(
       else
         bits = bits * (rv - lv + 1);
     } else {
-      for (UHDM::range* ran : *ranges) {
-        expr* lexpr = (expr*)ran->Left_expr();
-        expr* rexpr = (expr*)ran->Right_expr();
+      for (UHDM::range *ran : *ranges) {
+        expr *lexpr = (expr *)ran->Left_expr();
+        expr *rexpr = (expr *)ran->Right_expr();
         int64_t lv = getValue(reduceExpr(lexpr, invalidValue, inst, pexpr));
 
         int64_t rv = getValue(reduceExpr(rexpr, invalidValue, inst, pexpr));
@@ -819,7 +836,6 @@ uint64_t ExprEval::size(
   }
   return bits;
 }
-
 
 static bool getStringVal(std::string &result, expr *val) {
   const UHDM::constant *hs0 = any_cast<const UHDM::constant *>(val);
@@ -835,7 +851,8 @@ static bool getStringVal(std::string &result, expr *val) {
   return false;
 }
 
-expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const instance* inst, const any* pexpr) {
+expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
+                             const any *pexpr) {
   expr *result = op;
   Serializer &s = *op->GetSerializer();
   UHDM::VectorOfany &operands = *op->Operands();
@@ -931,7 +948,6 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const instance* 
   return result;
 }
 
-
 static uint64_t getMask(uint64_t wide) {
   uint64_t mask = 0;
   uint64_t sizeInBits = sizeof(mask) * 8;
@@ -985,10 +1001,9 @@ static std::string toBinary(int size, uint64_t val) {
   return result;
 }
 
-
 expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
-                                     bool &invalidValue, const instance* inst,
-                                     const any *pexpr) {
+                                bool &invalidValue, const any *inst,
+                                const any *pexpr) {
   Serializer &s = *op->GetSerializer();
   expr *result = nullptr;
   expr *exp = reduceExpr(op, invalidValue, inst, pexpr);
@@ -1059,8 +1074,7 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
   return result;
 }
 
-
-static std::string& ltrim(std::string& str, char c) {
+static std::string &ltrim(std::string &str, char c) {
   auto it1 =
       std::find_if(str.begin(), str.end(), [c](char ch) { return (ch == c); });
   if (it1 != str.end()) str.erase(str.begin(), it1 + 1);
@@ -1115,7 +1129,7 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr) {
           invalidValue = true;
         } else {
           ltrim(v, '\'');
-         ltrim(v, 's');
+          ltrim(v, 's');
           ltrim(v, 'h');
           try {
             result = std::strtoll(v.c_str() + std::string_view("HEX:").length(),
@@ -1331,8 +1345,8 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
   return result;
 }
 
-
-expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance* inst, const any* pexpr) {
+expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
+                           const any *inst, const any *pexpr) {
   Serializer &s = *result->GetSerializer();
   UHDM_OBJECT_TYPE objtype = result->UhdmType();
   if (objtype == uhdmoperation) {
@@ -1369,10 +1383,12 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           case vpiArithRShiftOp:
           case vpiRShiftOp: {
             if (operands.size() == 2) {
-              int64_t val0 = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
-              int64_t val1 = get_value(
-                  invalidValue, reduceExpr(operands[1], invalidValue, inst, pexpr));
+              int64_t val0 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
+              int64_t val1 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[1], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t val = ((uint64_t)val0) >> ((uint64_t)val1);
               UHDM::constant *c = s.MakeConstant();
@@ -1441,10 +1457,12 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           case vpiArithLShiftOp:
           case vpiLShiftOp: {
             if (operands.size() == 2) {
-              int64_t val0 = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
-              int64_t val1 = get_value(
-                  invalidValue, reduceExpr(operands[1], invalidValue, inst, pexpr));
+              int64_t val0 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
+              int64_t val1 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[1], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t val = ((uint64_t)val0) << ((uint64_t)val1);
               UHDM::constant *c = s.MakeConstant();
@@ -1521,10 +1539,12 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiBitOrOp: {
             if (operands.size() == 2) {
-              int64_t val0 = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
-              int64_t val1 = get_value(
-                  invalidValue, reduceExpr(operands[1], invalidValue, inst, pexpr));
+              int64_t val0 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
+              int64_t val1 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[1], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t val = ((uint64_t)val0) | ((uint64_t)val1);
               UHDM::constant *c = s.MakeConstant();
@@ -1538,10 +1558,12 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiBitAndOp: {
             if (operands.size() == 2) {
-              int64_t val0 = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
-              int64_t val1 = get_value(
-                  invalidValue, reduceExpr(operands[1], invalidValue, inst, pexpr));
+              int64_t val0 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
+              int64_t val1 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[1], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t val = ((uint64_t)val0) & ((uint64_t)val1);
               UHDM::constant *c = s.MakeConstant();
@@ -1555,10 +1577,12 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiLogOrOp: {
             if (operands.size() == 2) {
-              int64_t val0 = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
-              int64_t val1 = get_value(
-                  invalidValue, reduceExpr(operands[1], invalidValue, inst, pexpr));
+              int64_t val0 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
+              int64_t val1 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[1], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t val = ((uint64_t)val0) || ((uint64_t)val1);
               UHDM::constant *c = s.MakeConstant();
@@ -1572,10 +1596,12 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiLogAndOp: {
             if (operands.size() == 2) {
-              int64_t val0 = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
-              int64_t val1 = get_value(
-                  invalidValue, reduceExpr(operands[1], invalidValue, inst, pexpr));
+              int64_t val0 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
+              int64_t val1 =
+                  get_value(invalidValue,
+                            reduceExpr(operands[1], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t val = ((uint64_t)val0) && ((uint64_t)val1);
               UHDM::constant *c = s.MakeConstant();
@@ -1688,7 +1714,8 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiBitNegOp: {
             if (operands.size() == 1) {
-              expr *operand = reduceExpr(operands[0], invalidValue, inst, pexpr);
+              expr *operand =
+                  reduceExpr(operands[0], invalidValue, inst, pexpr);
               if (operand) {
                 uint64_t val = (uint64_t)get_value(invalidValue, operand);
                 if (invalidValue) break;
@@ -1720,7 +1747,8 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           case vpiNotOp: {
             if (operands.size() == 1) {
               uint64_t val = !((uint64_t)get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr)));
+                  invalidValue,
+                  reduceExpr(operands[0], invalidValue, inst, pexpr)));
               if (invalidValue) break;
               UHDM::constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(val));
@@ -1733,13 +1761,14 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiInsideOp: {
             if (operands.size() > 1) {
-              int64_t val = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
+              int64_t val =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
               if (invalidValue) break;
               for (unsigned int i = 1; i < operands.size(); i++) {
-                int64_t oval =
-                    get_value(invalidValue,
-                              reduceExpr(operands[i], invalidValue, inst, pexpr));
+                int64_t oval = get_value(
+                    invalidValue,
+                    reduceExpr(operands[i], invalidValue, inst, pexpr));
                 if (invalidValue) break;
                 if (oval == val) {
                   UHDM::constant *c = s.MakeConstant();
@@ -1756,8 +1785,8 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiUnaryAndOp: {
             if (operands.size() == 1) {
-              constant *cst = (constant *)(reduceExpr(
-                  operands[0], invalidValue, inst, pexpr));
+              constant *cst = (constant *)(reduceExpr(operands[0], invalidValue,
+                                                      inst, pexpr));
               uint64_t val = get_value(invalidValue, cst);
               if (invalidValue) break;
               uint64_t res = val & 1;
@@ -1775,8 +1804,9 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiUnaryNandOp: {
             if (operands.size() == 1) {
-              uint64_t val = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
+              uint64_t val =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 32; i++) {
@@ -1794,8 +1824,9 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiUnaryOrOp: {
             if (operands.size() == 1) {
-              uint64_t val = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
+              uint64_t val =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 32; i++) {
@@ -1812,8 +1843,9 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiUnaryNorOp: {
             if (operands.size() == 1) {
-              uint64_t val = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
+              uint64_t val =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 64; i++) {
@@ -1831,8 +1863,9 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiUnaryXorOp: {
             if (operands.size() == 1) {
-              uint64_t val = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
+              uint64_t val =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 64; i++) {
@@ -1849,8 +1882,9 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiUnaryXNorOp: {
             if (operands.size() == 1) {
-              uint64_t val = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
+              uint64_t val =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 64; i++) {
@@ -1901,8 +1935,17 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
                 if ((val1 == 0) && (invalidValue == false) &&
                     (invalidValueD == false)) {
                   // Divide by 0
-                  s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO, inst->VpiFullName(),
-                              expr1, nullptr);
+                  std::string fullPath;
+                  if (const gen_scope_array *in =
+                          any_cast<gen_scope_array *>(inst)) {
+                    fullPath = in->VpiFullName();
+                  } else if (inst->UhdmType() == uhdmdesign) {
+                    fullPath = inst->VpiName();
+                  } else {
+                    fullPath = ((scope *)inst)->VpiFullName();
+                  }
+                  s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO, fullPath,
+                                      expr1, nullptr);
                 }
               }
               if (invalidValueI && invalidValueD) invalidValue = true;
@@ -1948,8 +1991,10 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           case vpiDivOp: {
             if (operands.size() == 2) {
               bool divideByZero = true;
-              expr *div_expr = reduceExpr(operands[1], invalidValue, inst, pexpr);
-              expr *num_expr = reduceExpr(operands[0], invalidValue, inst, pexpr);
+              expr *div_expr =
+                  reduceExpr(operands[1], invalidValue, inst, pexpr);
+              expr *num_expr =
+                  reduceExpr(operands[0], invalidValue, inst, pexpr);
               bool invalidValueI = false;
               bool invalidValueD = false;
               int64_t divisor = get_value(invalidValueI, div_expr);
@@ -1986,8 +2031,17 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
               if (invalidValueI && invalidValueD) invalidValue = true;
               if (divideByZero) {
                 // Divide by 0
-                s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO, inst->VpiFullName(),
-                              div_expr, nullptr);
+                std::string fullPath;
+                if (const gen_scope_array *in =
+                        any_cast<gen_scope_array *>(inst)) {
+                  fullPath = in->VpiFullName();
+                } else if (inst->UhdmType() == uhdmdesign) {
+                  fullPath = inst->VpiName();
+                } else {
+                  fullPath = ((scope *)inst)->VpiFullName();
+                }
+                s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO, fullPath,
+                                    div_expr, nullptr);
               }
             }
             break;
@@ -2001,9 +2055,11 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
               int64_t val = 0;
               expr *the_val = nullptr;
               if (condVal) {
-                the_val = reduceExpr(operands[1], localInvalidValue, inst, pexpr);
+                the_val =
+                    reduceExpr(operands[1], localInvalidValue, inst, pexpr);
               } else {
-                the_val = reduceExpr(operands[2], localInvalidValue, inst, pexpr);
+                the_val =
+                    reduceExpr(operands[2], localInvalidValue, inst, pexpr);
               }
               if (localInvalidValue == false) {
                 val = get_value(localInvalidValue, the_val);
@@ -2025,8 +2081,9 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
           }
           case vpiMultiConcatOp: {
             if (operands.size() == 2) {
-              int64_t n = get_value(
-                  invalidValue, reduceExpr(operands[0], invalidValue, inst, pexpr));
+              int64_t n =
+                  get_value(invalidValue,
+                            reduceExpr(operands[0], invalidValue, inst, pexpr));
               if (invalidValue) break;
               if (n > 1000) n = 1000;  // Must be -1 or something silly
               if (n < 0) n = 0;
@@ -2120,8 +2177,7 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
               if ((optype != uhdmconstant) && (operType != vpiConcatOp) &&
                   (operType != vpiMultiAssignmentPatternOp) &&
                   (operType != vpiAssignmentPatternOp)) {
-                if (expr *tmp =
-                        reduceExpr(op, invalidValue, inst, pexpr)) {
+                if (expr *tmp = reduceExpr(op, invalidValue, inst, pexpr)) {
                   op = tmp;
                 }
                 optype = op->UhdmType();
@@ -2158,8 +2214,8 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
                     break;
                   }
                   case vpiHexConst: {
-                    std::string tmp = hexToBin(
-                        v.c_str() + std::string_view("HEX:").length());
+                    std::string tmp =
+                        hexToBin(v.c_str() + std::string_view("HEX:").length());
                     std::string value;
                     if (size > tmp.size()) {
                       for (unsigned int i = 0; i < size - tmp.size(); i++) {
@@ -2241,8 +2297,7 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
             break;
           }
           case vpiCastOp: {
-            expr *oper =
-                reduceExpr(operands[0], invalidValue, inst, pexpr);
+            expr *oper = reduceExpr(operands[0], invalidValue, inst, pexpr);
             uint64_t val0 = get_value(invalidValue, oper);
             if (invalidValue) break;
             const typespec *tps = op->Typespec();
@@ -2341,8 +2396,7 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
     const std::string &name = sel->VpiName();
     const expr *index = sel->VpiIndex();
     uint64_t index_val = get_value(
-        invalidValue,
-        reduceExpr((expr *)index, invalidValue, inst, pexpr));
+        invalidValue, reduceExpr((expr *)index, invalidValue, inst, pexpr));
     if (invalidValue == false) {
       any *object = getObject(name, inst, pexpr);
       if (object) {
@@ -2483,8 +2537,7 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
     bool selection = false;
     for (auto index : *sel->Exprs()) {
       uint64_t index_val = get_value(
-          invalidValue,
-          reduceExpr((expr *)index, invalidValue, inst, pexpr));
+          invalidValue, reduceExpr((expr *)index, invalidValue, inst, pexpr));
       if (object) {
         UHDM_OBJECT_TYPE otype = object->UhdmType();
         if (otype == uhdmoperation) {
@@ -2507,8 +2560,7 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
               invalidValue = true;
             }
           } else if (opType == vpiConditionOp) {
-            expr *exp =
-                reduceExpr(object, invalidValue, inst, pexpr);
+            expr *exp = reduceExpr(object, invalidValue, inst, pexpr);
             UHDM_OBJECT_TYPE otype = exp->UhdmType();
             if (otype == uhdmoperation) {
               operation *op = (operation *)exp;
@@ -2546,28 +2598,28 @@ expr *ExprEval::reduceExpr(const any* result, bool& invalidValue, const instance
 }
 
 namespace UHDM {
-  std::string vPrint(UHDM::any* handle) {
-    if (handle == nullptr) {
-      std::cout << "NULL HANDLE\n";
-      return "NULL HANDLE";
-    }
-    ExprEval eval;
-    Serializer* s = handle->GetSerializer();
-    std::stringstream out;
-    eval.prettyPrint(*s, handle, 0, out);
-    std::cout << out.str() << "\n";
-    return out.str();
-  }
-}
-
-std::string ExprEval::prettyPrint(UHDM::any* handle) {
+std::string vPrint(UHDM::any *handle) {
   if (handle == nullptr) {
     std::cout << "NULL HANDLE\n";
     return "NULL HANDLE";
   }
   ExprEval eval;
-  Serializer* s = handle->GetSerializer();
+  Serializer *s = handle->GetSerializer();
   std::stringstream out;
   eval.prettyPrint(*s, handle, 0, out);
-  return out.str();  
+  std::cout << out.str() << "\n";
+  return out.str();
+}
+}  // namespace UHDM
+
+std::string ExprEval::prettyPrint(UHDM::any *handle) {
+  if (handle == nullptr) {
+    std::cout << "NULL HANDLE\n";
+    return "NULL HANDLE";
+  }
+  ExprEval eval;
+  Serializer *s = handle->GetSerializer();
+  std::stringstream out;
+  eval.prettyPrint(*s, handle, 0, out);
+  return out.str();
 }

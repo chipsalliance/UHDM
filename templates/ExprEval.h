@@ -27,59 +27,59 @@
 #ifndef UHDM_EXPREVAL_H
 #define UHDM_EXPREVAL_H
 
-#include <uhdm/typespec.h>
 #include <uhdm/expr.h>
+#include <uhdm/typespec.h>
+
 #include <iostream>
 #include <sstream>
 
 namespace UHDM {
-  class Serializer;
-  class ExprEval {
- 
-  public:
-   bool isFullySpecified(const typespec* tps);
+class Serializer;
+class ExprEval {
+ public:
+  bool isFullySpecified(const typespec* tps);
 
-   uint64_t size(
-       const any* object, bool& invalidValue, const instance* inst,
-       const any* pexpr,
-       bool full /* false: use only last range size, true: use all ranges */);
+  uint64_t size(
+      const any* object, bool& invalidValue, const any* inst, const any* pexpr,
+      bool full /* false: use only last range size, true: use all ranges */);
 
-   expr* reduceExpr(const any* object, bool& invalidValue, const instance* inst, const any* pexpr);
+  expr* reduceExpr(const any* object, bool& invalidValue, const any* inst,
+                   const any* pexpr);
 
-   uint64_t getValue(const UHDM::expr* expr);
+  uint64_t getValue(const UHDM::expr* expr);
 
-   any* getValue(const std::string& name, const instance* inst, const any* pexpr);
+  any* getValue(const std::string& name, const any* inst, const any* pexpr);
 
-   any* getObject(const std::string& name, const instance* inst, const any* pexpr);
+  any* getObject(const std::string& name, const any* inst, const any* pexpr);
 
-   int64_t get_value(bool& invalidValue, const UHDM::expr* expr);
+  int64_t get_value(bool& invalidValue, const UHDM::expr* expr);
 
-   uint64_t get_uvalue(bool& invalidValue, const UHDM::expr* expr);
+  uint64_t get_uvalue(bool& invalidValue, const UHDM::expr* expr);
 
   long double get_double(bool& invalidValue, const UHDM::expr* expr);
 
-   expr* flattenPatternAssignments(Serializer& s, const typespec* tps,
-                                   expr* assignExpr);
+  expr* flattenPatternAssignments(Serializer& s, const typespec* tps,
+                                  expr* assignExpr);
 
-   void prettyPrint(Serializer& s, const any* tree, uint32_t indent,
-                    std::ostream& out);
+  void prettyPrint(Serializer& s, const any* tree, uint32_t indent,
+                   std::ostream& out);
 
-   std::string prettyPrint(UHDM::any* handle);
+  std::string prettyPrint(UHDM::any* handle);
 
-  private:
-   expr* reduceCompOp(operation* op, bool& invalidValue, const instance* inst,
-                      const any* pexpr);
+ private:
+  expr* reduceCompOp(operation* op, bool& invalidValue, const any* inst,
+                     const any* pexpr);
 
-   expr* reduceBitSelect(expr* op, unsigned int index_val, bool& invalidValue,
-                         const instance* inst, const any* pexpr);
+  expr* reduceBitSelect(expr* op, unsigned int index_val, bool& invalidValue,
+                        const any* inst, const any* pexpr);
 
-   void recursiveFlattening(Serializer& s, VectorOfany* flattened,
-                            const VectorOfany* ordered,
-                            std::vector<const typespec*> fieldTypes);
-  };
+  void recursiveFlattening(Serializer& s, VectorOfany* flattened,
+                           const VectorOfany* ordered,
+                           std::vector<const typespec*> fieldTypes);
+};
 
-  std::string vPrint(UHDM::any* handle);
+std::string vPrint(UHDM::any* handle);
 
-}
+}  // namespace UHDM
 
 #endif
