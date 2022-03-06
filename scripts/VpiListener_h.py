@@ -5,12 +5,12 @@ import file_utils
 def get_methods(models, enter, leave):
     methods = []
     for model in models.values():
-        if model['type'] != 'group_def':
+        if model['type'] not in ['class_def', 'group_def']:
             classname = model['name']
             Classname_ = classname[:1].upper() + classname[1:]
 
-            methods.append(f'    virtual void enter{Classname_}(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {{{enter}}}')
-            methods.append(f'    virtual void leave{Classname_}(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {{{leave}}}')
+            methods.append(f'  virtual void enter{Classname_}(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {{{enter}}}')
+            methods.append(f'  virtual void leave{Classname_}(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle) {{{leave}}}')
             methods.append('')
 
     return methods

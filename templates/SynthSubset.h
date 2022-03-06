@@ -66,9 +66,6 @@ class SynthSubset : public VpiListener {
   void leaveThread_obj(const thread_obj* object, const BaseClass* parent,
                        vpiHandle handle, vpiHandle parentHandle) override;
 
-  void leaveWaits(const waits* object, const BaseClass* parent,
-                  vpiHandle handle, vpiHandle parentHandle) override;
-
   void leaveWait_stmt(const wait_stmt* object, const BaseClass* parent,
                       vpiHandle handle, vpiHandle parentHandle) override;
 
@@ -77,9 +74,6 @@ class SynthSubset : public VpiListener {
 
   void leaveOrdered_wait(const ordered_wait* object, const BaseClass* parent,
                          vpiHandle handle, vpiHandle parentHandle) override;
-
-  void leaveDisables(const disables* object, const BaseClass* parent,
-                     vpiHandle handle, vpiHandle parentHandle) override;
 
   void leaveDisable(const disable* object, const BaseClass* parent,
                     vpiHandle handle, vpiHandle parentHandle) override;
@@ -270,7 +264,7 @@ class SynthSubset : public VpiListener {
   void leaveUser_systf(const user_systf* object, const BaseClass* parent,
                        vpiHandle handle, vpiHandle parentHandle) override;
 
-  void leaveTf_call(const tf_call* object, const BaseClass* parent,
+  void leaveTask_call(const task_call* object, const BaseClass* parent,
                     vpiHandle handle, vpiHandle parentHandle) override;
 
   void leaveMethod_func_call(const method_func_call* object,
@@ -280,10 +274,6 @@ class SynthSubset : public VpiListener {
   void leaveMethod_task_call(const method_task_call* object,
                              const BaseClass* parent, vpiHandle handle,
                              vpiHandle parentHandle) override;
-
-  void leaveConstraint_expr(const constraint_expr* object,
-                            const BaseClass* parent, vpiHandle handle,
-                            vpiHandle parentHandle) override;
 
   void leaveConstraint_ordering(const constraint_ordering* object,
                                 const BaseClass* parent, vpiHandle handle,

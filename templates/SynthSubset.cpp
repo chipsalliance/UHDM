@@ -160,11 +160,6 @@ void SynthSubset::leaveThread_obj(const thread_obj* object,
   reportError(object);
 }
 
-void SynthSubset::leaveWaits(const waits* object, const BaseClass* parent,
-                             vpiHandle handle, vpiHandle parentHandle) {
-  reportError(object);
-}
-
 void SynthSubset::leaveWait_stmt(const wait_stmt* object,
                                  const BaseClass* parent, vpiHandle handle,
                                  vpiHandle parentHandle) {
@@ -180,11 +175,6 @@ void SynthSubset::leaveWait_fork(const wait_fork* object,
 void SynthSubset::leaveOrdered_wait(const ordered_wait* object,
                                     const BaseClass* parent, vpiHandle handle,
                                     vpiHandle parentHandle) {
-  reportError(object);
-}
-
-void SynthSubset::leaveDisables(const disables* object, const BaseClass* parent,
-                                vpiHandle handle, vpiHandle parentHandle) {
   reportError(object);
 }
 
@@ -542,8 +532,9 @@ void SynthSubset::leaveUser_systf(const user_systf* object,
   reportError(object);
 }
 
-void SynthSubset::leaveTf_call(const tf_call* object, const BaseClass* parent,
-                               vpiHandle handle, vpiHandle parentHandle) {
+void SynthSubset::leaveTask_call(const task_call* object,
+                                 const BaseClass* parent, vpiHandle handle,
+                                 vpiHandle parentHandle) {
   reportError(object);
 }
 
@@ -558,13 +549,6 @@ void SynthSubset::leaveMethod_task_call(const method_task_call* object,
                                         const BaseClass* parent,
                                         vpiHandle handle,
                                         vpiHandle parentHandle) {
-  reportError(object);
-}
-
-void SynthSubset::leaveConstraint_expr(const constraint_expr* object,
-                                       const BaseClass* parent,
-                                       vpiHandle handle,
-                                       vpiHandle parentHandle) {
   reportError(object);
 }
 

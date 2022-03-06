@@ -25,12 +25,10 @@
  */
 
 #include <uhdm/ElaboratorListener.h>
-
-#include <iostream>
-
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
+#include <iostream>
 
 namespace UHDM {
 
@@ -513,10 +511,141 @@ void ElaboratorListener::enterVariables(const variables* object,
   }
 }
 
-void ElaboratorListener::leaveVariables(const variables* object,
+void ElaboratorListener::enterRef_var(const ref_var* object,
+                                      const BaseClass* parent, vpiHandle handle,
+                                      vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterShort_real_var(const short_real_var* object,
+                                             const BaseClass* parent,
+                                             vpiHandle handle,
+                                             vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterReal_var(const real_var* object,
+                                       const BaseClass* parent,
+                                       vpiHandle handle,
+                                       vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterByte_var(const byte_var* object,
+                                       const BaseClass* parent,
+                                       vpiHandle handle,
+                                       vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterShort_int_var(const short_int_var* object,
+                                            const BaseClass* parent,
+                                            vpiHandle handle,
+                                            vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterInt_var(const int_var* object,
+                                      const BaseClass* parent, vpiHandle handle,
+                                      vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterLong_int_var(const long_int_var* object,
+                                           const BaseClass* parent,
+                                           vpiHandle handle,
+                                           vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterInteger_var(const integer_var* object,
+                                          const BaseClass* parent,
+                                          vpiHandle handle,
+                                          vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterTime_var(const time_var* object,
+                                       const BaseClass* parent,
+                                       vpiHandle handle,
+                                       vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterArray_var(const array_var* object,
                                         const BaseClass* parent,
                                         vpiHandle handle,
-                                        vpiHandle parentHandle) {}
+                                        vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterPacked_array_var(const packed_array_var* object,
+                                               const BaseClass* parent,
+                                               vpiHandle handle,
+                                               vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterBit_var(const bit_var* object,
+                                      const BaseClass* parent, vpiHandle handle,
+                                      vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterLogic_var(const logic_var* object,
+                                        const BaseClass* parent,
+                                        vpiHandle handle,
+                                        vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterStruct_var(const struct_var* object,
+                                         const BaseClass* parent,
+                                         vpiHandle handle,
+                                         vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterUnion_var(const union_var* object,
+                                        const BaseClass* parent,
+                                        vpiHandle handle,
+                                        vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterEnum_var(const enum_var* object,
+                                       const BaseClass* parent,
+                                       vpiHandle handle,
+                                       vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterString_var(const string_var* object,
+                                         const BaseClass* parent,
+                                         vpiHandle handle,
+                                         vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterChandle_var(const chandle_var* object,
+                                          const BaseClass* parent,
+                                          vpiHandle handle,
+                                          vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterVar_bit(const var_bit* object,
+                                      const BaseClass* parent, vpiHandle handle,
+                                      vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterClass_var(const class_var* object,
+                                        const BaseClass* parent,
+                                        vpiHandle handle,
+                                        vpiHandle parentHandle) {
+  enterVariables(object, parent, handle, parentHandle);
+}
 
 void ElaboratorListener::enterTask_func(const task_func* object,
                                         const BaseClass* parent,
@@ -549,6 +678,30 @@ void ElaboratorListener::leaveTask_func(const task_func* object,
                                         vpiHandle handle,
                                         vpiHandle parentHandle) {
   instStack_.pop_back();
+}
+
+void ElaboratorListener::enterFunction(const function* object,
+                                       const BaseClass* parent,
+                                       vpiHandle handle,
+                                       vpiHandle parentHandle) {
+  enterTask_func(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::leaveFunction(const function* object,
+                                       const BaseClass* parent,
+                                       vpiHandle handle,
+                                       vpiHandle parentHandle) {
+  leaveTask_func(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::enterTask(const task* object, const BaseClass* parent,
+                                   vpiHandle handle, vpiHandle parentHandle) {
+  enterTask_func(object, parent, handle, parentHandle);
+}
+
+void ElaboratorListener::leaveTask(const task* object, const BaseClass* parent,
+                                   vpiHandle handle, vpiHandle parentHandle) {
+  leaveTask_func(object, parent, handle, parentHandle);
 }
 
 void ElaboratorListener::enterGen_scope(const gen_scope* object,
@@ -606,4 +759,4 @@ void ElaboratorListener::leaveRef_obj(const ref_obj* object,
     ((ref_obj*)object)->Actual_group(bindAny(object->VpiName()));
 }
 
-} // namespace UHDM
+}  // namespace UHDM

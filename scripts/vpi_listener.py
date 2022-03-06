@@ -52,13 +52,13 @@ def generate(models):
         classname = model['name']
         Classname_ = classname[:1].upper() + classname[1:]
 
+        baseclass = model.get('extends')
+
         if modeltype != 'class_def':
             classnames.add(classname)
 
-        baseclass = model.get('extends')
-
-        declarations.append(f'void listen_{classname}(vpiHandle handle, VpiListener* listener);')
-        declarations.append(f'void listen_{classname}(vpiHandle handle, VpiListener* listener, VisitedContainer* visited);')
+            declarations.append(f'void listen_{classname}(vpiHandle handle, VpiListener* listener);')
+            declarations.append(f'void listen_{classname}(vpiHandle handle, VpiListener* listener, VisitedContainer* visited);')
 
         private_implementations.append(f'static void listen_{classname}_(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle, VpiListener* listener, VisitedContainer* visited) {{')
         if baseclass:
@@ -78,23 +78,24 @@ def generate(models):
         private_implementations.append( '}')
         private_implementations.append( '')
 
-        public_implementations.append(f'void UHDM::listen_{classname}(vpiHandle handle, VpiListener* listener, VisitedContainer* visited) {{')
-        public_implementations.append(f'  const {classname}* object = (const {classname}*) ((const uhdm_handle*)handle)->object;')
-        public_implementations.append( '  const BaseClass* parent = object->VpiParent();')
-        public_implementations.append( '  vpiHandle parentHandle = (parent != nullptr) ? NewVpiHandle(parent) : nullptr;')
-        public_implementations.append(f'  listener->enter{Classname_}(object, parent, handle, parentHandle);')
-        public_implementations.append( '  if (visited->insert(object).second) {')
-        public_implementations.append(f'    listen_{classname}_(object, parent, handle, parentHandle, listener, visited);')
-        public_implementations.append( '  }')
-        public_implementations.append(f'  listener->leave{Classname_}(object, parent, handle, parentHandle);')
-        public_implementations.append( '  vpi_release_handle(parentHandle);')
-        public_implementations.append(f'}}')
-        public_implementations.append( '')
-        public_implementations.append(f'void UHDM::listen_{classname}(vpiHandle handle, VpiListener* listener) {{')
-        public_implementations.append( '  VisitedContainer visited;')
-        public_implementations.append(f'  listen_{classname}(handle, listener, &visited);')
-        public_implementations.append(f'}}')
-        public_implementations.append( '')
+        if modeltype != 'class_def':
+            public_implementations.append(f'void UHDM::listen_{classname}(vpiHandle handle, VpiListener* listener, VisitedContainer* visited) {{')
+            public_implementations.append(f'  const {classname}* object = (const {classname}*) ((const uhdm_handle*)handle)->object;')
+            public_implementations.append( '  const BaseClass* parent = object->VpiParent();')
+            public_implementations.append( '  vpiHandle parentHandle = (parent != nullptr) ? NewVpiHandle(parent) : nullptr;')
+            public_implementations.append(f'  listener->enter{Classname_}(object, parent, handle, parentHandle);')
+            public_implementations.append( '  if (visited->insert(object).second) {')
+            public_implementations.append(f'    listen_{classname}_(object, parent, handle, parentHandle, listener, visited);')
+            public_implementations.append( '  }')
+            public_implementations.append(f'  listener->leave{Classname_}(object, parent, handle, parentHandle);')
+            public_implementations.append( '  vpi_release_handle(parentHandle);')
+            public_implementations.append(f'}}')
+            public_implementations.append( '')
+            public_implementations.append(f'void UHDM::listen_{classname}(vpiHandle handle, VpiListener* listener) {{')
+            public_implementations.append( '  VisitedContainer visited;')
+            public_implementations.append(f'  listen_{classname}(handle, listener, &visited);')
+            public_implementations.append(f'}}')
+            public_implementations.append( '')
 
    # vpi_listener.h
     with open(config.get_template_filepath('vpi_listener.h'), 'rt') as strm:
