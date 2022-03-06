@@ -16,4 +16,9 @@
  
 - obj_def: short_int_typespec
   - extends: typespec
+  - property: sign
+    name: sign
+    vpi: vpiSigned
+    type: bool
+    card: 1
 

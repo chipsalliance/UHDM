@@ -26,3 +26,8 @@
     vpi: vpiExpr
     type: expr
     card: 1 
+  - property: sign
+    name: sign
+    vpi: vpiSigned
+    type: bool
+    card: 1

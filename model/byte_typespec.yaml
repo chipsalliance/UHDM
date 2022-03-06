@@ -16,4 +16,9 @@
  
 - obj_def: byte_typespec
   - extends: typespec
+  - property: sign
+    name: sign
+    vpi: vpiSigned
+    type: bool
+    card: 1
 
