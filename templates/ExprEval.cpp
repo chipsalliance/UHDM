@@ -102,8 +102,8 @@ bool ExprEval::isFullySpecified(const UHDM::typespec *tps) {
 void tokenizeMulti(std::string_view str, std::string_view separator,
                    std::vector<std::string> &result) {
   std::string tmp;
-  const unsigned int sepSize = separator.size();
-  const unsigned int stringSize = str.size();
+  const unsigned int sepSize = static_cast<unsigned int>(separator.size());
+  const unsigned int stringSize = static_cast<unsigned int>(str.size());
   for (unsigned int i = 0; i < stringSize; i++) {
     bool isSeparator = true;
     for (unsigned int j = 0; j < sepSize; j++) {
@@ -356,7 +356,7 @@ long double ExprEval::get_double(bool &invalidValue, const UHDM::expr *expr) {
         break;
       }
       default: {
-        result = get_value(invalidValue, expr);
+        result = static_cast<long double>(get_value(invalidValue, expr));
         break;
       }
     }
@@ -752,7 +752,7 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         UHDM::VectorOftypespec_member *members = sts->Members();
         if (members) {
           for (UHDM::typespec_member *member : *members) {
-            unsigned int max =
+            uint64_t max =
                 size(member->Typespec(), invalidValue, inst, pexpr, full);
             if (max > bits) bits = max;
           }
@@ -1045,16 +1045,16 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
         if (ranges) {
           range *r = ranges->at(0);
           bool invalidValue = false;
-          lr = get_value(invalidValue, r->Left_expr());
-          rr = get_value(invalidValue, r->Right_expr());
+          lr = static_cast<unsigned short>(get_value(invalidValue, r->Left_expr()));
+          rr = static_cast<unsigned short>(get_value(invalidValue, r->Right_expr()));
         }
       }
     }
-    c->VpiSize(wordSize);
+    c->VpiSize(static_cast<int>(wordSize));
     if (index_val < binary.size()) {
       // TODO: If range does not start at 0
       if (lr >= rr) {
-        index_val = binary.size() - ((index_val + 1) * wordSize);
+        index_val = static_cast<unsigned int>(binary.size() - ((index_val + 1) * wordSize));
       }
       std::string v;
       for (unsigned int i = 0; i < wordSize; i++) {
@@ -1812,7 +1812,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (int i = 1; i < cst->VpiSize(); i++) {
-                res = res & ((val & (1 << i)) >> i);
+                res = res & ((val & (1ULL << i)) >> i);
               }
               UHDM::constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(res));
@@ -1831,7 +1831,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 32; i++) {
-                res = res & ((val & (1 << i)) >> i);
+                res = res & ((val & (1ULL << i)) >> i);
               }
               res = !res;
               UHDM::constant *c = s.MakeConstant();
@@ -1851,7 +1851,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 32; i++) {
-                res = res | ((val & (1 << i)) >> i);
+                res = res | ((val & (1ULL << i)) >> i);
               }
               UHDM::constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(res));
@@ -1870,7 +1870,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 64; i++) {
-                res = res | ((val & (1 << i)) >> i);
+                res = res | ((val & (1ULL << i)) >> i);
               }
               res = !res;
               UHDM::constant *c = s.MakeConstant();
@@ -1890,7 +1890,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 64; i++) {
-                res = res ^ ((val & (1 << i)) >> i);
+                res = res ^ ((val & (1ULL << i)) >> i);
               }
               UHDM::constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(res));
@@ -1909,7 +1909,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (invalidValue) break;
               uint64_t res = val & 1;
               for (unsigned int i = 1; i < 64; i++) {
-                res = res ^ ((val & (1 << i)) >> i);
+                res = res ^ ((val & (1ULL << i)) >> i);
               }
               res = !res;
               UHDM::constant *c = s.MakeConstant();
@@ -1983,7 +1983,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               int64_t val1 = get_value(invalidValueI, expr1);
               int64_t val = 0;
               if ((invalidValue == false) && (invalidValueI == false)) {
-                val = pow(val0, val1);
+                val = static_cast<int64_t>(std::pow<int64_t>(val0, val1));
                 UHDM::constant *c = s.MakeConstant();
                 c->VpiValue("INT:" + std::to_string(val));
                 c->VpiDecompile(std::to_string(val));
@@ -2171,7 +2171,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 c->VpiDecompile(std::to_string(res));
                 c->VpiConstType(vpiUIntConst);
               }
-              c->VpiSize(n * width);
+              c->VpiSize(static_cast<int>(n * width));
               // Word size
               if (width) {
                 int_typespec *ts = s.MakeInt_typespec();
@@ -2306,7 +2306,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             if (c1) {
               if (stringVal) {
                 c1->VpiValue("STRING:" + cval);
-                c1->VpiSize(cval.size() * 8);
+                c1->VpiSize(static_cast<int>(cval.size() * 8));
                 c1->VpiConstType(vpiStringConst);
               } else {
                  if (cval.size() > UHDM_MAX_BIT_WIDTH) {
@@ -2375,7 +2375,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     ((uint64_t)((uint64_t)1 << cast_to)) - ((uint64_t)1);
                 uint64_t res = val0 & mask;
                 c->VpiValue("UINT:" + std::to_string(res));
-                c->VpiSize(cast_to);
+                c->VpiSize(static_cast<int>(cast_to));
                 c->VpiConstType(vpiUIntConst);
                 result = c;
               } else if (ttps == uhdmenum_typespec) {
@@ -2514,10 +2514,10 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             }
             if (object) result = object;
           } else if (opType == vpiMultiConcatOp) {
-            result = reduceBitSelect(op, index_val, invalidValue, inst, pexpr);
+            result = reduceBitSelect(op, static_cast<unsigned int>(index_val), invalidValue, inst, pexpr);
           }
         } else if (otype == uhdmconstant) {
-          result = reduceBitSelect((constant *)object, index_val, invalidValue,
+          result = reduceBitSelect((constant *)object, static_cast<unsigned int>(index_val), invalidValue,
                                    inst, pexpr);
         }
       }
@@ -2553,7 +2553,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       UHDM::constant *c = s.MakeConstant();
       c->VpiValue("BIN:" + sub);
       c->VpiDecompile(sub);
-      c->VpiSize(sub.size());
+      c->VpiSize(static_cast<int>(sub.size()));
       c->VpiConstType(vpiBinaryConst);
       result = c;
     }
