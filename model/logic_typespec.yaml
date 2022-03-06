@@ -46,3 +46,10 @@
     vpi: vpiIndexTypespec
     type: typespec
     card: 1
+  - property: sign
+    name: sign
+    vpi: vpiSigned
+    type: bool
+    card: 1
+
+    
