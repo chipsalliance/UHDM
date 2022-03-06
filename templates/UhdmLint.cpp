@@ -231,13 +231,14 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
   if (!baseType) return;
   ExprEval eval;
   bool invalidValue = false;
-  uint64_t baseSize = eval.size(baseType, invalidValue, object->Instance(), object->VpiParent(), true);
+  uint64_t baseSize =
+      eval.size(baseType, invalidValue,
+                object->Instance() ? object->Instance() : object->VpiParent(),
+                object->VpiParent(), true);
   for (auto c : *object->Enum_consts()) {
     const std::string& val = c->VpiDecompile();
-    if (c->VpiSize() == -1)
-      continue;
-    if (!strstr(val.c_str(), "'"))
-      continue;
+    if (c->VpiSize() == -1) continue;
+    if (!strstr(val.c_str(), "'")) continue;
     uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
                                 object->VpiParent(), true);
     if (invalidValue == false) {

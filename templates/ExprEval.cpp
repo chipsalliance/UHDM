@@ -130,7 +130,15 @@ void tokenizeMulti(std::string_view str, std::string_view separator,
 
 any *ExprEval::getValue(const std::string &name, const any *inst,
                         const any *pexpr) {
-  Serializer &s = *inst->GetSerializer();
+  if ((inst == nullptr) && (pexpr == nullptr)) {
+    return nullptr;
+  }
+  Serializer* tmps = nullptr;
+  if (inst)
+    tmps = inst->GetSerializer();
+  else 
+    tmps = pexpr->GetSerializer();
+  Serializer &s = *tmps;
   any *result = nullptr;
   const any *root = inst;
   const any *tmp = inst;
@@ -168,13 +176,13 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
     } else if (the_instance->UhdmType() == uhdmdesign) {
       param_assigns = ((design *)the_instance)->Param_assigns();
       typespecs = ((design *)the_instance)->Typespecs();
-    } else {
+    } else if (any_cast<scope*>(the_instance)) {
       param_assigns = ((scope *)the_instance)->Param_assigns();
       typespecs = ((scope *)the_instance)->Typespecs();
     }
     if (param_assigns) {
       for (auto p : *param_assigns) {
-        if (p->Lhs()->VpiName() == the_name) {
+        if (p->Lhs() && (p->Lhs()->VpiName() == the_name)) {
           result = (any *)p->Rhs();
           break;
         }
@@ -265,7 +273,7 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
       if (inst->UhdmType() == uhdmgen_scope_array) {
       } else if (inst->UhdmType() == uhdmdesign) {
         param_assigns = ((design *)inst)->Param_assigns();
-      } else {
+      } else if (any_cast<scope*>(inst)) {
         param_assigns = ((scope *)inst)->Param_assigns();
         variables = ((scope *)inst)->Variables();
         if (const instance *in = any_cast<instance *>(inst)) {
@@ -1941,7 +1949,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     fullPath = in->VpiFullName();
                   } else if (inst->UhdmType() == uhdmdesign) {
                     fullPath = inst->VpiName();
-                  } else {
+                  } else if (any_cast<scope*>(inst)) {
                     fullPath = ((scope *)inst)->VpiFullName();
                   }
                   s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO, fullPath,
@@ -2037,7 +2045,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   fullPath = in->VpiFullName();
                 } else if (inst->UhdmType() == uhdmdesign) {
                   fullPath = inst->VpiName();
-                } else {
+                } else if (any_cast<scope*>(inst)) {
                   fullPath = ((scope *)inst)->VpiFullName();
                 }
                 s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO, fullPath,
