@@ -44,7 +44,7 @@
     type: class_defn
     vpi_obj: vpiClassDefn
     vpi: uhdmallClasses
-    card: any  
+    card: any
   - class: allInterfaces
     type: interface
     vpi_obj: vpiInterface
@@ -59,17 +59,12 @@
     type: program
     vpi_obj: vpiProgram
     vpi: uhdmallPrograms
-    card: any   
+    card: any
   - class: allModules
     type: module
     vpi_obj: vpiModule
     vpi: uhdmallModules
     card: any
-  - class: topModules
-    type: module
-    vpi_obj: vpiModule
-    vpi: uhdmtopModules
-    card: any  
   - class_ref: typespecs
     name: typespecs
     vpi: vpiTypedef
@@ -93,4 +88,9 @@
   - obj_ref: param_assigns
     vpi: vpiParamAssign
     type: param_assign
+    card: any
+  - class: topModules
+    type: module
+    vpi_obj: vpiModule
+    vpi: uhdmtopModules
     card: any
