@@ -38,6 +38,7 @@
 #include <uhdm/vpi_uhdm.h>
 #include <uhdm/SymbolFactory.h>
 
+#define UHDM_MAX_BIT_WIDTH 4096
 
 namespace UHDM {
 enum ErrorType {
@@ -52,7 +53,8 @@ enum ErrorType {
   UHDM_ILLEGAL_PACKED_DIMENSION = 719,
   UHDM_NON_SYNTHESIZABLE = 720,
   UHDM_ENUM_CONST_SIZE_MISMATCH = 721,
-  UHDM_DIVIDE_BY_ZERO = 722
+  UHDM_DIVIDE_BY_ZERO = 722,
+  UHDM_INTERNAL_ERROR_OUT_OF_BOUND = 723
 };
 
 typedef std::function<void(ErrorType errType, const std::string&,
