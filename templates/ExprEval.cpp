@@ -1063,6 +1063,19 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
           v += std::to_string(bitv - '0');
         }
       }
+      if (v.size() > UHDM_MAX_BIT_WIDTH) {
+        std::string fullPath;
+        if (const gen_scope_array *in = any_cast<gen_scope_array *>(inst)) {
+          fullPath = in->VpiFullName();
+        } else if (inst->UhdmType() == uhdmdesign) {
+          fullPath = inst->VpiName();
+        } else if (any_cast<scope *>(inst)) {
+          fullPath = ((scope *)inst)->VpiFullName();
+        }
+        s.GetErrorHandler()(ErrorType::UHDM_INTERNAL_ERROR_OUT_OF_BOUND, fullPath, op,
+                            nullptr);
+        v = "0";
+      }
       std::reverse(v.begin(), v.end());
       c->VpiValue("BIN:" + v);
       c->VpiDecompile(std::to_string(wordSize) + "'b" + v);
@@ -2296,6 +2309,21 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 c1->VpiSize(cval.size() * 8);
                 c1->VpiConstType(vpiStringConst);
               } else {
+                 if (cval.size() > UHDM_MAX_BIT_WIDTH) {
+                   std::string fullPath;
+                   if (const gen_scope_array *in =
+                           any_cast<gen_scope_array *>(inst)) {
+                     fullPath = in->VpiFullName();
+                   } else if (inst->UhdmType() == uhdmdesign) {
+                     fullPath = inst->VpiName();
+                   } else if (any_cast<scope *>(inst)) {
+                     fullPath = ((scope *)inst)->VpiFullName();
+                   }
+                   s.GetErrorHandler()(
+                       ErrorType::UHDM_INTERNAL_ERROR_OUT_OF_BOUND, fullPath,
+                       op, nullptr);
+                   cval = "0";
+                 }
                 c1->VpiValue("BIN:" + cval);
                 c1->VpiSize(csize);
                 c1->VpiConstType(vpiBinaryConst);
