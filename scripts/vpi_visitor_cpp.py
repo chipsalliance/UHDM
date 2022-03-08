@@ -19,14 +19,15 @@ def _get_implementation(classname, vpi, card):
             # Prevent stepping inside tasks while processing calls (task_call, method_task_call) to them
             shallow_visit = 'true'
 
-        # Prevent loop in Standard VPI
-        if vpi not in ['vpiModule', 'vpiInterface']:
-            content.append(f'  itr = vpi_handle({vpi}, obj_h);')
-            content.append(f'  visit_object(itr, indent + kLevelIndent, "{vpi}", visited, out, {shallow_visit});')
-            content.append( '  release_handle(itr);')
+        if vpi in ['vpiInstance', 'vpiModule', 'vpiInterface']:
+            # Prevent walking upwards and makes the UHDM output cleaner
+            # Prevent loop in Standard VPI
+            shallow_visit = 'true'
 
+        content.append(f'  itr = vpi_handle({vpi}, obj_h);')
+        content.append(f'  visit_object(itr, indent + kLevelIndent, "{vpi}", visited, out, {shallow_visit});')
+        content.append( '  release_handle(itr);')
     else:
-
         # Prevent loop in Standard VPI
         if vpi != 'vpiUse':
             content.append(f'  itr = vpi_iterate({vpi}, obj_h);')

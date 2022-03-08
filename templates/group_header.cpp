@@ -28,23 +28,24 @@
 #include <uhdm/uhdm.h>
 
 namespace UHDM {
-bool <GROUPNAME>GroupCompliant(any* item) {
+bool <GROUPNAME>GroupCompliant(const any* item) {
   if (item == nullptr) {
     return true;
   }
-  BaseClass* the_item = (BaseClass*) item;
-  UHDM_OBJECT_TYPE uhdmtype = the_item->UhdmType();
+  UHDM_OBJECT_TYPE uhdmtype = item->UhdmType();
   if (<CHECKTYPE>) {
-    item->GetSerializer()->GetErrorHandler()(ErrorType::UHDM_WRONG_OBJECT_TYPE, "Internal Error: adding wrong object type (" + UhdmName(uhdmtype) + ") in a <GROUPNAME> group!", the_item, nullptr);
+    item->GetSerializer()->GetErrorHandler()(ErrorType::UHDM_WRONG_OBJECT_TYPE, "Internal Error: adding wrong object type (" + UhdmName(uhdmtype) + ") in a <GROUPNAME> group!", item, nullptr);
     return false;
   }
   return true;
 }
 
-bool <GROUPNAME>GroupCompliant(VectorOfany* vec) {
-  for (auto item : *vec) {
-    if (!<GROUPNAME>GroupCompliant(item)) {
-      return false;
+bool <GROUPNAME>GroupCompliant(const VectorOfany* vec) {
+  if (vec != nullptr) {
+    for (auto item : *vec) {
+      if (!<GROUPNAME>GroupCompliant(item)) {
+        return false;
+      }
     }
   }
   return true;

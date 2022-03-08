@@ -30,8 +30,8 @@
 
 namespace UHDM {
 
-bool <GROUPNAME>GroupCompliant(any* item);
-bool <GROUPNAME>GroupCompliant(VectorOfany* vec);
+bool <GROUPNAME>GroupCompliant(const any* item);
+bool <GROUPNAME>GroupCompliant(const VectorOfany* vec);
 
 }  // namespace UHDM
 
