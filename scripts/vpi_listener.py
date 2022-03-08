@@ -60,23 +60,24 @@ def generate(models):
             declarations.append(f'void listen_{classname}(vpiHandle handle, VpiListener* listener);')
             declarations.append(f'void listen_{classname}(vpiHandle handle, VpiListener* listener, VisitedContainer* visited);')
 
-        private_implementations.append(f'static void listen_{classname}_(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle, VpiListener* listener, VisitedContainer* visited) {{')
-        if baseclass:
-            private_implementations.append(f'  listen_{baseclass}_(object, parent, handle, parentHandle, listener, visited);')
+        if model.get('subclasses') or modeltype == 'obj_def':
+            private_implementations.append(f'static void listen_{classname}_(const {classname}* object, const BaseClass* parent, vpiHandle handle, vpiHandle parentHandle, VpiListener* listener, VisitedContainer* visited) {{')
+            if baseclass:
+                private_implementations.append(f'  listen_{baseclass}_(object, parent, handle, parentHandle, listener, visited);')
 
-        for key, value in model.allitems():
-            if key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
-                vpi  = value.get('vpi')
-                type = value.get('type')
-                card = value.get('card')
+            for key, value in model.allitems():
+                if key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
+                    vpi  = value.get('vpi')
+                    type = value.get('type')
+                    card = value.get('card')
 
-                if key == 'group_ref':
-                    type = 'any'
+                    if key == 'group_ref':
+                        type = 'any'
 
-                private_implementations.extend(_get_listeners(classname, vpi, type, card))
+                    private_implementations.extend(_get_listeners(classname, vpi, type, card))
 
-        private_implementations.append( '}')
-        private_implementations.append( '')
+            private_implementations.append( '}')
+            private_implementations.append( '')
 
         if modeltype != 'class_def':
             public_implementations.append(f'void UHDM::listen_{classname}(vpiHandle handle, VpiListener* listener, VisitedContainer* visited) {{')
