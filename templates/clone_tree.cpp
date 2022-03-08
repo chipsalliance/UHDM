@@ -133,6 +133,11 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
     clone->Tf_call_args(Tf_call_args());
     clone->UhdmId(id);
     clone->VpiParent(parent);
+    clone->VpiFile(VpiFile());
+    clone->VpiLineNo(VpiLineNo());
+    clone->VpiColumnNo(VpiColumnNo());
+    clone->VpiEndLineNo(VpiEndLineNo());
+    clone->VpiEndColumnNo(VpiEndColumnNo());
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
@@ -242,6 +247,11 @@ tf_call* method_task_call::DeepClone(Serializer* serializer,
     clone->Tf_call_args(Tf_call_args());
     clone->UhdmId(id);
     clone->VpiParent(parent);
+    clone->VpiFile(VpiFile());
+    clone->VpiLineNo(VpiLineNo());
+    clone->VpiColumnNo(VpiColumnNo());
+    clone->VpiEndLineNo(VpiEndLineNo());
+    clone->VpiEndColumnNo(VpiEndColumnNo());
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
