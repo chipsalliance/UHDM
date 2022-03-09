@@ -38,7 +38,7 @@
 #include <uhdm/vpi_uhdm.h>
 #include <uhdm/SymbolFactory.h>
 
-#define UHDM_MAX_BIT_WIDTH 4096
+#define UHDM_MAX_BIT_WIDTH 1024*1024
 
 namespace UHDM {
 enum ErrorType {
