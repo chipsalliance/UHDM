@@ -2188,23 +2188,23 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             int csize = 0;
             bool stringVal = false;
             for (unsigned int i = 0; i < operands.size(); i++) {
-              any *op = operands[i];
-              UHDM_OBJECT_TYPE optype = op->UhdmType();
+              any *oper = operands[i];
+              UHDM_OBJECT_TYPE optype = oper->UhdmType();
               int operType = 0;
               if (optype == uhdmoperation) {
-                operation *o = (operation *)op;
+                operation *o = (operation *)oper;
                 operType = o->VpiOpType();
               }
               if ((optype != uhdmconstant) && (operType != vpiConcatOp) &&
                   (operType != vpiMultiAssignmentPatternOp) &&
                   (operType != vpiAssignmentPatternOp)) {
-                if (expr *tmp = reduceExpr(op, invalidValue, inst, pexpr)) {
-                  op = tmp;
+                if (expr *tmp = reduceExpr(oper, invalidValue, inst, pexpr)) {
+                  oper = tmp;
                 }
                 optype = op->UhdmType();
               }
               if (optype == uhdmconstant) {
-                constant *c2 = (constant *)op;
+                constant *c2 = (constant *)oper;
                 std::string v = c2->VpiValue();
                 unsigned int size = c2->VpiSize();
                 csize += size;
@@ -2228,7 +2228,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                       long long iv = std::strtoll(
                           v.c_str() + std::string_view("DEC:").length(),
                           nullptr, 10);
-                      cval += toBinary(size, iv);
+                      std::string bin = toBinary(size, iv);
+                      if (op->VpiReordered()) {
+                        std::reverse(bin.begin(), bin.end());
+                      }
+                      cval += bin;
                     } else {
                       c1 = nullptr;
                     }
@@ -2259,7 +2263,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                       int64_t iv = std::strtoll(
                           v.c_str() + std::string_view("INT:").length(),
                           nullptr, 10);
-                      cval += toBinary(size, iv);
+                      std::string bin = toBinary(size, iv);
+                      if (op->VpiReordered()) {
+                        std::reverse(bin.begin(), bin.end());
+                      }
+                      cval += bin;
                     } else {
                       c1 = nullptr;
                     }
@@ -2270,7 +2278,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                       uint64_t iv = std::strtoull(
                           v.c_str() + std::string_view("UINT:").length(),
                           nullptr, 10);
-                      cval += toBinary(size, iv);
+                      std::string bin = toBinary(size, iv);
+                      if (op->VpiReordered()) {
+                        std::reverse(bin.begin(), bin.end());
+                      }
+                      cval += bin;
                     } else {
                       c1 = nullptr;
                     }
@@ -2288,12 +2300,20 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                       uint64_t iv = std::strtoull(
                           v.c_str() + std::string_view("UINT:").length(),
                           nullptr, 10);
-                      cval += toBinary(size, iv);
+                      std::string bin = toBinary(size, iv);
+                      if (op->VpiReordered()) {
+                        std::reverse(bin.begin(), bin.end());
+                      }
+                      cval += bin;
                     } else {
                       int64_t iv = std::strtoll(
                           v.c_str() + std::string_view("INT:").length(),
                           nullptr, 10);
-                      cval += toBinary(size, iv);
+                      std::string bin = toBinary(size, iv);
+                      if (op->VpiReordered()) {
+                        std::reverse(bin.begin(), bin.end());
+                      }
+                      cval += bin;
                     }
                     break;
                   }
@@ -2309,21 +2329,24 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 c1->VpiSize(static_cast<int>(cval.size() * 8));
                 c1->VpiConstType(vpiStringConst);
               } else {
-                 if (cval.size() > UHDM_MAX_BIT_WIDTH) {
-                   std::string fullPath;
-                   if (const gen_scope_array *in =
-                           any_cast<gen_scope_array *>(inst)) {
-                     fullPath = in->VpiFullName();
-                   } else if (inst->UhdmType() == uhdmdesign) {
-                     fullPath = inst->VpiName();
-                   } else if (any_cast<scope *>(inst)) {
-                     fullPath = ((scope *)inst)->VpiFullName();
-                   }
-                   s.GetErrorHandler()(
-                       ErrorType::UHDM_INTERNAL_ERROR_OUT_OF_BOUND, fullPath,
-                       op, nullptr);
-                   cval = "0";
-                 }
+                if (op->VpiReordered()) {
+                  std::reverse(cval.begin(), cval.end());
+                }
+                if (cval.size() > UHDM_MAX_BIT_WIDTH) {
+                  std::string fullPath;
+                  if (const gen_scope_array *in =
+                          any_cast<gen_scope_array *>(inst)) {
+                    fullPath = in->VpiFullName();
+                  } else if (inst->UhdmType() == uhdmdesign) {
+                    fullPath = inst->VpiName();
+                  } else if (any_cast<scope *>(inst)) {
+                    fullPath = ((scope *)inst)->VpiFullName();
+                  }
+                  s.GetErrorHandler()(
+                      ErrorType::UHDM_INTERNAL_ERROR_OUT_OF_BOUND, fullPath, op,
+                      nullptr);
+                  cval = "0";
+                }
                 c1->VpiValue("BIN:" + cval);
                 c1->VpiSize(csize);
                 c1->VpiConstType(vpiBinaryConst);
