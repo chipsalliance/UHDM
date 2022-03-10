@@ -2219,6 +2219,9 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                         value += '0';
                       }
                     }
+                    if (op->VpiReordered()) {
+                      std::reverse(tmp.begin(), tmp.end());
+                    }
                     value += tmp;
                     cval += value;
                     break;
@@ -2247,6 +2250,9 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                         value += '0';
                       }
                     }
+                    if (op->VpiReordered()) {
+                      std::reverse(tmp.begin(), tmp.end());
+                    }
                     value += tmp;
                     cval += value;
                     break;
@@ -2255,7 +2261,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     long long iv = std::strtoll(
                         v.c_str() + std::string_view("OCT:").length(), nullptr,
                         8);
-                    cval += toBinary(size, iv);
+                    std::string bin = toBinary(size, iv);
+                    if (op->VpiReordered()) {
+                      std::reverse(bin.begin(), bin.end());
+                    }
+                    cval += bin;
                     break;
                   }
                   case vpiIntConst: {
