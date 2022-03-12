@@ -25,7 +25,8 @@
 #include <string.h>
 #include <uhdm/ExprEval.h>
 #include <uhdm/uhdm.h>
-
+#include <uhdm/clone_tree.h>
+#include <uhdm/ElaboratorListener.h>
 #include <algorithm>
 #include <bitset>
 #include <cmath>
@@ -2665,6 +2666,475 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
   }
   return (expr *)result;
 }
+
+bool ExprEval::setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp, bool& invalidValue, Serializer& s, const any* inst) {
+  bool invalidValueI = false;
+  bool invalidValueD = false;
+  int64_t valI = get_value(invalidValueI, rhsexp);
+  long double valD = 0;
+  if (invalidValueI) {
+    valD = get_double(invalidValueD, rhsexp);
+  }
+  UHDM::VectorOfparam_assign *param_assigns = nullptr;
+  if (inst->UhdmType() == uhdmgen_scope_array) {
+  } else if (inst->UhdmType() == uhdmdesign) {
+    param_assigns = ((design *)inst)->Param_assigns();
+    if (param_assigns == nullptr) {
+      ((design *)inst)->Param_assigns(s.MakeParam_assignVec());
+      param_assigns = ((design *)inst)->Param_assigns();
+    }
+  } else if (any_cast<scope *>(inst)) {
+    param_assigns = ((scope *)inst)->Param_assigns();
+    if (param_assigns == nullptr) {
+      ((scope *)inst)->Param_assigns(s.MakeParam_assignVec());
+      param_assigns = ((scope *)inst)->Param_assigns();
+    }
+  }
+  if (invalidValueI && invalidValueD) {
+    if (param_assigns) {
+      param_assign *pa = s.MakeParam_assign();
+      pa->Rhs(rhsexp);
+      pa->Lhs((any *)lhsexp);
+      param_assigns->push_back(pa);
+    }
+  } else if (invalidValueI) {
+    if (param_assigns) {
+      constant *c = s.MakeConstant();
+      c->VpiValue("REAL:" + std::to_string((double)valD));
+      c->VpiSize(64);
+      c->VpiConstType(vpiRealConst);
+      param_assign *pa = s.MakeParam_assign();
+      pa->Rhs(c);
+      ref_obj *ref = s.MakeRef_obj();
+      ref->VpiName(lhs);
+      pa->Lhs(ref);
+      param_assigns->push_back(pa);
+    }
+  } else {
+    if (param_assigns) {
+      constant *c = s.MakeConstant();
+      c->VpiValue("INT:" + std::to_string(valI));
+      c->VpiSize(32);
+      c->VpiConstType(vpiIntConst);
+      param_assign *pa = s.MakeParam_assign();
+      pa->Rhs(c);
+      ref_obj *ref = s.MakeRef_obj();
+      ref->VpiName(lhs);
+      pa->Lhs(ref);
+      param_assigns->push_back(pa);
+    }
+  }
+  if (invalidValueI && invalidValueD) invalidValue = true;
+  return invalidValue;
+}
+
+void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
+                             bool& invalidValue, bool& continue_flag,
+                             bool& break_flag, const any* inst,
+                             const std::filesystem::path& fileName, int lineNumber,
+                             const any* stmt) {
+  if (invalidValue) {
+    return;
+  }
+  Serializer &s = *inst->GetSerializer();
+  UHDM_OBJECT_TYPE stt = stmt->UhdmType();
+  switch (stt) {
+    case uhdmcase_stmt: {
+      case_stmt* st = (case_stmt*)stmt;
+      expr* cond = (expr*)st->VpiCondition();
+      int64_t val =
+          get_value(invalidValue,
+                    reduceExpr(cond, invalidValue,
+                               scopes.back(), nullptr));
+      for (case_item* item : *st->Case_items()) {
+        VectorOfany* exprs = item->VpiExprs();
+        bool done = false;
+        for (any* exp : *exprs) {
+          int64_t vexp = get_value(
+              invalidValue,
+              reduceExpr(exp, invalidValue, 
+                         scopes.back(), nullptr));
+          if (val == vexp) {
+            EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                     scopes.back(), fileName,
+                     lineNumber, item->Stmt());
+            done = true;
+            break;
+          }
+        }
+        if (done) break;
+      }
+      break;
+    }
+    case uhdmif_else: {
+      if_else* st = (if_else*)stmt;
+      expr* cond = (expr*)st->VpiCondition();
+      int64_t val =
+          get_value(invalidValue,
+                    reduceExpr(cond, invalidValue, 
+                               scopes.back(), nullptr));
+      if (val > 0) {
+        EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                  scopes.back(), fileName, lineNumber,
+                 st->VpiStmt());
+      } else {
+        EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                 scopes.back(), fileName, lineNumber,
+                 st->VpiElseStmt());
+      }
+      break;
+    }
+    case uhdmif_stmt: {
+      if_stmt* st = (if_stmt*)stmt;
+      expr* cond = (expr*)st->VpiCondition();
+      int64_t val =
+          get_value(invalidValue,
+                    reduceExpr(cond, invalidValue, 
+                               scopes.back(), nullptr));
+      if (val > 0) {
+        EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                scopes.back(), fileName, lineNumber,
+                 st->VpiStmt());
+      }
+      break;
+    }
+    case uhdmbegin: {
+      begin* st = (begin*)stmt;
+      if (st->Stmts()) {
+        for (auto bst : *st->Stmts()) {
+          EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                  scopes.back(), fileName,
+                   lineNumber, bst);
+          if (continue_flag) {
+            return;
+          }
+          if (break_flag) {
+            return;
+          }
+        }
+      }
+      break;
+    }
+    case uhdmnamed_begin: {
+      named_begin* st = (named_begin*)stmt;
+      if (st->Stmts()) {
+        for (auto bst : *st->Stmts()) {
+          EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                   scopes.back(), fileName,
+                   lineNumber, bst);
+          if (continue_flag) {
+            return;
+          }
+          if (break_flag) {
+            return;
+          }
+        }
+      }
+      break;
+    }
+    case uhdmassignment: {
+      assignment* st = (assignment*)stmt;
+      const std::string lhs = st->Lhs()->VpiName();
+      expr* lhsexp = (expr*)st->Lhs();
+      expr* rhs = (expr*)st->Rhs();
+      expr* rhsexp = reduceExpr(rhs, invalidValue, 
+                                scopes.back(), nullptr);
+      invalidValue = setValueInInstance(lhs, lhsexp, rhsexp, invalidValue, s, inst);
+      break;
+    }
+    case uhdmassign_stmt: {
+      assign_stmt *st = (assign_stmt *)stmt;
+      const std::string lhs = st->Lhs()->VpiName();
+      expr *lhsexp = (expr *)st->Lhs();
+      expr *rhs = (expr *)st->Rhs();
+      expr *rhsexp = reduceExpr(rhs, invalidValue, scopes.back(), nullptr);
+      invalidValue =
+          setValueInInstance(lhs, lhsexp, rhsexp, invalidValue, s, inst);
+      break;
+    }
+    case uhdmrepeat: {
+      repeat* st = (repeat*)stmt;
+      const expr* cond = st->VpiCondition();
+      expr* rcond =
+          reduceExpr((expr*)cond, invalidValue, 
+                     scopes.back(),  nullptr);
+      int64_t val =
+          get_value(invalidValue,
+                    reduceExpr(rcond, invalidValue, 
+                               scopes.back(), nullptr));
+      if (invalidValue == false) {
+        for (int i = 0; i < val; i++) {
+          EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                   scopes.back(), fileName,
+                   lineNumber, st->VpiStmt());
+        }
+      }
+      break;
+    }
+    case uhdmfor_stmt: {
+      for_stmt* st = (for_stmt*)stmt;
+      if (st->VpiForInitStmt()) {
+        EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                  scopes.back(), fileName, lineNumber,
+                 st->VpiForInitStmt());
+      }
+      if (st->VpiForInitStmts()) {
+        for (auto s : *st->VpiForInitStmts()) {
+          EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                   scopes.back(), fileName,
+                   lineNumber, s);
+        }
+      }
+      while (1) {
+        expr* cond = (expr*)st->VpiCondition();
+        if (cond) {
+          int64_t val = get_value(
+              invalidValue,
+              reduceExpr(cond, invalidValue, 
+                         scopes.back(), nullptr));
+          if (val == 0) {
+            break;
+          }
+          if (invalidValue) break;
+        }
+        EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                 scopes.back(), fileName, lineNumber,
+                 st->VpiStmt());
+        if (invalidValue) break;
+        if (continue_flag) {
+          continue_flag = false;
+          continue;
+        }
+        if (break_flag) {
+          break_flag = false;
+          break;
+        }
+        if (st->VpiForIncStmt()) {
+          EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                 scopes.back(), fileName,
+                   lineNumber, st->VpiForIncStmt());
+        }
+        if (invalidValue) break;
+        if (st->VpiForIncStmts()) {
+          for (auto s : *st->VpiForIncStmts()) {
+            EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                    scopes.back(), fileName,
+                     lineNumber, s);
+          }
+        }
+        if (invalidValue) break;
+      }
+      break;
+    }
+    case uhdmreturn_stmt: {
+      return_stmt* st = (return_stmt*)stmt;
+      expr* cond = (expr*)st->VpiCondition();
+      if (cond) {
+        expr* rhsexp = reduceExpr(cond, invalidValue,
+                                  scopes.back(),  nullptr);
+        ref_obj* lhsexp = s.MakeRef_obj();
+        lhsexp->VpiName(funcName);
+        invalidValue =
+            setValueInInstance(funcName, lhsexp, rhsexp, invalidValue, s, inst);
+      }
+      break;
+    }
+    case uhdmwhile_stmt: {
+      while_stmt* st = (while_stmt*)stmt;
+      expr* cond = (expr*)st->VpiCondition();
+      if (cond) {
+        while (1) {
+          int64_t val = get_value(
+              invalidValue,
+              reduceExpr(cond, invalidValue, 
+                         scopes.back(), nullptr));
+          if (invalidValue) break;
+          if (val == 0) {
+            break;
+          }
+          EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                  scopes.back(), fileName, lineNumber, st->VpiStmt());
+          if (invalidValue) break;
+          if (continue_flag) {
+            continue_flag = false;
+            continue;
+          }
+          if (break_flag) {
+            break_flag = false;
+            break;
+          }
+        }
+      }
+      break;
+    }
+    case uhdmdo_while: {
+      do_while* st = (do_while*)stmt;
+      expr* cond = (expr*)st->VpiCondition();
+      if (cond) {
+        while (1) {
+          EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                    scopes.back(),fileName, lineNumber, st->VpiStmt());
+          if (invalidValue) break;
+          if (continue_flag) {
+            continue_flag = false;
+            continue;
+          }
+          if (break_flag) {
+            break_flag = false;
+            break;
+          }
+          int64_t val = get_value(
+              invalidValue,
+              reduceExpr(cond, invalidValue,
+                         scopes.back(),  nullptr));
+          if (invalidValue) break;
+          if (val == 0) {
+            break;
+          }
+        }
+      }
+      break;
+    }
+    case uhdmcontinue_stmt: {
+      continue_flag = true;
+      break;
+    }
+    case uhdmbreak_stmt: {
+      break_flag = true;
+      break;
+    }
+    case uhdmoperation: {
+      operation* op = (operation*)stmt;
+      // ++, -- ops
+      reduceExpr(op, invalidValue,  scopes.back(),
+                  nullptr);
+      break;
+    }
+    default: {
+      invalidValue = true;
+      s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, inst->VpiName(),
+                          stmt, nullptr);
+      break;
+    }
+  }
+}
+
+expr* ExprEval::EvalFunc(UHDM::function* func, std::vector<any*>* args,
+                              bool& invalidValue, const any* inst,
+                              const std::filesystem::path& fileName, int lineNumber,
+                              any* pexpr) {
+  if (func == nullptr) {
+    invalidValue = true;
+    return nullptr;
+  }
+  Serializer &s = *func->GetSerializer();
+  const std::string name = func->VpiName();
+  // set internal scope stack
+  Scopes scopes;
+  module* scope = s.MakeModule();
+  UHDM::VectorOfparam_assign *param_assigns = nullptr;
+  if (inst->UhdmType() == uhdmgen_scope_array) {
+  } else if (inst->UhdmType() == uhdmdesign) {
+    param_assigns = ((design *)inst)->Param_assigns();
+  } else if (any_cast<UHDM::scope *>(inst)) {
+    param_assigns = ((UHDM::scope *)inst)->Param_assigns();
+  }
+  if (param_assigns) {
+    scope->Param_assigns(s.MakeParam_assignVec());
+    for (auto p : *param_assigns) {
+      ElaboratorListener listener(&s);
+      any* pp = UHDM::clone_tree(p, s, &listener);
+      scope->Param_assigns()->push_back((param_assign*) pp);
+    }
+  }
+
+  // default return value is invalid
+  constant* c = s.MakeConstant();
+  c->VpiValue("INT:0");
+  c->VpiSize(64);
+  c->VpiConstType(vpiIntConst);
+  param_assign* pa = s.MakeParam_assign();
+  pa->Rhs(c);
+  ref_obj* ref = s.MakeRef_obj();
+  ref->VpiName(name);
+  pa->Lhs(ref);
+  scope->Param_assigns()->push_back(pa);
+  
+  // set args
+  if (func->Io_decls()) {
+    unsigned int index = 0;
+    for (auto io : *func->Io_decls()) {
+      if (args && (index < args->size())) {
+        const std::string ioname = io->VpiName();
+        expr* ioexp = (expr*)args->at(index);
+        expr* exparg = reduceExpr(ioexp, invalidValue,
+                                  inst, pexpr);
+        invalidValue =
+            setValueInInstance(ioname, io, exparg, invalidValue, s, inst);                          
+      }
+      index++;
+    }
+  } else {
+    return nullptr;
+  }
+  scopes.push_back(scope);
+  if (const UHDM::any* the_stmt = func->Stmt()) {
+    UHDM_OBJECT_TYPE stt = the_stmt->UhdmType();
+    switch (stt) {
+      case uhdmbegin: {
+        UHDM::begin* st = (UHDM::begin*)the_stmt;
+        bool continue_flag = false;
+        bool break_flag = false;
+        for (auto stmt : *st->Stmts()) {
+          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag,
+                    scope, fileName, lineNumber, stmt);
+          if (continue_flag || break_flag) {
+            s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, inst->VpiName(),
+                          stmt, nullptr);
+          }
+        }
+        break;
+      }
+      case uhdmnamed_begin: {
+        UHDM::named_begin* st = (UHDM::named_begin*)the_stmt;
+        bool continue_flag = false;
+        bool break_flag = false;
+        for (auto stmt : *st->Stmts()) {
+          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag,
+                   scope, fileName, lineNumber, stmt);
+          if (continue_flag || break_flag) {
+            s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, inst->VpiName(),
+                          stmt, nullptr);
+          }
+        }
+        break;
+      }
+      default: {
+        bool continue_flag = false;
+        bool break_flag = false;
+        EvalStmt(name, scopes, invalidValue, continue_flag, break_flag,
+                  scope, fileName, lineNumber,
+                 the_stmt);
+        if (continue_flag || break_flag) {
+          s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, inst->VpiName(),
+                          the_stmt, nullptr);
+        }
+        break;
+      }
+    }
+  }
+  // return value
+  if (scope->Param_assigns()) {
+    for (auto p : *scope->Param_assigns()) {
+      if (p->VpiName() == name) {
+        invalidValue = false;
+        return (expr *)p->Rhs();
+      }
+    }
+  }
+  return nullptr;
+}
+
 
 namespace UHDM {
 std::string vPrint(UHDM::any *handle) {

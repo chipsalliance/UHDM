@@ -76,6 +76,20 @@ class ExprEval {
   void recursiveFlattening(Serializer& s, VectorOfany* flattened,
                            const VectorOfany* ordered,
                            std::vector<const typespec*> fieldTypes);
+
+  typedef std::vector<module*> Scopes;
+
+  UHDM::expr* EvalFunc(UHDM::function* func, std::vector<UHDM::any*>* args,
+                       bool& invalidValue, const any* inst,
+                       const std::filesystem::path& fileName, int lineNumber,
+                       UHDM::any* pexpr);
+
+  void EvalStmt(const std::string& funcName, Scopes& scopes, bool& invalidValue,
+                bool& continue_flag, bool& break_flag, const any* inst,
+                const std::filesystem::path& fileName, int lineNumber,
+                const UHDM::any* stmt);
+
+  bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp, bool& invalidValue, Serializer& s, const any* inst);
 };
 
 std::string vPrint(UHDM::any* handle);
