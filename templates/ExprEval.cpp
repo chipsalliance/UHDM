@@ -1367,6 +1367,61 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
   return result;
 }
 
+static UHDM::task_func *getTaskFunc(const std::string &name, const any *inst) {
+  if (inst == nullptr) {
+    return nullptr;
+  }
+  const any *root = inst;
+  const any *tmp = inst;
+  while (tmp) {
+    root = tmp;
+    tmp = tmp->VpiParent();
+  }
+  const design *des = any_cast<design *>(root);
+  std::string the_name = name;
+  const any *the_instance = inst;
+  if (des && (name.find("::") != std::string::npos)) {
+    std::vector<std::string> res;
+    tokenizeMulti(name, "::", res);
+    if (res.size() > 1) {
+      const std::string &packName = res[0];
+      const std::string &varName = res[1];
+      the_name = varName;
+      package *pack = nullptr;
+      if (des->TopPackages()) {
+        for (auto p : *des->TopPackages()) {
+          if (p->VpiName() == packName) {
+            pack = p;
+            break;
+          }
+        }
+      }
+      the_instance = pack;
+    }
+  }
+  while (the_instance) {
+    UHDM::VectorOftask_func *task_funcs = nullptr;
+    if (the_instance->UhdmType() == uhdmgen_scope_array) {
+    } else if (the_instance->UhdmType() == uhdmdesign) {
+      task_funcs = ((design *)the_instance)->Task_funcs();
+    } else if (any_cast<instance *>(the_instance)) {
+      task_funcs = ((UHDM::instance *)the_instance)->Task_funcs();
+    }
+
+    if (task_funcs) {
+      for (UHDM::task_func *tf : *task_funcs) {
+        if (tf->VpiName() == name) {
+          return tf;
+        }
+      }
+    }
+
+    the_instance = the_instance->VpiParent();
+  }
+
+  return nullptr;
+}
+
 expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                            const any *inst, const any *pexpr) {
   Serializer &s = *result->GetSerializer();
@@ -2444,10 +2499,24 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       TODO in UHDM
     */
   } else if (objtype == uhdmfunc_call) {
-    invalidValue = true;
-    /*
-      TODO in UHDM
-    */
+    func_call *scall = (func_call *)result;
+    const std::string &name = scall->VpiName();
+    std::vector<any *> *args = scall->Tf_call_args();
+    UHDM::task_func *func = getTaskFunc(name, inst);
+    function *actual_func = nullptr;
+    if (func) {
+      actual_func = any_cast<function *>(func);
+    }
+    if (actual_func == nullptr) {
+      s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_USER_FUNCTION, name, scall,
+                          nullptr);
+      invalidValue = true;
+    }
+    expr *tmp = EvalFunc(actual_func, args, invalidValue, inst,
+                         scall->VpiFile(), scall->VpiLineNo(), (any *)pexpr);
+    if (tmp && (invalidValue == false)) {
+      result = tmp;
+    }
   } else if (objtype == uhdmref_obj) {
     ref_obj *ref = (ref_obj *)result;
     const std::string &name = ref->VpiName();
