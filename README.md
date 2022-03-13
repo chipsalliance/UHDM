@@ -104,9 +104,9 @@
  * After Deserialization of the persisted design (elaborated or not) (Read [`module-port_test.cpp`](tests/module-port_test.cpp))
  * Client applications can elaborate optionally and use the VPI interface to navigate the Object Model and create their own internal data structures (Read [`tests/listener_elab_test.cpp`](tests/listener_elab_test.cpp))
  * Or use the Visitor (More like a Walker)
-   * An example Visitor is auto-generated to print the content of the data model [`visitor.cpp`](templates/vpi_visitor.cpp)
+   * An example Visitor is auto-generated to print the content of the data model [`vpi_visitor.cpp`](templates/vpi_visitor.cpp)
  * Or use the Listener Design Pattern
-   * An example Listener is used as an example (tests/vpi_listener.cpp),
+   * Examples can be found in tests/vpi_listener.cpp or tests/uhdm_listener.cpp
    * The listener enables client application development with minimum disruption while the data model evolves.
    * An Custom Elaborator example code uses the Listener Design Pattern in [`listener_elab_test.cpp`](tests/listener_elab_test.cpp)
    * A Full Elaboration example is demonstrated in [`full_elab_test.cpp`](tests/full_elab_test.cpp) and [`uhdm-dump.cpp`](util/uhdm-dump.cpp)

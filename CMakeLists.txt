@@ -122,16 +122,17 @@ add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
 set(uhdm-GENERATED_SRC
     ${GENDIR}/src/BaseClass.cpp
+    ${GENDIR}/src/clone_tree.cpp
     ${GENDIR}/src/ElaboratorListener.cpp
     ${GENDIR}/src/ExprEval.cpp
-    ${GENDIR}/src/UhdmLint.cpp
-    ${GENDIR}/src/SynthSubset.cpp
     ${GENDIR}/src/Serializer.cpp
     ${GENDIR}/src/Serializer_restore.cpp
     ${GENDIR}/src/Serializer_save.cpp
     ${GENDIR}/src/SymbolFactory.cpp
+    ${GENDIR}/src/SynthSubset.cpp
     ${GENDIR}/src/UHDM.capnp.c++
-    ${GENDIR}/src/clone_tree.cpp
+    ${GENDIR}/src/UhdmLint.cpp
+    ${GENDIR}/src/UhdmListener.cpp
     ${GENDIR}/src/vpi_listener.cpp
     ${GENDIR}/src/vpi_user.cpp
     ${GENDIR}/src/vpi_visitor.cpp
@@ -216,20 +217,21 @@ if (UHDM_BUILD_TESTS)
   register_tests(
     # These are already gtest-ified, albeit some would need some finer
     # grained testing.
-    tests/module-port_test.cpp
-    tests/statement_test.cpp
-    tests/tf_call_test.cpp
-    tests/process_test.cpp
-    tests/vpi_listener_test.cpp
-    tests/vpi_value_conversion_test.cpp
-    tests/vpi_get_test.cpp
-    tests/listener_elab_test.cpp
-    tests/full_elab_test.cpp
-    tests/error-handler_test.cpp
     tests/classes_test.cpp
+    tests/error-handler_test.cpp
+    tests/expr_reduce_test.cpp
+    tests/full_elab_test.cpp
     tests/garbage_collect_test.cpp
     tests/group_membership_test.cpp
-    tests/expr_reduce_test.cpp
+    tests/listener_elab_test.cpp
+    tests/module-port_test.cpp
+    tests/process_test.cpp
+    tests/statement_test.cpp
+    tests/tf_call_test.cpp
+    tests/uhdm_listener_test.cpp
+    tests/vpi_get_test.cpp
+    tests/vpi_listener_test.cpp
+    tests/vpi_value_conversion_test.cpp
   )
 endif()
 
