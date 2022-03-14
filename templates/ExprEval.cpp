@@ -131,6 +131,9 @@ void tokenizeMulti(std::string_view str, std::string_view separator,
 
 any *ExprEval::getValue(const std::string &name, const any *inst,
                         const any *pexpr) {
+  if (getValueFunctor) {
+    return getValueFunctor(name, inst, pexpr);
+  }
   if ((inst == nullptr) && (pexpr == nullptr)) {
     return nullptr;
   }
@@ -240,6 +243,9 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
 
 any *ExprEval::getObject(const std::string &name, const any *inst,
                          const any *pexpr) {
+  if (getObjectFunctor) {
+    return getObjectFunctor(name, inst, pexpr);
+  }
   any *result = nullptr;
   while (pexpr) {
     if (const UHDM::scope *s = any_cast<const scope *>(pexpr)) {

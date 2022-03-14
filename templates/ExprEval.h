@@ -30,19 +30,30 @@
 #include <uhdm/expr.h>
 #include <uhdm/typespec.h>
 
+#include <functional>
 #include <iostream>
 #include <sstream>
 
 namespace UHDM {
 class Serializer;
+
+typedef std::function<any*(const std::string& name, const any* inst,
+                           const any* pexpr)>
+    GetObjectFunctor;
+
 class ExprEval {
  public:
   bool isFullySpecified(const typespec* tps);
 
+  /* Computes the size in bits of an object {typespec, var, net, operation...}.
+   */
   uint64_t size(
       const any* object, bool& invalidValue, const any* inst, const any* pexpr,
       bool full /* false: use only last range size, true: use all ranges */);
 
+  /* Tries to reduce any expression into a constant, returns the orignal
+     expression if fails. If am invalid value is found in the process,
+     invalidValue will be set to true */
   expr* reduceExpr(const any* object, bool& invalidValue, const any* inst,
                    const any* pexpr);
 
@@ -98,6 +109,13 @@ class ExprEval {
 
   bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst);
+
+  void setGetObjectFunctor(GetObjectFunctor func) { getObjectFunctor = func; }
+  void setGetValueFunctor(GetObjectFunctor func) { getValueFunctor = func; }
+  
+  private:
+    GetObjectFunctor getObjectFunctor = nullptr;
+    GetObjectFunctor getValueFunctor = nullptr;
 };
 
 std::string vPrint(UHDM::any* handle);
