@@ -644,6 +644,12 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
   if (typespec) {
     UHDM_OBJECT_TYPE ttps = typespec->UhdmType();
     switch (ttps) {
+      case UHDM::uhdmhier_path: {
+        typespec = decodeHierPath((hier_path *)typespec, invalidValue, inst,
+                                  nullptr, true);
+        bits = size(typespec, invalidValue, inst, pexpr, full);
+        break;
+      }
       case UHDM::uhdmarray_typespec: {
         array_typespec *lts = (array_typespec *)typespec;
         ranges = lts->Ranges();
