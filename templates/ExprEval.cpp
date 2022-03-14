@@ -2494,10 +2494,116 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
   } else if (objtype == uhdmconstant) {
     return (expr *)result;
   } else if (objtype == uhdmsys_func_call) {
-    invalidValue = true;
-    /*
-      TODO in UHDM
-    */
+    sys_func_call *scall = (sys_func_call *)result;
+    const std::string &name = scall->VpiName();
+    if ((name == "$bits") || (name == "$size") || (name == "$high") ||
+        (name == "$low") || (name == "$left") || (name == "$right")) {
+      uint64_t bits = 0;
+      bool found = false;
+      for (auto arg : *scall->Tf_call_args()) {
+        UHDM::UHDM_OBJECT_TYPE argtype = arg->UhdmType();
+        if (argtype == uhdmref_obj) {
+          ref_obj *ref = (ref_obj *)arg;
+          const std::string &objname = ref->VpiName();
+          any *object = getObject(objname, inst, pexpr);
+          if (object) {
+            if (UHDM::param_assign *passign =
+                    any_cast<param_assign *>(object)) {
+              object = (any *)passign->Rhs();
+            }
+          }
+          if (object == nullptr) {
+            object = (expr *)getValue(objname, inst, pexpr);
+          }
+          const typespec *tps = nullptr;
+          if (expr *exp = any_cast<expr *>(object)) {
+            tps = exp->Typespec();
+          } else if (typespec *tp = any_cast<typespec *>(object)) {
+            tps = tp;
+          }
+          if (tps) {
+            bits += size(tps, invalidValue, inst, pexpr, (name != "$size"));
+            found = true;
+          } else {
+            bits += size(object, invalidValue, inst, pexpr, (name != "$size"));
+            found = true;
+          }
+        } else if (argtype == uhdmoperation) {
+          operation *oper = (operation *)arg;
+          if (oper->VpiOpType() == vpiConcatOp) {
+            for (auto op : *oper->Operands()) {
+              bits += size(op, invalidValue, inst, pexpr, (name != "$size"));
+            }
+            found = true;
+          }
+        } else if (argtype == uhdmhier_path) {
+          hier_path *path = (hier_path *)arg;
+          auto elems = path->Path_elems();
+          if (elems && (elems->size() > 1)) {
+            const std::string &base = elems->at(0)->VpiName();
+            const std::string &suffix = elems->at(1)->VpiName();
+            any *var = getObject(base, inst, pexpr);
+            if (var) {
+              if (UHDM::param_assign *passign = any_cast<param_assign *>(var)) {
+                var = (any *)passign->Rhs();
+              }
+            }
+            if (var) {
+              UHDM_OBJECT_TYPE vtype = var->UhdmType();
+              if (vtype == uhdmport) {
+                port *p = (port *)var;
+                if (const typespec *tps = p->Typespec()) {
+                  UHDM_OBJECT_TYPE ttps = tps->UhdmType();
+                  if (ttps == uhdmstruct_typespec) {
+                    struct_typespec *tpss = (struct_typespec *)tps;
+                    for (typespec_member *memb : *tpss->Members()) {
+                      if (memb->VpiName() == suffix) {
+                        const typespec *tps = memb->Typespec();
+                        if (tps) {
+                          bits += size(tps, invalidValue, inst, pexpr,
+                                       (name != "$size"));
+                          found = true;
+                        }
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      if (found) {
+        UHDM::constant *c = s.MakeConstant();
+        c->VpiValue("UINT:" + std::to_string(bits));
+        c->VpiDecompile(std::to_string(bits));
+        c->VpiSize(64);
+        c->VpiConstType(vpiUIntConst);
+        result = c;
+      }
+    } else if (name == "$clog2") {
+      bool invalidValue = false;
+      for (auto arg : *scall->Tf_call_args()) {
+        uint64_t clog2 = 0;
+        uint64_t val =
+            get_value(invalidValue, reduceExpr(arg, invalidValue, inst, pexpr));
+        if (val) {
+          val = val - 1;
+          for (; val > 0; clog2 = clog2 + 1) {
+            val = val >> 1;
+          }
+        }
+        if (invalidValue == false) {
+          UHDM::constant *c = s.MakeConstant();
+          c->VpiValue("UINT:" + std::to_string(clog2));
+          c->VpiDecompile(std::to_string(clog2));
+          c->VpiSize(64);
+          c->VpiConstType(vpiUIntConst);
+          result = c;
+        }
+      }
+    }
   } else if (objtype == uhdmfunc_call) {
     func_call *scall = (func_call *)result;
     const std::string &name = scall->VpiName();
