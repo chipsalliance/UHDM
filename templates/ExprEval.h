@@ -2,7 +2,7 @@
 
 /*
 
- Copyright 2019-2021 Alain Dargelas
+ Copyright 2019-2022 Alain Dargelas
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ class ExprEval {
 
   std::string prettyPrint(UHDM::any* handle);
 
- private:
   expr* reduceCompOp(operation* op, bool& invalidValue, const any* inst,
                      const any* pexpr);
 
@@ -76,6 +75,14 @@ class ExprEval {
   void recursiveFlattening(Serializer& s, VectorOfany* flattened,
                            const VectorOfany* ordered,
                            std::vector<const typespec*> fieldTypes);
+
+  any* decodeHierPath(hier_path* path, bool& invalidValue, const any* inst,
+                      const any* pexpr, bool returnTypespec);
+
+  any* hierarchicalSelector(std::vector<std::string>& select_path,
+                            unsigned int level, UHDM::any* object,
+                            bool& invalidValue, const any* inst,
+                            const UHDM::any* pexpr, bool returnTypespec);
 
   typedef std::vector<module*> Scopes;
 
@@ -89,7 +96,8 @@ class ExprEval {
                 const std::filesystem::path& fileName, int lineNumber,
                 const UHDM::any* stmt);
 
-  bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp, bool& invalidValue, Serializer& s, const any* inst);
+  bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
+                          bool& invalidValue, Serializer& s, const any* inst);
 };
 
 std::string vPrint(UHDM::any* handle);
