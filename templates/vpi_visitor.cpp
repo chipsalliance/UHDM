@@ -593,9 +593,6 @@ void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedCont
   if (alreadyVisited || shallowVisit) {
     return;
   }
-  if (strcmp(relation, "vpiParent") == 0) {
-    return;
-  }
 <OBJECT_VISITORS>
 }
 

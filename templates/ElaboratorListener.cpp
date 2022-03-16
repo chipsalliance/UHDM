@@ -235,6 +235,8 @@ void ElaboratorListener::enterClass_defn(const class_defn* object,
                                          const BaseClass* parent,
                                          vpiHandle handle,
                                          vpiHandle parentHandle) {
+  if (!visited_.insert(object).second) return;
+
   class_defn* cl = (class_defn*)object;
 
   // Collect instance elaborated nets
@@ -276,7 +278,9 @@ void ElaboratorListener::leaveClass_defn(const class_defn* object,
                                          const BaseClass* parent,
                                          vpiHandle handle,
                                          vpiHandle parentHandle) {
-  instStack_.pop_back();
+  if (!instStack_.empty() && (instStack_.back().first == object)) {
+    instStack_.pop_back();
+  }
 }
 
 // Hardcoded implementations

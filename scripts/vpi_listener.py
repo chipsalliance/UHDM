@@ -5,7 +5,7 @@ import file_utils
 def _get_listeners(classname, vpi, type, card):
     listeners = []
 
-    if vpi in [ 'vpiParent', 'vpiInstance', 'vpiExtends' ]:
+    if vpi in ['vpiParent', 'vpiInstance', 'vpiProgram', 'vpiPackage', 'vpiUdp']:
         return listeners # To prevent infinite loops in visitors as these relations are pointing upward in the tree
 
     elif card == '1':

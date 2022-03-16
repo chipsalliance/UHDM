@@ -428,7 +428,7 @@ def _get_GetByVpiType_implementation(model):
         content.append(f'  switch (type) {{')
 
     if modeltype == 'obj_def':
-        content.append( '  case vpiParent: return std::make_tuple(vpiParent_, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);')
+        content.append( '    case vpiParent: return std::make_tuple(vpiParent_, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);')
 
     if case_bodies:
         for vpi in sorted(case_bodies.keys()):
