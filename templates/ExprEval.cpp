@@ -23,10 +23,11 @@
  */
 
 #include <string.h>
-#include <uhdm/ExprEval.h>
-#include <uhdm/uhdm.h>
-#include <uhdm/clone_tree.h>
 #include <uhdm/ElaboratorListener.h>
+#include <uhdm/ExprEval.h>
+#include <uhdm/clone_tree.h>
+#include <uhdm/uhdm.h>
+
 #include <algorithm>
 #include <bitset>
 #include <cmath>
@@ -131,19 +132,20 @@ void tokenizeMulti(std::string_view str, std::string_view separator,
 
 any *ExprEval::getValue(const std::string &name, const any *inst,
                         const any *pexpr) {
+  any *result = nullptr;
   if (getValueFunctor) {
-    return getValueFunctor(name, inst, pexpr);
+    result = getValueFunctor(name, inst, pexpr);
+    if (result) return result;
   }
   if ((inst == nullptr) && (pexpr == nullptr)) {
     return nullptr;
   }
-  Serializer* tmps = nullptr;
+  Serializer *tmps = nullptr;
   if (inst)
     tmps = inst->GetSerializer();
-  else 
+  else
     tmps = pexpr->GetSerializer();
   Serializer &s = *tmps;
-  any *result = nullptr;
   const any *root = inst;
   const any *tmp = inst;
   while (tmp) {
@@ -180,7 +182,7 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
     } else if (the_instance->UhdmType() == uhdmdesign) {
       param_assigns = ((design *)the_instance)->Param_assigns();
       typespecs = ((design *)the_instance)->Typespecs();
-    } else if (any_cast<scope*>(the_instance)) {
+    } else if (any_cast<scope *>(the_instance)) {
       param_assigns = ((scope *)the_instance)->Param_assigns();
       typespecs = ((scope *)the_instance)->Typespecs();
     }
@@ -238,14 +240,14 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
       if (tmp) result = tmp;
     }
   }
+  // if ((result == nullptr) && getValueFunctor) {
+  //   result = getValueFunctor(name, inst, pexpr);
+  // }
   return result;
 }
 
 any *ExprEval::getObject(const std::string &name, const any *inst,
                          const any *pexpr) {
-  if (getObjectFunctor) {
-    return getObjectFunctor(name, inst, pexpr);
-  }
   any *result = nullptr;
   while (pexpr) {
     if (const UHDM::scope *s = any_cast<const scope *>(pexpr)) {
@@ -280,7 +282,7 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
       if (inst->UhdmType() == uhdmgen_scope_array) {
       } else if (inst->UhdmType() == uhdmdesign) {
         param_assigns = ((design *)inst)->Param_assigns();
-      } else if (any_cast<scope*>(inst)) {
+      } else if (any_cast<scope *>(inst)) {
         param_assigns = ((scope *)inst)->Param_assigns();
         variables = ((scope *)inst)->Variables();
         if (const instance *in = any_cast<instance *>(inst)) {
@@ -347,6 +349,9 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
         result = (any *)passign->Rhs();
       }
     }
+  }
+  if ((result == nullptr) && getObjectFunctor) {
+    return getObjectFunctor(name, inst, pexpr);
   }
   return result;
 }
@@ -991,7 +996,7 @@ static std::string trimLeadingZeros(const std::string &s) {
   return res;
 }
 
-std::string& rtrim(std::string& str, char c) {
+std::string &rtrim(std::string &str, char c) {
   auto it1 = std::find_if(str.rbegin(), str.rend(),
                           [c](char ch) { return (ch == c); });
   if (it1 != str.rend()) str.erase(it1.base() - 1, str.end());
@@ -1065,8 +1070,10 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
         if (ranges) {
           range *r = ranges->at(0);
           bool invalidValue = false;
-          lr = static_cast<unsigned short>(get_value(invalidValue, r->Left_expr()));
-          rr = static_cast<unsigned short>(get_value(invalidValue, r->Right_expr()));
+          lr = static_cast<unsigned short>(
+              get_value(invalidValue, r->Left_expr()));
+          rr = static_cast<unsigned short>(
+              get_value(invalidValue, r->Right_expr()));
         }
       }
     }
@@ -1074,7 +1081,8 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
     if (index_val < binary.size()) {
       // TODO: If range does not start at 0
       if (lr >= rr) {
-        index_val = static_cast<unsigned int>(binary.size() - ((index_val + 1) * wordSize));
+        index_val = static_cast<unsigned int>(binary.size() -
+                                              ((index_val + 1) * wordSize));
       }
       std::string v;
       for (unsigned int i = 0; i < wordSize; i++) {
@@ -1092,8 +1100,8 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
         } else if (any_cast<scope *>(inst)) {
           fullPath = ((scope *)inst)->VpiFullName();
         }
-        s.GetErrorHandler()(ErrorType::UHDM_INTERNAL_ERROR_OUT_OF_BOUND, fullPath, op,
-                            nullptr);
+        s.GetErrorHandler()(ErrorType::UHDM_INTERNAL_ERROR_OUT_OF_BOUND,
+                            fullPath, op, nullptr);
         v = "0";
       }
       std::reverse(v.begin(), v.end());
@@ -1386,7 +1394,11 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
   return result;
 }
 
-static UHDM::task_func *getTaskFunc(const std::string &name, const any *inst) {
+UHDM::task_func *ExprEval::getTaskFunc(const std::string &name,
+                                       const any *inst) {
+  if (getTaskFuncFunctor) {
+    return getTaskFuncFunctor(name, inst);
+  }
   if (inst == nullptr) {
     return nullptr;
   }
@@ -1502,7 +1514,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
                                     bool &invalidValue, const any *inst,
                                     const UHDM::any *pexpr,
                                     bool returnTypespec) {
-  Serializer &s = *object->GetSerializer();
+  Serializer &s = (object) ? *object->GetSerializer() : *inst->GetSerializer();
   if (level >= select_path.size()) {
     return (expr *)object;
   }
@@ -1661,6 +1673,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
 
       int bIndex = -1;
       if (inst) {
+        /*
         any *baseP = nullptr;
         VectorOfany *parameters = nullptr;
         if (inst->UhdmType() == uhdmgen_scope_array) {
@@ -1677,27 +1690,32 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
             }
           }
         }
+        */
+        any *baseP = getObject(select_path[0], inst, pexpr);
         if (baseP) {
-          parameter *p = any_cast<parameter *>(baseP);
-          if (p) {
-            const typespec *tps = p->Typespec();
-            if (tps) {
-              if (tps->UhdmType() == uhdmpacked_array_typespec) {
-                packed_array_typespec *tmp = (packed_array_typespec *)tps;
-                tps = (typespec *)tmp->Elem_typespec();
-              }
-              if (tps->UhdmType() == uhdmstruct_typespec) {
-                struct_typespec *sts = (struct_typespec *)tps;
-                UHDM::VectorOftypespec_member *members = sts->Members();
-                if (members) {
-                  unsigned int i = 0;
-                  for (UHDM::typespec_member *member : *members) {
-                    if (member->VpiName() == elemName) {
-                      bIndex = i;
-                      break;
-                    }
-                    i++;
+          const typespec *tps = nullptr;
+          if (parameter *p = any_cast<parameter *>(baseP)) {
+            tps = p->Typespec();
+          } else if (operation *p = any_cast<operation *>(baseP)) {
+            tps = p->Typespec();
+          }
+
+          if (tps) {
+            if (tps->UhdmType() == uhdmpacked_array_typespec) {
+              packed_array_typespec *tmp = (packed_array_typespec *)tps;
+              tps = (typespec *)tmp->Elem_typespec();
+            }
+            if (tps->UhdmType() == uhdmstruct_typespec) {
+              struct_typespec *sts = (struct_typespec *)tps;
+              UHDM::VectorOftypespec_member *members = sts->Members();
+              if (members) {
+                unsigned int i = 0;
+                for (UHDM::typespec_member *member : *members) {
+                  if (member->VpiName() == elemName) {
+                    bIndex = i;
+                    break;
                   }
+                  i++;
                 }
               }
             }
@@ -1885,6 +1903,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 c->VpiSize(64);
                 c->VpiConstType(vpiIntConst);
                 result = c;
+                setValueInInstance(operands[0]->VpiName(), operands[0], c,
+                                   invalidValue, s, inst);
               } else {
                 invalidValueD = false;
                 long double val = get_double(invalidValueD, reduc0);
@@ -1901,6 +1921,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   c->VpiSize(64);
                   c->VpiConstType(vpiRealConst);
                   result = c;
+                  setValueInInstance(operands[0]->VpiName(), operands[0], c,
+                                     invalidValue, s, inst);
                 }
               }
             }
@@ -2393,7 +2415,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     fullPath = in->VpiFullName();
                   } else if (inst->UhdmType() == uhdmdesign) {
                     fullPath = inst->VpiName();
-                  } else if (any_cast<scope*>(inst)) {
+                  } else if (any_cast<scope *>(inst)) {
                     fullPath = ((scope *)inst)->VpiFullName();
                   }
                   s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO, fullPath,
@@ -2489,7 +2511,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   fullPath = in->VpiFullName();
                 } else if (inst->UhdmType() == uhdmdesign) {
                   fullPath = inst->VpiName();
-                } else if (any_cast<scope*>(inst)) {
+                } else if (any_cast<scope *>(inst)) {
                   fullPath = ((scope *)inst)->VpiFullName();
                 }
                 s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO, fullPath,
@@ -2632,7 +2654,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 if (expr *tmp = reduceExpr(oper, invalidValue, inst, pexpr)) {
                   oper = tmp;
                 }
-                optype = op->UhdmType();
+                optype = oper->UhdmType();
               }
               if (optype == uhdmconstant) {
                 constant *c2 = (constant *)oper;
@@ -3097,11 +3119,13 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             }
             if (object) result = object;
           } else if (opType == vpiMultiConcatOp) {
-            result = reduceBitSelect(op, static_cast<unsigned int>(index_val), invalidValue, inst, pexpr);
+            result = reduceBitSelect(op, static_cast<unsigned int>(index_val),
+                                     invalidValue, inst, pexpr);
           }
         } else if (otype == uhdmconstant) {
-          result = reduceBitSelect((constant *)object, static_cast<unsigned int>(index_val), invalidValue,
-                                   inst, pexpr);
+          result = reduceBitSelect((constant *)object,
+                                   static_cast<unsigned int>(index_val),
+                                   invalidValue, inst, pexpr);
         }
       }
     }
@@ -3216,9 +3240,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
   return (expr *)result;
 }
 
-bool ExprEval::setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp, bool& invalidValue, Serializer& s, const any* inst) {
+bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
+                                  expr *rhsexp, bool &invalidValue,
+                                  Serializer &s, const any *inst) {
   bool invalidValueI = false;
   bool invalidValueD = false;
+  bool opRhs = false;
   int64_t valI = get_value(invalidValueI, rhsexp);
   long double valD = 0;
   if (invalidValueI) {
@@ -3241,47 +3268,75 @@ bool ExprEval::setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhs
   }
   if (invalidValueI && invalidValueD) {
     if (param_assigns) {
+      for (VectorOfparam_assign::iterator itr = param_assigns->begin();
+           itr != param_assigns->end(); itr++) {
+        if ((*itr)->Lhs()->VpiName() == lhs) {
+          param_assigns->erase(itr);
+          break;
+        }
+      }
       param_assign *pa = s.MakeParam_assign();
       pa->Rhs(rhsexp);
-      pa->Lhs((any *)lhsexp);
+      parameter *param = s.MakeParameter();
+      param->VpiName(lhsexp->VpiName());
+      pa->Lhs(param);
       param_assigns->push_back(pa);
+      if (rhsexp && (rhsexp->UhdmType() == uhdmoperation)) {
+        opRhs = true;
+      }
     }
   } else if (invalidValueI) {
     if (param_assigns) {
+      for (VectorOfparam_assign::iterator itr = param_assigns->begin();
+           itr != param_assigns->end(); itr++) {
+        if ((*itr)->Lhs()->VpiName() == lhs) {
+          param_assigns->erase(itr);
+          break;
+        }
+      }
       constant *c = s.MakeConstant();
       c->VpiValue("REAL:" + std::to_string((double)valD));
+      c->VpiDecompile(std::to_string(valD));
       c->VpiSize(64);
       c->VpiConstType(vpiRealConst);
       param_assign *pa = s.MakeParam_assign();
       pa->Rhs(c);
-      ref_obj *ref = s.MakeRef_obj();
-      ref->VpiName(lhs);
-      pa->Lhs(ref);
+      parameter *param = s.MakeParameter();
+      param->VpiName(lhs);
+      pa->Lhs(param);
       param_assigns->push_back(pa);
     }
   } else {
     if (param_assigns) {
+      for (VectorOfparam_assign::iterator itr = param_assigns->begin();
+           itr != param_assigns->end(); itr++) {
+        if ((*itr)->Lhs()->VpiName() == lhs) {
+          param_assigns->erase(itr);
+          break;
+        }
+      }
       constant *c = s.MakeConstant();
       c->VpiValue("INT:" + std::to_string(valI));
+      c->VpiDecompile(std::to_string(valI));
       c->VpiSize(32);
       c->VpiConstType(vpiIntConst);
       param_assign *pa = s.MakeParam_assign();
       pa->Rhs(c);
-      ref_obj *ref = s.MakeRef_obj();
-      ref->VpiName(lhs);
-      pa->Lhs(ref);
+      parameter *param = s.MakeParameter();
+      param->VpiName(lhs);
+      pa->Lhs(param);
       param_assigns->push_back(pa);
     }
   }
-  if (invalidValueI && invalidValueD) invalidValue = true;
+  if (invalidValueI && invalidValueD && (!opRhs)) invalidValue = true;
   return invalidValue;
 }
 
-void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
-                             bool& invalidValue, bool& continue_flag,
-                             bool& break_flag, const any* inst,
-                             const std::filesystem::path& fileName, int lineNumber,
-                             const any* stmt) {
+void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
+                        bool &invalidValue, bool &continue_flag,
+                        bool &break_flag, const any *inst,
+                        const std::filesystem::path &fileName, int lineNumber,
+                        const any *stmt) {
   if (invalidValue) {
     return;
   }
@@ -3289,24 +3344,20 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
   UHDM_OBJECT_TYPE stt = stmt->UhdmType();
   switch (stt) {
     case uhdmcase_stmt: {
-      case_stmt* st = (case_stmt*)stmt;
-      expr* cond = (expr*)st->VpiCondition();
-      int64_t val =
-          get_value(invalidValue,
-                    reduceExpr(cond, invalidValue,
-                               scopes.back(), nullptr));
-      for (case_item* item : *st->Case_items()) {
-        VectorOfany* exprs = item->VpiExprs();
+      case_stmt *st = (case_stmt *)stmt;
+      expr *cond = (expr *)st->VpiCondition();
+      int64_t val = get_value(
+          invalidValue, reduceExpr(cond, invalidValue, scopes.back(), nullptr));
+      for (case_item *item : *st->Case_items()) {
+        VectorOfany *exprs = item->VpiExprs();
         bool done = false;
-        for (any* exp : *exprs) {
-          int64_t vexp = get_value(
-              invalidValue,
-              reduceExpr(exp, invalidValue, 
-                         scopes.back(), nullptr));
+        for (any *exp : *exprs) {
+          int64_t vexp =
+              get_value(invalidValue,
+                        reduceExpr(exp, invalidValue, scopes.back(), nullptr));
           if (val == vexp) {
             EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                     scopes.back(), fileName,
-                     lineNumber, item->Stmt());
+                     scopes.back(), fileName, lineNumber, item->Stmt());
             done = true;
             break;
           }
@@ -3316,44 +3367,36 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
       break;
     }
     case uhdmif_else: {
-      if_else* st = (if_else*)stmt;
-      expr* cond = (expr*)st->VpiCondition();
-      int64_t val =
-          get_value(invalidValue,
-                    reduceExpr(cond, invalidValue, 
-                               scopes.back(), nullptr));
+      if_else *st = (if_else *)stmt;
+      expr *cond = (expr *)st->VpiCondition();
+      int64_t val = get_value(
+          invalidValue, reduceExpr(cond, invalidValue, scopes.back(), nullptr));
       if (val > 0) {
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                  scopes.back(), fileName, lineNumber,
-                 st->VpiStmt());
+                 scopes.back(), fileName, lineNumber, st->VpiStmt());
       } else {
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 scopes.back(), fileName, lineNumber,
-                 st->VpiElseStmt());
+                 scopes.back(), fileName, lineNumber, st->VpiElseStmt());
       }
       break;
     }
     case uhdmif_stmt: {
-      if_stmt* st = (if_stmt*)stmt;
-      expr* cond = (expr*)st->VpiCondition();
-      int64_t val =
-          get_value(invalidValue,
-                    reduceExpr(cond, invalidValue, 
-                               scopes.back(), nullptr));
+      if_stmt *st = (if_stmt *)stmt;
+      expr *cond = (expr *)st->VpiCondition();
+      int64_t val = get_value(
+          invalidValue, reduceExpr(cond, invalidValue, scopes.back(), nullptr));
       if (val > 0) {
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                scopes.back(), fileName, lineNumber,
-                 st->VpiStmt());
+                 scopes.back(), fileName, lineNumber, st->VpiStmt());
       }
       break;
     }
     case uhdmbegin: {
-      begin* st = (begin*)stmt;
+      begin *st = (begin *)stmt;
       if (st->Stmts()) {
         for (auto bst : *st->Stmts()) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                  scopes.back(), fileName,
-                   lineNumber, bst);
+                   scopes.back(), fileName, lineNumber, bst);
           if (continue_flag) {
             return;
           }
@@ -3365,12 +3408,11 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
       break;
     }
     case uhdmnamed_begin: {
-      named_begin* st = (named_begin*)stmt;
+      named_begin *st = (named_begin *)stmt;
       if (st->Stmts()) {
         for (auto bst : *st->Stmts()) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName,
-                   lineNumber, bst);
+                   scopes.back(), fileName, lineNumber, bst);
           if (continue_flag) {
             return;
           }
@@ -3382,13 +3424,13 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
       break;
     }
     case uhdmassignment: {
-      assignment* st = (assignment*)stmt;
+      assignment *st = (assignment *)stmt;
       const std::string lhs = st->Lhs()->VpiName();
-      expr* lhsexp = (expr*)st->Lhs();
-      expr* rhs = (expr*)st->Rhs();
-      expr* rhsexp = reduceExpr(rhs, invalidValue, 
-                                scopes.back(), nullptr);
-      invalidValue = setValueInInstance(lhs, lhsexp, rhsexp, invalidValue, s, inst);
+      expr *lhsexp = (expr *)st->Lhs();
+      expr *rhs = (expr *)st->Rhs();
+      expr *rhsexp = reduceExpr(rhs, invalidValue, scopes.back(), nullptr);
+      invalidValue =
+          setValueInInstance(lhs, lhsexp, rhsexp, invalidValue, s, inst);
       break;
     }
     case uhdmassign_stmt: {
@@ -3402,53 +3444,45 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
       break;
     }
     case uhdmrepeat: {
-      repeat* st = (repeat*)stmt;
-      const expr* cond = st->VpiCondition();
-      expr* rcond =
-          reduceExpr((expr*)cond, invalidValue, 
-                     scopes.back(),  nullptr);
-      int64_t val =
-          get_value(invalidValue,
-                    reduceExpr(rcond, invalidValue, 
-                               scopes.back(), nullptr));
+      repeat *st = (repeat *)stmt;
+      const expr *cond = st->VpiCondition();
+      expr *rcond =
+          reduceExpr((expr *)cond, invalidValue, scopes.back(), nullptr);
+      int64_t val = get_value(invalidValue, reduceExpr(rcond, invalidValue,
+                                                       scopes.back(), nullptr));
       if (invalidValue == false) {
         for (int i = 0; i < val; i++) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName,
-                   lineNumber, st->VpiStmt());
+                   scopes.back(), fileName, lineNumber, st->VpiStmt());
         }
       }
       break;
     }
     case uhdmfor_stmt: {
-      for_stmt* st = (for_stmt*)stmt;
+      for_stmt *st = (for_stmt *)stmt;
       if (st->VpiForInitStmt()) {
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                  scopes.back(), fileName, lineNumber,
-                 st->VpiForInitStmt());
+                 scopes.back(), fileName, lineNumber, st->VpiForInitStmt());
       }
       if (st->VpiForInitStmts()) {
         for (auto s : *st->VpiForInitStmts()) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName,
-                   lineNumber, s);
+                   scopes.back(), fileName, lineNumber, s);
         }
       }
       while (1) {
-        expr* cond = (expr*)st->VpiCondition();
+        expr *cond = (expr *)st->VpiCondition();
         if (cond) {
-          int64_t val = get_value(
-              invalidValue,
-              reduceExpr(cond, invalidValue, 
-                         scopes.back(), nullptr));
+          int64_t val =
+              get_value(invalidValue,
+                        reduceExpr(cond, invalidValue, scopes.back(), nullptr));
           if (val == 0) {
             break;
           }
           if (invalidValue) break;
         }
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 scopes.back(), fileName, lineNumber,
-                 st->VpiStmt());
+                 scopes.back(), fileName, lineNumber, st->VpiStmt());
         if (invalidValue) break;
         if (continue_flag) {
           continue_flag = false;
@@ -3460,15 +3494,13 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
         }
         if (st->VpiForIncStmt()) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 scopes.back(), fileName,
-                   lineNumber, st->VpiForIncStmt());
+                   scopes.back(), fileName, lineNumber, st->VpiForIncStmt());
         }
         if (invalidValue) break;
         if (st->VpiForIncStmts()) {
           for (auto s : *st->VpiForIncStmts()) {
             EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                    scopes.back(), fileName,
-                     lineNumber, s);
+                     scopes.back(), fileName, lineNumber, s);
           }
         }
         if (invalidValue) break;
@@ -3476,12 +3508,11 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
       break;
     }
     case uhdmreturn_stmt: {
-      return_stmt* st = (return_stmt*)stmt;
-      expr* cond = (expr*)st->VpiCondition();
+      return_stmt *st = (return_stmt *)stmt;
+      expr *cond = (expr *)st->VpiCondition();
       if (cond) {
-        expr* rhsexp = reduceExpr(cond, invalidValue,
-                                  scopes.back(),  nullptr);
-        ref_obj* lhsexp = s.MakeRef_obj();
+        expr *rhsexp = reduceExpr(cond, invalidValue, scopes.back(), nullptr);
+        ref_obj *lhsexp = s.MakeRef_obj();
         lhsexp->VpiName(funcName);
         invalidValue =
             setValueInInstance(funcName, lhsexp, rhsexp, invalidValue, s, inst);
@@ -3489,20 +3520,19 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
       break;
     }
     case uhdmwhile_stmt: {
-      while_stmt* st = (while_stmt*)stmt;
-      expr* cond = (expr*)st->VpiCondition();
+      while_stmt *st = (while_stmt *)stmt;
+      expr *cond = (expr *)st->VpiCondition();
       if (cond) {
         while (1) {
-          int64_t val = get_value(
-              invalidValue,
-              reduceExpr(cond, invalidValue, 
-                         scopes.back(), nullptr));
+          int64_t val =
+              get_value(invalidValue,
+                        reduceExpr(cond, invalidValue, scopes.back(), nullptr));
           if (invalidValue) break;
           if (val == 0) {
             break;
           }
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                  scopes.back(), fileName, lineNumber, st->VpiStmt());
+                   scopes.back(), fileName, lineNumber, st->VpiStmt());
           if (invalidValue) break;
           if (continue_flag) {
             continue_flag = false;
@@ -3517,12 +3547,12 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
       break;
     }
     case uhdmdo_while: {
-      do_while* st = (do_while*)stmt;
-      expr* cond = (expr*)st->VpiCondition();
+      do_while *st = (do_while *)stmt;
+      expr *cond = (expr *)st->VpiCondition();
       if (cond) {
         while (1) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                    scopes.back(),fileName, lineNumber, st->VpiStmt());
+                   scopes.back(), fileName, lineNumber, st->VpiStmt());
           if (invalidValue) break;
           if (continue_flag) {
             continue_flag = false;
@@ -3532,10 +3562,9 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
             break_flag = false;
             break;
           }
-          int64_t val = get_value(
-              invalidValue,
-              reduceExpr(cond, invalidValue,
-                         scopes.back(),  nullptr));
+          int64_t val =
+              get_value(invalidValue,
+                        reduceExpr(cond, invalidValue, scopes.back(), nullptr));
           if (invalidValue) break;
           if (val == 0) {
             break;
@@ -3553,10 +3582,9 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
       break;
     }
     case uhdmoperation: {
-      operation* op = (operation*)stmt;
+      operation *op = (operation *)stmt;
       // ++, -- ops
-      reduceExpr(op, invalidValue,  scopes.back(),
-                  nullptr);
+      reduceExpr(op, invalidValue, scopes.back(), nullptr);
       break;
     }
     default: {
@@ -3568,10 +3596,10 @@ void ExprEval::EvalStmt(const std::string& funcName, Scopes& scopes,
   }
 }
 
-expr* ExprEval::EvalFunc(UHDM::function* func, std::vector<any*>* args,
-                              bool& invalidValue, const any* inst,
-                              const std::filesystem::path& fileName, int lineNumber,
-                              any* pexpr) {
+expr *ExprEval::EvalFunc(UHDM::function *func, std::vector<any *> *args,
+                         bool &invalidValue, const any *inst,
+                         const std::filesystem::path &fileName, int lineNumber,
+                         any *pexpr) {
   if (func == nullptr) {
     invalidValue = true;
     return nullptr;
@@ -3580,7 +3608,7 @@ expr* ExprEval::EvalFunc(UHDM::function* func, std::vector<any*>* args,
   const std::string name = func->VpiName();
   // set internal scope stack
   Scopes scopes;
-  module* scope = s.MakeModule();
+  module *scope = s.MakeModule();
   UHDM::VectorOfparam_assign *param_assigns = nullptr;
   if (inst->UhdmType() == uhdmgen_scope_array) {
   } else if (inst->UhdmType() == uhdmdesign) {
@@ -3592,11 +3620,12 @@ expr* ExprEval::EvalFunc(UHDM::function* func, std::vector<any*>* args,
     scope->Param_assigns(s.MakeParam_assignVec());
     for (auto p : *param_assigns) {
       ElaboratorListener listener(&s);
-      any* pp = UHDM::clone_tree(p, s, &listener);
-      scope->Param_assigns()->push_back((param_assign*) pp);
+      any *pp = UHDM::clone_tree(p, s, &listener);
+      scope->Param_assigns()->push_back((param_assign *)pp);
     }
   }
 
+  /*
   // default return value is invalid
   constant* c = s.MakeConstant();
   c->VpiValue("INT:0");
@@ -3604,22 +3633,25 @@ expr* ExprEval::EvalFunc(UHDM::function* func, std::vector<any*>* args,
   c->VpiConstType(vpiIntConst);
   param_assign* pa = s.MakeParam_assign();
   pa->Rhs(c);
-  ref_obj* ref = s.MakeRef_obj();
-  ref->VpiName(name);
-  pa->Lhs(ref);
+  parameter* param = s.MakeParameter();
+  param->VpiName(name);
+  pa->Lhs(param);
+  if (scope->Param_assigns() == nullptr) {
+    scope->Param_assigns(s.MakeParam_assignVec());
+  }
   scope->Param_assigns()->push_back(pa);
-  
+  */
+
   // set args
   if (func->Io_decls()) {
     unsigned int index = 0;
     for (auto io : *func->Io_decls()) {
       if (args && (index < args->size())) {
         const std::string ioname = io->VpiName();
-        expr* ioexp = (expr*)args->at(index);
-        expr* exparg = reduceExpr(ioexp, invalidValue,
-                                  inst, pexpr);
+        expr *ioexp = (expr *)args->at(index);
+        expr *exparg = reduceExpr(ioexp, invalidValue, scope, pexpr);
         invalidValue =
-            setValueInInstance(ioname, io, exparg, invalidValue, s, inst);                          
+            setValueInInstance(ioname, io, exparg, invalidValue, s, scope);
       }
       index++;
     }
@@ -3627,33 +3659,33 @@ expr* ExprEval::EvalFunc(UHDM::function* func, std::vector<any*>* args,
     return nullptr;
   }
   scopes.push_back(scope);
-  if (const UHDM::any* the_stmt = func->Stmt()) {
+  if (const UHDM::any *the_stmt = func->Stmt()) {
     UHDM_OBJECT_TYPE stt = the_stmt->UhdmType();
     switch (stt) {
       case uhdmbegin: {
-        UHDM::begin* st = (UHDM::begin*)the_stmt;
+        UHDM::begin *st = (UHDM::begin *)the_stmt;
         bool continue_flag = false;
         bool break_flag = false;
         for (auto stmt : *st->Stmts()) {
-          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag,
-                    scope, fileName, lineNumber, stmt);
+          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag, scope,
+                   fileName, lineNumber, stmt);
           if (continue_flag || break_flag) {
-            s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, inst->VpiName(),
-                          stmt, nullptr);
+            s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
+                                inst->VpiName(), stmt, nullptr);
           }
         }
         break;
       }
       case uhdmnamed_begin: {
-        UHDM::named_begin* st = (UHDM::named_begin*)the_stmt;
+        UHDM::named_begin *st = (UHDM::named_begin *)the_stmt;
         bool continue_flag = false;
         bool break_flag = false;
         for (auto stmt : *st->Stmts()) {
-          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag,
-                   scope, fileName, lineNumber, stmt);
+          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag, scope,
+                   fileName, lineNumber, stmt);
           if (continue_flag || break_flag) {
-            s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, inst->VpiName(),
-                          stmt, nullptr);
+            s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
+                                inst->VpiName(), stmt, nullptr);
           }
         }
         break;
@@ -3661,12 +3693,11 @@ expr* ExprEval::EvalFunc(UHDM::function* func, std::vector<any*>* args,
       default: {
         bool continue_flag = false;
         bool break_flag = false;
-        EvalStmt(name, scopes, invalidValue, continue_flag, break_flag,
-                  scope, fileName, lineNumber,
-                 the_stmt);
+        EvalStmt(name, scopes, invalidValue, continue_flag, break_flag, scope,
+                 fileName, lineNumber, the_stmt);
         if (continue_flag || break_flag) {
           s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, inst->VpiName(),
-                          the_stmt, nullptr);
+                              the_stmt, nullptr);
         }
         break;
       }
@@ -3675,15 +3706,14 @@ expr* ExprEval::EvalFunc(UHDM::function* func, std::vector<any*>* args,
   // return value
   if (scope->Param_assigns()) {
     for (auto p : *scope->Param_assigns()) {
-      if (p->VpiName() == name) {
-        invalidValue = false;
+      if (p->Lhs()->VpiName() == name) {
         return (expr *)p->Rhs();
       }
     }
   }
+  invalidValue = true;
   return nullptr;
 }
-
 
 namespace UHDM {
 std::string vPrint(UHDM::any *handle) {
