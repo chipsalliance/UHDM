@@ -41,6 +41,14 @@ typedef std::function<any*(const std::string& name, const any* inst,
                            const any* pexpr)>
     GetObjectFunctor;
 
+typedef std::function<task_func*(const std::string& name, const any* inst)>
+    GetTaskFuncFunctor;
+
+/* This UHDM extension offers expression reduction and other utilities that can
+ be operating either:
+ - standalone using UHDM fully elaborated tree
+ - as a utility in a greater context, example: Surelog elaboration */
+
 class ExprEval {
  public:
   bool isFullySpecified(const typespec* tps);
@@ -110,12 +118,19 @@ class ExprEval {
   bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst);
 
+  /* For Surelog or other UHDM clients to use the UHDM expr evaluator in their context */
   void setGetObjectFunctor(GetObjectFunctor func) { getObjectFunctor = func; }
   void setGetValueFunctor(GetObjectFunctor func) { getValueFunctor = func; }
-  
-  private:
-    GetObjectFunctor getObjectFunctor = nullptr;
-    GetObjectFunctor getValueFunctor = nullptr;
+  void setGetTaskFuncFunctor(GetTaskFuncFunctor func) {
+    getTaskFuncFunctor = func;
+  }
+
+  UHDM::task_func* getTaskFunc(const std::string& name, const any* inst);
+
+ private:
+  GetObjectFunctor getObjectFunctor = nullptr;
+  GetObjectFunctor getValueFunctor = nullptr;
+  GetTaskFuncFunctor getTaskFuncFunctor = nullptr;
 };
 
 std::string vPrint(UHDM::any* handle);
