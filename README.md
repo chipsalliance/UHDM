@@ -111,8 +111,8 @@
    * An Custom Elaborator example code uses the Listener Design Pattern in [`listener_elab_test.cpp`](tests/listener_elab_test.cpp)
    * A Full Elaboration example is demonstrated in [`full_elab_test.cpp`](tests/full_elab_test.cpp) and [`uhdm-dump.cpp`](util/uhdm-dump.cpp)
  * The uhdm-dump [`uhdm-dump`](util/uhdm-dump.cpp) executable creates a human readable view of the UHDM serialized data model using the visitor [`visitor.cpp`](templates/vpi_visitor.cpp).
- * An optional linter that warns about non-Synthesizable constructs can be found here: [`SynthSubset.cpp`](templates/SynthSubset.cpp)
- * An optional linter that warns about diverse Verilog compliances post-elaboration can be found here: [`UhdmLinter.cpp`](templates/UhdmLinter.cpp)
+ * An optional linter (Listener) that warns about non-Synthesizable constructs can be found here: [`SynthSubset.cpp`](templates/SynthSubset.cpp)
+ * An optional linter (Listener) that warns about diverse Verilog compliances post-elaboration can be found here: [`UhdmLint.cpp`](templates/UhdmLint.cpp)
  * An optionnal expression evaluator can be found here: [`ExprEval.cpp`](templates/ExprEval.cpp)
 
 
