@@ -229,6 +229,7 @@ if (UHDM_BUILD_TESTS)
     tests/classes_test.cpp
     tests/garbage_collect_test.cpp
     tests/group_membership_test.cpp
+    tests/expr_reduce_test.cpp
   )
 endif()
 
