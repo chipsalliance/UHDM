@@ -133,10 +133,6 @@ void tokenizeMulti(std::string_view str, std::string_view separator,
 any *ExprEval::getValue(const std::string &name, const any *inst,
                         const any *pexpr) {
   any *result = nullptr;
-  if (getValueFunctor) {
-    result = getValueFunctor(name, inst, pexpr);
-    if (result) return result;
-  }
   if ((inst == nullptr) && (pexpr == nullptr)) {
     return nullptr;
   }
@@ -240,9 +236,9 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
       if (tmp) result = tmp;
     }
   }
-  // if ((result == nullptr) && getValueFunctor) {
-  //   result = getValueFunctor(name, inst, pexpr);
-  // }
+  if ((result == nullptr) && getValueFunctor) {
+    result = getValueFunctor(name, inst, pexpr);
+  }
   return result;
 }
 
@@ -716,6 +712,16 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         ranges = lts->Ranges();
         break;
       }
+      case UHDM::uhdmstring_typespec: {
+        bits = 0;
+        invalidValue = true;
+        break;
+      }
+      case UHDM::uhdmunsupported_typespec: {
+        bits = 0;
+        invalidValue = true;
+        break;
+      }
       case UHDM::uhdmlogic_net: {
         bits = 1;
         UHDM::logic_net *lts = (UHDM::logic_net *)typespec;
@@ -777,8 +783,6 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         }
         break;
       }
-      case uhdmunsupported_typespec:
-        break;
       case uhdmconstant: {
         constant *c = (constant *)typespec;
         bits = c->VpiSize();
@@ -793,6 +797,8 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         ref_obj *ref = (ref_obj *)typespec;
         if (const any *act = ref->Actual_group()) {
           bits = size(act, invalidValue, inst, pexpr, full);
+        } else {
+          invalidValue = true;
         }
         break;
       }
@@ -825,7 +831,26 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         bits += size(tps, invalidValue, inst, pexpr, full);
         break;
       }
+      case uhdmbit_select: {
+        bits = 1;
+        break;
+      }
+      case uhdmpart_select: {
+        part_select *sel = (part_select *)typespec;
+        expr *lexpr = (expr *)sel->Left_range();
+        expr *rexpr = (expr *)sel->Right_range();
+        int64_t lv = getValue(reduceExpr(lexpr, invalidValue, inst, pexpr));
+
+        int64_t rv = getValue(reduceExpr(rexpr, invalidValue, inst, pexpr));
+
+        if (lv > rv)
+          bits = ((lv - rv) + 1);
+        else
+          bits = ((rv - lv) + 1);
+        break;
+      }
       default:
+        invalidValue = true;
         break;
     }
   }
