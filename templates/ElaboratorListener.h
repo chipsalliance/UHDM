@@ -30,6 +30,8 @@
 #include <uhdm/VpiListener.h>
 
 #include <map>
+#include <unordered_set>
+#include <vector>
 
 namespace UHDM {
 
@@ -181,6 +183,9 @@ class ElaboratorListener : public VpiListener {
 
   void leaveTask_func(const task_func* object, const BaseClass* parent,
                       vpiHandle handle, vpiHandle parentHandle);
+
+  typedef std::unordered_set<const UHDM::any*> VisitedSet;
+  VisitedSet visited_;
 
   // Instance context stack
   typedef std::vector<std::pair<

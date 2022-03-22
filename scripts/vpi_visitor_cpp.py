@@ -5,12 +5,18 @@ import file_utils
 
 
 def _get_implementation(classname, vpi, card):
-    shallow_visit = 'false'
     content = []
-    if (vpi == 'vpiParent') and (classname != 'part_select'):
-        return content
-
     if card == '1':
+        shallow_visit = 'false'
+
+        if (vpi == 'vpiParent') and ('_select' not in classname):
+            return content
+
+        if vpi in ['vpiInstance', 'vpiModule', 'vpiInterface', 'vpiUse', 'vpiProgram', 'vpiClassDefn', 'vpiPackage', 'vpiUdp']:
+            # Prevent walking upwards and makes the UHDM output cleaner
+            # Prevent loop in Standard VPI
+            shallow_visit = 'true'
+
         if 'func_call' in classname and vpi == 'vpiFunction':
             # Prevent stepping inside functions while processing calls (func_call, method_func_call) to them
             shallow_visit = 'true'
@@ -19,23 +25,18 @@ def _get_implementation(classname, vpi, card):
             # Prevent stepping inside tasks while processing calls (task_call, method_task_call) to them
             shallow_visit = 'true'
 
-        if vpi in ['vpiInstance', 'vpiModule', 'vpiInterface']:
-            # Prevent walking upwards and makes the UHDM output cleaner
-            # Prevent loop in Standard VPI
-            shallow_visit = 'true'
-
-        content.append(f'  itr = vpi_handle({vpi}, obj_h);')
-        content.append(f'  visit_object(itr, indent + kLevelIndent, "{vpi}", visited, out, {shallow_visit});')
-        content.append( '  release_handle(itr);')
+        content.append(f'  if (vpiHandle itr = vpi_handle({vpi}, obj_h)) {{')
+        content.append(f'    visit_object(itr, indent + kLevelIndent, "{vpi}", visited, out, {shallow_visit});')
+        content.append( '    release_handle(itr);')
+        content.append( '  }')
     else:
-        # Prevent loop in Standard VPI
-        if vpi != 'vpiUse':
-            content.append(f'  itr = vpi_iterate({vpi}, obj_h);')
-            content.append( '  while (vpiHandle obj = vpi_scan(itr)) {')
-            content.append(f'    visit_object(obj, indent + kLevelIndent, "{vpi}", visited, out, {shallow_visit});')
-            content.append( '    release_handle(obj);')
-            content.append( '  }')
-            content.append( '  release_handle(itr);')
+        content.append(f'  if (vpiHandle itr = vpi_iterate({vpi}, obj_h)) {{')
+        content.append( '    while (vpiHandle obj = vpi_scan(itr)) {')
+        content.append(f'      visit_object(obj, indent + kLevelIndent, "{vpi}", visited, out, false);')
+        content.append( '      release_handle(obj);')
+        content.append( '    }')
+        content.append( '    release_handle(itr);')
+        content.append( '  }')
 
     return content
 
@@ -92,15 +93,10 @@ def generate(models):
         if baseclass:
             private_visitor_bodies.append(f'  visit_{baseclass}(obj_h, indent, relation, visited, out, shallowVisit);')
 
-        itr_required = False
-        private_visitor_body = []
-
-        if classname == 'part_select':
-            private_visitor_body.extend(_get_implementation(classname, 'vpiParent', '1'))
-            itr_required = True
+        private_visitor_bodies.extend(_get_implementation(classname, 'vpiParent', '1'))
 
         if modeltype != 'class_def':
-            private_visitor_body.extend(_get_vpi_xxx_visitor('string', 'vpiFile', '1'))
+            private_visitor_bodies.extend(_get_vpi_xxx_visitor('string', 'vpiFile', '1'))
         
         type_specified = False
         for key, value in model.allitems():
@@ -111,22 +107,16 @@ def generate(models):
                 card = value.get('card')
 
                 type_specified = name == 'type' or type_specified
-                private_visitor_body.extend(_get_vpi_xxx_visitor(type, vpi, card))
+                private_visitor_bodies.extend(_get_vpi_xxx_visitor(type, vpi, card))
 
             elif key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
                 vpi = value.get('vpi')
                 card = value.get('card')
 
-                private_visitor_body.extend(_get_implementation(classname, vpi, card))
-                itr_required = True
+                private_visitor_bodies.extend(_get_implementation(classname, vpi, card))
 
         if not type_specified and (modeltype == 'obj_def'):
-            private_visitor_body.extend(_get_vpi_xxx_visitor('unsigned int', 'vpiType', '1'))
-
-        if private_visitor_body:
-            if itr_required:
-                private_visitor_bodies.append(f'  vpiHandle itr;')
-            private_visitor_bodies.extend(private_visitor_body)
+            private_visitor_bodies.extend(_get_vpi_xxx_visitor('unsigned int', 'vpiType', '1'))
 
         private_visitor_bodies.append(f'}}')
         private_visitor_bodies.append('')

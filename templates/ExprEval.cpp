@@ -118,12 +118,12 @@ void tokenizeMulti(std::string_view str, std::string_view separator,
     if (isSeparator) {
       i = i + sepSize - 1;
       result.push_back(tmp);
-      tmp = "";
+      tmp.clear();
       if (i == (str.size() - 1)) result.push_back(tmp);
     } else if (i == (str.size() - 1)) {
       tmp += str[i];
       result.push_back(tmp);
-      tmp = "";
+      tmp.clear();
     } else {
       tmp += str[i];
     }
@@ -1632,7 +1632,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
             uint64_t res = iv & mask;
             res = res >> (from);
             cons->VpiValue("UINT:" + std::to_string(res));
-            cons->VpiSize(width);
+            cons->VpiSize(static_cast<int>(width));
             return cons;
           } else {
             from += size(member, invalidValue, inst, pexpr, true);
@@ -1646,8 +1646,8 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
   if (elemName.find('[') != std::string::npos) {
     std::string indexName = ltrim(elemName, '[');
     indexName = rtrim(elemName, ']');
-    selectIndex = std::strtoull(indexName.c_str(), nullptr, 10);
-    elemName = "";
+    selectIndex = static_cast<int>(std::strtoull(indexName.c_str(), nullptr, 10));
+    elemName.clear();
     if (operation *oper = any_cast<operation *>(object)) {
       int opType = oper->VpiOpType();
       if (opType == vpiAssignmentPatternOp) {
