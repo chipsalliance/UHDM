@@ -102,7 +102,7 @@ class Serializer {
   uhdm_handleFactory uhdm_handleMaker;
 <FACTORY_DATA_MEMBERS>
 
-  std::unordered_map<const BaseClass*, unsigned long>& AllObjects() {
+  const std::unordered_map<const BaseClass*, unsigned long>& AllObjects() const {
     return allIds_;
   }
 

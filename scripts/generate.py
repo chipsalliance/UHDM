@@ -15,6 +15,7 @@ import serializer
 import uhdm_forward_decl_h
 import uhdm_h
 import uhdm_types_h
+import UhdmListener
 import vpi_listener
 import vpi_user_cpp
 import vpi_visitor_cpp
@@ -58,6 +59,9 @@ def _worker(params):
 
     elif key == 'uhdm_types_h':
         return uhdm_types_h.generate(*args)
+
+    elif key == 'UhdmListener':
+      return UhdmListener.generate(*args)
 
     elif key == 'vpi_listener':
         return vpi_listener.generate(*args)
@@ -141,6 +145,7 @@ def _main():
         ('uhdm_forward_decl_h', [models]),
         ('uhdm_h', [models]),
         ('uhdm_types_h', [models]),
+        ('UhdmListener', [models]),
         ('vpi_listener', [models]),
         ('vpi_user_cpp', [models]),
         ('vpi_visitor_cpp', [models]),
