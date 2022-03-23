@@ -434,6 +434,11 @@ void ExprEval::recursiveFlattening(Serializer &s, VectorOfany *flattened,
           flattened->push_back(sop);
           break;
         }
+        case uhdminteger_typespec: {
+          any *sop = (any *)tp->Pattern();
+          flattened->push_back(sop);
+          break;
+        }
         case uhdmstring_typespec: {
           any *sop = (any *)tp->Pattern();
           UHDM_OBJECT_TYPE sopt = sop->UhdmType();
@@ -689,14 +694,18 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
       }
       case UHDM::uhdminteger_typespec: {
         integer_typespec *itps = (integer_typespec *)typespec;
-        if (itps->VpiValue().find("UINT:") != std::string::npos) {
-          bits = std::strtoull(
-              itps->VpiValue().c_str() + std::string_view("UINT:").length(),
-              nullptr, 10);
+        if (itps->VpiValue().empty()) {
+          bits = 32;
         } else {
-          bits = std::strtoll(
-              itps->VpiValue().c_str() + std::string_view("INT:").length(),
-              nullptr, 10);
+          if (itps->VpiValue().find("UINT:") != std::string::npos) {
+            bits = std::strtoull(
+                itps->VpiValue().c_str() + std::string_view("UINT:").length(),
+                nullptr, 10);
+          } else {
+            bits = std::strtoll(
+                itps->VpiValue().c_str() + std::string_view("INT:").length(),
+                nullptr, 10);
+          }
         }
         break;
       }
@@ -1080,6 +1089,11 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
     if (typespec *cts = (typespec *)cexp->Typespec()) {
       if (cts->UhdmType() == uhdmint_typespec) {
         int_typespec *icts = (int_typespec *)cts;
+        wordSize = std::strtoull(
+            icts->VpiValue().c_str() + std::string_view("UINT:").length(),
+            nullptr, 10);
+      } else if (cts->UhdmType() == uhdminteger_typespec) {
+        integer_typespec *icts = (integer_typespec *)cts;
         wordSize = std::strtoull(
             icts->VpiValue().c_str() + std::string_view("UINT:").length(),
             nullptr, 10);
@@ -2871,15 +2885,20 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               } else if (ttps == uhdminteger_typespec) {
                 integer_typespec *itps = (integer_typespec *)tps;
                 uint64_t cast_to = 0;
-                if (itps->VpiValue().find("UINT:") != std::string::npos) {
-                  cast_to =
-                      std::strtoull(itps->VpiValue().c_str() +
-                                        std::string_view("UINT:").length(),
-                                    nullptr, 10);
+                if (itps->VpiValue().empty()) {
+                  cast_to = 32;
                 } else {
-                  cast_to = std::strtoll(itps->VpiValue().c_str() +
-                                             std::string_view("INT:").length(),
-                                         nullptr, 10);
+                  if (itps->VpiValue().find("UINT:") != std::string::npos) {
+                    cast_to =
+                        std::strtoull(itps->VpiValue().c_str() +
+                                          std::string_view("UINT:").length(),
+                                      nullptr, 10);
+                  } else {
+                    cast_to =
+                        std::strtoll(itps->VpiValue().c_str() +
+                                         std::string_view("INT:").length(),
+                                     nullptr, 10);
+                  }
                 }
                 UHDM::constant *c = s.MakeConstant();
                 uint64_t mask =
