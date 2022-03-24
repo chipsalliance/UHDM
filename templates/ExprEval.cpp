@@ -1080,7 +1080,7 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
     if (cexp->VpiConstType() == vpiBinaryConst) {
       binary = cexp->VpiValue();
       binary = binary.erase(0, 4);
-      std::reverse(binary.begin(), binary.end());
+      //std::reverse(binary.begin(), binary.end());
     } else {
       int64_t val = get_value(invalidValue, exp);
       binary = toBinary(exp->VpiSize(), val);
@@ -1143,7 +1143,7 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
                             fullPath, op, nullptr);
         v = "0";
       }
-      std::reverse(v.begin(), v.end());
+      //std::reverse(v.begin(), v.end());
       c->VpiValue("BIN:" + v);
       c->VpiDecompile(std::to_string(wordSize) + "'b" + v);
       c->VpiConstType(vpiBinaryConst);
