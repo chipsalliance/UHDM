@@ -1068,6 +1068,9 @@ static std::string toBinary(int size, uint64_t val) {
   return result;
 }
 
+
+
+
 expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
                                 bool &invalidValue, const any *inst,
                                 const any *pexpr) {
@@ -1080,7 +1083,10 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
     if (cexp->VpiConstType() == vpiBinaryConst) {
       binary = cexp->VpiValue();
       binary = binary.erase(0, 4);
-      //std::reverse(binary.begin(), binary.end());
+    } else if (cexp->VpiConstType() == vpiHexConst) {
+      std::string hex = cexp->VpiValue();
+      hex = hex.erase(0, 4);
+      binary = hexToBin(hex);
     } else {
       int64_t val = get_value(invalidValue, exp);
       binary = toBinary(exp->VpiSize(), val);
@@ -1143,7 +1149,6 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
                             fullPath, op, nullptr);
         v = "0";
       }
-      //std::reverse(v.begin(), v.end());
       c->VpiValue("BIN:" + v);
       c->VpiDecompile(std::to_string(wordSize) + "'b" + v);
       c->VpiConstType(vpiBinaryConst);
@@ -1327,7 +1332,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
           ltrim(v, 's');
           ltrim(v, 'b');
           try {
-            result = std::strtoll(v.c_str() + std::string_view("BIN:").length(),
+            result = std::strtoull(v.c_str() + std::string_view("BIN:").length(),
                                   nullptr, 2);
           } catch (...) {
             invalidValue = true;
@@ -1337,7 +1342,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
       }
       case vpiDecConst: {
         try {
-          result = std::strtoll(v.c_str() + std::string_view("DEC:").length(),
+          result = std::strtoull(v.c_str() + std::string_view("DEC:").length(),
                                 nullptr, 10);
         } catch (...) {
           invalidValue = true;
@@ -1352,7 +1357,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
           ltrim(v, 's');
           ltrim(v, 'h');
           try {
-            result = std::strtoll(v.c_str() + std::string_view("HEX:").length(),
+            result = std::strtoull(v.c_str() + std::string_view("HEX:").length(),
                                   nullptr, 16);
           } catch (...) {
             invalidValue = true;
@@ -1368,7 +1373,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
           ltrim(v, 's');
           ltrim(v, 'o');
           try {
-            result = std::strtoll(v.c_str() + std::string_view("OCT:").length(),
+            result = std::strtoull(v.c_str() + std::string_view("OCT:").length(),
                                   nullptr, 8);
           } catch (...) {
             invalidValue = true;
@@ -1378,7 +1383,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
       }
       case vpiIntConst: {
         try {
-          result = std::strtoll(v.c_str() + std::string_view("INT:").length(),
+          result = std::strtoull(v.c_str() + std::string_view("INT:").length(),
                                 nullptr, 10);
         } catch (...) {
           invalidValue = true;
@@ -1396,7 +1401,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
       }
       case vpiScalar: {
         try {
-          result = std::strtoll(v.c_str() + std::string_view("SCAL:").length(),
+          result = std::strtoull(v.c_str() + std::string_view("SCAL:").length(),
                                 nullptr, 2);
         } catch (...) {
           invalidValue = true;
@@ -1418,7 +1423,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
             result = std::strtoull(
                 v.c_str() + std::string_view("UINT:").length(), nullptr, 10);
           } else if (v.find("INT:") != std::string::npos) {
-            result = std::strtoll(v.c_str() + std::string_view("INT:").length(),
+            result = std::strtoull(v.c_str() + std::string_view("INT:").length(),
                                   nullptr, 10);
           } else {
             invalidValue = true;
