@@ -8,12 +8,8 @@ def _get_listen_implementation(classname, name, vpi, type, card):
     Name_ = name[:1].upper() + name[1:]
     Classname_ = classname[:1].upper() + classname[1:]
 
-    if vpi in [ 'vpiParent', 'vpiInstance', 'vpiExtends' ]:
-        return listeners # To prevent infinite loops in visitors as these relations are pointing upward in the tree
-    
-    elif card == '1':
-        # upward vpiModule, vpiInterface relation (when card == 1, pointing to the parent object) creates loops in visitors
-        if vpi in [ 'vpiModule', 'vpiInterface' ]:
+    if card == '1':
+        if vpi in [ 'vpiParent', 'vpiInstance', 'vpiModule', 'vpiInterface', 'vpiUse', 'vpiProgram', 'vpiClassDefn', 'vpiPackage', 'vpiUdp' ]:
             return listeners
 
         if 'func_call' in classname and vpi == 'vpiFunction':
