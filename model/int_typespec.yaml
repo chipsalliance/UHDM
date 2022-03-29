@@ -33,3 +33,9 @@
     vpi: vpiSigned
     type: bool
     card: 1
+ # For parameter type
+  - obj_ref: ranges
+    name: ranges
+    vpi: vpiRange
+    type: range
+    card: any

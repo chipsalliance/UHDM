@@ -685,7 +685,12 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         break;
       }
       case UHDM::uhdmint_typespec: {
+        int_typespec *its = (int_typespec *)typespec;
         bits = 32;
+        ranges = its->Ranges();
+        if (ranges) {
+          bits = 1;
+        }
         break;
       }
       case UHDM::uhdmlong_int_typespec: {
@@ -1105,12 +1110,37 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
             nullptr, 10);
       }
     }
+    if (wordSize == 0) {
+      wordSize = 1;
+    }
     constant *c = s.MakeConstant();
     unsigned short lr = 0;
     unsigned short rr = 0;
     if (const typespec *tps = exp->Typespec()) {
       if (tps->UhdmType() == uhdmlogic_typespec) {
         logic_typespec *lts = (logic_typespec *)tps;
+        VectorOfrange *ranges = lts->Ranges();
+        if (ranges) {
+          range *r = ranges->at(0);
+          bool invalidValue = false;
+          lr = static_cast<unsigned short>(
+              get_value(invalidValue, r->Left_expr()));
+          rr = static_cast<unsigned short>(
+              get_value(invalidValue, r->Right_expr()));
+        }
+      } else if (tps->UhdmType() == uhdmint_typespec) {
+        int_typespec *lts = (int_typespec *)tps;
+        VectorOfrange *ranges = lts->Ranges();
+        if (ranges) {
+          range *r = ranges->at(0);
+          bool invalidValue = false;
+          lr = static_cast<unsigned short>(
+              get_value(invalidValue, r->Left_expr()));
+          rr = static_cast<unsigned short>(
+              get_value(invalidValue, r->Right_expr()));
+        }
+      } else if (tps->UhdmType() == uhdmbit_typespec) {
+        bit_typespec *lts = (bit_typespec *)tps;
         VectorOfrange *ranges = lts->Ranges();
         if (ranges) {
           range *r = ranges->at(0);
