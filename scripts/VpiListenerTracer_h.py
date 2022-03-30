@@ -1,9 +1,17 @@
 import config
 import file_utils
-import VpiListener_h
+
 
 def generate(models):
-    methods = VpiListener_h.get_methods(models, ' TRACE_ENTER; ', ' TRACE_LEAVE; ')
+    methods = []
+    for model in models.values():
+        if model['type'] not in ['class_def', 'group_def']:
+            classname = model['name']
+            Classname_ = classname[:1].upper() + classname[1:]
+
+            methods.append(f'  virtual void enter{Classname_}(const {classname}* object, vpiHandle handle) {{ TRACE_ENTER; }}')
+            methods.append(f'  virtual void leave{Classname_}(const {classname}* object, vpiHandle handle) {{ TRACE_LEAVE; }}')
+            methods.append('')
 
     with open(config.get_template_filepath('VpiListenerTracer.h'), 'rt') as strm:
         file_content = strm.read()

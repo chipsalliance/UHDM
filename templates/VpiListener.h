@@ -27,21 +27,35 @@
 #ifndef UHDM_VPILISTENER_H
 #define UHDM_VPILISTENER_H
 
-#include <uhdm/uhdm_forward_decl.h>
+#include <uhdm/containers.h>
 #include <uhdm/vpi_user.h>
 
 namespace UHDM {
 class VpiListener {
+protected:
+  typedef std::vector<const any *> any_stack_t;
+
+  VisitedContainer visited;
+  any_stack_t callstack;
+
 public:
   // Use implicit constructor to initialize all members
   // VpiListener()
 
   virtual ~VpiListener() = default;
 
-<VPI_LISTENER_METHODS>
-};
+public:
+  void listenAny(vpiHandle handle);
+  void listenDesigns(const std::vector<vpiHandle>& designs);
+<VPI_PUBLIC_LISTEN_DECLARATIONS>
 
+  virtual void enterAny(const any* object, vpiHandle handle) {}
+  virtual void leaveAny(const any* object, vpiHandle handle) {}
+
+<VPI_ENTER_LEAVE_DECLARATIONS>
+private:
+<VPI_PRIVATE_LISTEN_DECLARATIONS>
+};
 }  // namespace UHDM
 
-
-#endif
+#endif  // UHDM_VPILISTENER_H

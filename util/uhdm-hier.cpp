@@ -34,7 +34,6 @@
 #endif
 
 #include <uhdm/uhdm.h>
-#include <uhdm/vpi_listener.h>
 
 using namespace UHDM;
 

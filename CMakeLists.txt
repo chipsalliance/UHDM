@@ -139,7 +139,7 @@ set(uhdm-GENERATED_SRC
     ${GENDIR}/src/UHDM.capnp.c++
     ${GENDIR}/src/UhdmLint.cpp
     ${GENDIR}/src/UhdmListener.cpp
-    ${GENDIR}/src/vpi_listener.cpp
+    ${GENDIR}/src/VpiListener.cpp
     ${GENDIR}/src/vpi_user.cpp
     ${GENDIR}/src/vpi_visitor.cpp
 )

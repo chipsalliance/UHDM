@@ -27,42 +27,30 @@
 #ifndef UHDM_LINT_H
 #define UHDM_LINT_H
 
-#include <uhdm/typespec.h>
-#include <uhdm/expr.h>
-#include <uhdm/design.h>
-#include <iostream>
-#include <sstream>
-
 #include <uhdm/VpiListener.h>
 
 namespace UHDM {
 class Serializer;
-class UhdmLint : public VpiListener {
+class UhdmLint final : public VpiListener {
  public:
   UhdmLint(Serializer* serializer, design* des) : serializer_(serializer), design_(des) {}
 
  private:
-  void leaveBit_select(const bit_select* object, const BaseClass* parent,
-                       vpiHandle handle, vpiHandle parentHandle) override;
+  void leaveBit_select(const bit_select* object, vpiHandle handle) override;
 
-  void leaveFunction(const function* object, const BaseClass* parent,
-                     vpiHandle handle, vpiHandle parentHandle) override;
+  void leaveFunction(const function* object, vpiHandle handle) override;
 
   void leaveStruct_typespec(const struct_typespec* object,
-                            const BaseClass* parent, vpiHandle handle,
-                            vpiHandle parentHandle) override;
+                            vpiHandle handle) override;
 
-  void leaveModule(const module* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override;
+  void leaveModule(const module* object, vpiHandle handle) override;
 
-  void leaveAssignment(const assignment* object, const BaseClass* parent,
-                       vpiHandle handle, vpiHandle parentHandle) override;
+  void leaveAssignment(const assignment* object, vpiHandle handle) override;
 
-  void leaveLogic_net(const logic_net* object, const BaseClass* parent,
-                      vpiHandle handle, vpiHandle parentHandle) override;
+  void leaveLogic_net(const logic_net* object, vpiHandle handle) override;
 
-  void leaveEnum_typespec(const enum_typespec* object, const BaseClass* parent,
-                          vpiHandle handle, vpiHandle parentHandle) override;
+  void leaveEnum_typespec(const enum_typespec* object,
+                          vpiHandle handle) override;
 
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 

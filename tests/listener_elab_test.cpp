@@ -32,11 +32,10 @@
 
 // Verifies that the forward declaration header compiles
 #include "gtest/gtest.h"
+#include "uhdm/VpiListener.h"
 #include "uhdm/uhdm.h"
 #include "uhdm/uhdm_forward_decl.h"
-#include "uhdm/vpi_listener.h"
 #include "uhdm/vpi_visitor.h"
-#include "uhdm/VpiListener.h"
 
 using namespace UHDM;
 
@@ -188,14 +187,12 @@ class MyElaboratorListener : public VpiListener {
  protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
-  void leaveDesign(const design* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override {
+  void leaveDesign(const design* object, vpiHandle handle) override {
     design* root = (design*)object;
     root->VpiElaborated(true);
   }
 
-  void enterModule(const module* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override {
+  void enterModule(const module* object, vpiHandle handle) override {
     bool topLevelModule = object->VpiTopModule();
     const std::string& instName = object->VpiName();
     const std::string& defName = object->VpiDefName();
@@ -269,10 +266,12 @@ class MyElaboratorListener : public VpiListener {
             // context on the stack (hirarchical nets) enterCont_assign listener
             // method below will be trigerred to capture the same data as the
             // walking above in (1)
-            vpiHandle defModule = NewVpiHandle(defMod);
-            VisitedContainer visited;
-            listen_module(defModule, this, &visited);
-            vpi_free_object(defModule);
+            if (vpiHandle defModule = NewVpiHandle(defMod)) {
+              MyElaboratorListener* listener = new MyElaboratorListener();
+              listener->listenModule(defModule);
+              delete listener;
+              vpi_free_object(defModule);
+            }
 
             break;
           }
@@ -283,8 +282,7 @@ class MyElaboratorListener : public VpiListener {
     }
   }
 
-  void leaveModule(const module* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override {
+  void leaveModule(const module* object, vpiHandle handle) override {
     const std::string& instName = object->VpiName();
     bool flatModule =
         (instName == "") && ((object->VpiParent() == 0) ||
@@ -296,8 +294,7 @@ class MyElaboratorListener : public VpiListener {
 
   // Make full use of the listener pattern for all objects in a module, example
   // with "cont assign":
-  void enterCont_assign(const cont_assign* assign, const BaseClass* parent,
-                        vpiHandle handle, vpiHandle parentHandle) override {
+  void enterCont_assign(const cont_assign* assign, vpiHandle handle) override {
     net* lnet = nullptr;
     net* rnet = nullptr;
     ref_obj* lref = nullptr;
@@ -376,7 +373,7 @@ TEST(ListenerElabTest, RoundTrip) {
   if (!elaborated) {
     std::cout << "Elaborating...\n";
     MyElaboratorListener* listener = new MyElaboratorListener();
-    listen_designs(designs, listener);
+    listener->listenDesigns(designs);
     delete listener;
   }
   std::string post_elab1 = visit_designs(designs);
@@ -388,7 +385,7 @@ TEST(ListenerElabTest, RoundTrip) {
   // 2nd elab. We expect no change
   {
     MyElaboratorListener* listener = new MyElaboratorListener();
-    listen_designs(designs, listener);
+    listener->listenDesigns(designs);
     delete listener;
   }
   std::string post_elab2 = visit_designs(designs);

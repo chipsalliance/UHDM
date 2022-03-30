@@ -390,9 +390,9 @@ gen_scope_array* gen_scope_array::DeepClone(Serializer* serializer,
     auto clone_vec = serializer->MakeGen_scopeVec();
     clone->Gen_scopes(clone_vec);
     for (auto obj : *vec) {
-      elaborator->enterGen_scope(obj, parent, nullptr, nullptr);
+      elaborator->enterGen_scope(obj, nullptr);
       clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
-      elaborator->leaveGen_scope(obj, parent, nullptr, nullptr);
+      elaborator->leaveGen_scope(obj, nullptr);
     }
   }
   if (auto obj = VpiInstance())
@@ -459,7 +459,7 @@ function* function::DeepClone(Serializer* serializer,
       }
     }
   }
-  elaborator->enterTask_func(clone, parent, nullptr, nullptr);
+  elaborator->enterTask_func(clone, nullptr);
   if (auto vec = Concurrent_assertions()) {
     auto clone_vec = serializer->MakeConcurrent_assertionsVec();
     clone->Concurrent_assertions(clone_vec);
@@ -553,7 +553,7 @@ function* function::DeepClone(Serializer* serializer,
   }
   if (auto obj = Stmt())
     clone->Stmt(obj->DeepClone(serializer, elaborator, clone));
-  elaborator->leaveTask_func(clone, parent, nullptr, nullptr);
+  elaborator->leaveTask_func(clone, nullptr);
   return clone;
 }
 
@@ -608,7 +608,7 @@ task* task::DeepClone(Serializer* serializer, ElaboratorListener* elaborator,
       }
     }
   }
-  elaborator->enterTask_func(clone, parent, nullptr, nullptr);
+  elaborator->enterTask_func(clone, nullptr);
   if (auto vec = Concurrent_assertions()) {
     auto clone_vec = serializer->MakeConcurrent_assertionsVec();
     clone->Concurrent_assertions(clone_vec);
@@ -709,7 +709,7 @@ task* task::DeepClone(Serializer* serializer, ElaboratorListener* elaborator,
   }
   if (auto obj = Stmt())
     clone->Stmt(obj->DeepClone(serializer, elaborator, clone));
-  elaborator->leaveTask_func(clone, parent, nullptr, nullptr);
+  elaborator->leaveTask_func(clone, nullptr);
   return clone;
 }
 

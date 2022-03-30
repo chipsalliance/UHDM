@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include "uhdm/ElaboratorListener.h"
 #include "uhdm/uhdm.h"
-#include "uhdm/vpi_listener.h"
+#include "uhdm/VpiListener.h"
 #include "uhdm/vpi_visitor.h"
 
 using namespace UHDM;
@@ -116,8 +116,9 @@ TEST(ClassesTest, DesignSaveRestoreRoundtrip) {
 
   // Elaborate restored designs
   ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
-  listen_designs(restoredDesigns, listener);
-  const std::string elaborated = visit_designs(restoredDesigns);
+  listener->listenDesigns(restoredDesigns);
+  delete listener;
 
+  const std::string elaborated = visit_designs(restoredDesigns);
   EXPECT_NE(restored, elaborated);  // Elaboration should've done _something_
 }

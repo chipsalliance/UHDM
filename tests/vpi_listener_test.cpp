@@ -1,6 +1,6 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
-#include "uhdm/vpi_listener.h"
+#include "uhdm/VpiListener.h"
 
 #include <iostream>
 #include <memory>
@@ -16,34 +16,31 @@ using testing::ElementsAre;
 
 class MyVpiListener : public VpiListener {
  protected:
-  void enterModule(const module* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override {
-    CollectLine("Module", object, parentHandle);
+  void enterModule(const module* object, vpiHandle handle) override {
+    CollectLine("Module", object);
     stack_.push(object);
   }
 
-  void leaveModule(const module* object, const BaseClass* parent,
-                   vpiHandle handle, vpiHandle parentHandle) override {
+  void leaveModule(const module* object, vpiHandle handle) override {
     ASSERT_EQ(stack_.top(), object);
     stack_.pop();
   }
 
-  void enterProgram(const program* object, const BaseClass* parent,
-                    vpiHandle handle, vpiHandle parentHandle) override {
-    CollectLine("Program", object, parentHandle);
+  void enterProgram(const program* object, vpiHandle handle) override {
+    CollectLine("Program", object);
     stack_.push(object);
   }
 
-  void leaveProgram(const program* object, const BaseClass* parent,
-                    vpiHandle handle, vpiHandle parentHandle) override {
+  void leaveProgram(const program* object, vpiHandle handle) override {
     ASSERT_EQ(stack_.top(), object);
     stack_.pop();
   }
 
  public:
-  void CollectLine(const std::string& prefix, const BaseClass* object,
-                   vpiHandle parentHandle) {
+  void CollectLine(const std::string& prefix, const BaseClass* object) {
+    vpiHandle parentHandle = NewVpiHandle(object->VpiParent());
     const char* const parentName = vpi_get_str(vpiName, parentHandle);
+    vpi_free_object(parentHandle);
     collected_.push_back(
         prefix + ": " + object->VpiName() + "/" + object->VpiDefName() +
         " parent: " + ((parentName != nullptr) ? parentName : "-"));
@@ -119,7 +116,7 @@ TEST(VpiListenerTest, ProgramModule) {
   const std::vector<vpiHandle>& design = buildModuleProg(&serializer);
 
   std::unique_ptr<MyVpiListener> listener(new MyVpiListener());
-  listen_designs(design, listener.get());
+  listener->listenDesigns(design);
   const std::vector<std::string> expected = {
       "Module: /M1 parent: design1",
       "Program: /PR1 parent: -",

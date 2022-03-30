@@ -31,9 +31,7 @@
 
 namespace UHDM {
 
-void UhdmLint::leaveBit_select(const bit_select* object,
-                               const BaseClass* parent, vpiHandle handle,
-                               vpiHandle parentHandle) {
+void UhdmLint::leaveBit_select(const bit_select* object, vpiHandle handle) {
   const expr* index = object->VpiIndex();
   if (index) {
     if (index->UhdmType() == uhdmref_obj) {
@@ -78,8 +76,7 @@ static const any* returnWithValue(const any* stmt) {
   return nullptr;
 }
 
-void UhdmLint::leaveFunction(const function* object, const BaseClass* parent,
-                             vpiHandle handle, vpiHandle parentHandle) {
+void UhdmLint::leaveFunction(const function* object, vpiHandle handle) {
   if (object->Return() == nullptr) {
     if (const any* st = object->Stmt()) {
       const any* ret = returnWithValue(st);
@@ -92,9 +89,7 @@ void UhdmLint::leaveFunction(const function* object, const BaseClass* parent,
   }
 }
 
-void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
-                                    const BaseClass* parent, vpiHandle handle,
-                                    vpiHandle parentHandle) {
+void UhdmLint::leaveStruct_typespec(const struct_typespec* object, vpiHandle handle) {
   if (object->VpiPacked()) {
     if (object->Members()) {
       for (typespec_member* member : *object->Members()) {
@@ -108,8 +103,7 @@ void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
   }
 }
 
-void UhdmLint::leaveModule(const module* object, const BaseClass* parent,
-                           vpiHandle handle, vpiHandle parentHandle) {
+void UhdmLint::leaveModule(const module* object, vpiHandle handle) {
   if (auto assigns = object->Cont_assigns()) {
     checkMultiContAssign(assigns);
   }
@@ -179,9 +173,7 @@ void UhdmLint::checkMultiContAssign(
   }
 }
 
-void UhdmLint::leaveAssignment(const assignment* object,
-                               const BaseClass* parent, vpiHandle handle,
-                               vpiHandle parentHandle) {
+void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
   const any* lhs = object->Lhs();
   if (!lhs) return;
   if (lhs->UhdmType() == uhdmref_obj) {
@@ -208,8 +200,7 @@ void UhdmLint::leaveAssignment(const assignment* object,
   }
 }
 
-void UhdmLint::leaveLogic_net(const logic_net* object, const BaseClass* parent,
-                      vpiHandle handle, vpiHandle parentHandle) {
+void UhdmLint::leaveLogic_net(const logic_net* object, vpiHandle handle) {
   const logic_typespec* tps =
       any_cast<const logic_typespec*>(object->Typespec());
   if (tps) {
@@ -229,9 +220,7 @@ void UhdmLint::leaveLogic_net(const logic_net* object, const BaseClass* parent,
   }
 }
 
-void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
-                                  const BaseClass* parent, vpiHandle handle,
-                                  vpiHandle parentHandle) {
+void UhdmLint::leaveEnum_typespec(const enum_typespec* object, vpiHandle handle) {
   const typespec* baseType = object->Base_typespec();
   if (!baseType) return;
   ExprEval eval;
