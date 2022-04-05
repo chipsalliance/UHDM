@@ -102,7 +102,7 @@ class Serializer {
   uhdm_handleFactory uhdm_handleMaker;
 <FACTORY_DATA_MEMBERS>
 
-  const std::unordered_map<const BaseClass*, unsigned long>& AllObjects() const {
+  const std::map<const BaseClass*, unsigned long>& AllObjects() const {
     return allIds_;
   }
 
@@ -125,7 +125,7 @@ class Serializer {
   BaseClass* GetObject(unsigned int objectType, unsigned int index);
   void SetId(const BaseClass* p, unsigned long id);
   unsigned long GetId(const BaseClass* p);
-  std::unordered_map<const BaseClass*, unsigned long> allIds_;
+  std::map<const BaseClass*, unsigned long> allIds_;
   unsigned long incrId_;  // Capnp id
   unsigned long objId_;   // ID for property annotations
 
