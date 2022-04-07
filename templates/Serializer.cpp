@@ -47,7 +47,7 @@ void Serializer::SetId(const BaseClass* p, unsigned long id) {
 }
 
 unsigned long Serializer::GetId(const BaseClass* p) {
-  std::unordered_map<const BaseClass*, unsigned long>::iterator itr = allIds_.find(p);
+  std::map<const BaseClass*, unsigned long>::iterator itr = allIds_.find(p);
   if (itr == allIds_.end()) {
     unsigned long tmp = incrId_;
     allIds_.insert(std::make_pair(p, incrId_));
