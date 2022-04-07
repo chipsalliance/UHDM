@@ -25,3 +25,8 @@
     vpi: vpiSeqFormalDecl
     type: seq_formal_decl
     card: any
+  - property: name
+    name: name
+    vpi: vpiName
+    type: string
+    card: 1
