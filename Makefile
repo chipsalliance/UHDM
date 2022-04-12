@@ -1,7 +1,7 @@
 # UHDM top Makefile (Wrapper to cmake)
 
 # Use bash as the default shell
-SHELL := /bin/bash
+SHELL := /usr/bin/env bash
 
 ifeq ($(CPU_CORES),)
 	CPU_CORES := $(shell nproc)
@@ -33,8 +33,7 @@ test-junit: release
 	xsltproc .github/kokoro/ctest2junit.xsl build/Testing/*/Test.xml > build/test_results.xml
 
 clean:
-	rm -rf build
-	rm -rf src/ headers/  # legacy location, not used anymore.
+	rm -rf build dbuild
 
 install: build
 	cmake --install build --config Release
