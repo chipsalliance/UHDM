@@ -91,6 +91,7 @@ endif()
 file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
 file(GLOB templates_SRC ${PROJECT_SOURCE_DIR}/templates/*.h
      ${PROJECT_SOURCE_DIR}/templates/*.cpp)
+file(GLOB include_SRC ${PROJECT_SOURCE_DIR}/include/*.h)
 
 set(model-GENERATED_UHDM ${GENDIR}/src/UHDM.capnp)
 set_source_files_properties(${model-GENERATED_UHDM} PROPERTIES GENERATED TRUE)
@@ -104,7 +105,8 @@ add_custom_command(
           ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
           ${py_SRC}
           ${yaml_SRC}
-          ${templates_SRC})
+          ${templates_SRC}
+          ${include_SRC})
 
 set(model-GENERATED_SRC ${GENDIR}/src/UHDM.capnp.h
                         ${GENDIR}/src/UHDM.capnp.c++)

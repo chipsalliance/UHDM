@@ -250,7 +250,7 @@ constraint_expr.yaml
 constraint_ordering.yaml
 constraint_item_group.yaml
 constraint.yaml
-import.yaml
+import_typespec.yaml
 expr_range_group.yaml
 dist_item.yaml
 distribution.yaml
