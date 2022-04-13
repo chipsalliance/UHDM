@@ -58,10 +58,15 @@ bool UhdmListener::didVisitAll(const Serializer& serializer) const {
 <UHDM_PRIVATE_LISTEN_IMPLEMENTATIONS>
 <UHDM_PUBLIC_LISTEN_IMPLEMENTATIONS>
 void UhdmListener::listenAny(const any* const object) {
+  const bool revisiting = visited.find(object) != visited.end();
+  if (!revisiting) enterAny(object);
+
   switch (object->UhdmType()) {
 <UHDM_LISTENANY_IMPLEMENTATION>
   default: break;
   }
+
+  if (!revisiting) leaveAny(object);
 }
 
 } // namespace UHDM

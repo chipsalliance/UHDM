@@ -82,7 +82,10 @@ public:
 
   void listenAny(const any *const object);
 <UHDM_PUBLIC_LISTEN_DECLARATIONS>
-  
+
+  virtual void enterAny(const any* const object) {}
+  virtual void leaveAny(const any* const object) {}
+
 <UHDM_ENTER_LEAVE_DECLARATIONS>
 <UHDM_ENTER_LEAVE_VECTOR_DECLARATIONS>
 private:
