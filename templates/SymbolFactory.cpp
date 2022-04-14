@@ -30,12 +30,12 @@ const std::string& SymbolFactory::getBadSymbol() {
   return kBadSymbol;
 }
 
-SymbolFactory::ID SymbolFactory::Make(const std::string& symbol) {
-  const auto inserted = symbol2IdMap_.insert({symbol, idCounter_});
-  if (inserted.second) {
-    id2SymbolMap_.emplace_back(symbol);
-    idCounter_++;
-  }
+SymbolFactory::ID SymbolFactory::Make(std::string_view symbol) {
+  const auto found = symbol2IdMap_.find(symbol);
+  if (found != symbol2IdMap_.end()) return found->second;
+  id2SymbolMap_.emplace_back(symbol);
+  std::string_view stable_view = id2SymbolMap_.back();
+  const auto inserted = symbol2IdMap_.insert({stable_view, idCounter_++});
   return inserted.first->second;
 }
 
@@ -43,7 +43,7 @@ const std::string& SymbolFactory::GetSymbol(ID id) const {
   return (id < id2SymbolMap_.size()) ? id2SymbolMap_[id] : getBadSymbol();
 }
 
-SymbolFactory::ID SymbolFactory::GetId(const std::string& symbol) const {
+SymbolFactory::ID SymbolFactory::GetId(std::string_view symbol) const {
   auto found = symbol2IdMap_.find(symbol);
   return (found == symbol2IdMap_.end()) ? kBadId : found->second;
 }

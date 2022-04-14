@@ -106,9 +106,9 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
   ::capnp::PackedFdMessageReader message(fileid, options);
   UhdmRoot::Reader cap_root = message.getRoot<UhdmRoot>();
 
-  ::capnp::List<::capnp::Text>::Reader symbols = cap_root.getSymbols();
-  for (auto symbol : symbols) {
-    symbolMaker.Make(symbol);
+  const ::capnp::List<::capnp::Text>::Reader& symbols = cap_root.getSymbols();
+  for (const auto& symbol : symbols) {
+    symbolMaker.Make(symbol.cStr());
   }
 
 <CAPNP_INIT_FACTORIES>

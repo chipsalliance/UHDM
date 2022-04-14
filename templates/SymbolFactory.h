@@ -27,8 +27,9 @@
 #ifndef UHDM_SYMBOL_FACTORY_H
 #define UHDM_SYMBOL_FACTORY_H
 
+#include <deque>
 #include <string>
-#include <vector>
+#include <string_view>
 #include <unordered_map>
 
 #include <uhdm/uhdm_types.h>
@@ -41,23 +42,36 @@ class SymbolFactory {
 
 public:
   typedef unsigned int ID;
-  typedef std::vector<std::string> Id2SymbolMap;
-  typedef std::unordered_map<std::string, ID> Symbol2IdMap;
+  // The deque guarantees that the allocated strings are never moving around,
+  // so we can rely on string_views pointing to them be stable even with
+  // short string optimizations (which otherwise would _not_ work if std::moved)
+  typedef std::deque<std::string> Id2SymbolMap;
+  typedef std::unordered_map<std::string_view, ID> Symbol2IdMap;
 
 private:
   static constexpr ID kBadId = -1;  // setting all the bits.
 
 public:
+  SymbolFactory() = default;
+
+  // Must never copy: expensive, and string locations would not be stable.
+  // It would also be a programming error.
+  SymbolFactory(const SymbolFactory& s) = delete;
+  SymbolFactory& operator=(const SymbolFactory&) = delete;
+  SymbolFactory(SymbolFactory&& s) = delete;
+  SymbolFactory& operator=(SymbolFactory&&) = delete;
+
   // Register given "symbol" string as a symbol and return its id.
   // If this is an existing symbol, its ID is returned, otherwise a new one
   // is created.
-  ID Make(const std::string& symbol);
+  ID Make(std::string_view symbol);
 
-  // Find id of given "symbol" or return "@@BAD_SYMBOL@@" if it doesn't exist.
+  // Return string of symbol identified by "id"
+  // or "@@BAD_SYMBOL@@" if it doesn't exist.
   const std::string& GetSymbol(ID id) const;
 
-  // Get symbol string identified by given ID or 0 (zero) if it doesn't exist
-  ID GetId(const std::string& symbol) const;
+  // Get ID of given "symbol" or kBadId if it doesn't exist
+  ID GetId(std::string_view symbol) const;
 
   // Remove all symbols
   void Purge();
