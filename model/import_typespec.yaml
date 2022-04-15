@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "import_stmt" formal description
+# Universal Hardware Data Model (UHDM) "import_typespec" formal description
 
-- obj_def: import
+- obj_def: import_typespec
   - extends: typespec
   - property: type
-    name: uhdmimport
+    name: uhdmimport_typespec
     vpi: vpiType
     type: unsigned int
     card: 1
   - obj_ref: item
     name: item
-    vpi: vpiImport
+    vpi: vpiImportTypespec
     type: constant
     card: 1
 

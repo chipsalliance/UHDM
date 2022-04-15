@@ -192,7 +192,7 @@ extern "C" {
 
 /************ methods used to traverse 1 to many relationships ************/
 #define vpiTypedef                            725
-#define vpiImport                             726
+#define vpiImportTypespec                     726
 #define vpiDerivedClasses                     727
 #define vpiInterfaceDecl vpiVirtualInterfaceVar /* interface decl deprecated */
 
@@ -381,7 +381,7 @@ extern "C" {
 #define vpiAssignmentPatternOp            75 /* '{} assignment pattern */
 #define vpiMultiAssignmentPatternOp       76 /* '{n{}} multi assignment pattern */
 #define vpiIfOp                           77 /* if operator */
-#define vpiIfElseOp                       78 /* if–else operator */
+#define vpiIfElseOp                       78 /* if-else operator */
 #define vpiCompAndOp                      79 /* Composite and operator */
 #define vpiCompOrOp                       80 /* Composite or operator */
 #define vpiImpliesOp                      94 /* implies operator */

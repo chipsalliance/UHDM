@@ -160,7 +160,7 @@ def _get_data_member(type, vpi, card):
 
     if card == '1':
         pointer = ''
-        default_assignment = '0'
+        default_assignment = 'false' if type == 'bool' else '0'
         if type not in ['unsigned int', 'int', 'bool', 'std::string']:
             pointer = '*'
             default_assignment = 'nullptr'

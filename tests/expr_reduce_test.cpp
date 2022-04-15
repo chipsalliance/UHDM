@@ -121,7 +121,7 @@ TEST(FullElabTest, ElaborationRoundtrip) {
       ExprEval eval;
       bool invalidValue = false;
       expr* reduced = eval.reduceExpr(rhs, invalidValue, m, pass);
-      int val = eval.get_value(invalidValue, reduced);
+      int64_t val = eval.get_value(invalidValue, reduced);
       EXPECT_EQ(val, 5);
       EXPECT_EQ(invalidValue, false);
     }

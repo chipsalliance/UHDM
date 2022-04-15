@@ -288,7 +288,7 @@ static std::string vpiTypeName(vpiHandle h) {
     case 721: return "vpiPattern";
     case 722: return "vpiWeight";
     case 725: return "vpiTypedef";
-    case 726: return "vpiImport";
+    case 726: return "vpiImportTypespec";
     case 727: return "vpiDerivedClasses";
     case 100: return "vpiVariables";
     case 728: return "vpiVirtualInterfaceVar";

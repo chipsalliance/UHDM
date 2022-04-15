@@ -96,7 +96,7 @@
     card: any
   - group_ref: instance_items
     name: instance_items
-    vpi: vpiImport
+    vpi: vpiImportTypespec
     type: instance_item
     card: any
   - obj_ref: let_decls
