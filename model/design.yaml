@@ -30,6 +30,10 @@
     vpi: vpiType
     type: unsigned int
     card: 1
+  - obj_ref: include_file_infos
+    vpi: vpiIncludeFileInfo
+    type: include_file_info
+    card: any
   - class: allPackages
     type: package
     vpi_obj: vpiPackage
@@ -39,7 +43,7 @@
     type: package
     vpi_obj: vpiPackage
     vpi: uhdmtopPackages
-    card: any  
+    card: any
   - class: allClasses
     type: class_defn
     vpi_obj: vpiClassDefn

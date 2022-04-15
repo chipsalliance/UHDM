@@ -545,8 +545,10 @@ void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedCont
 
 #endif
 
-    if (objectType == vpiModule || objectType == vpiProgram || objectType == vpiClassDefn || objectType == vpiPackage ||
-        objectType == vpiInterface || objectType == vpiUdp) {
+    if ((objectType == vpiModule) || (objectType == vpiProgram) ||
+        (objectType == vpiClassDefn) || (objectType == vpiPackage) ||
+        (objectType == vpiInterface) || (objectType == vpiUdp) ||
+        (objectType == vpiIncludeFileInfo)) {
       if (const char* s = vpi_get_str(vpiFile, obj_h)) {
         if (int l = vpi_get(vpiLineNo, obj_h)) {
           out << " " << s << ":" << l;  // fileName, line
