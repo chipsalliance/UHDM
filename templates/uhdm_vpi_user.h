@@ -52,9 +52,8 @@
 #define  vpiRefEndColumnNo   3022
 
 // Include file details
-#define vpiIncludeFileInfo      3023
-#define vpiIncludedFile         3024
-#define vpiResolvedIncludedFile 3025
+#define vpiIncludeFileInfo   3023
+#define vpiIncludedFile      3024
 
 // Tags used to model unsupported nodes
 #define vpiUnsupportedStmt   4000
