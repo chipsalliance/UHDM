@@ -227,6 +227,7 @@ if (UHDM_BUILD_TESTS)
     tests/module-port_test.cpp
     tests/process_test.cpp
     tests/statement_test.cpp
+    tests/symbol_factory_test.cpp
     tests/tf_call_test.cpp
     tests/uhdm_listener_test.cpp
     tests/vpi_get_test.cpp
