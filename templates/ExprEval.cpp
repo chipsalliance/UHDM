@@ -2169,10 +2169,14 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               int64_t val0 = get_value(invalidValueI, expr0);
               if ((invalidValue == false) && (invalidValueI == false)) {
                 int64_t val = -val0;
+                uint64_t size = 64;
+                if (expr0->UhdmType() == uhdmconstant) {
+                  size = expr0->VpiSize();
+                }
                 UHDM::constant *c = s.MakeConstant();
                 c->VpiValue("INT:" + std::to_string(val));
                 c->VpiDecompile(std::to_string(val));
-                c->VpiSize(64);
+                c->VpiSize(size);
                 c->VpiConstType(vpiIntConst);
                 result = c;
               } else {
@@ -3062,8 +3066,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       bool invalidValue = false;
       for (auto arg : *scall->Tf_call_args()) {
         uint64_t clog2 = 0;
-        uint64_t val =
-            get_value(invalidValue, reduceExpr(arg, invalidValue, inst, pexpr));
+        uint64_t val = get_uvalue(invalidValue,
+                                  reduceExpr(arg, invalidValue, inst, pexpr));
         if (val) {
           val = val - 1;
           for (; val > 0; clog2 = clog2 + 1) {
@@ -3077,6 +3081,62 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           c->VpiSize(64);
           c->VpiConstType(vpiUIntConst);
           result = c;
+        }
+      }
+    } else if (name == "$signed" || name == "$unsigned") {
+      bool invalidTmpValue = false;
+      if (scall->Tf_call_args()) {
+        for (auto arg : *scall->Tf_call_args()) {
+          expr *val = reduceExpr(arg, invalidTmpValue, inst, pexpr);
+          if ((val->UhdmType() == uhdmconstant) && (invalidTmpValue == false)) {
+            constant *c = (constant *)val;
+            if (c->VpiConstType() == vpiIntConst ||
+                c->VpiConstType() == vpiDecConst) {
+              int64_t value = get_value(invalidValue, val);
+              uint64_t size = c->VpiSize();
+              if (name == "$signed") {
+                return c;
+              } else {
+                uint64_t res = value;
+                if (value >= 0) {
+                  return c;
+                } else {
+                  res = ~value;
+                  res = ~res;
+                  uint64_t mask = getMask(size);
+                  res = res & mask;
+                  UHDM::constant *c = s.MakeConstant();
+                  c->VpiValue("UINT:" + std::to_string(res));
+                  c->VpiDecompile(std::to_string(res));
+                  c->VpiSize(size);
+                  c->VpiConstType(vpiUIntConst);
+                  result = c;
+                }
+              }
+            } else if (c->VpiConstType() == vpiUIntConst ||
+                       c->VpiConstType() == vpiBinaryConst ||
+                       c->VpiConstType() == vpiHexConst ||
+                       c->VpiConstType() == vpiOctConst) {
+              uint64_t value = get_uvalue(invalidValue, val);
+              uint64_t size = c->VpiSize();
+              if (name == "$signed") {
+                int64_t res = value;
+                bool negsign = value & (1 << (size - 1));
+                if (negsign) {
+                  res &= ~(1UL << (size - 1));
+                  res = -res;
+                }
+                UHDM::constant *c = s.MakeConstant();
+                c->VpiValue("INT:" + std::to_string(res));
+                c->VpiDecompile(std::to_string(res));
+                c->VpiSize(size);
+                c->VpiConstType(vpiIntConst);
+                result = c;
+              } else {
+                result = c;
+              }
+            }
+          }
         }
       }
     }
