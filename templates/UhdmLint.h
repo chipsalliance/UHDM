@@ -29,6 +29,7 @@
 
 #include <uhdm/typespec.h>
 #include <uhdm/expr.h>
+#include <uhdm/design.h>
 #include <iostream>
 #include <sstream>
 
@@ -38,7 +39,7 @@ namespace UHDM {
 class Serializer;
 class UhdmLint : public VpiListener {
  public:
-  UhdmLint(Serializer* serializer) : serializer_(serializer) {}
+  UhdmLint(Serializer* serializer, design* des) : serializer_(serializer), design_(des) {}
 
  private:
   void leaveBit_select(const bit_select* object, const BaseClass* parent,
@@ -66,6 +67,7 @@ class UhdmLint : public VpiListener {
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 
   Serializer* serializer_ = nullptr;
+  design* design_ = nullptr;
 };
 
 }  // namespace UHDM

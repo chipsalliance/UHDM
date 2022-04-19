@@ -149,9 +149,11 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
     tmp = tmp->VpiParent();
   }
   const design *des = any_cast<design *>(root);
+  if (des)
+    m_design = des;
   std::string the_name = name;
   const any *the_instance = inst;
-  if (des && (name.find("::") != std::string::npos)) {
+  if (m_design && (name.find("::") != std::string::npos)) {
     std::vector<std::string> res;
     tokenizeMulti(name, "::", res);
     if (res.size() > 1) {
@@ -159,8 +161,8 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
       const std::string &varName = res[1];
       the_name = varName;
       package *pack = nullptr;
-      if (des->TopPackages()) {
-        for (auto p : *des->TopPackages()) {
+      if (m_design->TopPackages()) {
+        for (auto p : *m_design->TopPackages()) {
           if (p->VpiName() == packName) {
             pack = p;
             break;
@@ -275,12 +277,15 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
       UHDM::VectorOfvariables *variables = nullptr;
       UHDM::VectorOfarray_net *array_nets = nullptr;
       UHDM::VectorOfnet *nets = nullptr;
+      UHDM::VectorOftypespec* typespecs = nullptr;
       if (inst->UhdmType() == uhdmgen_scope_array) {
       } else if (inst->UhdmType() == uhdmdesign) {
         param_assigns = ((design *)inst)->Param_assigns();
+        typespecs = ((design *)inst)->Typespecs();
       } else if (any_cast<scope *>(inst)) {
         param_assigns = ((scope *)inst)->Param_assigns();
         variables = ((scope *)inst)->Variables();
+        typespecs = ((scope *)inst)->Typespecs();
         if (const instance *in = any_cast<instance *>(inst)) {
           array_nets = in->Array_nets();
           nets = in->Nets();
@@ -319,11 +324,20 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
           }
         }
       }
-
+      if ((result == nullptr) && typespecs) {
+        for (auto o : *typespecs) {
+          if (o->VpiName() == name) {
+            result = o;
+            break;
+          }
+        }
+      }
       if ((result == nullptr) ||
           (result && (result->UhdmType() != uhdmconstant) &&
            (result->UhdmType() != uhdmparam_assign))) {
-        result = getValue(name, inst, pexpr);
+        any* tmpresult = getValue(name, inst, pexpr);
+        if (tmpresult)
+          result = tmpresult;
       }
       if (result) break;
       if (inst) {
@@ -1483,9 +1497,11 @@ UHDM::task_func *ExprEval::getTaskFunc(const std::string &name,
     tmp = tmp->VpiParent();
   }
   const design *des = any_cast<design *>(root);
+  if (des)
+    m_design = des;
   std::string the_name = name;
   const any *the_instance = inst;
-  if (des && (name.find("::") != std::string::npos)) {
+  if (m_design && (name.find("::") != std::string::npos)) {
     std::vector<std::string> res;
     tokenizeMulti(name, "::", res);
     if (res.size() > 1) {
@@ -1493,8 +1509,8 @@ UHDM::task_func *ExprEval::getTaskFunc(const std::string &name,
       const std::string &varName = res[1];
       the_name = varName;
       package *pack = nullptr;
-      if (des->TopPackages()) {
-        for (auto p : *des->TopPackages()) {
+      if (m_design->TopPackages()) {
+        for (auto p : *m_design->TopPackages()) {
           if (p->VpiName() == packName) {
             pack = p;
             break;
@@ -1515,7 +1531,7 @@ UHDM::task_func *ExprEval::getTaskFunc(const std::string &name,
 
     if (task_funcs) {
       for (UHDM::task_func *tf : *task_funcs) {
-        if (tf->VpiName() == name) {
+        if (tf->VpiName() == the_name) {
           return tf;
         }
       }
@@ -2986,6 +3002,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           ref_obj *ref = (ref_obj *)arg;
           const std::string &objname = ref->VpiName();
           any *object = getObject(objname, inst, pexpr);
+          if (object == nullptr) {
+            if (inst->UhdmType() == uhdmpackage) {
+              object = getObject(inst->VpiName() + "::" + objname, inst, pexpr);
+            }
+          }
           if (object) {
             if (UHDM::param_assign *passign =
                     any_cast<param_assign *>(object)) {
@@ -3748,6 +3769,7 @@ expr *ExprEval::EvalFunc(UHDM::function *func, std::vector<any *> *args,
   // set internal scope stack
   Scopes scopes;
   module *scope = s.MakeModule();
+  scope->VpiParent((any*) inst);
   UHDM::VectorOfparam_assign *param_assigns = nullptr;
   if (inst->UhdmType() == uhdmgen_scope_array) {
   } else if (inst->UhdmType() == uhdmdesign) {
@@ -3763,23 +3785,6 @@ expr *ExprEval::EvalFunc(UHDM::function *func, std::vector<any *> *args,
       scope->Param_assigns()->push_back((param_assign *)pp);
     }
   }
-
-  /*
-  // default return value is invalid
-  constant* c = s.MakeConstant();
-  c->VpiValue("INT:0");
-  c->VpiSize(64);
-  c->VpiConstType(vpiIntConst);
-  param_assign* pa = s.MakeParam_assign();
-  pa->Rhs(c);
-  parameter* param = s.MakeParameter();
-  param->VpiName(name);
-  pa->Lhs(param);
-  if (scope->Param_assigns() == nullptr) {
-    scope->Param_assigns(s.MakeParam_assignVec());
-  }
-  scope->Param_assigns()->push_back(pa);
-  */
 
   // set args
   if (func->Io_decls()) {
