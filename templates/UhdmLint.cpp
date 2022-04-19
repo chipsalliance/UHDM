@@ -235,6 +235,7 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
   const typespec* baseType = object->Base_typespec();
   if (!baseType) return;
   ExprEval eval;
+   eval.setDesign(design_);
   bool invalidValue = false;
   uint64_t baseSize =
       eval.size(baseType, invalidValue,
@@ -248,6 +249,10 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
                                 object->VpiParent(), true);
     if (invalidValue == false) {
       if (baseSize != c_size) {
+        baseSize =
+      eval.size(baseType, invalidValue,
+                object->Instance() ? object->Instance() : object->VpiParent(),
+                object->VpiParent(), true);
         serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_CONST_SIZE_MISMATCH,
                                        c->VpiName(), c, baseType);
       }

@@ -117,7 +117,7 @@ class ExprEval {
 
   bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst);
-
+  void setDesign(design* des) { m_design = des; }
   /* For Surelog or other UHDM clients to use the UHDM expr evaluator in their context */
   void setGetObjectFunctor(GetObjectFunctor func) { getObjectFunctor = func; }
   void setGetValueFunctor(GetObjectFunctor func) { getValueFunctor = func; }
@@ -131,6 +131,7 @@ class ExprEval {
   GetObjectFunctor getObjectFunctor = nullptr;
   GetObjectFunctor getValueFunctor = nullptr;
   GetTaskFuncFunctor getTaskFuncFunctor = nullptr;
+  const UHDM::design* m_design = nullptr;
 };
 
 std::string vPrint(UHDM::any* handle);
