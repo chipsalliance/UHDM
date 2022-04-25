@@ -16,7 +16,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 option(
   WITH_LIBCXX
   "Building with clang++ and libc++(in Linux). To enable with: -DWITH_LIBCXX=On"
-  On)
+  OFF)
 option(UHDM_BUILD_TESTS "Enable testing." ON)
 
 project(UHDM)
@@ -53,6 +53,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   ${PROJECT_SOURCE_DIR}/model/models.lst
 )
+
+if(WITH_LIBCXX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
 
