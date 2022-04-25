@@ -91,6 +91,12 @@ void ElaboratorListener::enterModule(const module* object,
     }
     if (object->Parameters()) {
       for (any* param : *object->Parameters()) {
+        ComponentMap::iterator itr = paramMap.find(param->VpiName());
+        if (itr != paramMap.end()) {
+          if ((*itr).second == nullptr) {
+            paramMap.erase(itr);
+          }
+        }
         paramMap.insert(std::make_pair(param->VpiName(), param));
       }
     }
