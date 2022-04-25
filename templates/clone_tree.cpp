@@ -24,6 +24,7 @@
  */
 #include <uhdm/ElaboratorListener.h>
 #include <uhdm/ExprEval.h>
+#include <uhdm/RTTI.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
@@ -800,97 +801,247 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           ref_obj* ref = (ref_obj*)previous;
           const any* actual = ref->Actual_group();
           if (actual) {
-            if (actual->UhdmType() == uhdmstruct_net ||
-                actual->UhdmType() == uhdmstruct_var) {
-              struct_typespec* stpt = nullptr;
-              if (actual->UhdmType() == uhdmstruct_net) {
-                stpt = (struct_typespec*)((struct_net*)actual)->Typespec();
-              } else if (actual->UhdmType() == uhdmstruct_var) {
-                stpt = (struct_typespec*)((struct_var*)actual)->Typespec();
-              }
-              if (stpt) {
-                for (typespec_member* member : *stpt->Members()) {
-                  if (member->VpiName() == name) {
-                    if (current->UhdmType() == uhdmref_obj) {
-                      ((ref_obj*)current)->Actual_group(member);
-                    } else if (current->UhdmType() == uhdmbit_select) {
-                      const any* parent = current->VpiParent();
-                      if (parent && (parent->UhdmType() == uhdmref_obj))
-                        ((ref_obj*)parent)->Actual_group(member);
+            UHDM_OBJECT_TYPE actual_type = actual->UhdmType();
+            switch (actual_type) {
+              case uhdmstruct_net:
+              case uhdmstruct_var: {
+                struct_typespec* stpt = nullptr;
+                if (actual->UhdmType() == uhdmstruct_net) {
+                  stpt = (struct_typespec*)((struct_net*)actual)->Typespec();
+                } else if (actual->UhdmType() == uhdmstruct_var) {
+                  stpt = (struct_typespec*)((struct_var*)actual)->Typespec();
+                }
+                if (stpt) {
+                  for (typespec_member* member : *stpt->Members()) {
+                    if (member->VpiName() == name) {
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(member);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(member);
+                      }
+                      previous = member;
+                      found = true;
+                      break;
                     }
-                    previous = member;
-                    found = true;
-                    break;
                   }
                 }
+                break;
               }
-            } else if (actual->UhdmType() == uhdmunion_var) {
-              union_typespec* stpt =
-                  (union_typespec*)((union_var*)actual)->Typespec();
-              if (stpt) {
-                for (typespec_member* member : *stpt->Members()) {
-                  if (member->VpiName() == name) {
-                    if (current->UhdmType() == uhdmref_obj) {
-                      ((ref_obj*)current)->Actual_group(member);
-                    } else if (current->UhdmType() == uhdmbit_select) {
-                      const any* parent = current->VpiParent();
-                      if (parent && (parent->UhdmType() == uhdmref_obj))
-                        ((ref_obj*)parent)->Actual_group(member);
+              case uhdmunion_var: {
+                union_typespec* stpt =
+                    (union_typespec*)((union_var*)actual)->Typespec();
+                if (stpt) {
+                  for (typespec_member* member : *stpt->Members()) {
+                    if (member->VpiName() == name) {
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(member);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(member);
+                      }
+                      previous = member;
+                      found = true;
+                      break;
                     }
-                    previous = member;
-                    found = true;
-                    break;
                   }
                 }
+                break;
               }
-            } else if (actual->UhdmType() == uhdminterface) {
-              interface* interf = (interface*)actual;
-              if (interf->Variables()) {
-                for (variables* var : *interf->Variables()) {
-                  if (var->VpiName() == name) {
-                    if (current->UhdmType() == uhdmref_obj) {
-                      ((ref_obj*)current)->Actual_group(var);
-                    } else if (current->UhdmType() == uhdmbit_select) {
-                      const any* parent = current->VpiParent();
-                      if (parent && (parent->UhdmType() == uhdmref_obj))
-                        ((ref_obj*)parent)->Actual_group(var);
+              case uhdminterface: {
+                interface* interf = (interface*)actual;
+                if (interf->Variables()) {
+                  for (variables* var : *interf->Variables()) {
+                    if (var->VpiName() == name) {
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(var);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(var);
+                      }
+                      previous = var;
+                      found = true;
+                      break;
                     }
-                    previous = var;
-                    found = true;
-                    break;
                   }
                 }
+                break;
               }
-            } else if (actual->UhdmType() == uhdmarray_var) {
-              if (current->UhdmType() == uhdmmethod_func_call)
-                found = true;
-              else if (current->UhdmType() == uhdmbit_select)
-                found = true;
-            } else if (actual->UhdmType() == uhdmstring_var) {
-              if (current->UhdmType() == uhdmmethod_func_call)
-                found = true;
-              else if (current->UhdmType() == uhdmbit_select)
-                found = true;
-            } else if (actual->UhdmType() == uhdmclass_typespec) {
-              // TODO: proper support for classes
-              found = true;
-            } else if (actual->UhdmType() == uhdmio_decl) {
-              if (const typespec* tps = ((io_decl*)actual)->Typespec()) {
-                if (tps->UhdmType() == uhdmstring_typespec) {
+              case uhdmarray_var: {
+                if (current->UhdmType() == uhdmmethod_func_call)
                   found = true;
-                } else if (tps->UhdmType() == uhdmclass_typespec) {
+                else if (current->UhdmType() == uhdmbit_select)
                   found = true;
-                } 
+                break;
               }
-            } else if (actual->UhdmType() == uhdmref_var) {
-              found = true;
-              // TODO: class var support
+              case uhdmstring_var: {
+                if (current->UhdmType() == uhdmmethod_func_call)
+                  found = true;
+                else if (current->UhdmType() == uhdmbit_select)
+                  found = true;
+                break;
+              }
+              case uhdmclass_typespec: {
+                // TODO: proper support for classes
+                found = true;
+                break;
+              }
+              case uhdmio_decl: {
+                io_decl* decl = (io_decl*)actual;
+                if (const typespec* tps = decl->Typespec()) {
+                  if (tps->UhdmType() == uhdmstring_typespec) {
+                    found = true;
+                  } else if (tps->UhdmType() == uhdmclass_typespec) {
+                    found = true;
+                  } else if (tps->UhdmType() == uhdmstruct_typespec) {
+                    struct_typespec* stpt = (struct_typespec*)tps;
+                    for (typespec_member* member : *stpt->Members()) {
+                      if (member->VpiName() == name) {
+                        if (current->UhdmType() == uhdmref_obj) {
+                          ((ref_obj*)current)->Actual_group(member);
+                        } else if (current->UhdmType() == uhdmbit_select) {
+                          const any* parent = current->VpiParent();
+                          if (parent && (parent->UhdmType() == uhdmref_obj))
+                            ((ref_obj*)parent)->Actual_group(member);
+                        }
+                        previous = member;
+                        found = true;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (decl->Ranges()) {
+                  if (current->UhdmType() == uhdmmethod_func_call)
+                    found = true;
+                  else if (current->UhdmType() == uhdmbit_select)
+                    found = true;
+                }
+                // TODO: class method support
+                if (current->UhdmType() == uhdmmethod_func_call) found = true;
+                break;
+              }
+              case uhdmparameter: {
+                parameter* param = (parameter*)actual;
+                if (const typespec* tps = param->Typespec()) {
+                  if (tps->UhdmType() == uhdmstring_typespec) {
+                    found = true;
+                  } else if (tps->UhdmType() == uhdmclass_typespec) {
+                    found = true;
+                  } else if (tps->UhdmType() == uhdmstruct_typespec) {
+                    struct_typespec* stpt = (struct_typespec*)tps;
+                    for (typespec_member* member : *stpt->Members()) {
+                      if (member->VpiName() == name) {
+                        if (current->UhdmType() == uhdmref_obj) {
+                          ((ref_obj*)current)->Actual_group(member);
+                        } else if (current->UhdmType() == uhdmbit_select) {
+                          const any* parent = current->VpiParent();
+                          if (parent && (parent->UhdmType() == uhdmref_obj))
+                            ((ref_obj*)parent)->Actual_group(member);
+                        }
+                        previous = member;
+                        found = true;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (param->Ranges()) {
+                  if (current->UhdmType() == uhdmmethod_func_call)
+                    found = true;
+                  else if (current->UhdmType() == uhdmbit_select)
+                    found = true;
+                }
+                break;
+              }
+              case uhdmoperation: {
+                operation* op = (operation*)actual;
+                if (op->VpiOpType() != vpiAssignmentPatternOp) {
+                  break;
+                }
+                const typespec* tps = op->Typespec();
+                if (!tps) {
+                  break;
+                }
+                const struct_typespec* stps =
+                    any_cast<const struct_typespec*>(tps);
+                if (!stps) {
+                  break;
+                }
+                std::vector<std::string> fieldNames;
+                std::vector<const typespec*> fieldTypes;
+                for (typespec_member* memb : *stps->Members()) {
+                  fieldNames.push_back(memb->VpiName());
+                  fieldTypes.push_back(memb->Typespec());
+                }
+                std::vector<any*> tmp(fieldNames.size());
+                VectorOfany* orig = op->Operands();
+                any* defaultOp = nullptr;
+                any* res = nullptr;
+                int index = 0;
+                for (auto oper : *orig) {
+                  if (oper->UhdmType() == uhdmtagged_pattern) {
+                    tagged_pattern* tp = (tagged_pattern*)oper;
+                    const typespec* ttp = tp->Typespec();
+                    const std::string& tname = ttp->VpiName();
+                    bool found = false;
+                    if (tname == "default") {
+                      defaultOp = oper;
+                      found = true;
+                    }
+                    for (unsigned int i = 0; i < fieldNames.size(); i++) {
+                      if (tname == fieldNames[i]) {
+                        tmp[i] = oper;
+                        found = true;
+                        res = tmp[i];
+                        break;
+                      }
+                    }
+                    if (found == false) {
+                      for (unsigned int i = 0; i < fieldTypes.size(); i++) {
+                        if (ttp->UhdmType() == fieldTypes[i]->UhdmType()) {
+                          tmp[i] = oper;
+                          found = true;
+                          res = tmp[i];
+                          break;
+                        }
+                      }
+                    }
+                  } else {
+                    if (index < (int)tmp.size()) {
+                      tmp[index] = oper;
+                      found = true;
+                      res = tmp[index];
+                    }
+                  }
+                  index++;
+                }
+                if (res == nullptr) {
+                  if (defaultOp) {
+                    res = defaultOp;
+                  }
+                }
+                previous = res;
+                break;
+              }
+              case uhdmref_var: {
+                found = true;
+                // TODO: class var support
+                break;
+              }
+              default:
+                // TODO: class method support
+                if (current->UhdmType() == uhdmmethod_func_call) found = true;
+                break;
             }
             if (!found) {
               // WIP:
               // serializer->GetErrorHandler()(
-              //               ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(),
-              //               this, nullptr);
+              //    ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
+              //    nullptr);
             }
           } else {
             // WIP:
@@ -935,5 +1086,4 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
 
   return clone;
 }
-}  // UHDM namespace
-
+}  // namespace UHDM
