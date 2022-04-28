@@ -76,6 +76,7 @@ tagged_pattern.yaml
 struct_pattern.yaml
 unsupported_expr.yaml
 unsupported_stmt.yaml
+include_file_info.yaml
 
 sequence_expr_group.yaml
 sequence_expr_multiclock_group.yaml
