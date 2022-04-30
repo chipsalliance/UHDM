@@ -20,8 +20,3 @@
     vpi: vpiIncludedFile
     type: string
     card: 1
-  - property: resolved_included_file
-    name: resolved included file
-    vpi: vpiResolvedIncludedFile
-    type: string
-    card: 1
