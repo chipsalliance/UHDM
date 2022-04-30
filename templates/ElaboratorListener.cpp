@@ -110,6 +110,20 @@ void ElaboratorListener::enterModule(const module* object,
         paramMap.insert(std::make_pair(var->VpiName(), var));
       }
     }
+    if (object->Ports()) {
+      for (ports* port : *object->Ports()) {
+        if (const any* low = port->Low_conn()) {
+          if (low->UhdmType() == uhdmref_obj) {
+            ref_obj* r = (ref_obj*) low;
+            if (const any* actual = r->Actual_group()) {
+              if (actual->UhdmType() == uhdminterface) {
+                netMap.insert(std::make_pair(port->VpiName(), actual));
+              }
+            }
+          }
+        }
+      }
+    }
 
     // Collect func and task declaration
     ComponentMap funcMap;
@@ -213,6 +227,11 @@ void ElaboratorListener::enterPackage(const package* object,
   instStack_.push_back(
       std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
 
+}
+
+void ElaboratorListener::leavePackage(const package* object,
+                                      const BaseClass* parent, vpiHandle handle,
+                                      vpiHandle parentHandle) {
   if (clone_) {
     if (auto vec = object->Task_funcs()) {
       auto clone_vec = serializer_->MakeTask_funcVec();
@@ -229,11 +248,6 @@ void ElaboratorListener::enterPackage(const package* object,
       }
     }
   }
-}
-
-void ElaboratorListener::leavePackage(const package* object,
-                                      const BaseClass* parent, vpiHandle handle,
-                                      vpiHandle parentHandle) {
   instStack_.pop_back();
 }
 
