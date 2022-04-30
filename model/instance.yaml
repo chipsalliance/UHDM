@@ -106,6 +106,11 @@
     vpi: vpiProgramArray
     type: program
     card: any
+  - obj_ref: class_defn
+    name: class defn
+    vpi: vpiClassDefn
+    type: class_defn
+    card: any
   - class_ref: task_func
     name: task func
     vpi: vpiTaskFunc
@@ -130,11 +135,6 @@
     name: assertion
     vpi: vpiAssertion
     type: assertion
-    card: any
-  - obj_ref: class_defn
-    name: class defn
-    vpi: vpiClassDefn
-    type: class_defn
     card: any
   - obj_ref: module
     name: module

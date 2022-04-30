@@ -803,6 +803,32 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           if (actual) {
             UHDM_OBJECT_TYPE actual_type = actual->UhdmType();
             switch (actual_type) {
+              case uhdmclass_var: {
+                const typespec* tps = ((class_var*)actual)->Typespec();
+                if (tps) {
+                  class_typespec* ctps = (class_typespec*) tps;
+                  const class_defn* defn = ctps->Class_defn();
+                  if (defn && defn->Variables()) {
+                    for (variables* var : *defn->Variables()) {
+                      if (var->VpiName() == name) {
+                        if (current->UhdmType() == uhdmref_obj) {
+                          ((ref_obj*)current)->Actual_group(var);
+                        } else if (current->UhdmType() == uhdmbit_select) {
+                          const any* parent = current->VpiParent();
+                          if (parent && (parent->UhdmType() == uhdmref_obj))
+                            ((ref_obj*)parent)->Actual_group(var);
+                        }
+                        found = true;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (current->UhdmType() == uhdmmethod_func_call) {
+                  found = true;
+                }
+                break;
+              }
               case uhdmstruct_net:
               case uhdmstruct_var: {
                 struct_typespec* stpt = nullptr;
@@ -863,6 +889,54 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                           ((ref_obj*)parent)->Actual_group(var);
                       }
                       previous = var;
+                      found = true;
+                      break;
+                    }
+                  }
+                }
+                if (interf->Modports()) {
+                  for (modport* mport : *interf->Modports()) {
+                    if (mport->VpiName() == name) {
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(mport);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(mport);
+                      }
+                      found = true;
+                      break;
+                    }
+                    if (mport->Io_decls()) {
+                      for (io_decl* decl : *mport->Io_decls()) {
+                        if (decl->VpiName() == name) {
+                          if (current->UhdmType() == uhdmref_obj) {
+                            ((ref_obj*)current)->Actual_group(decl);
+                          } else if (current->UhdmType() == uhdmbit_select) {
+                            const any* parent = current->VpiParent();
+                            if (parent && (parent->UhdmType() == uhdmref_obj))
+                              ((ref_obj*)parent)->Actual_group(decl);
+                          }
+                          found = true;
+                          break;
+                        }
+                      }
+                    }
+                    if (found)
+                      break;
+                  }
+                }
+                if (interf->Nets()) {
+                  for (nets* n : *interf->Nets()) {
+                    if (n->VpiName() == name) {
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(n);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(n);
+                      }
+                      previous = n;
                       found = true;
                       break;
                     }
