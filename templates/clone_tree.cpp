@@ -806,7 +806,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               case uhdmclass_var: {
                 const typespec* tps = ((class_var*)actual)->Typespec();
                 if (tps) {
-                  class_typespec* ctps = (class_typespec*) tps;
+                  class_typespec* ctps = (class_typespec*)tps;
                   const class_defn* defn = ctps->Class_defn();
                   if (defn && defn->Variables()) {
                     for (variables* var : *defn->Variables()) {
@@ -922,8 +922,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                         }
                       }
                     }
-                    if (found)
-                      break;
+                    if (found) break;
                   }
                 }
                 if (interf->Nets()) {
@@ -966,11 +965,12 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               case uhdmio_decl: {
                 io_decl* decl = (io_decl*)actual;
                 if (const typespec* tps = decl->Typespec()) {
-                  if (tps->UhdmType() == uhdmstring_typespec) {
+                  UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+                  if (ttype == uhdmstring_typespec) {
                     found = true;
-                  } else if (tps->UhdmType() == uhdmclass_typespec) {
+                  } else if (ttype == uhdmclass_typespec) {
                     found = true;
-                  } else if (tps->UhdmType() == uhdmstruct_typespec) {
+                  } else if (ttype == uhdmstruct_typespec) {
                     struct_typespec* stpt = (struct_typespec*)tps;
                     for (typespec_member* member : *stpt->Members()) {
                       if (member->VpiName() == name) {
@@ -985,6 +985,35 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                         found = true;
                         break;
                       }
+                    }
+                    if (name == "name") {
+                      // Builtin introspection
+                      found = true;
+                    }
+                  } else if (ttype == uhdmenum_typespec) {
+                    if (name == "name") {
+                      // Builtin introspection
+                      found = true;
+                    }
+                  } else if (ttype == uhdmunion_typespec) {
+                    union_typespec* stpt = (union_typespec*)tps;
+                    for (typespec_member* member : *stpt->Members()) {
+                      if (member->VpiName() == name) {
+                        if (current->UhdmType() == uhdmref_obj) {
+                          ((ref_obj*)current)->Actual_group(member);
+                        } else if (current->UhdmType() == uhdmbit_select) {
+                          const any* parent = current->VpiParent();
+                          if (parent && (parent->UhdmType() == uhdmref_obj))
+                            ((ref_obj*)parent)->Actual_group(member);
+                        }
+                        previous = member;
+                        found = true;
+                        break;
+                      }
+                    }
+                    if (name == "name") {
+                      // Builtin introspection
+                      found = true;
                     }
                   }
                 }
@@ -1001,11 +1030,12 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               case uhdmparameter: {
                 parameter* param = (parameter*)actual;
                 if (const typespec* tps = param->Typespec()) {
-                  if (tps->UhdmType() == uhdmstring_typespec) {
+                  UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+                  if (ttype == uhdmstring_typespec) {
                     found = true;
-                  } else if (tps->UhdmType() == uhdmclass_typespec) {
+                  } else if (ttype == uhdmclass_typespec) {
                     found = true;
-                  } else if (tps->UhdmType() == uhdmstruct_typespec) {
+                  } else if (ttype == uhdmstruct_typespec) {
                     struct_typespec* stpt = (struct_typespec*)tps;
                     for (typespec_member* member : *stpt->Members()) {
                       if (member->VpiName() == name) {
@@ -1020,6 +1050,35 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                         found = true;
                         break;
                       }
+                    }
+                    if (name == "name") {
+                      // Builtin introspection
+                      found = true;
+                    }
+                  } else if (ttype == uhdmenum_typespec) {
+                    if (name == "name") {
+                      // Builtin introspection
+                      found = true;
+                    }
+                  } else if (ttype == uhdmunion_typespec) {
+                    union_typespec* stpt = (union_typespec*)tps;
+                    for (typespec_member* member : *stpt->Members()) {
+                      if (member->VpiName() == name) {
+                        if (current->UhdmType() == uhdmref_obj) {
+                          ((ref_obj*)current)->Actual_group(member);
+                        } else if (current->UhdmType() == uhdmbit_select) {
+                          const any* parent = current->VpiParent();
+                          if (parent && (parent->UhdmType() == uhdmref_obj))
+                            ((ref_obj*)parent)->Actual_group(member);
+                        }
+                        previous = member;
+                        found = true;
+                        break;
+                      }
+                    }
+                    if (name == "name") {
+                      // Builtin introspection
+                      found = true;
                     }
                   }
                 }
@@ -1114,7 +1173,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             if (!found) {
               // WIP:
               // serializer->GetErrorHandler()(
-              //    ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
+              //   ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
               //    nullptr);
             }
           } else {
