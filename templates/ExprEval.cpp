@@ -720,7 +720,7 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
             bits = std::strtoull(
                 itps->VpiValue().c_str() + std::string_view("UINT:").length(),
                 nullptr, 10);
-          } else {
+          } else if (itps->VpiValue().find("INT:") != std::string::npos) {
             bits = std::strtoll(
                 itps->VpiValue().c_str() + std::string_view("INT:").length(),
                 nullptr, 10);
@@ -1114,14 +1114,28 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
     if (typespec *cts = (typespec *)cexp->Typespec()) {
       if (cts->UhdmType() == uhdmint_typespec) {
         int_typespec *icts = (int_typespec *)cts;
-        wordSize = std::strtoull(
+        const std::string& value = icts->VpiValue();
+        if (value.find("UINT:") != std::string::npos) {
+          wordSize = std::strtoull(
             icts->VpiValue().c_str() + std::string_view("UINT:").length(),
             nullptr, 10);
+        } else if (value.find("INT:") != std::string::npos) {
+          wordSize = std::strtoull(
+            icts->VpiValue().c_str() + std::string_view("INT:").length(),
+            nullptr, 10);
+        }
       } else if (cts->UhdmType() == uhdminteger_typespec) {
         integer_typespec *icts = (integer_typespec *)cts;
-        wordSize = std::strtoull(
+        const std::string& value = icts->VpiValue();
+        if (value.find("UINT:") != std::string::npos) {
+          wordSize = std::strtoull(
             icts->VpiValue().c_str() + std::string_view("UINT:").length(),
             nullptr, 10);
+        } else if (value.find("INT:") != std::string::npos) {
+          wordSize = std::strtoull(
+            icts->VpiValue().c_str() + std::string_view("INT:").length(),
+            nullptr, 10);
+        }
       }
     }
     if (wordSize == 0) {
