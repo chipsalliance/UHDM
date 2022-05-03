@@ -806,18 +806,37 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               case uhdmclass_var: {
                 const typespec* tps = ((class_var*)actual)->Typespec();
                 if (tps) {
-                  class_typespec* ctps = (class_typespec*)tps;
-                  const class_defn* defn = ctps->Class_defn();
-                  if (defn && defn->Variables()) {
-                    for (variables* var : *defn->Variables()) {
-                      if (var->VpiName() == name) {
+                  UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+                  if (ttype == uhdmclass_typespec) {
+                    class_typespec* ctps = (class_typespec*)tps;
+                    const class_defn* defn = ctps->Class_defn();
+                    if (defn && defn->Variables()) {
+                      for (variables* var : *defn->Variables()) {
+                        if (var->VpiName() == name) {
+                          if (current->UhdmType() == uhdmref_obj) {
+                            ((ref_obj*)current)->Actual_group(var);
+                          } else if (current->UhdmType() == uhdmbit_select) {
+                            const any* parent = current->VpiParent();
+                            if (parent && (parent->UhdmType() == uhdmref_obj))
+                              ((ref_obj*)parent)->Actual_group(var);
+                          }
+                          found = true;
+                          break;
+                        }
+                      }
+                    }
+                  } else if (ttype == uhdmstruct_typespec) {
+                    struct_typespec* stpt = (struct_typespec*)tps;
+                    for (typespec_member* member : *stpt->Members()) {
+                      if (member->VpiName() == name) {
                         if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(var);
+                          ((ref_obj*)current)->Actual_group(member);
                         } else if (current->UhdmType() == uhdmbit_select) {
                           const any* parent = current->VpiParent();
                           if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(var);
+                            ((ref_obj*)parent)->Actual_group(member);
                         }
+                        previous = member;
                         found = true;
                         break;
                       }
@@ -1174,7 +1193,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               // WIP:
               // serializer->GetErrorHandler()(
               //   ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
-              //    nullptr);
+              //   nullptr);
             }
           } else {
             // WIP:
