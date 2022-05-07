@@ -155,6 +155,15 @@ void ElaboratorListener::enterModule(const module* object,
       }
     }
 
+    // Collect gen_scope
+    if (object->Gen_scope_arrays()) {
+      for (gen_scope_array* gsa : *object->Gen_scope_arrays()) {
+        for (gen_scope* gs : *gsa->Gen_scopes()) {
+          netMap.insert(std::make_pair(gsa->VpiName(), gs));
+        }
+      }
+    }
+
     // Push instance context on the stack
     instStack_.push_back(
         std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));

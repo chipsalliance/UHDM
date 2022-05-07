@@ -810,8 +810,36 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           if (actual) {
             UHDM_OBJECT_TYPE actual_type = actual->UhdmType();
             switch (actual_type) {
+              case uhdmgen_scope: {
+                if (obj->UhdmType() == uhdmmethod_func_call) {
+                  method_func_call* call = (method_func_call*)current;
+                  gen_scope* scope = (gen_scope*)actual;
+                  if (scope->Task_funcs()) {
+                    for (auto tf : *scope->Task_funcs()) {
+                      if (tf->VpiName() == name) {
+                        call->Function(any_cast<function*>(tf));
+                        found = true;
+                        break;
+                      }
+                    }
+                  }
+                } else if (obj->UhdmType() == uhdmmethod_task_call) {
+                  method_task_call* call = (method_task_call*)current;
+                  gen_scope* scope = (gen_scope*)actual;
+                  if (scope->Task_funcs()) {
+                    for (auto tf : *scope->Task_funcs()) {
+                      if (tf->VpiName() == name) {
+                        call->Task(any_cast<task*>(tf));
+                        found = true;
+                        break;
+                      }
+                    }
+                  }
+                }
+                break;
+              }
               case uhdmarray_var: {
-                array_var* avar = (array_var*) actual;
+                array_var* avar = (array_var*)actual;
                 VectorOfvariables* vars = avar->Variables();
                 if (vars && vars->size()) {
                   actual = vars->at(0);

@@ -34,4 +34,6 @@
   - obj_ref: indexed_part_select
   - obj_ref: typespec_member
   - class_ref: task_func
+  - class_ref: scope
+
 
