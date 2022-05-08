@@ -713,6 +713,148 @@ void ElaboratorListener::leaveTask_func(const task_func* object,
   instStack_.pop_back();
 }
 
+void ElaboratorListener::enterForeach_stmt(const foreach_stmt* object,
+                                           const BaseClass* parent,
+                                           vpiHandle handle,
+                                           vpiHandle parentHandle) {
+  ComponentMap varMap;
+  if (object->Array_vars()) {
+    for (variables* var : *object->Array_vars()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  if (object->VpiLoopVars()) {
+    for (any* var : *object->VpiLoopVars()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  ComponentMap paramMap;
+
+  ComponentMap funcMap;
+
+  instStack_.push_back(
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+}
+
+void ElaboratorListener::leaveForeach_stmt(const foreach_stmt* object,
+                                           const BaseClass* parent,
+                                           vpiHandle handle,
+                                           vpiHandle parentHandle) {
+  instStack_.pop_back();
+}
+
+void ElaboratorListener::enterBegin(const begin* object,
+                                    const BaseClass* parent, vpiHandle handle,
+                                    vpiHandle parentHandle) {
+  ComponentMap varMap;
+  if (object->Array_vars()) {
+    for (variables* var : *object->Array_vars()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  ComponentMap paramMap;
+  ComponentMap funcMap;
+  instStack_.push_back(
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+}
+
+void ElaboratorListener::leaveBegin(const begin* object,
+                                    const BaseClass* parent, vpiHandle handle,
+                                    vpiHandle parentHandle) {
+  instStack_.pop_back();
+}
+
+void ElaboratorListener::enterNamed_begin(const named_begin* object,
+                                          const BaseClass* parent,
+                                          vpiHandle handle,
+                                          vpiHandle parentHandle) {
+  ComponentMap varMap;
+  if (object->Array_vars()) {
+    for (variables* var : *object->Array_vars()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  ComponentMap paramMap;
+  ComponentMap funcMap;
+  instStack_.push_back(
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+}
+void ElaboratorListener::leaveNamed_begin(const named_begin* object,
+                                          const BaseClass* parent,
+                                          vpiHandle handle,
+                                          vpiHandle parentHandle) {
+  instStack_.pop_back();
+}
+
+void ElaboratorListener::enterFork_stmt(const fork_stmt* object,
+                                        const BaseClass* parent,
+                                        vpiHandle handle,
+                                        vpiHandle parentHandle) {
+  ComponentMap varMap;
+  if (object->Array_vars()) {
+    for (variables* var : *object->Array_vars()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  ComponentMap paramMap;
+  ComponentMap funcMap;
+  instStack_.push_back(
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+}
+void ElaboratorListener::leaveFork_stmt(const fork_stmt* object,
+                                        const BaseClass* parent,
+                                        vpiHandle handle,
+                                        vpiHandle parentHandle) {
+  instStack_.pop_back();
+}
+
+void ElaboratorListener::enterNamed_fork(const named_fork* object,
+                                         const BaseClass* parent,
+                                         vpiHandle handle,
+                                         vpiHandle parentHandle) {
+  ComponentMap varMap;
+  if (object->Array_vars()) {
+    for (variables* var : *object->Array_vars()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  ComponentMap paramMap;
+  ComponentMap funcMap;
+  instStack_.push_back(
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+}
+void ElaboratorListener::leaveNamed_fork(const named_fork* object,
+                                         const BaseClass* parent,
+                                         vpiHandle handle,
+                                         vpiHandle parentHandle) {
+  instStack_.pop_back();
+}
+
 void ElaboratorListener::enterFunction(const function* object,
                                        const BaseClass* parent,
                                        vpiHandle handle,
