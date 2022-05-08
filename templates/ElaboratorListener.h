@@ -174,6 +174,31 @@ class ElaboratorListener : public VpiListener {
   void leaveTask(const task* object, const BaseClass* parent, vpiHandle handle,
                  vpiHandle parentHandle) final;
 
+  void enterForeach_stmt(const foreach_stmt* object, const BaseClass* parent,
+                         vpiHandle handle, vpiHandle parentHandle);
+  void leaveForeach_stmt(const foreach_stmt* object, const BaseClass* parent,
+                         vpiHandle handle, vpiHandle parentHandle);
+
+  void enterBegin(const begin* object, const BaseClass* parent,
+                  vpiHandle handle, vpiHandle parentHandle);
+  void leaveBegin(const begin* object, const BaseClass* parent,
+                  vpiHandle handle, vpiHandle parentHandle);
+
+  void enterNamed_begin(const named_begin* object, const BaseClass* parent,
+                        vpiHandle handle, vpiHandle parentHandle);
+  void leaveNamed_begin(const named_begin* object, const BaseClass* parent,
+                        vpiHandle handle, vpiHandle parentHandle);
+
+  void enterFork_stmt(const fork_stmt* object, const BaseClass* parent,
+                      vpiHandle handle, vpiHandle parentHandle);
+  void leaveFork_stmt(const fork_stmt* object, const BaseClass* parent,
+                      vpiHandle handle, vpiHandle parentHandle);
+
+  void enterNamed_fork(const named_fork* object, const BaseClass* parent,
+                       vpiHandle handle, vpiHandle parentHandle);
+  void leaveNamed_fork(const named_fork* object, const BaseClass* parent,
+                       vpiHandle handle, vpiHandle parentHandle);
+
  private:
   void enterVariables(const variables* object, const BaseClass* parent,
                       vpiHandle handle, vpiHandle parentHandle);
