@@ -368,7 +368,7 @@ def _get_DeepClone_implementation(model, models):
         content.append('  return clone;')
         content.append('}')
         content.append('')
-        
+
     return content, includes
 
 
