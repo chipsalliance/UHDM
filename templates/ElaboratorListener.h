@@ -69,7 +69,6 @@ class ElaboratorListener : public VpiListener {
     scheduledTfCallBinding_.push_back(clone);
   }
 
- protected:
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
   void leaveDesign(const design* object, const BaseClass* parent,
