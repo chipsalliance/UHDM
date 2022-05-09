@@ -183,7 +183,6 @@ def _get_DeepClone_implementation(model, models):
     content = []
     content.append(f'void {classname}::DeepCopy({classname}* clone, Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {{')
     content.append(f'  basetype_t::DeepCopy(clone, serializer, elaborator, parent);')
-
     modeltype = model.get('type')
     basename = model.get('extends', 'BaseClass')
     Classname = classname[0].upper() + classname[1:]
@@ -336,6 +335,10 @@ def _get_DeepClone_implementation(model, models):
     if modeltype == 'obj_def':
         # DeepClone() not implemented for class_def; just declare to narrow the covariant return type.
         content.append(f'{classname}* {classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {{')
+
+        if classname in ['begin', 'named_begin', 'fork', 'named_fork']:
+            content.append(f'  elaborator->enter{Classname}((const  {classname}*) this, parent, nullptr, nullptr);')
+        
         if 'Net' in vpi_name:
             includes.add('ElaboratorListener')
             content.append(f'  {classname}* clone = any_cast<{classname}*>(elaborator->bindNet(VpiName()));')
@@ -358,6 +361,10 @@ def _get_DeepClone_implementation(model, models):
         content.append('  *clone = *this;')
         content.append('  clone->UhdmId(id);')
         content.append('  DeepCopy(clone, serializer, elaborator, parent);')
+        
+        if classname in ['begin', 'named_begin', 'fork', 'named_fork']:
+            content.append(f'  elaborator->leave{Classname}((const  {classname}*) this, parent, nullptr, nullptr);')
+
         content.append('  return clone;')
         content.append('}')
         content.append('')
