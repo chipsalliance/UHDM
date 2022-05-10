@@ -215,6 +215,17 @@ void ElaboratorListener::enterPackage(const package* object,
                                       const BaseClass* parent, vpiHandle handle,
                                       vpiHandle parentHandle) {
   ComponentMap netMap;
+  
+  if (object->Array_vars()) {
+    for (variables* var : *object->Array_vars()) {
+      netMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      netMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
 
   // Collect instance parameters, defparams
   ComponentMap paramMap;
@@ -530,14 +541,16 @@ void ElaboratorListener::enterVariables(const variables* object,
       return;  // Only do class var propagation while in elaboration
     const class_var* cv = (class_var*)object;
     class_var* const rw_cv = (class_var*)cv;
-    class_typespec* ctps = (class_typespec*)cv->Typespec();
+    typespec* ctps = (typespec*)cv->Typespec();
     if (ctps) {
       ctps = ctps->DeepClone(s, this, rw_cv);
       rw_cv->Typespec(ctps);
-      VectorOfparam_assign* params = ctps->Param_assigns();
-      if (params) {
-        for (param_assign* pass : *params) {
-          propagateParamAssign(pass, ctps->Class_defn());
+      if (class_typespec* cctps = any_cast<class_typespec*>(ctps)) {
+        VectorOfparam_assign* params = cctps->Param_assigns();
+        if (params) {
+          for (param_assign* pass : *params) {
+            propagateParamAssign(pass, cctps->Class_defn());
+          }
         }
       }
     }

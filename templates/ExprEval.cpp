@@ -3305,10 +3305,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
   } else if (objtype == uhdmpart_select) {
     part_select *sel = (part_select *)result;
-    ref_obj *parent = (ref_obj *)sel->VpiParent();
+    any *parent = (any*)sel->VpiParent();
     std::string name = parent->VpiName();
     if (name.empty()) {
-      name = parent->VpiDefName();
+      if (ref_obj* ref = any_cast<ref_obj*>(parent)) {
+        name = ref->VpiDefName();
+      }
     }
     any *object = getObject(name, inst, pexpr);
     if (object) {

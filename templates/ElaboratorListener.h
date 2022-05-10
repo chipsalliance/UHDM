@@ -43,14 +43,14 @@ class ElaboratorListener : public VpiListener {
   friend gen_scope_array;
 
  public:
-  ElaboratorListener(Serializer* serializer, bool debug = false)
-      : serializer_(serializer), debug_(debug) {}
+  ElaboratorListener(Serializer* serializer, bool debug = false, bool muteErrors = false)
+      : serializer_(serializer), debug_(debug), muteErrors_(muteErrors) {}
   void uniquifyTypespec(bool uniquify) { uniquifyTypespec_ = uniquify; }
   bool uniquifyTypespec() { return uniquifyTypespec_; }
   void bindOnly(bool bindOnly) { clone_ = !bindOnly; }
   bool bindOnly() { return !clone_; }
   bool isFunctionCall(const std::string& name, const expr* prefix);
-
+  bool muteErrors() { return muteErrors_; }
   bool isTaskCall(const std::string& name, const expr* prefix);
 
   // Bind to a net in the current instance
@@ -223,6 +223,7 @@ class ElaboratorListener : public VpiListener {
   Serializer* serializer_ = nullptr;
   bool inHierarchy_ = false;
   bool debug_ = false;
+  bool muteErrors_ = false;
   bool uniquifyTypespec_ = true;
   bool clone_ = true;
   std::vector<tf_call*> scheduledTfCallBinding_;

@@ -778,6 +778,55 @@ cont_assign* cont_assign::DeepClone(Serializer* serializer,
   return clone;
 }
 
+any* bindClassTypespec(class_typespec* ctps, any* current,
+                       const std::string& name, bool& found) {
+  any* previous = nullptr;
+  const class_defn* defn = ctps->Class_defn();
+  while (defn) {
+    if (defn->Variables()) {
+      for (variables* var : *defn->Variables()) {
+        if (var->VpiName() == name) {
+          if (current->UhdmType() == uhdmref_obj) {
+            ((ref_obj*)current)->Actual_group(var);
+          } else if (current->UhdmType() == uhdmbit_select) {
+            const any* parent = current->VpiParent();
+            if (parent && (parent->UhdmType() == uhdmref_obj))
+              ((ref_obj*)parent)->Actual_group(var);
+          }
+          previous = var;
+          found = true;
+          break;
+        }
+      }
+    }
+    if (defn->Task_funcs()) {
+      for (task_func* tf : *defn->Task_funcs()) {
+        if (tf->VpiName() == name) {
+          if (current->UhdmType() == uhdmref_obj) {
+            ((ref_obj*)current)->Actual_group(tf);
+          } else if (current->UhdmType() == uhdmbit_select) {
+            const any* parent = current->VpiParent();
+            if (parent && (parent->UhdmType() == uhdmref_obj))
+              ((ref_obj*)parent)->Actual_group(tf);
+          }
+          previous = tf;
+          found = true;
+          break;
+        }
+      }
+    }
+    if (found) break;
+    const class_defn* tmp = defn;
+    defn = nullptr;
+    if (const extends* ext = tmp->Extends()) {
+      if (const class_typespec* tp = ext->Class_typespec()) {
+        defn = tp->Class_defn();
+      }
+    }
+  }
+  return previous;
+}
+
 hier_path* hier_path::DeepClone(Serializer* serializer,
                                 ElaboratorListener* elaborator,
                                 BaseClass* parent) const {
@@ -888,48 +937,9 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   UHDM_OBJECT_TYPE ttype = tps->UhdmType();
                   if (ttype == uhdmclass_typespec) {
                     class_typespec* ctps = (class_typespec*)tps;
-                    const class_defn* defn = ctps->Class_defn();
-                    while (defn) {
-                      if (defn->Variables()) {
-                        for (variables* var : *defn->Variables()) {
-                          if (var->VpiName() == name) {
-                            if (current->UhdmType() == uhdmref_obj) {
-                              ((ref_obj*)current)->Actual_group(var);
-                            } else if (current->UhdmType() == uhdmbit_select) {
-                              const any* parent = current->VpiParent();
-                              if (parent && (parent->UhdmType() == uhdmref_obj))
-                                ((ref_obj*)parent)->Actual_group(var);
-                            }
-                            previous = var;
-                            found = true;
-                            break;
-                          }
-                        }
-                      }
-                      if (defn->Task_funcs()) {
-                        for (task_func* tf : *defn->Task_funcs()) {
-                          if (tf->VpiName() == name) {
-                            if (current->UhdmType() == uhdmref_obj) {
-                              ((ref_obj*)current)->Actual_group(tf);
-                            } else if (current->UhdmType() == uhdmbit_select) {
-                              const any* parent = current->VpiParent();
-                              if (parent && (parent->UhdmType() == uhdmref_obj))
-                                ((ref_obj*)parent)->Actual_group(tf);
-                            }
-                            previous = tf;
-                            found = true;
-                            break;
-                          }
-                        }
-                      }
-                      if (found) break;
-                      const class_defn* tmp = defn;
-                      defn = nullptr;
-                      if (const extends* ext = tmp->Extends()) {
-                        if (const class_typespec* tp = ext->Class_typespec()) {
-                          defn = tp->Class_defn();
-                        }
-                      }
+                    any* tmp = bindClassTypespec(ctps, current, name, found);
+                    if (found) {
+                      previous = tmp;
                     }
                   } else if (ttype == uhdmstruct_typespec) {
                     struct_typespec* stpt = (struct_typespec*)tps;
@@ -1085,8 +1095,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 break;
               }
               case uhdmclass_typespec: {
-                // TODO: proper support for classes
-                found = true;
+                class_typespec* ctps = (class_typespec*)actual;
+                any* tmp = bindClassTypespec(ctps, current, name, found);
+                if (found) {
+                  previous = tmp;
+                }
                 break;
               }
               case uhdmio_decl: {
@@ -1096,7 +1109,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   if (ttype == uhdmstring_typespec) {
                     found = true;
                   } else if (ttype == uhdmclass_typespec) {
-                    found = true;
+                    class_typespec* ctps = (class_typespec*)tps;
+                    any* tmp = bindClassTypespec(ctps, current, name, found);
+                    if (found) {
+                      previous = tmp;
+                    }
                   } else if (ttype == uhdmstruct_typespec) {
                     struct_typespec* stpt = (struct_typespec*)tps;
                     for (typespec_member* member : *stpt->Members()) {
@@ -1161,7 +1178,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   if (ttype == uhdmstring_typespec) {
                     found = true;
                   } else if (ttype == uhdmclass_typespec) {
-                    found = true;
+                    class_typespec* ctps = (class_typespec*)tps;
+                    any* tmp = bindClassTypespec(ctps, current, name, found);
+                    if (found) {
+                      previous = tmp;
+                    }
                   } else if (ttype == uhdmstruct_typespec) {
                     struct_typespec* stpt = (struct_typespec*)tps;
                     for (typespec_member* member : *stpt->Members()) {
@@ -1299,14 +1320,17 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
             if (!found) {
               // WIP:
-              //serializer->GetErrorHandler()(
-              //    ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
-              //    nullptr);
+              //if (!elaborator->muteErrors())
+              //  serializer->GetErrorHandler()(
+              //      ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
+              //      nullptr);
             }
           } else {
             // WIP:
-            //serializer->GetErrorHandler()(ErrorType::UHDM_UNRESOLVED_HIER_PATH,
-            //                              VpiName(), this, nullptr);
+            //if (!elaborator->muteErrors())
+            //  serializer->GetErrorHandler()(
+            //      ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
+            //      nullptr);
           }
         } else if (previous->UhdmType() == uhdmtypespec_member) {
           typespec_member* member = (typespec_member*)previous;
