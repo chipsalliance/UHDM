@@ -37,6 +37,7 @@ def _generate_module_listeners(models):
                     listeners.append( '    enterTask_func(obj, defMod, nullptr, nullptr);')
                     listeners.append( '    auto* tf = obj->DeepClone(serializer_, this, inst);')
                     listeners.append( '    ComponentMap& funcMap = std::get<2>(instStack_.at(instStack_.size()-2).second);')
+                    listeners.append( '    funcMap.erase(tf->VpiName());')
                     listeners.append( '    funcMap.insert(std::make_pair(tf->VpiName(), tf));')
                     listeners.append( '    leaveTask_func(obj, defMod, nullptr, nullptr);')
                     listeners.append( '    tf->VpiParent(inst);')

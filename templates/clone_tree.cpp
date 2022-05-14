@@ -291,12 +291,13 @@ tf_call* func_call::DeepClone(Serializer* serializer,
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (function* f =
-            any_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
-      clone->Function(f);
-    } else {
-      elaborator->scheduleTaskFuncBinding(clone);
-    }
+    // TRYOUT: Always bind later (on cloned object)
+    // if (function* f =
+    //         any_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
+    //  clone->Function(f);
+    //} else {
+    elaborator->scheduleTaskFuncBinding(clone);
+    //}
     if (auto obj = Scope())
       clone->Scope(obj->DeepClone(serializer, elaborator, clone));
     if (auto vec = Tf_call_args()) {
