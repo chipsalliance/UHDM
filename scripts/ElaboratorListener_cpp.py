@@ -2,9 +2,8 @@ import config
 import file_utils
 
 
-def _generate_module_listeners(models):
+def _generate_module_listeners(models, classname):
     listeners = []
-    classname = 'module'
     while classname:
         model = models[classname]
 
@@ -178,13 +177,15 @@ def _generate_class_listeners(models):
 
 
 def generate(models):
-    module_listeners = _generate_module_listeners(models)
+    module_listeners = _generate_module_listeners(models, 'module')
+    interface_listeners = _generate_module_listeners(models, 'interface')
     class_listeners = _generate_class_listeners(models)
 
     with open(config.get_template_filepath('ElaboratorListener.cpp'), 'rt') as strm:
         file_content = strm.read()
 
     file_content = file_content.replace('<MODULE_ELABORATOR_LISTENER>', (' ' * 10) + ('\n' + (' ' * 10)).join(module_listeners))
+    file_content = file_content.replace('<INTERFACE_ELABORATOR_LISTENER>', (' ' * 10) + ('\n' + (' ' * 10)).join(interface_listeners))
     file_content = file_content.replace('<CLASS_ELABORATOR_LISTENER>', (' ' * 4) + ('\n' + (' ' * 4)).join(class_listeners))
     file_utils.set_content_if_changed(config.get_output_source_filepath('ElaboratorListener.cpp'), file_content)
 
