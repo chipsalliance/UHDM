@@ -238,7 +238,7 @@ def _get_DeepClone_implementation(model, models):
                     content.append(f'  if (!clone->{method}()) clone->{method}((any*) this->{method}());')
 
                 elif method in ['Task', 'Function']:
-                    prefix = ''
+                    prefix = 'nullptr'
                     includes.add(method.lower())
                     includes.add('ElaboratorListener')
                     if 'method_' in classname:
@@ -248,12 +248,8 @@ def _get_DeepClone_implementation(model, models):
                         content.append(f'  const ref_obj* ref = any_cast<const ref_obj*> (clone->Prefix());')
                         content.append( '  const class_var* prefix = nullptr;')
                         content.append( '  if (ref) prefix = any_cast<const class_var*> (ref->Actual_group());')
-                        prefix = ', prefix'
-                    content.append(f'  if ({method.lower()}* t = any_cast<{method.lower()}*> (elaborator->bindTaskFunc(VpiName(){prefix}))) {{')
-                    content.append(f'    clone->{method}(t);')
-                    content.append( '  } else {')
-                    content.append( '    elaborator->scheduleTaskFuncBinding(clone);')
-                    content.append( '  }')
+                        prefix = 'prefix'
+                    content.append(f'  elaborator->scheduleTaskFuncBinding(clone, {prefix});')
 
                 elif classname == 'disable' and method == 'VpiExpr':
                     includes.add('expr')

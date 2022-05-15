@@ -108,10 +108,7 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
     const class_var* prefix = nullptr;
     if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    if (function* f =
-            any_cast<function*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
-      clone->Function(f);
-    }
+    elaborator->scheduleTaskFuncBinding(clone, prefix);
     if (auto obj = With())
       clone->With(obj->DeepClone(serializer, elaborator, clone));
     if (auto obj = Scope())
@@ -144,10 +141,7 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
     const class_var* prefix = nullptr;
     if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    if (task* f =
-            any_cast<task*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
-      clone->Task(f);
-    }
+    elaborator->scheduleTaskFuncBinding(clone, prefix);
     if (auto obj = With())
       clone->With(obj->DeepClone(serializer, elaborator, clone));
     if (auto obj = Scope())
@@ -222,10 +216,7 @@ tf_call* method_task_call::DeepClone(Serializer* serializer,
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
     const class_var* prefix = nullptr;
     if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    if (task* t =
-            any_cast<task*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
-      clone->Task(t);
-    }
+    elaborator->scheduleTaskFuncBinding(clone, prefix);
     if (auto obj = With())
       clone->With(obj->DeepClone(serializer, elaborator, clone));
     if (auto obj = Scope())
@@ -258,10 +249,7 @@ tf_call* method_task_call::DeepClone(Serializer* serializer,
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
     const class_var* prefix = nullptr;
     if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    if (function* t =
-            any_cast<function*>(elaborator->bindTaskFunc(VpiName(), prefix))) {
-      clone->Function(t);
-    }
+    elaborator->scheduleTaskFuncBinding(clone, prefix);
     if (auto obj = With())
       clone->With(obj->DeepClone(serializer, elaborator, clone));
     if (auto obj = Scope())
@@ -291,13 +279,7 @@ tf_call* func_call::DeepClone(Serializer* serializer,
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    // TRYOUT: Always bind later (on cloned object)
-    // if (function* f =
-    //         any_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
-    //  clone->Function(f);
-    //} else {
-    elaborator->scheduleTaskFuncBinding(clone);
-    //}
+    elaborator->scheduleTaskFuncBinding(clone, nullptr);
     if (auto obj = Scope())
       clone->Scope(obj->DeepClone(serializer, elaborator, clone));
     if (auto vec = Tf_call_args()) {
@@ -323,9 +305,7 @@ tf_call* func_call::DeepClone(Serializer* serializer,
     clone->VpiColumnNo(VpiColumnNo());
     clone->VpiEndLineNo(VpiEndLineNo());
     clone->VpiEndColumnNo(VpiEndColumnNo());
-    if (task* f = any_cast<task*>(elaborator->bindTaskFunc(VpiName()))) {
-      clone->Task(f);
-    }
+    elaborator->scheduleTaskFuncBinding(clone, nullptr);
     if (auto obj = Scope())
       clone->Scope(obj->DeepClone(serializer, elaborator, clone));
     if (auto vec = Tf_call_args()) {
@@ -354,9 +334,7 @@ tf_call* task_call::DeepClone(Serializer* serializer,
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (task* t = any_cast<task*>(elaborator->bindTaskFunc(VpiName()))) {
-      clone->Task(t);
-    }
+    elaborator->scheduleTaskFuncBinding(clone, nullptr);
     if (auto obj = Scope())
       clone->Scope(obj->DeepClone(serializer, elaborator, clone));
     if (auto vec = Tf_call_args()) {
@@ -382,10 +360,7 @@ tf_call* task_call::DeepClone(Serializer* serializer,
     clone->Tf_call_args(Tf_call_args());
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (function* t =
-            any_cast<function*>(elaborator->bindTaskFunc(VpiName()))) {
-      clone->Function(t);
-    }
+    elaborator->scheduleTaskFuncBinding(clone, nullptr);
     if (auto obj = Scope())
       clone->Scope(obj->DeepClone(serializer, elaborator, clone));
     if (auto vec = Tf_call_args()) {

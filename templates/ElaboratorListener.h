@@ -65,9 +65,10 @@ class ElaboratorListener : public VpiListener {
   // Bind to a function or task in the current scope
   any* bindTaskFunc(const std::string& name, const class_var* prefix = nullptr);
 
-  void scheduleTaskFuncBinding(tf_call* clone) {
-    scheduledTfCallBinding_.push_back(clone);
+  void scheduleTaskFuncBinding(tf_call* clone, const class_var* prefix) {
+    scheduledTfCallBinding_.push_back(std::make_pair(clone, prefix));
   }
+  void bindScheduledTaskFunc();
 
   typedef std::map<std::string, const BaseClass*> ComponentMap;
 
@@ -79,6 +80,12 @@ class ElaboratorListener : public VpiListener {
 
   void leaveModule(const module* object, const BaseClass* parent,
                    vpiHandle handle, vpiHandle parentHandle) final;
+
+  void enterInterface(const interface* object, const BaseClass* parent,
+                      vpiHandle handle, vpiHandle parentHandle) final;
+
+  void leaveInterface(const interface* object, const BaseClass* parent,
+                      vpiHandle handle, vpiHandle parentHandle) final;
 
   void enterPackage(const package* object, const BaseClass* parent,
                     vpiHandle handle, vpiHandle parentHandle) final;
@@ -226,7 +233,7 @@ class ElaboratorListener : public VpiListener {
   bool muteErrors_ = false;
   bool uniquifyTypespec_ = true;
   bool clone_ = true;
-  std::vector<tf_call*> scheduledTfCallBinding_;
+  std::vector<std::pair<tf_call*, const class_var*>> scheduledTfCallBinding_;
 };
 
 };  // namespace UHDM

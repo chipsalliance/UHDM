@@ -114,7 +114,7 @@ void ElaboratorListener::enterModule(const module* object,
       for (ports* port : *object->Ports()) {
         if (const any* low = port->Low_conn()) {
           if (low->UhdmType() == uhdmref_obj) {
-            ref_obj* r = (ref_obj*) low;
+            ref_obj* r = (ref_obj*)low;
             if (const any* actual = r->Actual_group()) {
               if (actual->UhdmType() == uhdminterface) {
                 netMap.insert(std::make_pair(port->VpiName(), actual));
@@ -190,19 +190,7 @@ void ElaboratorListener::enterModule(const module* object,
 void ElaboratorListener::leaveModule(const module* object,
                                      const BaseClass* parent, vpiHandle handle,
                                      vpiHandle parentHandle) {
-  for (tf_call* call : scheduledTfCallBinding_) {
-    if (call->UhdmType() == uhdmfunc_call) {
-      if (function* f =
-              dynamic_cast<function*>(bindTaskFunc(call->VpiName()))) {
-        ((func_call*)call)->Function(f);
-      }
-    } else {
-      if (task* f = dynamic_cast<task*>(bindTaskFunc(call->VpiName()))) {
-        ((task_call*)call)->Task(f);
-      }
-    }
-  }
-  scheduledTfCallBinding_.clear();
+  bindScheduledTaskFunc();
   if (inHierarchy_) {
     instStack_.pop_back();
     if (instStack_.empty()) {
@@ -215,7 +203,7 @@ void ElaboratorListener::enterPackage(const package* object,
                                       const BaseClass* parent, vpiHandle handle,
                                       vpiHandle parentHandle) {
   ComponentMap netMap;
-  
+
   if (object->Array_vars()) {
     for (variables* var : *object->Array_vars()) {
       netMap.insert(std::make_pair(var->VpiName(), var));
@@ -246,7 +234,6 @@ void ElaboratorListener::enterPackage(const package* object,
   // Push instance context on the stack
   instStack_.push_back(
       std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
-
 }
 
 void ElaboratorListener::leavePackage(const package* object,
@@ -261,6 +248,7 @@ void ElaboratorListener::leavePackage(const package* object,
         auto* tf = obj->DeepClone(serializer_, this, (package*)object);
         ComponentMap& funcMap =
             std::get<2>((instStack_.at(instStack_.size() - 2)).second);
+        funcMap.erase(tf->VpiName());
         funcMap.insert(std::make_pair(tf->VpiName(), tf));
         leaveTask_func(obj, object, nullptr, nullptr);
         tf->VpiParent((package*)object);
@@ -268,6 +256,7 @@ void ElaboratorListener::leavePackage(const package* object,
       }
     }
   }
+  bindScheduledTaskFunc();
   instStack_.pop_back();
 }
 
@@ -314,10 +303,195 @@ void ElaboratorListener::enterClass_defn(const class_defn* object,
   }
 }
 
+void ElaboratorListener::bindScheduledTaskFunc() {
+  for (auto& call_prefix : scheduledTfCallBinding_) {
+    tf_call* call = call_prefix.first;
+    const class_var* prefix = call_prefix.second;
+    if (call->UhdmType() == uhdmfunc_call) {
+      if (function* f =
+              dynamic_cast<function*>(bindTaskFunc(call->VpiName(), prefix))) {
+        ((func_call*)call)->Function(f);
+      }
+    } else if (call->UhdmType() == uhdmtask_call) {
+      if (task* f =
+              dynamic_cast<task*>(bindTaskFunc(call->VpiName(), prefix))) {
+        ((task_call*)call)->Task(f);
+      }
+    } else if (call->UhdmType() == uhdmmethod_func_call) {
+      if (function* f =
+              dynamic_cast<function*>(bindTaskFunc(call->VpiName(), prefix))) {
+        ((method_func_call*)call)->Function(f);
+      }
+    } else if (call->UhdmType() == uhdmmethod_task_call) {
+      if (task* f =
+              dynamic_cast<task*>(bindTaskFunc(call->VpiName(), prefix))) {
+        ((method_task_call*)call)->Task(f);
+      }
+    }
+  }
+  scheduledTfCallBinding_.clear();
+}
+
 void ElaboratorListener::leaveClass_defn(const class_defn* object,
                                          const BaseClass* parent,
                                          vpiHandle handle,
                                          vpiHandle parentHandle) {
+  bindScheduledTaskFunc();
+  if (!instStack_.empty() && (instStack_.back().first == object)) {
+    instStack_.pop_back();
+  }
+}
+
+void ElaboratorListener::enterInterface(const interface* object,
+                                        const BaseClass* parent,
+                                        vpiHandle handle,
+                                        vpiHandle parentHandle) {
+  // interface* inst = (interface*)object;
+  const std::string& instName = object->VpiName();
+  const std::string& defName = object->VpiDefName();
+  bool flatModule =
+      (instName == "") && ((object->VpiParent() == 0) ||
+                           ((object->VpiParent() != 0) &&
+                            (object->VpiParent()->VpiType() != vpiModule)));
+  // false when it is an interface in a hierachy tree
+  if (debug_)
+    std::cout << "Module: " << defName << " (" << instName
+              << ") Flat:" << flatModule << std::endl;
+
+  if (flatModule) {
+    // Flat list of module (unelaborated)
+    flatComponentMap_.insert(std::make_pair(object->VpiDefName(), object));
+  } else {
+    // Hierachical module list (elaborated)
+    inHierarchy_ = true;
+
+    // Collect instance elaborated nets
+    ComponentMap netMap;
+    if (object->Nets()) {
+      for (net* net : *object->Nets()) {
+        netMap.insert(std::make_pair(net->VpiName(), net));
+      }
+    }
+    if (object->Array_nets()) {
+      for (array_net* net : *object->Array_nets()) {
+        netMap.insert(std::make_pair(net->VpiName(), net));
+      }
+    }
+    if (object->Interfaces()) {
+      for (interface* inter : *object->Interfaces()) {
+        netMap.insert(std::make_pair(inter->VpiName(), inter));
+      }
+    }
+
+    // Collect instance parameters, defparams
+    ComponentMap paramMap;
+    if (object->Param_assigns()) {
+      for (param_assign* passign : *object->Param_assigns()) {
+        paramMap.insert(
+            std::make_pair(passign->Lhs()->VpiName(), passign->Rhs()));
+      }
+    }
+    if (object->Parameters()) {
+      for (any* param : *object->Parameters()) {
+        ComponentMap::iterator itr = paramMap.find(param->VpiName());
+        if (itr != paramMap.end()) {
+          if ((*itr).second == nullptr) {
+            paramMap.erase(itr);
+          }
+        }
+        paramMap.insert(std::make_pair(param->VpiName(), param));
+      }
+    }
+
+    if (object->Variables()) {
+      for (variables* var : *object->Variables()) {
+        paramMap.insert(std::make_pair(var->VpiName(), var));
+      }
+    }
+    if (object->Ports()) {
+      for (ports* port : *object->Ports()) {
+        if (const any* low = port->Low_conn()) {
+          if (low->UhdmType() == uhdmref_obj) {
+            ref_obj* r = (ref_obj*)low;
+            if (const any* actual = r->Actual_group()) {
+              if (actual->UhdmType() == uhdminterface) {
+                netMap.insert(std::make_pair(port->VpiName(), actual));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Collect func and task declaration
+    ComponentMap funcMap;
+    if (object->Task_funcs()) {
+      for (task_func* var : *object->Task_funcs()) {
+        funcMap.insert(std::make_pair(var->VpiName(), var));
+      }
+    }
+
+    // Check if Module instance has a definition, collect enums
+    ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
+    if (itrDef != flatComponentMap_.end()) {
+      const BaseClass* comp = (*itrDef).second;
+      int compType = comp->VpiType();
+      switch (compType) {
+        case vpiModule: {
+          module* defMod = (module*)comp;
+          if (defMod->Typespecs()) {
+            for (typespec* tps : *defMod->Typespecs()) {
+              if (tps->UhdmType() == uhdmenum_typespec) {
+                enum_typespec* etps = (enum_typespec*)tps;
+                for (enum_const* econst : *etps->Enum_consts()) {
+                  paramMap.insert(std::make_pair(econst->VpiName(), econst));
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Collect gen_scope
+    if (object->Gen_scope_arrays()) {
+      for (gen_scope_array* gsa : *object->Gen_scope_arrays()) {
+        for (gen_scope* gs : *gsa->Gen_scopes()) {
+          netMap.insert(std::make_pair(gsa->VpiName(), gs));
+        }
+      }
+    }
+
+    // Push instance context on the stack
+    instStack_.push_back(
+        std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
+
+    // Check if Module instance has a definition
+    if (itrDef != flatComponentMap_.end()) {
+      const BaseClass* comp = (*itrDef).second;
+      int compType = comp->VpiType();
+      switch (compType) {
+        case vpiInterface: {
+          //  interface* defMod = (interface*)comp;
+          if (clone_) {
+            // Don't activate yet  <INTERFACE//regexp trap//_ELABORATOR_LISTENER>
+            // We need to enter/leave modports and perform binding so not to loose the 
+            // binding performed loosely during Surelog elab 
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+}
+
+void ElaboratorListener::leaveInterface(const interface* object,
+                                        const BaseClass* parent,
+                                        vpiHandle handle,
+                                        vpiHandle parentHandle) {
+  bindScheduledTaskFunc();
   if (!instStack_.empty() && (instStack_.back().first == object)) {
     instStack_.pop_back();
   }
