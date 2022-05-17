@@ -1590,6 +1590,10 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
       cons = any_cast<constant *>(object);
       if (cons->Typespec() == nullptr)
         cons->Typespec((typespec *)path->Typespec());
+    } else if (operation *oper = any_cast<operation *>(object)) {
+      if (returnTypespec) {
+        object = (typespec*) oper->Typespec();
+      }
     }
 
     std::vector<std::string> the_path;
