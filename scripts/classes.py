@@ -191,19 +191,16 @@ def _get_DeepClone_implementation(model, models):
     if classname in ['part_select', 'bit_select', 'indexed_part_select']:
         includes.add('ElaboratorListener')
         includes.add('ref_obj')
-        content.append('  if (const any* parent = VpiParent()) {')
-        content.append('    ref_obj* ref = serializer->MakeRef_obj();')
-        content.append('    clone->VpiParent(ref);')
-        content.append('    ref->VpiName(parent->VpiName());')
-        content.append('    if (parent->UhdmType() == uhdmref_obj) {')
-        content.append('      ref->VpiFullName(((ref_obj*) VpiParent())->VpiFullName());')
+        content.append('  if (const any* thisParent = VpiParent()) {')
+        content.append('    if (thisParent->UhdmType() == uhdmref_obj) {')
+        content.append('      clone->VpiParent(thisParent->DeepClone(serializer, elaborator, parent));')
+        content.append('    } else {')
+        content.append('      ref_obj* ref = serializer->MakeRef_obj();')
+        content.append('      clone->VpiParent(ref);')
+        content.append('      ref->VpiName(thisParent->VpiName());')
+        content.append('      ref->VpiParent(parent);')
+        content.append('      ref->Actual_group(elaborator->bindAny(thisParent->VpiName()));')
         content.append('    }')
-        content.append('    ref->VpiParent((any*) parent);')
-        content.append('    ref->Actual_group(elaborator->bindAny(ref->VpiName()));')
-        content.append('    if (!ref->Actual_group())')
-        content.append('      if (parent->UhdmType() == uhdmref_obj) {')
-        content.append('        ref->Actual_group((any*) ((ref_obj*) VpiParent())->Actual_group());')
-        content.append('      }')
         content.append('  }')
     elif modeltype == 'obj_def':
         content.append('  clone->VpiParent(parent);')
@@ -235,7 +232,7 @@ def _get_DeepClone_implementation(model, models):
                 if (classname in ['ref_obj', 'ref_var']) and (method == 'Actual_group'):
                     includes.add('ElaboratorListener')
                     content.append(f'  clone->{method}(elaborator->bindAny(VpiName()));')
-                    content.append(f'  if (!clone->{method}()) clone->{method}((any*) this->{method}());')
+                    content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')
 
                 elif method in ['Task', 'Function']:
                     prefix = 'nullptr'
@@ -333,7 +330,7 @@ def _get_DeepClone_implementation(model, models):
         content.append(f'{classname}* {classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {{')
 
         if classname in ['begin', 'named_begin', 'fork', 'named_fork']:
-            content.append(f'  elaborator->enter{Classname}((const  {classname}*) this, parent, nullptr, nullptr);')
+            content.append(f'  elaborator->enter{Classname}(this, parent, nullptr, nullptr);')
         
         if 'Net' in vpi_name:
             includes.add('ElaboratorListener')
@@ -359,7 +356,7 @@ def _get_DeepClone_implementation(model, models):
         content.append('  DeepCopy(clone, serializer, elaborator, parent);')
         
         if classname in ['begin', 'named_begin', 'fork', 'named_fork']:
-            content.append(f'  elaborator->leave{Classname}((const  {classname}*) this, parent, nullptr, nullptr);')
+            content.append(f'  elaborator->leave{Classname}(this, parent, nullptr, nullptr);')
 
         content.append('  return clone;')
         content.append('}')
