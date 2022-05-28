@@ -864,6 +864,13 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 break;
               }
+              case uhdmnamed_event: {
+                if (name == "triggered") {
+                  // Builtin
+                  found = true;
+                } 
+                break;
+              }
               case uhdmarray_var: {
                 array_var* avar = (array_var*)actual;
                 VectorOfvariables* vars = avar->Variables();
