@@ -86,13 +86,13 @@ def generate(models):
             classnames.add(classname)
 
             public_implementations.append(f'void UhdmListener::listen{Classname_}(const {classname}* const object) {{')
+            public_implementations.append( '  callstack.push_back(object);')
             public_implementations.append(f'  enter{Classname_}(object);')
             public_implementations.append( '  if (visited.insert(object).second) {')
-            public_implementations.append( '    callstack.push_back(object);')
             public_implementations.append(f'    listen{Classname_}_(object);')
-            public_implementations.append( '    callstack.pop_back();')
             public_implementations.append( '  }')
             public_implementations.append(f'  leave{Classname_}(object);')
+            public_implementations.append( '  callstack.pop_back();')
             public_implementations.append(f'}}')
             public_implementations.append( '')
 
