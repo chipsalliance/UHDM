@@ -81,6 +81,12 @@ void ElaboratorListener::enterModule(const module* object,
       }
     }
 
+    if (object->Named_events()) {
+      for (named_event* var : *object->Named_events()) {
+        netMap.insert(std::make_pair(var->VpiName(), var));
+      }
+    }
+
     // Collect instance parameters, defparams
     ComponentMap paramMap;
     if (object->Param_assigns()) {
@@ -215,6 +221,12 @@ void ElaboratorListener::enterPackage(const package* object,
     }
   }
 
+  if (object->Named_events()) {
+    for (named_event* var : *object->Named_events()) {
+      netMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+
   // Collect instance parameters, defparams
   ComponentMap paramMap;
   if (object->Parameters()) {
@@ -272,6 +284,12 @@ void ElaboratorListener::enterClass_defn(const class_defn* object,
   ComponentMap varMap;
   if (object->Variables()) {
     for (variables* var : *object->Variables()) {
+      varMap.insert(std::make_pair(var->VpiName(), var));
+    }
+  }
+
+ if (object->Named_events()) {
+    for (named_event* var : *object->Named_events()) {
       varMap.insert(std::make_pair(var->VpiName(), var));
     }
   }
@@ -380,6 +398,12 @@ void ElaboratorListener::enterInterface(const interface* object,
     if (object->Interfaces()) {
       for (interface* inter : *object->Interfaces()) {
         netMap.insert(std::make_pair(inter->VpiName(), inter));
+      }
+    }
+
+    if (object->Named_events()) {
+      for (named_event* var : *object->Named_events()) {
+        netMap.insert(std::make_pair(var->VpiName(), var));
       }
     }
 
