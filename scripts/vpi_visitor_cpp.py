@@ -9,9 +9,13 @@ def _get_implementation(classname, vpi, card):
     if card == '1':
         shallow_visit = 'false'
 
-        if vpi in ['vpiParent', 'vpiInstance', 'vpiModule', 'vpiInterface', 'vpiUse', 'vpiProgram', 'vpiClassDefn', 'vpiPackage', 'vpiUdp']:
+        if vpi in ['vpiInstance', 'vpiModule', 'vpiInterface', 'vpiUse', 'vpiProgram', 'vpiClassDefn', 'vpiPackage', 'vpiUdp']:
             # Prevent walking upwards and makes the UHDM output cleaner
             # Prevent loop in Standard VPI
+            shallow_visit = 'true'
+
+        if '_select' not in classname and vpi == 'vpiParent':
+            # Print shallow for all but '_select' parents
             shallow_visit = 'true'
 
         if 'func_call' in classname and vpi == 'vpiFunction':
@@ -90,9 +94,8 @@ def generate(models):
         if baseclass:
             private_visitor_bodies.append(f'  visit_{baseclass}(obj_h, indent, relation, visited, out, shallowVisit);')
 
-        private_visitor_bodies.extend(_get_implementation(classname, 'vpiParent', '1'))
-
         if modeltype != 'class_def':
+            private_visitor_bodies.extend(_get_implementation(classname, 'vpiParent', '1'))
             private_visitor_bodies.extend(_get_vpi_xxx_visitor('string', 'vpiFile', '1'))
         
         type_specified = False
