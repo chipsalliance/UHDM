@@ -864,6 +864,21 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 break;
               }
+              case uhdmmodport: {
+                UHDM::modport* modport = (UHDM::modport*) actual;
+                if (modport->Io_decls()) {
+                  for (io_decl* decl : *modport->Io_decls()) {
+                    if (decl->VpiName() == name) {
+                      found = true;
+                      previous = decl;
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(decl);
+                      }
+                    }
+                  }
+                } 
+                break;
+              }
               case uhdmnamed_event: {
                 if (name == "triggered") {
                   // Builtin
