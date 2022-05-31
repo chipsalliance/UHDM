@@ -70,6 +70,20 @@ void ElaboratorListener::enterModule(const module* object,
         netMap.insert(std::make_pair(net->VpiName(), net));
       }
     }
+    if (object->Ports()) {
+      for (port* port : *object->Ports()) {
+        if (const any* low = port->Low_conn()) {
+          if (low->UhdmType() == uhdmref_obj) {
+            ref_obj* ref = (ref_obj*) low;
+            if (const any* actual = ref->Actual_group()) {
+              if (actual->UhdmType() == uhdmmodport) {
+                netMap.insert(std::make_pair(port->VpiName(), actual));
+              }
+            }
+          }
+        }
+      }
+    }
     if (object->Array_nets()) {
       for (array_net* net : *object->Array_nets()) {
         netMap.insert(std::make_pair(net->VpiName(), net));
