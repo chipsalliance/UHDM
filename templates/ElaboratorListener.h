@@ -52,6 +52,7 @@ class ElaboratorListener : public VpiListener {
   bool isFunctionCall(const std::string& name, const expr* prefix);
   bool muteErrors() { return muteErrors_; }
   bool isTaskCall(const std::string& name, const expr* prefix);
+  void ignoreLastInstance(bool ignore) { ignoreLastInstance_ = ignore; }
 
   // Bind to a net in the current instance
   any* bindNet(const std::string& name);
@@ -233,6 +234,7 @@ class ElaboratorListener : public VpiListener {
   bool muteErrors_ = false;
   bool uniquifyTypespec_ = true;
   bool clone_ = true;
+  bool ignoreLastInstance_ = false;
   std::vector<std::pair<tf_call*, const class_var*>> scheduledTfCallBinding_;
 };
 
