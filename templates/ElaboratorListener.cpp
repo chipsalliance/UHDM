@@ -540,10 +540,6 @@ void ElaboratorListener::leaveInterface(const interface* object,
 any* ElaboratorListener::bindNet(const std::string& name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
-    if (ignoreLastInstance_) {
-      if (i == instStack_.rbegin())
-        continue;
-    }
     ComponentMap& netMap = std::get<0>((*i).second);
     ComponentMap::iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
@@ -557,10 +553,6 @@ any* ElaboratorListener::bindNet(const std::string& name) {
 any* ElaboratorListener::bindAny(const std::string& name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
-    if (ignoreLastInstance_) {
-      if (i == instStack_.rbegin())
-        continue;
-    }
     ComponentMap& netMap = std::get<0>((*i).second);
     ComponentMap::iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
@@ -580,10 +572,6 @@ any* ElaboratorListener::bindAny(const std::string& name) {
 any* ElaboratorListener::bindParam(const std::string& name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
-    if (ignoreLastInstance_) {
-      if (i == instStack_.rbegin())
-        continue;
-    }
     ComponentMap& paramMap = std::get<1>((*i).second);
     ComponentMap::iterator paramItr = paramMap.find(name);
     if (paramItr != paramMap.end()) {
@@ -598,10 +586,6 @@ any* ElaboratorListener::bindTaskFunc(const std::string& name,
                                       const class_var* prefix) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
-    if (ignoreLastInstance_) {
-      if (i == instStack_.rbegin())
-        continue;
-    }
     ComponentMap& funcMap = std::get<2>((*i).second);
     ComponentMap::iterator funcItr = funcMap.find(name);
     if (funcItr != funcMap.end()) {
