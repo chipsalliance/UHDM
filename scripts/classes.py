@@ -252,12 +252,6 @@ def _get_DeepClone_implementation(model, models):
                     includes.add('expr')
                     content.append(f'  if (auto obj = {method}()) clone->{method}((expr*) obj);')
 
-                elif classname == 'ports' and method == 'High_conn':
-                    content.append(f'  if (auto obj = {method}())')
-                    content.append('    { elaborator->ignoreLastInstance(true); ')
-                    content.append(f'      clone->{method}((expr*) obj);')
-                    content.append('      elaborator->ignoreLastInstance(false); }')
-
                 elif classname == 'int_typespec' and method == 'Cast_to_expr':
                     includes.add('variables')
                     content.append(f'  if (auto obj = {method}()) clone->{method}((variables*) obj);')
