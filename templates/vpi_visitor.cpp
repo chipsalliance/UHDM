@@ -550,46 +550,23 @@ void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedCont
         (objectType == vpiInterface) || (objectType == vpiUdp) ||
         (objectType == vpiIncludeFileInfo)) {
       if (const char* s = vpi_get_str(vpiFile, obj_h)) {
-        if (int l = vpi_get(vpiLineNo, obj_h)) {
-          out << " " << s << ":" << l;  // fileName, line
-          if (int c = vpi_get(vpiColumnNo, obj_h)) {
-            out << ":" << c << ": ";  // , column
-          } else {
-            out << ": ";
-          }
-          if (int c = vpi_get(vpiEndLineNo, obj_h)) {
-            out << ", endln:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
-          }
-        } else {
-           out << ", file:" << s;  // fileName
-        }
-      }
-    } else {
-      if (int l = vpi_get(vpiLineNo, obj_h)) {
-        if (int c = vpi_get(vpiColumnNo, obj_h)) {
-          out << ", line:" << l << ":" << c;
-        } else {
-          out << ", line:" << l;
-        }
-        if (int c = vpi_get(vpiEndLineNo, obj_h)) {
-          out << ", endln:" << c << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
-        }
+        out << ", file:" << s;  // fileName
       }
     }
-    if (vpiHandle par = vpi_handle(vpiParent, obj_h)) {
-      if (const char* parentName = vpi_get_str(vpiFullName, par)) {
-        out << ", parent:" << parentName;
-      } else if (const char* parentName = vpi_get_str(vpiName, par)) {
-        out << ", parent:" << parentName;
+
+    if (int l = vpi_get(vpiLineNo, obj_h)) {
+      out << ", line:" << l << ":" << vpi_get(vpiColumnNo, obj_h);
+
+      if (int l = vpi_get(vpiEndLineNo, obj_h)) {
+        out << ", endln:" << l << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
       }
-      if (showIDs) {
-        const uhdm_handle* const phandle = (const uhdm_handle*) par;
-        const BaseClass* const pobject = (const BaseClass*) phandle->object;
-        out << ", parID:" << pobject->UhdmId();
-      }
-      vpi_free_object(par);
     }
     out << "\n";
+  }
+
+  // Force shallow visit for all vpiParent except for vpiRefObj
+  if (strcmp(relation, "vpiParent") == 0) {
+    shallowVisit = (objectType != vpiRefObj);
   }
 
   if (alreadyVisited || shallowVisit) {
@@ -599,14 +576,14 @@ void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedCont
 }
 
 // Public interface
-void visit_designs (const std::vector<vpiHandle>& designs, std::ostream &out) {
+void visit_designs(const std::vector<vpiHandle>& designs, std::ostream &out) {
   for (auto design : designs) {
     VisitedContainer visited;
     visit_object(design, 0, "", &visited, out);
   }
 }
 
-std::string visit_designs (const std::vector<vpiHandle>& designs) {
+std::string visit_designs(const std::vector<vpiHandle>& designs) {
   std::stringstream out;
   visit_designs(designs, out);
   return out.str();
