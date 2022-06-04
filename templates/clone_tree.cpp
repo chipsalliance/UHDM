@@ -825,7 +825,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
         if (name.empty()) {
           if (obj->UhdmType() == uhdmpart_select ||
               obj->UhdmType() == uhdmindexed_part_select) {
-            if (obj->VpiParent()) name = obj->VpiParent()->VpiDefName();
+            if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
           }
         }
         if (previous->UhdmType() == uhdmref_obj) {
