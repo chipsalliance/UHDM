@@ -775,6 +775,22 @@ any* bindClassTypespec(class_typespec* ctps, any* current,
         }
       }
     }
+    if (defn->Named_events()) {
+      for (named_event* event : *defn->Named_events()) {
+        if (event->VpiName() == name) {
+          if (current->UhdmType() == uhdmref_obj) {
+            ((ref_obj*)current)->Actual_group(event);
+          } else if (current->UhdmType() == uhdmbit_select) {
+            const any* parent = current->VpiParent();
+            if (parent && (parent->UhdmType() == uhdmref_obj))
+              ((ref_obj*)parent)->Actual_group(event);
+          }
+          previous = event;
+          found = true;
+          break;
+        }
+      }
+    }
     if (defn->Task_funcs()) {
       for (task_func* tf : *defn->Task_funcs()) {
         if (tf->VpiName() == name) {
@@ -893,7 +909,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   actual = vars->at(0);
                   actual_type = actual->UhdmType();
                 }
-                if (name == "size" || name == "exists") {
+                if (name == "size" || name == "exists" || name == "find" || name == "max") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
                   if (current->UhdmType() == uhdmref_obj) {
@@ -912,7 +928,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   actual = vars->at(0);
                   actual_type = actual->UhdmType();
                 }
-                if (name == "size" || name == "exists") {
+                if (name == "size" || name == "exists" || name == "exists" || name == "max") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
                   if (current->UhdmType() == uhdmref_obj) {
