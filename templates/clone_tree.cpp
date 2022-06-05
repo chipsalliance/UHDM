@@ -844,9 +844,20 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
           }
         }
-        if (previous->UhdmType() == uhdmref_obj) {
-          ref_obj* ref = (ref_obj*)previous;
-          const any* actual = ref->Actual_group();
+        if (previous->UhdmType() == uhdmref_obj || previous->UhdmType() == uhdmbit_select) {
+          const any* actual = nullptr;
+          if (previous->UhdmType() == uhdmbit_select) {
+            bit_select* sel = (bit_select*) previous;
+            if (const any* p = sel->VpiParent()) {
+              if (p->UhdmType() == uhdmref_obj) {
+                ref_obj* pref = (ref_obj*) p;
+                actual = pref->Actual_group();
+              }
+            }
+          } else {
+            ref_obj* ref = (ref_obj*)previous;
+            actual = ref->Actual_group();
+          }
           if (actual) {
             UHDM_OBJECT_TYPE actual_type = actual->UhdmType();
             switch (actual_type) {
@@ -916,6 +927,25 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   // Builtin
                   found = true;
                 } 
+                break;
+              }
+              case uhdmarray_net: {
+                array_net* anet = (array_net*)actual;
+                VectorOfnet* vars = anet->Nets();
+                if (vars && vars->size()) {
+                  actual = vars->at(0);
+                  actual_type = actual->UhdmType();
+                }
+                if (name == "size" || name == "exists" || name == "find" || name == "max") {
+                  func_call* call = serializer->MakeFunc_call();
+                  call->VpiName(name);
+                  if (current->UhdmType() == uhdmref_obj) {
+                    ((ref_obj*)current)->Actual_group(call);
+                  }
+                  // Builtin method
+                  found = true;
+                  previous = (any*)call;
+                }
                 break;
               }
               case uhdmarray_var: {
@@ -1461,7 +1491,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
           }
           break;
-        }
+        } 
       }
       if (!found) previous = current;
     }
