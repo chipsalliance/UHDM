@@ -36,25 +36,10 @@
     vpi: vpiGeneric
     type: bool
     card: 1 
-  - class_ref: ports
-    name: ports
-    vpi: vpiPortInst
-    type: ports
-    card: any
   - group_ref: actual_group
     name: actual group
     vpi: vpiActual
     type: actual_group
-    card: 1
-  - class_ref: instance
-    name: instance
-    vpi: vpiInstance
-    type: instance
-    card: 1
-  - class_ref: task_func
-    name: task func
-    vpi: vpiTaskFunc
-    type: task_func
     card: 1
  # Non Standard: identify reference to a struct member {base : {10'h0, ...  }}
   - property: is_struct_member
