@@ -851,9 +851,9 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             UHDM_OBJECT_TYPE actual_type = actual->UhdmType();
             switch (actual_type) {
               case uhdmgen_scope: {
+                gen_scope* scope = (gen_scope*)actual;
                 if (obj->UhdmType() == uhdmmethod_func_call) {
                   method_func_call* call = (method_func_call*)current;
-                  gen_scope* scope = (gen_scope*)actual;
                   if (scope->Task_funcs()) {
                     for (auto tf : *scope->Task_funcs()) {
                       if (tf->VpiName() == name) {
@@ -866,13 +866,29 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   }
                 } else if (obj->UhdmType() == uhdmmethod_task_call) {
                   method_task_call* call = (method_task_call*)current;
-                  gen_scope* scope = (gen_scope*)actual;
                   if (scope->Task_funcs()) {
                     for (auto tf : *scope->Task_funcs()) {
                       if (tf->VpiName() == name) {
                         call->Task(any_cast<task*>(tf));
                         found = true;
                         previous = (any*)call->Task();
+                        break;
+                      }
+                    }
+                  }
+                } else {
+                  if (scope->Modules()) {
+                    for (auto m : *scope->Modules()) {
+                      if (m->VpiName() == name) {
+                        found = true;
+                        previous = m;
+                        if (current->UhdmType() == uhdmref_obj) {
+                          ((ref_obj*)current)->Actual_group(m);
+                        } else if (current->UhdmType() == uhdmbit_select) {
+                          const any* parent = current->VpiParent();
+                          if (parent && (parent->UhdmType() == uhdmref_obj))
+                            ((ref_obj*)parent)->Actual_group(m);
+                        }
                         break;
                       }
                     }
@@ -1400,6 +1416,51 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 break;
             }
           }
+        } else if (previous->UhdmType() == uhdmmodule) {
+          module* mod = (module*)previous;
+          if (mod->Variables()) {
+            for (variables* var : *mod->Variables()) {
+              if (var->VpiName() == name) {
+                if (current->UhdmType() == uhdmref_obj) {
+                  ((ref_obj*)current)->Actual_group(var);
+                } else if (current->UhdmType() == uhdmbit_select) {
+                  const any* parent = current->VpiParent();
+                  if (parent && (parent->UhdmType() == uhdmref_obj))
+                    ((ref_obj*)parent)->Actual_group(var);
+                }
+                previous = var;
+                found = true;
+                break;
+              }
+            }
+          }
+
+          if (mod->Nets()) {
+            for (nets* n : *mod->Nets()) {
+              if (n->VpiName() == name) {
+                if (current->UhdmType() == uhdmref_obj) {
+                  ((ref_obj*)current)->Actual_group(n);
+                } else if (current->UhdmType() == uhdmbit_select) {
+                  const any* parent = current->VpiParent();
+                  if (parent && (parent->UhdmType() == uhdmref_obj))
+                    ((ref_obj*)parent)->Actual_group(n);
+                }
+                previous = n;
+                found = true;
+                break;
+              }
+            }
+          }
+          if (mod->Modules()) {
+            for (auto m : *mod->Modules()) {
+              if (m->VpiName() == name) {
+                found = true;
+                previous = m;
+                break;
+              }
+            }
+          }
+          break;
         }
       }
       if (!found) previous = current;
