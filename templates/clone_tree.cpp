@@ -991,6 +991,52 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
 
             switch (actual_type) {
+              case uhdmmodule: {
+                module* mod = (module*)actual;
+                if (mod->Variables()) {
+                  for (variables* var : *mod->Variables()) {
+                    if (var->VpiName() == name) {
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(var);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(var);
+                      }
+                      previous = var;
+                      found = true;
+                      break;
+                    }
+                  }
+                }
+
+                if (mod->Nets()) {
+                  for (nets* n : *mod->Nets()) {
+                    if (n->VpiName() == name) {
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(n);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(n);
+                      }
+                      previous = n;
+                      found = true;
+                      break;
+                    }
+                  }
+                }
+                if (mod->Modules()) {
+                  for (auto m : *mod->Modules()) {
+                    if (m->VpiName() == name) {
+                      found = true;
+                      previous = m;
+                      break;
+                    }
+                  }
+                }
+                break;
+              }
               case uhdmclass_var: {
                 const typespec* tps = ((class_var*)actual)->Typespec();
                 if (tps) {
@@ -1380,10 +1426,10 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
             if (!found) {
               // WIP:
-              //if (!elaborator->muteErrors())
-              //  serializer->GetErrorHandler()(
-              //      ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
-              //      nullptr);
+              if (!elaborator->muteErrors())
+                serializer->GetErrorHandler()(
+                    ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
+                    nullptr);
             }
           } else {
             // WIP:

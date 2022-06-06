@@ -81,11 +81,6 @@
     vpi: vpiProcess
     type: process_stmt
     card: any
-  - obj_ref: cont_assigns
-    name: cont assign
-    vpi: vpiContAssign
-    type: cont_assign
-    card: any
   - obj_ref: modules
     name: modules
     vpi: vpiModule
@@ -95,6 +90,16 @@
     name: module array
     vpi: vpiModuleArray
     type: module_array
+    card: any
+  - obj_ref: gen_scope_array
+    name: gen scope array
+    vpi: vpiGenScopeArray
+    type: gen_scope_array
+    card: any
+  - obj_ref: cont_assigns
+    name: cont assign
+    vpi: vpiContAssign
+    type: cont_assign
     card: any
   - class_ref: primitives
     name: primitive
@@ -129,9 +134,4 @@
   - obj_ref: clocking_blocks
     vpi: vpiClockingBlock
     type: clocking_block
-    card: any
-  - obj_ref: gen_scope_array
-    name: gen scope array
-    vpi: vpiGenScopeArray
-    type: gen_scope_array
     card: any

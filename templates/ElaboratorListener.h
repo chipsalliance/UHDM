@@ -221,7 +221,7 @@ class ElaboratorListener : public VpiListener {
 
   // Instance context stack
   typedef std::vector<std::pair<
-      const BaseClass*, std::tuple<ComponentMap, ComponentMap, ComponentMap>>>
+      const BaseClass*, std::tuple<ComponentMap, ComponentMap, ComponentMap, ComponentMap>>>
       InstStack;
   InstStack instStack_;
 
