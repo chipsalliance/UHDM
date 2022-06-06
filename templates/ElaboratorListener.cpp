@@ -153,6 +153,8 @@ void ElaboratorListener::enterModule(const module* object,
       }
     }
 
+    ComponentMap modMap;
+  
     // Check if Module instance has a definition, collect enums
     ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
     if (itrDef != flatComponentMap_.end()) {
@@ -184,9 +186,21 @@ void ElaboratorListener::enterModule(const module* object,
       }
     }
 
+    if (object->Modules()) {
+      for (module* mod : *object->Modules()) {
+        modMap.insert(std::make_pair(mod->VpiName(), mod));
+      }
+    }
+
+    if (object->Module_arrays()) {
+      for (module_array* mod : *object->Module_arrays()) {
+        modMap.insert(std::make_pair(mod->VpiName(), mod));
+      }
+    }
+    
     // Push instance context on the stack
     instStack_.push_back(
-        std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
+        std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap, modMap)));
 
     // Check if Module instance has a definition
     if (itrDef != flatComponentMap_.end()) {
@@ -256,10 +270,10 @@ void ElaboratorListener::enterPackage(const package* object,
 
   // Collect func and task declaration
   ComponentMap funcMap;
-
+  ComponentMap modMap;
   // Push instance context on the stack
   instStack_.push_back(
-      std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
+      std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap, modMap)));
 }
 
 void ElaboratorListener::leavePackage(const package* object,
@@ -323,13 +337,14 @@ void ElaboratorListener::enterClass_defn(const class_defn* object,
       funcMap.insert(std::make_pair(var->VpiName(), var));
     }
   }
+  ComponentMap modMap;
 
   // Push class defn context on the stack
   // Class context is going to be pushed in case of:
   //   - imbricated classes
   //   - inheriting classes (Through the extends relation)
   instStack_.push_back(
-      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap, modMap)));
   if (clone_) {
 <CLASS_ELABORATOR_LISTENER>
   }
@@ -499,10 +514,10 @@ void ElaboratorListener::enterInterface(const interface* object,
         }
       }
     }
-
+    ComponentMap modMap;
     // Push instance context on the stack
     instStack_.push_back(
-        std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
+        std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap, modMap)));
 
     // Check if Module instance has a definition
     if (itrDef != flatComponentMap_.end()) {
@@ -571,6 +586,12 @@ any* ElaboratorListener::bindAny(const std::string& name) {
     ComponentMap::iterator paramItr = paramMap.find(name);
     if (paramItr != paramMap.end()) {
       return (any*)(*paramItr).second;
+    }
+
+    ComponentMap& modMap = std::get<3>((*i).second);
+    ComponentMap::iterator modItr = modMap.find(name);
+    if (modItr != modMap.end()) {
+      return (any*)(*modItr).second;
     }
   }
   return nullptr;
@@ -942,9 +963,9 @@ void ElaboratorListener::enterTask_func(const task_func* object,
   ComponentMap paramMap;
 
   ComponentMap funcMap;
-
+  ComponentMap modMap;
   instStack_.push_back(
-      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap, modMap)));
 }
 
 void ElaboratorListener::leaveTask_func(const task_func* object,
@@ -977,9 +998,9 @@ void ElaboratorListener::enterForeach_stmt(const foreach_stmt* object,
   ComponentMap paramMap;
 
   ComponentMap funcMap;
-
+  ComponentMap modMap;
   instStack_.push_back(
-      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap, modMap)));
 }
 
 void ElaboratorListener::leaveForeach_stmt(const foreach_stmt* object,
@@ -1005,8 +1026,9 @@ void ElaboratorListener::enterBegin(const begin* object,
   }
   ComponentMap paramMap;
   ComponentMap funcMap;
+  ComponentMap modMap;
   instStack_.push_back(
-      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap, modMap)));
 }
 
 void ElaboratorListener::leaveBegin(const begin* object,
@@ -1032,8 +1054,9 @@ void ElaboratorListener::enterNamed_begin(const named_begin* object,
   }
   ComponentMap paramMap;
   ComponentMap funcMap;
+  ComponentMap modMap;
   instStack_.push_back(
-      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap, modMap)));
 }
 void ElaboratorListener::leaveNamed_begin(const named_begin* object,
                                           const BaseClass* parent,
@@ -1059,8 +1082,9 @@ void ElaboratorListener::enterFork_stmt(const fork_stmt* object,
   }
   ComponentMap paramMap;
   ComponentMap funcMap;
+  ComponentMap modMap;
   instStack_.push_back(
-      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap, modMap)));
 }
 void ElaboratorListener::leaveFork_stmt(const fork_stmt* object,
                                         const BaseClass* parent,
@@ -1086,8 +1110,9 @@ void ElaboratorListener::enterNamed_fork(const named_fork* object,
   }
   ComponentMap paramMap;
   ComponentMap funcMap;
+  ComponentMap modMap;
   instStack_.push_back(
-      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap)));
+      std::make_pair(object, std::make_tuple(varMap, paramMap, funcMap, modMap)));
 }
 void ElaboratorListener::leaveNamed_fork(const named_fork* object,
                                          const BaseClass* parent,
@@ -1156,9 +1181,9 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object,
   }
 
   ComponentMap funcMap;
-
+  ComponentMap modMap;
   instStack_.push_back(
-      std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap)));
+      std::make_pair(object, std::make_tuple(netMap, paramMap, funcMap, modMap)));
 }
 
 void ElaboratorListener::leaveGen_scope(const gen_scope* object,
