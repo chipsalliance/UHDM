@@ -22,6 +22,10 @@ def _get_implementation(classname, vpi, card):
             # Prevent stepping inside tasks while processing calls (task_call, method_task_call) to them
             shallow_visit = 'true'
 
+        if classname in ['ref_obj']:
+            # Ref_obj are always printed shallow
+            shallow_visit = 'true'
+
         content.append(f'  if (vpiHandle itr = vpi_handle({vpi}, obj_h)) {{')
         content.append(f'    visit_object(itr, indent + kLevelIndent, "{vpi}", visited, out, {shallow_visit});')
         content.append( '    release_handle(itr);')
