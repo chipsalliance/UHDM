@@ -16,7 +16,7 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
 
     final = ''
     virtual = ''
-    if vpi in ['vpiParent', 'uhdmParentType', 'uhdmType', 'vpiLineNo', 'vpiColumnNo', 'vpiEndLineNo', 'vpiEndColumnNo', 'vpiFile', 'vpiName', 'vpiDefName', 'uhdmId']:
+    if vpi in ['vpiParent', 'uhdmType', 'vpiLineNo', 'vpiColumnNo', 'vpiEndLineNo', 'vpiEndColumnNo', 'vpiFile', 'vpiName', 'vpiDefName', 'uhdmId']:
         final = ' final'
         virtual = 'virtual '
 
@@ -43,10 +43,7 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
             content.append(f'  {virtual}const std::string& {Vpi_}() const{final};')
         else:
             content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
-            if vpi == 'vpiParent':
-                content.append(f'  virtual bool {Vpi_}({type}{pointer} data) final {{ {check}{vpi}_ = data; uhdmParentType_ = (data != nullptr) ? data->UhdmType() : 0; return true; }}')
-            else:
-                content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final} {{ {check}{vpi}_ = data; return true; }}')
+            content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final} {{ {check}{vpi}_ = data; return true; }}')
     elif card == 'any':
         content.append(f'  VectorOf{type}* {Vpi_}() const {{ return {vpi}_; }}')
         content.append(f'  bool {Vpi_}(VectorOf{type}* data) {{ {check}{vpi}_ = data; return true; }}')
@@ -704,12 +701,6 @@ def _generate_one_class(model, models, templates):
         data_members.extend(_get_data_member('BaseClass', 'vpiParent', '1'))
         declarations.extend(_get_declarations(classname, 'BaseClass', 'vpiParent', '1'))
         func_body, func_includes = _get_implementations(classname, 'BaseClass', 'vpiParent', '1')
-        implementations.extend(func_body)
-        includes.update(func_includes)
-
-        data_members.extend(_get_data_member('unsigned int', 'uhdmParentType', '1'))
-        declarations.extend(_get_declarations(classname, 'unsigned int', 'uhdmParentType', '1'))
-        func_body, func_includes = _get_implementations(classname, 'unsigned int', 'uhdmParentType', '1')
         implementations.extend(func_body)
         includes.update(func_includes)
 

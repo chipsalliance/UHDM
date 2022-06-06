@@ -76,8 +76,7 @@ inline void Serializer::SetRestoreId_(FactoryT<T>* const factory, unsigned long 
 
 struct Serializer::RestoreAdapter {
   void operator()(Any::Reader reader, Serializer *const serializer, BaseClass *const obj) const {
-    obj->UhdmParentType(reader.getUhdmParentType());
-    obj->VpiParent(serializer->GetObject(reader.getUhdmParentType(), reader.getVpiParent() - 1));
+    obj->VpiParent(serializer->GetObject(reader.getVpiParent().getType(), reader.getVpiParent().getIndex() - 1));
     obj->VpiFile(std::filesystem::path(serializer->symbolMaker.GetSymbol(reader.getVpiFile())));
     obj->VpiLineNo(reader.getVpiLineNo());
     obj->VpiColumnNo(reader.getVpiColumnNo());
@@ -124,8 +123,8 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
   close(fileid);
   return designs;
 }
+}  // namespace UHDM
 
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
-}  // namespace UHDM

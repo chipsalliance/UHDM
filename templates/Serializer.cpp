@@ -94,6 +94,6 @@ void Serializer::Purge() {
 }
 }  // namespace UHDM
 
-#if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
+#if defined(_MSC_VER)
   #pragma warning(pop)
 #endif

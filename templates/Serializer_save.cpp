@@ -65,8 +65,11 @@ void Serializer::SetSaveId_(FactoryT<T> *const factory) {
 
 struct Serializer::SaveAdapter {
   void operator()(const BaseClass *const obj, Serializer *const serializer, Any::Builder builder) const {
-    builder.setVpiParent(serializer->GetId(obj->VpiParent()));
-    builder.setUhdmParentType(obj->UhdmParentType());
+    if (obj->VpiParent() != nullptr) {
+      ::ObjIndexType::Builder vpiParentBuilder = builder.getVpiParent();
+      vpiParentBuilder.setIndex(serializer->GetId(obj->VpiParent()));
+      vpiParentBuilder.setType(obj->VpiParent()->UhdmType());
+    }
     builder.setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile().string()));
     builder.setVpiLineNo(obj->VpiLineNo());
     builder.setVpiColumnNo(obj->VpiColumnNo());
@@ -119,8 +122,8 @@ void Serializer::Save(const std::string& file) {
   writePackedMessageToFd(fileid, message);
   close(fileid);
 }
+}  // namespace UHDM
 
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
-}  // namespace UHDM

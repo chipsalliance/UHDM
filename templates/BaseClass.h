@@ -74,10 +74,6 @@ namespace UHDM {
 
     virtual bool VpiParent(BaseClass* data) = 0;
 
-    virtual unsigned int UhdmParentType() const = 0;
-
-    virtual bool UhdmParentType(unsigned int data) = 0;
-
     virtual std::filesystem::path VpiFile() const = 0;
     virtual SymbolFactory::ID VpiFileId() const = 0;
 
