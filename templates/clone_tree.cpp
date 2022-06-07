@@ -838,19 +838,32 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
       bool found = false;
       if (previous) {
         std::string name = obj->VpiName();
+        std::string nameIndexed = name;
         if (name.empty()) {
           if (obj->UhdmType() == uhdmpart_select ||
               obj->UhdmType() == uhdmindexed_part_select) {
             if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
           }
         }
-        if (previous->UhdmType() == uhdmref_obj || previous->UhdmType() == uhdmbit_select) {
+        if (obj->UhdmType() == uhdmbit_select) {
+          if (const any* p = obj->VpiParent()) {
+            if (p->UhdmType() == uhdmref_obj) {
+              ref_obj* pr = (ref_obj*)p;
+              const std::string& pname = pr->VpiName();
+              if (pname.find('[') != std::string::npos) {
+                nameIndexed = pname;
+              }
+            }
+          }
+        }
+        if (previous->UhdmType() == uhdmref_obj ||
+            previous->UhdmType() == uhdmbit_select) {
           const any* actual = nullptr;
           if (previous->UhdmType() == uhdmbit_select) {
-            bit_select* sel = (bit_select*) previous;
+            bit_select* sel = (bit_select*)previous;
             if (const any* p = sel->VpiParent()) {
               if (p->UhdmType() == uhdmref_obj) {
-                ref_obj* pref = (ref_obj*) p;
+                ref_obj* pref = (ref_obj*)p;
                 actual = pref->Actual_group();
               }
             }
@@ -890,7 +903,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 } else {
                   if (scope->Modules()) {
                     for (auto m : *scope->Modules()) {
-                      if (m->VpiName() == name) {
+                      if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                         found = true;
                         previous = m;
                         if (current->UhdmType() == uhdmref_obj) {
@@ -908,7 +921,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 break;
               }
               case uhdmmodport: {
-                UHDM::modport* modport = (UHDM::modport*) actual;
+                UHDM::modport* modport = (UHDM::modport*)actual;
                 if (modport->Io_decls()) {
                   for (io_decl* decl : *modport->Io_decls()) {
                     if (decl->VpiName() == name) {
@@ -919,14 +932,14 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                       }
                     }
                   }
-                } 
+                }
                 break;
               }
               case uhdmnamed_event: {
                 if (name == "triggered") {
                   // Builtin
                   found = true;
-                } 
+                }
                 break;
               }
               case uhdmarray_net: {
@@ -936,7 +949,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   actual = vars->at(0);
                   actual_type = actual->UhdmType();
                 }
-                if (name == "size" || name == "exists" || name == "find" || name == "max") {
+                if (name == "size" || name == "exists" || name == "find" ||
+                    name == "max") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
                   if (current->UhdmType() == uhdmref_obj) {
@@ -955,7 +969,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   actual = vars->at(0);
                   actual_type = actual->UhdmType();
                 }
-                if (name == "size" || name == "exists" || name == "find" || name == "max") {
+                if (name == "size" || name == "exists" || name == "find" ||
+                    name == "max") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
                   if (current->UhdmType() == uhdmref_obj) {
@@ -974,7 +989,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   actual = vars->at(0);
                   actual_type = actual->UhdmType();
                 }
-                if (name == "size" || name == "exists" || name == "exists" || name == "max") {
+                if (name == "size" || name == "exists" || name == "exists" ||
+                    name == "max") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
                   if (current->UhdmType() == uhdmref_obj) {
@@ -1028,10 +1044,28 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 if (mod->Modules()) {
                   for (auto m : *mod->Modules()) {
-                    if (m->VpiName() == name) {
+                    if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                       found = true;
                       previous = m;
                       break;
+                    }
+                  }
+                }
+                if (mod->Gen_scope_arrays()) {
+                  for (auto gsa : *mod->Gen_scope_arrays()) {
+                    if (gsa->VpiName() == name || gsa->VpiName() == nameIndexed) {
+                      for (auto gs : *gsa->Gen_scopes()) {
+                        if (current->UhdmType() == uhdmref_obj) {
+                          ((ref_obj*)current)->Actual_group(gs);
+                        } else if (current->UhdmType() == uhdmbit_select) {
+                          const any* parent = current->VpiParent();
+                          if (parent && (parent->UhdmType() == uhdmref_obj))
+                            ((ref_obj*)parent)->Actual_group(gs);
+                        }
+                        previous = gs;
+                        found = true;
+                        break;
+                      }
                     }
                   }
                 }
@@ -1433,7 +1467,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
           } else {
             // WIP:
-            //if (!elaborator->muteErrors())
+            // if (!elaborator->muteErrors())
             //  serializer->GetErrorHandler()(
             //      ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
             //      nullptr);
@@ -1529,7 +1563,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           }
           if (mod->Modules()) {
             for (auto m : *mod->Modules()) {
-              if (m->VpiName() == name) {
+              if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                 found = true;
                 previous = m;
                 break;
@@ -1537,7 +1571,51 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
           }
           break;
-        } 
+        } else if (previous->UhdmType() == uhdmgen_scope) {
+          gen_scope* scope = (gen_scope*)previous;
+          if (obj->UhdmType() == uhdmmethod_func_call) {
+            method_func_call* call = (method_func_call*)current;
+            if (scope->Task_funcs()) {
+              for (auto tf : *scope->Task_funcs()) {
+                if (tf->VpiName() == name) {
+                  call->Function(any_cast<function*>(tf));
+                  previous = (any*)call->Function();
+                  found = true;
+                  break;
+                }
+              }
+            }
+          } else if (obj->UhdmType() == uhdmmethod_task_call) {
+            method_task_call* call = (method_task_call*)current;
+            if (scope->Task_funcs()) {
+              for (auto tf : *scope->Task_funcs()) {
+                if (tf->VpiName() == name) {
+                  call->Task(any_cast<task*>(tf));
+                  found = true;
+                  previous = (any*)call->Task();
+                  break;
+                }
+              }
+            }
+          } else {
+            if (scope->Modules()) {
+              for (auto m : *scope->Modules()) {
+                if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                  found = true;
+                  previous = m;
+                  if (current->UhdmType() == uhdmref_obj) {
+                    ((ref_obj*)current)->Actual_group(m);
+                  } else if (current->UhdmType() == uhdmbit_select) {
+                    const any* parent = current->VpiParent();
+                    if (parent && (parent->UhdmType() == uhdmref_obj))
+                      ((ref_obj*)parent)->Actual_group(m);
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        }
       }
       if (!found) previous = current;
     }
