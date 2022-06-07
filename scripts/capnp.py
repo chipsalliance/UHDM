@@ -34,13 +34,12 @@ def generate(models):
     model_schemas = [
       'struct Any {',
       '  uhdmId @0 :UInt64;',
-      '  vpiParent @1 :UInt64;',
-      '  uhdmParentType @2 :UInt64;',
-      '  vpiFile @3 :UInt64;',
-      '  vpiLineNo @4 :UInt32;',
-      '  vpiEndLineNo @5 :UInt32;',
-      '  vpiColumnNo @6 :UInt16;',
-      '  vpiEndColumnNo @7 :UInt16;',
+      '  vpiParent @1 :ObjIndexType;',
+      '  vpiFile @2 :UInt64;',
+      '  vpiLineNo @3 :UInt32;',
+      '  vpiEndLineNo @4 :UInt32;',
+      '  vpiColumnNo @5 :UInt16;',
+      '  vpiEndColumnNo @6 :UInt16;',
       '}',
       ''
     ]
