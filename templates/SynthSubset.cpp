@@ -160,6 +160,18 @@ void SynthSubset::leaveThread_obj(const thread_obj* object,
   reportError(object);
 }
 
+void SynthSubset::leaveFork_stmt(const fork_stmt* object,
+                                 const BaseClass* parent, vpiHandle handle,
+                                 vpiHandle parentHandle) {
+  reportError(object);
+}
+
+void SynthSubset::leaveNamed_fork(const named_fork* object,
+                                  const BaseClass* parent, vpiHandle handle,
+                                  vpiHandle parentHandle) {
+  reportError(object);
+}
+
 void SynthSubset::leaveWait_stmt(const wait_stmt* object,
                                  const BaseClass* parent, vpiHandle handle,
                                  vpiHandle parentHandle) {
@@ -423,9 +435,21 @@ void SynthSubset::leaveTime_net(const time_net* object, const BaseClass* parent,
   reportError(object);
 }
 
+void SynthSubset::leaveEvent_stmt(const event_stmt* object,
+                                  const BaseClass* parent, vpiHandle handle,
+                                  vpiHandle parentHandle) {
+  reportError(object);
+}
+
 void SynthSubset::leaveNamed_event(const named_event* object,
                                    const BaseClass* parent, vpiHandle handle,
                                    vpiHandle parentHandle) {
+  reportError(object);
+}
+
+void SynthSubset::leaveEvent_typespec(const event_typespec* object,
+                                      const BaseClass* parent, vpiHandle handle,
+                                      vpiHandle parentHandle) {
   reportError(object);
 }
 
