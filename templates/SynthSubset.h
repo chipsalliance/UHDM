@@ -66,6 +66,12 @@ class SynthSubset : public VpiListener {
   void leaveThread_obj(const thread_obj* object, const BaseClass* parent,
                        vpiHandle handle, vpiHandle parentHandle) override;
 
+  void leaveFork_stmt(const fork_stmt* object, const BaseClass* parent,
+                      vpiHandle handle, vpiHandle parentHandle) override;
+
+  void leaveNamed_fork(const named_fork* object, const BaseClass* parent,
+                       vpiHandle handle, vpiHandle parentHandle) override;
+
   void leaveWait_stmt(const wait_stmt* object, const BaseClass* parent,
                       vpiHandle handle, vpiHandle parentHandle) override;
 
@@ -211,8 +217,16 @@ class SynthSubset : public VpiListener {
   void leaveTime_net(const time_net* object, const BaseClass* parent,
                      vpiHandle handle, vpiHandle parentHandle) override;
 
+  void leaveEvent_stmt(const event_stmt* object, const BaseClass* parent,
+                       vpiHandle handle, vpiHandle parentHandle) override;
+
   void leaveNamed_event(const named_event* object, const BaseClass* parent,
                         vpiHandle handle, vpiHandle parentHandle) override;
+
+  void leaveEvent_typespec(const event_typespec* object,
+                           const BaseClass* parent, vpiHandle handle,
+                           vpiHandle parentHandle) override;
+
 
   void leaveClass_typespec(const class_typespec* object,
                            const BaseClass* parent, vpiHandle handle,
