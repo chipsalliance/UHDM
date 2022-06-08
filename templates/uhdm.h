@@ -28,7 +28,6 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <map>
 
 #include <uhdm/sv_vpi_user.h>
 #include <uhdm/vhpi_user.h>

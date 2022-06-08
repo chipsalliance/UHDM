@@ -24,6 +24,7 @@
  */
 #include <uhdm/UhdmListener.h>
 #include <uhdm/uhdm.h>
+#include <unordered_map>
 
 namespace UHDM {
 ScopedVpiHandle::ScopedVpiHandle(const UHDM::any* const any)
