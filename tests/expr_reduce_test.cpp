@@ -31,7 +31,7 @@
 #include "gtest/gtest.h"
 #include "uhdm/ElaboratorListener.h"
 #include "uhdm/uhdm.h"
-#include "uhdm/vpi_listener.h"
+#include "uhdm/VpiListener.h"
 #include "uhdm/vpi_visitor.h"
 #include "uhdm/ExprEval.h"
 
@@ -104,7 +104,7 @@ TEST(FullElabTest, ElaborationRoundtrip) {
   EXPECT_FALSE(elaborated);
 
   ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
-  listen_designs(designs, listener);
+  listener->listenDesigns(designs);
   delete listener;
 
   elaborated = false;

@@ -17,44 +17,34 @@
  */
 
 /*
- * File:   vpi_listener.cpp
+ * File:   VpiListener.cpp
  * Author:
  *
  * Created on December 14, 2019, 10:03 PM
  */
-#include <uhdm/vpi_listener.h>
-
-#include <string.h>
-
-#include <iostream>
-#include <map>
-#include <string>
-#include <vector>
-
-#include <uhdm/sv_vpi_user.h>
-#include <uhdm/vhpi_user.h>
-
-#include <uhdm/Serializer.h>
-#include <uhdm/containers.h>
-#include <uhdm/uhdm.h>
-#include <uhdm/uhdm_types.h>
-#include <uhdm/vpi_uhdm.h>
 #include <uhdm/VpiListener.h>
+#include <uhdm/uhdm.h>
 
-using namespace UHDM;
+namespace UHDM {
+<VPI_PRIVATE_LISTEN_IMPLEMENTATIONS>
+<VPI_PUBLIC_LISTEN_IMPLEMENTATIONS>
+void VpiListener::listenAny(vpiHandle handle) {
+  const any* object = (const any*)((const uhdm_handle*)handle)->object;
+  const bool revisiting = visited.find(object) != visited.end();
+  if (!revisiting) enterAny(object, handle);
 
-<VPI_LISTENERS>
-void UHDM::listen_any(vpiHandle handle, VpiListener* listener, UHDM::VisitedContainer* visited) {
   unsigned int type = ((const uhdm_handle*)handle)->type;
   switch (type) {
-<VPI_ANY_LISTENERS>
-  default: break;
+<VPI_LISTENANY_IMPLEMENTATION>
+    default : break;
   }
+
+  if (!revisiting) leaveAny(object, handle);
 }
 
-void UHDM::listen_designs(const std::vector<vpiHandle>& designs, VpiListener* listener) {
+void VpiListener::listenDesigns(const std::vector<vpiHandle>& designs) {
   for (auto design_h : designs) {
-    UHDM::VisitedContainer visited;
-    listen_design(design_h, listener, &visited);
+    listenDesign(design_h);
   }
 }
+}  // namespace UHDM

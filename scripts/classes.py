@@ -333,8 +333,8 @@ def _get_DeepClone_implementation(model, models):
         content.append(f'{classname}* {classname}::DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {{')
 
         if classname in ['begin', 'named_begin', 'fork', 'named_fork']:
-            content.append(f'  elaborator->enter{Classname}(this, parent, nullptr, nullptr);')
-        
+            content.append(f'  elaborator->enter{Classname}(this, nullptr);')
+
         if 'Net' in vpi_name:
             includes.add('ElaboratorListener')
             content.append(f'  {classname}* clone = any_cast<{classname}*>(elaborator->bindNet(VpiName()));')
@@ -359,7 +359,7 @@ def _get_DeepClone_implementation(model, models):
         content.append('  DeepCopy(clone, serializer, elaborator, parent);')
         
         if classname in ['begin', 'named_begin', 'fork', 'named_fork']:
-            content.append(f'  elaborator->leave{Classname}(this, parent, nullptr, nullptr);')
+            content.append(f'  elaborator->leave{Classname}(this, nullptr);')
 
         content.append('  return clone;')
         content.append('}')
