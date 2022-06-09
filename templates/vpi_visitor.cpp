@@ -577,14 +577,17 @@ void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedCont
 
 // Public interface
 void visit_designs(const std::vector<vpiHandle>& designs, std::ostream &out) {
+  out << std::unitbuf;
   for (auto design : designs) {
     VisitedContainer visited;
     visit_object(design, 0, "", &visited, out);
   }
+  out << std::nounitbuf;
 }
 
 std::string visit_designs(const std::vector<vpiHandle>& designs) {
   std::stringstream out;
+  out << std::unitbuf;
   visit_designs(designs, out);
   return out.str();
 }
