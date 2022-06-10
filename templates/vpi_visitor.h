@@ -43,9 +43,6 @@ void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedCon
 // Visit designs, dump to given stream.
 void visit_designs (const std::vector<vpiHandle>& designs, std::ostream &out);
 
-// Visit designs, return string representation.
-std::string visit_designs (const std::vector<vpiHandle>& designs);
-
 // For debug use in GDB
 std::string decompile(UHDM::any* handle);
 

@@ -127,8 +127,9 @@ int main(int argc, char **argv) {
   visit_designs(restoredDesigns, std::cout);
 
   if (!goldenFile.empty()) {
-    const std::string restored = visit_designs(restoredDesigns);
-    if (!CompareContentWithFile(restored, goldenFile, verbose)) {
+    std::stringstream restored;
+    visit_designs(restoredDesigns, restored);
+    if (!CompareContentWithFile(restored.str(), goldenFile, verbose)) {
       return 2;
     }
   }

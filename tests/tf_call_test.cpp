@@ -4,9 +4,9 @@
 #include "uhdm/uhdm.h"
 #include "uhdm/vpi_visitor.h"
 
-using namespace UHDM;
+#include "test_util.h"
 
-#include "uhdm/vpi_visitor.h"
+using namespace UHDM;
 
 static std::vector<vpiHandle> build_tfCallDesign(Serializer* s) {
   std::vector<vpiHandle> designs;
@@ -71,11 +71,11 @@ static std::vector<vpiHandle> build_tfCallDesign(Serializer* s) {
 
 TEST(Serialization, TFCallDesign) {
   Serializer serializer;
-  const std::string orig = visit_designs(build_tfCallDesign(&serializer));
+  const std::string orig = designs_to_string(build_tfCallDesign(&serializer));
   const std::string filename = testing::TempDir() + "/surelog_tf_call.uhdm";
   serializer.Save(filename);
 
   std::vector<vpiHandle> restoredDesigns = serializer.Restore(filename);
-  const std::string restored = visit_designs(restoredDesigns);
+  const std::string restored = designs_to_string(restoredDesigns);
   EXPECT_EQ(orig, restored);
 }

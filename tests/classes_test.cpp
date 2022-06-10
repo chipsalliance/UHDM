@@ -7,6 +7,8 @@
 #include "uhdm/VpiListener.h"
 #include "uhdm/vpi_visitor.h"
 
+#include "test_util.h"
+
 using namespace UHDM;
 
 static std::vector<vpiHandle> build_designs(Serializer* s) {
@@ -104,13 +106,13 @@ static std::vector<vpiHandle> build_designs(Serializer* s) {
 TEST(ClassesTest, DesignSaveRestoreRoundtrip) {
   Serializer serializer;
   const std::vector<vpiHandle>& designs = build_designs(&serializer);
-  const std::string before = visit_designs(designs);
+  const std::string before = designs_to_string(designs);
 
   const std::string filename = testing::TempDir() + "/classes_test.uhdm";
   serializer.Save(filename);
 
   const std::vector<vpiHandle>& restoredDesigns = serializer.Restore(filename);
-  const std::string restored = visit_designs(restoredDesigns);
+  const std::string restored = designs_to_string(restoredDesigns);
 
   EXPECT_EQ(before, restored);
 
@@ -119,6 +121,6 @@ TEST(ClassesTest, DesignSaveRestoreRoundtrip) {
   listener->listenDesigns(restoredDesigns);
   delete listener;
 
-  const std::string elaborated = visit_designs(restoredDesigns);
+  const std::string elaborated = designs_to_string(restoredDesigns);
   EXPECT_NE(restored, elaborated);  // Elaboration should've done _something_
 }
