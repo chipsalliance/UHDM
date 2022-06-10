@@ -27,6 +27,7 @@
 #ifndef UHDM_BASE_CLASS_H
 #define UHDM_BASE_CLASS_H
 
+#include <deque>
 #include <filesystem>
 #include <set>
 #include <string_view>
@@ -147,7 +148,12 @@ namespace UHDM {
   template<typename T>
   class FactoryT final {
     friend Serializer;
-    typedef std::vector<T *> objects_t;
+    // TODO: make this an arena: iinstead of pointers, store the
+    // objects directly with placement-new'ed object using emplace_back()
+    // One less indirection and a lot less overhead.
+    // (dqque guarantees pointer stability; however, we'd need to
+    // do something special in Erase() - can't re-arrange).
+    typedef std::deque<T *> objects_t;
 
     public:
       T* Make() {

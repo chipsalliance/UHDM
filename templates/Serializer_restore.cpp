@@ -88,7 +88,7 @@ struct Serializer::RestoreAdapter {
 <CAPNP_RESTORE_ADAPTERS>
 
   template<typename T, typename U, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-  void operator()(typename ::capnp::List<U>::Reader reader, Serializer *serializer, std::vector<T*> &objects) const {
+  void operator()(typename ::capnp::List<U>::Reader reader, Serializer *serializer, typename FactoryT<T>::objects_t &objects) const {
     unsigned long index = 0;
     for (typename U::Reader obj : reader)
       operator()(obj, serializer, objects[index++]);
