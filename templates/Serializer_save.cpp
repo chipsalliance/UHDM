@@ -81,7 +81,7 @@ struct Serializer::SaveAdapter {
 <CAPNP_SAVE_ADAPTERS>
 
   template<typename T, typename U, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-  void operator()(const std::vector<T*> &objects, Serializer *serializer, typename ::capnp::List<U>::Builder builder) const {
+  void operator()(const typename FactoryT<T>::objects_t &objects, Serializer *serializer, typename ::capnp::List<U>::Builder builder) const {
     unsigned long index = 0;
     for (const T* obj : objects)
       operator()(obj, serializer, builder[index++]);
