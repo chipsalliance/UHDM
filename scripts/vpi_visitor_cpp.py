@@ -62,10 +62,10 @@ def _get_vpi_xxx_visitor(type, vpi, card):
     elif (card == '1') and (vpi not in ['vpiType', 'vpiFile', 'vpiLineNo', 'vpiColumnNo', 'vpiEndLineNo', 'vpiEndColumnNo']):
         if type == 'string':
             content.append(f'  if (const char* s = vpi_get_str({vpi}, obj_h))')
-            content.append(f'    stream_indent(out, indent) << "|{vpi}:" << s << std::endl;')
+            content.append(f'    stream_indent(out, indent) << "|{vpi}:" << s << "\\n";') # no std::endl, avoid flush
         else:
             content.append(f'  if (const int n = vpi_get({vpi}, obj_h))')
-            content.append(f'    stream_indent(out, indent) << "|{vpi}:" << n << std::endl;')
+            content.append(f'    stream_indent(out, indent) << "|{vpi}:" << n << "\\n";') # no std::endl, avoid flush
     return content
 
 

@@ -83,6 +83,8 @@ static int usage(const char *progname) {
 }
 
 int main(int argc, char **argv) {
+  std::ios::sync_with_stdio(false);
+
   bool elab = false;
   bool verbose = false;
   std::string uhdmFile;
