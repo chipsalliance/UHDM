@@ -5,6 +5,8 @@
 #include "uhdm/uhdm.h"
 #include "uhdm/vpi_visitor.h"
 
+#include "test_util.h"
+
 using namespace UHDM;
 using testing::HasSubstr;
 
@@ -107,7 +109,7 @@ TEST(ErrorHandlerTest, ErrorHandlerIsCalled) {
   serializer.SetErrorHandler(MyErrorHandler);
 
   issuedError = false;
-  const std::string before = visit_designs(build_designs(&serializer));
+  const std::string before = designs_to_string(build_designs(&serializer));
 
   EXPECT_TRUE(issuedError);  // Issue in design.
   EXPECT_THAT(last_msg, HasSubstr("adding wrong object type"));
@@ -121,7 +123,7 @@ TEST(ErrorHandlerTest, ErrorHandlerIsCalled) {
   // Save/restore will not contain the errornous part.
   issuedError = false;
   std::vector<vpiHandle> restoredDesigns = serializer.Restore(filename);
-  const std::string restored = visit_designs(restoredDesigns);
+  const std::string restored = designs_to_string(restoredDesigns);
   EXPECT_FALSE(issuedError);
 
   EXPECT_EQ(before, restored);

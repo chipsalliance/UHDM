@@ -6,6 +6,8 @@
 #include "uhdm/uhdm.h"
 #include "uhdm/vpi_visitor.h"
 
+#include "test_util.h"
+
 using namespace UHDM;
 
 // TODO: These tests are 'too big', i.e. they don't test a particular aspect
@@ -136,12 +138,12 @@ TEST(Serialization, SerializeModulePortDesign_e2e) {
   Serializer serializer;
   const std::vector<vpiHandle>& designs = buildModulePortDesign(&serializer);
 
-  const std::string orig = visit_designs(designs);
+  const std::string orig = designs_to_string(designs);
 
   const std::string filename = testing::TempDir() + "/serialize-roundrip.uhdm";
   serializer.Save(filename);
 
   const std::vector<vpiHandle>& restoredDesigns = serializer.Restore(filename);
-  const std::string restored = visit_designs(restoredDesigns);
+  const std::string restored = designs_to_string(restoredDesigns);
   EXPECT_EQ(orig, restored);
 }

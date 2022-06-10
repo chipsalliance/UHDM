@@ -4,9 +4,9 @@
 #include "uhdm/uhdm.h"
 #include "uhdm/vpi_visitor.h"
 
-using namespace UHDM;
+#include "test_util.h"
 
-#include "uhdm/vpi_visitor.h"
+using namespace UHDM;
 
 // This builds a simple design:
 // module m1;
@@ -86,13 +86,13 @@ static std::vector<vpiHandle> buildSimpleAlawysDesign(Serializer* s) {
 
 TEST(SerializationProcess, ProcessSerialization) {
   Serializer serializer;
-  const std::string orig = visit_designs(buildSimpleAlawysDesign(&serializer));
+  const std::string orig = designs_to_string(buildSimpleAlawysDesign(&serializer));
 
   const std::string filename = testing::TempDir() + "/surelog_process.uhdm";
   serializer.Save(filename);
 
   const std::vector<vpiHandle> restoredDesigns = serializer.Restore(filename);
-  const std::string restored = visit_designs(restoredDesigns);
+  const std::string restored = designs_to_string(restoredDesigns);
   EXPECT_EQ(orig, restored);
 }
 

@@ -37,6 +37,8 @@
 #include "uhdm/uhdm_forward_decl.h"
 #include "uhdm/vpi_visitor.h"
 
+#include "test_util.h"
+
 using namespace UHDM;
 
 //-------------------------------------------
@@ -364,7 +366,7 @@ TEST(ListenerElabTest, RoundTrip) {
   const std::vector<vpiHandle>& designs = build_designs(&serializer);
   std::string orig;
   orig += "DUMP Design content:\n";
-  orig += visit_designs(designs);
+  orig += designs_to_string(designs);
   std::cout << orig;
   bool elaborated = false;
   for (auto design : designs) {
@@ -376,7 +378,7 @@ TEST(ListenerElabTest, RoundTrip) {
     listener->listenDesigns(designs);
     delete listener;
   }
-  std::string post_elab1 = visit_designs(designs);
+  std::string post_elab1 = designs_to_string(designs);
   for (auto design : designs) {
     elaborated = vpi_get(vpiElaborated, design) || elaborated;
   }
@@ -388,6 +390,6 @@ TEST(ListenerElabTest, RoundTrip) {
     listener->listenDesigns(designs);
     delete listener;
   }
-  std::string post_elab2 = visit_designs(designs);
+  std::string post_elab2 = designs_to_string(designs);
   EXPECT_EQ(post_elab1, post_elab2);
 }
