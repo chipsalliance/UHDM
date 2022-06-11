@@ -148,16 +148,13 @@ namespace UHDM {
   template<typename T>
   class FactoryT final {
     friend Serializer;
-    // TODO: make this an arena: iinstead of pointers, store the
-    // objects directly with placement-new'ed object using emplace_back()
-    // One less indirection and a lot less overhead.
-    // (dqque guarantees pointer stability; however, we'd need to
-    // do something special in Erase() - can't re-arrange).
+    // TODO: consolidate allocator_ and objects_.
+    // We need both currently  because of Erase()
     typedef std::deque<T *> objects_t;
 
     public:
       T* Make() {
-        T* obj = new T;
+        T* obj = &allocator_.emplace_back();
         objects_.push_back(obj);
         return obj;
       }
@@ -174,13 +171,12 @@ namespace UHDM {
       }
 
       void Purge() {
-        for (typename objects_t::reference obj : objects_) {
-          delete obj;
-        }
         objects_.clear();
+        allocator_.clear();
       }
 
     private:
+      std::deque<T> allocator_;
       objects_t objects_;
   };
 

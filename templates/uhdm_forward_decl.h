@@ -36,11 +36,6 @@ class BaseClass;
 typedef BaseClass any;
 
 <UHDM_CLASSES_FORWARD_DECL>
-
-<UHDM_FACTORIES_FORWARD_DECL>
-
-typedef FactoryT<std::vector<BaseClass*>> VectorOfanyFactory;
-<UHDM_CONTAINER_FACTORIES_FORWARD_DECL>
 };
 
 

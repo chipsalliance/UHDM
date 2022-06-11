@@ -37,6 +37,7 @@
 #include <uhdm/containers.h>
 #include <uhdm/vpi_uhdm.h>
 #include <uhdm/SymbolFactory.h>
+#include <uhdm/uhdm.h>
 
 #define UHDM_MAX_BIT_WIDTH 1024*1024
 
