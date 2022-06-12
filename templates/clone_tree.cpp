@@ -950,7 +950,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   actual_type = actual->UhdmType();
                 }
                 if (name == "size" || name == "exists" || name == "find" ||
-                    name == "max") {
+                    name == "max" || name == "min") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
                   if (current->UhdmType() == uhdmref_obj) {
@@ -970,7 +970,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   actual_type = actual->UhdmType();
                 }
                 if (name == "size" || name == "exists" || name == "find" ||
-                    name == "max") {
+                    name == "max" || name == "min") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
                   if (current->UhdmType() == uhdmref_obj) {
@@ -990,7 +990,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   actual_type = actual->UhdmType();
                 }
                 if (name == "size" || name == "exists" || name == "exists" ||
-                    name == "max") {
+                    name == "max" || name == "min") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
                   if (current->UhdmType() == uhdmref_obj) {
