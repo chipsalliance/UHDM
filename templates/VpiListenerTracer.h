@@ -29,6 +29,8 @@
 
 #include "VpiListener.h"
 
+#include "uhdm/uhdm.h"  // Needed to know how to access VPI line/column
+
 #include <ostream>
 #include <string>
 
