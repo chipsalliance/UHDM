@@ -81,6 +81,10 @@ std::map<std::string, unsigned long> Serializer::ObjectStats() const {
   return stats;
 }
 
+Serializer::~Serializer() {
+  Purge();
+}
+
 void Serializer::Purge() {
   allIds_.clear();
   anyVectMaker.Purge();

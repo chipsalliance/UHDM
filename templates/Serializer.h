@@ -79,6 +79,8 @@ class Serializer {
   Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {
     symbolMaker.Make("");
   }
+  ~Serializer();
+
   void Save(const std::string& file);
   void Purge();
   void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }

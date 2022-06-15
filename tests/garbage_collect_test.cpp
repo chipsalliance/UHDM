@@ -65,5 +65,4 @@ TEST(GarbageCollectTest, NoLeakExpectation) {
   for (vpiHandle design : restoredDesigns) {
     vpi_release_handle(design);
   }
-  serializer.Purge();
 }
