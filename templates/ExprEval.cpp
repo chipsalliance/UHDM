@@ -3220,7 +3220,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       if (scall->Tf_call_args()) {
         for (auto arg : *scall->Tf_call_args()) {
           expr *val = reduceExpr(arg, invalidTmpValue, inst, pexpr);
-          if ((val->UhdmType() == uhdmconstant) && (invalidTmpValue == false)) {
+          if (val && (val->UhdmType() == uhdmconstant) && (invalidTmpValue == false)) {
             constant *c = (constant *)val;
             if (c->VpiConstType() == vpiIntConst ||
                 c->VpiConstType() == vpiDecConst) {
