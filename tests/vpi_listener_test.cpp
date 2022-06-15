@@ -1,18 +1,23 @@
 // -*- mode: c++; c-basic-offset: 2; indent-tabs-mode: nil; -*-
 
-#include "uhdm/VpiListener.h"
-
 #include <iostream>
 #include <memory>
 #include <stack>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "uhdm/uhdm.h"
+
+// uhdm
 #include "uhdm/VpiListener.h"
+#include "uhdm/VpiListenerTracer.h"
+
+// We include this last to make sure that the headers above don't accidentally
+// depend on any class defined here
+#include "uhdm/uhdm.h"
 
 using namespace UHDM;
 using testing::ElementsAre;
+using testing::HasSubstr;
 
 class MyVpiListener : public VpiListener {
  protected:
@@ -124,4 +129,14 @@ TEST(VpiListenerTest, ProgramModule) {
       "Module: u2/M3 parent: -",
   };
   EXPECT_EQ(listener->collected(), expected);
+}
+
+TEST(UhdmListenerTracerTest, ProgramModule) {
+  Serializer serializer;
+  const std::vector<vpiHandle>& design = buildModuleProg(&serializer);
+
+  std::stringstream out;
+  std::unique_ptr<VpiListenerTracer> listener(new VpiListenerTracer(out));
+  listener->listenDesigns(design);
+  EXPECT_THAT(out.str(), HasSubstr("enterDesign: [0,0:0,0]"));
 }
