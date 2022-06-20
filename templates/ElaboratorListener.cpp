@@ -139,7 +139,6 @@ void ElaboratorListener::leaveDesign(const design* object, vpiHandle handle) {
 }
 
 void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
-  module* inst = const_cast<module*>(object);
   bool topLevelModule = object->VpiTopModule();
   const std::string& instName = object->VpiName();
   const std::string& defName = object->VpiDefName();
@@ -200,9 +199,12 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
 
     // Collect instance parameters, defparams
     ComponentMap paramMap;
-    if (object->Param_assigns()) {
-      for (param_assign* passign : *object->Param_assigns()) {
-        paramMap.emplace(passign->Lhs()->VpiName(), passign->Rhs());
+    if (muteErrors_ == true) {
+      // In final hier_path binding we need the formal parameter, not the actual
+      if (object->Param_assigns()) {
+        for (param_assign* passign : *object->Param_assigns()) {
+          paramMap.emplace(passign->Lhs()->VpiName(), passign->Rhs());
+        }
       }
     }
     if (object->Parameters()) {
@@ -295,7 +297,34 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
     // Push instance context on the stack
     instStack_.emplace_back(object,
                             std::make_tuple(netMap, paramMap, funcMap, modMap));
+  }
+  if (muteErrors_ == false) {
+    elabModule(object, handle);
+  }
+}
 
+void ElaboratorListener::elabModule(const module* object, vpiHandle handle) {
+  module* inst = const_cast<module*>(object);
+  bool topLevelModule = object->VpiTopModule();
+  const std::string& instName = object->VpiName();
+  const std::string& defName = object->VpiDefName();
+  bool flatModule =
+      (instName == "") && ((object->VpiParent() == 0) ||
+                           ((object->VpiParent() != 0) &&
+                            (object->VpiParent()->VpiType() != vpiModule)));
+  // false when it is a module in a hierachy tree
+  if (debug_)
+    std::cout << "Module: " << defName << " (" << instName
+              << ") Flat:" << flatModule << ", Top:" << topLevelModule
+              << std::endl;
+
+  if (flatModule) {
+    // Flat list of module (unelaborated)
+    flatComponentMap_.emplace(object->VpiDefName(), object);
+  } else {
+    // Hierachical module list (elaborated)
+    inHierarchy_ = true;
+    ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
     // Check if Module instance has a definition
     if (itrDef != flatComponentMap_.end()) {
       const BaseClass* comp = (*itrDef).second;
@@ -304,7 +333,7 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
         case vpiModule: {
           module* defMod = (module*)comp;
           if (clone_) {
-<MODULE_ELABORATOR_LISTENER>
+            <MODULE_ELABORATOR_LISTENER>
           }
           break;
         }
@@ -392,8 +421,6 @@ void ElaboratorListener::leavePackage(const package* object, vpiHandle handle) {
 
 void ElaboratorListener::enterClass_defn(const class_defn* object,
                                          vpiHandle handle) {
-  class_defn* cl = (class_defn*)object;
-
   // Collect instance elaborated nets
   ComponentMap varMap;
   if (object->Variables()) {
@@ -431,6 +458,13 @@ void ElaboratorListener::enterClass_defn(const class_defn* object,
   //   - inheriting classes (Through the extends relation)
   instStack_.emplace_back(object,
                           std::make_tuple(varMap, paramMap, funcMap, modMap));
+  if (muteErrors_ == false) {
+    elabClass_defn(object, handle);
+  }
+}
+
+void ElaboratorListener::elabClass_defn(const class_defn* object, vpiHandle handle) {
+  class_defn* cl = (class_defn*)object;
   if (clone_) {
 <CLASS_ELABORATOR_LISTENER>
   }
@@ -797,6 +831,30 @@ void ElaboratorListener::enterTask_func(const task_func* object,
     }
   }
   varMap.emplace(object->VpiName(), object->Return());
+
+  if (const any* parent = object->VpiParent()) {
+    if (parent->UhdmType() == uhdmclass_defn) {
+      const class_defn* c = (class_defn*) parent;
+      while (c) {
+        if (c->Variables()) {
+          for (any* var : *c->Variables()) {
+             varMap.emplace(var->VpiName(), var);
+          }
+        }
+        const extends* ext = c->Extends();
+        if (ext) {
+          const class_typespec* ctps = ext->Class_typespec();
+          if (ctps) {
+            c = ctps->Class_defn();
+          } else {
+            c = nullptr;
+          }
+        } else {
+          c = nullptr;
+        }
+      }
+    }
+  }
 
   ComponentMap paramMap;
   ComponentMap funcMap;

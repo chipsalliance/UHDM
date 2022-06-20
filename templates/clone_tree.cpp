@@ -840,9 +840,19 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
         std::string name = obj->VpiName();
         std::string nameIndexed = name;
         if (name.empty()) {
-          if (obj->UhdmType() == uhdmpart_select ||
-              obj->UhdmType() == uhdmindexed_part_select) {
+          if (obj->UhdmType() == uhdmpart_select) {
             if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
+            part_select* sel = (part_select*) obj;
+            if (const any* actual = sel->Actual_group()) {
+              name = actual->VpiName();
+            }
+          }
+          if (obj->UhdmType() == uhdmindexed_part_select) {
+            if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
+            indexed_part_select* sel = (indexed_part_select*) obj;
+            if (const any* actual = sel->Actual_group()) {
+              name = actual->VpiName();
+            }           
           }
         }
         if (obj->UhdmType() == uhdmbit_select) {
@@ -855,9 +865,18 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
             }
           }
+          bit_select* sel = (bit_select*) obj;
+          if (const any* actual = sel->Actual_group()) {
+            const std::string& pname = actual->VpiName();
+            if (pname.find('[') != std::string::npos) {
+              nameIndexed = pname;
+            }
+          }
         }
         if (previous->UhdmType() == uhdmref_obj ||
-            previous->UhdmType() == uhdmbit_select) {
+            previous->UhdmType() == uhdmbit_select ||
+            previous->UhdmType() == uhdmpart_select ||
+            previous->UhdmType() == uhdmindexed_part_select) {
           const any* actual = nullptr;
           if (previous->UhdmType() == uhdmbit_select) {
             bit_select* sel = (bit_select*)previous;
@@ -867,6 +886,19 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 actual = pref->Actual_group();
               }
             }
+            if (const any* actualtmp = sel->Actual_group()) {
+              actual = actualtmp;
+            }
+          } else if (previous->UhdmType() == uhdmpart_select) {
+            part_select* sel = (part_select*) obj;
+            if (const any* actualtmp = sel->Actual_group()) {
+              actual = actualtmp;
+            }
+          } else if (previous->UhdmType() == uhdmindexed_part_select) {
+            indexed_part_select* sel = (indexed_part_select*) obj;
+            if (const any* actualtmp = sel->Actual_group()) {
+               actual = actualtmp;
+            } 
           } else {
             ref_obj* ref = (ref_obj*)previous;
             actual = ref->Actual_group();
@@ -1315,6 +1347,15 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 parameter* param = (parameter*)actual;
                 if (const typespec* tps = param->Typespec()) {
                   UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+                  if (ttype == uhdmpacked_array_typespec) {
+                    packed_array_typespec* ptps = (packed_array_typespec*)tps;
+                    tps = (typespec*)ptps->Elem_typespec();
+                    ttype = tps->UhdmType();
+                  } else if (ttype == uhdmarray_typespec) {
+                    array_typespec* ptps = (array_typespec*)tps;
+                    tps = (typespec*)ptps->Elem_typespec();
+                    ttype = tps->UhdmType();
+                  } 
                   if (ttype == uhdmstring_typespec) {
                     found = true;
                   } else if (ttype == uhdmclass_typespec) {
@@ -1460,17 +1501,17 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
             if (!found) {
               // WIP:
-              if (!elaborator->muteErrors())
+              if ((!elaborator->muteErrors()) && (!elaborator->isInUhdmAllIterator()))
                 serializer->GetErrorHandler()(
                     ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
                     nullptr);
             }
           } else {
             // WIP:
-            // if (!elaborator->muteErrors())
-            //  serializer->GetErrorHandler()(
-            //      ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
-            //      nullptr);
+            if ((!elaborator->muteErrors()) && (!elaborator->isInUhdmAllIterator()))
+              serializer->GetErrorHandler()(
+                  ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
+                  nullptr);
           }
         } else if (previous->UhdmType() == uhdmtypespec_member) {
           typespec_member* member = (typespec_member*)previous;
