@@ -31,4 +31,8 @@
     vpi: vpiRightRange
     type: expr
     card: 1
-
+  - group_ref: actual_group
+    name: actual group
+    vpi: vpiActual
+    type: actual_group
+    card: 1

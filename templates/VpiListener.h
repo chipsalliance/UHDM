@@ -53,6 +53,9 @@ public:
   virtual void leaveAny(const any* object, vpiHandle handle) {}
 
 <VPI_ENTER_LEAVE_DECLARATIONS>
+  bool isInUhdmAllIterator() { return uhdmAllIterator; }
+protected:
+  bool uhdmAllIterator = false; 
 private:
 <VPI_PRIVATE_LISTEN_DECLARATIONS>
 };

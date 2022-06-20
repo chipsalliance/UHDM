@@ -175,14 +175,15 @@ def _get_data_member(type, vpi, card):
 
 def _get_DeepClone_implementation(model, models):
     classname = model.get('name')
-
+    modeltype = model.get('type')
+    Classname = classname[0].upper() + classname[1:]
     includes = set()
     content = []
     content.append(f'void {classname}::DeepCopy({classname}* clone, Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {{')
+    if modeltype != 'class_def':
+        content.append(f'  elaborator->enter{Classname}(clone,nullptr);')
     content.append(f'  basetype_t::DeepCopy(clone, serializer, elaborator, parent);')
-    modeltype = model.get('type')
     basename = model.get('extends', 'BaseClass')
-    Classname = classname[0].upper() + classname[1:]
     vpi_name = config.make_vpi_name(classname)
 
     if classname in ['part_select', 'bit_select', 'indexed_part_select']:
@@ -226,7 +227,7 @@ def _get_DeepClone_implementation(model, models):
 
             # Unary relations
             if card == '1':
-                if (classname in ['ref_obj', 'ref_var']) and (method == 'Actual_group'):
+                if (classname in ['ref_obj', 'ref_var', 'bit_select', 'part_select']) and (method == 'Actual_group'):
                     includes.add('ElaboratorListener')
                     content.append(f'  clone->{method}(elaborator->bindAny(VpiName()));')
                     content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')
@@ -322,6 +323,8 @@ def _get_DeepClone_implementation(model, models):
                 content.append( '      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));')
                 content.append( '    }')
                 content.append( '  }')
+    if modeltype != 'class_def':
+          content.append(f'  elaborator->leave{Classname}(clone,nullptr);')
     content.append('}')
     content.append('')
 

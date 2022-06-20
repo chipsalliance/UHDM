@@ -79,6 +79,7 @@ class ElaboratorListener final : public VpiListener {
   void leaveDesign(const design* object, vpiHandle handle) final;
 
   void enterModule(const module* object, vpiHandle handle) final;
+  void elabModule(const module* object, vpiHandle handle);
   void leaveModule(const module* object, vpiHandle handle) final;
 
   void enterInterface(const interface* object, vpiHandle handle) final;
@@ -88,6 +89,7 @@ class ElaboratorListener final : public VpiListener {
   void leavePackage(const package* object, vpiHandle handle) final;
 
   void enterClass_defn(const class_defn* object, vpiHandle handle) final;
+  void elabClass_defn(const class_defn* object, vpiHandle handle);
   void leaveClass_defn(const class_defn* object, vpiHandle handle) final;
 
   void enterGen_scope(const gen_scope* object, vpiHandle handle) final;

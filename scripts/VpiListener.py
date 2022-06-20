@@ -24,6 +24,8 @@ def _get_listeners(classname, vpi, type, card):
         listeners.append( '  }')
 
     else:
+        if 'uhdmall' in vpi:
+          listeners.append(f'  uhdmAllIterator = true;')    
         listeners.append(f'  if (vpiHandle itr = vpi_iterate({vpi}, handle)) {{')
         listeners.append( '    while (vpiHandle obj = vpi_scan(itr)) {')
         listeners.append(f'      listenAny(obj);')
@@ -31,7 +33,8 @@ def _get_listeners(classname, vpi, type, card):
         listeners.append( '    }')
         listeners.append( '    vpi_free_object(itr);')
         listeners.append( '  }')
-
+        if 'uhdmall' in vpi:
+          listeners.append(f'  uhdmAllIterator = false;')   
     return listeners
 
 
