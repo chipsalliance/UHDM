@@ -294,6 +294,20 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
       }
     }
 
+    if (const clocking_block* block = object->Default_clocking()) {
+      modMap.emplace(block->VpiName(), block);
+    }
+
+    if (const clocking_block* block = object->Global_clocking()) {
+      modMap.emplace(block->VpiName(), block);
+    }
+
+    if (object->Clocking_blocks()) {
+      for (clocking_block* block : *object->Clocking_blocks()) {
+        modMap.emplace(block->VpiName(), block);
+      }
+    }
+
     // Push instance context on the stack
     instStack_.emplace_back(object,
                             std::make_tuple(netMap, paramMap, funcMap, modMap));
@@ -628,6 +642,21 @@ void ElaboratorListener::enterInterface(const interface* object,
       }
     }
     ComponentMap modMap;
+
+    if (const clocking_block* block = object->Default_clocking()) {
+      modMap.emplace(block->VpiName(), block);
+    }
+
+    if (const clocking_block* block = object->Global_clocking()) {
+      modMap.emplace(block->VpiName(), block);
+    }
+
+    if (object->Clocking_blocks()) {
+      for (clocking_block* block : *object->Clocking_blocks()) {
+        modMap.emplace(block->VpiName(), block);
+      }
+    }
+
     // Push instance context on the stack
     instStack_.emplace_back(object,
                             std::make_tuple(netMap, paramMap, funcMap, modMap));
