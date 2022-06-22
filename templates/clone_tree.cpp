@@ -1039,6 +1039,21 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
 
             switch (actual_type) {
+              case uhdmclocking_block: {
+                clocking_block* block = (clocking_block*) actual;
+                if (block->Clocking_io_decls()) {
+                  for (clocking_io_decl* decl : *block->Clocking_io_decls()) {
+                    if (decl->VpiName() == name) {
+                      found = true;
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(decl);
+                        previous = (any*)decl;
+                      }
+                    }
+                  }
+                }
+                break;
+              }
               case uhdmmodule: {
                 module* mod = (module*)actual;
                 if (mod->Variables()) {
