@@ -118,6 +118,12 @@ class ElaboratorListener final : public VpiListener {
   void enterNamed_fork(const named_fork* object, vpiHandle handle) final;
   void leaveNamed_fork(const named_fork* object, vpiHandle handle) final;
 
+  void enterMethod_func_call(const method_func_call* object, vpiHandle handle) final;
+  void leaveMethod_func_call(const method_func_call* object, vpiHandle handle) final;
+
+  void pushVar(any* var);
+  void popVar(any* var);
+
  private:
   void enterVariables(const variables* object, vpiHandle handle);
 
