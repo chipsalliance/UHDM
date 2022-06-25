@@ -1104,6 +1104,43 @@ void ElaboratorListener::leaveGen_scope(const gen_scope* object,
   }
 }
 
+void ElaboratorListener::pushVar(any* var) {
+  ComponentMap netMap;
+  ComponentMap paramMap;
+  ComponentMap funcMap;
+  ComponentMap modMap;
+  netMap.emplace(var->VpiName(), var);
+  instStack_.emplace_back(var,
+                          std::make_tuple(netMap, paramMap, funcMap, modMap));
+}
+
+void ElaboratorListener::popVar(any* var) {
+  if (!instStack_.empty() && (instStack_.back().first == var)) {
+    instStack_.pop_back();
+  }
+}
+
+void ElaboratorListener::enterMethod_func_call(const method_func_call* object, vpiHandle handle) {
+  ComponentMap netMap;
+  ComponentMap paramMap;
+  ComponentMap funcMap;
+  ComponentMap modMap;
+  if (object->Tf_call_args()) {
+    for (auto arg : *object->Tf_call_args()) {
+      netMap.emplace(arg->VpiName(), arg);
+    }
+  }
+  instStack_.emplace_back(object,
+                          std::make_tuple(netMap, paramMap, funcMap, modMap));
+}
+
+void ElaboratorListener::leaveMethod_func_call(const method_func_call* object, vpiHandle handle) {
+  if (!instStack_.empty() && (instStack_.back().first == object)) {
+    instStack_.pop_back();
+  }
+}
+
+
 void ElaboratorListener::leaveRef_obj(const ref_obj* object, vpiHandle handle) {
   if (!object->Actual_group())
     ((ref_obj*)object)->Actual_group(bindAny(object->VpiName()));

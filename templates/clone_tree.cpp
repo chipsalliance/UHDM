@@ -109,17 +109,59 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
     const class_var* prefix = nullptr;
     if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
     elaborator->scheduleTaskFuncBinding(clone, prefix);
-    if (auto obj = With())
-      clone->With(obj->DeepClone(serializer, elaborator, clone));
-    if (auto obj = Scope())
-      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    any* pushedVar = nullptr;
     if (auto vec = Tf_call_args()) {
       auto clone_vec = serializer->MakeAnyVec();
       clone->Tf_call_args(clone_vec);
       for (auto obj : *vec) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+        any* arg = obj->DeepClone(serializer, elaborator, clone);
+        // CB callbacks_to_append[$];
+        // unique_callbacks_to_append = callbacks_to_append.unique( cb_ ) with ( cb_.get_inst_id );
+        if (parent->UhdmType() == uhdmhier_path) {
+          hier_path* phier = (hier_path*) parent;
+          any* last = phier->Path_elems()->back();
+          if (last->UhdmType() == uhdmref_obj) {
+            ref_obj* last_ref = (ref_obj*) last;
+            if (const any* actual = last_ref->Actual_group()) {
+              if (arg->UhdmType() == uhdmref_obj) {
+                ref_obj* refarg = (ref_obj*) arg;
+                bool override = false;
+                if (const any* act = refarg->Actual_group()) {
+                  if (act->VpiName() == obj->VpiName()) {
+                    override = true;
+                  }
+                } else {
+                   override = true;
+                }
+                if (override) {
+                  if (actual->UhdmType() == uhdmarray_var) {
+                    array_var* arr = (array_var*)actual;
+                    for (variables* var : *arr->Variables()) {
+                      variables* clone =
+                          (variables*)clone_tree(var, *serializer, elaborator);
+                      clone->VpiName(obj->VpiName());
+                      actual = clone;
+                      elaborator->pushVar(clone);
+                      pushedVar = clone;
+                      break;
+                    }
+                  }
+                  refarg->Actual_group((any*)actual);
+                }
+              }
+            } 
+          }
+        }
+        clone_vec->push_back(arg);
       }
     }
+    if (auto obj = With())
+      clone->With(obj->DeepClone(serializer, elaborator, clone));
+    if (pushedVar) {
+      elaborator->pushVar(pushedVar);
+    }
+    if (auto obj = Scope())
+      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
     if (auto obj = Typespec())
       clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
   } else {

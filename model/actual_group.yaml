@@ -25,6 +25,7 @@
   - obj_ref: named_event_array
   - obj_ref: part_select
   - obj_ref: parameter
+  - obj_ref: type_parameter
   - obj_ref: enum_const
   - obj_ref: io_decl
   - obj_ref: clocking_io_decl
