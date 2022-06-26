@@ -1033,6 +1033,9 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   // Builtin method
                   found = true;
                   previous = (any*)call;
+                } else if (name == "") {
+                  // One of the Index(es)
+                  found = true;
                 }
                 break;
               }
@@ -1053,6 +1056,9 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   // Builtin method
                   found = true;
                   previous = (any*)call;
+                } else if (name == "") {
+                  // One of the Index(es)
+                  found = true;
                 }
                 break;
               }
