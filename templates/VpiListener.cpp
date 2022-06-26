@@ -44,6 +44,7 @@ void VpiListener::listenAny(vpiHandle handle) {
 
 void VpiListener::listenDesigns(const std::vector<vpiHandle>& designs) {
   for (auto design_h : designs) {
+    currentDesign_ = (design*) ((const uhdm_handle*)design_h)->object;
     listenDesign(design_h);
   }
 }

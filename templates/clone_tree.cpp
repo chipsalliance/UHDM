@@ -944,10 +944,36 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           } else {
             ref_obj* ref = (ref_obj*)previous;
             actual = ref->Actual_group();
+            if (actual == nullptr) {
+              if (previous->VpiName() == "$root") {
+                actual = elaborator->currentDesign();
+              }
+            }
           }
           if (actual) {
             UHDM_OBJECT_TYPE actual_type = actual->UhdmType();
             switch (actual_type) {
+              case uhdmdesign: {
+                design* scope = (design*) actual;
+                if (scope->TopModules()) {
+                  for (auto m : *scope->TopModules()) {
+                    const std::string& modName = m->VpiName();
+                    if (modName == name || modName == nameIndexed || modName == ("work@" + name)) {
+                      found = true;
+                      previous = m;
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(m);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(m);
+                      }
+                      break;
+                    }
+                  }
+                }
+                break;
+              }
               case uhdmgen_scope: {
                 gen_scope* scope = (gen_scope*)actual;
                 if (obj->UhdmType() == uhdmmethod_func_call) {

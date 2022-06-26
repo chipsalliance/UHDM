@@ -54,8 +54,10 @@ public:
 
 <VPI_ENTER_LEAVE_DECLARATIONS>
   bool isInUhdmAllIterator() { return uhdmAllIterator; }
+  design* currentDesign() { return currentDesign_; }
 protected:
-  bool uhdmAllIterator = false; 
+  bool uhdmAllIterator = false;
+  design* currentDesign_ = nullptr;
 private:
 <VPI_PRIVATE_LISTEN_DECLARATIONS>
 };
