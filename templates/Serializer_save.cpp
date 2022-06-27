@@ -113,7 +113,7 @@ void Serializer::Save(const std::string& file) {
   // Until that is repaired we go for the more disk-hungry and memory hungry method which gives correct results.
   ::capnp::List<::capnp::Text>::Builder symbols = cap_root.initSymbols(symbolMaker.id2SymbolMap_.size());
   index = 0;
-  for (auto symbol : symbolMaker.id2SymbolMap_) {
+  for (const auto& symbol : symbolMaker.id2SymbolMap_) {
     symbols.set(index, symbol.c_str());
     index++;
   }
