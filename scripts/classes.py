@@ -232,6 +232,11 @@ def _get_DeepClone_implementation(model, models):
                     content.append(f'  clone->{method}(elaborator->bindAny(VpiName()));')
                     content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')
 
+                elif classname == 'udp' and method == 'Udp_defn':
+                    includes.add('ElaboratorListener')
+                    content.append(f'  clone->{method}((udp_defn*) elaborator->bindAny(VpiDefName()));')
+                    content.append(f'  if (!clone->{method}()) clone->{method}((udp_defn*) {method}());')
+
                 elif method in ['Task', 'Function']:
                     prefix = 'nullptr'
                     includes.add(method.lower())
