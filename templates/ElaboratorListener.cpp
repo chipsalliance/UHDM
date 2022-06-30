@@ -1093,6 +1093,15 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object,
 
   ComponentMap funcMap;
   ComponentMap modMap;
+
+  // Collect gen_scope
+  if (object->Gen_scope_arrays()) {
+    for (gen_scope_array* gsa : *object->Gen_scope_arrays()) {
+      for (gen_scope* gs : *gsa->Gen_scopes()) {
+        modMap.emplace(gsa->VpiName(), gs);
+      }
+    }
+  }
   instStack_.emplace_back(object,
                           std::make_tuple(netMap, paramMap, funcMap, modMap));
 }
