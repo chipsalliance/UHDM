@@ -1649,6 +1649,10 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
               }
             }
+          } else if (tps && (tps->UhdmType() == uhdmstring_typespec)) {
+            if (name == "len") {
+              found = true;
+            }
           }
         } else if (previous->UhdmType() == uhdmarray_var) {
           array_var* avar = (array_var*)previous;
@@ -1686,6 +1690,30 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
               default:
                 break;
+            }
+          }
+        } else if (previous->UhdmType() == uhdmstruct_var ||
+                   previous->UhdmType() == uhdmstruct_net) {
+          struct_typespec* stpt = nullptr;
+          if (previous->UhdmType() == uhdmstruct_net) {
+            stpt = (struct_typespec*)((struct_net*)previous)->Typespec();
+          } else if (previous->UhdmType() == uhdmstruct_var) {
+            stpt = (struct_typespec*)((struct_var*)previous)->Typespec();
+          }
+          if (stpt) {
+            for (typespec_member* member : *stpt->Members()) {
+              if (member->VpiName() == name) {
+                if (current->UhdmType() == uhdmref_obj) {
+                  ((ref_obj*)current)->Actual_group(member);
+                } else if (current->UhdmType() == uhdmbit_select) {
+                  const any* parent = current->VpiParent();
+                  if (parent && (parent->UhdmType() == uhdmref_obj))
+                    ((ref_obj*)parent)->Actual_group(member);
+                }
+                previous = member;
+                found = true;
+                break;
+              }
             }
           }
         } else if (previous->UhdmType() == uhdmmodule) {
