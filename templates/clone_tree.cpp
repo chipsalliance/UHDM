@@ -158,7 +158,7 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
     if (auto obj = With())
       clone->With(obj->DeepClone(serializer, elaborator, clone));
     if (pushedVar) {
-      elaborator->pushVar(pushedVar);
+      elaborator->popVar(pushedVar);
     }
     if (auto obj = Scope())
       clone->Scope(obj->DeepClone(serializer, elaborator, clone));
