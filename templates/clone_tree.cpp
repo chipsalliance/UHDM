@@ -878,6 +878,38 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
       current = obj->DeepClone(serializer, elaborator, clone);
       clone_vec->push_back(current);
       bool found = false;
+      if (current->UhdmType() == uhdmref_obj) {
+        ref_obj* ref = (ref_obj*) current;
+        if (current->VpiName() == "this") {
+          const any* tmp = current;
+          while (tmp) {
+            if (tmp->UhdmType() == uhdmclass_defn) {
+              ref->Actual_group((any*) tmp);
+              found = true;
+              break;
+            }
+            tmp = tmp->VpiParent();
+          }
+        } else if (current->VpiName() == "super") {
+          const any* tmp = current;
+          while (tmp) {
+            if (tmp->UhdmType() == uhdmclass_defn) {
+              class_defn* def = (class_defn*) tmp;
+              const extends* ext = def->Extends();
+              if (ext) {
+                const class_typespec* ctps = ext->Class_typespec();
+                if (ctps) {
+                  ref->Actual_group((any*)ctps->Class_defn());
+                  found = true;
+                  break;
+                }
+              }
+              break;
+            }
+            tmp = tmp->VpiParent();
+          }
+        }
+      }
       if (previous) {
         std::string name = obj->VpiName();
         std::string nameIndexed = name;
