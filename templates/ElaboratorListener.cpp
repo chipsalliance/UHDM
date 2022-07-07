@@ -899,6 +899,44 @@ void ElaboratorListener::leaveTask_func(const task_func* object,
   }
 }
 
+void ElaboratorListener::enterFor_stmt(const for_stmt* object,
+                                       vpiHandle handle) {
+  ComponentMap varMap;
+  if (object->Array_vars()) {
+    for (variables* var : *object->Array_vars()) {
+      varMap.emplace(var->VpiName(), var);
+    }
+  }
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      varMap.emplace(var->VpiName(), var);
+    }
+  }
+  if (object->VpiForInitStmts()) {
+    for (any* stmt : *object->VpiForInitStmts()) {
+      if (stmt->UhdmType() == uhdmassign_stmt) {
+        assign_stmt* astmt = (assign_stmt*)stmt;
+        const any* lhs = astmt->Lhs();
+        if (lhs->UhdmType() != uhdmref_var) {
+          varMap.emplace(lhs->VpiName(), lhs);
+        }
+      }
+    }
+  }
+  ComponentMap paramMap;
+  ComponentMap funcMap;
+  ComponentMap modMap;
+  instStack_.emplace_back(object,
+                          std::make_tuple(varMap, paramMap, funcMap, modMap));
+}
+
+void ElaboratorListener::leaveFor_stmt(const for_stmt* object,
+                                       vpiHandle handle) {
+  if (!instStack_.empty() && (instStack_.back().first == object)) {
+    instStack_.pop_back();
+  }
+}
+
 void ElaboratorListener::enterForeach_stmt(const foreach_stmt* object,
                                            vpiHandle handle) {
   ComponentMap varMap;

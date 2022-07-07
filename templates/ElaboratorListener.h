@@ -106,6 +106,9 @@ class ElaboratorListener final : public VpiListener {
   void enterForeach_stmt(const foreach_stmt* object, vpiHandle handle) final;
   void leaveForeach_stmt(const foreach_stmt* object, vpiHandle handle) final;
 
+  void enterFor_stmt(const for_stmt* object, vpiHandle handle) final;
+  void leaveFor_stmt(const for_stmt* object, vpiHandle handle) final;
+
   void enterBegin(const begin* object, vpiHandle handle) final;
   void leaveBegin(const begin* object, vpiHandle handle) final;
 
