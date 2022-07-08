@@ -842,6 +842,12 @@ any* bindClassTypespec(class_typespec* ctps, any* current,
             const any* parent = current->VpiParent();
             if (parent && (parent->UhdmType() == uhdmref_obj))
               ((ref_obj*)parent)->Actual_group(tf);
+          } else if (current->UhdmType() == uhdmmethod_func_call) {
+            if (tf->UhdmType() == uhdmfunction)
+              ((method_func_call*)current)->Function((function*) tf);
+          } else if (current->UhdmType() == uhdmmethod_task_call) {
+            if (tf->UhdmType() == uhdmtask)
+              ((method_task_call*)current)->Task((task*) tf);
           }
           previous = tf;
           found = true;
