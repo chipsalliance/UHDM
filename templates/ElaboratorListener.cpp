@@ -138,6 +138,14 @@ void ElaboratorListener::leaveDesign(const design* object, vpiHandle handle) {
   const_cast<design*>(object)->VpiElaborated(true);
 }
 
+
+static std::string &ltrim(std::string &str, char c) {
+  auto it1 =
+      std::find_if(str.begin(), str.end(), [c](char ch) { return (ch == c); });
+  if (it1 != str.end()) str.erase(str.begin(), it1 + 1);
+  return str;
+}
+
 void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
   bool topLevelModule = object->VpiTopModule();
   const std::string& instName = object->VpiName();
@@ -281,6 +289,11 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
         }
       }
     }
+
+    // Module itself
+    std::string modName = object->VpiName();
+    modName = ltrim(modName, '@');
+    modMap.emplace(modName, object);
 
     if (object->Modules()) {
       for (module* mod : *object->Modules()) {
