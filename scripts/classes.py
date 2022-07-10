@@ -227,9 +227,27 @@ def _get_DeepClone_implementation(model, models):
 
             # Unary relations
             if card == '1':
-                if (classname in ['ref_obj', 'ref_var', 'bit_select', 'part_select']) and (method == 'Actual_group'):
+                if (classname in ['ref_obj', 'ref_var', 'part_select']) and (method == 'Actual_group'):
                     includes.add('ElaboratorListener')
                     content.append(f'  clone->{method}(elaborator->bindAny(VpiName()));')
+                    content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')
+
+                elif (classname in ['bit_select']) and (method == 'Actual_group'):
+                    includes.add('ElaboratorListener')
+                    includes.add('ExprEval')
+                    content.append(f'  std::string name = VpiName();')
+                    content.append(f'  ExprEval eval;')
+                    content.append(f'  bool invalidValue = false;')
+                    content.append( '  if (any* val = eval.reduceExpr(VpiIndex(), invalidValue, parent, parent, true)) {')
+                    content.append(f'    std::string indexName = eval.prettyPrint(val);')
+                    content.append( '    if (any* indexVal = elaborator->bindAny(indexName)) {')
+                    content.append(f'      val = eval.reduceExpr(indexVal, invalidValue, parent, parent, true);')
+                    content.append(f'      indexName = eval.prettyPrint(val);')
+                    content.append( '    }')
+                    content.append( '    indexName = name + "[" + indexName + "]";')
+                    content.append(f'    clone->{method}(elaborator->bindAny(indexName));')
+                    content.append( '  }')
+                    content.append(f'  if (!clone->{method}()) clone->{method}(elaborator->bindAny(name));')
                     content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')
 
                 elif classname == 'udp' and method == 'Udp_defn':
