@@ -57,7 +57,8 @@ class ExprEval {
    */
   uint64_t size(
       const any* object, bool& invalidValue, const any* inst, const any* pexpr,
-      bool full /* false: use only last range size, true: use all ranges */, bool muteError = false);
+      bool full /* false: use only last range size, true: use all ranges */,
+      bool muteError = false);
 
   /* Tries to reduce any expression into a constant, returns the orignal
      expression if fails. If an invalid value is found in the process,
@@ -67,9 +68,11 @@ class ExprEval {
 
   uint64_t getValue(const UHDM::expr* expr);
 
-  any* getValue(const std::string& name, const any* inst, const any* pexpr, bool muteError = false);
+  any* getValue(const std::string& name, const any* inst, const any* pexpr,
+                bool muteError = false);
 
-  any* getObject(const std::string& name, const any* inst, const any* pexpr, bool muteError = false);
+  any* getObject(const std::string& name, const any* inst, const any* pexpr,
+                 bool muteError = false);
 
   int64_t get_value(bool& invalidValue, const UHDM::expr* expr);
 
@@ -89,19 +92,22 @@ class ExprEval {
                      const any* pexpr, bool muteError = false);
 
   expr* reduceBitSelect(expr* op, unsigned int index_val, bool& invalidValue,
-                        const any* inst, const any* pexpr, bool muteError = false);
+                        const any* inst, const any* pexpr,
+                        bool muteError = false);
 
   void recursiveFlattening(Serializer& s, VectorOfany* flattened,
                            const VectorOfany* ordered,
                            std::vector<const typespec*> fieldTypes);
 
   any* decodeHierPath(hier_path* path, bool& invalidValue, const any* inst,
-                      const any* pexpr, bool returnTypespec, bool muteError = false);
+                      const any* pexpr, bool returnTypespec,
+                      bool muteError = false);
 
   any* hierarchicalSelector(std::vector<std::string>& select_path,
                             unsigned int level, UHDM::any* object,
                             bool& invalidValue, const any* inst,
-                            const UHDM::any* pexpr, bool returnTypespec, bool muteError = false);
+                            const UHDM::any* pexpr, bool returnTypespec,
+                            bool muteError = false);
 
   typedef std::vector<module*> Scopes;
 
@@ -118,7 +124,8 @@ class ExprEval {
   bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst);
   void setDesign(design* des) { m_design = des; }
-  /* For Surelog or other UHDM clients to use the UHDM expr evaluator in their context */
+  /* For Surelog or other UHDM clients to use the UHDM expr evaluator in their
+   * context */
   void setGetObjectFunctor(GetObjectFunctor func) { getObjectFunctor = func; }
   void setGetValueFunctor(GetObjectFunctor func) { getValueFunctor = func; }
   void setGetTaskFuncFunctor(GetTaskFuncFunctor func) {
