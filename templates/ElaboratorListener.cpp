@@ -232,6 +232,24 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
     if (object->Variables()) {
       for (variables* var : *object->Variables()) {
         paramMap.emplace(var->VpiName(), var);
+        if (var->UhdmType() == uhdmenum_var) {
+          enum_var* evar = (enum_var*) var;
+          enum_typespec* etps = (enum_typespec*)evar->Typespec();
+          for(auto c : *etps->Enum_consts()) {
+            paramMap.emplace(c->VpiName(), c);
+          }
+        }
+      }
+    }
+
+    if (object->Typespecs()) {
+      for (typespec* tps : *object->Typespecs()) {
+        if (tps->UhdmType() == uhdmenum_typespec) {
+          enum_typespec* etps = (enum_typespec*)tps;
+          for(auto c : *etps->Enum_consts()) {
+            paramMap.emplace(c->VpiName(), c);
+          }
+        }
       }
     }
     if (object->Ports()) {

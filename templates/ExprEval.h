@@ -57,19 +57,19 @@ class ExprEval {
    */
   uint64_t size(
       const any* object, bool& invalidValue, const any* inst, const any* pexpr,
-      bool full /* false: use only last range size, true: use all ranges */);
+      bool full /* false: use only last range size, true: use all ranges */, bool muteError = false);
 
   /* Tries to reduce any expression into a constant, returns the orignal
-     expression if fails. If am invalid value is found in the process,
+     expression if fails. If an invalid value is found in the process,
      invalidValue will be set to true */
   expr* reduceExpr(const any* object, bool& invalidValue, const any* inst,
-                   const any* pexpr);
+                   const any* pexpr, bool muteErrors = false);
 
   uint64_t getValue(const UHDM::expr* expr);
 
-  any* getValue(const std::string& name, const any* inst, const any* pexpr);
+  any* getValue(const std::string& name, const any* inst, const any* pexpr, bool muteError = false);
 
-  any* getObject(const std::string& name, const any* inst, const any* pexpr);
+  any* getObject(const std::string& name, const any* inst, const any* pexpr, bool muteError = false);
 
   int64_t get_value(bool& invalidValue, const UHDM::expr* expr);
 
@@ -86,34 +86,34 @@ class ExprEval {
   std::string prettyPrint(UHDM::any* handle);
 
   expr* reduceCompOp(operation* op, bool& invalidValue, const any* inst,
-                     const any* pexpr);
+                     const any* pexpr, bool muteError = false);
 
   expr* reduceBitSelect(expr* op, unsigned int index_val, bool& invalidValue,
-                        const any* inst, const any* pexpr);
+                        const any* inst, const any* pexpr, bool muteError = false);
 
   void recursiveFlattening(Serializer& s, VectorOfany* flattened,
                            const VectorOfany* ordered,
                            std::vector<const typespec*> fieldTypes);
 
   any* decodeHierPath(hier_path* path, bool& invalidValue, const any* inst,
-                      const any* pexpr, bool returnTypespec);
+                      const any* pexpr, bool returnTypespec, bool muteError = false);
 
   any* hierarchicalSelector(std::vector<std::string>& select_path,
                             unsigned int level, UHDM::any* object,
                             bool& invalidValue, const any* inst,
-                            const UHDM::any* pexpr, bool returnTypespec);
+                            const UHDM::any* pexpr, bool returnTypespec, bool muteError = false);
 
   typedef std::vector<module*> Scopes;
 
   UHDM::expr* EvalFunc(UHDM::function* func, std::vector<UHDM::any*>* args,
                        bool& invalidValue, const any* inst,
                        const std::filesystem::path& fileName, int lineNumber,
-                       UHDM::any* pexpr);
+                       UHDM::any* pexpr, bool muteError = false);
 
   void EvalStmt(const std::string& funcName, Scopes& scopes, bool& invalidValue,
                 bool& continue_flag, bool& break_flag, const any* inst,
                 const std::filesystem::path& fileName, int lineNumber,
-                const UHDM::any* stmt);
+                const UHDM::any* stmt, bool muteError = false);
 
   bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst);
