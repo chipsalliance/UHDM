@@ -1687,6 +1687,18 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
               }
             }
+          } else if (tps && (tps->UhdmType() == uhdmunion_typespec)) {
+            union_typespec* stpt = (union_typespec*)tps;
+            for (typespec_member* member : *stpt->Members()) {
+              if (member->VpiName() == name) {
+                if (current->UhdmType() == uhdmref_obj) {
+                  ((ref_obj*)current)->Actual_group(member);
+                  previous = member;
+                  found = true;
+                  break;
+                }
+              }
+            }
           } else if (tps && (tps->UhdmType() == uhdmstring_typespec)) {
             if (name == "len") {
               found = true;
