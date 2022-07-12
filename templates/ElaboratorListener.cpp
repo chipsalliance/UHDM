@@ -198,6 +198,12 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
         netMap.emplace(inter->VpiName(), inter);
       }
     }
+    if (object->Interface_arrays()) {
+      for (interface_array* inter : *object->Interface_arrays()) {
+        for (instance* interf : *inter->Instances())
+        netMap.emplace(interf->VpiName(), interf);
+      }
+    }
 
     if (object->Named_events()) {
       for (named_event* var : *object->Named_events()) {
@@ -589,7 +595,12 @@ void ElaboratorListener::enterInterface(const interface* object,
         netMap.emplace(inter->VpiName(), inter);
       }
     }
-
+    if (object->Interface_arrays()) {
+      for (interface_array* inter : *object->Interface_arrays()) {
+        for (instance* interf : *inter->Instances())
+        netMap.emplace(interf->VpiName(), interf);
+      }
+    }
     if (object->Named_events()) {
       for (named_event* var : *object->Named_events()) {
         netMap.emplace(var->VpiName(), var);
