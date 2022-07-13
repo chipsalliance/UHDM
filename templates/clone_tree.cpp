@@ -1377,14 +1377,19 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     if (mport->Io_decls()) {
                       for (io_decl* decl : *mport->Io_decls()) {
                         if (decl->VpiName() == name) {
+                          any* actual = decl;
+                          if (const any* exp = decl->Expr()) {
+                            actual = (any*)exp;
+                          }
                           if (current->UhdmType() == uhdmref_obj) {
-                            ((ref_obj*)current)->Actual_group(decl);
+                            ((ref_obj*)current)->Actual_group(actual);
                           } else if (current->UhdmType() == uhdmbit_select) {
                             const any* parent = current->VpiParent();
+                            ((bit_select*)current)->Actual_group(actual);
                             if (parent && (parent->UhdmType() == uhdmref_obj))
-                              ((ref_obj*)parent)->Actual_group(decl);
+                              ((ref_obj*)parent)->Actual_group(actual);
                           }
-                          previous = decl;
+                          previous = actual;
                           found = true;
                           break;
                         }

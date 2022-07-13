@@ -138,8 +138,7 @@ void ElaboratorListener::leaveDesign(const design* object, vpiHandle handle) {
   const_cast<design*>(object)->VpiElaborated(true);
 }
 
-
-static std::string &ltrim(std::string &str, char c) {
+static std::string& ltrim(std::string& str, char c) {
   auto it1 =
       std::find_if(str.begin(), str.end(), [c](char ch) { return (ch == c); });
   if (it1 != str.end()) str.erase(str.begin(), it1 + 1);
@@ -174,6 +173,19 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
         netMap.emplace(net->VpiName(), net);
       }
     }
+
+    if (object->Interfaces()) {
+      for (interface* inter : *object->Interfaces()) {
+        netMap.emplace(inter->VpiName(), inter);
+      }
+    }
+    if (object->Interface_arrays()) {
+      for (interface_array* inter : *object->Interface_arrays()) {
+        for (instance* interf : *inter->Instances())
+          netMap.emplace(interf->VpiName(), interf);
+      }
+    }
+
     if (object->Ports()) {
       for (port* port : *object->Ports()) {
         if (const any* low = port->Low_conn()) {
@@ -181,6 +193,7 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
             ref_obj* ref = (ref_obj*)low;
             if (const any* actual = ref->Actual_group()) {
               if (actual->UhdmType() == uhdmmodport) {
+                // If the interface of the modport is not yet in the map
                 netMap.emplace(port->VpiName(), actual);
               }
             }
@@ -191,17 +204,6 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
     if (object->Array_nets()) {
       for (array_net* net : *object->Array_nets()) {
         netMap.emplace(net->VpiName(), net);
-      }
-    }
-    if (object->Interfaces()) {
-      for (interface* inter : *object->Interfaces()) {
-        netMap.emplace(inter->VpiName(), inter);
-      }
-    }
-    if (object->Interface_arrays()) {
-      for (interface_array* inter : *object->Interface_arrays()) {
-        for (instance* interf : *inter->Instances())
-        netMap.emplace(interf->VpiName(), interf);
       }
     }
 
@@ -630,6 +632,7 @@ void ElaboratorListener::enterInterface(const interface* object,
         paramMap.emplace(var->VpiName(), var);
       }
     }
+
     if (object->Ports()) {
       for (ports* port : *object->Ports()) {
         if (const any* low = port->Low_conn()) {
@@ -637,6 +640,9 @@ void ElaboratorListener::enterInterface(const interface* object,
             ref_obj* r = (ref_obj*)low;
             if (const any* actual = r->Actual_group()) {
               if (actual->UhdmType() == uhdminterface) {
+                netMap.emplace(port->VpiName(), actual);
+              } else if (actual->UhdmType() == uhdmmodport) {
+                // If the interface of the modport is not yet in the map
                 netMap.emplace(port->VpiName(), actual);
               }
             }
