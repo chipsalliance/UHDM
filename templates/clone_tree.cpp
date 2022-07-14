@@ -1316,6 +1316,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                       if (current->UhdmType() == uhdmref_obj) {
                         ((ref_obj*)current)->Actual_group(member);
                       } else if (current->UhdmType() == uhdmbit_select) {
+                        ((bit_select*)current)->Actual_group(member);
                         const any* parent = current->VpiParent();
                         if (parent && (parent->UhdmType() == uhdmref_obj))
                           ((ref_obj*)parent)->Actual_group(member);
@@ -1687,33 +1688,45 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
         } else if (previous->UhdmType() == uhdmtypespec_member) {
           typespec_member* member = (typespec_member*)previous;
           const typespec* tps = member->Typespec();
-          if (tps && (tps->UhdmType() == uhdmstruct_typespec)) {
-            struct_typespec* stpt = (struct_typespec*)tps;
-            for (typespec_member* member : *stpt->Members()) {
-              if (member->VpiName() == name) {
-                if (current->UhdmType() == uhdmref_obj) {
-                  ((ref_obj*)current)->Actual_group(member);
-                  previous = member;
-                  found = true;
-                  break;
+          if (tps) {
+            UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+            if (ttype == uhdmpacked_array_typespec) {
+              packed_array_typespec* ptps = (packed_array_typespec*)tps;
+              tps = (typespec*)ptps->Elem_typespec();
+              ttype = tps->UhdmType();
+            } else if (ttype == uhdmarray_typespec) {
+              array_typespec* ptps = (array_typespec*)tps;
+              tps = (typespec*)ptps->Elem_typespec();
+              ttype = tps->UhdmType();
+            }
+            if (ttype == uhdmstruct_typespec) {
+              struct_typespec* stpt = (struct_typespec*)tps;
+              for (typespec_member* member : *stpt->Members()) {
+                if (member->VpiName() == name) {
+                  if (current->UhdmType() == uhdmref_obj) {
+                    ((ref_obj*)current)->Actual_group(member);
+                    previous = member;
+                    found = true;
+                    break;
+                  }
                 }
               }
-            }
-          } else if (tps && (tps->UhdmType() == uhdmunion_typespec)) {
-            union_typespec* stpt = (union_typespec*)tps;
-            for (typespec_member* member : *stpt->Members()) {
-              if (member->VpiName() == name) {
-                if (current->UhdmType() == uhdmref_obj) {
-                  ((ref_obj*)current)->Actual_group(member);
-                  previous = member;
-                  found = true;
-                  break;
+            } else if (ttype == uhdmunion_typespec) {
+              union_typespec* stpt = (union_typespec*)tps;
+              for (typespec_member* member : *stpt->Members()) {
+                if (member->VpiName() == name) {
+                  if (current->UhdmType() == uhdmref_obj) {
+                    ((ref_obj*)current)->Actual_group(member);
+                    previous = member;
+                    found = true;
+                    break;
+                  }
                 }
               }
-            }
-          } else if (tps && (tps->UhdmType() == uhdmstring_typespec)) {
-            if (name == "len") {
-              found = true;
+            } else if (ttype == uhdmstring_typespec) {
+              if (name == "len") {
+                found = true;
+              }
             }
           }
         } else if (previous->UhdmType() == uhdmarray_var) {
