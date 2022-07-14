@@ -926,13 +926,20 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             if (const any* actual = sel->Actual_group()) {
               name = actual->VpiName();
             }
-          }
-          if (obj->UhdmType() == uhdmindexed_part_select) {
+          } else if (obj->UhdmType() == uhdmindexed_part_select) {
             if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
             indexed_part_select* sel = (indexed_part_select*) obj;
             if (const any* actual = sel->Actual_group()) {
               name = actual->VpiName();
             }           
+          } else if (obj->UhdmType() == uhdmbit_select) {
+            //  a[i][j]
+            bit_select* sel = (bit_select*) obj;
+            if (previous->UhdmType() == uhdmbit_select) {
+              bit_select* prev = (bit_select*) previous;
+              sel->Actual_group((any*) prev->Actual_group());
+              found = true;
+            }
           }
         }
         if (obj->UhdmType() == uhdmbit_select) {
