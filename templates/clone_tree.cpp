@@ -1389,6 +1389,12 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                           if (const any* exp = decl->Expr()) {
                             actual = (any*)exp;
                           }
+                          if (actual->UhdmType() == uhdmref_obj) {
+                            ref_obj* ref = (ref_obj*) actual;
+                            if (const any* act = ref->Actual_group()) {
+                              actual = (any*) act;
+                            }
+                          }
                           if (current->UhdmType() == uhdmref_obj) {
                             ((ref_obj*)current)->Actual_group(actual);
                           } else if (current->UhdmType() == uhdmbit_select) {

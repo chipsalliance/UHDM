@@ -174,6 +174,19 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
       }
     }
 
+    if (object->Variables()) {
+      for (variables* var : *object->Variables()) {
+        netMap.emplace(var->VpiName(), var);
+        if (var->UhdmType() == uhdmenum_var) {
+          enum_var* evar = (enum_var*) var;
+          enum_typespec* etps = (enum_typespec*)evar->Typespec();
+          for(auto c : *etps->Enum_consts()) {
+            netMap.emplace(c->VpiName(), c);
+          }
+        }
+      }
+    }
+
     if (object->Interfaces()) {
       for (interface* inter : *object->Interfaces()) {
         netMap.emplace(inter->VpiName(), inter);
@@ -237,19 +250,7 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
         paramMap.emplace(param->VpiName(), param);
       }
     }
-    if (object->Variables()) {
-      for (variables* var : *object->Variables()) {
-        paramMap.emplace(var->VpiName(), var);
-        if (var->UhdmType() == uhdmenum_var) {
-          enum_var* evar = (enum_var*) var;
-          enum_typespec* etps = (enum_typespec*)evar->Typespec();
-          for(auto c : *etps->Enum_consts()) {
-            paramMap.emplace(c->VpiName(), c);
-          }
-        }
-      }
-    }
-
+    
     if (object->Typespecs()) {
       for (typespec* tps : *object->Typespecs()) {
         if (tps->UhdmType() == uhdmenum_typespec) {
@@ -418,6 +419,13 @@ void ElaboratorListener::enterPackage(const package* object, vpiHandle handle) {
   if (object->Variables()) {
     for (variables* var : *object->Variables()) {
       netMap.emplace(var->VpiName(), var);
+      if (var->UhdmType() == uhdmenum_var) {
+        enum_var* evar = (enum_var*)var;
+        enum_typespec* etps = (enum_typespec*)evar->Typespec();
+        for (auto c : *etps->Enum_consts()) {
+          netMap.emplace(c->VpiName(), c);
+        }
+      }
     }
   }
 
@@ -434,12 +442,7 @@ void ElaboratorListener::enterPackage(const package* object, vpiHandle handle) {
       paramMap.emplace(param->VpiName(), param);
     }
   }
-  if (object->Variables()) {
-    for (variables* var : *object->Variables()) {
-      paramMap.emplace(var->VpiName(), var);
-    }
-  }
-
+  
   // Collect func and task declaration
   ComponentMap funcMap;
   ComponentMap modMap;
@@ -479,6 +482,13 @@ void ElaboratorListener::enterClass_defn(const class_defn* object,
   if (object->Variables()) {
     for (variables* var : *object->Variables()) {
       varMap.emplace(var->VpiName(), var);
+      if (var->UhdmType() == uhdmenum_var) {
+        enum_var* evar = (enum_var*)var;
+        enum_typespec* etps = (enum_typespec*)evar->Typespec();
+        for (auto c : *etps->Enum_consts()) {
+          varMap.emplace(c->VpiName(), c);
+        }
+      }
     }
   }
 
@@ -592,6 +602,20 @@ void ElaboratorListener::enterInterface(const interface* object,
         netMap.emplace(net->VpiName(), net);
       }
     }
+
+    if (object->Variables()) {
+      for (variables* var : *object->Variables()) {
+        netMap.emplace(var->VpiName(), var);
+        if (var->UhdmType() == uhdmenum_var) {
+          enum_var* evar = (enum_var*)var;
+          enum_typespec* etps = (enum_typespec*)evar->Typespec();
+          for (auto c : *etps->Enum_consts()) {
+            netMap.emplace(c->VpiName(), c);
+          }
+        }
+      }
+    }
+
     if (object->Interfaces()) {
       for (interface* inter : *object->Interfaces()) {
         netMap.emplace(inter->VpiName(), inter);
@@ -624,12 +648,6 @@ void ElaboratorListener::enterInterface(const interface* object,
           paramMap.erase(itr);
         }
         paramMap.emplace(param->VpiName(), param);
-      }
-    }
-
-    if (object->Variables()) {
-      for (variables* var : *object->Variables()) {
-        paramMap.emplace(var->VpiName(), var);
       }
     }
 
@@ -1159,6 +1177,22 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object,
       netMap.emplace(net->VpiName(), net);
     }
   }
+
+  if (object->Variables()) {
+    for (variables* var : *object->Variables()) {
+      netMap.emplace(var->VpiName(), var);
+      if (var->UhdmType() == uhdmenum_var) {
+        enum_var* evar = (enum_var*)var;
+        enum_typespec* etps = (enum_typespec*)evar->Typespec();
+        for (auto c : *etps->Enum_consts()) {
+          netMap.emplace(c->VpiName(), c);
+        }
+      }
+    }
+  }
+
+  
+
   // Collect instance parameters, defparams
   ComponentMap paramMap;
   if (object->Parameters()) {
@@ -1169,11 +1203,6 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object,
   if (object->Def_params()) {
     for (def_param* param : *object->Def_params()) {
       paramMap.emplace(param->VpiName(), param);
-    }
-  }
-  if (object->Variables()) {
-    for (variables* var : *object->Variables()) {
-      paramMap.emplace(var->VpiName(), var);
     }
   }
 
