@@ -1859,7 +1859,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
       if (tps->UhdmType() == uhdmlogic_typespec) {
         logic_typespec *ltps = (logic_typespec *)tps;
         VectorOfrange *ranges = ltps->Ranges();
-        if (ranges->size() >= 2) {
+        if (ranges && (ranges->size() >= 2)) {
           logic_typespec *tmp = s.MakeLogic_typespec();
           VectorOfrange *tmpR = s.MakeRangeVec();
           for (unsigned int i = 1; i < ranges->size(); i++) {
