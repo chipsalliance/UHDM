@@ -3468,10 +3468,14 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       int64_t r = get_value(invalidValue, sel->Right_range());
       std::reverse(binary.begin(), binary.end());
       std::string sub;
-      if (l > r)
-        sub = binary.substr(r, l - r + 1);
-      else
-        sub = binary.substr(l, r - l + 1);
+      if (r > (int64_t)binary.size() || l > (int64_t)binary.size()) {
+        sub = "0";
+      } else {
+        if (l > r)
+          sub = binary.substr(r, l - r + 1);
+        else
+          sub = binary.substr(l, r - l + 1);
+      }
       UHDM::constant *c = s.MakeConstant();
       c->VpiValue("BIN:" + sub);
       c->VpiDecompile(sub);
