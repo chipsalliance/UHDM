@@ -58,7 +58,9 @@ bool ExprEval::isFullySpecified(const UHDM::typespec *tps) {
     case uhdmarray_typespec: {
       array_typespec *ltps = (array_typespec *)tps;
       const typespec *elem = ltps->Elem_typespec();
-      if (!isFullySpecified(elem)) return false;
+      if (elem) {
+        if (!isFullySpecified(elem)) return false;
+      }
       ranges = ltps->Ranges();
       break;
     }
