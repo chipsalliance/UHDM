@@ -210,6 +210,9 @@ jobs:
         where python && python --version
 
         make release
+        if %errorlevel% neq 0 exit /b %errorlevel%
         make test
+        if %errorlevel% neq 0 exit /b %errorlevel%
         make install
+        if %errorlevel% neq 0 exit /b %errorlevel%
         make test_install
