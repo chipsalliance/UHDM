@@ -194,8 +194,11 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
     }
     if (object->Interface_arrays()) {
       for (interface_array* inter : *object->Interface_arrays()) {
-        for (instance* interf : *inter->Instances())
-          netMap.emplace(interf->VpiName(), interf);
+        if (VectorOfinstance* instances = inter->Instances()) {
+          for (instance* interf : *instances) {
+            netMap.emplace(interf->VpiName(), interf);
+          }
+        }
       }
     }
 

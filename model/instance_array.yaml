@@ -60,3 +60,8 @@
     vpi: vpiModule
     type: module
     card: any
+  - class_ref: typespec
+    name: typespec
+    vpi: vpiTypespec
+    type: typespec
+    card: 1
