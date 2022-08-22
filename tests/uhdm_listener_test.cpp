@@ -16,21 +16,25 @@ using testing::ElementsAre;
 class MyUhdmListener : public UhdmListener {
  protected:
   void enterModule(const module* object) override {
+    if (visited.find(object) != visited.end()) return;
     CollectLine("Module", object);
     stack_.push(object);
   }
 
   void leaveModule(const module* object) override {
+    if (visited.find(object) != visited.end()) return;
     ASSERT_EQ(stack_.top(), object);
     stack_.pop();
   }
 
   void enterProgram(const program* object) override {
+    if (visited.find(object) != visited.end()) return;
     CollectLine("Program", object);
     stack_.push(object);
   }
 
   void leaveProgram(const program* object) override {
+    if (visited.find(object) != visited.end()) return;
     ASSERT_EQ(stack_.top(), object);
     stack_.pop();
   }
