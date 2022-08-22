@@ -114,7 +114,7 @@
  * An optional linter (Listener) that warns about non-Synthesizable constructs can be found here: [`SynthSubset.cpp`](templates/SynthSubset.cpp)
  * An optional linter (Listener) that warns about diverse Verilog compliances post-elaboration can be found here: [`UhdmLint.cpp`](templates/UhdmLint.cpp)
  * An optionnal expression evaluator can be found here: [`ExprEval.cpp`](templates/ExprEval.cpp)
-
+ * The Yosys-plugin code (most comprehensive open-source usage of UHDM) can be found here: https://github.com/chipsalliance/yosys-f4pga-plugins/tree/main/systemverilog-plugin 
 
 # Linking libuhdm.a to your application
  * After instaling (`make install`), create your own executable (Read [`Makefile`](Makefile)) , ie:
