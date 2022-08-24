@@ -28,6 +28,16 @@
 namespace UHDM {
 <VPI_PRIVATE_LISTEN_IMPLEMENTATIONS>
 <VPI_PUBLIC_LISTEN_IMPLEMENTATIONS>
+
+bool VpiListener::inCallstackOfType(UHDM_OBJECT_TYPE type) {
+  for (any_stack_t::reverse_iterator itr = callstack.rbegin(); itr != callstack.rend(); ++itr) {
+    if ((*itr)->UhdmType() == type) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void VpiListener::listenAny(vpiHandle handle) {
   const any* object = (const any*)((const uhdm_handle*)handle)->object;
   const bool revisiting = visited.find(object) != visited.end();

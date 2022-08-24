@@ -54,6 +54,7 @@ public:
 
 <VPI_ENTER_LEAVE_DECLARATIONS>
   bool isInUhdmAllIterator() { return uhdmAllIterator; }
+  bool inCallstackOfType(UHDM_OBJECT_TYPE type);
   design* currentDesign() { return currentDesign_; }
 protected:
   bool uhdmAllIterator = false;
