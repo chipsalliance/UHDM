@@ -379,6 +379,10 @@ void ElaboratorListener::elabModule(const module* object, vpiHandle handle) {
     // Flat list of module (unelaborated)
     flatComponentMap_.emplace(object->VpiDefName(), object);
   } else {
+    // Do not elab modules used in hier_path base, that creates a loop
+    if (inCallstackOfType(uhdmhier_path)) {
+      return;
+    }
     // Hierachical module list (elaborated)
     inHierarchy_ = true;
     ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
