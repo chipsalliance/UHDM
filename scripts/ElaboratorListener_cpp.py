@@ -86,7 +86,7 @@ def _generate_module_listeners(models, classname):
                     listeners.append( '  }')
                     listeners.append( '}')
 
-                elif method not in ['Ports', 'Nets', 'Parameters', 'Param_assigns']:
+                elif method not in ['Ports', 'Nets', 'Parameters', 'Param_assigns', 'Interface_arrays', 'Module_arrays']:
                     # We don't want to override the elaborated instance ports by the module def ports, same for nets, params and param_assigns
                     listeners.append(f'if (auto vec = defMod->{method}()) {{')
                     listeners.append(f'  auto clone_vec = serializer_->Make{Cast}Vec();')

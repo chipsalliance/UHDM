@@ -220,6 +220,7 @@ time_typespec.yaml
 enum_typespec.yaml
 string_typespec.yaml
 chandle_typespec.yaml
+module_typespec.yaml
 struct_typespec.yaml
 union_typespec.yaml
 logic_typespec.yaml
