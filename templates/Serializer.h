@@ -32,6 +32,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <uhdm/containers.h>
@@ -87,6 +88,7 @@ class Serializer {
   ErrorHandler GetErrorHandler() { return errorHandler; }
   const std::vector<vpiHandle> Restore(const std::string& file);
   std::map<std::string, unsigned long> ObjectStats() const;
+  void PrintStats(std::ostream& strm, std::string_view infoText) const;
 
  private:
   template <typename T>
