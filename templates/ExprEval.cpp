@@ -3673,21 +3673,22 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
           invalidValue,
           reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
       for (case_item *item : *st->Case_items()) {
-        VectorOfany *exprs = item->VpiExprs();
-        bool done = false;
-        for (any *exp : *exprs) {
-          int64_t vexp = get_value(
-              invalidValue,
-              reduceExpr(exp, invalidValue, scopes.back(), nullptr, muteError));
-          if (val == vexp) {
-            EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                     scopes.back(), fileName, lineNumber, item->Stmt(),
-                     muteError);
-            done = true;
-            break;
+        if (VectorOfany *exprs = item->VpiExprs()) {
+          bool done = false;
+          for (any *exp : *exprs) {
+            int64_t vexp = get_value(
+                invalidValue, reduceExpr(exp, invalidValue, scopes.back(),
+                                         nullptr, muteError));
+            if (val == vexp) {
+              EvalStmt(funcName, scopes, invalidValue, continue_flag,
+                       break_flag, scopes.back(), fileName, lineNumber,
+                       item->Stmt(), muteError);
+              done = true;
+              break;
+            }
           }
+          if (done) break;
         }
-        if (done) break;
       }
       break;
     }
