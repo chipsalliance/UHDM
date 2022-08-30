@@ -1195,7 +1195,11 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
               icts->VpiValue().c_str() + std::string_view("INT:").length(),
               nullptr, 10);
         }
-      }
+      } else if (cts->UhdmType() == uhdmlogic_typespec) {
+        logic_typespec *icts = (logic_typespec *)cts;
+        const logic_typespec* elem = icts->Logic_typespec();
+        wordSize = size(elem, invalidValue, inst, pexpr, false, muteError);
+      } 
     }
     if (wordSize == 0) {
       wordSize = 1;
@@ -3638,11 +3642,14 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           break;
         }
       }
-      constant *c = s.MakeConstant();
-      c->VpiValue("INT:" + std::to_string(valI));
-      c->VpiDecompile(std::to_string(valI));
-      c->VpiSize(32);
-      c->VpiConstType(vpiIntConst);
+      constant *c = dynamic_cast<constant*> (rhsexp);
+      if (c == nullptr) {
+        c = s.MakeConstant();
+        c->VpiValue("INT:" + std::to_string(valI));
+        c->VpiDecompile(std::to_string(valI));
+        c->VpiSize(64);
+        c->VpiConstType(vpiIntConst);
+      }
       param_assign *pa = s.MakeParam_assign();
       pa->Rhs(c);
       parameter *param = s.MakeParameter();
@@ -3973,8 +3980,11 @@ expr *ExprEval::EvalFunc(UHDM::function *func, std::vector<any *> *args,
         const std::string ioname = io->VpiName();
         expr *ioexp = (expr *)args->at(index);
         expr *exparg = reduceExpr(ioexp, invalidValue, scope, pexpr, muteError);
-        invalidValue =
+        if (exparg) {
+          exparg->Typespec((typespec*) io->Typespec());
+          invalidValue =
             setValueInInstance(ioname, io, exparg, invalidValue, s, scope);
+        }
       }
       index++;
     }
