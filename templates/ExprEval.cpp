@@ -3988,9 +3988,8 @@ expr *ExprEval::EvalFunc(UHDM::function *func, std::vector<any *> *args,
       }
       index++;
     }
-  } else {
-    return nullptr;
-  }
+  } 
+
   scopes.push_back(scope);
   if (const UHDM::any *the_stmt = func->Stmt()) {
     UHDM_OBJECT_TYPE stt = the_stmt->UhdmType();
