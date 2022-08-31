@@ -3664,7 +3664,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
 
 void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
                         bool &invalidValue, bool &continue_flag,
-                        bool &break_flag, const any *inst,
+                        bool &break_flag, bool &return_flag, const any *inst,
                         const std::filesystem::path &fileName, int lineNumber,
                         const any *stmt, bool muteError) {
   if (invalidValue) {
@@ -3688,8 +3688,8 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
                                          nullptr, muteError));
             if (val == vexp) {
               EvalStmt(funcName, scopes, invalidValue, continue_flag,
-                       break_flag, scopes.back(), fileName, lineNumber,
-                       item->Stmt(), muteError);
+                       break_flag, return_flag, scopes.back(), fileName,
+                       lineNumber, item->Stmt(), muteError);
               done = true;
               break;
             }
@@ -3707,11 +3707,12 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
           reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
       if (val > 0) {
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 scopes.back(), fileName, lineNumber, st->VpiStmt(), muteError);
+                 return_flag, scopes.back(), fileName, lineNumber,
+                 st->VpiStmt(), muteError);
       } else {
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 scopes.back(), fileName, lineNumber, st->VpiElseStmt(),
-                 muteError);
+                 return_flag, scopes.back(), fileName, lineNumber,
+                 st->VpiElseStmt(), muteError);
       }
       break;
     }
@@ -3723,7 +3724,8 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
           reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
       if (val > 0) {
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 scopes.back(), fileName, lineNumber, st->VpiStmt(), muteError);
+                 return_flag, scopes.back(), fileName, lineNumber,
+                 st->VpiStmt(), muteError);
       }
       break;
     }
@@ -3732,11 +3734,9 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
       if (st->Stmts()) {
         for (auto bst : *st->Stmts()) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName, lineNumber, bst, muteError);
-          if (continue_flag) {
-            return;
-          }
-          if (break_flag) {
+                   return_flag, scopes.back(), fileName, lineNumber, bst,
+                   muteError);
+          if (continue_flag || break_flag || return_flag) {
             return;
           }
         }
@@ -3748,11 +3748,9 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
       if (st->Stmts()) {
         for (auto bst : *st->Stmts()) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName, lineNumber, bst, muteError);
-          if (continue_flag) {
-            return;
-          }
-          if (break_flag) {
+                   return_flag, scopes.back(), fileName, lineNumber, bst,
+                   muteError);
+          if (continue_flag || break_flag || return_flag) {
             return;
           }
         }
@@ -3792,8 +3790,8 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
       if (invalidValue == false) {
         for (int i = 0; i < val; i++) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName, lineNumber, st->VpiStmt(),
-                   muteError);
+                   return_flag, scopes.back(), fileName, lineNumber,
+                   st->VpiStmt(), muteError);
         }
       }
       break;
@@ -3802,13 +3800,14 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
       for_stmt *st = (for_stmt *)stmt;
       if (st->VpiForInitStmt()) {
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 scopes.back(), fileName, lineNumber, st->VpiForInitStmt(),
-                 muteError);
+                 return_flag, scopes.back(), fileName, lineNumber,
+                 st->VpiForInitStmt(), muteError);
       }
       if (st->VpiForInitStmts()) {
         for (auto s : *st->VpiForInitStmts()) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName, lineNumber, s, muteError);
+                   return_flag, scopes.back(), fileName, lineNumber, s,
+                   muteError);
         }
       }
       while (1) {
@@ -3823,7 +3822,8 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
           if (invalidValue) break;
         }
         EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 scopes.back(), fileName, lineNumber, st->VpiStmt(), muteError);
+                 return_flag, scopes.back(), fileName, lineNumber,
+                 st->VpiStmt(), muteError);
         if (invalidValue) break;
         if (continue_flag) {
           continue_flag = false;
@@ -3833,16 +3833,20 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
           break_flag = false;
           break;
         }
+        if (return_flag) {
+          break;
+        }
         if (st->VpiForIncStmt()) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName, lineNumber, st->VpiForIncStmt(),
-                   muteError);
+                   return_flag, scopes.back(), fileName, lineNumber,
+                   st->VpiForIncStmt(), muteError);
         }
         if (invalidValue) break;
         if (st->VpiForIncStmts()) {
           for (auto s : *st->VpiForIncStmts()) {
             EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                     scopes.back(), fileName, lineNumber, s, muteError);
+                     return_flag, scopes.back(), fileName, lineNumber, s,
+                     muteError);
           }
         }
         if (invalidValue) break;
@@ -3859,6 +3863,7 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
         lhsexp->VpiName(funcName);
         invalidValue =
             setValueInInstance(funcName, lhsexp, rhsexp, invalidValue, s, inst);
+        return_flag = true;
       }
       break;
     }
@@ -3875,8 +3880,8 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
             break;
           }
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName, lineNumber, st->VpiStmt(),
-                   muteError);
+                   return_flag, scopes.back(), fileName, lineNumber,
+                   st->VpiStmt(), muteError);
           if (invalidValue) break;
           if (continue_flag) {
             continue_flag = false;
@@ -3884,6 +3889,9 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
           }
           if (break_flag) {
             break_flag = false;
+            break;
+          }
+          if (return_flag) {
             break;
           }
         }
@@ -3896,8 +3904,8 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
       if (cond) {
         while (1) {
           EvalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   scopes.back(), fileName, lineNumber, st->VpiStmt(),
-                   muteError);
+                   return_flag, scopes.back(), fileName, lineNumber,
+                   st->VpiStmt(), muteError);
           if (invalidValue) break;
           if (continue_flag) {
             continue_flag = false;
@@ -3905,6 +3913,9 @@ void ExprEval::EvalStmt(const std::string &funcName, Scopes &scopes,
           }
           if (break_flag) {
             break_flag = false;
+            break;
+          }
+          if (return_flag) {
             break;
           }
           int64_t val = get_value(invalidValue,
@@ -3981,26 +3992,28 @@ expr *ExprEval::EvalFunc(UHDM::function *func, std::vector<any *> *args,
         expr *ioexp = (expr *)args->at(index);
         expr *exparg = reduceExpr(ioexp, invalidValue, scope, pexpr, muteError);
         if (exparg) {
-          exparg->Typespec((typespec*) io->Typespec());
+          exparg->Typespec((typespec *)io->Typespec());
           invalidValue =
-            setValueInInstance(ioname, io, exparg, invalidValue, s, scope);
+              setValueInInstance(ioname, io, exparg, invalidValue, s, scope);
         }
       }
       index++;
     }
-  } 
+  }
 
   scopes.push_back(scope);
   if (const UHDM::any *the_stmt = func->Stmt()) {
     UHDM_OBJECT_TYPE stt = the_stmt->UhdmType();
+    bool return_flag = false;
     switch (stt) {
       case uhdmbegin: {
         UHDM::begin *st = (UHDM::begin *)the_stmt;
         bool continue_flag = false;
         bool break_flag = false;
         for (auto stmt : *st->Stmts()) {
-          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag, scope,
-                   fileName, lineNumber, stmt, muteError);
+          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag,
+                   return_flag, scope, fileName, lineNumber, stmt, muteError);
+          if (return_flag) break;
           if (continue_flag || break_flag) {
             if (muteError == false)
               s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
@@ -4014,8 +4027,9 @@ expr *ExprEval::EvalFunc(UHDM::function *func, std::vector<any *> *args,
         bool continue_flag = false;
         bool break_flag = false;
         for (auto stmt : *st->Stmts()) {
-          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag, scope,
-                   fileName, lineNumber, stmt, muteError);
+          EvalStmt(name, scopes, invalidValue, continue_flag, break_flag,
+                   return_flag, scope, fileName, lineNumber, stmt, muteError);
+          if (return_flag) break;
           if (continue_flag || break_flag) {
             if (muteError == false)
               s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
@@ -4027,8 +4041,8 @@ expr *ExprEval::EvalFunc(UHDM::function *func, std::vector<any *> *args,
       default: {
         bool continue_flag = false;
         bool break_flag = false;
-        EvalStmt(name, scopes, invalidValue, continue_flag, break_flag, scope,
-                 fileName, lineNumber, the_stmt, muteError);
+        EvalStmt(name, scopes, invalidValue, continue_flag, break_flag,
+                 return_flag, scope, fileName, lineNumber, the_stmt, muteError);
         if (continue_flag || break_flag) {
           if (muteError == false)
             s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
