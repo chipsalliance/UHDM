@@ -76,7 +76,7 @@ inline void Serializer::SetRestoreId_(FactoryT<T>* const factory, unsigned long 
 struct Serializer::RestoreAdapter {
   void operator()(Any::Reader reader, Serializer *const serializer, BaseClass *const obj) const {
     obj->VpiParent(serializer->GetObject(reader.getVpiParent().getType(), reader.getVpiParent().getIndex() - 1));
-    obj->VpiFile(std::filesystem::path(serializer->symbolMaker.GetSymbol(reader.getVpiFile())));
+    obj->VpiFile(serializer->symbolMaker.GetSymbol(reader.getVpiFile()));
     obj->VpiLineNo(reader.getVpiLineNo());
     obj->VpiColumnNo(reader.getVpiColumnNo());
     obj->VpiEndLineNo(reader.getVpiEndLineNo());
@@ -94,9 +94,10 @@ struct Serializer::RestoreAdapter {
   }
 };
 
-const std::vector<vpiHandle> Serializer::Restore(const std::string& file) {
+const std::vector<vpiHandle> Serializer::Restore(const std::filesystem::path& filepath) {
   Purge();
   std::vector<vpiHandle> designs;
+  const std::string file = filepath.string();
   int fileid = open(file.c_str(), O_RDONLY | O_BINARY);
   ::capnp::ReaderOptions options;
   options.traversalLimitInWords = ULLONG_MAX;

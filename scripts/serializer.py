@@ -73,10 +73,7 @@ def generate(models):
                 Vpi_ = vpi[:1].upper() + vpi[1:]
                 Vpi = Vpi_.replace('_', '')
 
-                if vpi in ['vpiFile', 'vpiDefFile']:
-                    saves_adapters.append(f'    builder.set{Vpi}(serializer->symbolMaker.Make(obj->{Vpi_}().string()));')
-                    restore_adapters.append(f'    obj->{Vpi_}(serializer->symbolMaker.GetSymbol(reader.get{Vpi}()));')
-                elif type in ['string', 'value', 'delay']:
+                if type in ['string', 'value', 'delay']:
                     saves_adapters.append(f'    builder.set{Vpi}(serializer->symbolMaker.Make(obj->{Vpi_}()));')
                     restore_adapters.append(f'    obj->{Vpi_}(serializer->symbolMaker.GetSymbol(reader.get{Vpi}()));')
                 else:

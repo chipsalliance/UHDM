@@ -28,8 +28,8 @@
 #define UHDM_BASE_CLASS_H
 
 #include <deque>
-#include <filesystem>
 #include <set>
+#include <string>
 #include <string_view>
 #include <tuple>
 #include <variant>
@@ -75,10 +75,9 @@ namespace UHDM {
 
     virtual bool VpiParent(BaseClass* data) = 0;
 
-    virtual std::filesystem::path VpiFile() const = 0;
-    virtual SymbolFactory::ID VpiFileId() const = 0;
+    virtual const std::string& VpiFile() const = 0;
 
-    virtual bool VpiFile(const std::filesystem::path& data) = 0;
+    virtual bool VpiFile(const std::string& data) = 0;
 
     virtual int VpiLineNo() const final { return vpiLineNo_; }
 

@@ -24,6 +24,7 @@
  */
 #include <uhdm/Serializer.h>
 
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -97,7 +98,7 @@ void Serializer::PrintStats(std::ostream& strm,
     if (count > 0) {
       // The longest model name is
       // "enum_struct_union_packed_array_typespec_group"
-      strm << std::setw(48) << std::left << name << std::setw(4) << std::right
+      strm << std::setw(48) << std::left << name << std::setw(8) << std::right
            << count << std::endl;
     }
   }
