@@ -111,15 +111,13 @@ class ExprEval {
 
   typedef std::vector<module*> Scopes;
 
-  UHDM::expr* EvalFunc(UHDM::function* func, std::vector<UHDM::any*>* args,
-                       bool& invalidValue, const any* inst,
-                       const std::filesystem::path& fileName, int lineNumber,
-                       UHDM::any* pexpr, bool muteError = false);
+  UHDM::expr* evalFunc(UHDM::function* func, std::vector<UHDM::any*>* args,
+                       bool& invalidValue, const any* inst, UHDM::any* pexpr,
+                       bool muteError = false);
 
-  void EvalStmt(const std::string& funcName, Scopes& scopes, bool& invalidValue,
+  void evalStmt(const std::string& funcName, Scopes& scopes, bool& invalidValue,
                 bool& continue_flag, bool& break_flag, bool& return_flag,
-                const any* inst, const std::filesystem::path& fileName,
-                int lineNumber, const UHDM::any* stmt, bool muteError = false);
+                const any* inst, const UHDM::any* stmt, bool muteError = false);
 
   bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst);
