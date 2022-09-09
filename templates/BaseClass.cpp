@@ -50,9 +50,8 @@ BaseClass::vpi_property_value_t BaseClass::GetVpiPropertyValue(
     case vpiType:
       return vpi_property_value_t(VpiType());
     case vpiFile: {
-      SymbolFactory::ID fileId = VpiFileId();
-      if (fileId != SymbolFactory::getBadId()) {
-        const std::string& file = serializer_->symbolMaker.GetSymbol(fileId);
+      const std::string& file = VpiFile();
+      if (!file.empty()) {
         return vpi_property_value_t(file.c_str());
       }
     } break;

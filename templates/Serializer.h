@@ -28,6 +28,7 @@
 #define UHDM_SERIALIZER_H
 
 
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -82,11 +83,11 @@ class Serializer {
   }
   ~Serializer();
 
-  void Save(const std::string& file);
+  void Save(const std::filesystem::path& filepath);
   void Purge();
   void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
   ErrorHandler GetErrorHandler() { return errorHandler; }
-  const std::vector<vpiHandle> Restore(const std::string& file);
+  const std::vector<vpiHandle> Restore(const std::filesystem::path& filepath);
   std::map<std::string, unsigned long> ObjectStats() const;
   void PrintStats(std::ostream& strm, std::string_view infoText) const;
 

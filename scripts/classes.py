@@ -34,11 +34,7 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
             pointer = '*'
             const = 'const '
 
-        if vpi in ['vpiFile', 'vpiDefFile']:
-            content.append(f'  {virtual}bool {Vpi_}(const std::filesystem::path& data){final};')
-            content.append(f'  {virtual}SymbolFactory::ID {Vpi_}Id() const{final} {{ return {vpi}_; }}')
-            content.append(f'  {virtual}std::filesystem::path {Vpi_}() const{final};')
-        elif type == 'std::string':
+        if type == 'std::string':
             content.append(f'  {virtual}bool {Vpi_}(const std::string& data){final};')
             content.append(f'  {virtual}const std::string& {Vpi_}() const{final};')
         else:
@@ -131,19 +127,11 @@ def _get_implementations(classname, type, vpi, card, real_type=''):
         content.append(f'    return serializer_->symbolMaker.GetSymbol({vpi}_);')
         content.append( '  }')
         content.append( '}')
-    elif vpi in ['vpiFile', 'vpiDefFile']:
-        content.append(f'std::filesystem::path {classname}::{Vpi_}() const {{')
-        content.append(f'  const std::string &symbol = serializer_->symbolMaker.GetSymbol({vpi}_);')
-        content.append( '  return (symbol.empty() || (symbol == SymbolFactory::getBadSymbol())) ? std::filesystem::path() : std::filesystem::path(symbol);')
-        content.append(f'}}')
     else:
         content.append(f'const {type}{pointer}& {classname}::{Vpi_}() const {{ return serializer_->symbolMaker.GetSymbol({vpi}_); }}')
 
     content.append('')
-    if vpi in ['vpiFile', 'vpiDefFile']:
-        content.append(f'bool {classname}::{Vpi_}(const std::filesystem::path& data) {{ {vpi}_ = serializer_->symbolMaker.Make(data.string()); return true; }}')
-    else:
-        content.append(f'bool {classname}::{Vpi_}(const {type}{pointer}& data) {{ {vpi}_ = serializer_->symbolMaker.Make(data); return true; }}')
+    content.append(f'bool {classname}::{Vpi_}(const {type}{pointer}& data) {{ {vpi}_ = serializer_->symbolMaker.Make(data); return true; }}')
     content.append('')
 
     return content, includes
@@ -162,7 +150,7 @@ def _get_data_member(type, vpi, card):
             pointer = '*'
             default_assignment = 'nullptr'
 
-        if type == 'std::string' or vpi in ['vpiFile', 'vpiDefFile']:
+        if type == 'std::string':
             content.append(f'  SymbolFactory::ID {vpi}_ = {default_assignment};')
         else:
             content.append(f'  {type}{pointer} {vpi}_ = {default_assignment};')
@@ -498,17 +486,7 @@ def _get_GetVpiPropertyValue_implementation(model):
                 type_specified = True
 
             if (card == '1') and (type not in ['value', 'delay']):
-                if vpi in ['vpiFile', 'vpiDefFile']:
-                    case_bodies[vpi] = [
-                        f'    case {vpi}: {{',
-                        f'      SymbolFactory::ID fileId = {Vpi_}Id();',
-                        f'      if (fileId != SymbolFactory::getBadId()) {{',
-                         '        const std::string& file = serializer_->symbolMaker.GetSymbol(fileId);',
-                         '        if (!file.empty()) return vpi_property_value_t(file.c_str());',
-                        f'      }}',
-                        f'    }} break;'
-                    ]
-                elif type == 'string':
+                if type == 'string':
                     case_bodies[vpi] = [ f'    case {vpi}: {{' ]
                     if vpi == 'vpiFullName':
                         case_bodies[vpi].extend([
