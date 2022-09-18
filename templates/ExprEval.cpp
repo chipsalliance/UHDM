@@ -222,7 +222,11 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
       if (result->UhdmType() == uhdmoperation) {
         operation *op = (operation *)result;
         UHDM::ExprEval eval;
-        eval.flattenPatternAssignments(s, op->Typespec(), (UHDM::expr *)result);
+        expr *res = eval.flattenPatternAssignments(s, op->Typespec(),
+                                                  (UHDM::expr *)result);
+        if (res->UhdmType() == uhdmoperation) {
+          ((operation *)result)->Operands(((operation *)res)->Operands());
+        }
       }
     }
     if (result) break;
@@ -579,6 +583,12 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       return result;
     }
     if (tps->UhdmType() != uhdmstruct_typespec) {
+      tps = op->Typespec();
+    }
+    if (tps == nullptr) {
+      return result;
+    }
+    if (tps->UhdmType() != uhdmstruct_typespec) {
       return result;
     }
     if (op->VpiFlattened()) {
@@ -596,9 +606,9 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
     std::vector<any *> tmp(fieldNames.size());
     any *defaultOp = nullptr;
     int index = 0;
+    bool flatten = false;
     for (auto oper : *orig) {
       if (oper->UhdmType() == uhdmtagged_pattern) {
-        op->VpiFlattened(true);
         tagged_pattern *tp = (tagged_pattern *)oper;
         const typespec *ttp = tp->Typespec();
         const std::string &tname = ttp->VpiName();
@@ -638,10 +648,11 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       index++;
     }
     index = 0;
+    ElaboratorListener listener(&s);
     for (auto op : tmp) {
       if (defaultOp) {
         if (op == nullptr) {
-          op = defaultOp;
+          op = clone_tree((any *)defaultOp, s, &listener);
         }
       }
       if (op == nullptr) {
@@ -652,11 +663,16 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       ordered->push_back(op);
       index++;
     }
-    op->Operands(ordered);
+    operation *opres = (operation*)clone_tree((any *)op, s, &listener);
+    opres->Operands(ordered);
+    if (flatten) {
+      opres->VpiFlattened(true);
+    }
     // Flattening
     VectorOfany *flattened = s.MakeAnyVec();
     recursiveFlattening(s, flattened, ordered, fieldTypes);
-    op->Operands(flattened);
+    opres->Operands(flattened);
+    result = opres;
   }
   return result;
 }
@@ -2813,7 +2829,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 }
               }
               UHDM::constant *c = s.MakeConstant();
-              unsigned int width = cv->VpiSize();
+              int64_t width = cv->VpiSize();
               int consttype = ((UHDM::constant *)cv)->VpiConstType();
               c->VpiConstType(consttype);
               if (consttype == vpiBinaryConst) {
@@ -2822,7 +2838,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 std::string tmp =
                     val.c_str() + std::string_view("BIN:").length();
                 std::string value;
-                if (width > tmp.size()) {
+                if (width > (int)tmp.size()) {
                   for (unsigned int i = 0; i < width - tmp.size(); i++) {
                     value += '0';
                   }
@@ -2904,7 +2920,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (optype == uhdmconstant) {
                 constant *c2 = (constant *)oper;
                 std::string v = c2->VpiValue();
-                unsigned int size = c2->VpiSize();
+                int size = c2->VpiSize();
                 csize += size;
                 int type = c2->VpiConstType();
                 switch (type) {
@@ -2912,7 +2928,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     std::string tmp =
                         v.c_str() + std::string_view("BIN:").length();
                     std::string value;
-                    if (size > tmp.size()) {
+                    if (size > (int) tmp.size()) {
                       for (unsigned int i = 0; i < size - tmp.size(); i++) {
                         value += '0';
                       }
@@ -2943,7 +2959,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     std::string tmp =
                         hexToBin(v.c_str() + std::string_view("HEX:").length());
                     std::string value;
-                    if (size > tmp.size()) {
+                    if (size > (int) tmp.size()) {
                       for (unsigned int i = 0; i < size - tmp.size(); i++) {
                         value += '0';
                       }
@@ -3270,7 +3286,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             if (c->VpiConstType() == vpiIntConst ||
                 c->VpiConstType() == vpiDecConst) {
               int64_t value = get_value(invalidValue, val);
-              uint64_t size = c->VpiSize();
+              int64_t size = c->VpiSize();
               if (name == "$signed") {
                 return c;
               } else {
@@ -3295,7 +3311,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                        c->VpiConstType() == vpiHexConst ||
                        c->VpiConstType() == vpiOctConst) {
               uint64_t value = get_uvalue(invalidValue, val);
-              uint64_t size = c->VpiSize();
+              int64_t size = c->VpiSize();
               if (name == "$signed") {
                 int64_t res = value;
                 bool negsign = value & (1ULL << (size - 1));

@@ -780,7 +780,10 @@ cont_assign* cont_assign::DeepClone(Serializer* serializer,
         if (actual->UhdmType() == uhdmstruct_var) {
           struct_var* stv = (struct_var*)actual;
           ExprEval eval;
-          eval.flattenPatternAssignments(*serializer, stv->Typespec(), rhs);
+          expr* res = eval.flattenPatternAssignments(*serializer, stv->Typespec(), rhs);
+          if (res->UhdmType() == uhdmoperation) {
+            ((operation*)rhs)->Operands(((operation*)res)->Operands());
+          }
         }
       }
     }
