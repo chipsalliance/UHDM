@@ -169,7 +169,7 @@ target_include_directories(uhdm SYSTEM PUBLIC
   $<INSTALL_INTERFACE:include>)
 target_include_directories(uhdm PRIVATE
   ${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src
-  ${PROJECT_SOURCE_DIR}/third_party/UHDM/src)
+  ${GENDIR}/src)
 target_compile_definitions(uhdm
   PUBLIC PLI_DLLISPEC=
   PUBLIC PLI_DLLESPEC=)
