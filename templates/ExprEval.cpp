@@ -39,6 +39,16 @@
 
 using namespace UHDM;
 
+static uint64_t getMask(uint64_t wide) {
+  uint64_t mask = 0;
+  uint64_t sizeInBits = sizeof(mask) * 8;
+  mask = (wide >= sizeInBits)
+             ? ((uint64_t)-1)
+             : ((uint64_t)((uint64_t)(((uint64_t)1) << ((uint64_t)wide))) -
+                (uint64_t)1);
+  return mask;
+}
+
 static std::string &ltrim(std::string &str, char c) {
   auto it1 =
       std::find_if(str.begin(), str.end(), [c](char ch) { return (ch == c); });
@@ -660,6 +670,34 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
                             fieldNames[index], exp, nullptr);
         return result;
       }
+      if (op->UhdmType() == uhdmtagged_pattern) {
+        tagged_pattern *tp = (tagged_pattern *)op;
+        const any *patt = tp->Pattern();
+        if (patt->UhdmType() == uhdmconstant) {
+          constant *c = (constant *)patt;
+          if (c->VpiSize() == -1) {
+            bool invalidValue = false;
+            uint64_t uval = get_uvalue(invalidValue, c);
+            if (uval == 1) {
+              uint64_t size = ExprEval::size(fieldTypes[index], invalidValue,
+                                         nullptr, exp, true, true);
+              uint64_t mask = getMask(size);
+              uval = mask;
+              c->VpiValue("UINT:" + std::to_string(uval));
+              c->VpiDecompile(std::to_string(uval));
+              c->VpiConstType(vpiUIntConst);
+              c->VpiSize(size);
+            } else if (uval == 0) {
+              uint64_t size = ExprEval::size(fieldTypes[index], invalidValue,
+                                         nullptr, exp, true, true);
+              c->VpiValue("UINT:" + std::to_string(uval));
+              c->VpiDecompile(std::to_string(uval));
+              c->VpiConstType(vpiUIntConst);
+              c->VpiSize(size);
+            }
+          }
+        }
+      }
       ordered->push_back(op);
       index++;
     }
@@ -1103,16 +1141,6 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
     result = c;
   }
   return result;
-}
-
-static uint64_t getMask(uint64_t wide) {
-  uint64_t mask = 0;
-  uint64_t sizeInBits = sizeof(mask) * 8;
-  mask = (wide >= sizeInBits)
-             ? ((uint64_t)-1)
-             : ((uint64_t)((uint64_t)(((uint64_t)1) << ((uint64_t)wide))) -
-                (uint64_t)1);
-  return mask;
 }
 
 static std::string trimLeadingZeros(const std::string &s) {
