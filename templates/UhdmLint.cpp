@@ -24,10 +24,10 @@
  * Created on Jan 3, 2022, 9:03 PM
  */
 #include <string.h>
+#include <uhdm/ExprEval.h>
 #include <uhdm/UhdmLint.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
-#include <uhdm/ExprEval.h>
 
 namespace UHDM {
 
@@ -89,7 +89,8 @@ void UhdmLint::leaveFunction(const function* object, vpiHandle handle) {
   }
 }
 
-void UhdmLint::leaveStruct_typespec(const struct_typespec* object, vpiHandle handle) {
+void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
+                                    vpiHandle handle) {
   if (object->VpiPacked()) {
     if (object->Members()) {
       for (typespec_member* member : *object->Members()) {
@@ -220,31 +221,31 @@ void UhdmLint::leaveLogic_net(const logic_net* object, vpiHandle handle) {
   }
 }
 
-void UhdmLint::leaveEnum_typespec(const enum_typespec* object, vpiHandle handle) {
+void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
+                                  vpiHandle handle) {
   const typespec* baseType = object->Base_typespec();
   if (!baseType) return;
+
   ExprEval eval;
-   eval.setDesign(design_);
+  eval.setDesign(design_);
+
   bool invalidValue = false;
-  uint64_t baseSize =
+  const uint64_t baseSize =
       eval.size(baseType, invalidValue,
                 object->Instance() ? object->Instance() : object->VpiParent(),
                 object->VpiParent(), true);
+  if (invalidValue) return;
+
   for (auto c : *object->Enum_consts()) {
     const std::string& val = c->VpiDecompile();
     if (c->VpiSize() == -1) continue;
-    if (!strstr(val.c_str(), "'")) continue;
-    uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
-                                object->VpiParent(), true);
-    if (invalidValue == false) {
-      if (baseSize != c_size) {
-        baseSize =
-      eval.size(baseType, invalidValue,
-                object->Instance() ? object->Instance() : object->VpiParent(),
-                object->VpiParent(), true);
-        serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_CONST_SIZE_MISMATCH,
-                                       c->VpiName(), c, baseType);
-      }
+    if (val.find('\'') == std::string::npos) continue;
+    invalidValue = false;
+    const uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
+                                      object->VpiParent(), true);
+    if (!invalidValue && (baseSize != c_size)) {
+      serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_CONST_SIZE_MISMATCH,
+                                     c->VpiName(), c, baseType);
     }
   }
 }
