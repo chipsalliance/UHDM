@@ -334,6 +334,7 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
       UHDM::VectorOfarray_net *array_nets = nullptr;
       UHDM::VectorOfnet *nets = nullptr;
       UHDM::VectorOftypespec *typespecs = nullptr;
+      UHDM::VectorOfscope* scopes = nullptr;
       if (inst->UhdmType() == uhdmgen_scope_array) {
       } else if (inst->UhdmType() == uhdmdesign) {
         param_assigns = ((design *)inst)->Param_assigns();
@@ -342,6 +343,7 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
         param_assigns = ((scope *)inst)->Param_assigns();
         variables = ((scope *)inst)->Variables();
         typespecs = ((scope *)inst)->Typespecs();
+        scopes = ((scope *)inst)->Scopes();
         if (const instance *in = any_cast<instance *>(inst)) {
           array_nets = in->Array_nets();
           nets = in->Nets();
@@ -382,6 +384,14 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
       }
       if ((result == nullptr) && typespecs) {
         for (auto o : *typespecs) {
+          if (o->VpiName() == name) {
+            result = o;
+            break;
+          }
+        }
+      }
+      if ((result == nullptr) && scopes) {
+        for (auto o : *scopes) {
           if (o->VpiName() == name) {
             result = o;
             break;
@@ -783,7 +793,10 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
       case UHDM::uhdmhier_path: {
         typespec = decodeHierPath((hier_path *)typespec, invalidValue, inst,
                                   nullptr, true);
-        bits = size(typespec, invalidValue, inst, pexpr, full);
+        if (typespec)
+          bits = size(typespec, invalidValue, inst, pexpr, full);
+        else 
+          invalidValue = true;
         break;
       }
       case UHDM::uhdmarray_typespec: {
@@ -993,7 +1006,7 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         invalidValue = true;
         break;
     }
-  }
+  } 
   if (ranges) {
     if (!full) {
       UHDM::range *last_range = nullptr;
