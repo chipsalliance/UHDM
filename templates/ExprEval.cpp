@@ -3513,8 +3513,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       constant *co = (constant *)object;
       int64_t val = get_value(invalidValue, co);
       std::string binary = toBinary(co->VpiSize(), val);
-      int64_t l = get_value(invalidValue, sel->Left_range());
-      int64_t r = get_value(invalidValue, sel->Right_range());
+      int64_t l = get_value(
+          invalidValue,
+          reduceExpr(sel->Left_range(), invalidValue, inst, pexpr, muteError));
+      int64_t r = get_value(
+          invalidValue,
+          reduceExpr(sel->Right_range(), invalidValue, inst, pexpr, muteError));
       std::reverse(binary.begin(), binary.end());
       std::string sub;
       if (r > (int64_t)binary.size() || l > (int64_t)binary.size()) {
@@ -3525,6 +3529,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         else
           sub = binary.substr(l, r - l + 1);
       }
+      std::reverse(sub.begin(), sub.end());
       UHDM::constant *c = s.MakeConstant();
       c->VpiValue("BIN:" + sub);
       c->VpiDecompile(sub);
