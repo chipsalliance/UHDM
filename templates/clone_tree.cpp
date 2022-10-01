@@ -1081,6 +1081,22 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                       }
                     }
                   }
+                  if (scope->Array_nets()) {
+                    for (auto m : *scope->Array_nets()) {
+                      if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                        found = true;
+                        previous = m;
+                        if (current->UhdmType() == uhdmref_obj) {
+                          ((ref_obj*)current)->Actual_group(m);
+                        } else if (current->UhdmType() == uhdmbit_select) {
+                          const any* parent = current->VpiParent();
+                          if (parent && (parent->UhdmType() == uhdmref_obj))
+                            ((ref_obj*)parent)->Actual_group(m);
+                        }
+                        break;
+                      }
+                    }
+                  }
                   if (scope->Variables()) {
                     for (auto m : *scope->Variables()) {
                       if (m->VpiName() == name || m->VpiName() == nameIndexed) {
