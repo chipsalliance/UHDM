@@ -2969,18 +2969,14 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     break;
                   }
                   case vpiDecConst: {
-                    if (operands.size() == 1) {
-                      long long iv = std::strtoll(
-                          v.c_str() + std::string_view("DEC:").length(),
-                          nullptr, 10);
-                      std::string bin = toBinary(size, iv);
-                      if (op->VpiReordered()) {
-                        std::reverse(bin.begin(), bin.end());
-                      }
-                      cval += bin;
-                    } else {
-                      c1 = nullptr;
+                    long long iv = std::strtoll(
+                        v.c_str() + std::string_view("DEC:").length(), nullptr,
+                        10);
+                    std::string bin = toBinary(size, iv);
+                    if (op->VpiReordered()) {
+                      std::reverse(bin.begin(), bin.end());
                     }
+                    cval += bin;
                     break;
                   }
                   case vpiHexConst: {
