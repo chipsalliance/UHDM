@@ -122,7 +122,7 @@ set(CAPNP_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/capnproto/c++/src/capnp)
 
 add_custom_command(
   OUTPUT ${model-GENERATED_SRC}
-  COMMAND ${CAPNP_DIR}/capnp compile -o${CAPNP_DIR}/capnpc-c++ ${model-GENERATED_UHDM}
+  COMMAND ${CAPNP_DIR}/capnp compile -o${CAPNP_DIR}/capnpc-c++ --src-prefix=${GENDIR}/.. ${model-GENERATED_UHDM}
   DEPENDS capnpc capnpc_cpp ${model-GENERATED_UHDM})
 add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
