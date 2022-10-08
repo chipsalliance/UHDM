@@ -146,7 +146,6 @@ void SynthSubset::leaveAny(const any* object, vpiHandle handle) {
     case uhdmreal_var:
     case uhdmtime_var:
     case uhdmchandle_var:
-    case uhdmtask:
     case uhdmchecker_port:
     case uhdmchecker_inst_port:
     case uhdmswitch_tran:
@@ -177,7 +176,6 @@ void SynthSubset::leaveAny(const any* object, vpiHandle handle) {
     case uhdmsequence_typespec:
     case uhdmproperty_typespec:
     case uhdmuser_systf:
-    case uhdmtask_call:
     case uhdmmethod_func_call:
     case uhdmmethod_task_call:
     case uhdmconstraint_ordering:
@@ -197,6 +195,50 @@ void SynthSubset::leaveAny(const any* object, vpiHandle handle) {
       break;
     default:
       break;
+  }
+}
+
+void SynthSubset::leaveTask(const task* topobject, vpiHandle handle) {
+  // Give specific error for non-synthesizable tasks
+  std::function<void(const any*, const any*)> inst_visit =
+      [&inst_visit, this](const any* stmt, const any* top) {
+        UHDM_OBJECT_TYPE type = stmt->UhdmType();
+        UHDM::VectorOfany* stmts = nullptr;
+        if (type == uhdmbegin) {
+          begin* b = (begin*)stmt;
+          stmts = b->Stmts();
+        } else if (type == uhdmnamed_begin) {
+          named_begin* b = (named_begin*)stmt;
+          stmts = b->Stmts();
+        }
+        if (stmts) {
+          for (auto st : *stmts) {
+            UHDM_OBJECT_TYPE sttype = st->UhdmType();
+            switch (sttype) {
+              case uhdmwait_stmt:
+              case uhdmwait_fork:
+              case uhdmordered_wait:
+              case uhdmdisable:
+              case uhdmdisable_fork:
+              case uhdmforce:
+              case uhdmdeassign:
+              case uhdmrelease:
+              case uhdmsoft_disable:
+              case uhdmfork_stmt:
+              case uhdmnamed_fork:
+              case uhdmevent_stmt: {
+                reportError(top);
+              }
+              default: {
+              }
+            }
+            inst_visit(st, top);
+          }
+        }
+      };
+
+  if (const any* stmt = topobject->Stmt()) {
+    inst_visit(stmt, topobject);
   }
 }
 

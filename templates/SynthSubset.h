@@ -49,6 +49,8 @@ class SynthSubset final : public VpiListener {
   void leaveSys_func_call(const sys_func_call* object,
                           vpiHandle handle) override;
 
+  void leaveTask(const task* object, vpiHandle handle) override;
+
   void leaveClass_typespec(const class_typespec* object,
                            vpiHandle handle) override;
 
