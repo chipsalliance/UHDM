@@ -243,8 +243,12 @@ if (UHDM_BUILD_TESTS)
 endif()
 
 # Useful utilities
+add_executable(uhdm-cmp ${PROJECT_SOURCE_DIR}/util/uhdm-cmp.cpp)
+target_link_libraries(uhdm-cmp PRIVATE uhdm)
+
 add_executable(uhdm-dump ${PROJECT_SOURCE_DIR}/util/uhdm-dump.cpp)
 target_link_libraries(uhdm-dump PRIVATE uhdm)
+
 add_executable(uhdm-hier ${PROJECT_SOURCE_DIR}/util/uhdm-hier.cpp)
 target_link_libraries(uhdm-hier PRIVATE uhdm)
 
@@ -270,7 +274,7 @@ target_link_libraries(test_inst PRIVATE
 
 # Installation target
 install(
-  TARGETS uhdm capnp kj uhdm-dump uhdm-hier
+  TARGETS uhdm capnp kj uhdm-cmp uhdm-dump uhdm-hier
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${GENDIR}/uhdm/
