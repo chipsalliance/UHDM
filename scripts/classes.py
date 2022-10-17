@@ -526,16 +526,13 @@ def _get_GetVpiPropertyValue_implementation(model):
 def _get_Compare_implementation(model):
     vpi_blacklist = [
         'uhdmId',
-        'uhdmParentType',
         'uhdmType',
         'vpiColumnNo',
         'vpiEndColumnNo',
         'vpiEndLineNo',
         'vpiFile',
         'vpiFullName',
-        'vpiInstance',
         'vpiLineNo',
-        'vpiParent',
     ]
 
     classname = model['name']
@@ -544,18 +541,21 @@ def _get_Compare_implementation(model):
     includes = set()
     content = [
         f'int {classname}::Compare(const BaseClass *const other, AnySet& visited) const {{',
-         '  int r = 0;',
-         '  if (!visited.insert(this).second) return r;',
-         '',
-         '  AnySet local;',
-         '  if ((r = basetype_t::Compare(other, local)) != 0) return r;',
-         '  visited.merge(local);',
-         ''
+         '  int r = 0;'
     ]
+
+    if not model['subclasses']:
+        # Mark self visited (and check) only for the most derived sub-class
+        content.append('  if (!visited.insert(this).second) return r;')
+
+    content.extend([
+         '  if ((r = basetype_t::Compare(other, visited)) != 0) return r;',
+         ''
+    ])
 
     var_declared = False
     for key, value in model.allitems():
-        if key not in ['property', 'obj_ref', 'class_ref']:
+        if key not in ['property', 'obj_ref', 'class_ref', 'class']:
             continue
 
         vpi = value.get('vpi')
@@ -591,8 +591,7 @@ def _get_Compare_implementation(model):
                   f'  auto lhs_{name} = lhs->{Name}();',
                   f'  auto rhs_{name} = rhs->{Name}();',
                   f'  if ((lhs_{name} != nullptr) && (rhs_{name} != nullptr)) {{',
-                  f'    if ((r = lhs_{name}->Compare(rhs_{name}, local)) != 0) return r;',
-                   '    visited.merge(local);',
+                  f'    if ((r = lhs_{name}->Compare(rhs_{name}, visited)) != 0) return r;',
                   f'  }} else if ((lhs_{name} != nullptr) && (rhs_{name} == nullptr)) {{',
                    '    return 1;',
                   f'  }} else if ((lhs_{name} == nullptr) && (rhs_{name} != nullptr)) {{',
@@ -613,8 +612,7 @@ def _get_Compare_implementation(model):
                 f'    if ((r = static_cast<int>(lhs_{name}->size() - rhs_{name}->size())) != 0) return r;',
                  '',
                 f'    for (size_t i = 0, n = lhs_{name}->size(); i < n; ++i) {{',
-                f'      if ((r = lhs_{name}->at(i)->Compare(rhs_{name}->at(i), local)) != 0) return r;',
-                 '      visited.merge(local);',
+                f'      if ((r = lhs_{name}->at(i)->Compare(rhs_{name}->at(i), visited)) != 0) return r;',
                  '    }',
                 f'  }} else if ((lhs_{name} != nullptr) && (rhs_{name} == nullptr)) {{',
                  '    return 1;',
