@@ -43,8 +43,19 @@ def _generate_module_listeners(models, classname):
                     listeners.append( '    clone_vec->push_back(tf);')
                     listeners.append( '  }')
                     listeners.append( '}')
+                elif method in ['Cont_assigns']:
+                    # We want to deep clone existing instance cont assign to perform binding
+                    listeners.append(f'if (auto vec = inst->{method}()) {{')
+                    listeners.append(f'  auto clone_vec = serializer_->Make{Cast}Vec();')
+                    listeners.append(f'  inst->{method}(clone_vec);')
+                    listeners.append( '  for (auto obj : *vec) {')
+                    listeners.append( '    auto* stmt = obj->DeepClone(serializer_, this, inst);')
+                    listeners.append( '    stmt->VpiParent(inst);')
+                    listeners.append( '    clone_vec->push_back(stmt);')
+                    listeners.append( '  }')
+                    listeners.append( '}')
 
-                elif method in ['Cont_assigns', 'Gen_scope_arrays']:
+                elif method in ['Gen_scope_arrays']:
                     # We want to deep clone existing instance cont assign to perform binding
                     listeners.append(f'if (auto vec = inst->{method}()) {{')
                     listeners.append(f'  auto clone_vec = serializer_->Make{Cast}Vec();')
