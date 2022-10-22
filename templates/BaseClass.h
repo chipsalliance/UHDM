@@ -77,7 +77,7 @@ namespace UHDM {
 
     virtual const std::string& VpiFile() const = 0;
 
-    virtual bool VpiFile(const std::string& data) = 0;
+    virtual bool VpiFile(std::string_view data) = 0;
 
     virtual int VpiLineNo() const final { return vpiLineNo_; }
 

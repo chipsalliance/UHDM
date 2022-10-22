@@ -35,7 +35,7 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
             const = 'const '
 
         if type == 'std::string':
-            content.append(f'  {virtual}bool {Vpi_}(const std::string& data){final};')
+            content.append(f'  {virtual}bool {Vpi_}(std::string_view data){final};')
             content.append(f'  {virtual}const std::string& {Vpi_}() const{final};')
         else:
             content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
@@ -131,7 +131,7 @@ def _get_implementations(classname, type, vpi, card, real_type=''):
         content.append(f'const {type}{pointer}& {classname}::{Vpi_}() const {{ return serializer_->symbolMaker.GetSymbol({vpi}_); }}')
 
     content.append('')
-    content.append(f'bool {classname}::{Vpi_}(const {type}{pointer}& data) {{ {vpi}_ = serializer_->symbolMaker.Make(data); return true; }}')
+    content.append(f'bool {classname}::{Vpi_}(std::string_view data) {{ {vpi}_ = serializer_->symbolMaker.Make(data); return true; }}')
     content.append('')
 
     return content, includes
@@ -223,17 +223,19 @@ def _get_DeepClone_implementation(model, models):
                 elif (classname in ['bit_select']) and (method == 'Actual_group'):
                     includes.add('ElaboratorListener')
                     includes.add('ExprEval')
-                    content.append(f'  std::string name = VpiName();')
+                    content.append(f'  const std::string& name = VpiName();')
                     content.append(f'  ExprEval eval;')
                     content.append(f'  bool invalidValue = false;')
                     content.append( '  if (any* val = eval.reduceExpr(VpiIndex(), invalidValue, parent, parent, true)) {')
-                    content.append(f'    std::string indexName = eval.prettyPrint(val);')
-                    content.append( '    if (any* indexVal = elaborator->bindAny(indexName)) {')
-                    content.append(f'      val = eval.reduceExpr(indexVal, invalidValue, parent, parent, true);')
-                    content.append(f'      indexName = eval.prettyPrint(val);')
+                    content.append( '    if (!invalidValue) {')
+                    content.append(f'      std::string indexName = eval.prettyPrint(val);')
+                    content.append( '      if (any* indexVal = elaborator->bindAny(indexName)) {')
+                    content.append(f'        val = eval.reduceExpr(indexVal, invalidValue, parent, parent, true);')
+                    content.append(f'        if (!invalidValue) indexName = eval.prettyPrint(val);')
+                    content.append( '      }')
+                    content.append( '      indexName = name + "[" + indexName + "]";')
+                    content.append(f'      clone->{method}(elaborator->bindAny(indexName));')
                     content.append( '    }')
-                    content.append( '    indexName = name + "[" + indexName + "]";')
-                    content.append(f'    clone->{method}(elaborator->bindAny(indexName));')
                     content.append( '  }')
                     content.append(f'  if (!clone->{method}()) clone->{method}(elaborator->bindAny(name));')
                     content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')

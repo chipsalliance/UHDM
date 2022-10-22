@@ -696,14 +696,14 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
               c->VpiValue("UINT:" + std::to_string(uval));
               c->VpiDecompile(std::to_string(uval));
               c->VpiConstType(vpiUIntConst);
-              c->VpiSize(size);
+              c->VpiSize(static_cast<int>(size));
             } else if (uval == 0) {
               uint64_t size = ExprEval::size(fieldTypes[index], invalidValue,
                                          nullptr, exp, true, true);
               c->VpiValue("UINT:" + std::to_string(uval));
               c->VpiDecompile(std::to_string(uval));
               c->VpiConstType(vpiUIntConst);
-              c->VpiSize(size);
+              c->VpiSize(static_cast<int>(size));
             }
           }
         }
