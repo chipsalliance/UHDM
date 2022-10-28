@@ -51,6 +51,7 @@ typedef std::function<task_func*(const std::string& name, const any* inst)>
 
 class ExprEval {
  public:
+  ExprEval(bool muteError = false) : m_muteError(muteError) {}
   bool isFullySpecified(const typespec* tps);
 
   /* Computes the size in bits of an object {typespec, var, net, operation...}.
@@ -137,6 +138,7 @@ class ExprEval {
   GetObjectFunctor getValueFunctor = nullptr;
   GetTaskFuncFunctor getTaskFuncFunctor = nullptr;
   const UHDM::design* m_design = nullptr;
+  bool m_muteError = false;
 };
 
 std::string vPrint(UHDM::any* handle);
