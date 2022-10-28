@@ -654,21 +654,24 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
           }
         }
         if (found == false) {
-          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, tname, exp,
-                              nullptr);
+          if (!m_muteError)
+            s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, tname,
+                                exp, nullptr);
           return result;
         }
       } else {
-        if (index < (int)tmp.size())
+        if (index < (int)tmp.size()) {
           tmp[index] = oper;
-        else
-          s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY,
-                              "Out of bound!", exp, nullptr);
+        } else {
+          if (!m_muteError)
+            s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY,
+                                "Out of bound!", exp, nullptr);
+        }
       }
       index++;
     }
     index = 0;
-    ElaboratorListener listener(&s);
+    ElaboratorListener listener(&s, false, m_muteError);
     for (auto op : tmp) {
       if (defaultOp) {
         if (op == nullptr) {
@@ -676,7 +679,8 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
         }
       }
       if (op == nullptr) {
-        s.GetErrorHandler()(ErrorType::UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN,
+        if (!m_muteError)
+          s.GetErrorHandler()(ErrorType::UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN,
                             fieldNames[index], exp, nullptr);
         return result;
       }
@@ -1313,7 +1317,7 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
         } else if (any_cast<scope *>(inst)) {
           fullPath = ((scope *)inst)->VpiFullName();
         }
-        if (muteError == false)
+        if (muteError == false && m_muteError == false)
           s.GetErrorHandler()(ErrorType::UHDM_INTERNAL_ERROR_OUT_OF_BOUND,
                               fullPath, op, nullptr);
         v = "0";
@@ -2704,7 +2708,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   } else if (any_cast<scope *>(inst)) {
                     fullPath = ((scope *)inst)->VpiFullName();
                   }
-                  if (muteError == false)
+                  if (muteError == false && m_muteError == false)
                     s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO,
                                         fullPath, expr1, nullptr);
                 }
@@ -2803,7 +2807,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 } else if (any_cast<scope *>(inst)) {
                   fullPath = ((scope *)inst)->VpiFullName();
                 }
-                if (muteError == false)
+                if (muteError == false && m_muteError == false)
                   s.GetErrorHandler()(ErrorType::UHDM_DIVIDE_BY_ZERO, fullPath,
                                       div_expr, nullptr);
               }
@@ -3087,7 +3091,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   } else if (any_cast<scope *>(inst)) {
                     fullPath = ((scope *)inst)->VpiFullName();
                   }
-                  if (muteError == false)
+                  if (muteError == false && m_muteError == false)
                     s.GetErrorHandler()(
                         ErrorType::UHDM_INTERNAL_ERROR_OUT_OF_BOUND, fullPath,
                         op, nullptr);
@@ -3360,7 +3364,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       actual_func = any_cast<function *>(func);
     }
     if (actual_func == nullptr) {
-      if (muteError == false)
+      if (muteError == false && m_muteError == false)
         s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_USER_FUNCTION, name,
                             scall, nullptr);
       invalidValue = true;
@@ -3967,7 +3971,7 @@ void ExprEval::evalStmt(const std::string &funcName, Scopes &scopes,
     }
     default: {
       invalidValue = true;
-      if (muteError == false)
+      if (muteError == false && m_muteError == false)
         s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, inst->VpiName(),
                             stmt, nullptr);
       break;
@@ -4036,7 +4040,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
                    return_flag, scope, stmt, muteError);
           if (return_flag) break;
           if (continue_flag || break_flag) {
-            if (muteError == false)
+            if (muteError == false && m_muteError == false)
               s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
                                   inst->VpiName(), stmt, nullptr);
           }
@@ -4052,7 +4056,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
                    return_flag, scope, stmt, muteError);
           if (return_flag) break;
           if (continue_flag || break_flag) {
-            if (muteError == false)
+            if (muteError == false && m_muteError == false)
               s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
                                   inst->VpiName(), stmt, nullptr);
           }
@@ -4065,7 +4069,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
         evalStmt(name, scopes, invalidValue, continue_flag, break_flag,
                  return_flag, scope, the_stmt, muteError);
         if (continue_flag || break_flag) {
-          if (muteError == false)
+          if (muteError == false && m_muteError == false)
             s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
                                 inst->VpiName(), the_stmt, nullptr);
         }
