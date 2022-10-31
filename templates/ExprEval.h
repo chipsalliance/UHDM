@@ -110,7 +110,7 @@ class ExprEval {
                             const UHDM::any* pexpr, bool returnTypespec,
                             bool muteError = false);
 
-  typedef std::vector<module*> Scopes;
+  typedef std::vector<const instance*> Scopes;
 
   UHDM::expr* evalFunc(UHDM::function* func, std::vector<UHDM::any*>* args,
                        bool& invalidValue, const any* inst, UHDM::any* pexpr,
@@ -121,7 +121,7 @@ class ExprEval {
                 const any* inst, const UHDM::any* stmt, bool muteError = false);
 
   bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
-                          bool& invalidValue, Serializer& s, const any* inst);
+                          bool& invalidValue, Serializer& s, const any* inst, bool muteError);
   void setDesign(design* des) { m_design = des; }
   /* For Surelog or other UHDM clients to use the UHDM expr evaluator in their
    * context */
