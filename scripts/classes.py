@@ -530,11 +530,17 @@ def _get_Compare_implementation(model):
         'uhdmId',
         'uhdmType',
         'vpiColumnNo',
+        'vpiDefLineNo',
         'vpiEndColumnNo',
         'vpiEndLineNo',
         'vpiFile',
         'vpiFullName',
         'vpiLineNo',
+        'vpiRefColumnNo',
+        'vpiRefEndColumnNo',
+        'vpiRefEndLineNo',
+        'vpiRefFile',
+        'vpiRefLineNo',
     ]
 
     classname = model['name']
