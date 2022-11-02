@@ -3820,13 +3820,13 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           std::reverse(rhsbinary.begin(), rhsbinary.end());
           if (sel->VpiIndexedPartSelectType() == vpiPosIndexed) {
             int index = 0;
-            for (uint32_t i = base; i < base + offset - 1; i++) {
+            for (uint32_t i = base; i < base + offset; i++) {
               lhsbinary[i] = rhsbinary[index];
               index++;
             }
           } else {
             int index = 0;
-            for (uint32_t i = base; i > base - offset + 1; i--) {
+            for (uint32_t i = base; i > base - offset; i--) {
               lhsbinary[i] = rhsbinary[index];
               index++;
             }
