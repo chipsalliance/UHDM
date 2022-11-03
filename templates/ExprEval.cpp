@@ -3781,10 +3781,12 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
     }
   } else {
     if (param_assigns) {
+      const any* prevRhs = nullptr;
       for (VectorOfparam_assign::iterator itr = param_assigns->begin();
            itr != param_assigns->end(); itr++) {
         if ((*itr)->Lhs()->VpiName() == lhsname) {
-          param_assigns->erase(itr);
+          prevRhs = (*itr)->Rhs();
+          param_assigns->erase(itr); 
           break;
         }
       }
@@ -3806,9 +3808,22 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           if (expr *elhs = any_cast<expr *>(object)) {
             tps = elhs->Typespec();
           }
-          uint64_t si = size(tps, invalidValue, inst, lhsexp, true, muteError);
-          for (uint32_t i = 0; i < si; i++) {
-            lhsbinary += "x";
+          uint64_t si =
+                size(tps, invalidValue, inst, lhsexp, true, muteError);
+          if (prevRhs && prevRhs->UhdmType() == uhdmconstant) {
+            const constant* prev = (constant*) prevRhs;
+            if (prev->VpiConstType() == vpiBinaryConst) {
+              std::string val = prev->VpiValue();
+              val.erase(0, 4);
+              lhsbinary = val;
+            } else {
+              lhsbinary = toBinary(si, get_uvalue(invalidValue, prev));
+            }
+            std::reverse(lhsbinary.begin(), lhsbinary.end());
+          } else {
+            for (uint32_t i = 0; i < si; i++) {
+              lhsbinary += "x";
+            }
           }
           int64_t base =
               get_value(invalidValue, reduceExpr(sel->Base_expr(), invalidValue,
@@ -3832,7 +3847,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
             }
           }
           std::reverse(lhsbinary.begin(), lhsbinary.end());
-          UHDM::constant *c = s.MakeConstant();
+          c = s.MakeConstant();
           c->VpiValue("BIN:" + lhsbinary);
           c->VpiDecompile(lhsbinary);
           c->VpiSize(static_cast<int>(lhsbinary.size()));
