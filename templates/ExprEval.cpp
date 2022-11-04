@@ -3825,10 +3825,10 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
               lhsbinary += "x";
             }
           }
-          int64_t base =
-              get_value(invalidValue, reduceExpr(sel->Base_expr(), invalidValue,
+          uint64_t base =
+              get_uvalue(invalidValue, reduceExpr(sel->Base_expr(), invalidValue,
                                                  inst, lhsexp, muteError));
-          int64_t offset = get_value(
+          uint64_t offset = get_uvalue(
               invalidValue, reduceExpr(sel->Width_expr(), invalidValue, inst,
                                        lhsexp, muteError));
           std::string rhsbinary = toBinary(c->VpiSize(), valUI);
@@ -3880,10 +3880,10 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
               lhsbinary += "x";
             }
           }
-          int64_t left =
-              get_value(invalidValue, reduceExpr(sel->Left_range(), invalidValue,
+          uint64_t left =
+              get_uvalue(invalidValue, reduceExpr(sel->Left_range(), invalidValue,
                                                  inst, lhsexp, muteError));
-          int64_t right = get_value(
+          uint64_t right = get_uvalue(
               invalidValue, reduceExpr(sel->Right_range(), invalidValue, inst,
                                        lhsexp, muteError));
           std::string rhsbinary = toBinary(c->VpiSize(), valUI);
@@ -3901,6 +3901,44 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
               index++;
             }
           }
+          std::reverse(lhsbinary.begin(), lhsbinary.end());
+          c = s.MakeConstant();
+          c->VpiValue("BIN:" + lhsbinary);
+          c->VpiDecompile(lhsbinary);
+          c->VpiSize(static_cast<int>(lhsbinary.size()));
+          c->VpiConstType(vpiBinaryConst);
+        }
+      } else if (lhsexp->UhdmType() == uhdmbit_select) {
+        bit_select *sel = (bit_select *)lhsexp;
+        const std::string &name = lhsexp->VpiParent()->VpiName();
+        any *object = getObject(name, inst, lhsexp, muteError);
+        if (object) {
+          std::string lhsbinary;
+          const typespec *tps = nullptr;
+          if (expr *elhs = any_cast<expr *>(object)) {
+            tps = elhs->Typespec();
+          }
+          uint64_t si =
+                size(tps, invalidValue, inst, lhsexp, true, muteError);
+          if (prevRhs && prevRhs->UhdmType() == uhdmconstant) {
+            const constant* prev = (constant*) prevRhs;
+            if (prev->VpiConstType() == vpiBinaryConst) {
+              std::string val = prev->VpiValue();
+              val.erase(0, 4);
+              lhsbinary = val;
+            } else {
+              lhsbinary = toBinary(si, get_uvalue(invalidValue, prev));
+            }
+            std::reverse(lhsbinary.begin(), lhsbinary.end());
+          } else {
+            for (uint32_t i = 0; i < si; i++) {
+              lhsbinary += "x";
+            }
+          }
+          uint64_t index =
+              get_uvalue(invalidValue, reduceExpr(sel->VpiIndex(), invalidValue,
+                                                 inst, lhsexp, muteError));
+          lhsbinary[index] = std::to_string(valUI)[0];
           std::reverse(lhsbinary.begin(), lhsbinary.end());
           c = s.MakeConstant();
           c->VpiValue("BIN:" + lhsbinary);
