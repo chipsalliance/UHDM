@@ -62,7 +62,7 @@ class SynthSubset final : public VpiListener {
 
   Serializer* serializer_ = nullptr;
   std::set<const any*>& nonSynthesizableObjects_;
-  std::set<std::string> nonSynthSysCalls_;
+  std::set<std::string, std::less<>> nonSynthSysCalls_;
   bool reportErrors_;
   bool allowFormal_;
 };

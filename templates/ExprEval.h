@@ -37,11 +37,11 @@
 namespace UHDM {
 class Serializer;
 
-typedef std::function<any*(const std::string& name, const any* inst,
+typedef std::function<any*(std::string_view name, const any* inst,
                            const any* pexpr)>
     GetObjectFunctor;
 
-typedef std::function<task_func*(const std::string& name, const any* inst)>
+typedef std::function<task_func*(std::string_view name, const any* inst)>
     GetTaskFuncFunctor;
 
 /* This UHDM extension offers expression reduction and other utilities that can
@@ -69,10 +69,10 @@ class ExprEval {
 
   uint64_t getValue(const UHDM::expr* expr);
 
-  any* getValue(const std::string& name, const any* inst, const any* pexpr,
+  any* getValue(std::string_view name, const any* inst, const any* pexpr,
                 bool muteError = false);
 
-  any* getObject(const std::string& name, const any* inst, const any* pexpr,
+  any* getObject(std::string_view name, const any* inst, const any* pexpr,
                  bool muteError = false);
 
   int64_t get_value(bool& invalidValue, const UHDM::expr* expr, bool strict = false);
@@ -116,11 +116,11 @@ class ExprEval {
                        bool& invalidValue, const any* inst, UHDM::any* pexpr,
                        bool muteError = false);
 
-  void evalStmt(const std::string& funcName, Scopes& scopes, bool& invalidValue,
+  void evalStmt(std::string_view funcName, Scopes& scopes, bool& invalidValue,
                 bool& continue_flag, bool& break_flag, bool& return_flag,
                 const any* inst, const UHDM::any* stmt, bool muteError = false);
 
-  bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
+  bool setValueInInstance(std::string_view lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst,
                           const any* scope_exp, bool muteError);
   void setDesign(design* des) { m_design = des; }
@@ -132,7 +132,7 @@ class ExprEval {
     getTaskFuncFunctor = func;
   }
 
-  UHDM::task_func* getTaskFunc(const std::string& name, const any* inst);
+  UHDM::task_func* getTaskFunc(std::string_view name, const any* inst);
 
  private:
   GetObjectFunctor getObjectFunctor = nullptr;

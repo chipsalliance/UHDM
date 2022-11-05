@@ -38,8 +38,9 @@ void UhdmLint::leaveBit_select(const bit_select* object, vpiHandle handle) {
       ref_obj* ref = (ref_obj*)index;
       const any* act = ref->Actual_group();
       if (act && act->UhdmType() == uhdmreal_var) {
+        const std::string errMsg(act->VpiName());
         serializer_->GetErrorHandler()(ErrorType::UHDM_REAL_TYPE_AS_SELECT,
-                                       act->VpiName(), ref, nullptr);
+                                       errMsg, ref, nullptr);
       }
     }
   }
@@ -81,9 +82,9 @@ void UhdmLint::leaveFunction(const function* object, vpiHandle handle) {
     if (const any* st = object->Stmt()) {
       const any* ret = returnWithValue(st);
       if (ret) {
+        const std::string errMsg(object->VpiName());
         serializer_->GetErrorHandler()(
-            ErrorType::UHDM_RETURN_VALUE_VOID_FUNCTION, object->VpiName(), ret,
-            nullptr);
+            ErrorType::UHDM_RETURN_VALUE_VOID_FUNCTION, errMsg, ret, nullptr);
       }
     }
   }
@@ -122,7 +123,7 @@ void UhdmLint::checkMultiContAssign(
       for (auto operand : *op->Operands()) {
         if (operand->UhdmType() == uhdmconstant) {
           constant* c = (constant*)operand;
-          if (c->VpiValue().find('z') != std::string::npos) {
+          if (c->VpiValue().find('z') != std::string_view::npos) {
             triStatedOp = true;
             break;
           }
@@ -135,7 +136,7 @@ void UhdmLint::checkMultiContAssign(
       const UHDM::expr* lhs = as->Lhs();
       const UHDM::expr* rhs = as->Rhs();
       if (lhs->UhdmType() == uhdmref_obj) {
-        const std::string& n = lhs->VpiName();
+        const std::string_view n = lhs->VpiName();
         if (n == lhs_exp->VpiName()) {
           ref_obj* ref = (ref_obj*)lhs;
           const any* actual = ref->Actual_group();
@@ -158,7 +159,7 @@ void UhdmLint::checkMultiContAssign(
             for (auto operand : *op->Operands()) {
               if (operand->UhdmType() == uhdmconstant) {
                 constant* c = (constant*)operand;
-                if (c->VpiValue().find('z') != std::string::npos) {
+                if (c->VpiValue().find('z') != std::string_view::npos) {
                   triStatedOp = true;
                   break;
                 }
@@ -193,9 +194,11 @@ void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
           }
           tmp = tmp->VpiParent();
         }
-        if (inProcess)
+        if (inProcess) {
+          const std::string errMsg(lhs->VpiName());
           serializer_->GetErrorHandler()(ErrorType::UHDM_ILLEGAL_WIRE_LHS,
-                                         lhs->VpiName(), lhs, 0);
+                                         errMsg, lhs, 0);
+        }
       }
     }
   }
@@ -212,9 +215,9 @@ void UhdmLint::leaveLogic_net(const logic_net* object, vpiHandle handle) {
       if (rhs->UhdmType() == uhdmconstant) {
         constant* c = (constant*)rhs;
         if (c->VpiValue() == "STRING:unsized") {
+          const std::string errMsg(object->VpiName());
           serializer_->GetErrorHandler()(
-              ErrorType::UHDM_ILLEGAL_PACKED_DIMENSION, object->VpiName(), c,
-              0);
+              ErrorType::UHDM_ILLEGAL_PACKED_DIMENSION, errMsg, c, 0);
         }
       }
     }
@@ -237,15 +240,16 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
   if (invalidValue) return;
 
   for (auto c : *object->Enum_consts()) {
-    const std::string& val = c->VpiDecompile();
+    const std::string_view val = c->VpiDecompile();
     if (c->VpiSize() == -1) continue;
     if (val.find('\'') == std::string::npos) continue;
     invalidValue = false;
     const uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
                                       object->VpiParent(), true);
     if (!invalidValue && (baseSize != c_size)) {
+      const std::string errMsg(c->VpiName());
       serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_CONST_SIZE_MISMATCH,
-                                     c->VpiName(), c, baseType);
+                                     errMsg, c, baseType);
     }
   }
 }

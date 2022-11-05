@@ -60,7 +60,7 @@ const any* UhdmAdjuster::resize(const any* object, int maxsize,
         }
       }
       if (constType == vpiBinaryConst) {
-        std::string value = c->VpiValue();
+        std::string value(c->VpiValue());
         if (is_signed && (!is_overall_unsigned)) {
           value.insert(4, (maxsize - c->VpiSize()), '1');
         } else {
@@ -187,7 +187,7 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
 }
 
 void UhdmAdjuster::enterModule_inst(const module_inst* object, vpiHandle handle) {
-  const std::string& instName = object->VpiName();
+  const std::string_view instName = object->VpiName();
   bool flatModule = (instName.empty()) &&
                     ((object->VpiParent() == 0) ||
                      ((object->VpiParent() != 0) &&

@@ -31,13 +31,8 @@ SymbolFactory::SymbolFactory() : m_parent(nullptr), m_idOffset(0) {
   registerSymbol(getBadSymbol());
 }
 
-const std::string& SymbolFactory::getBadSymbol() {
-  static const std::string k_badSymbol(BadRawSymbol);
-  return k_badSymbol;
-}
-
-const std::string& SymbolFactory::getEmptyMacroMarker() {
-  static const std::string k_emptyMacroMarker("@@EMPTY_MACRO@@");
+std::string_view SymbolFactory::getEmptyMacroMarker() {
+  static constexpr std::string_view k_emptyMacroMarker("@@EMPTY_MACRO@@");
   return k_emptyMacroMarker;
 }
 
@@ -89,7 +84,7 @@ std::pair<SymbolId, std::string_view> SymbolFactory::get(
                    found->first);
 }
 
-const std::string& SymbolFactory::getSymbol(SymbolId id) const {
+std::string_view SymbolFactory::getSymbol(SymbolId id) const {
   RawSymbolId rid = (RawSymbolId)id;
   if (rid < m_idOffset) {
     assert(m_parent);  // If we have a non-0 idOffset, we must have parent
@@ -140,13 +135,13 @@ SymbolId SymbolFactory::Make(std::string_view symbol) {
              : registerSymbol(symbol);
 }
 
-const std::string& SymbolFactory::GetSymbol(SymbolId id) const {
+std::string_view SymbolFactory::GetSymbol(SymbolId id) const {
   // IMPORTANT NOTE:
   // This is UHDM specific API and to be used within UHDM only.
   // An important distinction between these and the above -
   // For invalid id, these will return an empty string
   // unlike the above which return bad symbol.
-  static const std::string k_empty;
+  static constexpr std::string_view k_empty;
   return id ? getSymbol(id) : k_empty;
 }
 

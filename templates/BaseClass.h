@@ -29,7 +29,6 @@
 
 #include <deque>
 #include <set>
-#include <string>
 #include <string_view>
 #include <tuple>
 #include <variant>
@@ -43,7 +42,7 @@ namespace UHDM {
   class BaseClass;
   class Serializer;
   class ElaboratorListener;
-  static inline std::string nonamebaseclass ("");
+  static inline constexpr std::string_view kEmpty("");
 
 #ifdef STANDARD_VPI
   typedef std::set<vpiHandle> VisitedContainer;
@@ -75,7 +74,7 @@ namespace UHDM {
 
     virtual bool VpiParent(BaseClass* data) = 0;
 
-    virtual const std::string& VpiFile() const = 0;
+    virtual std::string_view VpiFile() const = 0;
 
     virtual bool VpiFile(std::string_view data) = 0;
 
@@ -95,9 +94,9 @@ namespace UHDM {
 
     virtual bool VpiEndColumnNo(short int data) final { vpiEndColumnNo_ = data; return true; }
 
-    virtual const std::string& VpiName() const { return nonamebaseclass; }
+    virtual std::string_view VpiName() const { return kEmpty; }
 
-    virtual const std::string& VpiDefName() const { return nonamebaseclass; }
+    virtual std::string_view VpiDefName() const { return kEmpty; }
 
     virtual unsigned int VpiType() const = 0;
 

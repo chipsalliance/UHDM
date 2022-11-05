@@ -68,7 +68,7 @@ class SymbolFactory {
 
   // Get symbol string identified by given ID or BadSymbol if it doesn't exist
   // (see #getBadSymbol()).
-  const std::string& getSymbol(SymbolId id) const;
+  std::string_view getSymbol(SymbolId id) const;
 
   // Copy input id from corresponding SymbolFactory rhs to this SymbolFactory
   SymbolId copyFrom(SymbolId id, const SymbolFactory* rhs);
@@ -77,9 +77,9 @@ class SymbolFactory {
   // used as an index into this  vector to get the corresponding text-symbol.
   std::vector<std::string_view> getSymbols() const;
 
-  static const std::string& getBadSymbol();
+  static std::string_view getBadSymbol() { return BadRawSymbol; }
   static SymbolId getBadId() { return BadSymbolId; }
-  static const std::string& getEmptyMacroMarker();
+  static std::string_view getEmptyMacroMarker();
 
   // IMPORTANT NOTE:
   // These are UHDM specific APIs and to be used within UHDM only.
@@ -87,7 +87,7 @@ class SymbolFactory {
   // For invalid id, these will return an empty string
   // unlike the above which return bad symbol.
   SymbolId Make(std::string_view symbol);
-  const std::string& GetSymbol(SymbolId id) const;
+  std::string_view GetSymbol(SymbolId id) const;
   SymbolId GetId(std::string_view symbol) const;
 
  protected:

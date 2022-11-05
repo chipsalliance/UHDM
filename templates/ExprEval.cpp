@@ -83,36 +83,37 @@ bool ExprEval::isFullySpecified(const UHDM::typespec *tps) {
   return true;
 }
 
-void tokenizeMulti(std::string_view str, std::string_view separator,
-                   std::vector<std::string> &result) {
-  std::string tmp;
-  const unsigned int sepSize = static_cast<unsigned int>(separator.size());
-  const unsigned int stringSize = static_cast<unsigned int>(str.size());
-  for (unsigned int i = 0; i < stringSize; i++) {
+static std::vector<std::string_view> tokenizeMulti(
+    std::string_view str, std::string_view multichar_separator) {
+  std::vector<std::string_view> result;
+  if (str.empty()) return result;
+
+  size_t start = 0;
+  size_t end = 0;
+  const size_t sepSize = multichar_separator.size();
+  const size_t stringSize = str.size();
+  for (size_t i = 0; i < stringSize; i++) {
     bool isSeparator = true;
-    for (unsigned int j = 0; j < sepSize; j++) {
+    for (size_t j = 0; j < sepSize; j++) {
       if (i + j >= stringSize) break;
-      if (str[i + j] != separator[j]) {
+      if (str[i + j] != multichar_separator[j]) {
         isSeparator = false;
         break;
       }
     }
     if (isSeparator) {
+      result.emplace_back(str.data() + start, end - start);
+      start = end = end + sepSize;
       i = i + sepSize - 1;
-      result.push_back(tmp);
-      tmp.clear();
-      if (i == (str.size() - 1)) result.push_back(tmp);
-    } else if (i == (str.size() - 1)) {
-      tmp += str[i];
-      result.push_back(tmp);
-      tmp.clear();
     } else {
-      tmp += str[i];
+      ++end;
     }
   }
+  result.emplace_back(str.data() + start, end - start);
+  return result;
 }
 
-any *ExprEval::getValue(const std::string &name, const any *inst,
+any *ExprEval::getValue(std::string_view name, const any *inst,
                         const any *pexpr, bool muteError) {
   any *result = nullptr;
   if ((inst == nullptr) && (pexpr == nullptr)) {
@@ -132,14 +133,13 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
   }
   const design *des = any_cast<design *>(root);
   if (des) m_design = des;
-  std::string the_name = name;
+  std::string_view the_name = name;
   const any *the_instance = inst;
   if (m_design && (name.find("::") != std::string::npos)) {
-    std::vector<std::string> res;
-    tokenizeMulti(name, "::", res);
+    std::vector<std::string_view> res = tokenizeMulti(name, "::");
     if (res.size() > 1) {
-      const std::string &packName = res[0];
-      const std::string &varName = res[1];
+      const std::string_view packName = res[0];
+      const std::string_view varName = res[1];
       the_name = varName;
       package *pack = nullptr;
       if (m_design->TopPackages()) {
@@ -229,7 +229,7 @@ any *ExprEval::getValue(const std::string &name, const any *inst,
   return result;
 }
 
-any *ExprEval::getObject(const std::string &name, const any *inst,
+any *ExprEval::getObject(std::string_view name, const any *inst,
                          const any *pexpr, bool muteError) {
   any *result = nullptr;
   while (pexpr) {
@@ -338,7 +338,7 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
       }
       if ((result == nullptr) && param_assigns) {
         for (auto o : *param_assigns) {
-          const std::string &pname = o->Lhs()->VpiName();
+          const std::string_view pname = o->Lhs()->VpiName();
           if (pname == name) {
             result = o;
             break;
@@ -380,7 +380,7 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
 
   if (result && (result->UhdmType() == uhdmref_obj)) {
     ref_obj *ref = (ref_obj *)result;
-    const std::string &refname = ref->VpiName();
+    const std::string_view refname = ref->VpiName();
     if (refname != name) result = getObject(refname, inst, pexpr, muteError);
     if (result) {
       if (UHDM::param_assign *passign = any_cast<param_assign *>(result)) {
@@ -602,11 +602,11 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       return result;
     }
     struct_typespec *stps = (struct_typespec *)tps;
-    std::vector<std::string> fieldNames;
+    std::vector<std::string_view> fieldNames;
     std::vector<const typespec *> fieldTypes;
     for (typespec_member *memb : *stps->Members()) {
-      fieldNames.push_back(memb->VpiName());
-      fieldTypes.push_back(memb->Typespec());
+      fieldNames.emplace_back(memb->VpiName());
+      fieldTypes.emplace_back(memb->Typespec());
     }
     VectorOfany *orig = op->Operands();
     VectorOfany *ordered = s.MakeAnyVec();
@@ -618,7 +618,7 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       if (oper->UhdmType() == uhdmtagged_pattern) {
         tagged_pattern *tp = (tagged_pattern *)oper;
         const typespec *ttp = tp->Typespec();
-        const std::string &tname = ttp->VpiName();
+        const std::string_view tname = ttp->VpiName();
         bool found = false;
         if (tname == "default") {
           defaultOp = oper;
@@ -641,18 +641,21 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
           }
         }
         if (found == false) {
-          if (!m_muteError)
-            s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, tname,
+          if (!m_muteError) {
+            const std::string errMsg(tname);
+            s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY, errMsg,
                                 exp, nullptr);
+          }
           return result;
         }
       } else {
         if (index < (int)tmp.size()) {
           tmp[index] = oper;
         } else {
-          if (!m_muteError)
+          if (!m_muteError) {
             s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_PATTERN_KEY,
                                 "Out of bound!", exp, nullptr);
+          }
         }
       }
       index++;
@@ -666,9 +669,11 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
         }
       }
       if (op == nullptr) {
-        if (!m_muteError)
+        if (!m_muteError) {
+          const std::string errMsg(fieldNames[index]);
           s.GetErrorHandler()(ErrorType::UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN,
-                              fieldNames[index], exp, nullptr);
+                              errMsg, exp, nullptr);
+        }
         return result;
       }
       if (op->UhdmType() == uhdmtagged_pattern) {
@@ -1299,9 +1304,10 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
         } else if (any_cast<scope *>(inst)) {
           fullPath = ((scope *)inst)->VpiFullName();
         }
-        if (muteError == false && m_muteError == false)
+        if (muteError == false && m_muteError == false) {
           s.GetErrorHandler()(ErrorType::UHDM_INTERNAL_ERROR_OUT_OF_BOUND,
                               fullPath, op, nullptr);
+        }
         v = "0";
       }
       c->VpiValue("BIN:" + v);
@@ -1534,7 +1540,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr,
   return result;
 }
 
-UHDM::task_func *ExprEval::getTaskFunc(const std::string &name,
+UHDM::task_func *ExprEval::getTaskFunc(std::string_view name,
                                        const any *inst) {
   if (getTaskFuncFunctor) {
     UHDM::task_func *result = getTaskFuncFunctor(name, inst);
@@ -1553,14 +1559,13 @@ UHDM::task_func *ExprEval::getTaskFunc(const std::string &name,
   }
   const design *des = any_cast<design *>(root);
   if (des) m_design = des;
-  std::string the_name = name;
+  std::string_view the_name = name;
   const any *the_instance = inst;
   if (m_design && (name.find("::") != std::string::npos)) {
-    std::vector<std::string> res;
-    tokenizeMulti(name, "::", res);
+    std::vector<std::string_view> res = tokenizeMulti(name, "::");
     if (res.size() > 1) {
-      const std::string &packName = res[0];
-      const std::string &varName = res[1];
+      const std::string_view packName = res[0];
+      const std::string_view varName = res[1];
       the_name = varName;
       package *pack = nullptr;
       if (m_design->TopPackages()) {
@@ -1944,7 +1949,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
           if (param_assigns) {
             for (param_assign *param : *param_assigns) {
               if (param && param->Lhs()) {
-                const std::string &param_name = param->Lhs()->VpiName();
+                const std::string_view param_name = param->Lhs()->VpiName();
                 if (param_name == select_path[0]) {
                   parameter *p = any_cast<parameter *>((any *)param->Lhs());
                   if (p) {
@@ -2044,7 +2049,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         UHDM_OBJECT_TYPE optype = oper->UhdmType();
         if (optype == uhdmref_obj) {
           ref_obj *ref = (ref_obj *)oper;
-          const std::string &name = ref->VpiName();
+          const std::string_view name = ref->VpiName();
           any *tmp = getValue(name, inst, pexpr, muteError);
           if (!tmp) {
             constantOperands = false;
@@ -2812,14 +2817,13 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               int consttype = ((UHDM::constant *)cv)->VpiConstType();
               c->VpiConstType(consttype);
               if (consttype == vpiBinaryConst) {
-                const std::string &val = cv->VpiValue();
-                std::string tmp =
-                    val.c_str() + std::string_view("BIN:").length();
+                std::string_view val = cv->VpiValue();
+                val.remove_prefix(std::string_view("BIN:").length());
                 std::string value;
-                if (width > (int)tmp.size()) {
-                  value.append(width - tmp.size(), '0');
+                if (width > (int)val.size()) {
+                  value.append(width - val.size(), '0');
                 }
-                value += tmp;
+                value += val;
                 std::string res;
                 for (unsigned int i = 0; i < n; i++) {
                   res += value;
@@ -2827,26 +2831,29 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 c->VpiValue("BIN:" + res);
                 c->VpiDecompile(res);
               } else if (consttype == vpiHexConst) {
-                const std::string &val = cv->VpiValue();
+                std::string_view val = cv->VpiValue();
+                val.remove_prefix(std::string_view("HEX:").length());
                 std::string res;
                 for (unsigned int i = 0; i < n; i++) {
-                  res += val.c_str() + std::string_view("HEX:").length();
+                  res += val;
                 }
                 c->VpiValue("HEX:" + res);
                 c->VpiDecompile(res);
               } else if (consttype == vpiOctConst) {
-                const std::string &val = cv->VpiValue();
+                std::string_view val = cv->VpiValue();
+                val.remove_prefix(std::string_view("OCT:").length());
                 std::string res;
                 for (unsigned int i = 0; i < n; i++) {
-                  res += val.c_str() + std::string_view("OCT:").length();
+                  res += val;
                 }
                 c->VpiValue("OCT:" + res);
                 c->VpiDecompile(res);
               } else if (consttype == vpiStringConst) {
-                const std::string &val = cv->VpiValue();
+                std::string_view val = cv->VpiValue();
+                val.remove_prefix(std::string_view("STRING:").length());
                 std::string res;
                 for (unsigned int i = 0; i < n; i++) {
-                  res += val.c_str() + std::string_view("STRING:").length();
+                  res += val;
                 }
                 c->VpiValue("STRING:" + res);
                 c->VpiDecompile(res);
@@ -3138,7 +3145,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     return (expr *)result;
   } else if (objtype == uhdmsys_func_call) {
     sys_func_call *scall = (sys_func_call *)result;
-    const std::string &name = scall->VpiName();
+    const std::string_view name = scall->VpiName();
     if ((name == "$bits") || (name == "$size") || (name == "$high") ||
         (name == "$low") || (name == "$left") || (name == "$right")) {
       uint64_t bits = 0;
@@ -3147,12 +3154,13 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         UHDM::UHDM_OBJECT_TYPE argtype = arg->UhdmType();
         if (argtype == uhdmref_obj) {
           ref_obj *ref = (ref_obj *)arg;
-          const std::string &objname = ref->VpiName();
+          const std::string_view objname = ref->VpiName();
           any *object = getObject(objname, inst, pexpr, muteError);
           if (object == nullptr) {
             if (inst->UhdmType() == uhdmpackage) {
-              object = getObject(inst->VpiName() + "::" + objname, inst, pexpr,
-                                 muteError);
+              std::string name(inst->VpiName());
+              name.append("::").append(objname);
+              object = getObject(name, inst, pexpr, muteError);
             }
           }
           if (object) {
@@ -3191,8 +3199,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           hier_path *path = (hier_path *)arg;
           auto elems = path->Path_elems();
           if (elems && (elems->size() > 1)) {
-            const std::string &base = elems->at(0)->VpiName();
-            const std::string &suffix = elems->at(1)->VpiName();
+            const std::string_view base = elems->at(0)->VpiName();
+            const std::string_view suffix = elems->at(1)->VpiName();
             any *var = getObject(base, inst, pexpr, muteError);
             if (var) {
               if (UHDM::param_assign *passign = any_cast<param_assign *>(var)) {
@@ -3315,7 +3323,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
   } else if (objtype == uhdmfunc_call) {
     func_call *scall = (func_call *)result;
-    const std::string &name = scall->VpiName();
+    const std::string_view name = scall->VpiName();
     std::vector<any *> *args = scall->Tf_call_args();
     UHDM::task_func *func = getTaskFunc(name, inst);
     function *actual_func = nullptr;
@@ -3323,9 +3331,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       actual_func = any_cast<function *>(func);
     }
     if (actual_func == nullptr) {
-      if (muteError == false && m_muteError == false)
-        s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_USER_FUNCTION, name,
+      if (muteError == false && m_muteError == false) {
+        const std::string errMsg(name);
+        s.GetErrorHandler()(ErrorType::UHDM_UNDEFINED_USER_FUNCTION, errMsg,
                             scall, nullptr);
+      }
       invalidValue = true;
     }
     expr *tmp = evalFunc(actual_func, args, invalidValue, inst, (any *)pexpr,
@@ -3335,7 +3345,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
   } else if (objtype == uhdmref_obj) {
     ref_obj *ref = (ref_obj *)result;
-    const std::string &name = ref->VpiName();
+    const std::string_view name = ref->VpiName();
     any *tmp = getValue(name, inst, pexpr, muteError);
     if (tmp) {
       result = tmp;
@@ -3347,7 +3357,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     return res;
   } else if (objtype == uhdmbit_select) {
     bit_select *sel = (bit_select *)result;
-    const std::string &name = sel->VpiName();
+    const std::string_view name = sel->VpiName();
     const expr *index = sel->VpiIndex();
     uint64_t index_val = get_value(
         invalidValue,
@@ -3447,7 +3457,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
   } else if (objtype == uhdmpart_select) {
     part_select *sel = (part_select *)result;
     any *parent = (any *)sel->VpiParent();
-    std::string name = parent->VpiName();
+    std::string_view name = parent->VpiName();
     if (name.empty()) {
       if (ref_obj *ref = any_cast<ref_obj *>(parent)) {
         name = ref->VpiDefName();
@@ -3469,12 +3479,10 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         binary = co->VpiValue();
         binary.erase(0, 4);
       } else if (co->VpiConstType() == vpiHexConst) {
-        std::string val = co->VpiValue();
-        val.erase(0, 4);
-        for (unsigned int i = 0; i < val.size(); i++) {
-          char tmp[2];
-          tmp[0] = val[i];
-          tmp[1] = '\0';
+        std::string_view val = co->VpiValue();
+        val.remove_prefix(4);
+        for (char ch : val) {
+          char tmp[2] = {ch, '\0'};
           binary += hexToBinary(tmp);
         }
       } else {
@@ -3509,7 +3517,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
   } else if (objtype == uhdmindexed_part_select) {
     indexed_part_select *sel = (indexed_part_select *)result;
-    const std::string &name = sel->VpiParent()->VpiName();
+    const std::string_view name = sel->VpiParent()->VpiName();
     any *object = getObject(name, inst, pexpr, muteError);
     if (object) {
       if (UHDM::param_assign *passign = any_cast<param_assign *>(object)) {
@@ -3546,7 +3554,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
   } else if (objtype == uhdmvar_select) {
     var_select *sel = (var_select *)result;
-    const std::string &name = sel->VpiName();
+    const std::string_view name = sel->VpiName();
     any *object = getObject(name, inst, pexpr, muteError);
     if (object) {
       if (UHDM::param_assign *passign = any_cast<param_assign *>(object)) {
@@ -3621,7 +3629,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
   return (expr *)result;
 }
 
-bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
+bool ExprEval::setValueInInstance(std::string_view lhs, any *lhsexp,
                                   expr *rhsexp, bool &invalidValue,
                                   Serializer &s, const any *inst,
                                   const any *scope_exp, bool muteError) {
@@ -3629,7 +3637,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
   bool invalidValueUI = false;
   bool invalidValueD = false;
   bool opRhs = false;
-  std::string lhsname = lhs;
+  std::string_view lhsname = lhs;
   if (lhsname.empty()) {
     lhsname = lhsexp->VpiParent()->VpiName();
   }
@@ -3751,7 +3759,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
         }
       } else if (lhsexp->UhdmType() == uhdmindexed_part_select) {
         indexed_part_select *sel = (indexed_part_select *)lhsexp;
-        const std::string &name = lhsexp->VpiParent()->VpiName();
+        const std::string_view name = lhsexp->VpiParent()->VpiName();
         any *object = getObject(name, inst, scope_exp, muteError);
         if (object) {
           std::string lhsbinary;
@@ -3763,8 +3771,8 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           if (prevRhs && prevRhs->UhdmType() == uhdmconstant) {
             const constant *prev = (constant *)prevRhs;
             if (prev->VpiConstType() == vpiBinaryConst) {
-              std::string val = prev->VpiValue();
-              val.erase(0, 4);
+              std::string_view val = prev->VpiValue();
+              val.remove_prefix(std::string_view("BIN:").length());
               lhsbinary = val;
             } else {
               lhsbinary = NumUtils::toBinary(static_cast<int>(si),
@@ -3806,7 +3814,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
         }
       } else if (lhsexp->UhdmType() == uhdmpart_select) {
         part_select *sel = (part_select *)lhsexp;
-        const std::string &name = lhsexp->VpiParent()->VpiName();
+        const std::string_view name = lhsexp->VpiParent()->VpiName();
         any *object = getObject(name, inst, scope_exp, muteError);
         if (object) {
           std::string lhsbinary;
@@ -3818,8 +3826,8 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           if (prevRhs && prevRhs->UhdmType() == uhdmconstant) {
             const constant *prev = (constant *)prevRhs;
             if (prev->VpiConstType() == vpiBinaryConst) {
-              std::string val = prev->VpiValue();
-              val.erase(0, 4);
+              std::string_view val = prev->VpiValue();
+              val.remove_prefix(std::string_view("BIN:").length());
               lhsbinary = val;
             } else {
               lhsbinary = NumUtils::toBinary(static_cast<int>(si),
@@ -3861,7 +3869,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
         }
       } else if (lhsexp->UhdmType() == uhdmbit_select) {
         bit_select *sel = (bit_select *)lhsexp;
-        const std::string &name = lhsexp->VpiParent()->VpiName();
+        const std::string_view name = lhsexp->VpiParent()->VpiName();
         any *object = getObject(name, inst, scope_exp, muteError);
         if (object) {
           std::string lhsbinary;
@@ -3873,8 +3881,8 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           if (prevRhs && prevRhs->UhdmType() == uhdmconstant) {
             const constant *prev = (constant *)prevRhs;
             if (prev->VpiConstType() == vpiBinaryConst) {
-              std::string val = prev->VpiValue();
-              val.erase(0, 4);
+              std::string_view val = prev->VpiValue();
+              val.remove_prefix(std::string_view("BIN:").length());
               lhsbinary = val;
             } else {
               lhsbinary = NumUtils::toBinary(static_cast<int>(si),
@@ -3910,7 +3918,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
   return invalidValue;
 }
 
-void ExprEval::evalStmt(const std::string &funcName, Scopes &scopes,
+void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
                         bool &invalidValue, bool &continue_flag,
                         bool &break_flag, bool &return_flag, const any *inst,
                         const any *stmt, bool muteError) {
@@ -4001,7 +4009,7 @@ void ExprEval::evalStmt(const std::string &funcName, Scopes &scopes,
     }
     case uhdmassignment: {
       assignment *st = (assignment *)stmt;
-      const std::string lhs = st->Lhs()->VpiName();
+      const std::string_view lhs = st->Lhs()->VpiName();
       expr *lhsexp = (expr *)st->Lhs();
       expr *rhs = (expr *)st->Rhs();
       expr *rhsexp =
@@ -4012,7 +4020,7 @@ void ExprEval::evalStmt(const std::string &funcName, Scopes &scopes,
     }
     case uhdmassign_stmt: {
       assign_stmt *st = (assign_stmt *)stmt;
-      const std::string lhs = st->Lhs()->VpiName();
+      const std::string_view lhs = st->Lhs()->VpiName();
       expr *lhsexp = (expr *)st->Lhs();
       expr *rhs = (expr *)st->Rhs();
       expr *rhsexp =
@@ -4179,9 +4187,11 @@ void ExprEval::evalStmt(const std::string &funcName, Scopes &scopes,
     }
     default: {
       invalidValue = true;
-      if (muteError == false && m_muteError == false)
-        s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, inst->VpiName(),
+      if (muteError == false && m_muteError == false) {
+        const std::string errMsg(inst->VpiName());
+        s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, errMsg,
                             stmt, nullptr);
+      }
       break;
     }
   }
@@ -4195,7 +4205,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
     return nullptr;
   }
   Serializer &s = *func->GetSerializer();
-  const std::string name = func->VpiName();
+  const std::string_view name = func->VpiName();
   // set internal scope stack
   Scopes scopes;
   module_inst *scope = s.MakeModule_inst();
@@ -4225,7 +4235,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
     unsigned int index = 0;
     for (auto io : *func->Io_decls()) {
       if (args && (index < args->size())) {
-        const std::string ioname = io->VpiName();
+        const std::string_view ioname = io->VpiName();
         expr *ioexp = (expr *)args->at(index);
         expr *exparg = reduceExpr(ioexp, invalidValue, scope, pexpr, muteError);
         if (exparg) {
@@ -4252,9 +4262,11 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
                    return_flag, scope, stmt, muteError);
           if (return_flag) break;
           if (continue_flag || break_flag) {
-            if (muteError == false && m_muteError == false)
+            if (muteError == false && m_muteError == false) {
+              const std::string errMsg(inst->VpiName());
               s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
-                                  inst->VpiName(), stmt, nullptr);
+                                  errMsg, stmt, nullptr);
+            }
           }
         }
         break;
@@ -4268,9 +4280,11 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
                    return_flag, scope, stmt, muteError);
           if (return_flag) break;
           if (continue_flag || break_flag) {
-            if (muteError == false && m_muteError == false)
+            if (muteError == false && m_muteError == false) {
+              const std::string errMsg(inst->VpiName());
               s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
-                                  inst->VpiName(), stmt, nullptr);
+                                  errMsg, stmt, nullptr);
+            }
           }
         }
         break;
@@ -4281,9 +4295,11 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
         evalStmt(name, scopes, invalidValue, continue_flag, break_flag,
                  return_flag, scope, the_stmt, muteError);
         if (continue_flag || break_flag) {
-          if (muteError == false && m_muteError == false)
+          if (muteError == false && m_muteError == false) {
+            const std::string errMsg(inst->VpiName());
             s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
-                                inst->VpiName(), the_stmt, nullptr);
+                                errMsg, the_stmt, nullptr);
+          }
         }
         break;
       }
@@ -4300,11 +4316,11 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
           if (p->Rhs() && (p->Rhs()->UhdmType() == uhdmconstant)) {
             constant *c = (constant *)p->Rhs();
             if (c->VpiConstType() == vpiBinaryConst) {
-              std::string val = c->VpiValue();
-              val = val.erase(0, 4);
+              std::string_view val = c->VpiValue();
+              val.remove_prefix(std::string_view("BIN:").length());
               if (val.size() > s) {
-                val = val.erase(0, val.size() - s);
-                c->VpiValue("BIN:" + val);
+                val.remove_prefix(val.size() - s);
+                c->VpiValue(std::string("BIN:").append(val));
                 c->VpiDecompile(val);
               }
             } else {

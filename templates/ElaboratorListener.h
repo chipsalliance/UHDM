@@ -50,29 +50,29 @@ class ElaboratorListener final : public VpiListener {
   bool uniquifyTypespec() { return uniquifyTypespec_; }
   void bindOnly(bool bindOnly) { clone_ = !bindOnly; }
   bool bindOnly() { return !clone_; }
-  bool isFunctionCall(const std::string& name, const expr* prefix);
+  bool isFunctionCall(std::string_view name, const expr* prefix);
   bool muteErrors() { return muteErrors_; }
-  bool isTaskCall(const std::string& name, const expr* prefix);
+  bool isTaskCall(std::string_view name, const expr* prefix);
   void ignoreLastInstance(bool ignore) { ignoreLastInstance_ = ignore; }
 
   // Bind to a net in the current instance
-  any* bindNet(const std::string& name);
+  any* bindNet(std::string_view name);
 
   // Bind to a net or parameter in the current instance
-  any* bindAny(const std::string& name);
+  any* bindAny(std::string_view name);
 
   // Bind to a param in the current instance
-  any* bindParam(const std::string& name);
+  any* bindParam(std::string_view name);
 
   // Bind to a function or task in the current scope
-  any* bindTaskFunc(const std::string& name, const class_var* prefix = nullptr);
+  any* bindTaskFunc(std::string_view name, const class_var* prefix = nullptr);
 
   void scheduleTaskFuncBinding(tf_call* clone, const class_var* prefix) {
     scheduledTfCallBinding_.push_back(std::make_pair(clone, prefix));
   }
   void bindScheduledTaskFunc();
 
-  typedef std::map<std::string, const BaseClass*> ComponentMap;
+  typedef std::map<std::string, const BaseClass*, std::less<>> ComponentMap;
 
   void enterAny(const any* object, vpiHandle handle) final;
 

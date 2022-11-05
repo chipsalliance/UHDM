@@ -45,8 +45,15 @@ class MyUhdmListener : public UhdmListener {
     if (object->VpiParent() != nullptr)
       parentName = object->VpiParent()->VpiName();
     if (parentName.empty()) parentName = "-";
-    collected_.emplace_back(prefix + ": " + object->VpiName() + "/" +
-                            object->VpiDefName() + " parent: " + parentName);
+    std::string line;
+    line.append(prefix)
+        .append(": ")
+        .append(object->VpiName())
+        .append("/")
+        .append(object->VpiDefName())
+        .append(" parent: ")
+        .append(parentName);
+    collected_.emplace_back(std::move(line));
   }
 
   const std::vector<std::string>& collected() const { return collected_; }
