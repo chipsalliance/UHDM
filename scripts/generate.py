@@ -127,6 +127,8 @@ def _main():
             config.get_template_filepath('SynthSubset.h'): config.get_output_header_filepath('SynthSubset.h'),
             config.get_template_filepath('SynthSubset.cpp'): config.get_output_source_filepath('SynthSubset.cpp'),
             config.get_template_filepath('RTTI.h'): config.get_output_header_filepath('RTTI.h'),
+            config.get_template_filepath('SymbolId.h'): config.get_output_header_filepath('SymbolId.h'),
+            config.get_template_filepath('SymbolId.cpp'): config.get_output_source_filepath('SymbolId.cpp'),
             config.get_template_filepath('SymbolFactory.h'): config.get_output_header_filepath('SymbolFactory.h'),
             config.get_template_filepath('SymbolFactory.cpp'): config.get_output_source_filepath('SymbolFactory.cpp'),
             config.get_template_filepath('uhdm_vpi_user.h'): config.get_output_header_filepath('uhdm_vpi_user.h'),

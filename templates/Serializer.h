@@ -78,9 +78,7 @@ class Serializer {
  public:
   using IdMap = std::map<const BaseClass*, unsigned long>;
 
-  Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {
-    symbolMaker.Make("");
-  }
+  Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {}
   ~Serializer();
 
   void Save(const std::filesystem::path& filepath);

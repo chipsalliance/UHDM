@@ -69,7 +69,7 @@ struct Serializer::SaveAdapter {
       vpiParentBuilder.setIndex(serializer->GetId(obj->VpiParent()));
       vpiParentBuilder.setType(obj->VpiParent()->UhdmType());
     }
-    builder.setVpiFile(obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));
+    builder.setVpiFile((RawSymbolId)obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));
     builder.setVpiLineNo(obj->VpiLineNo());
     builder.setVpiColumnNo(obj->VpiColumnNo());
     builder.setVpiEndLineNo(obj->VpiEndLineNo());
@@ -100,7 +100,7 @@ void Serializer::Save(const std::filesystem::path& filepath) {
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designMaker.objects_.size());
   index = 0;
   for (auto design : designMaker.objects_) {
-    designs[index].setVpiName(design->GetSerializer()->symbolMaker.Make(design->VpiName()));
+    designs[index].setVpiName((RawSymbolId)design->GetSerializer()->symbolMaker.Make(design->VpiName()));
     index++;
   }
 
@@ -112,9 +112,9 @@ void Serializer::Save(const std::filesystem::path& filepath) {
   // Ideally, the save should not include the hierarchical nets that can be recreated on the fly.
   // Something broke this mechanism that saved a lot of memory/disk space.
   // Until that is repaired we go for the more disk-hungry and memory hungry method which gives correct results.
-  ::capnp::List<::capnp::Text>::Builder symbols = cap_root.initSymbols(symbolMaker.id2SymbolMap_.size());
+  ::capnp::List<::capnp::Text>::Builder symbols = cap_root.initSymbols(symbolMaker.m_id2SymbolMap.size());
   index = 0;
-  for (const auto& symbol : symbolMaker.id2SymbolMap_) {
+  for (const auto& symbol : symbolMaker.m_id2SymbolMap) {
     symbols.set(index, symbol.c_str());
     index++;
   }
