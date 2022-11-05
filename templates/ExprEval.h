@@ -121,7 +121,8 @@ class ExprEval {
                 const any* inst, const UHDM::any* stmt, bool muteError = false);
 
   bool setValueInInstance(const std::string& lhs, any* lhsexp, expr* rhsexp,
-                          bool& invalidValue, Serializer& s, const any* inst, bool muteError);
+                          bool& invalidValue, Serializer& s, const any* inst,
+                          const any* scope_exp, bool muteError);
   void setDesign(design* des) { m_design = des; }
   /* For Surelog or other UHDM clients to use the UHDM expr evaluator in their
    * context */
