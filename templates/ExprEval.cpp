@@ -3430,7 +3430,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                             scall, nullptr);
       invalidValue = true;
     }
-    expr *tmp = evalFunc(actual_func, args, invalidValue, inst, (any *)pexpr);
+    expr *tmp = evalFunc(actual_func, args, invalidValue, inst, (any *)pexpr, muteError);
     if (tmp && (invalidValue == false)) {
       result = tmp;
     }
@@ -4295,7 +4295,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   if (param_assigns) {
     scope->Param_assigns(s.MakeParam_assignVec());
     for (auto p : *param_assigns) {
-      ElaboratorListener listener(&s);
+      ElaboratorListener listener(&s, false, muteError);
       any *pp = UHDM::clone_tree(p, s, &listener);
       scope->Param_assigns()->push_back((param_assign *)pp);
     }
