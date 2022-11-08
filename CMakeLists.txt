@@ -18,6 +18,7 @@ option(
   "Building with clang++ and libc++(in Linux). To enable with: -DWITH_LIBCXX=On"
   OFF)
 option(UHDM_BUILD_TESTS "Enable testing." ON)
+option(UHDM_USE_HOST_GTEST "Use gtest from host system, not third_party/" OFF)
 
 project(UHDM)
 
@@ -194,7 +195,13 @@ add_dependencies(uhdm GenerateCode)
 add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
 
 if (UHDM_BUILD_TESTS)
-  add_subdirectory(third_party/googletest EXCLUDE_FROM_ALL)
+  if (UHDM_USE_HOST_GTEST)
+    find_package(GTest REQUIRED)
+  else()
+    add_subdirectory(third_party/googletest EXCLUDE_FROM_ALL)
+    set(GTEST_INCLUDE_DIRS third_party/googletest/googletest/include
+      third_party/googletest/googlemock/include)
+  endif()
   enable_testing()
   include(GoogleTest)
   # All unit-tests are registered with this custom target as dependency, so
@@ -208,9 +215,7 @@ if (UHDM_BUILD_TESTS)
       get_filename_component(test_prefix ${test_cc_file} DIRECTORY)
 
       add_executable(${test_bin} ${PROJECT_SOURCE_DIR}/${test_cc_file})
-      target_include_directories(${test_bin} PRIVATE
-        third_party/googletest/googletest/include
-        third_party/googletest/googlemock/include)
+      target_include_directories(${test_bin} PRIVATE ${GTEST_INCLUDE_DIR})
       target_link_libraries(${test_bin} PRIVATE uhdm gtest gmock gtest_main)
       add_test(
         NAME ${test_prefix}/${test_bin} COMMAND ${test_bin}
