@@ -56,8 +56,11 @@ TEST(VpiValue, ParseValueFindPrefix) {
   // With Whitespace in front.
   EXPECT_EQ(ParseAndRegenerateString("  INT:42"), "INT:42");
 
-  // .. or even other garbage in front.
-  EXPECT_EQ(ParseAndRegenerateString("unrelated stuff:43 INT:42"), "INT:42");
+  // .. or with whitespace at end.
+  EXPECT_EQ(ParseAndRegenerateString("INT:42  "), "INT:42");
+
+  // .. or at both ends.
+  EXPECT_EQ(ParseAndRegenerateString("  INT:42  "), "INT:42");
 }
 
 TEST(VpiValue, ParseScalarValue) {

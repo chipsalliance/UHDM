@@ -122,7 +122,7 @@ void UhdmLint::checkMultiContAssign(
       for (auto operand : *op->Operands()) {
         if (operand->UhdmType() == uhdmconstant) {
           constant* c = (constant*)operand;
-          if (strstr(c->VpiValue().c_str(), "z")) {
+          if (c->VpiValue().find('z') != std::string::npos) {
             triStatedOp = true;
             break;
           }
@@ -158,7 +158,7 @@ void UhdmLint::checkMultiContAssign(
             for (auto operand : *op->Operands()) {
               if (operand->UhdmType() == uhdmconstant) {
                 constant* c = (constant*)operand;
-                if (strstr(c->VpiValue().c_str(), "z")) {
+                if (c->VpiValue().find('z') != std::string::npos) {
                   triStatedOp = true;
                   break;
                 }
