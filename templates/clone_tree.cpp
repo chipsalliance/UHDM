@@ -1204,6 +1204,26 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 break;
               }
+              case uhdmpacked_array_net: {
+                packed_array_net* avar = (packed_array_net*)actual;
+                VectorOfany* vars = avar->Elements();
+                if (vars && vars->size()) {
+                  actual = vars->at(0);
+                  actual_type = actual->UhdmType();
+                }
+                if (name == "size" || name == "exists" || name == "exists" ||
+                    name == "max" || name == "min") {
+                  func_call* call = serializer->MakeFunc_call();
+                  call->VpiName(name);
+                  if (current->UhdmType() == uhdmref_obj) {
+                    ((ref_obj*)current)->Actual_group(call);
+                  }
+                  // Builtin method
+                  found = true;
+                  previous = (any*)call;
+                }
+                break;
+              }
               default:
                 break;
             }
