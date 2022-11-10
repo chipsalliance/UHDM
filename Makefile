@@ -15,6 +15,7 @@ endif
 
 PREFIX?=/usr/local
 ADDITIONAL_CMAKE_OPTIONS ?=
+export CTEST_PARALLEL_LEVEL = $(CPU_CORES)
 
 release: build
 	cmake --build build --config Release -j $(CPU_CORES)
