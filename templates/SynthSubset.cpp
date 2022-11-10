@@ -228,6 +228,7 @@ void SynthSubset::leaveTask(const task* topobject, vpiHandle handle) {
               case uhdmnamed_fork:
               case uhdmevent_stmt: {
                 reportError(top);
+                break;
               }
               default: {
               }
