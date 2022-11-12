@@ -1224,13 +1224,85 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 break;
               }
+              case uhdmnamed_begin: {
+                named_begin* begin = (named_begin*)actual;
+                if (begin->Variables()) {
+                  for (auto m : *begin->Variables()) {
+                    if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                      found = true;
+                      previous = m;
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(m);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(m);
+                      }
+                      break;
+                    }
+                  }
+                }
+                if (begin->Array_vars()) {
+                  for (auto m : *begin->Array_vars()) {
+                    if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                      found = true;
+                      previous = m;
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(m);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(m);
+                      }
+                      break;
+                    }
+                  }
+                }
+                break;
+              }
+              case uhdmnamed_fork: {
+                named_fork* begin = (named_fork*)actual;
+                if (begin->Variables()) {
+                  for (auto m : *begin->Variables()) {
+                    if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                      found = true;
+                      previous = m;
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(m);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(m);
+                      }
+                      break;
+                    }
+                  }
+                }
+                if (begin->Array_vars()) {
+                  for (auto m : *begin->Array_vars()) {
+                    if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                      found = true;
+                      previous = m;
+                      if (current->UhdmType() == uhdmref_obj) {
+                        ((ref_obj*)current)->Actual_group(m);
+                      } else if (current->UhdmType() == uhdmbit_select) {
+                        const any* parent = current->VpiParent();
+                        if (parent && (parent->UhdmType() == uhdmref_obj))
+                          ((ref_obj*)parent)->Actual_group(m);
+                      }
+                      break;
+                    }
+                  }
+                }
+                break;
+              }
               default:
                 break;
             }
 
             switch (actual_type) {
               case uhdmclocking_block: {
-                clocking_block* block = (clocking_block*) actual;
+                clocking_block* block = (clocking_block*)actual;
                 if (block->Clocking_io_decls()) {
                   for (clocking_io_decl* decl : *block->Clocking_io_decls()) {
                     if (decl->VpiName() == name) {
@@ -1290,7 +1362,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 if (mod->Gen_scope_arrays()) {
                   for (auto gsa : *mod->Gen_scope_arrays()) {
-                    if (gsa->VpiName() == name || gsa->VpiName() == nameIndexed) {
+                    if (gsa->VpiName() == name ||
+                        gsa->VpiName() == nameIndexed) {
                       for (auto gs : *gsa->Gen_scopes()) {
                         if (current->UhdmType() == uhdmref_obj) {
                           ((ref_obj*)current)->Actual_group(gs);
@@ -1429,9 +1502,9 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                             actual = (any*)exp;
                           }
                           if (actual->UhdmType() == uhdmref_obj) {
-                            ref_obj* ref = (ref_obj*) actual;
+                            ref_obj* ref = (ref_obj*)actual;
                             if (const any* act = ref->Actual_group()) {
-                              actual = (any*) act;
+                              actual = (any*)act;
                             }
                           }
                           if (current->UhdmType() == uhdmref_obj) {
@@ -1572,7 +1645,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     array_typespec* ptps = (array_typespec*)tps;
                     tps = (typespec*)ptps->Elem_typespec();
                     ttype = tps->UhdmType();
-                  } 
+                  }
                   if (ttype == uhdmstring_typespec) {
                     found = true;
                   } else if (ttype == uhdmclass_typespec) {
@@ -1718,14 +1791,16 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
             if (!found) {
               // WIP:
-              if ((!elaborator->muteErrors()) && (!elaborator->isInUhdmAllIterator()))
+              if ((!elaborator->muteErrors()) &&
+                  (!elaborator->isInUhdmAllIterator()))
                 serializer->GetErrorHandler()(
                     ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
                     nullptr);
             }
           } else {
             // WIP:
-            if ((!elaborator->muteErrors()) && (!elaborator->isInUhdmAllIterator()))
+            if ((!elaborator->muteErrors()) &&
+                (!elaborator->isInUhdmAllIterator()))
               serializer->GetErrorHandler()(
                   ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
                   nullptr);
