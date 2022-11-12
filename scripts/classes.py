@@ -151,7 +151,7 @@ def _get_data_member(type, vpi, card):
             default_assignment = 'nullptr'
 
         if type == 'std::string':
-            content.append(f'  SymbolFactory::ID {vpi}_ = {default_assignment};')
+            content.append(f'  SymbolId {vpi}_;')
         else:
             content.append(f'  {type}{pointer} {vpi}_ = {default_assignment};')
 

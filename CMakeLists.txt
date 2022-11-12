@@ -136,6 +136,7 @@ set(uhdm-GENERATED_SRC
     ${GENDIR}/src/Serializer_restore.cpp
     ${GENDIR}/src/Serializer_save.cpp
     ${GENDIR}/src/SymbolFactory.cpp
+    ${GENDIR}/src/SymbolId.cpp
     ${GENDIR}/src/SynthSubset.cpp
     ${GENDIR}/src/UHDM.capnp.c++
     ${GENDIR}/src/UhdmLint.cpp

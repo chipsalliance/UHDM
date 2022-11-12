@@ -18,19 +18,21 @@
 #include <string_view>
 #include <vector>
 
-#include "uhdm/SymbolFactory.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "uhdm/SymbolFactory.h"
 
 namespace UHDM {
+using testing::ElementsAre;
+
 namespace {
 TEST(SymbolFactoryTest, SymbolFactoryAccess) {
   SymbolFactory table;
 
-  const SymbolFactory::ID foo_id = table.Make("foo");
+  const SymbolId foo_id = table.Make("foo");
   EXPECT_NE(foo_id, SymbolFactory::getBadId());
 
-  const SymbolFactory::ID bar_id = table.Make("bar");
+  const SymbolId bar_id = table.Make("bar");
   EXPECT_NE(foo_id, bar_id);
 
   // Attempting to register the same symbol will result in original ID.
@@ -52,13 +54,21 @@ TEST(SymbolFactoryTest, SymbolFactoryAccess) {
   // Retrieve text symbol by ID
   EXPECT_EQ(table.GetSymbol(foo_id), "foo");
   EXPECT_EQ(table.GetSymbol(bar_id), "bar");
-  EXPECT_EQ(table.GetSymbol(42), SymbolFactory::getBadSymbol());  // no-exist
+  EXPECT_EQ(table.GetSymbol(SymbolId(42, "<whatever>")),
+            SymbolFactory::getBadSymbol());  // no-exist
+  EXPECT_EQ(table.GetSymbol(SymbolId(0, "")),
+            "");  // no-exist, but zero however should return an empty string
+
+  // For now, symbols returned in getSymbols() always contain bad symbol as
+  // first element (though this is an implementation detail and might change).
+  EXPECT_THAT(table.getSymbols(),
+              ElementsAre(SymbolFactory::getBadSymbol(), "foo", "bar"));
 }
 
 TEST(SymbolFactoryTest, SymbolStringsAreStable) {
   SymbolFactory table;
 
-  const SymbolFactory::ID foo_id = table.Make("foo");
+  const SymbolId foo_id = table.Make("foo");
 
   // Deliberately using .data() here so that API change to GetSymbol() returning
   // std::string_view later will keep this test source-code compatible.

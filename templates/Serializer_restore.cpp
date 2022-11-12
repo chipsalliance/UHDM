@@ -51,6 +51,8 @@
 
 
 namespace UHDM {
+static constexpr std::string_view kUnknownRawSymbol = "<unknown>";
+
 template <typename T>
 inline T* Serializer::Make(FactoryT<T>* const factory) {
   T* const obj = factory->Make();
@@ -76,7 +78,7 @@ inline void Serializer::SetRestoreId_(FactoryT<T>* const factory, unsigned long 
 struct Serializer::RestoreAdapter {
   void operator()(Any::Reader reader, Serializer *const serializer, BaseClass *const obj) const {
     obj->VpiParent(serializer->GetObject(reader.getVpiParent().getType(), reader.getVpiParent().getIndex() - 1));
-    obj->VpiFile(serializer->symbolMaker.GetSymbol(reader.getVpiFile()));
+    obj->VpiFile(serializer->symbolMaker.GetSymbol(SymbolId(reader.getVpiFile(), kUnknownRawSymbol)));
     obj->VpiLineNo(reader.getVpiLineNo());
     obj->VpiColumnNo(reader.getVpiColumnNo());
     obj->VpiEndLineNo(reader.getVpiEndLineNo());

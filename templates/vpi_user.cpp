@@ -200,7 +200,7 @@ vpiHandle vpi_handle_by_name(PLI_BYTE8* name, vpiHandle refHandle) {
   const uhdm_handle* const handle = (const uhdm_handle*)refHandle;
   const BaseClass* const object = (const BaseClass*)handle->object;
   if (object->GetSerializer()->symbolMaker.GetId(name) ==
-      static_cast<SymbolFactory::ID>(-1)) {
+      SymbolFactory::getBadId()) {
     return nullptr;
   }
   const BaseClass *const ref = object->GetByVpiName(std::string_view(name));
