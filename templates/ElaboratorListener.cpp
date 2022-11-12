@@ -1055,7 +1055,7 @@ void ElaboratorListener::enterBegin(const begin* object, vpiHandle handle) {
       varMap.emplace(var->VpiName(), var);
     }
   }
-
+  
   ComponentMap paramMap;
   ComponentMap funcMap;
   ComponentMap modMap;
@@ -1072,6 +1072,14 @@ void ElaboratorListener::leaveBegin(const begin* object, vpiHandle handle) {
 void ElaboratorListener::enterNamed_begin(const named_begin* object,
                                           vpiHandle handle) {
   ComponentMap varMap;
+  if (instStack_.size()) {
+    for (InstStack::reverse_iterator i = instStack_.rbegin();
+         i != instStack_.rend(); ++i) {
+      ComponentMap& modMap = std::get<3>((*i).second);
+      modMap.emplace(object->VpiName(), object);
+      break;
+    }
+  }
   if (object->Array_vars()) {
     for (variables* var : *object->Array_vars()) {
       varMap.emplace(var->VpiName(), var);
@@ -1126,6 +1134,14 @@ void ElaboratorListener::leaveFork_stmt(const fork_stmt* object,
 void ElaboratorListener::enterNamed_fork(const named_fork* object,
                                          vpiHandle handle) {
   ComponentMap varMap;
+  if (instStack_.size()) {
+    for (InstStack::reverse_iterator i = instStack_.rbegin();
+         i != instStack_.rend(); ++i) {
+      ComponentMap& modMap = std::get<3>((*i).second);
+      modMap.emplace(object->VpiName(), object);
+      break;
+    }
+  }
   if (object->Array_vars()) {
     for (variables* var : *object->Array_vars()) {
       varMap.emplace(var->VpiName(), var);
