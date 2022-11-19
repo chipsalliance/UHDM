@@ -4374,6 +4374,20 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   if (scope->Param_assigns()) {
     for (auto p : *scope->Param_assigns()) {
       if (p->Lhs()->VpiName() == name) {
+        const typespec *tps = func->Return()->Typespec();
+        if (tps && (tps->UhdmType() == uhdmlogic_typespec)) {
+          uint64_t s = size(tps, invalidValue, inst, pexpr, true, true);
+          if (p->Rhs() && (p->Rhs()->UhdmType() == uhdmconstant)) {
+            constant *c = (constant *)p->Rhs();
+            uint64_t mask = getMask(s);
+            int64_t v = get_value(invalidValue, c);
+            v = v & mask;
+            c->VpiValue("UINT:" + std::to_string(v));
+            c->VpiDecompile(std::to_string(v));
+            c->VpiConstType(vpiUIntConst);
+            c->VpiSize(static_cast<int>(s));
+          }
+        }
         return (expr *)p->Rhs();
       }
     }
