@@ -4379,12 +4379,22 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
           uint64_t s = size(tps, invalidValue, inst, pexpr, true, true);
           if (p->Rhs() && (p->Rhs()->UhdmType() == uhdmconstant)) {
             constant *c = (constant *)p->Rhs();
-            uint64_t mask = getMask(s);
-            int64_t v = get_value(invalidValue, c);
-            v = v & mask;
-            c->VpiValue("UINT:" + std::to_string(v));
-            c->VpiDecompile(std::to_string(v));
-            c->VpiConstType(vpiUIntConst);
+            if (c->VpiConstType() == vpiBinaryConst) {
+              std::string val = c->VpiValue();
+              val = val.erase(0, 4);
+              if (val.size() > s) {
+                val = val.erase(0, val.size() - s);
+                c->VpiValue("BIN:" + val);
+                c->VpiDecompile(val);
+              }
+            } else {
+              uint64_t mask = getMask(s);
+              int64_t v = get_value(invalidValue, c);
+              v = v & mask;
+              c->VpiValue("UINT:" + std::to_string(v));
+              c->VpiDecompile(std::to_string(v));
+              c->VpiConstType(vpiUIntConst);
+            }
             c->VpiSize(static_cast<int>(s));
           }
         }
