@@ -1483,7 +1483,11 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr) {
         break;
       }
       case vpiStringConst: {
+        std::string val = v.c_str() + std::string_view("STRING:").length();
         result = 0;
+        for (uint32_t i = 0; i < val.size(); i ++) {
+          result += (val[i] << ((val.size() - (i + 1)) * 8));
+        }
         break;
       }
       case vpiRealConst: {
@@ -1633,7 +1637,11 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
         break;
       }
       case vpiStringConst: {
+        std::string val = v.c_str() + std::string_view("STRING:").length();
         result = 0;
+        for (uint32_t i = 0; i < val.size(); i ++) {
+          result += (val[i] << ((val.size() - (i + 1)) * 8));
+        }
         break;
       }
       case vpiRealConst: {
@@ -2546,6 +2554,9 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 if (operand->UhdmType() == uhdmconstant) {
                   constant *c = (constant *)operand;
                   size = c->VpiSize();
+                  if (const typespec* tps = c->Typespec()) {
+                    size = ExprEval::size(tps, invalidValue, inst, pexpr, true, muteError);
+                  }
                   if (size == 1) {
                     val = !val;
                   } else {
