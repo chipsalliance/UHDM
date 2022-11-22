@@ -33,10 +33,10 @@ namespace UHDM {
 
 SynthSubset::SynthSubset(Serializer* serializer,
                          std::set<const any*>& nonSynthesizableObjects,
-                         bool reportErrors)
+                         bool reportErrors, bool allowFormal)
     : serializer_(serializer),
       nonSynthesizableObjects_(nonSynthesizableObjects),
-      reportErrors_(reportErrors) {
+      reportErrors_(reportErrors), allowFormal_(allowFormal) {
   const std::string kDollar("$");
   for (auto s :
        {// "display",
@@ -125,12 +125,6 @@ void SynthSubset::leaveAny(const any* object, vpiHandle handle) {
     case uhdmforce:
     case uhdmdeassign:
     case uhdmrelease:
-    case uhdmexpect_stmt:
-    case uhdmcover:
-    case uhdmassume:
-    case uhdmrestrict:
-    case uhdmimmediate_assume:
-    case uhdmimmediate_cover:
     case uhdmsequence_inst:
     case uhdmseq_formal_decl:
     case uhdmsequence_decl:
@@ -193,6 +187,15 @@ void SynthSubset::leaveAny(const any* object, vpiHandle handle) {
     case uhdmevent_typespec:
       reportError(object);
       break;
+    case uhdmexpect_stmt:
+    case uhdmcover:
+    case uhdmassume:
+    case uhdmrestrict:
+    case uhdmimmediate_assume:
+    case uhdmimmediate_cover:
+      if (!allowFormal_)
+        reportError(object);
+      break;  
     default:
       break;
   }
