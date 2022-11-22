@@ -166,8 +166,8 @@ void UhdmLint::checkMultiContAssign(
             }
             if (triStatedOp) continue;
           }
-          serializer_->GetErrorHandler()(ErrorType::UHDM_MULTIPLE_CONT_ASSIGN,
-                                         lhs_exp->VpiName(), lhs_exp, lhs);
+//          serializer_->GetErrorHandler()(ErrorType::UHDM_MULTIPLE_CONT_ASSIGN,
+//                                         lhs_exp->VpiName(), lhs_exp, lhs);
         }
       }
     }
