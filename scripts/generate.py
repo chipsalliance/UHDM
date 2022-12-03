@@ -124,6 +124,8 @@ def _main():
             config.get_template_filepath('ExprEval.cpp'): config.get_output_source_filepath('ExprEval.cpp'),
             config.get_template_filepath('UhdmLint.h'): config.get_output_header_filepath('UhdmLint.h'),
             config.get_template_filepath('UhdmLint.cpp'): config.get_output_source_filepath('UhdmLint.cpp'),
+            config.get_template_filepath('UhdmAdjuster.h'): config.get_output_header_filepath('UhdmAdjuster.h'),
+            config.get_template_filepath('UhdmAdjuster.cpp'): config.get_output_source_filepath('UhdmAdjuster.cpp'),
             config.get_template_filepath('SynthSubset.h'): config.get_output_header_filepath('SynthSubset.h'),
             config.get_template_filepath('SynthSubset.cpp'): config.get_output_source_filepath('SynthSubset.cpp'),
             config.get_template_filepath('RTTI.h'): config.get_output_header_filepath('RTTI.h'),
