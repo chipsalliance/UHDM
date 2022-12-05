@@ -2550,7 +2550,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (operand) {
                 uint64_t val = (uint64_t)get_value(invalidValue, operand);
                 if (invalidValue) break;
-                int size = 64;
+                uint64_t size = 64;
                 if (operand->UhdmType() == uhdmconstant) {
                   constant *c = (constant *)operand;
                   size = c->VpiSize();
@@ -3837,7 +3837,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
             constant *c = s.MakeConstant();
             c->VpiValue("BIN:" + part);
             c->VpiDecompile(part);
-            c->VpiSize(part.size());
+            c->VpiSize(static_cast<int>(part.size()));
             c->VpiConstType(vpiBinaryConst);
             setValueInInstance(name, oper, c, invalidValue, s, inst, lhsexp,
                                muteError);
@@ -3862,7 +3862,8 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
               val.erase(0, 4);
               lhsbinary = val;
             } else {
-              lhsbinary = toBinary(si, get_uvalue(invalidValue, prev));
+              lhsbinary = toBinary(static_cast<int>(si),
+                                   get_uvalue(invalidValue, prev));
             }
             std::reverse(lhsbinary.begin(), lhsbinary.end());
           } else {
@@ -3880,13 +3881,13 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           std::reverse(rhsbinary.begin(), rhsbinary.end());
           if (sel->VpiIndexedPartSelectType() == vpiPosIndexed) {
             int index = 0;
-            for (uint32_t i = base; i < base + offset; i++) {
+            for (uint64_t i = base; i < base + offset; i++) {
               lhsbinary[i] = rhsbinary[index];
               index++;
             }
           } else {
             int index = 0;
-            for (uint32_t i = base; i > base - offset; i--) {
+            for (uint64_t i = base; i > base - offset; i--) {
               lhsbinary[i] = rhsbinary[index];
               index++;
             }
@@ -3916,7 +3917,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
               val.erase(0, 4);
               lhsbinary = val;
             } else {
-              lhsbinary = toBinary(si, get_uvalue(invalidValue, prev));
+              lhsbinary = toBinary(static_cast<int>(si), get_uvalue(invalidValue, prev));
             }
             std::reverse(lhsbinary.begin(), lhsbinary.end());
           } else {
@@ -3934,13 +3935,13 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           std::reverse(rhsbinary.begin(), rhsbinary.end());
           if (left > right) {
             int index = 0;
-            for (uint32_t i = right; i <= left; i++) {
+            for (uint64_t i = right; i <= left; i++) {
               lhsbinary[i] = rhsbinary[index];
               index++;
             }
           } else {
             int index = 0;
-            for (uint32_t i = left; i <= right; i++) {
+            for (uint64_t i = left; i <= right; i++) {
               lhsbinary[i] = rhsbinary[index];
               index++;
             }
@@ -3970,7 +3971,8 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
               val.erase(0, 4);
               lhsbinary = val;
             } else {
-              lhsbinary = toBinary(si, get_uvalue(invalidValue, prev));
+              lhsbinary = toBinary(static_cast<int>(si),
+                                   get_uvalue(invalidValue, prev));
             }
             std::reverse(lhsbinary.begin(), lhsbinary.end());
           } else {
