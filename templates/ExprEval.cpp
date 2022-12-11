@@ -1362,7 +1362,7 @@ static bool largeInt(const std::string &value, bool isSigned) {
   return largeInt;
 }
 
-int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr) {
+int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr, bool strict) {
   int64_t result = 0;
   bool isSigned = false;
   int type = 0;
@@ -1387,6 +1387,16 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr) {
   if (!invalidValue) {
     switch (type) {
       case vpiBinaryConst: {
+        if (strict) {
+          for (uint32_t i = 0; i < v.size(); i++) {
+            char c = v[i];
+            if (c == 'x' || c == 'X' || c == 'z' || c == 'Z' || c == '?') {
+              invalidValue = true;
+              result = 0;
+              return result;
+            }
+          }
+        }
         if (expr->VpiSize() > 64) {
           invalidValue = true;
         } else {
@@ -1516,7 +1526,7 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr) {
   return result;
 }
 
-uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
+uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr, bool strict) {
   uint64_t result = 0;
   bool isSigned = false;
   int type = 0;
@@ -1541,6 +1551,16 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr) {
   if (!invalidValue) {
     switch (type) {
       case vpiBinaryConst: {
+        if (strict) {
+          for (uint32_t i = 0; i < v.size(); i++) {
+            char c = v[i];
+            if (c == 'x' || c == 'X' || c == 'z' || c == 'Z' || c == '?') {
+              invalidValue = true;
+              result = 0;
+              return result;
+            }
+          }
+        }
         if (expr->VpiSize() > 64) {
           invalidValue = true;
         } else {
@@ -4387,7 +4407,8 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   if (scope->Param_assigns()) {
     for (auto p : *scope->Param_assigns()) {
       if (p->Lhs()->VpiName() == name) {
-        const typespec *tps = func->Return()->Typespec();
+        const typespec *tps = nullptr;
+        if (func->Return()) tps = func->Return()->Typespec();
         if (tps && (tps->UhdmType() == uhdmlogic_typespec)) {
           uint64_t s = size(tps, invalidValue, inst, pexpr, true, true);
           if (p->Rhs() && (p->Rhs()->UhdmType() == uhdmconstant)) {
