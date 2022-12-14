@@ -1086,8 +1086,8 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
         break;
     }
   } else {
-    int64_t v0 = get_value(invalidValueI, reduc0);
-    int64_t v1 = get_value(invalidValueI, reduc1);
+    int64_t v0 = get_uvalue(invalidValueI, reduc0);
+    int64_t v1 = get_uvalue(invalidValueI, reduc1);
     if ((invalidValue == false) && (invalidValueI == false)) {
       switch (optype) {
         case vpiEqOp:
@@ -1528,17 +1528,11 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr, bool str
 
 uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr, bool strict) {
   uint64_t result = 0;
-  bool isSigned = false;
   int type = 0;
   std::string v;
   if (const UHDM::constant *c = any_cast<const UHDM::constant *>(expr)) {
     type = c->VpiConstType();
     v = c->VpiValue();
-    if (const typespec *tps = c->Typespec()) {
-      if (tps->UhdmType() == uhdmint_typespec) {
-        isSigned = ((int_typespec *)tps)->VpiSigned();
-      }
-    }
   } else if (const UHDM::variables *c =
                  any_cast<const UHDM::variables *>(expr)) {
     if (c->UhdmType() == uhdmenum_var) {
@@ -1578,7 +1572,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr, bool s
       }
       case vpiDecConst: {
         try {
-          if (largeInt(v.c_str() + std::string_view("DEC:").length(), isSigned)) {
+          if (largeInt(v.c_str() + std::string_view("DEC:").length(), false)) {
             invalidValue = true;
             return result;
           }
@@ -1623,7 +1617,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr, bool s
       }
       case vpiIntConst: {
         try {
-          if (largeInt(v.c_str() + std::string_view("INT:").length(), isSigned)) {
+          if (largeInt(v.c_str() + std::string_view("INT:").length(), false)) {
             invalidValue = true;
             return result;
           }
@@ -1636,7 +1630,7 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr, bool s
       }
       case vpiUIntConst: {
         try {
-          if (largeInt(v.c_str() + std::string_view("UINT:").length(), isSigned)) {
+          if (largeInt(v.c_str() + std::string_view("UINT:").length(), false)) {
             invalidValue = true;
             return result;
           }
