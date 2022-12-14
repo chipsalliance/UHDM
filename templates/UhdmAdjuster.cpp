@@ -75,7 +75,7 @@ const any* UhdmAdjuster::resize(const any* object, int maxsize, bool is_overall_
   } else if (type == uhdmlogic_net) {
     const any* parent = result->VpiParent();
     if (parent && (parent->UhdmType() == uhdmmodule)) {
-      module* mod = (module*)parent;
+      module_inst* mod = (module_inst*)parent;
       if (mod->Cont_assigns()) {
         for (cont_assign* cass : *mod->Cont_assigns()) {
           if (cass->Lhs()->VpiName() == result->VpiName()) {
@@ -141,7 +141,7 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
       } else if (type == uhdmlogic_net) {
         const any* parent = exp->VpiParent();
         if (parent && (parent->UhdmType() == uhdmmodule)) {
-          module* mod = (module*)parent;
+          module_inst* mod = (module_inst*)parent;
           if (mod->Cont_assigns()) {
             for (cont_assign* cass : *mod->Cont_assigns()) {
               if (cass->Lhs()->VpiName() == exp->VpiName()) {

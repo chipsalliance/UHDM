@@ -82,6 +82,6 @@
     card: 1
   - obj_ref: module
     name: module
-    vpi: vpiModule
-    type: module
+    vpi: vpiModuleInst
+    type: module_inst
     card: 1

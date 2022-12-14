@@ -111,22 +111,22 @@ int main(int argc, char** argv) {
                 path += objectName + ".";
               }
               // Recursive tree traversal
-              if (vpi_get(vpiType, obj_h) == vpiModule ||
+              if (vpi_get(vpiType, obj_h) == vpiModuleInst ||
                   vpi_get(vpiType, obj_h) == vpiGenScope) {
-                vpiHandle subItr = vpi_iterate(vpiModule, obj_h);
+                vpiHandle subItr = vpi_iterate(vpiModuleInst, obj_h);
                 while (vpiHandle sub_h = vpi_scan(subItr)) {
                   res += inst_visit(sub_h, path);
                   vpi_release_handle(sub_h);
                 }
                 vpi_release_handle(subItr);
-                subItr = vpi_iterate(vpiInterface, obj_h);
+                subItr = vpi_iterate(vpiInterfaceInst, obj_h);
                 while (vpiHandle sub_h = vpi_scan(subItr)) {
                   res += inst_visit(sub_h, path);
                   vpi_release_handle(sub_h);
                 }
                 vpi_release_handle(subItr);
               }
-              if (vpi_get(vpiType, obj_h) == vpiModule ||
+              if (vpi_get(vpiType, obj_h) == vpiModuleInst ||
                   vpi_get(vpiType, obj_h) == vpiGenScope) {
                 vpiHandle subItr = vpi_iterate(vpiGenScopeArray, obj_h);
                 while (vpiHandle sub_h = vpi_scan(subItr)) {

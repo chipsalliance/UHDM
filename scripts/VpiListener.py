@@ -6,8 +6,8 @@ def _get_listeners(classname, vpi, type, card):
     listeners = []
 
     if card == '1':
-        # upward vpiModule, vpiInterface relation (when card == 1, pointing to the parent object) creates loops in visitors
-        if vpi in ['vpiParent', 'vpiInstance', 'vpiModule', 'vpiInterface', 'vpiUse', 'vpiProgram', 'vpiClassDefn', 'vpiPackage', 'vpiUdp']:
+        # upward vpiModuleInst, vpiInterfaceInst relation (when card == 1, pointing to the parent object) creates loops in visitors
+        if vpi in ['vpiParent', 'vpiInstance', 'vpiModuleInst', 'vpiInterfaceInst', 'vpiUse', 'vpiProgram', 'vpiClassDefn', 'vpiPackage', 'vpiUdp']:
             return listeners
 
         if 'func_call' in classname and vpi == 'vpiFunction':
