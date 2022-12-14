@@ -37,9 +37,9 @@ class UhdmAdjuster final : public VpiListener {
 
  private:
   
-  void leaveCase_stmt(const case_stmt* object, vpiHandle handle);
-  void leaveConstant(const constant* object, vpiHandle handle);
-  void enterModule(const module* object, vpiHandle handle);
+  void leaveCase_stmt(const case_stmt* object, vpiHandle handle) final;
+  void leaveConstant(const constant* object, vpiHandle handle) final;
+  void enterModule_inst(const module_inst* object, vpiHandle handle) final;
 
   const any* resize(const any* object, int maxsize, bool is_unsigned);
   Serializer* serializer_ = nullptr;

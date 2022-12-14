@@ -54,7 +54,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
   //-------------------------------------------
   // Module definition M1 (non elaborated)
-  module* m1 = s->MakeModule();
+  module_inst* m1 = s->MakeModule_inst();
   {
     m1->VpiDefName("M1");
     m1->VpiParent(d);
@@ -83,7 +83,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
     m1->Param_assigns()->push_back(pass);
   }
 
-  VectorOfmodule* topModules = s->MakeModuleVec();
+  VectorOfmodule_inst* topModules = s->MakeModule_instVec();
   d->TopModules(topModules);
   topModules->push_back(m1);
 

@@ -15,13 +15,13 @@ using testing::ElementsAre;
 
 class MyUhdmListener : public UhdmListener {
  protected:
-  void enterModule(const module* object) override {
+  void enterModule_inst(const module_inst* object) override {
     if (visited.find(object) != visited.end()) return;
     CollectLine("Module", object);
     stack_.push(object);
   }
 
-  void leaveModule(const module* object) override {
+  void leaveModule_inst(const module_inst* object) override {
     if (visited.find(object) != visited.end()) return;
     ASSERT_EQ(stack_.top(), object);
     stack_.pop();
@@ -61,36 +61,36 @@ static design* buildModuleProg(Serializer* s) {
   design* d = s->MakeDesign();
   d->VpiName("design1");
   // Module
-  module* m1 = s->MakeModule();
+  module_inst* m1 = s->MakeModule_inst();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
   m1->VpiFullName("top::M1");
   m1->VpiParent(d);
 
   // Module
-  module* m2 = s->MakeModule();
+  module_inst* m2 = s->MakeModule_inst();
   m2->VpiDefName("M2");
   m2->VpiName("u1");
   m2->VpiParent(m1);
 
   // Module
-  module* m3 = s->MakeModule();
+  module_inst* m3 = s->MakeModule_inst();
   m3->VpiDefName("M3");
   m3->VpiName("u2");
   m3->VpiParent(m1);
 
   // Instance
-  module* m4 = s->MakeModule();
+  module_inst* m4 = s->MakeModule_inst();
   m4->VpiDefName("M4");
   m4->VpiName("u3");
   m4->VpiParent(m3);
   m4->Instance(m3);
 
-  VectorOfmodule* v1 = s->MakeModuleVec();
+  VectorOfmodule_inst* v1 = s->MakeModule_instVec();
   v1->push_back(m1);
   d->AllModules(v1);
 
-  VectorOfmodule* v2 = s->MakeModuleVec();
+  VectorOfmodule_inst* v2 = s->MakeModule_instVec();
   v2->push_back(m2);
   v2->push_back(m3);
   m1->Modules(v2);

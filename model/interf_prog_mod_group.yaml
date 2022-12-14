@@ -15,7 +15,6 @@
 # Universal Hardware Data Model (UHDM) "interface program module group" formal description
  
 - group_def: interf_prog_mod_group
-  - obj_ref: module
+  - obj_ref: module_inst
   - obj_ref: program
-  - obj_ref: interface
- 
+  - obj_ref: interface_inst

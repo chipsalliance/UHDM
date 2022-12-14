@@ -87,7 +87,7 @@ class Serializer {
   void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
   ErrorHandler GetErrorHandler() { return errorHandler; }
   const std::vector<vpiHandle> Restore(const std::filesystem::path& filepath);
-  std::map<std::string, unsigned long> ObjectStats() const;
+  std::map<std::string, unsigned long, std::less<>> ObjectStats() const;
   void PrintStats(std::ostream& strm, std::string_view infoText) const;
 
  private:

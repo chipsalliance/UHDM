@@ -203,10 +203,10 @@ class_defn.yaml
 class_obj.yaml
 class_var.yaml
 instance.yaml
-interface.yaml
+interface_inst.yaml
 program.yaml
 package.yaml
-module.yaml
+module_inst.yaml
 checker_decl.yaml
 checker_inst.yaml
 short_real_typespec.yaml

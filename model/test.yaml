@@ -27,12 +27,12 @@
     vpi: vpiTopModule
     card: 1
   - obj_ref: modules
-    vpi: vpiModule
-    type: module
+    vpi: vpiModuleInst
+    type: module_inst
     card: any
 
 - obj_def: design
   - class: uhdmAllModules
-    type: module
-    vpi_obj: vpiModule
+    type: module_inst
+    vpi_obj: vpiModuleInst
     card: any

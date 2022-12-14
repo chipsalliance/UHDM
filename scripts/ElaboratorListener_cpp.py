@@ -188,8 +188,8 @@ def _generate_class_listeners(models):
 
 
 def generate(models):
-    module_listeners = _generate_module_listeners(models, 'module')
-    interface_listeners = _generate_module_listeners(models, 'interface')
+    module_listeners = _generate_module_listeners(models, 'module_inst')
+    interface_listeners = _generate_module_listeners(models, 'interface_inst')
     class_listeners = _generate_class_listeners(models)
 
     with open(config.get_template_filepath('ElaboratorListener.cpp'), 'rt') as strm:

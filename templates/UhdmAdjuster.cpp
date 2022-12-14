@@ -77,8 +77,8 @@ const any* UhdmAdjuster::resize(const any* object, int maxsize,
     return resize(actual, maxsize, is_overall_unsigned);
   } else if (type == uhdmlogic_net) {
     const any* parent = result->VpiParent();
-    if (parent && (parent->UhdmType() == uhdmmodule)) {
-      module* mod = (module*)parent;
+    if (parent && (parent->UhdmType() == uhdmmodule_inst)) {
+      module_inst* mod = (module_inst*)parent;
       if (mod->Cont_assigns()) {
         for (cont_assign* cass : *mod->Cont_assigns()) {
           if (cass->Lhs()->VpiName() == result->VpiName()) {
@@ -143,8 +143,8 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
         expressions.push((const expr*)actual);
       } else if (type == uhdmlogic_net) {
         const any* parent = exp->VpiParent();
-        if (parent && (parent->UhdmType() == uhdmmodule)) {
-          module* mod = (module*)parent;
+        if (parent && (parent->UhdmType() == uhdmmodule_inst)) {
+          module_inst* mod = (module_inst*)parent;
           if (mod->Cont_assigns()) {
             for (cont_assign* cass : *mod->Cont_assigns()) {
               if (cass->Lhs()->VpiName() == exp->VpiName()) {
@@ -186,12 +186,12 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
   }
 }
 
-void UhdmAdjuster::enterModule(const module* object, vpiHandle handle) {
+void UhdmAdjuster::enterModule_inst(const module_inst* object, vpiHandle handle) {
   const std::string& instName = object->VpiName();
-  bool flatModule =
-      (instName == "") && ((object->VpiParent() == 0) ||
-                           ((object->VpiParent() != 0) &&
-                            (object->VpiParent()->VpiType() != vpiModule)));
+  bool flatModule = (instName.empty()) &&
+                    ((object->VpiParent() == 0) ||
+                     ((object->VpiParent() != 0) &&
+                      (object->VpiParent()->VpiType() != vpiModuleInst)));
   if (!flatModule) elaboratedTree_ = true;
   currentInstance_ = object;
 }
@@ -210,7 +210,8 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           if (oper != object) {
             ExprEval eval;
             bool invalidValue = false;
-            int tmp = eval.size(oper, invalidValue, currentInstance_, op, true, true);
+            int tmp = static_cast<int>(eval.size(
+                oper, invalidValue, currentInstance_, op, true, true));
             if (!invalidValue) {
               size = tmp;
             }

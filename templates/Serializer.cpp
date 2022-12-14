@@ -77,8 +77,8 @@ BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
   }
 }
 
-std::map<std::string, unsigned long> Serializer::ObjectStats() const {
-  std::map<std::string, unsigned long> stats;
+std::map<std::string, unsigned long, std::less<>> Serializer::ObjectStats() const {
+  std::map<std::string, unsigned long, std::less<>> stats;
 <FACTORY_STATS>
   return stats;
 }
@@ -87,19 +87,20 @@ void Serializer::PrintStats(std::ostream& strm,
                             std::string_view infoText) const {
   strm << "=== UHDM Object Stats Begin (" << infoText << ") ===" << std::endl;
   auto stats = ObjectStats();
-  std::vector<std::string> names;
+  std::vector<std::string_view> names;
   names.reserve(stats.size());
-  std::transform(
-      stats.begin(), stats.end(), std::back_inserter(names),
-      [](decltype(stats)::value_type const& pair) { return pair.first; });
+  std::transform(stats.begin(), stats.end(), std::back_inserter(names),
+                 [](decltype(stats)::value_type const& pair) {
+                   return std::string_view(pair.first);
+                 });
   std::sort(names.begin(), names.end());
-  for (const std::string& name : names) {
-    unsigned long count = stats[name];
-    if (count > 0) {
+  for (std::string_view name : names) {
+    auto it = stats.find(name);
+    if (it->second > 0) {
       // The longest model name is
       // "enum_struct_union_packed_array_typespec_group"
       strm << std::setw(48) << std::left << name << std::setw(8) << std::right
-           << count << std::endl;
+           << it->second << std::endl;
     }
   }
   strm << "=== UHDM Object Stats End ===" << std::endl;

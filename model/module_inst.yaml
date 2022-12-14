@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "interface" formal description
+# Universal Hardware Data Model (UHDM) "module_inst" formal description
  
-- obj_def: interface
+- obj_def: module_inst
   - extends: instance
   - property: index
     name: index
@@ -22,20 +22,20 @@
     type: int
     card: 1
   - property: type
-    name: vpiInterface
+    name: vpiModuleInst
     vpi: vpiType
     type: unsigned int
     card: 1
-  - obj_ref: interface_tf_decls
-    name: interface tf decl
-    vpi: vpiInterfaceTfDecl
-    type: interface_tf_decl
-    card: any
-  - obj_ref: modports
-    name: modport
-    vpi: vpiModport
-    type: modport
-    card: any
+  - property: top_module
+    name: top module
+    type: bool
+    vpi: vpiTopModule
+    card: 1
+  - property: decay_time
+    name: decay time
+    type: int
+    vpi: vpiDefDecayTime
+    card: 1
   - obj_ref: global_clocking
     name: global clocking
     vpi: vpiGlobalClocking
@@ -51,29 +51,25 @@
     vpi: vpiDefaultDisableIff
     type: expr_dist
     card: 1
+  - obj_ref: module_array
+    name: module array
+    vpi: vpiModuleArray
+    type: module_array
+    card: 1
   - class_ref: instance_array
     name: instance array
     vpi: vpiInstanceArray
     type: instance_array
     card: 1
-  - obj_ref: mod_paths
-    name: mod path
-    vpi: vpiModPath
-    type: mod_path
+  - obj_ref: ports
+    vpi: vpiPort
+    name: port
+    type: port
     card: any
-  - obj_ref: cont_assigns
-    name: cont assign
-    vpi: vpiContAssign
-    type: cont_assign
-    card: any
-  - obj_ref: clocking_blocks
-    vpi: vpiClockingBlock
-    type: clocking_block
-    card: any  
   - obj_ref: interfaces
-    name: interface
-    vpi: vpiInterface
-    type: interface
+    name: interface_inst
+    vpi: vpiInterfaceInst
+    type: interface_inst
     card: any
   - obj_ref: interface_arrays
     vpi: vpiInterfaceArray
@@ -85,13 +81,57 @@
     vpi: vpiProcess
     type: process_stmt
     card: any
-  - obj_ref: ports
-    vpi: vpiPort
-    name: port
-    type: port
+  - obj_ref: modules
+    name: modules
+    vpi: vpiModuleInst
+    type: module_inst
+    card: any
+  - obj_ref: module_arrays
+    name: module array
+    vpi: vpiModuleArray
+    type: module_array
     card: any
   - obj_ref: gen_scope_array
     name: gen scope array
     vpi: vpiGenScopeArray
     type: gen_scope_array
-    card: any    
+    card: any
+  - obj_ref: cont_assigns
+    name: cont assign
+    vpi: vpiContAssign
+    type: cont_assign
+    card: any
+  - class_ref: primitives
+    name: primitive
+    vpi: vpiPrimitive
+    type: primitive
+    card: any
+  - class_ref: primitive_arrays
+    name: primitive array
+    vpi: vpiPrimitiveArray
+    type: primitive_array
+    card: any
+  - obj_ref: mod_paths
+    vpi: vpiModPath
+    type: mod_path
+    card: any
+  - obj_ref: tchks
+    vpi: vpiTchk
+    type: tchk
+    card: any
+  - obj_ref: def_params
+    vpi: vpiDefParam
+    type: def_param
+    card: any
+  - obj_ref: io_decls
+    vpi: vpiIODecl
+    type: io_decl
+    card: any
+  - obj_ref: alias_stmts
+    vpi: vpiAliasStmt
+    type: alias_stmt
+    card: any
+  - obj_ref: clocking_blocks
+    vpi: vpiClockingBlock
+    type: clocking_block
+    card: any

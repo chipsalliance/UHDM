@@ -15,10 +15,10 @@
 # Universal Hardware Data Model (UHDM) "tchk" formal description
 
 - obj_def: tchk
-  - obj_ref: module
-    name: module
-    type: module
-    vpi: vpiModule
+  - obj_ref: module_inst
+    name: module_inst
+    type: module_inst
+    vpi: vpiModuleInst
     card: 1
   - class_ref: expr
     name: expr

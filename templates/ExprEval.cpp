@@ -369,7 +369,7 @@ any *ExprEval::getObject(const std::string &name, const any *inst,
       }
       if (result) break;
       if (inst) {
-        if (inst->UhdmType() == uhdmmodule) {
+        if (inst->UhdmType() == uhdmmodule_inst) {
           break;
         } else {
           inst = inst->VpiParent();
@@ -4198,7 +4198,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   const std::string name = func->VpiName();
   // set internal scope stack
   Scopes scopes;
-  module *scope = s.MakeModule();
+  module_inst *scope = s.MakeModule_inst();
   scope->VpiParent((any *)inst);
   if (const instance *pack = func->Instance()) {
     scope->Task_funcs(pack->Task_funcs());
