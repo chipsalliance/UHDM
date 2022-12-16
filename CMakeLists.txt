@@ -132,6 +132,7 @@ set(uhdm-GENERATED_SRC
     ${GENDIR}/src/clone_tree.cpp
     ${GENDIR}/src/ElaboratorListener.cpp
     ${GENDIR}/src/ExprEval.cpp
+    ${GENDIR}/src/NumUtils.cpp
     ${GENDIR}/src/Serializer.cpp
     ${GENDIR}/src/Serializer_restore.cpp
     ${GENDIR}/src/Serializer_save.cpp

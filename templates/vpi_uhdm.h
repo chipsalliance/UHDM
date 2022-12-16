@@ -29,6 +29,9 @@
 
 #include <uhdm/uhdm_types.h>
 
+#include <string>
+#include <string_view>
+
 namespace UHDM {
   class Serializer;
   class design;
@@ -61,9 +64,9 @@ class uhdm_handleFactory {
 /** Obtain a vpiHandle from a BaseClass (any) object */
 vpiHandle NewVpiHandle (const UHDM::BaseClass* object);
 
-s_vpi_value* String2VpiValue(const std::string& s);
+s_vpi_value* String2VpiValue(std::string_view sv);
 
-s_vpi_delay* String2VpiDelays(const std::string& s);
+s_vpi_delay* String2VpiDelays(std::string_view sv);
 
 std::string VpiValue2String(const s_vpi_value* value);
 

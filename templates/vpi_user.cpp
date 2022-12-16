@@ -25,19 +25,14 @@
 #include <uhdm/sv_vpi_user.h>
 #include <uhdm/vhpi_user.h>
 
-#include <string.h>
-#if defined(_MSC_VER)
-  #define strcasecmp _stricmp
-  #define strdup _strdup
-#else
-  #include <strings.h>
-#endif
-
+#include <cctype>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include <uhdm/NumUtils.h>
 #include <uhdm/Serializer.h>
 #include <uhdm/containers.h>
 #include <uhdm/uhdm.h>
@@ -48,6 +43,25 @@
 
 using namespace UHDM;
 
+static char* StrClone(std::string_view sv) {
+  char* clone = new char[sv.length() + 1];
+  std::memcpy(clone, sv.data(), sv.length());
+  clone[sv.length()] = '\0';
+  return clone;
+}
+
+static int32_t StriCmp(std::string_view lhs, std::string_view rhs) {
+  for (size_t i = 0, n = std::min(lhs.length(), rhs.length()); i < n; ++i) {
+    int32_t lc = std::tolower((int32_t)lhs[i]);
+    int32_t rc = std::tolower((int32_t)rhs[i]);
+    if (lc != rc) return (lc < rc) ? -1 : +1;
+  }
+
+  return (lhs.length() == rhs.length())
+    ? 0
+    : ((lhs.length() < rhs.length()) ? -1 : +1);
+}
+
 UHDM::design* UhdmDesignFromVpiHandle(vpiHandle hdesign) {
   if (!hdesign) return nullptr;
   UHDM::any* tmp = (UHDM::any*)((uhdm_handle*)hdesign)->object;
@@ -57,23 +71,29 @@ UHDM::design* UhdmDesignFromVpiHandle(vpiHandle hdesign) {
     return nullptr;
 }
 
-s_vpi_value* String2VpiValue(const std::string& s) {
+s_vpi_value* String2VpiValue(std::string_view sv) {
+  while (!sv.empty() && isspace(sv.front())) sv.remove_prefix(1);
   s_vpi_value* val = new s_vpi_value;
   val->format = 0;
   val->value.integer = 0;
   val->value.scalar = 0;
   val->value.str = nullptr;
-  size_t pos;
-  if ((pos = s.find("UINT:")) != std::string::npos) {
+  if (sv.find("UINT:") == 0) {
     val->format = vpiUIntVal;
-    val->value.uint = std::strtoull(s.c_str() + pos + strlen("UINT:"), 0, 10);
-  } else if ((pos = s.find("INT:")) != std::string::npos) {
+    sv.remove_prefix(std::string_view("UINT:").length());
+    if (NumUtils::parseUint64(sv, &val->value.uint) == nullptr) {
+      val->value.uint = 0;
+    }
+  } else if (sv.find("INT:") == 0) {
     val->format = vpiIntVal;
-    val->value.integer = std::strtoll(s.c_str() + pos + strlen("INT:"), 0, 10);
-  } else if ((pos = s.find("SCAL:")) != std::string::npos) {
+    sv.remove_prefix(std::string_view("INT:").length());
+    if (NumUtils::parseInt64(sv, &val->value.integer) == nullptr) {
+      val->value.integer = 0;
+    }
+  } else if (sv.find("SCAL:") == 0) {
     val->format = vpiScalarVal;
-    const char* const parse_pos = s.c_str() + pos + strlen("SCAL:");
-    switch (parse_pos[0]) {
+    sv.remove_prefix(std::string_view("SCAL:").length());
+    switch (sv.front()) {
       case 'Z': val->value.scalar = vpiZ; break;
       case 'X': val->value.scalar = vpiX; break;
       case 'H': val->value.scalar = vpiH; break;
@@ -81,49 +101,62 @@ s_vpi_value* String2VpiValue(const std::string& s) {
         // Not really clear what the difference between X and DontCare is.
         // Let's parse 'W'eak don't care as this one.
       case 'W': val->value.scalar = vpiDontCare; break;
-      default:
-        if (strcasecmp(parse_pos, "DontCare") == 0) {
+      default: {
+        if (StriCmp(sv, std::string_view("DontCare")) == 0) {
           val->value.scalar = vpiDontCare;
-        } else if (strcasecmp(parse_pos, "NoChange") == 0) {
+        } else if (StriCmp(sv, std::string_view("NoChange")) == 0) {
           val->value.scalar = vpiNoChange;
         } else {
-          val->value.scalar = atoi(parse_pos);  // Maybe written numerically?
+          // Maybe written numerically?
+          if (NumUtils::parseInt32(sv, &val->value.scalar) == nullptr) {
+            val->value.scalar = 0;
+          }
         }
-        break;
+      } break;
     }
-  } else if ((pos = s.find("BIN:")) != std::string::npos) {
+  } else if (sv.find("BIN:") == 0) {
     val->format = vpiBinStrVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("BIN:"));
-  } else if ((pos = s.find("HEX:")) != std::string::npos) {
+    sv.remove_prefix(std::string_view("BIN:").length());
+    val->value.str = StrClone(sv);
+  } else if (sv.find("HEX:") == 0) {
     val->format = vpiHexStrVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("HEX:"));
-  } else if ((pos = s.find("OCT:")) != std::string::npos) {
+    sv.remove_prefix(std::string_view("HEX:").length());
+    val->value.str = StrClone(sv);
+  } else if (sv.find("OCT:") == 0) {
     val->format = vpiOctStrVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("OCT:"));
-  } else if ((pos = s.find("STRING:")) != std::string::npos) {
+    sv.remove_prefix(std::string_view("OCT:").length());
+    val->value.str = StrClone(sv);
+  } else if (sv.find("STRING:") == 0) {
     val->format = vpiStringVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("STRING:"));
-  } else if ((pos = s.find("REAL:")) != std::string::npos) {
+    sv.remove_prefix(std::string_view("STRING:").length());
+    val->value.str = StrClone(sv);
+  } else if (sv.find("REAL:") == 0) {
     val->format = vpiRealVal;
-    val->value.real = atof(s.c_str() + pos + strlen("REAL:"));
-  } else if ((pos = s.find("DEC:")) != std::string::npos) {
+    sv.remove_prefix(std::string_view("REAL:").length());
+    if (NumUtils::parseDouble(sv, &val->value.real) == nullptr) {
+      val->value.real = 0;
+    }
+  } else if (sv.find("DEC:") == 0) {
     val->format = vpiDecStrVal;
-    val->value.str = strdup(s.c_str() + pos + strlen("DEC:"));
+    sv.remove_prefix(std::string_view("DEC:").length());
+    val->value.str = StrClone(sv);
   }
 
   return val;
 }
 
-s_vpi_delay* String2VpiDelays(const std::string& s) {
-  std::string scopy = s;
+s_vpi_delay* String2VpiDelays(std::string_view sv) {
+  while (!sv.empty() && isspace(sv.front())) sv.remove_prefix(1);
   s_vpi_delay* delay = new s_vpi_delay;
   delay->da = nullptr;
-  if (strstr(scopy.c_str(), "#")) {
-    scopy.erase(0, 1);
+  if (sv.front() == '#') {
     delay->da = new t_vpi_time;
     delay->no_of_delays = 1;
     delay->time_type = vpiScaledRealTime;
-    delay->da[0].low = atoi(scopy.c_str());
+    sv.remove_prefix(1);
+    if (NumUtils::parseUint32(sv, &delay->da[0].low) == nullptr) {
+      delay->da[0].low = 0;
+    }
     delay->da[0].type = vpiScaledRealTime;
   }
   return delay;

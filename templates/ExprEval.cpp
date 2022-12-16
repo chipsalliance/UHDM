@@ -25,6 +25,7 @@
 #include <string.h>
 #include <uhdm/ElaboratorListener.h>
 #include <uhdm/ExprEval.h>
+#include <uhdm/NumUtils.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
@@ -36,23 +37,19 @@
 #include <locale>
 #include <regex>
 #include <sstream>
+#include <string_view>
 
 using namespace UHDM;
 
-static uint64_t getMask(uint64_t wide) {
-  uint64_t mask = 0;
-  uint64_t sizeInBits = sizeof(mask) * 8;
-  mask = (wide >= sizeInBits)
-             ? ((uint64_t)-1)
-             : ((uint64_t)((uint64_t)(((uint64_t)1) << ((uint64_t)wide))) -
-                (uint64_t)1);
-  return mask;
+[[nodiscard]] static std::string_view ltrim(std::string_view str, char c) {
+  auto pos = str.find(c);
+  if (pos != std::string_view::npos) str = str.substr(pos + 1);
+  return str;
 }
 
-static std::string &ltrim(std::string &str, char c) {
-  auto it1 =
-      std::find_if(str.begin(), str.end(), [c](char ch) { return (ch == c); });
-  if (it1 != str.end()) str.erase(str.begin(), it1 + 1);
+[[nodiscard]] std::string_view rtrim(std::string_view str, char c) {
+  auto pos = str.rfind(c);
+  if (pos != std::string_view::npos) str = str.substr(0, pos);
   return str;
 }
 
@@ -435,11 +432,11 @@ long double ExprEval::get_double(bool &invalidValue, const UHDM::expr *expr) {
   long double result = 0;
   if (const UHDM::constant *c = any_cast<const UHDM::constant *>(expr)) {
     int type = c->VpiConstType();
-    const std::string &v = c->VpiValue();
+    std::string_view sv = c->VpiValue();
     switch (type) {
       case vpiRealConst: {
-        result = std::strtold(v.c_str() + std::string_view("REAL:").length(),
-                              nullptr);
+        sv.remove_prefix(std::string_view("REAL:").length());
+        invalidValue = NumUtils::parseLongDouble(sv, &result) == nullptr;
         break;
       }
       default: {
@@ -457,38 +454,62 @@ uint64_t ExprEval::getValue(const UHDM::expr *expr) {
   uint64_t result = 0;
   if (expr && expr->UhdmType() == UHDM::uhdmconstant) {
     UHDM::constant *c = (UHDM::constant *)expr;
-    const std::string &v = c->VpiValue();
+    std::string_view sv = c->VpiValue();
     int type = c->VpiConstType();
     switch (type) {
       case vpiBinaryConst: {
-        result = std::strtoll(v.c_str() + strlen("BIN:"), nullptr, 2);
+        sv.remove_prefix(std::string_view("BIN:").length());
+        if (NumUtils::parseBinary(sv, &result) == nullptr) {
+          result = 0;
+        }
         break;
       }
       case vpiDecConst: {
-        result = std::strtoll(v.c_str() + strlen("DEC:"), nullptr, 10);
+        sv.remove_prefix(std::string_view("DEC:").length());
+        if (NumUtils::parseIntLenient(sv, &result) == nullptr) {
+          result = 0;
+        }
         break;
       }
       case vpiHexConst: {
-        result = std::strtoll(v.c_str() + strlen("HEX:"), nullptr, 16);
+        sv.remove_prefix(std::string_view("HEX:").length());
+        if (NumUtils::parseHex(sv, &result) == nullptr) {
+          result = 0;
+        }
         break;
       }
       case vpiOctConst: {
-        result = std::strtoll(v.c_str() + strlen("OCT:"), nullptr, 8);
+        sv.remove_prefix(std::string_view("OCT:").length());
+        if (NumUtils::parseOctal(sv, &result) == nullptr) {
+          result = 0;
+        }
         break;
       }
       case vpiIntConst: {
-        result = std::strtoll(v.c_str() + strlen("INT:"), nullptr, 10);
+        sv.remove_prefix(std::string_view("INT:").length());
+        if (NumUtils::parseIntLenient(sv, &result) == nullptr) {
+          result = 0;
+        }
         break;
       }
       case vpiUIntConst: {
-        result = std::strtoull(v.c_str() + strlen("UINT:"), nullptr, 10);
+        sv.remove_prefix(std::string_view("UINT:").length());
+        if (NumUtils::parseUint64(sv, &result) == nullptr) {
+          result = 0;
+        }
         break;
       }
       default: {
-        if (v.find("UINT:") == 0) {
-          result = std::strtoull(v.c_str() + strlen("UINT:"), nullptr, 10);
+        if (sv.find("UINT:") == 0) {
+          sv.remove_prefix(std::string_view("UINT:").length());
+          if (NumUtils::parseUint64(sv, &result) == nullptr) {
+            result = 0;
+          }
         } else {
-          result = std::strtoll(v.c_str() + strlen("INT:"), nullptr, 10);
+          sv.remove_prefix(std::string_view("INT:").length());
+          if (NumUtils::parseIntLenient(sv, &result) == nullptr) {
+            result = 0;
+          }
         }
         break;
       }
@@ -695,7 +716,7 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
             if (uval == 1) {
               uint64_t size = ExprEval::size(fieldTypes[index], invalidValue,
                                              nullptr, exp, true, true);
-              uint64_t mask = getMask(size);
+              uint64_t mask = NumUtils::getMask(size);
               uval = mask;
               c->VpiValue("UINT:" + std::to_string(uval));
               c->VpiDecompile(std::to_string(uval));
@@ -744,14 +765,14 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
     }
     case uhdmparameter: {
       parameter *p = (parameter *)object;
-      std::string val = p->VpiValue();
+      std::string_view val = p->VpiValue();
       val = ltrim(val, ':');
       out << val;
       break;
     }
     case uhdmenum_const: {
       enum_const *c = (enum_const *)object;
-      std::string val = c->VpiValue();
+      std::string_view val = c->VpiValue();
       val = ltrim(val, ':');
       out << val;
       break;
@@ -840,15 +861,19 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
       }
       case UHDM::uhdminteger_typespec: {
         integer_typespec *itps = (integer_typespec *)typespec;
-        const std::string &val = itps->VpiValue();
+        std::string_view val = itps->VpiValue();
         if (val.empty()) {
           bits = 32;
         } else if (val.find("UINT:") == 0) {
-          bits = std::strtoull(val.c_str() + std::string_view("UINT:").length(),
-                               nullptr, 10);
+          val.remove_prefix(std::string_view("UINT:").length());
+          if (NumUtils::parseUint64(val, &bits) == nullptr) {
+            bits = 32;
+          }
         } else if (val.find("INT:") == 0) {
-          bits = std::strtoll(val.c_str() + std::string_view("INT:").length(),
-                              nullptr, 10);
+          val.remove_prefix(std::string_view("INT:").length());
+          if (NumUtils::parseIntLenient(val, &bits) == nullptr) {
+            bits = 32;
+          }
         }
         break;
       }
@@ -1154,56 +1179,6 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
   return result;
 }
 
-static std::string trimLeadingZeros(const std::string &s) {
-  const uint64_t sSize = s.size();
-  std::string res;
-  bool nonZero = false;
-  for (unsigned int i = 0; i < sSize; i++) {
-    const char c = s[i];
-    if (c != '0') nonZero = true;
-    if (nonZero) res += c;
-  }
-  return res;
-}
-
-std::string &rtrim(std::string &str, char c) {
-  auto it1 = std::find_if(str.rbegin(), str.rend(),
-                          [c](char ch) { return (ch == c); });
-  if (it1 != str.rend()) str.erase(it1.base() - 1, str.end());
-  return str;
-}
-
-static std::string hexToBin(const std::string &s) {
-  std::string out;
-  for (auto i : s) {
-    uint8_t n;
-    if ((i <= '9') && (i >= '0'))
-      n = i - '0';
-    else
-      n = 10 + i - 'A';
-    for (int8_t j = 3; j >= 0; --j) out.push_back((n & (1 << j)) ? '1' : '0');
-  }
-  out = trimLeadingZeros(out);
-  return out;
-}
-
-static std::string toBinary(int size, uint64_t val) {
-  int constexpr bitFieldSize = 100;
-  std::string tmp = std::bitset<bitFieldSize>(val).to_string();
-  if (size <= 0) {
-    for (unsigned int i = 0; i < bitFieldSize; i++) {
-      if (tmp[i] == '1') {
-        size = bitFieldSize - i;
-        break;
-      }
-    }
-  }
-  std::string result;
-  for (unsigned int i = bitFieldSize - size; i < bitFieldSize; i++)
-    result += tmp[i];
-  return result;
-}
-
 expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
                                 bool &invalidValue, const any *inst,
                                 const any *pexpr, bool muteError) {
@@ -1215,36 +1190,44 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
     constant *cexp = (constant *)exp;
     if (cexp->VpiConstType() == vpiBinaryConst) {
       binary = cexp->VpiValue();
-      binary = binary.erase(0, 4);
+      binary = binary.substr(std::string_view("BIN:").length());
     } else if (cexp->VpiConstType() == vpiHexConst) {
-      std::string hex = cexp->VpiValue();
-      hex = hex.erase(0, 4);
-      binary = hexToBin(hex);
+      std::string_view hex = cexp->VpiValue();
+      hex.remove_prefix(std::string_view("HEX:").length());
+      binary = NumUtils::hexToBin(hex);
     } else {
       int64_t val = get_value(invalidValue, exp);
-      binary = toBinary(exp->VpiSize(), val);
+      binary = NumUtils::toBinary(exp->VpiSize(), val);
     }
     uint64_t wordSize = 1;
     if (typespec *cts = (typespec *)cexp->Typespec()) {
       if (cts->UhdmType() == uhdmint_typespec) {
         int_typespec *icts = (int_typespec *)cts;
-        const std::string &value = icts->VpiValue();
+        std::string_view value = icts->VpiValue();
         if (value.find("UINT:") == 0) {
-          wordSize = std::strtoull(
-              value.c_str() + std::string_view("UINT:").length(), nullptr, 10);
+          value.remove_prefix(std::string_view("UINT:").length());
+          if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
+            wordSize = 1;
+          }
         } else if (value.find("INT:") == 0) {
-          wordSize = std::strtoull(
-              value.c_str() + std::string_view("INT:").length(), nullptr, 10);
+          value.remove_prefix(std::string_view("INT:").length());
+          if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
+            wordSize = 1;
+          }
         }
       } else if (cts->UhdmType() == uhdminteger_typespec) {
         integer_typespec *icts = (integer_typespec *)cts;
-        const std::string &value = icts->VpiValue();
+        std::string_view value = icts->VpiValue();
         if (value.find("UINT:") == 0) {
-          wordSize = std::strtoull(
-              value.c_str() + std::string_view("UINT:").length(), nullptr, 10);
+          value.remove_prefix(std::string_view("UINT:").length());
+          if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
+            wordSize = 1;
+          }
         } else if (value.find("INT:") == 0) {
-          wordSize = std::strtoull(
-              value.c_str() + std::string_view("INT:").length(), nullptr, 10);
+          value.remove_prefix(std::string_view("INT:").length());
+          if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
+            wordSize = 1;
+          }
         }
       } else if (cts->UhdmType() == uhdmlogic_typespec) {
         logic_typespec *icts = (logic_typespec *)cts;
@@ -1340,46 +1323,19 @@ expr *ExprEval::reduceBitSelect(expr *op, unsigned int index_val,
   return result;
 }
 
-static bool largeInt(const std::string &value, bool isSigned) {
-  bool largeInt = false;
-  if (value.size() > 20) {
-    largeInt = true;
-  } else if (value.size() == 20) {
-    if (isSigned) {
-      int64_t test = std::strtoll(value.c_str(), 0, 10);
-      std::string testv = std::to_string(test);
-      if (testv != value) {
-        largeInt = true;
-      }
-    } else {
-      uint64_t test = std::strtoull(value.c_str(), 0, 10);
-      std::string testv = std::to_string(test);
-      if (testv != value) {
-        largeInt = true;
-      }
-    }
-  }
-  return largeInt;
-}
-
-int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr, bool strict) {
+int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr,
+                            bool strict) {
   int64_t result = 0;
-  bool isSigned = false;
   int type = 0;
-  std::string v;
+  std::string_view sv;
   if (const UHDM::constant *c = any_cast<const UHDM::constant *>(expr)) {
     type = c->VpiConstType();
-    v = c->VpiValue();
-    if (const typespec *tps = c->Typespec()) {
-      if (tps->UhdmType() == uhdmint_typespec) {
-        isSigned = ((int_typespec *)tps)->VpiSigned();
-      }
-    }
+    sv = c->VpiValue();
   } else if (const UHDM::variables *c =
                  any_cast<const UHDM::variables *>(expr)) {
     if (c->UhdmType() == uhdmenum_var) {
       type = vpiUIntConst;
-      v = c->VpiValue();
+      sv = c->VpiValue();
     }
   } else {
     invalidValue = true;
@@ -1387,57 +1343,32 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr, bool str
   if (!invalidValue) {
     switch (type) {
       case vpiBinaryConst: {
-        if (strict) {
-          for (uint32_t i = 0; i < v.size(); i++) {
-            char c = v[i];
-            if (c == 'x' || c == 'X' || c == 'z' || c == 'Z' || c == '?') {
-              invalidValue = true;
-              result = 0;
-              return result;
-            }
-          }
-        }
         if (expr->VpiSize() > 64) {
           invalidValue = true;
         } else {
-          ltrim(v, '\'');
-          ltrim(v, 's');
-          ltrim(v, 'b');
-          try {
-            result = std::strtoll(v.c_str() + std::string_view("BIN:").length(),
-                                  nullptr, 2);
-          } catch (...) {
-            invalidValue = true;
-          }
+          sv = ltrim(sv, '\'');
+          sv = ltrim(sv, 's');
+          sv = ltrim(sv, 'b');
+          sv.remove_prefix(std::string_view("BIN:").length());
+          bool invalid = NumUtils::parseBinary(sv, &result) == nullptr;
+          if (strict) invalidValue = invalid;
         }
         break;
       }
       case vpiDecConst: {
-        try {
-          if (largeInt(v.c_str() + std::string_view("DEC:").length(), isSigned)) {
-            invalidValue = true;
-            return result;
-          }
-          result = std::strtoll(v.c_str() + std::string_view("DEC:").length(),
-                                nullptr, 10);
-        } catch (...) {
-          invalidValue = true;
-        }
+        sv.remove_prefix(std::string_view("DEC:").length());
+        invalidValue = NumUtils::parseInt64(sv, &result) == nullptr;
         break;
       }
       case vpiHexConst: {
         if (expr->VpiSize() > 64) {
           invalidValue = true;
         } else {
-          ltrim(v, '\'');
-          ltrim(v, 's');
-          ltrim(v, 'h');
-          try {
-            result = std::strtoll(v.c_str() + std::string_view("HEX:").length(),
-                                  nullptr, 16);
-          } catch (...) {
-            invalidValue = true;
-          }
+          sv = ltrim(sv, '\'');
+          sv = ltrim(sv, 's');
+          sv = ltrim(sv, 'h');
+          sv.remove_prefix(std::string_view("HEX:").length());
+          invalidValue = NumUtils::parseHex(sv, &result) == nullptr;
         }
         break;
       }
@@ -1445,58 +1376,34 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr, bool str
         if (expr->VpiSize() > 64) {
           invalidValue = true;
         } else {
-          ltrim(v, '\'');
-          ltrim(v, 's');
-          ltrim(v, 'o');
-          try {
-            result = std::strtoll(v.c_str() + std::string_view("OCT:").length(),
-                                  nullptr, 8);
-          } catch (...) {
-            invalidValue = true;
-          }
+          sv = ltrim(sv, '\'');
+          sv = ltrim(sv, 's');
+          sv = ltrim(sv, 'o');
+          sv.remove_prefix(std::string_view("OCT:").length());
+          invalidValue = NumUtils::parseOctal(sv, &result) == nullptr;
         }
         break;
       }
       case vpiIntConst: {
-        try {
-          if (largeInt(v.c_str() + std::string_view("INT:").length(), isSigned)) {
-            invalidValue = true;
-            return result;
-          }
-          result = std::strtoll(v.c_str() + std::string_view("INT:").length(),
-                                nullptr, 10);
-        } catch (...) {
-          invalidValue = true;
-        }
+        sv.remove_prefix(std::string_view("INT:").length());
+        invalidValue = NumUtils::parseInt64(sv, &result) == nullptr;
         break;
       }
       case vpiUIntConst: {
-        try {
-          if (largeInt(v.c_str() + std::string_view("UINT:").length(), isSigned)) {
-            invalidValue = true;
-            return result;
-          }
-          result = std::strtoull(v.c_str() + std::string_view("UINT:").length(),
-                                 nullptr, 10);
-        } catch (...) {
-          invalidValue = true;
-        }
+        sv.remove_prefix(std::string_view("UINT:").length());
+        invalidValue = NumUtils::parseIntLenient(sv, &result) == nullptr;
         break;
       }
       case vpiScalar: {
-        try {
-          result = std::strtoll(v.c_str() + std::string_view("SCAL:").length(),
-                                nullptr, 2);
-        } catch (...) {
-          invalidValue = true;
-        }
+        sv.remove_prefix(std::string_view("SCAL:").length());
+        invalidValue = NumUtils::parseBinary(sv, &result) == nullptr;
         break;
       }
       case vpiStringConst: {
-        std::string val = v.c_str() + std::string_view("STRING:").length();
+        sv.remove_prefix(std::string_view("STRING:").length());
         result = 0;
-        for (uint32_t i = 0; i < val.size(); i ++) {
-          result += (val[i] << ((val.size() - (i + 1)) * 8));
+        for (uint32_t i = 0; i < sv.size(); i++) {
+          result += (sv[i] << ((sv.size() - (i + 1)) * 8));
         }
         break;
       }
@@ -1506,17 +1413,13 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr, bool str
         break;
       }
       default: {
-        try {
-          if (v.find("UINT:") == 0) {
-            result = std::strtoull(
-                v.c_str() + std::string_view("UINT:").length(), nullptr, 10);
-          } else if (v.find("INT:") == 0) {
-            result = std::strtoll(v.c_str() + std::string_view("INT:").length(),
-                                  nullptr, 10);
-          } else {
-            invalidValue = true;
-          }
-        } catch (...) {
+        if (sv.find("UINT:") == 0) {
+          sv.remove_prefix(std::string_view("UINT:").length());
+          invalidValue = NumUtils::parseIntLenient(sv, &result) == nullptr;
+        } else if (sv.find("INT:") == 0) {
+          sv.remove_prefix(std::string_view("INT:").length());
+          invalidValue = NumUtils::parseInt64(sv, &result) == nullptr;
+        } else {
           invalidValue = true;
         }
         break;
@@ -1526,18 +1429,19 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr, bool str
   return result;
 }
 
-uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr, bool strict) {
+uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr,
+                              bool strict) {
   uint64_t result = 0;
   int type = 0;
-  std::string v;
+  std::string_view sv;
   if (const UHDM::constant *c = any_cast<const UHDM::constant *>(expr)) {
     type = c->VpiConstType();
-    v = c->VpiValue();
+    sv = c->VpiValue();
   } else if (const UHDM::variables *c =
                  any_cast<const UHDM::variables *>(expr)) {
     if (c->UhdmType() == uhdmenum_var) {
       type = vpiUIntConst;
-      v = c->VpiValue();
+      sv = c->VpiValue();
     }
   } else {
     invalidValue = true;
@@ -1545,57 +1449,32 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr, bool s
   if (!invalidValue) {
     switch (type) {
       case vpiBinaryConst: {
-        if (strict) {
-          for (uint32_t i = 0; i < v.size(); i++) {
-            char c = v[i];
-            if (c == 'x' || c == 'X' || c == 'z' || c == 'Z' || c == '?') {
-              invalidValue = true;
-              result = 0;
-              return result;
-            }
-          }
-        }
         if (expr->VpiSize() > 64) {
           invalidValue = true;
         } else {
-          ltrim(v, '\'');
-          ltrim(v, 's');
-          ltrim(v, 'b');
-          try {
-            result = std::strtoull(
-                v.c_str() + std::string_view("BIN:").length(), nullptr, 2);
-          } catch (...) {
-            invalidValue = true;
-          }
+          sv = ltrim(sv, '\'');
+          sv = ltrim(sv, 's');
+          sv = ltrim(sv, 'b');
+          sv.remove_prefix(std::string_view("BIN:").length());
+          bool invalid = NumUtils::parseBinary(sv, &result) == nullptr;
+          if (strict) invalidValue = invalid;
         }
         break;
       }
       case vpiDecConst: {
-        try {
-          if (largeInt(v.c_str() + std::string_view("DEC:").length(), false)) {
-            invalidValue = true;
-            return result;
-          }
-          result = std::strtoull(v.c_str() + std::string_view("DEC:").length(),
-                                 nullptr, 10);
-        } catch (...) {
-          invalidValue = true;
-        }
+        sv.remove_prefix(std::string_view("DEC:").length());
+        invalidValue = NumUtils::parseUint64(sv, &result) == nullptr;
         break;
       }
       case vpiHexConst: {
         if (expr->VpiSize() > 64) {
           invalidValue = true;
         } else {
-          ltrim(v, '\'');
-          ltrim(v, 's');
-          ltrim(v, 'h');
-          try {
-            result = std::strtoull(
-                v.c_str() + std::string_view("HEX:").length(), nullptr, 16);
-          } catch (...) {
-            invalidValue = true;
-          }
+          sv = ltrim(sv, '\'');
+          sv = ltrim(sv, 's');
+          sv = ltrim(sv, 'h');
+          sv.remove_prefix(std::string_view("HEX:").length());
+          invalidValue = NumUtils::parseHex(sv, &result) == nullptr;
         }
         break;
       }
@@ -1603,58 +1482,34 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr, bool s
         if (expr->VpiSize() > 64) {
           invalidValue = true;
         } else {
-          ltrim(v, '\'');
-          ltrim(v, 's');
-          ltrim(v, 'o');
-          try {
-            result = std::strtoull(
-                v.c_str() + std::string_view("OCT:").length(), nullptr, 8);
-          } catch (...) {
-            invalidValue = true;
-          }
+          sv = ltrim(sv, '\'');
+          sv = ltrim(sv, 's');
+          sv = ltrim(sv, 'o');
+          sv.remove_prefix(std::string_view("OCT:").length());
+          invalidValue = NumUtils::parseOctal(sv, &result) == nullptr;
         }
         break;
       }
       case vpiIntConst: {
-        try {
-          if (largeInt(v.c_str() + std::string_view("INT:").length(), false)) {
-            invalidValue = true;
-            return result;
-          }
-          result = std::strtoull(v.c_str() + std::string_view("INT:").length(),
-                                 nullptr, 10);
-        } catch (...) {
-          invalidValue = true;
-        }
+        sv.remove_prefix(std::string_view("INT:").length());
+        invalidValue = NumUtils::parseUint64(sv, &result) == nullptr;
         break;
       }
       case vpiUIntConst: {
-        try {
-          if (largeInt(v.c_str() + std::string_view("UINT:").length(), false)) {
-            invalidValue = true;
-            return result;
-          }
-          result = std::strtoull(v.c_str() + std::string_view("UINT:").length(),
-                                 nullptr, 10);
-        } catch (...) {
-          invalidValue = true;
-        }
+        sv.remove_prefix(std::string_view("UINT:").length());
+        invalidValue = NumUtils::parseUint64(sv, &result) == nullptr;
         break;
       }
       case vpiScalar: {
-        try {
-          result = std::strtoull(v.c_str() + std::string_view("SCAL:").length(),
-                                 nullptr, 2);
-        } catch (...) {
-          invalidValue = true;
-        }
+        sv.remove_prefix(std::string_view("SCAL:").length());
+        invalidValue = NumUtils::parseBinary(sv, &result) == nullptr;
         break;
       }
       case vpiStringConst: {
-        std::string val = v.c_str() + std::string_view("STRING:").length();
+        sv.remove_prefix(std::string_view("STRING:").length());
         result = 0;
-        for (uint32_t i = 0; i < val.size(); i ++) {
-          result += (val[i] << ((val.size() - (i + 1)) * 8));
+        for (uint32_t i = 0; i < sv.size(); i++) {
+          result += (sv[i] << ((sv.size() - (i + 1)) * 8));
         }
         break;
       }
@@ -1664,17 +1519,13 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr, bool s
         break;
       }
       default: {
-        try {
-          if (v.find("UINT:") == 0) {
-            result = std::strtoull(
-                v.c_str() + std::string_view("UINT:").length(), nullptr, 10);
-          } else if (v.find("INT:") == 0) {
-            result = std::strtoull(
-                v.c_str() + std::string_view("INT:").length(), nullptr, 10);
-          } else {
-            invalidValue = true;
-          }
-        } catch (...) {
+        if (sv.find("UINT:") == 0) {
+          sv.remove_prefix(std::string_view("UINT:").length());
+          invalidValue = NumUtils::parseUint64(sv, &result) == nullptr;
+        } else if (sv.find("INT:") == 0) {
+          sv.remove_prefix(std::string_view("INT:").length());
+          invalidValue = NumUtils::parseIntLenient(sv, &result) == nullptr;
+        } else {
           invalidValue = true;
         }
         break;
@@ -1788,9 +1639,9 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
 
     std::vector<std::string> the_path;
     for (auto elem : *path->Path_elems()) {
-      std::string elemName = elem->VpiName();
+      std::string_view elemName = elem->VpiName();
       elemName = rtrim(elemName, '[');
-      the_path.push_back(elemName);
+      the_path.emplace_back(elemName);
       if (elem->UhdmType() == uhdmbit_select) {
         bit_select *select = (bit_select *)elem;
         uint64_t baseIndex = get_value(
@@ -1975,10 +1826,11 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
 
   int selectIndex = -1;
   if (elemName.find('[') != std::string::npos) {
-    std::string indexName = ltrim(elemName, '[');
-    indexName = rtrim(elemName, ']');
-    selectIndex =
-        static_cast<int>(std::strtoull(indexName.c_str(), nullptr, 10));
+    std::string_view indexName = ltrim(elemName, '[');
+    indexName = rtrim(indexName, ']');
+    if (NumUtils::parseInt32(indexName, &selectIndex) == nullptr) {
+      selectIndex = -1;
+    }
     elemName.clear();
     if (operation *oper = any_cast<operation *>(object)) {
       int opType = oper->VpiOpType();
@@ -2568,13 +2420,14 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 if (operand->UhdmType() == uhdmconstant) {
                   constant *c = (constant *)operand;
                   size = c->VpiSize();
-                  if (const typespec* tps = c->Typespec()) {
-                    size = ExprEval::size(tps, invalidValue, inst, pexpr, true, muteError);
+                  if (const typespec *tps = c->Typespec()) {
+                    size = ExprEval::size(tps, invalidValue, inst, pexpr, true,
+                                          muteError);
                   }
                   if (size == 1) {
                     val = !val;
                   } else {
-                    uint64_t mask = getMask(size);
+                    uint64_t mask = NumUtils::getMask(size);
                     val = ~val;
                     val = val & mask;
                   }
@@ -3038,30 +2891,32 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               }
               if (optype == uhdmconstant) {
                 constant *c2 = (constant *)oper;
-                const std::string &v = c2->VpiValue();
+                std::string_view sv = c2->VpiValue();
                 int size = c2->VpiSize();
                 csize += size;
                 int type = c2->VpiConstType();
                 switch (type) {
                   case vpiBinaryConst: {
-                    std::string tmp =
-                        v.c_str() + std::string_view("BIN:").length();
+                    sv.remove_prefix(std::string_view("BIN:").length());
                     std::string value;
-                    if (size > (int)tmp.size()) {
-                      value.append(size - tmp.size(), '0');
+                    if (size > (int)sv.size()) {
+                      value.append(size - sv.size(), '0');
                     }
                     if (op->VpiReordered()) {
-                      std::reverse(tmp.begin(), tmp.end());
+                      value.append(sv.rbegin(), sv.rend());
+                    } else {
+                      value.append(sv.begin(), sv.end());
                     }
-                    value += tmp;
                     cval += value;
                     break;
                   }
                   case vpiDecConst: {
-                    long long iv = std::strtoll(
-                        v.c_str() + std::string_view("DEC:").length(), nullptr,
-                        10);
-                    std::string bin = toBinary(size, iv);
+                    sv.remove_prefix(std::string_view("DEC:").length());
+                    int64_t iv = 0;
+                    if (NumUtils::parseInt64(sv, &iv) == nullptr) {
+                      iv = 0;
+                    }
+                    std::string bin = NumUtils::toBinary(size, iv);
                     if (op->VpiReordered()) {
                       std::reverse(bin.begin(), bin.end());
                     }
@@ -3069,8 +2924,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     break;
                   }
                   case vpiHexConst: {
-                    std::string tmp =
-                        hexToBin(v.c_str() + std::string_view("HEX:").length());
+                    sv.remove_prefix(std::string_view("HEX:").length());
+                    std::string tmp = NumUtils::hexToBin(sv);
                     std::string value;
                     if (size > (int)tmp.size()) {
                       value.append(size - tmp.size(), '0');
@@ -3083,10 +2938,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     break;
                   }
                   case vpiOctConst: {
-                    long long iv = std::strtoll(
-                        v.c_str() + std::string_view("OCT:").length(), nullptr,
-                        8);
-                    std::string bin = toBinary(size, iv);
+                    sv.remove_prefix(std::string_view("OCT:").length());
+                    int64_t iv = 0;
+                    if (NumUtils::parseOctal(sv, &iv) == nullptr) {
+                      iv = 0;
+                    }
+                    std::string bin = NumUtils::toBinary(size, iv);
                     if (op->VpiReordered()) {
                       std::reverse(bin.begin(), bin.end());
                     }
@@ -3095,10 +2952,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   }
                   case vpiIntConst: {
                     if (operands.size() == 1 || (size != 64)) {
-                      int64_t iv = std::strtoll(
-                          v.c_str() + std::string_view("INT:").length(),
-                          nullptr, 10);
-                      std::string bin = toBinary(size, iv);
+                      sv.remove_prefix(std::string_view("INT:").length());
+                      int64_t iv = 0;
+                      if (NumUtils::parseInt64(sv, &iv) == nullptr) {
+                        iv = 0;
+                      }
+                      std::string bin = NumUtils::toBinary(size, iv);
                       if (op->VpiReordered()) {
                         std::reverse(bin.begin(), bin.end());
                       }
@@ -3110,10 +2969,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   }
                   case vpiUIntConst: {
                     if (operands.size() == 1 || (size != 64)) {
-                      uint64_t iv = std::strtoull(
-                          v.c_str() + std::string_view("UINT:").length(),
-                          nullptr, 10);
-                      std::string bin = toBinary(size, iv);
+                      sv.remove_prefix(std::string_view("UINT:").length());
+                      uint64_t iv = 0;
+                      if (NumUtils::parseUint64(sv, &iv) == nullptr) {
+                        iv = 0;
+                      }
+                      std::string bin = NumUtils::toBinary(size, iv);
                       if (op->VpiReordered()) {
                         std::reverse(bin.begin(), bin.end());
                       }
@@ -3124,27 +2985,30 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     break;
                   }
                   case vpiStringConst: {
-                    std::string tmp =
-                        v.c_str() + std::string_view("STRING:").length();
-                    cval += tmp;
+                    sv.remove_prefix(std::string_view("STRING:").length());
+                    cval += sv;
                     stringVal = true;
                     break;
                   }
                   default: {
-                    if (v.find("UINT:") == 0) {
-                      uint64_t iv = std::strtoull(
-                          v.c_str() + std::string_view("UINT:").length(),
-                          nullptr, 10);
-                      std::string bin = toBinary(size, iv);
+                    if (sv.find("UINT:") == 0) {
+                      sv.remove_prefix(std::string_view("UINT:").length());
+                      uint64_t iv = 0;
+                      if (NumUtils::parseUint64(sv, &iv) == nullptr) {
+                        iv = 0;
+                      }
+                      std::string bin = NumUtils::toBinary(size, iv);
                       if (op->VpiReordered()) {
                         std::reverse(bin.begin(), bin.end());
                       }
                       cval += bin;
                     } else {
-                      int64_t iv = std::strtoll(
-                          v.c_str() + std::string_view("INT:").length(),
-                          nullptr, 10);
-                      std::string bin = toBinary(size, iv);
+                      sv.remove_prefix(std::string_view("IINT:").length());
+                      int64_t iv = 0;
+                      if (NumUtils::parseInt64(sv, &iv) == nullptr) {
+                        iv = 0;
+                      }
+                      std::string bin = NumUtils::toBinary(size, iv);
                       if (op->VpiReordered()) {
                         std::reverse(bin.begin(), bin.end());
                       }
@@ -3219,18 +3083,20 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 result = c;
               } else if (ttps == uhdminteger_typespec) {
                 integer_typespec *itps = (integer_typespec *)tps;
-                const std::string &val = itps->VpiValue();
+                std::string_view val = itps->VpiValue();
                 uint64_t cast_to = 0;
                 if (val.empty()) {
                   cast_to = 32;
                 } else if (val.find("UINT:") == 0) {
-                  cast_to = std::strtoull(
-                      val.c_str() + std::string_view("UINT:").length(), nullptr,
-                      10);
+                  val.remove_prefix(std::string_view("UINT:").length());
+                  if (NumUtils::parseUint64(val, &cast_to) == nullptr) {
+                    cast_to = 32;
+                  }
                 } else {
-                  cast_to = std::strtoll(
-                      val.c_str() + std::string_view("INT:").length(), nullptr,
-                      10);
+                  val.remove_prefix(std::string_view("INT:").length());
+                  if (NumUtils::parseIntLenient(val, &cast_to) == nullptr) {
+                    cast_to = 32;
+                  }
                 }
                 UHDM::constant *c = s.MakeConstant();
                 uint64_t mask = ((uint64_t)(1ULL << cast_to)) - 1ULL;
@@ -3403,7 +3269,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 } else {
                   res = ~value;
                   res = ~res;
-                  uint64_t mask = getMask(size);
+                  uint64_t mask = NumUtils::getMask(size);
                   res = res & mask;
                   UHDM::constant *c = s.MakeConstant();
                   c->VpiValue("UINT:" + std::to_string(res));
@@ -3455,7 +3321,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                             scall, nullptr);
       invalidValue = true;
     }
-    expr *tmp = evalFunc(actual_func, args, invalidValue, inst, (any *)pexpr, muteError);
+    expr *tmp = evalFunc(actual_func, args, invalidValue, inst, (any *)pexpr,
+                         muteError);
     if (tmp && (invalidValue == false)) {
       result = tmp;
     }
@@ -3591,7 +3458,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     if (object && (object->UhdmType() == uhdmconstant)) {
       constant *co = (constant *)object;
       int64_t val = get_value(invalidValue, co);
-      std::string binary = toBinary(co->VpiSize(), val);
+      std::string binary = NumUtils::toBinary(co->VpiSize(), val);
       int64_t l = get_value(
           invalidValue,
           reduceExpr(sel->Left_range(), invalidValue, inst, pexpr, muteError));
@@ -3631,7 +3498,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     if (object && (object->UhdmType() == uhdmconstant)) {
       constant *co = (constant *)object;
       int64_t val = get_value(invalidValue, co);
-      std::string binary = toBinary(co->VpiSize(), val);
+      std::string binary = NumUtils::toBinary(co->VpiSize(), val);
       int64_t base = get_value(
           invalidValue,
           reduceExpr(sel->Base_expr(), invalidValue, inst, pexpr, muteError));
@@ -3826,7 +3693,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
       if (lhsexp->UhdmType() == uhdmoperation) {
         operation *op = (operation *)lhsexp;
         if (op->VpiOpType() == vpiConcatOp) {
-          std::string rhsbinary = toBinary(c->VpiSize(), valUI);
+          std::string rhsbinary = NumUtils::toBinary(c->VpiSize(), valUI);
           std::reverse(rhsbinary.begin(), rhsbinary.end());
           VectorOfany *operands = op->Operands();
           uint64_t accumul = 0;
@@ -3876,8 +3743,8 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
               val.erase(0, 4);
               lhsbinary = val;
             } else {
-              lhsbinary = toBinary(static_cast<int>(si),
-                                   get_uvalue(invalidValue, prev));
+              lhsbinary = NumUtils::toBinary(static_cast<int>(si),
+                                             get_uvalue(invalidValue, prev));
             }
             std::reverse(lhsbinary.begin(), lhsbinary.end());
           } else {
@@ -3891,7 +3758,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           uint64_t offset = get_uvalue(
               invalidValue, reduceExpr(sel->Width_expr(), invalidValue, inst,
                                        lhsexp, muteError));
-          std::string rhsbinary = toBinary(c->VpiSize(), valUI);
+          std::string rhsbinary = NumUtils::toBinary(c->VpiSize(), valUI);
           std::reverse(rhsbinary.begin(), rhsbinary.end());
           if (sel->VpiIndexedPartSelectType() == vpiPosIndexed) {
             int index = 0;
@@ -3931,7 +3798,8 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
               val.erase(0, 4);
               lhsbinary = val;
             } else {
-              lhsbinary = toBinary(static_cast<int>(si), get_uvalue(invalidValue, prev));
+              lhsbinary = NumUtils::toBinary(static_cast<int>(si),
+                                             get_uvalue(invalidValue, prev));
             }
             std::reverse(lhsbinary.begin(), lhsbinary.end());
           } else {
@@ -3945,7 +3813,7 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
           uint64_t right = get_uvalue(
               invalidValue, reduceExpr(sel->Right_range(), invalidValue, inst,
                                        lhsexp, muteError));
-          std::string rhsbinary = toBinary(c->VpiSize(), valUI);
+          std::string rhsbinary = NumUtils::toBinary(c->VpiSize(), valUI);
           std::reverse(rhsbinary.begin(), rhsbinary.end());
           if (left > right) {
             int index = 0;
@@ -3985,8 +3853,8 @@ bool ExprEval::setValueInInstance(const std::string &lhs, any *lhsexp,
               val.erase(0, 4);
               lhsbinary = val;
             } else {
-              lhsbinary = toBinary(static_cast<int>(si),
-                                   get_uvalue(invalidValue, prev));
+              lhsbinary = NumUtils::toBinary(static_cast<int>(si),
+                                             get_uvalue(invalidValue, prev));
             }
             std::reverse(lhsbinary.begin(), lhsbinary.end());
           } else {
@@ -4416,7 +4284,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
                 c->VpiDecompile(val);
               }
             } else {
-              uint64_t mask = getMask(s);
+              uint64_t mask = NumUtils::getMask(s);
               int64_t v = get_value(invalidValue, c);
               v = v & mask;
               c->VpiValue("UINT:" + std::to_string(v));
