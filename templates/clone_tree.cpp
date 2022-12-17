@@ -204,7 +204,7 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
 constant* constant::DeepClone(Serializer* serializer,
                               ElaboratorListener* elaborator,
                               BaseClass* parent) const {
-  if (elaborator->uniquifyTypespec()) {
+  if (elaborator->uniquifyTypespec() || (VpiSize() == -1)) {
     constant* const clone = serializer->MakeConstant();
     const unsigned long id = clone->UhdmId();
     *clone = *this;

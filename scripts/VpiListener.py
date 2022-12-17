@@ -34,7 +34,8 @@ def _get_listeners(classname, vpi, type, card):
         listeners.append( '    vpi_free_object(itr);')
         listeners.append( '  }')
         if 'uhdmall' in vpi:
-          listeners.append(f'  uhdmAllIterator = false;')   
+          listeners.append(f'  uhdmAllIterator = false;')
+          listeners.append(f'  visited.clear();')
     return listeners
 
 
