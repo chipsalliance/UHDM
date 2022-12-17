@@ -23,18 +23,21 @@
  *
  * Created on Jan 3, 2022, 9:03 PM
  */
-#include <stack>
 #include <string.h>
+#include <uhdm/ElaboratorListener.h>
 #include <uhdm/ExprEval.h>
+#include <uhdm/NumUtils.h>
+#include <uhdm/Serializer.h>
 #include <uhdm/UhdmAdjuster.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
-#include <uhdm/Serializer.h>
-#include <uhdm/ElaboratorListener.h>
+
+#include <stack>
 
 namespace UHDM {
 
-const any* UhdmAdjuster::resize(const any* object, int maxsize, bool is_overall_unsigned) {
+const any* UhdmAdjuster::resize(const any* object, int maxsize,
+                                bool is_overall_unsigned) {
   if (object == nullptr) {
     return nullptr;
   }
@@ -44,13 +47,13 @@ const any* UhdmAdjuster::resize(const any* object, int maxsize, bool is_overall_
     constant* c = (constant*)result;
     if (c->VpiSize() < maxsize) {
       ElaboratorListener listener(serializer_);
-      c = (constant*) UHDM::clone_tree(c, *serializer_, &listener);
+      c = (constant*)UHDM::clone_tree(c, *serializer_, &listener);
       int constType = c->VpiConstType();
       const typespec* tps = c->Typespec();
       bool is_signed = false;
       if (tps) {
         if (tps->UhdmType() == uhdmint_typespec) {
-          int_typespec* itps = (int_typespec*) tps;
+          int_typespec* itps = (int_typespec*)tps;
           if (itps->VpiSigned()) {
             is_signed = true;
           }
@@ -98,7 +101,7 @@ const any* UhdmAdjuster::resize(const any* object, int maxsize, bool is_overall_
 void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
   // Make all expressions match the largest expression size per LRM
   int maxsize = 0;
-  bool is_overall_unsigned = false; 
+  bool is_overall_unsigned = false;
   {
     // Find maxsize and is any expression is unsigned
     std::stack<const any*> expressions;
@@ -164,14 +167,16 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
   {
     // Resize in place
     case_stmt* mut_object = (case_stmt*)object;
-    UHDM::expr* newValue = (UHDM::expr*)resize(object->VpiCondition(), maxsize, is_overall_unsigned);
+    UHDM::expr* newValue = (UHDM::expr*)resize(object->VpiCondition(), maxsize,
+                                               is_overall_unsigned);
     if (newValue && (newValue->UhdmType() == uhdmconstant)) {
       mut_object->VpiCondition(newValue);
     }
     for (case_item* citem : *object->Case_items()) {
       if (citem->VpiExprs()) {
         for (uint32_t i = 0; i < citem->VpiExprs()->size(); i++) {
-          any* newValue = (any*) resize(citem->VpiExprs()->at(i), maxsize, is_overall_unsigned);
+          any* newValue = (any*)resize(citem->VpiExprs()->at(i), maxsize,
+                                       is_overall_unsigned);
           if (newValue && (newValue->UhdmType() == uhdmconstant)) {
             citem->VpiExprs()->at(i) = newValue;
           }
@@ -179,8 +184,59 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
       }
     }
   }
+}
 
-  
+void UhdmAdjuster::enterModule(const module* object, vpiHandle handle) {
+  const std::string& instName = object->VpiName();
+  bool flatModule =
+      (instName == "") && ((object->VpiParent() == 0) ||
+                           ((object->VpiParent() != 0) &&
+                            (object->VpiParent()->VpiType() != vpiModule)));
+  if (!flatModule) elaboratedTree_ = true;
+}
+
+void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
+  if (!elaboratedTree_) return;
+  if (object->VpiSize() == -1) {
+    const any* parent = object->VpiParent();
+    if (parent) {
+      if (parent->UhdmType() == uhdmoperation) {
+        operation* op = (operation*)parent;
+        int size = object->VpiSize();
+        int indexSelf = 0;
+        int i = 0;
+        for (any* oper : *op->Operands()) {
+          if (oper != object) {
+            ExprEval eval;
+            bool invalidValue = false;
+            int tmp = eval.size(oper, invalidValue, nullptr, op, true, true);
+            if (!invalidValue) {
+              size = tmp;
+            }
+          } else {
+            indexSelf = i;
+          }
+          i++;
+        }
+        if (size != object->VpiSize()) {
+          ElaboratorListener listener(serializer_);
+          constant* newc =
+              (constant*)UHDM::clone_tree(object, *serializer_, &listener);
+          newc->VpiSize(size);
+          bool invalidValue = false;
+          UHDM::ExprEval eval;
+          int64_t val = eval.get_value(invalidValue, object);
+          if (val == 1) {
+            uint64_t mask = NumUtils::getMask(size);
+            newc->VpiValue("UINT:" + std::to_string(mask));
+            newc->VpiDecompile(std::to_string(mask));
+            newc->VpiConstType(vpiUIntConst);
+          }
+          op->Operands()->at(indexSelf) = newc;
+        }
+      }
+    }
+  }
 }
 
 }  // namespace UHDM

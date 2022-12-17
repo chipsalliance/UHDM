@@ -38,9 +38,13 @@ class UhdmAdjuster final : public VpiListener {
  private:
   
   void leaveCase_stmt(const case_stmt* object, vpiHandle handle);
+  void leaveConstant(const constant* object, vpiHandle handle);
+  void enterModule(const module* object, vpiHandle handle);
+
   const any* resize(const any* object, int maxsize, bool is_unsigned);
   Serializer* serializer_ = nullptr;
   design* design_ = nullptr;
+  bool elaboratedTree_ = false;
 };
 
 }  // namespace UHDM
