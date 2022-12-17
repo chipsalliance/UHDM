@@ -22,10 +22,10 @@
  */
 
 #include <uhdm/NumUtils.h>
-#include <string.h>
 
 #include <algorithm>
 #include <bitset>
+#include <cstring>
 #include <iostream>
 #include <locale>
 #include <regex>
