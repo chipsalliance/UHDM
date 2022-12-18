@@ -1082,6 +1082,19 @@ static bool getStringVal(std::string &result, expr *val) {
   return false;
 }
 
+void resize(expr *resizedExp, int size) {
+  bool invalidValue = false;
+  ExprEval eval;
+  constant *c = (constant *)resizedExp;
+  int64_t val = eval.get_value(invalidValue, c);
+  if (val == 1) {
+    uint64_t mask = NumUtils::getMask(size);
+    c->VpiValue("UINT:" + std::to_string(mask));
+    c->VpiDecompile(std::to_string(mask));
+    c->VpiConstType(vpiUIntConst);
+  }
+}
+
 expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
                              const any *pexpr, bool muteError) {
   expr *result = op;
@@ -1092,6 +1105,19 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
   std::string s1;
   expr *reduc0 = reduceExpr(operands[0], invalidValue, inst, pexpr, muteError);
   expr *reduc1 = reduceExpr(operands[1], invalidValue, inst, pexpr, muteError);
+  if (invalidValue == true) {
+    return result;
+  }
+  if (reduc0 == nullptr || reduc1 == nullptr) {
+    return result;
+  }
+  int size0 = reduc0->VpiSize();
+  int size1 = reduc1->VpiSize();
+  if ((reduc0->VpiSize() == -1) && (reduc1->VpiSize() > 1)) {
+    resize(reduc0, size1);
+  } else if ((reduc1->VpiSize() == -1) && (reduc0->VpiSize() > 1)) {
+    resize(reduc1, size0);
+  }
   bool arg0isString = getStringVal(s0, reduc0);
   bool arg1isString = getStringVal(s1, reduc1);
   bool invalidValueI = false;
