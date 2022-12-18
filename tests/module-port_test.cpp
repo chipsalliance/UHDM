@@ -27,7 +27,7 @@ static std::vector<vpiHandle> buildModulePortDesign(Serializer* s) {
   design* d = s->MakeDesign();
   d->VpiName("design1");
   // Module
-  module_inst* m1 = s->MakeModule_inst();
+  module* m1 = s->MakeModule();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
   m1->VpiFullName("top::M1");
@@ -42,7 +42,7 @@ static std::vector<vpiHandle> buildModulePortDesign(Serializer* s) {
   lvar->VpiFullName("top::M1::v1");
 
   // Module
-  module_inst* m2 = s->MakeModule_inst();
+  module* m2 = s->MakeModule();
   m2->VpiDefName("M2");
   m2->VpiName("u1");
   m2->VpiParent(m1);
@@ -62,7 +62,7 @@ static std::vector<vpiHandle> buildModulePortDesign(Serializer* s) {
   m2->Ports(vp);
 
   // Module
-  module_inst* m3 = s->MakeModule_inst();
+  module* m3 = s->MakeModule();
   m3->VpiDefName("M3");
   m3->VpiName("u2");
   m3->VpiParent(m1);
@@ -70,16 +70,16 @@ static std::vector<vpiHandle> buildModulePortDesign(Serializer* s) {
   m3->VpiLineNo(30);
 
   // Instance
-  module_inst* m4 = s->MakeModule_inst();
+  module* m4 = s->MakeModule();
   m4->VpiDefName("M4");
   m4->VpiName("u3");
   m4->Ports(vp);
   m4->VpiParent(m3);
   m4->Instance(m3);
-  VectorOfmodule_inst* v1 = s->MakeModule_instVec();
+  VectorOfmodule* v1 = s->MakeModuleVec();
   v1->push_back(m1);
   d->AllModules(v1);
-  VectorOfmodule_inst* v2 = s->MakeModule_instVec();
+  VectorOfmodule* v2 = s->MakeModuleVec();
   v2->push_back(m2);
   v2->push_back(m3);
   m1->Modules(v2);

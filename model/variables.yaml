@@ -118,8 +118,8 @@
     card: 1
   - obj_ref: module
     name: module
-    vpi: vpiModuleInst
-    type: module_inst
+    vpi: vpiModule
+    type: module
     card: 1
   - class_ref: instance
     name: instance

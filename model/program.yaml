@@ -38,8 +38,8 @@
     card: 1
   - obj_ref: interfaces
     name: interface
-    vpi: vpiInterfaceInst
-    type: interface_inst
+    vpi: vpiInterface
+    type: interface
     card: any
   - group_ref: expr_dist
     name: expr distribution

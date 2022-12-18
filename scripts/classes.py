@@ -288,8 +288,8 @@ def _get_DeepClone_implementation(model, models):
                     content.append( '    clone->Instance(inst);')
 
                 elif method == 'Module':
-                    includes.add('module_inst')
-                    content.append(f'  if (auto obj = {method}()) clone->{method}((module_inst*) obj);')
+                    includes.add('module')
+                    content.append(f'  if (auto obj = {method}()) clone->{method}((module*) obj);')
 
                 elif method == 'Typespec':
                     includes.add('typespec')

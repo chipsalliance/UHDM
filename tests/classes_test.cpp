@@ -17,13 +17,13 @@ static std::vector<vpiHandle> build_designs(Serializer* s) {
   design* d = s->MakeDesign();
   d->VpiName("design1");
   // Module
-  module_inst* m1 = s->MakeModule_inst();
+  module* m1 = s->MakeModule();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
   m1->VpiParent(d);
   m1->VpiFile("fake1.sv");
   m1->VpiLineNo(10);
-  VectorOfmodule_inst* v1 = s->MakeModule_instVec();
+  VectorOfmodule* v1 = s->MakeModuleVec();
   v1->push_back(m1);
   d->AllModules(v1);
 
@@ -94,7 +94,7 @@ static std::vector<vpiHandle> build_designs(Serializer* s) {
   f3->Stmt(fcall);
   fcall2->VpiName("f1");  // parent class function
 
-  VectorOfmodule_inst* topModules = s->MakeModule_instVec();
+  VectorOfmodule* topModules = s->MakeModuleVec();
   d->TopModules(topModules);
   topModules->push_back(m1);
 

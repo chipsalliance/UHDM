@@ -50,8 +50,8 @@
     vpi: uhdmallClasses
     card: any
   - class: allInterfaces
-    type: interface_inst
-    vpi_obj: vpiInterfaceInst
+    type: interface
+    vpi_obj: vpiInterface
     vpi: uhdmallInterfaces
     card: any
   - class: allUdps
@@ -65,8 +65,8 @@
     vpi: uhdmallPrograms
     card: any
   - class: allModules
-    type: module_inst
-    vpi_obj: vpiModuleInst
+    type: module
+    vpi_obj: vpiModule
     vpi: uhdmallModules
     card: any
   - class_ref: typespecs
@@ -94,7 +94,7 @@
     type: param_assign
     card: any
   - class: topModules
-    type: module_inst
-    vpi_obj: vpiModuleInst
+    type: module
+    vpi_obj: vpiModule
     vpi: uhdmtopModules
     card: any

@@ -17,8 +17,8 @@
 - obj_def: tchk
   - obj_ref: module
     name: module
-    type: module_inst
-    vpi: vpiModuleInst
+    type: module
+    vpi: vpiModule
     card: 1
   - class_ref: expr
     name: expr

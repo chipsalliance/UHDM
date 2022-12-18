@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "interface_inst" formal description
+# Universal Hardware Data Model (UHDM) "interface" formal description
  
-- obj_def: interface_inst
+- obj_def: interface
   - extends: instance
   - property: index
     name: index
@@ -22,7 +22,7 @@
     type: int
     card: 1
   - property: type
-    name: vpiInterfaceInst
+    name: vpiInterface
     vpi: vpiType
     type: unsigned int
     card: 1
@@ -72,8 +72,8 @@
     card: any  
   - obj_ref: interfaces
     name: interface
-    vpi: vpiInterfaceInst
-    type: interface_inst
+    vpi: vpiInterface
+    type: interface
     card: any
   - obj_ref: interface_arrays
     vpi: vpiInterfaceArray
