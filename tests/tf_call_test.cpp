@@ -13,7 +13,7 @@ static std::vector<vpiHandle> build_tfCallDesign(Serializer* s) {
   // Design building
   design* d = s->MakeDesign();
   d->VpiName("designTF");
-  module* m1 = s->MakeModule();
+  module_inst* m1 = s->MakeModule_inst();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
   m1->VpiParent(d);
@@ -56,7 +56,7 @@ static std::vector<vpiHandle> build_tfCallDesign(Serializer* s) {
   begin_block->Stmts(statements);
   m1->Process(processes);
 
-  VectorOfmodule* v1 = s->MakeModuleVec();
+  VectorOfmodule_inst* v1 = s->MakeModule_instVec();
   v1->push_back(m1);
   d->AllModules(v1);
 

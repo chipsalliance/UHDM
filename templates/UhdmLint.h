@@ -43,7 +43,7 @@ class UhdmLint final : public VpiListener {
   void leaveStruct_typespec(const struct_typespec* object,
                             vpiHandle handle) override;
 
-  void leaveModule(const module* object, vpiHandle handle) override;
+  void leaveModule_inst(const module_inst* object, vpiHandle handle) override;
 
   void leaveAssignment(const assignment* object, vpiHandle handle) override;
 

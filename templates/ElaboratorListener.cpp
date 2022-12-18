@@ -145,14 +145,14 @@ static std::string& ltrim(std::string& str, char c) {
   return str;
 }
 
-void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
+void ElaboratorListener::enterModule_inst(const module_inst* object, vpiHandle handle) {
   bool topLevelModule = object->VpiTopModule();
   const std::string& instName = object->VpiName();
   const std::string& defName = object->VpiDefName();
   bool flatModule =
       (instName == "") && ((object->VpiParent() == 0) ||
                            ((object->VpiParent() != 0) &&
-                            (object->VpiParent()->VpiType() != vpiModule)));
+                            (object->VpiParent()->VpiType() != vpiModuleInst)));
   // false when it is a module in a hierachy tree
   if (debug_)
     std::cout << "Module: " << defName << " (" << instName
@@ -188,7 +188,7 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
     }
 
     if (object->Interfaces()) {
-      for (interface* inter : *object->Interfaces()) {
+      for (interface_inst* inter : *object->Interfaces()) {
         netMap.emplace(inter->VpiName(), inter);
       }
     }
@@ -295,8 +295,8 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
       const BaseClass* comp = (*itrDef).second;
       int compType = comp->VpiType();
       switch (compType) {
-        case vpiModule: {
-          module* defMod = (module*)comp;
+        case vpiModuleInst: {
+          module_inst* defMod = (module_inst*)comp;
           if (defMod->Typespecs()) {
             for (typespec* tps : *defMod->Typespecs()) {
               if (tps->UhdmType() == uhdmenum_typespec) {
@@ -326,7 +326,7 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
     modMap.emplace(modName, object);
 
     if (object->Modules()) {
-      for (module* mod : *object->Modules()) {
+      for (module_inst* mod : *object->Modules()) {
         modMap.emplace(mod->VpiName(), mod);
       }
     }
@@ -356,19 +356,19 @@ void ElaboratorListener::enterModule(const module* object, vpiHandle handle) {
                             std::make_tuple(netMap, paramMap, funcMap, modMap));
   }
   if (muteErrors_ == false) {
-    elabModule(object, handle);
+    elabModule_inst(object, handle);
   }
 }
 
-void ElaboratorListener::elabModule(const module* object, vpiHandle handle) {
-  module* inst = const_cast<module*>(object);
+void ElaboratorListener::elabModule_inst(const module_inst* object, vpiHandle handle) {
+  module_inst* inst = const_cast<module_inst*>(object);
   bool topLevelModule = object->VpiTopModule();
   const std::string& instName = object->VpiName();
   const std::string& defName = object->VpiDefName();
   bool flatModule =
       (instName == "") && ((object->VpiParent() == 0) ||
                            ((object->VpiParent() != 0) &&
-                            (object->VpiParent()->VpiType() != vpiModule)));
+                            (object->VpiParent()->VpiType() != vpiModuleInst)));
   // false when it is a module in a hierachy tree
   if (debug_)
     std::cout << "Module: " << defName << " (" << instName
@@ -391,8 +391,8 @@ void ElaboratorListener::elabModule(const module* object, vpiHandle handle) {
       const BaseClass* comp = (*itrDef).second;
       int compType = comp->VpiType();
       switch (compType) {
-        case vpiModule: {
-          module* defMod = (module*)comp;
+        case vpiModuleInst: {
+          module_inst* defMod = (module_inst*)comp;
           if (clone_) {
             <MODULE_ELABORATOR_LISTENER>
           }
@@ -405,7 +405,7 @@ void ElaboratorListener::elabModule(const module* object, vpiHandle handle) {
   }
 }
 
-void ElaboratorListener::leaveModule(const module* object, vpiHandle handle) {
+void ElaboratorListener::leaveModule_inst(const module_inst* object, vpiHandle handle) {
   bindScheduledTaskFunc();
   if (inHierarchy_ && !instStack_.empty() && (instStack_.back().first == object)) {
     instStack_.pop_back();
@@ -577,14 +577,14 @@ void ElaboratorListener::leaveClass_defn(const class_defn* object,
   }
 }
 
-void ElaboratorListener::enterInterface(const interface* object,
-                                        vpiHandle handle) {
+void ElaboratorListener::enterInterface_inst(const interface_inst* object,
+                                             vpiHandle handle) {
   const std::string& instName = object->VpiName();
   const std::string& defName = object->VpiDefName();
   bool flatModule =
       (instName == "") && ((object->VpiParent() == 0) ||
                            ((object->VpiParent() != 0) &&
-                            (object->VpiParent()->VpiType() != vpiModule)));
+                            (object->VpiParent()->VpiType() != vpiModuleInst)));
   // false when it is an interface in a hierachy tree
   if (debug_)
     std::cout << "Module: " << defName << " (" << instName
@@ -624,7 +624,7 @@ void ElaboratorListener::enterInterface(const interface* object,
     }
 
     if (object->Interfaces()) {
-      for (interface* inter : *object->Interfaces()) {
+      for (interface_inst* inter : *object->Interfaces()) {
         netMap.emplace(inter->VpiName(), inter);
       }
     }
@@ -690,8 +690,8 @@ void ElaboratorListener::enterInterface(const interface* object,
       const BaseClass* comp = (*itrDef).second;
       int compType = comp->VpiType();
       switch (compType) {
-        case vpiModule: {
-          module* defMod = (module*)comp;
+        case vpiModuleInst: {
+          module_inst* defMod = (module_inst*)comp;
           if (defMod->Typespecs()) {
             for (typespec* tps : *defMod->Typespecs()) {
               if (tps->UhdmType() == uhdmenum_typespec) {
@@ -739,7 +739,7 @@ void ElaboratorListener::enterInterface(const interface* object,
       const BaseClass* comp = (*itrDef).second;
       int compType = comp->VpiType();
       switch (compType) {
-        case vpiInterface: {
+        case vpiInterfaceInst: {
           //  interface* defMod = (interface*)comp;
           if (clone_) {
             // Don't activate yet  <INTERFACE//regexp
@@ -756,8 +756,8 @@ void ElaboratorListener::enterInterface(const interface* object,
   }
 }
 
-void ElaboratorListener::leaveInterface(const interface* object,
-                                        vpiHandle handle) {
+void ElaboratorListener::leaveInterface_inst(const interface_inst* object,
+                                             vpiHandle handle) {
   bindScheduledTaskFunc();
   if (!instStack_.empty() && (instStack_.back().first == object)) {
     instStack_.pop_back();

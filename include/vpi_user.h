@@ -151,7 +151,7 @@ typedef PLI_UINT32 *vpiHandle;
 #define vpiMemory             29   /* behavioral memory */
 #define vpiMemoryWord         30   /* single word of memory */
 #define vpiModPath            31   /* module path for path delays */
-#define vpiModule             32   /* module instance */
+#define vpiModuleInst         32   /* module instance */
 #define vpiNamedBegin         33   /* named block statement */
 #define vpiNamedEvent         34   /* event variable */
 #define vpiNamedFork          35   /* named fork-join block */
