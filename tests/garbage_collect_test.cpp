@@ -17,17 +17,17 @@ static std::vector<vpiHandle> build_designs(Serializer* s) {
   d->VpiName("design1");
 
   // Module
-  module_inst* m1 = s->MakeModule_inst();
+  module* m1 = s->MakeModule();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
   m1->VpiParent(d);
 
   // Module
-  module_inst* m2 = s->MakeModule_inst();
+  module* m2 = s->MakeModule();
   m2->VpiDefName("M2");
   m2->VpiName("u1");
 
-  VectorOfmodule_inst* v1 = s->MakeModule_instVec();
+  VectorOfmodule* v1 = s->MakeModuleVec();
   v1->push_back(m1);
   d->TopModules(v1);
 

@@ -57,8 +57,8 @@
     card: any
   - obj_ref: modules
     name: modules
-    vpi: vpiModuleInst
-    type: module_inst
+    vpi: vpiModule
+    type: module
     card: any
   - class_ref: elem_typespec
     name: elem typespec

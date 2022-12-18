@@ -27,6 +27,6 @@
     card: any
   - obj_ref: interface
     name: interface
-    vpi: vpiInterfaceInst
-    type: interface_inst
+    vpi: vpiInterface
+    type: interface
     card: 1

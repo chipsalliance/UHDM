@@ -4174,7 +4174,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   const std::string name = func->VpiName();
   // set internal scope stack
   Scopes scopes;
-  module_inst *scope = s.MakeModule_inst();
+  module *scope = s.MakeModule();
   scope->VpiParent((any *)inst);
   if (const instance *pack = func->Instance()) {
     scope->Task_funcs(pack->Task_funcs());

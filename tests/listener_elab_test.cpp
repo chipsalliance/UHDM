@@ -58,7 +58,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
   //-------------------------------------------
   // Module definition M1 (non elaborated)
-  module_inst* m1 = s->MakeModule_inst();
+  module* m1 = s->MakeModule();
   {
     m1->VpiDefName("M1");
     m1->VpiParent(d);
@@ -68,7 +68,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
   //-------------------------------------------
   // Module definition M2 (non elaborated)
-  module_inst* m2 = s->MakeModule_inst();
+  module* m2 = s->MakeModule();
   {
     m2->VpiDefName("M2");
     m2->VpiFile("fake2.sv");
@@ -111,8 +111,8 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
   //-------------------------------------------
   // Instance tree (Elaborated tree)
   // Top level module
-  module_inst* m3 = s->MakeModule_inst();
-  VectorOfmodule_inst* v1 = s->MakeModule_instVec();
+  module* m3 = s->MakeModule();
+  VectorOfmodule* v1 = s->MakeModuleVec();
   {
     m3->VpiDefName("M1");  // Points to the module def (by name)
     m3->VpiName("M1");     // Instance name
@@ -123,7 +123,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
   //-------------------------------------------
   // Sub Instance
-  module_inst* m4 = s->MakeModule_inst();
+  module* m4 = s->MakeModule();
   {
     m4->VpiDefName("M2");         // Points to the module def (by name)
     m4->VpiName("inst1");         // Instance name
@@ -163,12 +163,12 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
   //-------------------------------------------
   // Create both non-elaborated and elaborated lists
-  VectorOfmodule_inst* allModules = s->MakeModule_instVec();
+  VectorOfmodule* allModules = s->MakeModuleVec();
   d->AllModules(allModules);
   allModules->push_back(m1);
   allModules->push_back(m2);
 
-  VectorOfmodule_inst* topModules = s->MakeModule_instVec();
+  VectorOfmodule* topModules = s->MakeModuleVec();
   d->TopModules(topModules);
   topModules->push_back(
       m3);  // Only m3 goes there as it is the top level module
@@ -194,14 +194,14 @@ class MyElaboratorListener : public VpiListener {
     root->VpiElaborated(true);
   }
 
-  void enterModule_inst(const module_inst* object, vpiHandle handle) override {
+  void enterModule(const module* object, vpiHandle handle) override {
     bool topLevelModule = object->VpiTopModule();
     const std::string& instName = object->VpiName();
     const std::string& defName = object->VpiDefName();
     bool flatModule =
         (instName == "") && ((object->VpiParent() == 0) ||
                              ((object->VpiParent() != 0) &&
-                              (object->VpiParent()->VpiType() != vpiModuleInst)));
+                              (object->VpiParent()->VpiType() != vpiModule)));
     // false when it is a module in a hierachy tree
     std::cout << "Module: " << defName << " (" << instName
               << ") Flat:" << flatModule << ", Top:" << topLevelModule
@@ -230,8 +230,8 @@ class MyElaboratorListener : public VpiListener {
         const BaseClass* comp = (*itrDef).second;
         int compType = comp->VpiType();
         switch (compType) {
-          case vpiModuleInst: {
-            module_inst* defMod = (module_inst*)comp;
+          case vpiModule: {
+            module* defMod = (module*)comp;
 
             // 1) This section illustrates how one can walk the data model in
             // the listener context
@@ -270,7 +270,7 @@ class MyElaboratorListener : public VpiListener {
             // walking above in (1)
             if (vpiHandle defModule = NewVpiHandle(defMod)) {
               MyElaboratorListener* listener = new MyElaboratorListener();
-              listener->listenModule_inst(defModule);
+              listener->listenModule(defModule);
               delete listener;
               vpi_free_object(defModule);
             }
@@ -284,12 +284,12 @@ class MyElaboratorListener : public VpiListener {
     }
   }
 
-  void leaveModule_inst(const module_inst* object, vpiHandle handle) override {
+  void leaveModule(const module* object, vpiHandle handle) override {
     const std::string& instName = object->VpiName();
     bool flatModule =
         (instName == "") && ((object->VpiParent() == 0) ||
                              ((object->VpiParent() != 0) &&
-                              (object->VpiParent()->VpiType() != vpiModuleInst)));
+                              (object->VpiParent()->VpiType() != vpiModule)));
     // false when it is a module in a hierachy tree
     if (!flatModule) instStack_.pop();
   }

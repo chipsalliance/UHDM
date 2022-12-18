@@ -33,7 +33,7 @@ extern "C" {
 
 /****************************** OBJECT TYPES ******************************/
 #define vpiPackage                            600
-#define vpiInterfaceInst                      601
+#define vpiInterface                          601
 #define vpiProgram                            602
 #define vpiInterfaceArray                     603
 #define vpiProgramArray                       604

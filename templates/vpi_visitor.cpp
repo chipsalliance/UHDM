@@ -391,7 +391,7 @@ static std::string vpiTypeName(vpiHandle h) {
     case 24: return "vpiInitial";
     case 600: return "vpiPackage";
     case 25: return "vpiIntegerVar";
-    case 601: return "vpiInterfaceInst";
+    case 601: return "vpiInterface";
     case 26: return "vpiInterModPath";
     case 602: return "vpiProgram";
     case 27: return "vpiIterator";
@@ -403,7 +403,7 @@ static std::string vpiTypeName(vpiHandle h) {
     case 605: return "vpiTypespec";
     case 31: return "vpiModPath";
     case 606: return "vpiModport";
-    case 32: return "vpiModuleInst";
+    case 32: return "vpiModule";
     case 607: return "vpiInterfaceTfDecl";
     case 33: return "vpiNamedBegin";
     case 608: return "vpiRefObj";
@@ -544,9 +544,9 @@ void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedCont
 
 #endif
 
-    if ((objectType == vpiModuleInst) || (objectType == vpiProgram) ||
+    if ((objectType == vpiModule) || (objectType == vpiProgram) ||
         (objectType == vpiClassDefn) || (objectType == vpiPackage) ||
-        (objectType == vpiInterfaceInst) || (objectType == vpiUdp) ||
+        (objectType == vpiInterface) || (objectType == vpiUdp) ||
         (objectType == vpiIncludeFileInfo)) {
       if (const char* s = vpi_get_str(vpiFile, obj_h)) {
         out << ", file:" << s;  // fileName

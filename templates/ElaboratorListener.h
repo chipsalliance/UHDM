@@ -78,12 +78,12 @@ class ElaboratorListener final : public VpiListener {
 
   void leaveDesign(const design* object, vpiHandle handle) final;
 
-  void enterModule_inst(const module_inst* object, vpiHandle handle) final;
-  void elabModule_inst(const module_inst* object, vpiHandle handle);
-  void leaveModule_inst(const module_inst* object, vpiHandle handle) final;
+  void enterModule(const module* object, vpiHandle handle) final;
+  void elabModule(const module* object, vpiHandle handle);
+  void leaveModule(const module* object, vpiHandle handle) final;
 
-  void enterInterface_inst(const interface_inst* object, vpiHandle handle) final;
-  void leaveInterface_inst(const interface_inst* object, vpiHandle handle) final;
+  void enterInterface(const interface* object, vpiHandle handle) final;
+  void leaveInterface(const interface* object, vpiHandle handle) final;
 
   void enterPackage(const package* object, vpiHandle handle) final;
   void leavePackage(const package* object, vpiHandle handle) final;

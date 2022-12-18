@@ -19,7 +19,7 @@ static std::vector<vpiHandle> buildSimpleAlawysDesign(Serializer* s) {
   // Design building
   design* d = s->MakeDesign();
   d->VpiName("design_process");
-  module_inst* m1 = s->MakeModule_inst();
+  module* m1 = s->MakeModule();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
   m1->VpiName("u1");
@@ -65,7 +65,7 @@ static std::vector<vpiHandle> buildSimpleAlawysDesign(Serializer* s) {
   begin_block->Stmts(statements);
   m1->Process(processes);
 
-  VectorOfmodule_inst* v1 = s->MakeModule_instVec();
+  VectorOfmodule* v1 = s->MakeModuleVec();
   v1->push_back(m1);
   d->AllModules(v1);
   package* p1 = s->MakePackage();

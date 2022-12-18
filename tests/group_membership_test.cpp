@@ -40,7 +40,7 @@ TEST(GroupTest, Membership) {
   VectorOfany* exprs = s.MakeAnyVec();
   constant* legal = s.MakeConstant();
   exprs->push_back(legal);
-  module_inst* illegal = s.MakeModule_inst();
+  module* illegal = s.MakeModule();
   inst->Named_event_sequence_expr_groups(exprs);
   VectorOfany* all_legal = inst->Named_event_sequence_expr_groups();
   EXPECT_EQ(all_legal->size(), 1);

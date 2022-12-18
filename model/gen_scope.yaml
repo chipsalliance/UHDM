@@ -58,8 +58,8 @@
     card: any
   - obj_ref: modules
     name: modules
-    vpi: vpiModuleInst
-    type: module_inst
+    vpi: vpiModule
+    type: module
     card: any
   - obj_ref: module_arrays
     name: module array
@@ -102,8 +102,8 @@
     card: any
   - obj_ref: interfaces
     name: interface
-    vpi: vpiInterfaceInst
-    type: interface_inst
+    vpi: vpiInterface
+    type: interface
     card: any
   - obj_ref: interface_arrays
     vpi: vpiInterfaceArray
