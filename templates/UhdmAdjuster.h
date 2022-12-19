@@ -44,6 +44,7 @@ class UhdmAdjuster final : public VpiListener {
   const any* resize(const any* object, int maxsize, bool is_unsigned);
   Serializer* serializer_ = nullptr;
   design* design_ = nullptr;
+  const instance* currentInstance_ = nullptr;
   bool elaboratedTree_ = false;
 };
 
