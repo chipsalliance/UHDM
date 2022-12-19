@@ -193,6 +193,7 @@ void UhdmAdjuster::enterModule(const module* object, vpiHandle handle) {
                            ((object->VpiParent() != 0) &&
                             (object->VpiParent()->VpiType() != vpiModule)));
   if (!flatModule) elaboratedTree_ = true;
+  currentInstance_ = object;
 }
 
 void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
@@ -209,7 +210,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           if (oper != object) {
             ExprEval eval;
             bool invalidValue = false;
-            int tmp = eval.size(oper, invalidValue, nullptr, op, true, true);
+            int tmp = eval.size(oper, invalidValue, currentInstance_, op, true, true);
             if (!invalidValue) {
               size = tmp;
             }
