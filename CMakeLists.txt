@@ -92,6 +92,10 @@ else()
   )
 endif()
 
+if (WIN32)
+  add_compile_definitions(WIN32_LEAN_AND_MEAN)
+endif()
+
 # All the files the generator depends on.
 file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
 file(GLOB templates_SRC ${PROJECT_SOURCE_DIR}/templates/*.h

@@ -104,7 +104,7 @@ void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
   }
 }
 
-void UhdmLint::leaveModule(const module* object, vpiHandle handle) {
+void UhdmLint::leaveModule_inst(const module_inst* object, vpiHandle handle) {
   if (auto assigns = object->Cont_assigns()) {
     checkMultiContAssign(assigns);
   }
