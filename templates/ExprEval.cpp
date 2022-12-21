@@ -57,14 +57,15 @@ class DetectRefObj : public VpiListener {
  public:
   explicit DetectRefObj() {}
   ~DetectRefObj() override = default;
-  void leaveRef_obj(const ref_obj* object, vpiHandle handle) final {
-     hasRef_obj = true;
+  void leaveRef_obj(const ref_obj *object, vpiHandle handle) final {
+    hasRef_obj = true;
   }
-  void leaveHier_path(const hier_path* object, vpiHandle handle) final {
-      hasRef_obj = true;
+  void leaveHier_path(const hier_path *object, vpiHandle handle) final {
+    hasRef_obj = true;
   }
   bool refObjDetected() { return hasRef_obj; }
-private: 
+
+ private:
   bool hasRef_obj = false;
 };
 
@@ -892,8 +893,8 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         break;
       }
       case UHDM::uhdmarray_var: {
-        const UHDM::array_var* var = ((array_var *)typespec);
-        variables* regv = var->Variables()->at(0);
+        const UHDM::array_var *var = ((array_var *)typespec);
+        variables *regv = var->Variables()->at(0);
         bits += size(regv->Typespec(), invalidValue, inst, pexpr, full);
         ranges = var->Ranges();
         break;
@@ -2022,6 +2023,12 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     }
   }
   return nullptr;
+}
+
+static std::string hexToBinary(char input[2]) {
+  unsigned int x = std::stoul(input, nullptr, 16);
+  std::string result = std::bitset<4>(x).to_string();
+  return result;
 }
 
 expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
@@ -3158,7 +3165,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             object = (expr *)getValue(objname, inst, pexpr, muteError);
           }
           const typespec *tps = nullptr;
-          if (any_cast<array_var*>(object)) {
+          if (any_cast<array_var *>(object)) {
             // Size the object, not its typespec
           } else if (expr *exp = any_cast<expr *>(object)) {
             tps = exp->Typespec();
@@ -3457,8 +3464,25 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
     if (object && (object->UhdmType() == uhdmconstant)) {
       constant *co = (constant *)object;
-      int64_t val = get_value(invalidValue, co);
-      std::string binary = NumUtils::toBinary(co->VpiSize(), val);
+      std::string binary;
+      if (co->VpiConstType() == vpiBinaryConst) {
+        binary = co->VpiValue();
+        binary.erase(0, 4);
+      } else if (co->VpiConstType() == vpiHexConst) {
+        std::string val = co->VpiValue();
+        val.erase(0, 4);
+        for (unsigned int i = 0; i < val.size(); i++) {
+          char tmp[2];
+          tmp[0] = val[i];
+          tmp[1] = '\0';
+          binary += hexToBinary(tmp);
+        }
+      } else {
+        int64_t val = get_value(invalidValue, co);
+        if (invalidValue == false) {
+          binary = NumUtils::toBinary(co->VpiSize(), val);
+        }
+      }
       int64_t l = get_value(
           invalidValue,
           reduceExpr(sel->Left_range(), invalidValue, inst, pexpr, muteError));
