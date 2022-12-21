@@ -53,66 +53,31 @@ using namespace UHDM;
   return str;
 }
 
-bool ExprEval::isFullySpecified(const UHDM::typespec *tps) {
-  VectorOfrange *ranges = nullptr;
-  UHDM_OBJECT_TYPE type = tps->UhdmType();
-  switch (type) {
-    case uhdmlogic_typespec: {
-      logic_typespec *ltps = (logic_typespec *)tps;
-      ranges = ltps->Ranges();
-      break;
-    }
-    case uhdmarray_typespec: {
-      array_typespec *ltps = (array_typespec *)tps;
-      const typespec *elem = ltps->Elem_typespec();
-      if (elem) {
-        if (!isFullySpecified(elem)) return false;
-      }
-      ranges = ltps->Ranges();
-      break;
-    }
-    case uhdmbit_typespec: {
-      bit_typespec *ltps = (bit_typespec *)tps;
-      ranges = ltps->Ranges();
-      break;
-    }
-    case uhdmenum_typespec: {
-      enum_typespec *ltps = (enum_typespec *)tps;
-      const typespec *base = ltps->Base_typespec();
-      if (base && (!isFullySpecified(base))) return false;
-      break;
-    }
-    case uhdmstruct_typespec: {
-      struct_typespec *ltps = (struct_typespec *)tps;
-      for (typespec_member *member : *ltps->Members()) {
-        if (!isFullySpecified(member->Typespec())) return false;
-      }
-      break;
-    }
-    case uhdmunion_typespec: {
-      union_typespec *ltps = (union_typespec *)tps;
-      for (typespec_member *member : *ltps->Members()) {
-        if (!isFullySpecified(member->Typespec())) return false;
-      }
-      break;
-    }
-    case uhdmpacked_array_typespec: {
-      packed_array_typespec *ltps = (packed_array_typespec *)tps;
-      const typespec *elem = (const typespec *)ltps->Elem_typespec();
-      if (!isFullySpecified(elem)) return false;
-      const typespec *ttps = ltps->Typespec();
-      if (ttps && (!isFullySpecified(ttps))) return false;
-      ranges = ltps->Ranges();
-      break;
-    }
-    default:
-      break;
+class DetectRefObj : public VpiListener {
+ public:
+  explicit DetectRefObj() {}
+  ~DetectRefObj() override = default;
+  void leaveRef_obj(const ref_obj* object, vpiHandle handle) final {
+     hasRef_obj = true;
   }
-  if (ranges) {
-    for (auto range : *ranges) {
-      if (range->Left_expr()->UhdmType() != uhdmconstant) return false;
-      if (range->Right_expr()->UhdmType() != uhdmconstant) return false;
-    }
+  void leaveHier_path(const hier_path* object, vpiHandle handle) final {
+      hasRef_obj = true;
+  }
+  bool refObjDetected() { return hasRef_obj; }
+private: 
+  bool hasRef_obj = false;
+};
+
+bool ExprEval::isFullySpecified(const UHDM::typespec *tps) {
+  if (tps == nullptr) {
+    return true;
+  }
+  DetectRefObj detector;
+  vpiHandle h_rhs = NewVpiHandle(tps);
+  detector.listenAny(h_rhs);
+  vpi_free_object(h_rhs);
+  if (detector.refObjDetected()) {
+    return false;
   }
   return true;
 }
@@ -924,6 +889,13 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
       case UHDM::uhdmstruct_var: {
         const UHDM::typespec *tp = ((struct_var *)typespec)->Typespec();
         bits += size(tp, invalidValue, inst, pexpr, full);
+        break;
+      }
+      case UHDM::uhdmarray_var: {
+        const UHDM::array_var* var = ((array_var *)typespec);
+        variables* regv = var->Variables()->at(0);
+        bits += size(regv->Typespec(), invalidValue, inst, pexpr, full);
+        ranges = var->Ranges();
         break;
       }
       case UHDM::uhdmstruct_net: {
@@ -3186,7 +3158,9 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             object = (expr *)getValue(objname, inst, pexpr, muteError);
           }
           const typespec *tps = nullptr;
-          if (expr *exp = any_cast<expr *>(object)) {
+          if (any_cast<array_var*>(object)) {
+            // Size the object, not its typespec
+          } else if (expr *exp = any_cast<expr *>(object)) {
             tps = exp->Typespec();
           } else if (typespec *tp = any_cast<typespec *>(object)) {
             tps = tp;
