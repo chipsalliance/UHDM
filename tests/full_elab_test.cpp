@@ -55,7 +55,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
   //-------------------------------------------
   // Module definition M1 (non elaborated)
-  module* m1 = s->MakeModule();
+  module_inst* m1 = s->MakeModule_inst();
   {
     m1->VpiDefName("M1");
     m1->VpiParent(d);
@@ -65,7 +65,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
   //-------------------------------------------
   // Module definition M2 (non elaborated)
-  module* m2 = s->MakeModule();
+  module_inst* m2 = s->MakeModule_inst();
   {
     m2->VpiDefName("M2");
     m2->VpiFile("fake2.sv");
@@ -108,8 +108,8 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
   //-------------------------------------------
   // Instance tree (Elaborated tree)
   // Top level module
-  module* m3 = s->MakeModule();
-  VectorOfmodule* v1 = s->MakeModuleVec();
+  module_inst* m3 = s->MakeModule_inst();
+  VectorOfmodule_inst* v1 = s->MakeModule_instVec();
   {
     m3->VpiDefName("M1");  // Points to the module def (by name)
     m3->VpiName("M1");     // Instance name
@@ -120,7 +120,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
   //-------------------------------------------
   // Sub Instance
-  module* m4 = s->MakeModule();
+  module_inst* m4 = s->MakeModule_inst();
   {
     m4->VpiDefName("M2");         // Points to the module def (by name)
     m4->VpiName("inst1");         // Instance name
@@ -160,12 +160,12 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
   //-------------------------------------------
   // Create both non-elaborated and elaborated lists
-  VectorOfmodule* allModules = s->MakeModuleVec();
+  VectorOfmodule_inst* allModules = s->MakeModule_instVec();
   d->AllModules(allModules);
   allModules->push_back(m1);
   allModules->push_back(m2);
 
-  VectorOfmodule* topModules = s->MakeModuleVec();
+  VectorOfmodule_inst* topModules = s->MakeModule_instVec();
   d->TopModules(topModules);
   topModules->push_back(
       m3);  // Only m3 goes there as it is the top level module
@@ -178,7 +178,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 
 std::string dumpStats(const Serializer& serializer) {
   std::string result;
-  std::map<std::string, unsigned long> stats = serializer.ObjectStats();
+  auto stats = serializer.ObjectStats();
   for (const auto& stat : stats) {
     if (!stat.second) continue;
     result += stat.first + " " + std::to_string(stat.second) + "\n";
@@ -202,7 +202,7 @@ TEST(FullElabTest, ElaborationRoundtrip) {
             "cont_assign 1\n"
             "design 1\n"
             "logic_net 4\n"
-            "module 4\n"
+            "module_inst 4\n"
             "port 4\n"
             "ref_obj 4\n");
 

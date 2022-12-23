@@ -18,19 +18,19 @@ static std::vector<vpiHandle> buildStatementDesign(Serializer* s) {
   // Design building
   design* d = s->MakeDesign();
   d->VpiName("design3");
-  module* m1 = s->MakeModule();
+  module_inst* m1 = s->MakeModule_inst();
   m1->VpiTopModule(true);
   m1->VpiDefName("M1");
   m1->VpiParent(d);
   m1->VpiFile("fake1.sv");
   m1->VpiLineNo(10);
-  module* m2 = s->MakeModule();
+  module_inst* m2 = s->MakeModule_inst();
   m2->VpiDefName("M2");
   m2->VpiName("u1");
   m2->VpiFullName("M1.u1");
   m2->VpiParent(m1);
   m2->Instance(m1);
-  m2->Module(m1);
+  m2->Module_inst(m1);
   m2->VpiFile("fake2.sv");
   m2->VpiLineNo(20);
 
@@ -73,19 +73,19 @@ static std::vector<vpiHandle> buildStatementDesign(Serializer* s) {
   begin_block->Stmts(statements);
   m2->Process(processes);
 
-  module* m3 = s->MakeModule();
+  module_inst* m3 = s->MakeModule_inst();
   m3->VpiDefName("M3");
   m3->VpiName("u2");
   m3->VpiFullName("M1.u2");
   m3->VpiParent(m1);
   m3->Instance(m1);
-  m3->Module(m1);
+  m3->Module_inst(m1);
   m3->VpiFile("fake3.sv");
   m3->VpiLineNo(30);
-  VectorOfmodule* v1 = s->MakeModuleVec();
+  VectorOfmodule_inst* v1 = s->MakeModule_instVec();
   v1->push_back(m1);
   d->AllModules(v1);
-  VectorOfmodule* v2 = s->MakeModuleVec();
+  VectorOfmodule_inst* v2 = s->MakeModule_instVec();
   v2->push_back(m2);
   v2->push_back(m3);
   m1->Modules(v2);

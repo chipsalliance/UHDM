@@ -136,10 +136,10 @@
     vpi: vpiAssertion
     type: assertion
     card: any
-  - obj_ref: module
-    name: module
-    vpi: vpiModule
-    type: module
+  - obj_ref: module_inst
+    name: module_inst
+    vpi: vpiModuleInst
+    type: module_inst
     card: 1
   - class_ref: instance
     name: instance

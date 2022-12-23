@@ -1316,8 +1316,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 break;
               }
-              case uhdmmodule: {
-                module* mod = (module*)actual;
+              case uhdmmodule_inst: {
+                module_inst* mod = (module_inst*)actual;
                 if (mod->Variables()) {
                   for (variables* var : *mod->Variables()) {
                     if (var->VpiName() == name) {
@@ -1462,8 +1462,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 break;
               }
-              case uhdminterface: {
-                interface* interf = (interface*)actual;
+              case uhdminterface_inst: {
+                interface_inst* interf = (interface_inst*)actual;
                 if (interf->Variables()) {
                   for (variables* var : *interf->Variables()) {
                     if (var->VpiName() == name) {
@@ -1911,8 +1911,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
             }
           }
-        } else if (previous->UhdmType() == uhdmmodule) {
-          module* mod = (module*)previous;
+        } else if (previous->UhdmType() == uhdmmodule_inst) {
+          module_inst* mod = (module_inst*)previous;
           if (mod->Variables()) {
             for (variables* var : *mod->Variables()) {
               if (var->VpiName() == name) {

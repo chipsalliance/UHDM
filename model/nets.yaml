@@ -156,8 +156,8 @@
     vpi: vpiSimNet
     type: nets
     card: 1
-  - obj_ref: module
-    name: module
-    vpi: vpiModule
-    type: module
+  - obj_ref: module_inst
+    name: module_inst
+    vpi: vpiModuleInst
+    type: module_inst
     card: 1
