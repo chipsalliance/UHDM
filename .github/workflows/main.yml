@@ -7,7 +7,7 @@ on:
 jobs:
   linux-gcc:
     name: ubuntu-gcc
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         shell: bash
@@ -20,13 +20,13 @@ jobs:
                             python3 python3-orderedmultidict
 
     - name: Git pull
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: recursive
         fetch-depth: 0
 
     - name: Use ccache
-      uses: hendrikmuhs/ccache-action@v1
+      uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: linux-gcc-cache
 
@@ -54,29 +54,26 @@ jobs:
 
   macos:
     name: macos-gcc
-    runs-on: macos-latest
+    runs-on: macos-12
 
     steps:
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
+        python-version: 3.8
         architecture: x64
 
-    - name: Install dependencies
-      run: |
-       brew update
-       brew install cmake capnp
-
-       pip3 install orderedmultidict
+    - name: Setup Python Packages
+      run: pip3 install orderedmultidict
 
     - name: Git pull
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: recursive
         fetch-depth: 0
 
     - name: Use ccache
-      uses: hendrikmuhs/ccache-action@v1
+      uses: hendrikmuhs/ccache-action@v1.2
       with:
         key: macos-cache
 
@@ -106,8 +103,9 @@ jobs:
 
     steps:
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
+        python-version: 3.8
         architecture: x64
 
     - name: Setup Python Packages
@@ -124,7 +122,7 @@ jobs:
         MSYS2_PATH_TYPE: inherit
 
     - name: Git pull
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: recursive
         fetch-depth: 0
@@ -170,19 +168,20 @@ jobs:
 
     steps:
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
+        python-version: 3.8
         architecture: x64
 
     - name: Install Core Dependencies
       run: |
         choco install -y make
-        python -m pip install orderedmultidict
+        pip3 install orderedmultidict
 
     - run: git config --global core.autocrlf input
       shell: bash
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
         fetch-depth: 0
