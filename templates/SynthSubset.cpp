@@ -37,7 +37,7 @@ SynthSubset::SynthSubset(Serializer* serializer,
     : serializer_(serializer),
       nonSynthesizableObjects_(nonSynthesizableObjects),
       reportErrors_(reportErrors), allowFormal_(allowFormal) {
-  const std::string kDollar("$");
+  constexpr std::string_view kDollar("$");
   for (auto s :
        {// "display",
         "write", "strobe", "monitor", "monitoron", "monitoroff", "displayb",
@@ -81,7 +81,7 @@ SynthSubset::SynthSubset(Serializer* serializer,
         // "writememb",
         // "writememh",
         "value$plusargs"}) {
-    nonSynthSysCalls_.emplace(kDollar + s);
+    nonSynthSysCalls_.emplace(std::move(std::string(kDollar).append(s)));
   }
 }
 
@@ -104,9 +104,11 @@ void SynthSubset::reportError(const any* object) {
   }
   if (tmp) object = tmp;
   if (reportErrors_ && !reportedParent(object)) {
-    if (!object->VpiFile().empty())
+    if (!object->VpiFile().empty()) {
+      const std::string errMsg(object->VpiName());
       serializer_->GetErrorHandler()(ErrorType::UHDM_NON_SYNTHESIZABLE,
-                                     object->VpiName(), object, nullptr);
+                                     errMsg, object, nullptr);
+    }
   }
   mark(object);
 }
@@ -248,7 +250,7 @@ void SynthSubset::leaveTask(const task* topobject, vpiHandle handle) {
 
 void SynthSubset::leaveSys_task_call(const sys_task_call* object,
                                      vpiHandle handle) {
-  const std::string& name = object->VpiName();
+  const std::string_view name = object->VpiName();
   if (nonSynthSysCalls_.find(name) != nonSynthSysCalls_.end()) {
     reportError(object);
   }
@@ -256,7 +258,7 @@ void SynthSubset::leaveSys_task_call(const sys_task_call* object,
 
 void SynthSubset::leaveSys_func_call(const sys_func_call* object,
                                      vpiHandle handle) {
-  const std::string& name = object->VpiName();
+  const std::string_view name = object->VpiName();
   if (nonSynthSysCalls_.find(name) != nonSynthSysCalls_.end()) {
     reportError(object);
   }

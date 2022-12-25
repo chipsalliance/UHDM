@@ -46,9 +46,15 @@ class MyVpiListener : public VpiListener {
     vpiHandle parentHandle = NewVpiHandle(object->VpiParent());
     const char* const parentName = vpi_get_str(vpiName, parentHandle);
     vpi_free_object(parentHandle);
-    collected_.push_back(
-        prefix + ": " + object->VpiName() + "/" + object->VpiDefName() +
-        " parent: " + ((parentName != nullptr) ? parentName : "-"));
+    std::string line;
+    line.append(prefix)
+        .append(": ")
+        .append(object->VpiName())
+        .append("/")
+        .append(object->VpiDefName())
+        .append(" parent: ")
+        .append((parentName != nullptr) ? parentName : "-");
+    collected_.push_back(std::move(line));
   }
 
   const std::vector<std::string>& collected() const { return collected_; }

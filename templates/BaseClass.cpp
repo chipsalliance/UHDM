@@ -50,21 +50,21 @@ BaseClass::vpi_property_value_t BaseClass::GetVpiPropertyValue(
     case vpiType:
       return vpi_property_value_t(VpiType());
     case vpiFile: {
-      const std::string& file = VpiFile();
+      const std::string_view file = VpiFile();
       if (!file.empty()) {
-        return vpi_property_value_t(file.c_str());
+        return vpi_property_value_t(file.data());
       }
     } break;
     case vpiName: {
-      const std::string& name = VpiName();
+      const std::string_view name = VpiName();
       if (!name.empty()) {
-        return vpi_property_value_t(name.c_str());
+        return vpi_property_value_t(name.data());
       }
     } break;
     case vpiDefName: {
-      const std::string& defname = VpiDefName();
+      const std::string_view defname = VpiDefName();
       if (!defname.empty()) {
-        return vpi_property_value_t(defname.c_str());
+        return vpi_property_value_t(defname.data());
       }
     } break;
   }

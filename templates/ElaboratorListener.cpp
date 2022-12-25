@@ -38,7 +38,7 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
     case uhdmclass_defn: {
       class_defn* defn = (class_defn*)target;
       const any* lhs = pass->Lhs();
-      const std::string& name = lhs->VpiName();
+      const std::string_view name = lhs->VpiName();
       VectorOfany* params = defn->Parameters();
       if (params) {
         for (any* param : *params) {
@@ -75,7 +75,7 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
     case uhdmclass_typespec: {
       class_typespec* defn = (class_typespec*)target;
       const any* lhs = pass->Lhs();
-      const std::string& name = lhs->VpiName();
+      const std::string_view name = lhs->VpiName();
       VectorOfany* params = defn->Parameters();
       if (params) {
         for (any* param : *params) {
@@ -138,19 +138,18 @@ void ElaboratorListener::leaveDesign(const design* object, vpiHandle handle) {
   const_cast<design*>(object)->VpiElaborated(true);
 }
 
-static std::string& ltrim(std::string& str, char c) {
-  auto it1 =
-      std::find_if(str.begin(), str.end(), [c](char ch) { return (ch == c); });
-  if (it1 != str.end()) str.erase(str.begin(), it1 + 1);
+static std::string_view ltrim_until(std::string_view str, char c) {
+  auto it = str.find(c);
+  if (it != std::string_view::npos) str.remove_prefix(it + 1);
   return str;
 }
 
 void ElaboratorListener::enterModule_inst(const module_inst* object, vpiHandle handle) {
   bool topLevelModule = object->VpiTopModule();
-  const std::string& instName = object->VpiName();
-  const std::string& defName = object->VpiDefName();
+  const std::string_view instName = object->VpiName();
+  const std::string_view defName = object->VpiDefName();
   bool flatModule =
-      (instName == "") && ((object->VpiParent() == 0) ||
+      instName.empty() && ((object->VpiParent() == 0) ||
                            ((object->VpiParent() != 0) &&
                             (object->VpiParent()->VpiType() != vpiModuleInst)));
   // false when it is a module in a hierachy tree
@@ -321,8 +320,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object, vpiHandle h
     }
 
     // Module itself
-    std::string modName = object->VpiName();
-    modName = ltrim(modName, '@');
+    std::string_view modName = ltrim_until(object->VpiName(), '@');
     modMap.emplace(modName, object);
 
     if (object->Modules()) {
@@ -363,10 +361,10 @@ void ElaboratorListener::enterModule_inst(const module_inst* object, vpiHandle h
 void ElaboratorListener::elabModule_inst(const module_inst* object, vpiHandle handle) {
   module_inst* inst = const_cast<module_inst*>(object);
   bool topLevelModule = object->VpiTopModule();
-  const std::string& instName = object->VpiName();
-  const std::string& defName = object->VpiDefName();
+  const std::string_view instName = object->VpiName();
+  const std::string_view defName = object->VpiDefName();
   bool flatModule =
-      (instName == "") && ((object->VpiParent() == 0) ||
+      instName.empty() && ((object->VpiParent() == 0) ||
                            ((object->VpiParent() != 0) &&
                             (object->VpiParent()->VpiType() != vpiModuleInst)));
   // false when it is a module in a hierachy tree
@@ -468,7 +466,8 @@ void ElaboratorListener::leavePackage(const package* object, vpiHandle handle) {
         auto* tf = obj->DeepClone(serializer_, this, (package*)object);
         ComponentMap& funcMap =
             std::get<2>((instStack_.at(instStack_.size() - 2)).second);
-        funcMap.erase(tf->VpiName());
+        auto it = funcMap.find(tf->VpiName());
+        if (it != funcMap.end()) funcMap.erase(it);
         funcMap.emplace(tf->VpiName(), tf);
         leaveTask_func(obj, nullptr);
         tf->VpiParent((package*)object);
@@ -579,10 +578,10 @@ void ElaboratorListener::leaveClass_defn(const class_defn* object,
 
 void ElaboratorListener::enterInterface_inst(const interface_inst* object,
                                              vpiHandle handle) {
-  const std::string& instName = object->VpiName();
-  const std::string& defName = object->VpiDefName();
+  const std::string_view instName = object->VpiName();
+  const std::string_view defName = object->VpiDefName();
   bool flatModule =
-      (instName == "") && ((object->VpiParent() == 0) ||
+      instName.empty() && ((object->VpiParent() == 0) ||
                            ((object->VpiParent() != 0) &&
                             (object->VpiParent()->VpiType() != vpiModuleInst)));
   // false when it is an interface in a hierachy tree
@@ -766,7 +765,7 @@ void ElaboratorListener::leaveInterface_inst(const interface_inst* object,
 
 // Hardcoded implementations
 
-any* ElaboratorListener::bindNet(const std::string& name) {
+any* ElaboratorListener::bindNet(std::string_view name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
     if (ignoreLastInstance_) {
@@ -782,7 +781,7 @@ any* ElaboratorListener::bindNet(const std::string& name) {
 }
 
 // Bind to a net or parameter in the current instance
-any* ElaboratorListener::bindAny(const std::string& name) {
+any* ElaboratorListener::bindAny(std::string_view name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
     if (ignoreLastInstance_) {
@@ -810,7 +809,7 @@ any* ElaboratorListener::bindAny(const std::string& name) {
 }
 
 // Bind to a param in the current instance
-any* ElaboratorListener::bindParam(const std::string& name) {
+any* ElaboratorListener::bindParam(std::string_view name) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
     if (ignoreLastInstance_) {
@@ -826,7 +825,7 @@ any* ElaboratorListener::bindParam(const std::string& name) {
 }
 
 // Bind to a function or task in the current scope
-any* ElaboratorListener::bindTaskFunc(const std::string& name,
+any* ElaboratorListener::bindTaskFunc(std::string_view name,
                                       const class_var* prefix) {
   for (InstStack::reverse_iterator i = instStack_.rbegin();
        i != instStack_.rend(); ++i) {
@@ -862,7 +861,7 @@ any* ElaboratorListener::bindTaskFunc(const std::string& name,
   return nullptr;
 }
 
-bool ElaboratorListener::isFunctionCall(const std::string& name,
+bool ElaboratorListener::isFunctionCall(std::string_view name,
                                         const expr* prefix) {
   if (instStack_.size()) {
     for (InstStack::reverse_iterator i = instStack_.rbegin();
@@ -890,7 +889,7 @@ bool ElaboratorListener::isFunctionCall(const std::string& name,
   return true;
 }
 
-bool ElaboratorListener::isTaskCall(const std::string& name,
+bool ElaboratorListener::isTaskCall(std::string_view name,
                                     const expr* prefix) {
   if (instStack_.size()) {
     for (InstStack::reverse_iterator i = instStack_.rbegin();

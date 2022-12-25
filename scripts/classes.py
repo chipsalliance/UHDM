@@ -36,7 +36,7 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
 
         if type == 'std::string':
             content.append(f'  {virtual}bool {Vpi_}(std::string_view data){final};')
-            content.append(f'  {virtual}const std::string& {Vpi_}() const{final};')
+            content.append(f'  {virtual}std::string_view {Vpi_}() const{final};')
         else:
             content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
             content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final} {{ {check}{vpi}_ = data; return true; }}')
@@ -71,11 +71,11 @@ def _get_implementations(classname, type, vpi, card, real_type=''):
     Vpi_ = vpi[:1].upper() + vpi[1:]
 
     if vpi == 'vpiFullName':
-        content.append(f'const {type}{pointer}& {classname}::{Vpi_}() const {{')
+        content.append(f'std::string_view {classname}::{Vpi_}() const {{')
         content.append(f'  if ({vpi}_) {{')
         content.append(f'    return serializer_->symbolMaker.GetSymbol({vpi}_);')
         content.append( '  } else {')
-        content.append( '    std::vector<std::string> names;')
+        content.append( '    std::vector<std::string_view> names;')
         content.append( '    const BaseClass* parent = this;')
         content.append( '    const BaseClass* child = nullptr;')
         content.append( '    bool column = false;')
@@ -83,7 +83,7 @@ def _get_implementations(classname, type, vpi, card, real_type=''):
         content.append( '      const BaseClass* actual_parent = parent->VpiParent();')
         content.append( '      if (parent->UhdmType() == uhdmdesign) break;')
         content.append( '      if ((parent->UhdmType() == uhdmpackage) || (parent->UhdmType() == uhdmclass_defn)) column = true;')
-        content.append( '      const std::string& name = parent->VpiName().empty() ? parent->VpiDefName() : parent->VpiName();')
+        content.append( '      std::string_view name = parent->VpiName().empty() ? parent->VpiDefName() : parent->VpiName();')
         content.append( '      UHDM_OBJECT_TYPE parent_type = (parent != nullptr) ? parent->UhdmType() : uhdmunsupported_stmt;')
         content.append( '      UHDM_OBJECT_TYPE actual_parent_type = (actual_parent != nullptr) ? actual_parent->UhdmType() : uhdmunsupported_stmt;')
         content.append( '      bool skip_name = (actual_parent_type == uhdmref_obj) || (parent_type == uhdmmethod_func_call) ||')
@@ -106,7 +106,7 @@ def _get_implementations(classname, type, vpi, card, real_type=''):
         content.append( '        }')
         content.append( '      }')
         content.append( '      if ((!name.empty()) && (!skip_name)) {')
-        content.append( '        names.push_back(name);')
+        content.append( '        names.emplace_back(name);')
         content.append( '      }')
         content.append( '      child = parent;')
         content.append( '      parent = parent->VpiParent();')
@@ -128,7 +128,7 @@ def _get_implementations(classname, type, vpi, card, real_type=''):
         content.append( '  }')
         content.append( '}')
     else:
-        content.append(f'const {type}{pointer}& {classname}::{Vpi_}() const {{ return serializer_->symbolMaker.GetSymbol({vpi}_); }}')
+        content.append(f'std::string_view {classname}::{Vpi_}() const {{ return {vpi}_ ? serializer_->symbolMaker.GetSymbol({vpi}_) : kEmpty; }}')
 
     content.append('')
     content.append(f'bool {classname}::{Vpi_}(std::string_view data) {{ {vpi}_ = serializer_->symbolMaker.Make(data); return true; }}')
@@ -223,7 +223,7 @@ def _get_DeepClone_implementation(model, models):
                 elif (classname in ['bit_select']) and (method == 'Actual_group'):
                     includes.add('ElaboratorListener')
                     includes.add('ExprEval')
-                    content.append(f'  const std::string& name = VpiName();')
+                    content.append(f'  std::string_view name = VpiName();')
                     content.append(f'  ExprEval eval;')
                     content.append(f'  bool invalidValue = false;')
                     content.append( '  if (any* val = eval.reduceExpr(VpiIndex(), invalidValue, parent, parent, true)) {')
@@ -233,8 +233,9 @@ def _get_DeepClone_implementation(model, models):
                     content.append(f'        val = eval.reduceExpr(indexVal, invalidValue, parent, parent, true);')
                     content.append(f'        if (!invalidValue) indexName = eval.prettyPrint(val);')
                     content.append( '      }')
-                    content.append( '      indexName = name + "[" + indexName + "]";')
-                    content.append(f'      clone->{method}(elaborator->bindAny(indexName));')
+                    content.append( '      std::string fullIndexName;')
+                    content.append( '      fullIndexName.assign(name).append("[").append(indexName).append("]");')
+                    content.append(f'      clone->{method}(elaborator->bindAny(fullIndexName));')
                     content.append( '    }')
                     content.append( '  }')
                     content.append(f'  if (!clone->{method}()) clone->{method}(elaborator->bindAny(name));')
@@ -492,15 +493,15 @@ def _get_GetVpiPropertyValue_implementation(model):
                     case_bodies[vpi] = [ f'    case {vpi}: {{' ]
                     if vpi == 'vpiFullName':
                         case_bodies[vpi].extend([
-                            f'      const std::string &fullname = VpiFullName();',
+                            f'      std::string_view fullname = VpiFullName();',
                             f'      if (!fullname.empty() && (VpiName() != fullname)) {{',
-                            f'        return vpi_property_value_t(fullname.c_str());',
+                            f'        return vpi_property_value_t(fullname.data());',
                             f'      }}'
                           ])
                     else:
                         case_bodies[vpi].extend([
-                            f'      const std::string &data = {Vpi_}();',
-                            f'      if (!data.empty()) return vpi_property_value_t(data.c_str());'
+                            f'      std::string_view data = {Vpi_}();',
+                            f'      if (!data.empty()) return vpi_property_value_t(data.data());'
                         ])
                     case_bodies[vpi].append(f'    }} break;')
                 else:

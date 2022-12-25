@@ -800,7 +800,7 @@ cont_assign* cont_assign::DeepClone(Serializer* serializer,
 }
 
 any* bindClassTypespec(class_typespec* ctps, any* current,
-                       const std::string& name, bool& found) {
+                       std::string_view name, bool& found) {
   any* previous = nullptr;
   const class_defn* defn = ctps->Class_defn();
   while (defn) {
@@ -920,8 +920,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
         }
       }
       if (previous) {
-        std::string name = obj->VpiName();
-        std::string nameIndexed = name;
+        std::string_view name = obj->VpiName();
+        std::string nameIndexed(name);
         if (name.empty()) {
           if (obj->UhdmType() == uhdmpart_select) {
             if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
@@ -949,7 +949,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           if (const any* p = obj->VpiParent()) {
             if (p->UhdmType() == uhdmref_obj) {
               ref_obj* pr = (ref_obj*)p;
-              const std::string& pname = pr->VpiName();
+              const std::string_view pname = pr->VpiName();
               if (pname.find('[') != std::string::npos) {
                 nameIndexed = pname;
               }
@@ -957,7 +957,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           }
           bit_select* sel = (bit_select*) obj;
           if (const any* actual = sel->Actual_group()) {
-            const std::string& pname = actual->VpiName();
+            const std::string_view pname = actual->VpiName();
             if (pname.find('[') != std::string::npos) {
               nameIndexed = pname;
             }
@@ -1005,8 +1005,9 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 design* scope = (design*) actual;
                 if (scope->TopModules()) {
                   for (auto m : *scope->TopModules()) {
-                    const std::string& modName = m->VpiName();
-                    if (modName == name || modName == nameIndexed || modName == ("work@" + name)) {
+                    const std::string_view modName = m->VpiName();
+                    if (modName == name || modName == nameIndexed ||
+                        modName == std::string("work@").append(name)) {
                       found = true;
                       previous = m;
                       if (current->UhdmType() == uhdmref_obj) {
@@ -1723,11 +1724,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 if (!stps) {
                   break;
                 }
-                std::vector<std::string> fieldNames;
+                std::vector<std::string_view> fieldNames;
                 std::vector<const typespec*> fieldTypes;
                 for (typespec_member* memb : *stps->Members()) {
-                  fieldNames.push_back(memb->VpiName());
-                  fieldTypes.push_back(memb->Typespec());
+                  fieldNames.emplace_back(memb->VpiName());
+                  fieldTypes.emplace_back(memb->Typespec());
                 }
                 std::vector<any*> tmp(fieldNames.size());
                 VectorOfany* orig = op->Operands();
@@ -1738,7 +1739,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   if (oper->UhdmType() == uhdmtagged_pattern) {
                     tagged_pattern* tp = (tagged_pattern*)oper;
                     const typespec* ttp = tp->Typespec();
-                    const std::string& tname = ttp->VpiName();
+                    const std::string_view tname = ttp->VpiName();
                     bool found = false;
                     if (tname == "default") {
                       defaultOp = oper;
@@ -1792,18 +1793,22 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             if (!found) {
               // WIP:
               if ((!elaborator->muteErrors()) &&
-                  (!elaborator->isInUhdmAllIterator()))
+                  (!elaborator->isInUhdmAllIterator())) {
+                const std::string errMsg(VpiName());
                 serializer->GetErrorHandler()(
-                    ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
+                    ErrorType::UHDM_UNRESOLVED_HIER_PATH, errMsg, this,
                     nullptr);
+              }
             }
           } else {
             // WIP:
             if ((!elaborator->muteErrors()) &&
-                (!elaborator->isInUhdmAllIterator()))
+                (!elaborator->isInUhdmAllIterator())) {
+              const std::string errMsg(VpiName());
               serializer->GetErrorHandler()(
-                  ErrorType::UHDM_UNRESOLVED_HIER_PATH, VpiName(), this,
+                  ErrorType::UHDM_UNRESOLVED_HIER_PATH, errMsg, this,
                   nullptr);
+            }
           }
         } else if (previous->UhdmType() == uhdmtypespec_member) {
           typespec_member* member = (typespec_member*)previous;
