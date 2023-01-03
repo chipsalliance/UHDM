@@ -118,7 +118,8 @@ class ExprEval {
 
   void evalStmt(std::string_view funcName, Scopes& scopes, bool& invalidValue,
                 bool& continue_flag, bool& break_flag, bool& return_flag,
-                const any* inst, const UHDM::any* stmt, bool muteError = false);
+                const any* inst, const UHDM::any* stmt,
+                std::set<std::string>& local_vars, bool muteError = false);
 
   bool setValueInInstance(std::string_view lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst,
