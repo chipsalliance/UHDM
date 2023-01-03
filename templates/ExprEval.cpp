@@ -3921,7 +3921,8 @@ bool ExprEval::setValueInInstance(std::string_view lhs, any *lhsexp,
 void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
                         bool &invalidValue, bool &continue_flag,
                         bool &break_flag, bool &return_flag, const any *inst,
-                        const any *stmt, bool muteError) {
+                        const any *stmt, std::set<std::string> &local_vars,
+                        bool muteError) {
   if (invalidValue) {
     return;
   }
@@ -3944,7 +3945,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
             if (val == vexp) {
               evalStmt(funcName, scopes, invalidValue, continue_flag,
                        break_flag, return_flag, scopes.back(), item->Stmt(),
-                       muteError);
+                       local_vars, muteError);
               done = true;
               break;
             }
@@ -3962,10 +3963,12 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
           reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
       if (val > 0) {
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 return_flag, scopes.back(), st->VpiStmt(), muteError);
+                 return_flag, scopes.back(), st->VpiStmt(), local_vars,
+                 muteError);
       } else {
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 return_flag, scopes.back(), st->VpiElseStmt(), muteError);
+                 return_flag, scopes.back(), st->VpiElseStmt(), local_vars,
+                 muteError);
       }
       break;
     }
@@ -3977,7 +3980,8 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
           reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
       if (val > 0) {
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 return_flag, scopes.back(), st->VpiStmt(), muteError);
+                 return_flag, scopes.back(), st->VpiStmt(), local_vars,
+                 muteError);
       }
       break;
     }
@@ -3986,7 +3990,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       if (st->Stmts()) {
         for (auto bst : *st->Stmts()) {
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scopes.back(), bst, muteError);
+                   return_flag, scopes.back(), bst, local_vars, muteError);
           if (continue_flag || break_flag || return_flag) {
             return;
           }
@@ -3999,7 +4003,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       if (st->Stmts()) {
         for (auto bst : *st->Stmts()) {
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scopes.back(), bst, muteError);
+                   return_flag, scopes.back(), bst, local_vars, muteError);
           if (continue_flag || break_flag || return_flag) {
             return;
           }
@@ -4040,21 +4044,31 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       if (invalidValue == false) {
         for (int i = 0; i < val; i++) {
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scopes.back(), st->VpiStmt(), muteError);
+                   return_flag, scopes.back(), st->VpiStmt(), local_vars,
+                   muteError);
         }
       }
       break;
     }
     case uhdmfor_stmt: {
       for_stmt *st = (for_stmt *)stmt;
-      if (st->VpiForInitStmt()) {
+      if (const any *stmt = st->VpiForInitStmt()) {
+        if (stmt->UhdmType() == uhdmassign_stmt) {
+          assign_stmt *assign = (assign_stmt *)stmt;
+          local_vars.insert(std::string(assign->Lhs()->VpiName()));
+        }
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 return_flag, scopes.back(), st->VpiForInitStmt(), muteError);
+                 return_flag, scopes.back(), st->VpiForInitStmt(), local_vars,
+                 muteError);
       }
       if (st->VpiForInitStmts()) {
         for (auto s : *st->VpiForInitStmts()) {
+          if (s->UhdmType() == uhdmassign_stmt) {
+            assign_stmt *assign = (assign_stmt *)s;
+            local_vars.insert(std::string(assign->Lhs()->VpiName()));
+          }
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scopes.back(), s, muteError);
+                   return_flag, scopes.back(), s, local_vars, muteError);
         }
       }
       while (1) {
@@ -4069,7 +4083,8 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
           if (invalidValue) break;
         }
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 return_flag, scopes.back(), st->VpiStmt(), muteError);
+                 return_flag, scopes.back(), st->VpiStmt(), local_vars,
+                 muteError);
         if (invalidValue) break;
         if (continue_flag) {
           continue_flag = false;
@@ -4084,13 +4099,14 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
         }
         if (st->VpiForIncStmt()) {
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scopes.back(), st->VpiForIncStmt(), muteError);
+                   return_flag, scopes.back(), st->VpiForIncStmt(), local_vars,
+                   muteError);
         }
         if (invalidValue) break;
         if (st->VpiForIncStmts()) {
           for (auto s : *st->VpiForIncStmts()) {
             evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                     return_flag, scopes.back(), s, muteError);
+                     return_flag, scopes.back(), s, local_vars, muteError);
           }
         }
         if (invalidValue) break;
@@ -4124,7 +4140,8 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
             break;
           }
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scopes.back(), st->VpiStmt(), muteError);
+                   return_flag, scopes.back(), st->VpiStmt(), local_vars,
+                   muteError);
           if (invalidValue) break;
           if (continue_flag) {
             continue_flag = false;
@@ -4147,7 +4164,8 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       if (cond) {
         while (1) {
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scopes.back(), st->VpiStmt(), muteError);
+                   return_flag, scopes.back(), st->VpiStmt(), local_vars,
+                   muteError);
           if (invalidValue) break;
           if (continue_flag) {
             continue_flag = false;
@@ -4189,8 +4207,8 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       invalidValue = true;
       if (muteError == false && m_muteError == false) {
         const std::string errMsg(inst->VpiName());
-        s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, errMsg,
-                            stmt, nullptr);
+        s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, errMsg, stmt,
+                            nullptr);
       }
       break;
     }
@@ -4221,21 +4239,23 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   } else if (any_cast<UHDM::scope *>(inst)) {
     param_assigns = ((UHDM::scope *)inst)->Param_assigns();
   }
+  std::set<std::string> variables;
   if (param_assigns) {
     scope->Param_assigns(s.MakeParam_assignVec());
     for (auto p : *param_assigns) {
       ElaboratorListener listener(&s, false, muteError);
       any *pp = UHDM::clone_tree(p, s, &listener);
       scope->Param_assigns()->push_back((param_assign *)pp);
+      variables.insert(std::string(p->Lhs()->VpiName()));
     }
   }
-
   // set args
   if (func->Io_decls()) {
     unsigned int index = 0;
     for (auto io : *func->Io_decls()) {
       if (args && (index < args->size())) {
         const std::string_view ioname = io->VpiName();
+        variables.insert(std::string(ioname));
         expr *ioexp = (expr *)args->at(index);
         expr *exparg = reduceExpr(ioexp, invalidValue, scope, pexpr, muteError);
         if (exparg) {
@@ -4247,7 +4267,12 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
       index++;
     }
   }
-
+  if (func->Variables()) {
+    for (auto var : *func->Variables()) {
+      variables.insert(std::string(var->VpiName()));
+    }
+  }
+  variables.insert(std::string(name));
   scopes.push_back(scope);
   if (const UHDM::any *the_stmt = func->Stmt()) {
     UHDM_OBJECT_TYPE stt = the_stmt->UhdmType();
@@ -4259,13 +4284,13 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
         bool break_flag = false;
         for (auto stmt : *st->Stmts()) {
           evalStmt(name, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scope, stmt, muteError);
+                   return_flag, scope, stmt, variables, muteError);
           if (return_flag) break;
           if (continue_flag || break_flag) {
             if (muteError == false && m_muteError == false) {
               const std::string errMsg(inst->VpiName());
-              s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
-                                  errMsg, stmt, nullptr);
+              s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, errMsg,
+                                  stmt, nullptr);
             }
           }
         }
@@ -4277,13 +4302,13 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
         bool break_flag = false;
         for (auto stmt : *st->Stmts()) {
           evalStmt(name, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scope, stmt, muteError);
+                   return_flag, scope, stmt, variables, muteError);
           if (return_flag) break;
           if (continue_flag || break_flag) {
             if (muteError == false && m_muteError == false) {
               const std::string errMsg(inst->VpiName());
-              s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
-                                  errMsg, stmt, nullptr);
+              s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, errMsg,
+                                  stmt, nullptr);
             }
           }
         }
@@ -4293,12 +4318,12 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
         bool continue_flag = false;
         bool break_flag = false;
         evalStmt(name, scopes, invalidValue, continue_flag, break_flag,
-                 return_flag, scope, the_stmt, muteError);
+                 return_flag, scope, the_stmt, variables, muteError);
         if (continue_flag || break_flag) {
           if (muteError == false && m_muteError == false) {
             const std::string errMsg(inst->VpiName());
-            s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT,
-                                errMsg, the_stmt, nullptr);
+            s.GetErrorHandler()(ErrorType::UHDM_UNSUPPORTED_STMT, errMsg,
+                                the_stmt, nullptr);
           }
         }
         break;
@@ -4307,6 +4332,13 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   }
   // return value
   if (scope->Param_assigns()) {
+    for (auto p : *scope->Param_assigns()) {
+      const std::string n(p->Lhs()->VpiName());
+      if (variables.find(n) == variables.end()) {
+        invalidValue = true;
+        return nullptr;
+      }
+    }
     for (auto p : *scope->Param_assigns()) {
       if (p->Lhs()->VpiName() == name) {
         const typespec *tps = nullptr;
