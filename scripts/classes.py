@@ -564,7 +564,7 @@ def _get_Compare_implementation(model):
 
     var_declared = False
     for key, value in model.allitems():
-        if key not in ['property', 'obj_ref', 'class_ref', 'class']:
+        if key not in ['property', 'obj_ref', 'class_ref', 'class', 'group_ref']:
             continue
 
         vpi = value.get('vpi')
