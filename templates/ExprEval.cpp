@@ -3987,6 +3987,11 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
     }
     case uhdmbegin: {
       begin *st = (begin *)stmt;
+      if (st->Variables()) {
+        for (auto var : *st->Variables()) {
+          local_vars.insert(std::string(var->VpiName()));
+        }
+      }
       if (st->Stmts()) {
         for (auto bst : *st->Stmts()) {
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
@@ -4000,6 +4005,11 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
     }
     case uhdmnamed_begin: {
       named_begin *st = (named_begin *)stmt;
+      if (st->Variables()) {
+        for (auto var : *st->Variables()) {
+          local_vars.insert(std::string(var->VpiName()));
+        }
+      }
       if (st->Stmts()) {
         for (auto bst : *st->Stmts()) {
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
@@ -4334,7 +4344,7 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   if (scope->Param_assigns()) {
     for (auto p : *scope->Param_assigns()) {
       const std::string n(p->Lhs()->VpiName());
-      if (variables.find(n) == variables.end()) {
+      if ((!n.empty()) && (variables.find(n) == variables.end())) {
         invalidValue = true;
         return nullptr;
       }
