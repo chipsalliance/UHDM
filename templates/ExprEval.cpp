@@ -4354,26 +4354,36 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
         const typespec *tps = nullptr;
         if (func->Return()) tps = func->Return()->Typespec();
         if (tps && (tps->UhdmType() == uhdmlogic_typespec)) {
-          uint64_t s = size(tps, invalidValue, inst, pexpr, true, true);
+          logic_typespec* ltps = (logic_typespec*) tps;
+          uint64_t si = size(tps, invalidValue, inst, pexpr, true, true);
           if (p->Rhs() && (p->Rhs()->UhdmType() == uhdmconstant)) {
             constant *c = (constant *)p->Rhs();
+            ElaboratorListener listener(&s, false, muteError);
+            c = (constant*) UHDM::clone_tree(c, s, &listener);
             if (c->VpiConstType() == vpiBinaryConst) {
               std::string_view val = c->VpiValue();
               val.remove_prefix(std::string_view("BIN:").length());
-              if (val.size() > s) {
-                val.remove_prefix(val.size() - s);
+              if (val.size() > si) {
+                val.remove_prefix(val.size() - si);
                 c->VpiValue(std::string("BIN:").append(val));
                 c->VpiDecompile(val);
+              } else if (ltps->VpiSigned()) {
+                if (val == "1") {
+                  c->VpiValue("INT:-1");
+                  c->VpiDecompile("-1");
+                  c->VpiConstType(vpiIntConst);
+                }
               }
             } else {
-              uint64_t mask = NumUtils::getMask(s);
+              uint64_t mask = NumUtils::getMask(si);
               int64_t v = get_value(invalidValue, c);
               v = v & mask;
               c->VpiValue("UINT:" + std::to_string(v));
               c->VpiDecompile(std::to_string(v));
               c->VpiConstType(vpiUIntConst);
             }
-            c->VpiSize(static_cast<int>(s));
+            c->VpiSize(static_cast<int>(si));
+            return c;
           }
         }
         return (expr *)p->Rhs();
