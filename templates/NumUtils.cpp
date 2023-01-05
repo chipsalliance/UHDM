@@ -71,8 +71,8 @@ std::string NumUtils::binToHex(std::string_view s) {
 }
 
 std::string NumUtils::toBinary(int size, uint64_t val) {
-  int constexpr bitFieldSize = 100;
-  std::string tmp = std::bitset<bitFieldSize>(val).to_string();
+  int constexpr bitFieldSize = 64;
+  std::string tmp = std::bitset<64>(val).to_string();
   if (size <= 0) {
     for (unsigned int i = 0; i < bitFieldSize; i++) {
       if (tmp[i] == '1') {
@@ -82,9 +82,19 @@ std::string NumUtils::toBinary(int size, uint64_t val) {
     }
   }
   std::string result;
-  result.reserve(bitFieldSize - size + 1);
-  for (unsigned int i = bitFieldSize - size; i < bitFieldSize; i++)
-    result += tmp[i];
+  if (size < bitFieldSize) {
+    result.reserve(bitFieldSize - size + 1);
+    for (unsigned int i = bitFieldSize - size; i < bitFieldSize; i++)
+      result += tmp[i];
+  } else {
+    result.reserve(size);
+    for (unsigned int i = 0; i < (unsigned int) (size - bitFieldSize); i++) {
+      result += "0";
+    }
+    for (unsigned int i = 0; i < bitFieldSize; i++) {
+      result += tmp[i];
+    }
+  }
   return result;
 }
 
