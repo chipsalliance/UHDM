@@ -30,3 +30,11 @@
     vpi: vpiInstance
     type: instance
     card: 1
+# Not standard
+  - class_ref: resolution_func
+    name: resolution func
+    vpi: vpiFuncCall
+    type: tf_call
+    card: 1
+
+
