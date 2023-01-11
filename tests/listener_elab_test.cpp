@@ -209,7 +209,8 @@ class MyElaboratorListener : public VpiListener {
 
     if (flatModule) {
       // Flat list of module (unelaborated)
-      flatComponentMap_.insert(std::make_pair(object->VpiDefName(), object));
+      flatComponentMap_.insert(
+          ComponentMap::value_type(object->VpiDefName(), object));
     } else {
       // Hierachical module list (elaborated)
 
@@ -217,7 +218,7 @@ class MyElaboratorListener : public VpiListener {
       ComponentMap netMap;
       if (object->Nets()) {
         for (net* net : *object->Nets()) {
-          netMap.insert(std::make_pair(net->VpiName(), net));
+          netMap.insert(ComponentMap::value_type(net->VpiName(), net));
         }
       }
 
