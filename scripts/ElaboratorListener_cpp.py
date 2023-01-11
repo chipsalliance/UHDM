@@ -38,7 +38,7 @@ def _generate_module_listeners(models, classname):
                     listeners.append( '    ComponentMap& funcMap = std::get<2>(instStack_.at(instStack_.size()-2).second);')
                     listeners.append( '    auto it = funcMap.find(tf->VpiName());')
                     listeners.append( '    if (it != funcMap.end()) funcMap.erase(it);')
-                    listeners.append( '    funcMap.insert(std::make_pair(tf->VpiName(), tf));')
+                    listeners.append( '    funcMap.insert(ComponentMap::value_type(tf->VpiName(), tf));')
                     listeners.append( '    leaveTask_func(obj, nullptr);')
                     listeners.append( '    tf->VpiParent(inst);')
                     listeners.append( '    clone_vec->push_back(tf);')

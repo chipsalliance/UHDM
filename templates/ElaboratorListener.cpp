@@ -252,7 +252,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object, vpiHandle h
         paramMap.emplace(param->VpiName(), param);
       }
     }
-    
+
     if (object->Typespecs()) {
       for (typespec* tps : *object->Typespecs()) {
         if (tps->UhdmType() == uhdmenum_typespec) {
@@ -447,7 +447,7 @@ void ElaboratorListener::enterPackage(const package* object, vpiHandle handle) {
       paramMap.emplace(param->VpiName(), param);
     }
   }
-  
+
   // Collect func and task declaration
   ComponentMap funcMap;
   ComponentMap modMap;
@@ -644,7 +644,7 @@ void ElaboratorListener::enterInterface_inst(const interface_inst* object,
     if (object->Param_assigns()) {
       for (param_assign* passign : *object->Param_assigns()) {
         paramMap.insert(
-            std::make_pair(passign->Lhs()->VpiName(), passign->Rhs()));
+            ComponentMap::value_type(passign->Lhs()->VpiName(), passign->Rhs()));
       }
     }
     if (object->Parameters()) {
@@ -1054,7 +1054,7 @@ void ElaboratorListener::enterBegin(const begin* object, vpiHandle handle) {
       varMap.emplace(var->VpiName(), var);
     }
   }
-  
+
   ComponentMap paramMap;
   ComponentMap funcMap;
   ComponentMap modMap;
@@ -1213,7 +1213,7 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object,
     }
   }
 
-  
+
 
   // Collect instance parameters, defparams
   ComponentMap paramMap;
