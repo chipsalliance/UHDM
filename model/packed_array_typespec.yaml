@@ -46,4 +46,8 @@
     vpi: vpiIndexTypespec
     type: typespec
     card: 1
-    
+  - obj_ref: resolution_func
+    name: resolution func
+    vpi: vpiFunction
+    type: function
+    card: 1    

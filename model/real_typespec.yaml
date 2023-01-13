@@ -16,4 +16,8 @@
  
 - obj_def: real_typespec
   - extends: typespec
-
+  - obj_ref: resolution_func
+    name: resolution func
+    vpi: vpiFunction
+    type: function
+    card: 1    

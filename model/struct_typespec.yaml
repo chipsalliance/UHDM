@@ -26,4 +26,8 @@
     vpi: vpiTypespecMember
     type: typespec_member
     card: any
-
+  - obj_ref: resolution_func
+    name: resolution func
+    vpi: vpiFunction
+    type: function
+    card: 1
