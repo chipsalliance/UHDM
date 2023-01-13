@@ -18,7 +18,10 @@ option(
   "Building with clang++ and libc++(in Linux). To enable with: -DWITH_LIBCXX=On"
   OFF)
 option(UHDM_BUILD_TESTS "Enable testing." ON)
-option(UHDM_USE_HOST_GTEST "Use gtest from host system, not third_party/" OFF)
+option(UHDM_USE_HOST_GTEST "Use gtest from host system, not third_party/"
+                           OFF)
+option(UHDM_USE_HOST_CAPNP "Use capnproto from host system, not third_party/"
+                           OFF)
 
 project(UHDM)
 
@@ -39,8 +42,15 @@ if (NOT ${EXIT_CODE} EQUAL 0)
     "To install use following command: \"pip3 install orderedmultidict\".")
 endif()
 
-set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
-add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
+if(UHDM_USE_HOST_CAPNP)
+  find_package(CapnProto)
+else()
+  set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
+  add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
+  set(CAPNP_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/capnproto/c++/src/capnp)
+  set(CAPNP_EXECUTABLE ${CAPNP_DIR}/capnp)
+  set(CAPNPC_CXX_EXECUTABLE ${CAPNP_DIR}/capnpc-c++)
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -123,12 +133,10 @@ foreach(header_file ${model-GENERATED_SRC})
   set_source_files_properties(${header_file} PROPERTIES GENERATED TRUE)
 endforeach(header_file ${model-GENERATED_SRC})
 
-set(CAPNP_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/capnproto/c++/src/capnp)
-
 add_custom_command(
   OUTPUT ${model-GENERATED_SRC}
-  COMMAND ${CAPNP_DIR}/capnp compile -o${CAPNP_DIR}/capnpc-c++ --src-prefix=${GENDIR}/.. ${model-GENERATED_UHDM}
-  DEPENDS capnpc capnpc_cpp ${model-GENERATED_UHDM})
+  COMMAND ${CAPNP_EXECUTABLE} compile -o${CAPNPC_CXX_EXECUTABLE} --src-prefix=${GENDIR}/.. ${model-GENERATED_UHDM}
+  DEPENDS ${model-GENERATED_UHDM})
 add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
 set(uhdm-GENERATED_SRC
@@ -175,31 +183,43 @@ set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
 target_include_directories(uhdm SYSTEM PUBLIC
   $<BUILD_INTERFACE:${GENDIR}>
   $<INSTALL_INTERFACE:include>)
-target_include_directories(uhdm PRIVATE
-  ${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src
-  ${GENDIR}/src)
+target_include_directories(uhdm PRIVATE ${GENDIR}/src)
+
+if (UHDM_USE_HOST_CAPNP)
+  target_include_directories(uhdm PRIVATE ${CAPNP_INCLUDE_DIRS})
+else()
+  target_include_directories(uhdm PRIVATE ${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src)
+endif()
+
 target_compile_definitions(uhdm
   PUBLIC PLI_DLLISPEC=
   PUBLIC PLI_DLLESPEC=)
-target_link_libraries(uhdm PUBLIC capnp)
 
-if(APPLE)
-  target_link_libraries(uhdm
-      PUBLIC dl
-      PUBLIC util
-      PUBLIC m
-      PUBLIC pthread)
-elseif(UNIX)
-  target_link_libraries(uhdm
-      PUBLIC dl
-      PUBLIC util
-      PUBLIC m
-      PUBLIC rt
-      PUBLIC pthread)
+if (UHDM_USE_HOST_CAPNP)
+  target_link_libraries(uhdm PRIVATE CapnProto::capnp)
+else()
+  target_link_libraries(uhdm PRIVATE capnp)
+
+  if(APPLE)
+    target_link_libraries(uhdm
+       PUBLIC dl
+       PUBLIC util
+       PUBLIC m
+       PUBLIC pthread)
+  elseif(UNIX)
+    target_link_libraries(uhdm
+       PUBLIC dl
+       PUBLIC util
+       PUBLIC m
+       PUBLIC rt
+       PUBLIC pthread)
+  endif()
 endif()
 
 add_dependencies(uhdm GenerateCode)
-add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
+if(NOT UHDM_USE_HOST_CAPNP)
+  add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
+endif()
 
 if (UHDM_BUILD_TESTS)
   if (UHDM_USE_HOST_GTEST)
@@ -265,6 +285,8 @@ add_executable(uhdm-hier ${PROJECT_SOURCE_DIR}/util/uhdm-hier.cpp)
 target_link_libraries(uhdm-hier PRIVATE uhdm)
 
 # Installation tester
+# TODO: once we have a cmake package (find_package(uhdm)), this installation
+# tester should use that.
 add_executable(test_inst EXCLUDE_FROM_ALL ${PROJECT_SOURCE_DIR}/util/uhdm-dump.cpp)
 set_property(TARGET test_inst PROPERTY INCLUDE_DIRECTORIES) # Clear the list of inherited include directories
 set_property(TARGET test_inst PROPERTY LINK_LIBRARIES) # Clear the list of inherited link libraries
@@ -284,9 +306,16 @@ target_link_libraries(test_inst PRIVATE
   $<$<PLATFORM_ID:Darwin>:rt>
   $<$<PLATFORM_ID:Darwin>:pthread>)
 
+if(NOT UHDM_USE_HOST_CAPNP)
+  install(
+    TARGETS capnp kj
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
+endif()
+
 # Installation target
 install(
-  TARGETS uhdm capnp kj uhdm-cmp uhdm-dump uhdm-hier
+  TARGETS uhdm uhdm-cmp uhdm-dump uhdm-hier
   ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${GENDIR}/uhdm/
