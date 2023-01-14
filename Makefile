@@ -36,7 +36,7 @@ test-junit: release
 clean:
 	rm -rf build dbuild
 
-install: build
+install: release
 	cmake --install build --config Release
 
 uninstall:
