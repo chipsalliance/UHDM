@@ -22,7 +22,7 @@
     card: 1
   - obj_ref: module_inst
     name: module_inst
-    vpi: vpiModuleInst
+    vpi: vpiModule
     type: module_inst
     card: 1
   - obj_ref: attributes

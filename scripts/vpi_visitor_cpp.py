@@ -9,7 +9,7 @@ def _get_implementation(classname, vpi, card):
     if card == '1':
         shallow_visit = 'false'
 
-        if vpi in ['vpiParent', 'vpiInstance', 'vpiModuleInst', 'vpiInterfaceInst', 'vpiUse', 'vpiProgram', 'vpiClassDefn', 'vpiPackage', 'vpiUdp']:
+        if vpi in ['vpiParent', 'vpiInstance', 'vpiModule', 'vpiInterface', 'vpiUse', 'vpiProgram', 'vpiClassDefn', 'vpiPackage', 'vpiUdp']:
             # Prevent walking upwards and makes the UHDM output cleaner
             # Prevent loop in Standard VPI
             shallow_visit = 'true'

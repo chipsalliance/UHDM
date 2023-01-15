@@ -32,12 +32,11 @@
 
 // Verifies that the forward declaration header compiles
 #include "gtest/gtest.h"
+#include "test_util.h"
 #include "uhdm/VpiListener.h"
 #include "uhdm/uhdm.h"
 #include "uhdm/uhdm_forward_decl.h"
 #include "uhdm/vpi_visitor.h"
-
-#include "test_util.h"
 
 using namespace UHDM;
 
@@ -198,10 +197,10 @@ class MyElaboratorListener : public VpiListener {
     bool topLevelModule = object->VpiTopModule();
     const std::string_view instName = object->VpiName();
     const std::string_view defName = object->VpiDefName();
-    bool flatModule = instName.empty() &&
-                      ((object->VpiParent() == 0) ||
-                       ((object->VpiParent() != 0) &&
-                        (object->VpiParent()->VpiType() != vpiModuleInst)));
+    bool flatModule =
+        instName.empty() && ((object->VpiParent() == 0) ||
+                             ((object->VpiParent() != 0) &&
+                              (object->VpiParent()->VpiType() != vpiModule)));
     // false when it is a module in a hierachy tree
     std::cout << "Module: " << defName << " (" << instName
               << ") Flat:" << flatModule << ", Top:" << topLevelModule
@@ -231,7 +230,7 @@ class MyElaboratorListener : public VpiListener {
         const BaseClass* comp = (*itrDef).second;
         int compType = comp->VpiType();
         switch (compType) {
-          case vpiModuleInst: {
+          case vpiModule: {
             module_inst* defMod = (module_inst*)comp;
 
             // 1) This section illustrates how one can walk the data model in
@@ -287,10 +286,10 @@ class MyElaboratorListener : public VpiListener {
 
   void leaveModule_inst(const module_inst* object, vpiHandle handle) override {
     const std::string_view instName = object->VpiName();
-    bool flatModule = instName.empty() &&
-                      ((object->VpiParent() == 0) ||
-                       ((object->VpiParent() != 0) &&
-                        (object->VpiParent()->VpiType() != vpiModuleInst)));
+    bool flatModule =
+        instName.empty() && ((object->VpiParent() == 0) ||
+                             ((object->VpiParent() != 0) &&
+                              (object->VpiParent()->VpiType() != vpiModule)));
     // false when it is a module in a hierachy tree
     if (!flatModule) instStack_.pop();
   }

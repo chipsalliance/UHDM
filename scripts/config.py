@@ -111,6 +111,11 @@ def get_modellist_filepath():
 
 
 def make_vpi_name(classname):
+    classname_overrides = {
+      'module_inst': 'module',
+      'interface_inst': 'interface'
+    }
+    classname = classname_overrides.get(classname, classname)
     vpiclasstype = f'vpi{classname[:1].upper()}{classname[1:]}'
 
     underscore = False
@@ -125,7 +130,7 @@ def make_vpi_name(classname):
         else:
             vpiclasstype += ch
 
-    overrides = {
+    vpiname_overrides = {
       'vpiForkStmt': 'vpiFork',
       'vpiForStmt': 'vpiFor',
       'vpiIoDecl': 'vpiIODecl',
@@ -149,4 +154,4 @@ def make_vpi_name(classname):
       'vpiSwitchTran': 'vpiSwitch',
     }
 
-    return overrides.get(vpiclasstype, vpiclasstype)
+    return vpiname_overrides.get(vpiclasstype, vpiclasstype)
