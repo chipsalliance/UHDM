@@ -22,7 +22,7 @@
     type: int
     card: 1
   - property: type
-    name: vpiInterfaceInst
+    name: vpiInterface
     vpi: vpiType
     type: unsigned int
     card: 1
@@ -72,7 +72,7 @@
     card: any  
   - obj_ref: interfaces
     name: interface_inst
-    vpi: vpiInterfaceInst
+    vpi: vpiInterface
     type: interface_inst
     card: any
   - obj_ref: interface_arrays

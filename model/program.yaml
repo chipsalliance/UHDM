@@ -38,7 +38,7 @@
     card: 1
   - obj_ref: interfaces
     name: interface_inst
-    vpi: vpiInterfaceInst
+    vpi: vpiInterface
     type: interface_inst
     card: any
   - group_ref: expr_dist

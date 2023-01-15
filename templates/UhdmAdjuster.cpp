@@ -186,12 +186,13 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
   }
 }
 
-void UhdmAdjuster::enterModule_inst(const module_inst* object, vpiHandle handle) {
+void UhdmAdjuster::enterModule_inst(const module_inst* object,
+                                    vpiHandle handle) {
   const std::string_view instName = object->VpiName();
-  bool flatModule = (instName.empty()) &&
-                    ((object->VpiParent() == 0) ||
-                     ((object->VpiParent() != 0) &&
-                      (object->VpiParent()->VpiType() != vpiModuleInst)));
+  bool flatModule =
+      (instName.empty()) && ((object->VpiParent() == 0) ||
+                             ((object->VpiParent() != 0) &&
+                              (object->VpiParent()->VpiType() != vpiModule)));
   if (!flatModule) elaboratedTree_ = true;
   currentInstance_ = object;
 }
