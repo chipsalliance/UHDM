@@ -95,3 +95,7 @@
     vpi: vpiGenScopeArray
     type: gen_scope_array
     card: any    
+  - class_ref: elab_tasks
+    vpi: vpiSysTaskCall
+    type: tf_call
+    card: any

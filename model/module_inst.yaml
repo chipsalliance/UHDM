@@ -135,3 +135,7 @@
     vpi: vpiClockingBlock
     type: clocking_block
     card: any
+  - class_ref: elab_tasks
+    vpi: vpiSysTaskCall
+    type: tf_call
+    card: any
