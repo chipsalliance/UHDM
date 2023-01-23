@@ -123,3 +123,7 @@
     vpi: vpiTaskFunc
     type: task_func
     card: any
+  - class_ref: elab_tasks
+    vpi: vpiSysTaskCall
+    type: tf_call
+    card: any
