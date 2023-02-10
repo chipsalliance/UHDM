@@ -71,5 +71,5 @@
 #define vpiCheckerInst      5007 // Handle to checker_inst
 #define vpiCheckerPort      5008 // Handle to checker_port
 #define vpiCheckerInstPort  5009 // Handle to checker_inst_port
-
+#define vpiArrayExpr        5010 // Handle to array_expr
 #endif  // UHDM_VPI_USER_H

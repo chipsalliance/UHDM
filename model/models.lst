@@ -123,6 +123,7 @@ long_int_var.yaml
 integer_var.yaml
 time_var.yaml
 array_var.yaml
+array_expr.yaml
 reg_array.yaml
 reg.yaml
 enum_struct_union_packed_var_group.yaml

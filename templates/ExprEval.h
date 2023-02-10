@@ -31,6 +31,7 @@
 #include <uhdm/typespec.h>
 
 #include <functional>
+#include <map>
 #include <iostream>
 #include <sstream>
 
@@ -119,11 +120,14 @@ class ExprEval {
   void evalStmt(std::string_view funcName, Scopes& scopes, bool& invalidValue,
                 bool& continue_flag, bool& break_flag, bool& return_flag,
                 const any* inst, const UHDM::any* stmt,
-                std::set<std::string>& local_vars, bool muteError = false);
+                std::map<std::string, const typespec*>& local_vars,
+                bool muteError = false);
 
   bool setValueInInstance(std::string_view lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst,
-                          const any* scope_exp, bool muteError);
+                          const any* scope_exp,
+                          std::map<std::string, const typespec*>& local_vars,
+                          bool muteError);
   void setDesign(design* des) { m_design = des; }
   /* For Surelog or other UHDM clients to use the UHDM expr evaluator in their
    * context */
