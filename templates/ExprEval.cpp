@@ -253,6 +253,15 @@ any *ExprEval::getObject(std::string_view name, const any *inst,
           }
         }
       }
+      if ((result == nullptr) && s->Param_assigns()) {
+        for (auto o : *s->Param_assigns()) {
+          const std::string_view pname = o->Lhs()->VpiName();
+          if (pname == name) {
+            result = o;
+            break;
+          }
+        }
+      }
     }
     if (result) break;
     if (pexpr->UhdmType() == uhdmforeach_stmt) {
@@ -2125,8 +2134,9 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 c->VpiSize(64);
                 c->VpiConstType(vpiIntConst);
                 result = c;
+                std::map<std::string, const typespec*> local_vars;
                 setValueInInstance(operands[0]->VpiName(), operands[0], c,
-                                   invalidValue, s, inst, op, muteError);
+                                   invalidValue, s, inst, op,local_vars, muteError);
               } else {
                 invalidValueD = false;
                 long double val = get_double(invalidValueD, reduc0);
@@ -2143,8 +2153,9 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   c->VpiSize(64);
                   c->VpiConstType(vpiRealConst);
                   result = c;
+                  std::map<std::string, const typespec*> local_vars;
                   setValueInInstance(operands[0]->VpiName(), operands[0], c,
-                                     invalidValue, s, inst, op, muteError);
+                                     invalidValue, s, inst, op,local_vars, muteError);
                 }
               }
             }
@@ -3629,10 +3640,10 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
   return (expr *)result;
 }
 
-bool ExprEval::setValueInInstance(std::string_view lhs, any *lhsexp,
-                                  expr *rhsexp, bool &invalidValue,
-                                  Serializer &s, const any *inst,
-                                  const any *scope_exp, bool muteError) {
+bool ExprEval::setValueInInstance(
+    std::string_view lhs, any *lhsexp, expr *rhsexp, bool &invalidValue,
+    Serializer &s, const any *inst, const any *scope_exp,
+    std::map<std::string, const typespec *> &local_vars, bool muteError) {
   bool invalidValueI = false;
   bool invalidValueUI = false;
   bool invalidValueD = false;
@@ -3752,7 +3763,7 @@ bool ExprEval::setValueInInstance(std::string_view lhs, any *lhsexp,
             c->VpiDecompile(part);
             c->VpiSize(static_cast<int>(part.size()));
             c->VpiConstType(vpiBinaryConst);
-            setValueInInstance(name, oper, c, invalidValue, s, inst, lhsexp,
+            setValueInInstance(name, oper, c, invalidValue, s, inst, lhsexp, local_vars,
                                muteError);
             accumul = accumul + si;
           }
@@ -3904,6 +3915,19 @@ bool ExprEval::setValueInInstance(std::string_view lhs, any *lhsexp,
           c->VpiDecompile(lhsbinary);
           c->VpiSize(static_cast<int>(lhsbinary.size()));
           c->VpiConstType(vpiBinaryConst);
+        } else {
+          /*
+          std::map<std::string, const typespec *>::iterator itr =
+              local_vars.find(std::string(lhs));
+          if (itr != local_vars.end()) {
+            const typespec *tps = (*itr).second;
+            if (tps) {
+              if (tps->UhdmType() == uhdmpacked_array_typespec) {
+                array_expr* array = s.MakeArray_expr();
+              }
+            }
+          }
+          */
         }
       }
       param_assign *pa = s.MakeParam_assign();
@@ -3921,7 +3945,7 @@ bool ExprEval::setValueInInstance(std::string_view lhs, any *lhsexp,
 void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
                         bool &invalidValue, bool &continue_flag,
                         bool &break_flag, bool &return_flag, const any *inst,
-                        const any *stmt, std::set<std::string> &local_vars,
+                        const any *stmt, std::map<std::string,const typespec*> &local_vars,
                         bool muteError) {
   if (invalidValue) {
     return;
@@ -3989,7 +4013,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       begin *st = (begin *)stmt;
       if (st->Variables()) {
         for (auto var : *st->Variables()) {
-          local_vars.insert(std::string(var->VpiName()));
+          local_vars.emplace(std::string(var->VpiName()), var->Typespec());
         }
       }
       if (st->Stmts()) {
@@ -4007,7 +4031,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       named_begin *st = (named_begin *)stmt;
       if (st->Variables()) {
         for (auto var : *st->Variables()) {
-          local_vars.insert(std::string(var->VpiName()));
+          local_vars.emplace(std::string(var->VpiName()), var->Typespec());
         }
       }
       if (st->Stmts()) {
@@ -4029,7 +4053,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       expr *rhsexp =
           reduceExpr(rhs, invalidValue, scopes.back(), nullptr, muteError);
       invalidValue = setValueInInstance(lhs, lhsexp, rhsexp, invalidValue, s,
-                                        inst, stmt, muteError);
+                                        inst, stmt,local_vars, muteError);
       break;
     }
     case uhdmassign_stmt: {
@@ -4040,7 +4064,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       expr *rhsexp =
           reduceExpr(rhs, invalidValue, scopes.back(), nullptr, muteError);
       invalidValue = setValueInInstance(lhs, lhsexp, rhsexp, invalidValue, s,
-                                        inst, stmt, muteError);
+                                        inst, stmt,local_vars, muteError);
       break;
     }
     case uhdmrepeat: {
@@ -4065,7 +4089,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       if (const any *stmt = st->VpiForInitStmt()) {
         if (stmt->UhdmType() == uhdmassign_stmt) {
           assign_stmt *assign = (assign_stmt *)stmt;
-          local_vars.insert(std::string(assign->Lhs()->VpiName()));
+          local_vars.emplace(std::string(assign->Lhs()->VpiName()), assign->Lhs()->Typespec());
         }
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
                  return_flag, scopes.back(), st->VpiForInitStmt(), local_vars,
@@ -4075,7 +4099,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
         for (auto s : *st->VpiForInitStmts()) {
           if (s->UhdmType() == uhdmassign_stmt) {
             assign_stmt *assign = (assign_stmt *)s;
-            local_vars.insert(std::string(assign->Lhs()->VpiName()));
+            local_vars.emplace(std::string(assign->Lhs()->VpiName()), assign->Lhs()->Typespec());
           }
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
                    return_flag, scopes.back(), s, local_vars, muteError);
@@ -4132,7 +4156,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
         ref_obj *lhsexp = s.MakeRef_obj();
         lhsexp->VpiName(funcName);
         invalidValue = setValueInInstance(
-            funcName, lhsexp, rhsexp, invalidValue, s, inst, stmt, muteError);
+            funcName, lhsexp, rhsexp, invalidValue, s, inst, stmt,local_vars, muteError);
         return_flag = true;
       }
       break;
@@ -4249,14 +4273,19 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   } else if (any_cast<UHDM::scope *>(inst)) {
     param_assigns = ((UHDM::scope *)inst)->Param_assigns();
   }
-  std::set<std::string> variables;
+  std::map<std::string, const typespec*> variables; 
   if (param_assigns) {
     scope->Param_assigns(s.MakeParam_assignVec());
     for (auto p : *param_assigns) {
       ElaboratorListener listener(&s, false, muteError);
       any *pp = UHDM::clone_tree(p, s, &listener);
       scope->Param_assigns()->push_back((param_assign *)pp);
-      variables.insert(std::string(p->Lhs()->VpiName()));
+      const typespec* tps = nullptr;
+      const expr* lhs = any_cast<const expr*> (p->Lhs());
+      if (lhs) {
+        tps = lhs->Typespec();
+      }
+      variables.emplace(std::string(p->Lhs()->VpiName()), tps);
     }
   }
   // set args
@@ -4265,13 +4294,15 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
     for (auto io : *func->Io_decls()) {
       if (args && (index < args->size())) {
         const std::string_view ioname = io->VpiName();
-        variables.insert(std::string(ioname));
+        const typespec* tps = io->Typespec();
+        variables.emplace(std::string(ioname), tps);
         expr *ioexp = (expr *)args->at(index);
         expr *exparg = reduceExpr(ioexp, invalidValue, scope, pexpr, muteError);
         if (exparg) {
           exparg->Typespec((typespec *)io->Typespec());
+          std::map<std::string, const typespec*> local_vars;
           invalidValue = setValueInInstance(ioname, io, exparg, invalidValue, s,
-                                            scope, func, muteError);
+                                            scope, func,local_vars, muteError);
         }
       }
       index++;
@@ -4279,10 +4310,10 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   }
   if (func->Variables()) {
     for (auto var : *func->Variables()) {
-      variables.insert(std::string(var->VpiName()));
+      variables.emplace(std::string(var->VpiName()), var->Typespec());
     }
   }
-  variables.insert(std::string(name));
+  variables.emplace(std::string(name), func->Return()->Typespec());
   scopes.push_back(scope);
   if (const UHDM::any *the_stmt = func->Stmt()) {
     UHDM_OBJECT_TYPE stt = the_stmt->UhdmType();
