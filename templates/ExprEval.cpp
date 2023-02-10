@@ -4313,7 +4313,8 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
       variables.emplace(std::string(var->VpiName()), var->Typespec());
     }
   }
-  variables.emplace(std::string(name), func->Return()->Typespec());
+  variables.emplace(std::string(name),
+                    func->Return() ? func->Return()->Typespec() : nullptr);
   scopes.push_back(scope);
   if (const UHDM::any *the_stmt = func->Stmt()) {
     UHDM_OBJECT_TYPE stt = the_stmt->UhdmType();
