@@ -3401,6 +3401,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               result = elems->at(index_val);
             }
           }
+        } else if (otype == uhdmarray_expr) {
+          array_expr *array = (array_expr *)object;
+          VectorOfexpr *elems = array->Exprs();
+          if (index_val < elems->size()) {
+            result = elems->at(index_val);
+          }
         } else if (otype == uhdmoperation) {
           operation *op = (operation *)object;
           int opType = op->VpiOpType();
@@ -3717,14 +3723,6 @@ bool ExprEval::setValueInInstance(
   } else {
     if (param_assigns) {
       const any *prevRhs = nullptr;
-      for (VectorOfparam_assign::iterator itr = param_assigns->begin();
-           itr != param_assigns->end(); itr++) {
-        if ((*itr)->Lhs()->VpiName() == lhsname) {
-          prevRhs = (*itr)->Rhs();
-          param_assigns->erase(itr);
-          break;
-        }
-      }
       constant *c = any_cast<constant *>(rhsexp);
       if (c == nullptr) {
         c = s.MakeConstant();
@@ -3734,6 +3732,14 @@ bool ExprEval::setValueInInstance(
         c->VpiConstType(vpiIntConst);
       }
       if (lhsexp->UhdmType() == uhdmoperation) {
+        for (VectorOfparam_assign::iterator itr = param_assigns->begin();
+             itr != param_assigns->end(); itr++) {
+          if ((*itr)->Lhs()->VpiName() == lhsname) {
+            prevRhs = (*itr)->Rhs();
+            param_assigns->erase(itr);
+            break;
+          }
+        }
         operation *op = (operation *)lhsexp;
         if (op->VpiOpType() == vpiConcatOp) {
           std::string rhsbinary = NumUtils::toBinary(c->VpiSize(), valUI);
@@ -3763,12 +3769,20 @@ bool ExprEval::setValueInInstance(
             c->VpiDecompile(part);
             c->VpiSize(static_cast<int>(part.size()));
             c->VpiConstType(vpiBinaryConst);
-            setValueInInstance(name, oper, c, invalidValue, s, inst, lhsexp, local_vars,
-                               muteError);
+            setValueInInstance(name, oper, c, invalidValue, s, inst, lhsexp,
+                               local_vars, muteError);
             accumul = accumul + si;
           }
         }
       } else if (lhsexp->UhdmType() == uhdmindexed_part_select) {
+        for (VectorOfparam_assign::iterator itr = param_assigns->begin();
+             itr != param_assigns->end(); itr++) {
+          if ((*itr)->Lhs()->VpiName() == lhsname) {
+            prevRhs = (*itr)->Rhs();
+            param_assigns->erase(itr);
+            break;
+          }
+        }
         indexed_part_select *sel = (indexed_part_select *)lhsexp;
         const std::string_view name = lhsexp->VpiParent()->VpiName();
         any *object = getObject(name, inst, scope_exp, muteError);
@@ -3824,6 +3838,14 @@ bool ExprEval::setValueInInstance(
           c->VpiConstType(vpiBinaryConst);
         }
       } else if (lhsexp->UhdmType() == uhdmpart_select) {
+        for (VectorOfparam_assign::iterator itr = param_assigns->begin();
+             itr != param_assigns->end(); itr++) {
+          if ((*itr)->Lhs()->VpiName() == lhsname) {
+            prevRhs = (*itr)->Rhs();
+            param_assigns->erase(itr);
+            break;
+          }
+        }
         part_select *sel = (part_select *)lhsexp;
         const std::string_view name = lhsexp->VpiParent()->VpiName();
         any *object = getObject(name, inst, scope_exp, muteError);
@@ -3880,9 +3902,31 @@ bool ExprEval::setValueInInstance(
         }
       } else if (lhsexp->UhdmType() == uhdmbit_select) {
         bit_select *sel = (bit_select *)lhsexp;
+        uint64_t index = get_uvalue(
+            invalidValue,
+            reduceExpr(sel->VpiIndex(), invalidValue, inst, lhsexp, muteError));
         const std::string_view name = lhsexp->VpiParent()->VpiName();
         any *object = getObject(name, inst, scope_exp, muteError);
         if (object) {
+          if (object->UhdmType() == uhdmparam_assign) {
+            param_assign *param = (param_assign *)object;
+            if (param->Rhs()->UhdmType() == uhdmarray_expr) {
+              array_expr *array = (array_expr *)param->Rhs();
+              VectorOfexpr *values = array->Exprs();
+              values->resize(index + 1);
+              (*values)[index] = rhsexp;
+              return false;
+            }
+          }
+
+          for (VectorOfparam_assign::iterator itr = param_assigns->begin();
+               itr != param_assigns->end(); itr++) {
+            if ((*itr)->Lhs()->VpiName() == lhsname) {
+              prevRhs = (*itr)->Rhs();
+              param_assigns->erase(itr);
+              break;
+            }
+          }
           std::string lhsbinary;
           const typespec *tps = nullptr;
           if (expr *elhs = any_cast<expr *>(object)) {
@@ -3905,9 +3949,6 @@ bool ExprEval::setValueInInstance(
               lhsbinary += "x";
             }
           }
-          uint64_t index =
-              get_uvalue(invalidValue, reduceExpr(sel->VpiIndex(), invalidValue,
-                                                  inst, lhsexp, muteError));
           lhsbinary[index] = std::to_string(valUI)[0];
           std::reverse(lhsbinary.begin(), lhsbinary.end());
           c = s.MakeConstant();
@@ -3916,18 +3957,37 @@ bool ExprEval::setValueInInstance(
           c->VpiSize(static_cast<int>(lhsbinary.size()));
           c->VpiConstType(vpiBinaryConst);
         } else {
-          /*
           std::map<std::string, const typespec *>::iterator itr =
               local_vars.find(std::string(lhs));
           if (itr != local_vars.end()) {
             const typespec *tps = (*itr).second;
             if (tps) {
-              if (tps->UhdmType() == uhdmpacked_array_typespec) {
-                array_expr* array = s.MakeArray_expr();
+              if (tps->UhdmType() == uhdmarray_typespec) {
+
+                param_assign *pa = s.MakeParam_assign();
+                param_assigns->push_back(pa);
+                array_expr *array = s.MakeArray_expr();
+                VectorOfexpr *values = s.MakeExprVec();
+                values->resize(index + 1);
+                (*values)[index] = rhsexp;
+                array->Exprs(values);
+                pa->Rhs(array);
+                parameter *param = s.MakeParameter();
+                param->VpiName(lhsname);
+                pa->Lhs(param);
+                return false;
               }
             }
           }
-          */
+        }
+      } else {
+        for (VectorOfparam_assign::iterator itr = param_assigns->begin();
+             itr != param_assigns->end(); itr++) {
+          if ((*itr)->Lhs()->VpiName() == lhsname) {
+            prevRhs = (*itr)->Rhs();
+            param_assigns->erase(itr);
+            break;
+          }
         }
       }
       param_assign *pa = s.MakeParam_assign();
