@@ -761,6 +761,98 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
       operation *oper = (operation *)object;
       int opType = oper->VpiOpType();
       switch (opType) {
+        case vpiMinusOp:
+        case vpiPlusOp:
+        case vpiNotOp:
+        case vpiBitNegOp:
+        case vpiUnaryAndOp:
+        case vpiUnaryNandOp:
+        case vpiUnaryOrOp:
+        case vpiUnaryNorOp:
+        case vpiUnaryXorOp:
+        case vpiUnaryXNorOp: {
+            static std::unordered_map<int32_t, std::string_view> opToken = {
+              { vpiMinusOp, "-" },
+              { vpiPlusOp, "+" },
+              { vpiNotOp, "!" },
+              { vpiBitNegOp, "~" },
+              { vpiUnaryAndOp, "&" },
+              { vpiUnaryNandOp, "~&" },
+              { vpiUnaryOrOp, "|" },
+              { vpiUnaryNorOp, "~|" },
+              { vpiUnaryXorOp, "^" },
+              { vpiUnaryXNorOp, "~^" },
+            };
+            std::stringstream out_op0;
+            prettyPrint(s,oper->Operands()->at(0),0,out_op0);
+            out <<  opToken[opType] << out_op0.str();
+            break;
+        }
+        case vpiSubOp:
+        case vpiDivOp:
+        case vpiModOp:
+        case vpiEqOp:
+        case vpiNeqOp:
+        case vpiCaseEqOp:
+        case vpiCaseNeqOp:
+        case vpiGtOp:
+        case vpiGeOp:
+        case vpiLtOp:
+        case vpiLeOp:
+        case vpiLShiftOp:
+        case vpiRShiftOp:
+        case vpiAddOp:
+        case vpiMultOp:
+        case vpiLogAndOp:
+        case vpiLogOrOp:
+        case vpiBitAndOp:
+        case vpiBitOrOp:
+        case vpiBitXorOp:
+        case vpiBitXNorOp: {
+            static std::unordered_map<int32_t, std::string_view> opToken = {
+                { vpiMinusOp, "-" },
+                { vpiPlusOp, "+" },
+                { vpiNotOp, "!" },
+                { vpiBitNegOp, "~" },
+                { vpiUnaryAndOp, "&" },
+                { vpiUnaryNandOp, "~&" },
+                { vpiUnaryOrOp, "|" },
+                { vpiUnaryNorOp, "~|" },
+                { vpiUnaryXorOp, "^" },
+                { vpiUnaryXNorOp, "~^" },
+                { vpiSubOp, "-" },
+                { vpiDivOp, "/" },
+                { vpiModOp, "%" },
+                { vpiEqOp, "==" },
+                { vpiNeqOp, "!=" },
+                { vpiCaseEqOp, "===" },
+                { vpiCaseNeqOp, "!==" },
+                { vpiGtOp, ">" },
+                { vpiGeOp, ">=" },
+                { vpiLtOp, "<" },
+                { vpiLeOp, "<=" },
+                { vpiLShiftOp, "<<" },
+                { vpiRShiftOp, ">>" },
+                { vpiAddOp, "+" },
+                { vpiMultOp, "*" },
+                { vpiLogAndOp, "&&" },
+                { vpiLogOrOp, "||" },
+                { vpiBitAndOp, "&" },
+                { vpiBitOrOp, "|" },
+                { vpiBitXorOp, "^" },
+                { vpiBitXNorOp, "^~" },
+            };
+            std::stringstream out_op0;
+            prettyPrint(s,oper->Operands()->at(0),0,out_op0);
+            std::stringstream out_op1;
+            prettyPrint(s,oper->Operands()->at(1),0,out_op1);
+            out <<  out_op0.str() << opToken[opType] << out_op1.str();
+            break;
+        }
+        case vpiConditionOp: {
+            out << "vpiConditionOp not implemented" << __FILE__<<":"<<__LINE__ << std::endl;
+            break;
+        }
         case vpiConcatOp: {
           out << "{";
           for (uint32_t i = 0; i < oper->Operands()->size(); i++) {
@@ -772,6 +864,65 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
           out << "}";
           break;
         }
+/*
+  { vpiMultiConcatOp, "{{}}" },
+  { vpiEventOrOp, "or" },
+  { vpiNullOp, "" },
+  { vpiListOp, "," },
+  { vpiMinTypMaxOp, ":" },
+  { vpiPosedgeOp, "posedge " },
+  { vpiNegedgeOp, "negedge " },
+  { vpiArithLShiftOp, "<<<" },
+  { vpiArithRShiftOp, ">>>" },
+  { vpiPowerOp, "**" },
+  { vpiImplyOp, "->" },
+  { vpiNonOverlapImplyOp, "|=>" },
+  { vpiOverlapImplyOp, "|->" },
+  { vpiAcceptOnOp, "accept_on" },
+  { vpiRejectOnOp, "reject_on" },
+  { vpiSyncAcceptOnOp, "sync_accept_on" },
+  { vpiSyncRejectOnOp, "sync_reject_on" },
+  { vpiOverlapFollowedByOp, "overlapped followed_by" },
+  { vpiNonOverlapFollowedByOp, "nonoverlapped followed_by" },
+  { vpiNexttimeOp, "nexttime" },
+  { vpiAlwaysOp, "always" },
+  { vpiEventuallyOp, "eventually" },
+  { vpiUntilOp, "until" },
+  { vpiUntilWithOp, "until_with" },
+  { vpiUnaryCycleDelayOp, "##" },
+  { vpiCycleDelayOp, "##" },
+  { vpiIntersectOp, "intersection" },
+  { vpiFirstMatchOp, "first_match" },
+  { vpiThroughoutOp, "throughout" },
+  { vpiWithinOp, "within" },
+  { vpiRepeatOp, "[=]" },
+  { vpiConsecutiveRepeatOp, "[*]" },
+  { vpiGotoRepeatOp, "[->]" },
+  { vpiPostIncOp, "++" },
+  { vpiPreIncOp, "++" },
+  { vpiPostDecOp, "--" },
+  { vpiPreDecOp, "--" },
+  { vpiMatchOp, "match" },
+  { vpiCastOp, "type'" },
+  { vpiIffOp, "iff" },
+  { vpiWildEqOp, "==?" },
+  { vpiWildNeqOp, "!=?" },
+  { vpiStreamLROp, "{>>}" },
+  { vpiStreamRLOp, "{<<}" },
+  { vpiMatchedOp, ".matched" },
+  { vpiTriggeredOp, ".triggered" },
+  { vpiAssignmentPatternOp, "'{}" },
+  { vpiMultiAssignmentPatternOp, "{n{}}" },
+  { vpiIfOp, "if" },
+  { vpiIfElseOp, "if–else" },
+  { vpiCompAndOp, "and" },
+  { vpiCompOrOp, "or" },
+  { vpiImpliesOp, "implies" },
+  { vpiInsideOp, "inside" },
+  { vpiTypeOp, "type" },
+  { vpiAssignmentOp, "=" },
+*/
+
         default:
           break;
       }
