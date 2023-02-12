@@ -2059,6 +2059,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         if (optype == uhdmref_obj) {
           ref_obj *ref = (ref_obj *)oper;
           const std::string_view name = ref->VpiName();
+          if (name == "default" && ref->VpiStructMember()) continue;
           any *tmp = getValue(name, inst, pexpr, muteError);
           if (!tmp) {
             constantOperands = false;
