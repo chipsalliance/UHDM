@@ -14,7 +14,7 @@
 
 using namespace UHDM;
 
-std::vector<vpiHandle> build_designs(Serializer* s) {
+std::vector<vpiHandle> build_designs_MinusOp(Serializer* s) {
   std::vector<vpiHandle> designs;
   // Design building
   design* d = s->MakeDesign();
@@ -34,7 +34,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
     vp->push_back(p);
     p->VpiName("wire_i");
     p->VpiDirection(vpiInput);
-    
+
     logic_typespec * tps = s->MakeLogic_typespec();
     p->Typespec(tps);
 
@@ -48,7 +48,7 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
     oper->VpiOpType(vpiSubOp);
     VectorOfany* operands = s->MakeAnyVec();
     oper->Operands(operands);
-    
+
     ref_obj* SIZE = s->MakeRef_obj();
     operands->push_back(SIZE);
     SIZE->VpiName("SIZE");
@@ -81,10 +81,10 @@ std::vector<vpiHandle> build_designs(Serializer* s) {
 }
 
 
-TEST(exprVal,prettyPrint) {
+TEST(exprVal,prettyPrint_MinusOp) {
   Serializer serializer;
-  const std::vector<vpiHandle>& designs = build_designs(&serializer);
-  serializer.Save("expr_reduce_test.uhdm");
+  const std::vector<vpiHandle>& designs = build_designs_MinusOp(&serializer);
+  //serializer.Save("expr_reduce_test.uhdm");
   //const std::string before = designs_to_string(designs);
   //std::cout << before <<std::endl;
 
@@ -116,7 +116,7 @@ TEST(exprVal,prettyPrint) {
 
 	  expr * left = (expr *) range->Left_expr();
 	  std::string left_str = eval.prettyPrint((any *) left);
-	  EXPECT_EQ(left_str,"SIZE-1");
+	  EXPECT_EQ(left_str,"SIZE - 1");
 
 	  expr * right = (expr *) range->Right_expr();
 	  std::string right_str = eval.prettyPrint((any *) right);
@@ -127,3 +127,101 @@ TEST(exprVal,prettyPrint) {
   }
 
 }
+
+
+std::vector<vpiHandle> build_designs_ConditionOp(Serializer* s) {
+
+  std::vector<vpiHandle> designs;
+  // Design building
+  design* d = s->MakeDesign();
+  d->VpiName("design1");
+
+  //-------------------------------------------
+  // Module definition M1 (non elaborated)
+  module_inst* dut = s->MakeModule_inst();
+  {
+    dut->VpiDefName("M1");
+    dut->VpiParent(d);
+    dut->Parameters(s->MakeAnyVec());
+
+    VectorOfparam_assign *vpa = s->MakeParam_assignVec();
+    
+    param_assign* param = s->MakeParam_assign();
+    vpa->push_back(param);
+    dut->Param_assigns(vpa);
+
+    parameter* p = s->MakeParameter();
+    dut->Parameters()->push_back(p);
+    p->VpiName("a");
+    param->Lhs(p);
+
+    operation* oper = s->MakeOperation();
+    oper->VpiOpType(vpiConditionOp);
+    VectorOfany* operands = s->MakeAnyVec();
+    oper->Operands(operands);
+    ref_obj* b = s->MakeRef_obj();
+    b->VpiName("b");
+    operands->push_back(b);
+
+    constant* c1 = s->MakeConstant();
+    c1->VpiValue("UINT:1");
+    c1->VpiConstType(vpiIntConst);
+    c1->VpiDecompile("1");
+    operands->push_back(c1);
+
+    constant* c2 = s->MakeConstant();
+    c2->VpiValue("UINT:3");
+    c2->VpiConstType(vpiIntConst);
+    c2->VpiDecompile("3");
+    operands->push_back(c2);
+    param->Rhs(oper);
+
+  }
+
+  VectorOfmodule_inst* topModules = s->MakeModule_instVec();
+  d->TopModules(topModules);
+  topModules->push_back(dut);
+
+  vpiHandle dh = s->MakeUhdmHandle(uhdmdesign, d);
+  designs.push_back(dh);
+
+  return designs;
+}
+
+TEST(exprVal,prettyPrint_ConditionOp) {
+  Serializer serializer;
+  const std::vector<vpiHandle>& designs = build_designs_ConditionOp(&serializer);
+  //serializer.Save("expr_reduce_test.uhdm");
+  //const std::string before = designs_to_string(designs);
+  //std::cout << before <<std::endl;
+
+  bool elaborated = false;
+  for (auto design : designs) {
+    elaborated = vpi_get(vpiElaborated, design) || elaborated;
+  }
+  EXPECT_FALSE(elaborated);
+
+  ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
+  listener->listenDesigns(designs);
+  delete listener;
+
+  elaborated = false;
+  for (auto design : designs) {
+    elaborated = vpi_get(vpiElaborated, design) || elaborated;
+  }
+  EXPECT_TRUE(elaborated);
+
+  vpiHandle dh = designs.at(0);
+  design* d = UhdmDesignFromVpiHandle(dh);
+
+  ExprEval eval;
+  for (auto m : *d->TopModules()) {
+    for (auto pa : *m->Param_assigns()) {
+	    const any* rhs = pa->Rhs();
+	    std::string result = eval.prettyPrint( (any*) rhs);
+	    EXPECT_EQ(result,"b ? 1 : 3");
+    }
+  }
+
+}
+

@@ -846,11 +846,17 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
             prettyPrint(s,oper->Operands()->at(0),0,out_op0);
             std::stringstream out_op1;
             prettyPrint(s,oper->Operands()->at(1),0,out_op1);
-            out <<  out_op0.str() << opToken[opType] << out_op1.str();
+            out <<  out_op0.str() << " " << opToken[opType] << " " << out_op1.str();
             break;
         }
         case vpiConditionOp: {
-            out << "vpiConditionOp not implemented" << __FILE__<<":"<<__LINE__ << std::endl;
+            std::stringstream out_op0;
+            prettyPrint(s,oper->Operands()->at(0),0,out_op0);
+            std::stringstream out_op1;
+            prettyPrint(s,oper->Operands()->at(1),0,out_op1);
+            std::stringstream out_op2;
+            prettyPrint(s,oper->Operands()->at(2),0,out_op2);
+            out << out_op0.str() << " ? " << out_op1.str() << " : " << out_op2.str();
             break;
         }
         case vpiConcatOp: {
@@ -4653,7 +4659,7 @@ std::string vPrint(UHDM::any *handle) {
 }
 }  // namespace UHDM
 
-std::string ExprEval::prettyPrint(UHDM::any *handle) {
+std::string ExprEval::prettyPrint( const UHDM::any *handle) {
   if (handle == nullptr) {
     // std::cout << "NULL HANDLE\n";
     return "NULL HANDLE";
