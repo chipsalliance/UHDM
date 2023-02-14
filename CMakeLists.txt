@@ -271,6 +271,7 @@ if (UHDM_BUILD_TESTS)
     tests/vpi_get_test.cpp
     tests/vpi_listener_test.cpp
     tests/vpi_value_conversion_test.cpp
+    tests/expr_prettyPrint_test.cpp
   )
 endif()
 

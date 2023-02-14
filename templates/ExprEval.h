@@ -88,7 +88,7 @@ class ExprEval {
   void prettyPrint(Serializer& s, const any* tree, uint32_t indent,
                    std::ostream& out);
 
-  std::string prettyPrint(UHDM::any* handle);
+  std::string prettyPrint(const UHDM::any* handle);
 
   expr* reduceCompOp(operation* op, bool& invalidValue, const any* inst,
                      const any* pexpr, bool muteError = false);
