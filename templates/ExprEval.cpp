@@ -996,8 +996,25 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
       }
       break;
     }
+    case uhdmpart_select: {
+      part_select * ps  = (part_select*) object;
+      prettyPrint(s,ps->Left_range(),0,out);
+      out << ":";
+      prettyPrint(s,ps->Right_range(),0,out);
+      break;
+    }
     case uhdmref_obj: {
       out << object->VpiName();
+      break;
+    }
+    case uhdmvar_select: {
+      var_select * vs = (var_select*) object;
+      out << vs->VpiName(); 
+      for (uint32_t i = 0; i < vs->Exprs()->size(); i++) {
+	out << "[";
+        prettyPrint(s,vs->Exprs()->at(i),0,out);
+        out << "]";
+      }
       break;
     }
     default: {
