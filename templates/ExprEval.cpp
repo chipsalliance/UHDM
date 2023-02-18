@@ -750,6 +750,18 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
       out << val;
       break;
     }
+    case uhdmsys_func_call: {
+      sys_func_call *sysFuncCall = (sys_func_call*) object;
+      out << sysFuncCall->VpiName() << "(";
+      for (uint32_t i = 0; i < sysFuncCall->Tf_call_args()->size(); i++) {
+        prettyPrint(s,sysFuncCall->Tf_call_args()->at(i), 0, out);
+        if (i < sysFuncCall->Tf_call_args()->size() - 1) {
+          out << ",";
+        }
+      }
+      out << ")";
+      break;
+    }
     case uhdmenum_const: {
       enum_const *c = (enum_const *)object;
       std::string_view val = c->VpiValue();
@@ -770,7 +782,10 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
         case vpiUnaryOrOp:
         case vpiUnaryNorOp:
         case vpiUnaryXorOp:
-        case vpiUnaryXNorOp: {
+        case vpiUnaryXNorOp:
+        case vpiPreIncOp:
+        case vpiPreDecOp:
+	       	{
             static std::unordered_map<int32_t, std::string_view> opToken = {
               { vpiMinusOp, "-" },
               { vpiPlusOp, "+" },
@@ -782,6 +797,8 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
               { vpiUnaryNorOp, "~|" },
               { vpiUnaryXorOp, "^" },
               { vpiUnaryXNorOp, "~^" },
+              { vpiPreIncOp, "++" },
+              { vpiPreDecOp, "--" },
             };
             std::stringstream out_op0;
             prettyPrint(s,oper->Operands()->at(0),0,out_op0);
@@ -808,7 +825,14 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
         case vpiBitAndOp:
         case vpiBitOrOp:
         case vpiBitXorOp:
-        case vpiBitXNorOp: {
+        case vpiBitXNorOp:
+        case vpiArithLShiftOp:
+        case vpiArithRShiftOp:
+        case vpiPowerOp:
+        case vpiImplyOp:
+        case vpiNonOverlapImplyOp:
+        case vpiOverlapImplyOp:
+			     {
             static std::unordered_map<int32_t, std::string_view> opToken = {
                 { vpiMinusOp, "-" },
                 { vpiPlusOp, "+" },
@@ -841,6 +865,12 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
                 { vpiBitOrOp, "|" },
                 { vpiBitXorOp, "^" },
                 { vpiBitXNorOp, "^~" },
+                { vpiArithLShiftOp, "<<<" },
+                { vpiArithRShiftOp, ">>>" },
+                { vpiPowerOp, "**" },
+                { vpiImplyOp, "->" },
+                { vpiNonOverlapImplyOp, "|=>" },
+                { vpiOverlapImplyOp, "|->" },
             };
             std::stringstream out_op0;
             prettyPrint(s,oper->Operands()->at(0),0,out_op0);
@@ -870,20 +900,56 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
           out << "}";
           break;
         }
+        case vpiMultiConcatOp: {
+	  std::stringstream mult;
+          prettyPrint(s, oper->Operands()->at(0), 0, mult);
+	  std::stringstream op;
+          prettyPrint(s, oper->Operands()->at(1), 0, op);
+          out << "{" << mult.str()  << "{" << op.str() << "}}";
+	  break;
+        }
+	case vpiEventOrOp: {
+	  std::stringstream op[2];
+          prettyPrint(s, oper->Operands()->at(0), 0, op[0]);
+          prettyPrint(s, oper->Operands()->at(1), 0, op[1]);
+	  out << op[0].str() << " or " << op[1].str();
+          break;
+	}
+        case vpiNullOp: {
+	  break;
+	}
 /*
-  { vpiMultiConcatOp, "{{}}" },
-  { vpiEventOrOp, "or" },
-  { vpiNullOp, "" },
   { vpiListOp, "," },
   { vpiMinTypMaxOp, ":" },
-  { vpiPosedgeOp, "posedge " },
-  { vpiNegedgeOp, "negedge " },
-  { vpiArithLShiftOp, "<<<" },
-  { vpiArithRShiftOp, ">>>" },
-  { vpiPowerOp, "**" },
-  { vpiImplyOp, "->" },
-  { vpiNonOverlapImplyOp, "|=>" },
-  { vpiOverlapImplyOp, "|->" },
+*/
+        case vpiPosedgeOp: {
+          std::stringstream op;
+	  prettyPrint(s, oper->Operands()->at(0),0,op);
+	  out << "posedge " << op.str();
+	  break;
+	}
+        case vpiNegedgeOp: {
+          std::stringstream op;
+	  prettyPrint(s, oper->Operands()->at(0),0,op);
+	  out << "negedge " << op.str();
+	  break;
+	}
+        case vpiPostIncOp: {
+	  std::stringstream op;
+	  prettyPrint(s,oper->Operands()->at(0),0,op);
+	  out << op.str() << "++";
+	  break;
+	}
+        case vpiPostDecOp: {
+	  std::stringstream op;
+	  prettyPrint(s,oper->Operands()->at(0),0,op);
+	  out << op.str() << "--";
+	  break;
+	}
+
+
+
+/*
   { vpiAcceptOnOp, "accept_on" },
   { vpiRejectOnOp, "reject_on" },
   { vpiSyncAcceptOnOp, "sync_accept_on" },
@@ -904,10 +970,6 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
   { vpiRepeatOp, "[=]" },
   { vpiConsecutiveRepeatOp, "[*]" },
   { vpiGotoRepeatOp, "[->]" },
-  { vpiPostIncOp, "++" },
-  { vpiPreIncOp, "++" },
-  { vpiPostDecOp, "--" },
-  { vpiPreDecOp, "--" },
   { vpiMatchOp, "match" },
   { vpiCastOp, "type'" },
   { vpiIffOp, "iff" },
