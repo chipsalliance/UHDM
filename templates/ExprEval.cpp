@@ -831,8 +831,7 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
         case vpiPowerOp:
         case vpiImplyOp:
         case vpiNonOverlapImplyOp:
-        case vpiOverlapImplyOp:
-			     {
+	case vpiOverlapImplyOp: {
             static std::unordered_map<int32_t, std::string_view> opToken = {
                 { vpiMinusOp, "-" },
                 { vpiPlusOp, "+" },
@@ -889,8 +888,13 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
             out << out_op0.str() << " ? " << out_op1.str() << " : " << out_op2.str();
             break;
         }
-        case vpiConcatOp: {
-          out << "{";
+	case vpiConcatOp:
+	case vpiAssignmentPatternOp: {
+	  switch (opType) {
+	    case vpiConcatOp: { out << "{"; break; }
+	    case vpiAssignmentPatternOp: { out << "'{"; break; }
+	    default: { break;}
+	  };
           for (uint32_t i = 0; i < oper->Operands()->size(); i++) {
             prettyPrint(s, oper->Operands()->at(i), 0, out);
             if (i < oper->Operands()->size() - 1) {
@@ -914,6 +918,18 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
           prettyPrint(s, oper->Operands()->at(1), 0, op[1]);
 	  out << op[0].str() << " or " << op[1].str();
           break;
+	}
+	case vpiInsideOp: {
+	  prettyPrint(s,oper->Operands()->at(0), 0, out);
+	  out << " inside {";
+          for (uint32_t i = 1; i < oper->Operands()->size(); i++) {
+            prettyPrint(s, oper->Operands()->at(i), 0, out);
+            if (i < oper->Operands()->size() - 1) {
+              out << ",";
+            }
+          }
+          out << "}";
+	  break;
 	}
         case vpiNullOp: {
 	  break;
@@ -979,14 +995,12 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
   { vpiStreamRLOp, "{<<}" },
   { vpiMatchedOp, ".matched" },
   { vpiTriggeredOp, ".triggered" },
-  { vpiAssignmentPatternOp, "'{}" },
   { vpiMultiAssignmentPatternOp, "{n{}}" },
   { vpiIfOp, "if" },
   { vpiIfElseOp, "if–else" },
   { vpiCompAndOp, "and" },
   { vpiCompOrOp, "or" },
   { vpiImpliesOp, "implies" },
-  { vpiInsideOp, "inside" },
   { vpiTypeOp, "type" },
   { vpiAssignmentOp, "=" },
 */

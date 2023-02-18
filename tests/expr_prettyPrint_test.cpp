@@ -443,3 +443,106 @@ TEST(exprVal,prettyPrint_select) {
 }
 
 
+std::vector<vpiHandle> build_designs_AssignmentPatternOp(Serializer* s) {
+
+  std::vector<vpiHandle> designs;
+  // Design building
+  design* d = s->MakeDesign();
+  d->VpiName("design1");
+
+  //-------------------------------------------
+  // Module definition M1 (non elaborated)
+  module_inst* dut = s->MakeModule_inst();
+  {
+    dut->VpiDefName("M1");
+    dut->VpiParent(d);
+    dut->Parameters(s->MakeAnyVec());
+
+    VectorOfparam_assign *vpa = s->MakeParam_assignVec();
+
+    param_assign* param = s->MakeParam_assign();
+    vpa->push_back(param);
+    dut->Param_assigns(vpa);
+
+    parameter* p = s->MakeParameter();
+    dut->Parameters()->push_back(p);
+    p->VpiName("a");
+    param->Lhs(p);
+
+    operation* op  = s->MakeOperation();
+    param->Rhs(op);
+
+    op->VpiOpType(vpiAssignmentPatternOp);
+    VectorOfany* operands = s->MakeAnyVec();
+    op->Operands(operands);
+
+    constant* c1 = s->MakeConstant();
+    c1->VpiValue("UINT:1");
+    c1->VpiConstType(vpiIntConst);
+    c1->VpiDecompile("1");
+    operands->push_back(c1);
+
+
+    constant* c2 = s->MakeConstant();
+    c2->VpiValue("UINT:2");
+    c2->VpiConstType(vpiIntConst);
+    c2->VpiDecompile("2");
+    operands->push_back(c2);
+
+    constant* c3 = s->MakeConstant();
+    c3->VpiValue("UINT:3");
+    c3->VpiConstType(vpiIntConst);
+    c3->VpiDecompile("3");
+    operands->push_back(c3);
+
+  }
+
+  VectorOfmodule_inst* topModules = s->MakeModule_instVec();
+  d->TopModules(topModules);
+  topModules->push_back(dut);
+
+  vpiHandle dh = s->MakeUhdmHandle(uhdmdesign, d);
+  designs.push_back(dh);
+
+  return designs;
+}
+
+TEST(exprVal,prettyPrint_array) {
+  Serializer serializer;
+  const std::vector<vpiHandle>& designs = build_designs_AssignmentPatternOp(&serializer);
+  //serializer.Save("expr_AssignmentPatternOp_test.uhdm");
+  //const std::string before = designs_to_string(designs);
+  //std::cout << before <<std::endl;
+
+  bool elaborated = false;
+  for (auto design : designs) {
+    elaborated = vpi_get(vpiElaborated, design) || elaborated;
+  }
+  EXPECT_FALSE(elaborated);
+
+  ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
+  listener->listenDesigns(designs);
+  delete listener;
+
+  elaborated = false;
+  for (auto design : designs) {
+    elaborated = vpi_get(vpiElaborated, design) || elaborated;
+  }
+  EXPECT_TRUE(elaborated);
+
+  vpiHandle dh = designs.at(0);
+  design* d = UhdmDesignFromVpiHandle(dh);
+
+  ExprEval eval;
+  for (auto m : *d->TopModules()) {
+    for (auto pa : *m->Param_assigns()) {
+      const any* rhs = pa->Rhs();
+      std::string result = eval.prettyPrint( (any*) rhs);
+      std::string expected_result = "'{1,2,3}";
+      std::cout << expected_result << std::endl;
+
+      EXPECT_EQ(expected_result,result);
+    }
+  }
+
+}
