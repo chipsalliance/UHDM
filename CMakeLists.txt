@@ -1,6 +1,8 @@
 # -*- mode:cmake -*-
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
+
+
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
 if(NOT CMAKE_BUILD_TYPE)
@@ -69,7 +71,7 @@ if(WITH_LIBCXX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${MY_CXX_WARNING_FLAGS}")
 
 # Directory where code is generated into.
 set(GENDIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
@@ -323,3 +325,5 @@ install(DIRECTORY ${GENDIR}/uhdm/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/)
 install(FILES ${GENDIR}/src/UHDM.capnp
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm)
+
+#add_subdirectory(python)
