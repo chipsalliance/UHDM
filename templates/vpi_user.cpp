@@ -392,3 +392,8 @@ vpiHandle vpi_handle_by_multi_index(vpiHandle obj, PLI_INT32 num_index,
                                     PLI_INT32* index_array) {
   return 0;
 }
+
+
+vpiHandle vpi_register_assertion_cb( vpiHandle assertion, PLI_INT32 reason, vpi_assertion_callback_func *cb_rtn, PLI_BYTE8 *user_data) {
+  return 0;
+}
