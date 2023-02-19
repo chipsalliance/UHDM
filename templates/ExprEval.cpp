@@ -3946,7 +3946,8 @@ bool ExprEval::setValueInInstance(
       param->VpiName(lhsname);
       pa->Lhs(param);
       param_assigns->push_back(pa);
-      if (rhsexp && (rhsexp->UhdmType() == uhdmoperation)) {
+      if (rhsexp && ((rhsexp->UhdmType() == uhdmoperation) ||
+                     (rhsexp->UhdmType() == uhdmarray_expr))) {
         opRhs = true;
       }
     }
