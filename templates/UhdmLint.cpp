@@ -24,6 +24,7 @@
  * Created on Jan 3, 2022, 9:03 PM
  */
 #include <string.h>
+#include <regex>
 #include <uhdm/ExprEval.h>
 #include <uhdm/UhdmLint.h>
 #include <uhdm/clone_tree.h>
@@ -228,7 +229,7 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
                                   vpiHandle handle) {
   const typespec* baseType = object->Base_typespec();
   if (!baseType) return;
-
+  static std::regex r("^[0-9]*'");
   ExprEval eval;
   eval.setDesign(design_);
 
@@ -242,7 +243,7 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
   for (auto c : *object->Enum_consts()) {
     const std::string_view val = c->VpiDecompile();
     if (c->VpiSize() == -1) continue;
-    if (val.find('\'') == std::string::npos) continue;
+    if (!std::regex_match(std::string(val),r)) continue;
     invalidValue = false;
     const uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
                                       object->VpiParent(), true);
