@@ -57,6 +57,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # NOTE: Set the global output directories after the subprojects have had their go at it
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
@@ -326,4 +327,4 @@ install(DIRECTORY ${GENDIR}/uhdm/
 install(FILES ${GENDIR}/src/UHDM.capnp
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm)
 
-#add_subdirectory(python)
+add_subdirectory(python)

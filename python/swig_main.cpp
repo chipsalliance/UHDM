@@ -1,8 +1,5 @@
 #include "swig_main.h"
 
-std::vector<vpiHandle> read_uhdm(std::string filename){
-  UHDM::Serializer serializer;
-  return serializer.Restore(filename);
+const std::vector<vpiHandle> read_uhdm(UHDM::Serializer * s, std::string filename){
+  return (s->Restore(filename));
 }
-
-
