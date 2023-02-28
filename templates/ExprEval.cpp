@@ -1178,6 +1178,11 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         }
         break;
       }
+      case uhdmenum_var: {
+        const UHDM::typespec *tp = ((enum_var *)typespec)->Typespec();
+        bits += size(tp, invalidValue, inst, pexpr, full);
+        break;
+      }
       case UHDM::uhdmenum_typespec: {
         const UHDM::enum_typespec *sts =
             any_cast<const UHDM::enum_typespec *>(typespec);
