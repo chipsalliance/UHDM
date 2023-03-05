@@ -51,3 +51,5 @@ build:
 test_install:
 	cmake --build build --target test_inst --config Release -j $(CPU_CORES)
 	find build/bin -name test_inst* -exec {} \;
+
+.PHONY: build release debug test test-junit clean install uninstall test_install

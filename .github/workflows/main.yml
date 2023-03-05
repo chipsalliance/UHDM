@@ -8,6 +8,12 @@ jobs:
   linux-gcc:
     name: ubuntu-gcc
     runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        vendored_dependencies: [true, false]
+
     defaults:
       run:
         shell: bash
@@ -16,14 +22,26 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -qq
-        sudo apt install -y g++-9 build-essential cmake \
-                            python3 python3-orderedmultidict
+        sudo apt install -y g++-9 build-essential cmake
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.8
+
+    - name: Setup Python Packages
+      run: pip3 install orderedmultidict
 
     - name: Git pull
       uses: actions/checkout@v3
       with:
         submodules: recursive
         fetch-depth: 0
+      if: ${{ matrix.vendored_dependencies }}
+
+    - name: Git pull
+      uses: actions/checkout@v3
+      if: ${{ !matrix.vendored_dependencies }}
 
     - name: Use ccache
       uses: hendrikmuhs/ccache-action@v1.2
@@ -35,8 +53,20 @@ jobs:
         echo 'CC=gcc-9' >> $GITHUB_ENV
         echo 'CXX=g++-9' >> $GITHUB_ENV
         echo 'PREFIX=/tmp/uhdm-install' >> $GITHUB_ENV
-        echo 'ADDITIONAL_CMAKE_OPTIONS=-DPython3_ROOT_DIR=$pythonLocation' >> $GITHUB_ENV
-        echo 'PATH=/usr/lib/ccache:'"$pythonLocation""$PATH" >> $GITHUB_ENV
+        echo 'PATH=/usr/lib/ccache:'"$PATH" >> $GITHUB_ENV
+
+    - name: Install vendored dependencies
+      run: |
+        git clone https://github.com/google/googletest.git
+        cd googletest && cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 . && cmake --build build && sudo cmake --install build
+        git clone https://github.com/capnproto/capnproto.git
+        cd capnproto && cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 . && cmake --build build && sudo cmake --install build
+      if: ${{ !matrix.vendored_dependencies }}
+
+    - name: Configure cmake options
+      run: |
+        echo 'ADDITIONAL_CMAKE_OPTIONS=-DUHDM_USE_HOST_GTEST=ON -DUHDM_USE_HOST_CAPNP=ON' >> $GITHUB_ENV
+      if: ${{ !matrix.vendored_dependencies }}
 
     - name: Build & Test
       run: |
