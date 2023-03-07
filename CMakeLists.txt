@@ -177,6 +177,10 @@ endforeach(src_file ${uhdm-GENERATED_SRC})
 add_library(uhdm ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
 
+if(BUILD_SHARED_LIBS)
+  set_property(TARGET uhdm PROPERTY POSITION_INDEPENDENT_CODE 1)
+endif()
+
 # Our uhdm headers come with angle brackets (indicating system headers),
 # make sure that the compiler looks here first before finding an existing UHDM
 # installation. Hence we use SYSTEM
@@ -295,17 +299,14 @@ target_compile_definitions(test_inst
 target_include_directories(test_inst SYSTEM PRIVATE
   ${CMAKE_INSTALL_PREFIX}/include)
 if(NOT UHDM_USE_HOST_CAPNP)
-  target_link_libraries(test_inst PRIVATE
-    ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX}
-    ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}
-    ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}
+  target_link_libraries(test_inst PRIVATE uhdm capnp kj
     $<$<PLATFORM_ID:Darwin>:dl>
     $<$<PLATFORM_ID:Darwin>:util>
     $<$<AND:$<PLATFORM_ID:Darwin>,$<NOT:$<PLATFORM_ID:Apple>>>:m>
     $<$<PLATFORM_ID:Darwin>:rt>
     $<$<PLATFORM_ID:Darwin>:pthread>)
 else()
-  target_link_libraries(test_inst PRIVATE ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX} CapnProto::capnp
+  target_link_libraries(test_inst PRIVATE uhdm CapnProto::capnp
     $<$<PLATFORM_ID:Darwin>:dl>
     $<$<PLATFORM_ID:Darwin>:util>
     $<$<AND:$<PLATFORM_ID:Darwin>,$<NOT:$<PLATFORM_ID:Apple>>>:m>

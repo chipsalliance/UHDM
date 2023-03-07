@@ -58,9 +58,9 @@ jobs:
     - name: Install vendored dependencies
       run: |
         git clone https://github.com/google/googletest.git
-        cd googletest && cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 . && cmake --build build && sudo cmake --install build
+        cd googletest && cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON . && cmake --build build && sudo cmake --install build
         git clone https://github.com/capnproto/capnproto.git
-        cd capnproto && cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 . && cmake --build build && sudo cmake --install build
+        cd capnproto && cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 -DCMAKE_POSITION_INDEPENDENT_CODE=ON . && cmake --build build && sudo cmake --install build
       if: ${{ !matrix.vendored_dependencies }}
 
     - name: Configure cmake options
@@ -68,7 +68,7 @@ jobs:
         echo 'ADDITIONAL_CMAKE_OPTIONS=-DUHDM_USE_HOST_GTEST=ON -DUHDM_USE_HOST_CAPNP=ON' >> $GITHUB_ENV
       if: ${{ !matrix.vendored_dependencies }}
 
-    - name: Build & Test
+    - name: Ensure build/test env is setup
       run: |
         env
         which cmake && cmake --version
@@ -77,10 +77,21 @@ jobs:
         which $CC && $CC --version
         which $CXX && $CXX --version
 
+    - name: Build & Test
+      run: |
         make release
         make test
         make install
         make test_install
+      if: ${{ matrix.vendored_dependencies }}
+    
+    - name: Build & Test (Shared)
+      run: |
+        make release-shared
+        make test
+        make install-shared
+        make test_install
+      if: ${{ !matrix.vendored_dependencies }}
 
   macos:
     name: macos-gcc
