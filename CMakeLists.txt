@@ -29,6 +29,10 @@ project(UHDM)
 cmake_policy(SET CMP0091 NEW)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 message(STATUS "Python3_EXECUTABLE = ${Python3_EXECUTABLE}")
 
@@ -51,10 +55,6 @@ else()
   set(CAPNP_EXECUTABLE ${CAPNP_DIR}/capnp)
   set(CAPNPC_CXX_EXECUTABLE ${CAPNP_DIR}/capnpc-c++)
 endif()
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # NOTE: Set the global output directories after the subprojects have had their go at it
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
@@ -173,6 +173,19 @@ list(APPEND uhdm-GENERATED_SRC "${GENDIR}/src/classes.cpp")
 foreach(src_file ${uhdm-GENERATED_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
 endforeach(src_file ${uhdm-GENERATED_SRC})
+
+
+# Parse out version and configure header
+find_package (Git REQUIRED)
+execute_process(COMMAND git describe --abbrev=7
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  OUTPUT_VARIABLE GIT_DESCRIBE)
+string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${GIT_DESCRIBE}")
+string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${GIT_DESCRIBE}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+(.*)" "\\1" VERSION_SHA "${GIT_DESCRIBE}")
+set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}")
+
+message("${VERSION_MAJOR} ${VERSION_MINOR} ${VERSION_SHA}")
 
 add_library(uhdm ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
@@ -330,3 +343,19 @@ install(DIRECTORY ${GENDIR}/uhdm/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/)
 install(FILES ${GENDIR}/src/UHDM.capnp
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm)
+
+# Generate cmake config files for reuse by downstream packages
+include(CMakePackageConfigHelpers)
+
+# generate the config file that is includes the exports
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake"
+  INSTALL_DESTINATION cmake
+  NO_SET_AND_CHECK_MACRO
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+
+# install the configuration file
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake
+  DESTINATION cmake)
