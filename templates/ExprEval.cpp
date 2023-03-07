@@ -1178,6 +1178,11 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         }
         break;
       }
+      case uhdmenum_var: {
+        const UHDM::typespec *tp = ((enum_var *)typespec)->Typespec();
+        bits = size(tp, invalidValue, inst, pexpr, full);
+        break;
+      }
       case UHDM::uhdmenum_typespec: {
         const UHDM::enum_typespec *sts =
             any_cast<const UHDM::enum_typespec *>(typespec);
@@ -2068,17 +2073,39 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         for (typespec_member *member : *stpt->Members()) {
           if (member->VpiName() == elemName) {
             width = size(member, invalidValue, inst, pexpr, true);
-            uint64_t iv = get_value(invalidValue, cons);
-            uint64_t mask = 0;
+            if (cons->VpiSize() <= 64) {
+              uint64_t iv = get_value(invalidValue, cons);
+              uint64_t mask = 0;
 
-            for (uint64_t i = from; i < uint64_t(from + width); i++) {
-              mask |= ((uint64_t)1 << i);
+              for (uint64_t i = from; i < uint64_t(from + width); i++) {
+                mask |= ((uint64_t)1 << i);
+              }
+              uint64_t res = iv & mask;
+              res = res >> (from);
+              cons->VpiValue("UINT:" + std::to_string(res));
+              cons->VpiSize(static_cast<int>(width));
+              cons->VpiConstType(vpiUIntConst);
+              return cons;
+            } else {
+              std::string_view val = cons->VpiValue();
+              int ctype = cons->VpiConstType();
+              if (ctype == vpiHexConst) {
+                std::string_view vval = val.substr(strlen("HEX:"), std::string::npos);
+                std::string bin = NumUtils::hexToBin(vval);
+                std::string res = bin.substr(from, width);
+                cons->VpiValue("BIN:" + res);
+                cons->VpiSize(static_cast<int>(width));
+                cons->VpiConstType(vpiBinaryConst);
+                return cons;
+              } else if (ctype == vpiBinaryConst) {
+                std::string_view bin = val.substr(strlen("BIN:"), std::string::npos);
+                std::string_view res = bin.substr(from, width);
+                cons->VpiValue("BIN:" + std::string(res));
+                cons->VpiSize(static_cast<int>(width));
+                cons->VpiConstType(vpiBinaryConst);
+                return cons;
+              }
             }
-            uint64_t res = iv & mask;
-            res = res >> (from);
-            cons->VpiValue("UINT:" + std::to_string(res));
-            cons->VpiSize(static_cast<int>(width));
-            return cons;
           } else {
             from += size(member, invalidValue, inst, pexpr, true);
           }

@@ -1,5 +1,5 @@
 # -*- mode:cmake -*-
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 
 
@@ -190,36 +190,33 @@ target_include_directories(uhdm PRIVATE ${GENDIR}/src)
 
 if (UHDM_USE_HOST_CAPNP)
   target_include_directories(uhdm PRIVATE ${CAPNP_INCLUDE_DIRS})
+  target_link_libraries(uhdm PRIVATE CapnProto::capnp)
 else()
   target_include_directories(uhdm PRIVATE ${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src)
+  target_link_libraries(uhdm PRIVATE capnp)
 endif()
 
 target_compile_definitions(uhdm
   PUBLIC PLI_DLLISPEC=
   PUBLIC PLI_DLLESPEC=)
 
-if (UHDM_USE_HOST_CAPNP)
-  target_link_libraries(uhdm PRIVATE CapnProto::capnp)
-else()
-  target_link_libraries(uhdm PRIVATE capnp)
-
-  if(APPLE)
-    target_link_libraries(uhdm
-       PUBLIC dl
-       PUBLIC util
-       PUBLIC m
-       PUBLIC pthread)
-  elseif(UNIX)
-    target_link_libraries(uhdm
-       PUBLIC dl
-       PUBLIC util
-       PUBLIC m
-       PUBLIC rt
-       PUBLIC pthread)
-  endif()
+if(APPLE)
+  target_link_libraries(uhdm
+      PUBLIC dl
+      PUBLIC util
+      PUBLIC m
+      PUBLIC pthread)
+elseif(UNIX)
+  target_link_libraries(uhdm
+      PUBLIC dl
+      PUBLIC util
+      PUBLIC m
+      PUBLIC rt
+      PUBLIC pthread)
 endif()
 
 add_dependencies(uhdm GenerateCode)
+
 if(NOT UHDM_USE_HOST_CAPNP)
   add_dependencies(GenerateCode capnpc capnp_tool capnpc_cpp)
 endif()
@@ -245,8 +242,8 @@ if (UHDM_BUILD_TESTS)
       get_filename_component(test_prefix ${test_cc_file} DIRECTORY)
 
       add_executable(${test_bin} ${PROJECT_SOURCE_DIR}/${test_cc_file})
-      target_include_directories(${test_bin} PRIVATE ${GTEST_INCLUDE_DIR})
-      target_link_libraries(${test_bin} PRIVATE uhdm gtest gmock gtest_main)
+      target_include_directories(${test_bin} PRIVATE ${GTEST_INCLUDE_DIRS})
+      target_link_libraries(${test_bin} PRIVATE uhdm GTest::gtest GTest::gmock GTest::gtest_main)
       add_test(
         NAME ${test_prefix}/${test_bin} COMMAND ${test_bin}
         WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
@@ -300,15 +297,24 @@ target_compile_definitions(test_inst
   PUBLIC PLI_DLLESPEC=)
 target_include_directories(test_inst SYSTEM PRIVATE
   ${CMAKE_INSTALL_PREFIX}/include)
-target_link_libraries(test_inst PRIVATE
-  ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX}
-  ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}
-  ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}
-  $<$<PLATFORM_ID:Darwin>:dl>
-  $<$<PLATFORM_ID:Darwin>:util>
-  $<$<AND:$<PLATFORM_ID:Darwin>,$<NOT:$<PLATFORM_ID:Apple>>>:m>
-  $<$<PLATFORM_ID:Darwin>:rt>
-  $<$<PLATFORM_ID:Darwin>:pthread>)
+if(NOT UHDM_USE_HOST_CAPNP)
+  target_link_libraries(test_inst PRIVATE
+    ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX}
+    ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}
+    ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}
+    $<$<PLATFORM_ID:Darwin>:dl>
+    $<$<PLATFORM_ID:Darwin>:util>
+    $<$<AND:$<PLATFORM_ID:Darwin>,$<NOT:$<PLATFORM_ID:Apple>>>:m>
+    $<$<PLATFORM_ID:Darwin>:rt>
+    $<$<PLATFORM_ID:Darwin>:pthread>)
+else()
+  target_link_libraries(test_inst PRIVATE ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX} CapnProto::capnp
+    $<$<PLATFORM_ID:Darwin>:dl>
+    $<$<PLATFORM_ID:Darwin>:util>
+    $<$<AND:$<PLATFORM_ID:Darwin>,$<NOT:$<PLATFORM_ID:Apple>>>:m>
+    $<$<PLATFORM_ID:Darwin>:rt>
+    $<$<PLATFORM_ID:Darwin>:pthread>)
+endif()
 
 if(NOT UHDM_USE_HOST_CAPNP)
   install(
