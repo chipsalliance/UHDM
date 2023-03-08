@@ -9,13 +9,8 @@
 #include <unordered_set>
 #include <vector>
 
-#if !defined(SYMBOLID_DEBUG_ENABLED)
-#if defined(DEBUG) || defined(_DEBUG)
-#define SYMBOLID_DEBUG_ENABLED 1
-#else
-#define SYMBOLID_DEBUG_ENABLED 0
-#endif
-#endif
+// TODO(hs-apotell) SYMBOLID_DEBUG_ENABLED should be part of a config.h
+// so header and corresponding binary library match up.
 
 namespace UHDM {
 /**
@@ -76,8 +71,8 @@ class SymbolId final {
   friend std::ostream &operator<<(std::ostream &strm, const SymbolId &symbolId);
 };
 
-#ifndef SYMBOLID_DEBUG_ENABLED
-static_assert(sizeof(SymbolId) == sizeof(RawSymboldId), "SymboldId type grew?");
+#if !SYMBOLID_DEBUG_ENABLED
+static_assert(sizeof(SymbolId) == sizeof(RawSymbolId), "SymboldId type grew?");
 #endif
 
 inline static const SymbolId BadSymbolId(BadRawSymbolId, BadRawSymbol);
