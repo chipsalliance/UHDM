@@ -158,7 +158,7 @@ jobs:
       with:
         msystem: MSYS
         update: true
-        install: make cmake ninja gcc python
+        install: make cmake ninja gcc python git
       env:
         MSYS2_PATH_TYPE: inherit
 

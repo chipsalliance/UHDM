@@ -174,18 +174,39 @@ foreach(src_file ${uhdm-GENERATED_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
 endforeach(src_file ${uhdm-GENERATED_SRC})
 
-
 # Parse out version and configure header
-find_package (Git REQUIRED)
-execute_process(COMMAND git describe --abbrev=7
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  OUTPUT_VARIABLE GIT_DESCRIBE)
-string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${GIT_DESCRIBE}")
-string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${GIT_DESCRIBE}")
-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+(.*)" "\\1" VERSION_SHA "${GIT_DESCRIBE}")
-set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}")
+if(NOT DEFINED ENV{UHDM_VERSION_MAJOR})
+  # parse from working directory
+  # ensure `git` is installed
+  find_package (Git REQUIRED)
 
-message("${VERSION_MAJOR} ${VERSION_MINOR} ${VERSION_SHA}")
+  # get latest commit
+  execute_process(COMMAND git describe --tags --abbrev=0
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE LATEST_VERSION)
+
+  # parse out first number after "v"
+  string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" UHDM_VERSION_MAJOR "${LATEST_VERSION}")
+  # parse out second number, e.g. after "v[0-9]."
+  string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" UHDM_VERSION_MINOR "${LATEST_VERSION}")
+
+  # get latest commit
+  execute_process(COMMAND git rev-parse HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE UHDM_VERSION_COMMIT_SHA)
+  # strip newline
+  string(REGEX REPLACE "\n$" "" UHDM_VERSION_COMMIT_SHA "${UHDM_VERSION_COMMIT_SHA}")
+else()
+  # if set in env, assume some other deployment mechanism where
+  # not working from the git repo / where git not installed
+  set(UHDM_VERSION_MAJOR ENV{UHDM_VERSION_MAJOR})
+  set(UHDM_VERSION_MINOR ENV{UHDM_VERSION_MINOR})
+  set(UHDM_VERSION_COMMIT_SHA ENV{UHDM_VERSION_COMMIT_SHA})
+endif()
+
+set(UHDM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+message("Building version v${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} [${UHDM_VERSION_COMMIT_SHA}]")
+configure_file(${CMAKE_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uhdm-version.h)
 
 add_library(uhdm ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
