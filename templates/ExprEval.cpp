@@ -595,6 +595,12 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
   // Reordering
   if (exp->UhdmType() == uhdmoperation) {
     operation *op = (operation *)exp;
+    if (op->VpiOpType() == vpiConditionOp) {
+      VectorOfany *ops = op->Operands();
+      ops->at(1) = flattenPatternAssignments(s, tps, (expr *)ops->at(1));
+      ops->at(2) = flattenPatternAssignments(s, tps, (expr *)ops->at(2));
+      return result;
+    }
     if (op->VpiOpType() != vpiAssignmentPatternOp) {
       return result;
     }
