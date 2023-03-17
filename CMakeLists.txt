@@ -197,7 +197,7 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
   string(REGEX REPLACE "\n$" "" UHDM_VERSION_COMMIT_SHA "${UHDM_VERSION_COMMIT_SHA}")
 
   if(NOT "${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR}" STREQUAL "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}")
-    message(FATAL_ERROR "Git tag ${UHDM_VERSION_MAJOR}.{UHDM_VERSION_MINOR} \
+    message(FATAL_ERROR "Git tag ${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} \
       does not match project version ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}. \
       Did you forget to update project version in CMakeLists.txt?")
   endif()
@@ -373,13 +373,23 @@ include(CMakePackageConfigHelpers)
 
 # generate the config file that is includes the exports
 configure_package_config_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/install/Config.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake"
   INSTALL_DESTINATION cmake
   NO_SET_AND_CHECK_MACRO
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/install/UHDM.pc.in
+  "${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc"
+  @ONLY)
+
 # install the configuration file
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake
   DESTINATION cmake)
+
+# install the configuration file
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc
+  DESTINATION pkgconfig)
