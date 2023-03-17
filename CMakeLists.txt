@@ -23,7 +23,9 @@ option(UHDM_USE_HOST_GTEST "Use gtest from host system, not third_party/"
 option(UHDM_USE_HOST_CAPNP "Use capnproto from host system, not third_party/"
                            OFF)
 
-project(UHDM)
+
+# Set the project and version
+project(UHDM VERSION 1.48)
 
 # NOTE: Policy changes has to happen before adding any subprojects
 cmake_policy(SET CMP0091 NEW)
@@ -175,11 +177,8 @@ foreach(src_file ${uhdm-GENERATED_SRC})
 endforeach(src_file ${uhdm-GENERATED_SRC})
 
 # Parse out version and configure header
-if(NOT DEFINED ENV{UHDM_VERSION_MAJOR})
-  # parse from working directory
-  # ensure `git` is installed
-  find_package (Git REQUIRED)
-
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+  # running a build from the git repo, parse out tag and sha
   # get latest commit
   execute_process(COMMAND git describe --tags --abbrev=0
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -196,12 +195,16 @@ if(NOT DEFINED ENV{UHDM_VERSION_MAJOR})
     OUTPUT_VARIABLE UHDM_VERSION_COMMIT_SHA)
   # strip newline
   string(REGEX REPLACE "\n$" "" UHDM_VERSION_COMMIT_SHA "${UHDM_VERSION_COMMIT_SHA}")
+
+  if(NOT "${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR}" STREQUAL "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}")
+    message(FATAL_ERROR "Git tag ${UHDM_VERSION_MAJOR}.{UHDM_VERSION_MINOR} \
+      does not match project version ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}. \
+      Did you forget to update project version in CMakeLists.txt?")
+  endif()
 else()
-  # if set in env, assume some other deployment mechanism where
-  # not working from the git repo / where git not installed
-  set(UHDM_VERSION_MAJOR ENV{UHDM_VERSION_MAJOR})
-  set(UHDM_VERSION_MINOR ENV{UHDM_VERSION_MINOR})
-  set(UHDM_VERSION_COMMIT_SHA ENV{UHDM_VERSION_COMMIT_SHA})
+  set(UHDM_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
+  set(UHDM_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
+  set(UHDM_VERSION_COMMIT_SHA "release")
 endif()
 
 set(UHDM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
