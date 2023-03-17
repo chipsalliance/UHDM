@@ -387,9 +387,9 @@ configure_file(
 # install the configuration file
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake
-  DESTINATION cmake)
+  DESTINATION lib/cmake)
 
 # install the configuration file
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc
-  DESTINATION pkgconfig)
+  DESTINATION lib/pkgconfig)
