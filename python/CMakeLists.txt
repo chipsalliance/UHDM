@@ -27,9 +27,17 @@ target_link_libraries(py_uhdm
 set_target_properties(py_uhdm PROPERTIES 
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
 )
+
+# this figures out where to install the Python modules
+execute_process(
+    COMMAND ${Python3_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+    OUTPUT_VARIABLE Python_site_packages
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 install(
-	FILES uhdm.py 
-	DESTINATION ${PYTHON_SITE_PACKAGES}/
+	FILES ${CMAKE_CURRENT_BINARY_DIR}/uhdm.py 
+	DESTINATION ${CMAKE_INSTALL_PREFIX}/${Python_site_packages}
 )
 install(
 	TARGETS ${SWIG_MODULE_py_udhm_REAL_NAME} 
