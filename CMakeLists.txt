@@ -1,8 +1,6 @@
 # -*- mode:cmake -*-
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-
-
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
 if(NOT CMAKE_BUILD_TYPE)
@@ -44,6 +42,8 @@ if (NOT ${EXIT_CODE} EQUAL 0)
     "To install use following command: \"pip3 install orderedmultidict\".")
 endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if(UHDM_USE_HOST_CAPNP)
   find_package(CapnProto)
 else()
@@ -57,7 +57,6 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # NOTE: Set the global output directories after the subprojects have had their go at it
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
@@ -72,7 +71,7 @@ if(WITH_LIBCXX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC ${MY_CXX_WARNING_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MY_CXX_WARNING_FLAGS}")
 
 # Directory where code is generated into.
 set(GENDIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
