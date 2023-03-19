@@ -55,9 +55,12 @@ namespace UHDM {
   public:
     virtual ~ClientData() = default;
   };
-
+#ifndef SWIG
   class BaseClass : public RTTI {
     UHDM_IMPLEMENT_RTTI(BaseClass, RTTI)
+#else
+  class BaseClass {
+#endif
     friend Serializer;
 
   public:
@@ -143,6 +146,7 @@ namespace UHDM {
     short int vpiEndColumnNo_ = 0;
   };
 
+#ifndef SWIG
   template<typename T>
   class FactoryT final {
     friend Serializer;
@@ -184,9 +188,11 @@ namespace UHDM {
 
   typedef FactoryT<std::vector<BaseClass*>> VectorOfBaseClassFactory;
   typedef FactoryT<std::vector<BaseClass*>> VectorOfanyFactory;
-
+#endif
 }  // namespace UHDM
 
+#ifndef SWIG
 UHDM_IMPLEMENT_RTTI_CAST_FUNCTIONS(any_cast, UHDM::BaseClass)
+#endif
 
 #endif

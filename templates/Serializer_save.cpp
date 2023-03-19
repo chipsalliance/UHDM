@@ -88,11 +88,14 @@ struct Serializer::SaveAdapter {
 };
 
 void Serializer::Save(const std::filesystem::path& filepath) {
+    Save(filepath.string());
+}
+void Serializer::Save(const std::string& filepath) {
   unsigned long index = 0;
 
 <CAPNP_ID>
 
-  const std::string file = filepath.string();
+  const std::string file = filepath;
   const int fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
   ::capnp::MallocMessageBuilder message;
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();

@@ -97,9 +97,12 @@ struct Serializer::RestoreAdapter {
 };
 
 const std::vector<vpiHandle> Serializer::Restore(const std::filesystem::path& filepath) {
+    return Restore( filepath.string());
+}
+const std::vector<vpiHandle> Serializer::Restore(const std::string& filepath) {
   Purge();
   std::vector<vpiHandle> designs;
-  const std::string file = filepath.string();
+  const std::string file = filepath;
   int fileid = open(file.c_str(), O_RDONLY | O_BINARY);
   ::capnp::ReaderOptions options;
   options.traversalLimitInWords = ULLONG_MAX;

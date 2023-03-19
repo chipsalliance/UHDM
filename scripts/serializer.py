@@ -37,7 +37,7 @@ def generate(models):
 
         if modeltype != 'class_def':
             factory_data_members.append(f'  {classname}Factory {classname}Maker;')
-            factory_function_declarations.append(f'  {classname}* Make{Classname_}();')
+            factory_function_declarations.append(f'  UHDM::{classname}* Make{Classname_}();')
             factory_function_implementations.append(f'{classname}* Serializer::Make{Classname_}() {{ return Make<{classname}>(&{classname}Maker); }}')
             factory_object_type_map.append(f'  case uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.objects_[index];')
 
@@ -51,7 +51,7 @@ def generate(models):
             factory_stats.append(f'  stats.insert(std::make_pair("{classname}", {classname}Maker.objects_.size()));')
 
         factory_data_members.append(f'  VectorOf{classname}Factory {classname}VectMaker;')
-        factory_function_declarations.append(f'  std::vector<{classname}*>* Make{Classname_}Vec();')
+        factory_function_declarations.append(f'  std::vector<UHDM::{classname}*>* Make{Classname_}Vec();')
         factory_function_implementations.append(f'std::vector<{classname}*>* Serializer::Make{Classname_}Vec() {{ return Make<{classname}>(&{classname}VectMaker); }}')
 
         saves_adapters.append(f'  void operator()(const {classname} *const obj, Serializer *const serializer, {Classname}::Builder builder) const {{')

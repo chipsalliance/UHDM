@@ -36,6 +36,7 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
 
         if type == 'std::string':
             content.append(f'  {virtual}bool {Vpi_}(std::string_view data){final};')
+            content.append(f'#ifdef SWIG\n  {virtual}bool {Vpi_}(const std::string &data) {{ return {Vpi_}( std::string_view(data.c_str())); }}\n#endif')
             content.append(f'  {virtual}std::string_view {Vpi_}() const{final};')
         else:
             content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
@@ -787,7 +788,7 @@ def _generate_one_class(model, models, templates):
 
     declarations.append('  virtual const BaseClass* GetByVpiName(std::string_view name) const override;')
     declarations.append('  virtual std::tuple<const BaseClass*, UHDM_OBJECT_TYPE, const std::vector<const BaseClass*>*> GetByVpiType(int type) const override;')
-    declarations.append('  virtual vpi_property_value_t GetVpiPropertyValue(int property) const override;')
+    declarations.append('#ifndef SWIG\n  virtual vpi_property_value_t GetVpiPropertyValue(int property) const override;\n#endif')
     declarations.append('  virtual int Compare(const BaseClass* const other, AnySet& visited) const override;')
 
     func_body, func_includes = _get_GetByVpiName_implementation(model)

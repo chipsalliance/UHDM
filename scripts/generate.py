@@ -14,6 +14,7 @@ import ElaboratorListener_cpp
 import serializer
 import uhdm_forward_decl_h
 import uhdm_h
+import swig_uhdm_i
 import uhdm_types_h
 import UhdmListener
 import vpi_user_cpp
@@ -55,6 +56,9 @@ def _worker(params):
 
     elif key == 'uhdm_h':
         return uhdm_h.generate(*args)
+
+    elif key == 'swig_uhdm_i':
+        return swig_uhdm_i.generate(*args)
 
     elif key == 'uhdm_types_h':
         return uhdm_types_h.generate(*args)
@@ -146,6 +150,7 @@ def _main():
         ('serializer', [models]),
         ('uhdm_forward_decl_h', [models]),
         ('uhdm_h', [models]),
+        ('swig_uhdm_i', [models]),
         ('uhdm_types_h', [models]),
         ('UhdmListener', [models]),
         ('vpi_user_cpp', [models]),
