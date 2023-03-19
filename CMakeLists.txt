@@ -23,11 +23,17 @@ option(UHDM_USE_HOST_GTEST "Use gtest from host system, not third_party/"
 option(UHDM_USE_HOST_CAPNP "Use capnproto from host system, not third_party/"
                            OFF)
 
-project(UHDM)
+
+# Set the project and version
+project(UHDM VERSION 1.48)
 
 # NOTE: Policy changes has to happen before adding any subprojects
 cmake_policy(SET CMP0091 NEW)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 message(STATUS "Python3_EXECUTABLE = ${Python3_EXECUTABLE}")
@@ -51,10 +57,6 @@ else()
   set(CAPNP_EXECUTABLE ${CAPNP_DIR}/capnp)
   set(CAPNPC_CXX_EXECUTABLE ${CAPNP_DIR}/capnpc-c++)
 endif()
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # NOTE: Set the global output directories after the subprojects have had their go at it
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
@@ -174,8 +176,51 @@ foreach(src_file ${uhdm-GENERATED_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
 endforeach(src_file ${uhdm-GENERATED_SRC})
 
+# Parse out version and configure header
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+  # running a build from the git repo, parse out tag and sha
+  # get latest commit
+  execute_process(COMMAND git describe --tags --abbrev=0
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE LATEST_VERSION)
+
+  # parse out first number after "v"
+  string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" UHDM_VERSION_MAJOR "${LATEST_VERSION}")
+  # parse out second number, e.g. after "v[0-9]."
+  string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" UHDM_VERSION_MINOR "${LATEST_VERSION}")
+
+  # get latest commit
+  execute_process(COMMAND git rev-parse HEAD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE UHDM_VERSION_COMMIT_SHA)
+  # strip newline
+  string(REGEX REPLACE "\n$" "" UHDM_VERSION_COMMIT_SHA "${UHDM_VERSION_COMMIT_SHA}")
+
+  if("${UHDM_VERSION_MAJOR}" STREQUAL "")
+    # No tags locally, user project version
+    set(UHDM_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
+    set(UHDM_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
+  elseif(NOT "${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR}" STREQUAL "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}")
+    message(FATAL_ERROR "Git tag ${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} \
+      does not match project version ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}. \
+      Did you forget to update project version in CMakeLists.txt?")
+  endif()
+else()
+  set(UHDM_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
+  set(UHDM_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
+  set(UHDM_VERSION_COMMIT_SHA "release")
+endif()
+
+set(UHDM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+message("Building version v${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} [${UHDM_VERSION_COMMIT_SHA}]")
+configure_file(${CMAKE_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uhdm-version.h)
+
 add_library(uhdm ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
+
+if(BUILD_SHARED_LIBS)
+  set_property(TARGET uhdm PROPERTY POSITION_INDEPENDENT_CODE 1)
+endif()
 
 # Our uhdm headers come with angle brackets (indicating system headers),
 # make sure that the compiler looks here first before finding an existing UHDM
@@ -295,17 +340,14 @@ target_compile_definitions(test_inst
 target_include_directories(test_inst SYSTEM PRIVATE
   ${CMAKE_INSTALL_PREFIX}/include)
 if(NOT UHDM_USE_HOST_CAPNP)
-  target_link_libraries(test_inst PRIVATE
-    ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX}
-    ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}capnp${CMAKE_STATIC_LIBRARY_SUFFIX}
-    ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}kj${CMAKE_STATIC_LIBRARY_SUFFIX}
+  target_link_libraries(test_inst PRIVATE uhdm capnp kj
     $<$<PLATFORM_ID:Darwin>:dl>
     $<$<PLATFORM_ID:Darwin>:util>
     $<$<AND:$<PLATFORM_ID:Darwin>,$<NOT:$<PLATFORM_ID:Apple>>>:m>
     $<$<PLATFORM_ID:Darwin>:rt>
     $<$<PLATFORM_ID:Darwin>:pthread>)
 else()
-  target_link_libraries(test_inst PRIVATE ${CMAKE_INSTALL_PREFIX}/lib/uhdm/${CMAKE_STATIC_LIBRARY_PREFIX}uhdm${CMAKE_STATIC_LIBRARY_SUFFIX} CapnProto::capnp
+  target_link_libraries(test_inst PRIVATE uhdm CapnProto::capnp
     $<$<PLATFORM_ID:Darwin>:dl>
     $<$<PLATFORM_ID:Darwin>:util>
     $<$<AND:$<PLATFORM_ID:Darwin>,$<NOT:$<PLATFORM_ID:Apple>>>:m>
@@ -329,3 +371,29 @@ install(DIRECTORY ${GENDIR}/uhdm/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/)
 install(FILES ${GENDIR}/src/UHDM.capnp
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm)
+
+# Generate cmake config files for reuse by downstream packages
+include(CMakePackageConfigHelpers)
+
+# generate the config file that is includes the exports
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/install/Config.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake"
+  INSTALL_DESTINATION cmake
+  NO_SET_AND_CHECK_MACRO
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/install/UHDM.pc.in
+  "${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc"
+  @ONLY)
+
+# install the configuration file
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake
+  DESTINATION lib/cmake)
+
+# install the configuration file
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc
+  DESTINATION lib/pkgconfig)

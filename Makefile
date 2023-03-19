@@ -20,6 +20,9 @@ export CTEST_PARALLEL_LEVEL = $(CPU_CORES)
 release: build
 	cmake --build build --config Release -j $(CPU_CORES)
 
+release-shared: build-shared
+	cmake --build build --config Release -j $(CPU_CORES)
+
 debug:
 	mkdir -p dbuild
 	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) $(ADDITIONAL_CMAKE_OPTIONS) -S . -B dbuild
@@ -39,6 +42,9 @@ clean:
 install: release
 	cmake --install build --config Release
 
+install-shared: release-shared
+	cmake --install build --config Release
+
 uninstall:
 	$(RM) $(PREFIX)/bin/uhdm-dump $(PREFIX)/bin/uhdm-dump
 	$(RM) -r $(PREFIX)/lib/uhdm
@@ -46,10 +52,14 @@ uninstall:
 
 build:
 	mkdir -p build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) $(ADDITIONAL_CMAKE_OPTIONS) -S . -B build
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DBUILD_SHARED_LIBS=OFF $(ADDITIONAL_CMAKE_OPTIONS) -S . -B build
+
+build-shared:
+	mkdir -p build
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DBUILD_SHARED_LIBS=ON $(ADDITIONAL_CMAKE_OPTIONS) -S . -B build
 
 test_install:
 	cmake --build build --target test_inst --config Release -j $(CPU_CORES)
 	find build/bin -name test_inst* -exec {} \;
 
-.PHONY: build release debug test test-junit clean install uninstall test_install
+.PHONY: build build-shared build-static release debug test test-junit clean install uninstall test_install
