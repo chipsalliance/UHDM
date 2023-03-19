@@ -332,4 +332,8 @@ install(DIRECTORY ${GENDIR}/uhdm/
 install(FILES ${GENDIR}/src/UHDM.capnp
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm)
 
+if (CMAKE_POSITION_INDEPENDENT_CODE )
+	if (UHDM_USE_HOST_CAPNP)
 add_subdirectory(python)
+	endif()
+endif()
