@@ -1,0 +1,10 @@
+prefix="@CMAKE_INSTALL_PREFIX@"
+exec_prefix="${prefix}"
+libdir="${prefix}/lib/uhdm"
+includedir="${prefix}/include/uhdm"
+
+Name: @PROJECT_NAME@
+Description: @CMAKE_PROJECT_DESCRIPTION@
+Version: @PROJECT_VERSION@
+Cflags: -I${includedir}
+Libs: -L${libdir} -luhdm
