@@ -48,8 +48,6 @@ if (NOT ${EXIT_CODE} EQUAL 0)
     "To install use following command: \"pip3 install orderedmultidict\".")
 endif()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 if(UHDM_USE_HOST_CAPNP)
   find_package(CapnProto)
 else()
