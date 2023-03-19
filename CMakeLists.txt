@@ -178,7 +178,7 @@ foreach(src_file ${uhdm-GENERATED_SRC})
 endforeach(src_file ${uhdm-GENERATED_SRC})
 
 # Parse out version and configure header
-if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
   # running a build from the git repo, parse out tag and sha
   # get latest commit
   execute_process(COMMAND git describe --tags --abbrev=0
@@ -199,22 +199,22 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
 
   if("${UHDM_VERSION_MAJOR}" STREQUAL "")
     # No tags locally, user project version
-    set(UHDM_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
-    set(UHDM_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
-  elseif(NOT "${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR}" STREQUAL "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}")
+    set(UHDM_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+    set(UHDM_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+  elseif(NOT "${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR}" STREQUAL "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
     message(FATAL_ERROR "Git tag ${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} \
-      does not match project version ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}. \
+      does not match project version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}. \
       Did you forget to update project version in CMakeLists.txt?")
   endif()
 else()
-  set(UHDM_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
-  set(UHDM_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
+  set(UHDM_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+  set(UHDM_VERSION_MINOR ${PROJECT_VERSION_MINOR})
   set(UHDM_VERSION_COMMIT_SHA "release")
 endif()
 
 set(UHDM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 message("Building version v${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} [${UHDM_VERSION_COMMIT_SHA}]")
-configure_file(${CMAKE_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uhdm-version.h)
+configure_file(${PROJECT_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uhdm-version.h)
 
 add_library(uhdm ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
