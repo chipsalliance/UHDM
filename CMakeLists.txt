@@ -384,6 +384,13 @@ configure_package_config_file(
   NO_SET_AND_CHECK_MACRO
   NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
+# Depending on if we compile capnp from here or got from the host, the
+# package config refers to different libraries.
+if(UHDM_USE_HOST_CAPNP)
+  set(PC_OPTIONAL_REQUIRE_HOST_CAPNP "Requires: capnp")
+else()
+  set(PC_OPTIONAL_LOCAL_CAPNP "-lcapnp -lkj")
+endif()
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/install/UHDM.pc.in
   "${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc"
