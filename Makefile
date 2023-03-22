@@ -62,4 +62,14 @@ test_install:
 	cmake --build build --target test_inst --config Release -j $(CPU_CORES)
 	find build/bin -name test_inst* -exec {} \;
 
+# Smoke-test if installation results in usable pkg-config
+# Depending on system, PKG_CONFIG_PATH env var has different name. Set both.
+test_install_pkgconfig: install
+	PKG_CONFIG_PATH="$(PREFIX)/lib/pkgconfig:${PKG_CONFIG_PATH}" \
+	PKG_CONFIG_PATH_FOR_TARGET="$(PREFIX)/lib/pkgconfig:${PKG_CONFIG_PATH_FOR_TARGET}" \
+	PKG_CONFIG_CXXFLAGS=`pkg-config --cflags UHDM` && \
+	PKG_CONFIG_LDFLAGS=`pkg-config --libs UHDM` && \
+	echo -e "pkg-config:\n\tCXXFLAGS=$$PKG_CONFIG_CXXFLAGS\n\tLDFLAGS=$$PKG_CONFIG_LDFLAGS" && \
+	$(CXX) --std=c++17 $$PKG_CONFIG_CXXFLAGS util/uhdm-dump.cpp -obuild/uhdm-dump_pkg-config_test-compile $$PKG_CONFIG_LDFLAGS
+
 .PHONY: build build-shared build-static release debug test test-junit clean install uninstall test_install
