@@ -18,6 +18,7 @@ pkgs.mkShell {
       ccache
       ninja
       clang-tools
+      pkg-config
     ];
   shellHook =
   ''
