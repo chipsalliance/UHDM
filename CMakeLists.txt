@@ -177,38 +177,17 @@ foreach(src_file ${uhdm-GENERATED_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
 endforeach(src_file ${uhdm-GENERATED_SRC})
 
-# Parse out version and configure header
+# Set version from cmake project and extract latest hash if available.
+set(UHDM_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(UHDM_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
-  # running a build from the git repo, parse out tag and sha
-  # get latest commit
-  execute_process(COMMAND git describe --tags --abbrev=0
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE LATEST_VERSION)
-
-  # parse out first number after "v"
-  string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" UHDM_VERSION_MAJOR "${LATEST_VERSION}")
-  # parse out second number, e.g. after "v[0-9]."
-  string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" UHDM_VERSION_MINOR "${LATEST_VERSION}")
-
   # get latest commit
   execute_process(COMMAND git rev-parse HEAD
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE UHDM_VERSION_COMMIT_SHA)
   # strip newline
   string(REGEX REPLACE "\n$" "" UHDM_VERSION_COMMIT_SHA "${UHDM_VERSION_COMMIT_SHA}")
-
-  if("${UHDM_VERSION_MAJOR}" STREQUAL "")
-    # No tags locally, user project version
-    set(UHDM_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-    set(UHDM_VERSION_MINOR ${PROJECT_VERSION_MINOR})
-  elseif(NOT "${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR}" STREQUAL "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
-    message(FATAL_ERROR "Git tag ${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} \
-      does not match project version ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}. \
-      Did you forget to update project version in CMakeLists.txt?")
-  endif()
 else()
-  set(UHDM_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-  set(UHDM_VERSION_MINOR ${PROJECT_VERSION_MINOR})
   set(UHDM_VERSION_COMMIT_SHA "release")
 endif()
 
