@@ -22,5 +22,9 @@ pkgs.mkShell {
   shellHook =
   ''
     export CMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+    # Use host version by default.
+    export ADDITIONAL_CMAKE_OPTIONS="-DUHDM_USE_HOST_GTEST=On"
+    export ADDITIONAL_CMAKE_OPTIONS="$ADDITIONAL_CMAKE_OPTIONS -DUHDM_USE_HOST_CAPNP=On"
   '';
 }
