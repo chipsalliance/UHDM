@@ -272,9 +272,13 @@ jobs:
     - uses: actions/checkout@v2
       with:
        fetch-depth: 0
+       token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Tag with CMake version if not already.
       run: |
+        git config --local user.name "Development Bot"
+        git config --local user.email "uhdm-dev@chipsalliance.org"
+
         # We want to tag whenever the cmake version changes. So extract the
         # hash of when the current version was entered.
         read TAG_HASH TAG_VERSION <<<$(git annotate -l CMakeLists.txt | sed 's/\(^[0-9A-Fa-f]\+\).*project(UHDM VERSION \([0-9]\+\.[0-9]\+\).*/\1 \2/p;d')
