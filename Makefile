@@ -28,6 +28,12 @@ debug:
 	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) $(ADDITIONAL_CMAKE_OPTIONS) -S . -B dbuild
 	cmake --build dbuild --config Debug -j $(CPU_CORES)
 
+debug-shared:
+	mkdir -p dbuild
+	cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DBUILD_SHARED_LIBS=ON $(ADDITIONAL_CMAKE_OPTIONS) -S . -B dbuild
+	cmake --build dbuild --config Debug -j $(CPU_CORES)
+
+
 test: build
 	cmake --build build --target UnitTests --config Release -j $(CPU_CORES)
 	cd build && ctest -C Release --output-on-failure
