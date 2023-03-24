@@ -27,6 +27,8 @@ option(UHDM_USE_HOST_CAPNP "Use capnproto from host system, not third_party/"
 # Set the project and version
 project(UHDM VERSION 1.49)
 
+include(GNUInstallDirs)
+
 # NOTE: Policy changes has to happen before adding any subprojects
 cmake_policy(SET CMP0091 NEW)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -338,15 +340,16 @@ endif()
 if(NOT UHDM_USE_HOST_CAPNP)
   install(
     TARGETS capnp kj
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 endif()
 
 # Installation target
 install(
   TARGETS uhdm uhdm-cmp uhdm-dump uhdm-hier
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
-  LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${GENDIR}/uhdm/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/)
