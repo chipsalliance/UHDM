@@ -25,7 +25,7 @@ option(UHDM_USE_HOST_CAPNP "Use capnproto from host system, not third_party/"
 
 
 # Set the project and version
-project(UHDM VERSION 1.49)
+project(UHDM VERSION 1.50)
 
 include(GNUInstallDirs)
 
