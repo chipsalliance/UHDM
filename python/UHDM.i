@@ -1,4 +1,8 @@
 %module uhdm
+/* 
+Everithing in the %{ ... %} block is simply copied verbatim to the resulting wraper file created by swig.
+It is not parsed or interpreted by swig
+*/
 %{
 #include <stdarg.h>
 #include "sv_vpi_user.h"
@@ -286,8 +290,8 @@ namespace UHDM {
 */
 
 
-#include "BaseClass.h"
 %include "Serializer.h"
+%include "BaseClass.i"
 
 %include "attribute.h"
 %include "virtual_interface_var.h"
