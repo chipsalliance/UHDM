@@ -1,7 +1,7 @@
 class BaseClass {
   friend Serializer;
-  virtual ~BaseClass() = default;
-  Serializer* GetSerializer() const { return serializer_; }
+  virtual ~BaseClass();
+  Serializer* GetSerializer();
   virtual UHDM_OBJECT_TYPE UhdmType() = 0;
   virtual const BaseClass* VpiParent() = 0;
   virtual bool VpiParent(BaseClass* data) = 0;

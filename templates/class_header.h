@@ -38,12 +38,8 @@
 namespace UHDM {
 <TYPE_FORWARD_DECLARE>
 
-#ifndef SWIG
 class <CLASSNAME><FINAL_CLASS> : public <EXTENDS> {
   UHDM_IMPLEMENT_RTTI(<CLASSNAME>, <EXTENDS>)
-#else
-class <CLASSNAME> : public <EXTENDS> {
-#endif
 public:
   // Implicit constructor used to initialize all members,
   // comment: <CLASSNAME>();
@@ -53,7 +49,6 @@ public:
 
   <VIRTUAL> UHDM_OBJECT_TYPE UhdmType() const <OVERRIDE_OR_FINAL> { return uhdm<CLASSNAME>; }
 
-#ifndef SWIG
 protected:
   void DeepCopy(<CLASSNAME>* clone, Serializer* serializer,
                 ElaboratorListener* elaborator, BaseClass* parent) const;
@@ -61,16 +56,13 @@ protected:
 private:
 <MEMBERS>
 
-#endif
 };
 
-#ifndef SWIG
 <DISABLE_OBJECT_FACTORY>
 typedef FactoryT<<CLASSNAME>> <CLASSNAME>Factory;
 <END_DISABLE_OBJECT_FACTORY>
 
 typedef FactoryT<std::vector<<CLASSNAME> *>> VectorOf<CLASSNAME>Factory;
-#endif
 }  // namespace UHDM
 
 #endif
