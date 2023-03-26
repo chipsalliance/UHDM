@@ -12,6 +12,8 @@ It is not parsed or interpreted by swig
 #include "Serializer.h"
 #include "BaseClass.h"
 
+#include "uhdm.h"
+/*
 #include "attribute.h"
 #include "virtual_interface_var.h"
 #include "let_decl.h"
@@ -274,7 +276,7 @@ It is not parsed or interpreted by swig
 #include "constr_foreach.h"
 #include "design.h"
 
-
+*/
 
 %}
 %include "std_vector.i"
