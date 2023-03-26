@@ -55,7 +55,6 @@ protected:
 
 private:
 <MEMBERS>
-
 };
 
 <DISABLE_OBJECT_FACTORY>
@@ -63,6 +62,7 @@ typedef FactoryT<<CLASSNAME>> <CLASSNAME>Factory;
 <END_DISABLE_OBJECT_FACTORY>
 
 typedef FactoryT<std::vector<<CLASSNAME> *>> VectorOf<CLASSNAME>Factory;
+
 }  // namespace UHDM
 
 #endif
