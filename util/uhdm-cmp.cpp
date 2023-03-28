@@ -15,6 +15,7 @@
  */
 
 #include <uhdm/uhdm.h>
+#include <uhdm/uhdm-version.h>
 
 #include <algorithm>
 #include <filesystem>
@@ -29,7 +30,8 @@ static int32_t usage(const char *progName) {
             << "  " << progName << " <uhdm-file> <uhdm-file>" << std::endl
             << std::endl
             << "Reads input uhdm binary representations of two files and "
-               "compares them topographically."
+               "compares them topographically. (Version: "
+            << UHDM_VERSION_MAJOR << "." << UHDM_VERSION_MINOR << ") "
             << std::endl
             << std::endl
             << "Exits with code" << std::endl

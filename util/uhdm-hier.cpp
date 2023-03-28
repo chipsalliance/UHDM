@@ -34,6 +34,7 @@
 #endif
 
 #include <uhdm/uhdm.h>
+#include <uhdm/uhdm-version.h>
 
 using namespace UHDM;
 
@@ -52,10 +53,14 @@ int main(int argc, char** argv) {
     const std::string arg = argv[i];
     if (arg == "--line") {
       printLineInfo = true;
-    } else if (uhdmFile.empty())
+    } else if (arg == "--version") {
+      fprintf(stderr, "%d.%d\n", UHDM_VERSION_MAJOR, UHDM_VERSION_MINOR);
+      return 0;
+    } else if (uhdmFile.empty()) {
       uhdmFile = arg;
-    else
+    } else {
       return usage(argv[0]);
+    }
   }
 
   if (uhdmFile.empty()) {
