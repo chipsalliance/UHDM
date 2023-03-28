@@ -19,7 +19,7 @@ swig_add_library(py_uhdm
 	TYPE MODULE
 	LANGUAGE python
 	SOURCES 
-	${PROJECT_NAME}.i swig_main.cpp
+	${PROJECT_NAME}.i
 )
 target_link_libraries(py_uhdm 
 	PRIVATE uhdm ${PYTHON_LIBRARIES}

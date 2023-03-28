@@ -8,7 +8,6 @@ It is not parsed or interpreted by swig
 #include "vpi_user.h"
 #include "sv_vpi_user.h"
 #include "uhdm_vpi_user.h"
-#include "swig_main.h"
 #include "Serializer.h"
 #include "BaseClass.h"
 
@@ -38,4 +37,3 @@ namespace std {
 using namespace UHDM;
 %}
 
-%include "swig_main.h"
