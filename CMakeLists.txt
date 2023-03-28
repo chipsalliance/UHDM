@@ -1,6 +1,8 @@
 # -*- mode:cmake -*-
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
+project(UHDM VERSION 1.51)
+
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
 if(NOT CMAKE_BUILD_TYPE)
@@ -22,10 +24,6 @@ option(UHDM_USE_HOST_GTEST "Use gtest from host system, not third_party/"
                            OFF)
 option(UHDM_USE_HOST_CAPNP "Use capnproto from host system, not third_party/"
                            OFF)
-
-
-# Set the project and version
-project(UHDM VERSION 1.50)
 
 include(GNUInstallDirs)
 
