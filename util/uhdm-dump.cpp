@@ -78,9 +78,10 @@ static int usage(const char *progname) {
           "Options:\n"
           "\t--elab          : Elaborate the restored design.\n"
           "\t--verbose       : print diagnostic messages.\n"
+          "\t--version       : print version and exit.\n"
           "\nIf golden file is given to compare, exit code represent if output "
-          "matches.\n"
-          "\t--version       : print version and exit.\n");
+          "matches.\n");
+
   return 1;
 }
 
