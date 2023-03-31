@@ -35,6 +35,7 @@
 
 #include <uhdm/ElaboratorListener.h>
 #include <uhdm/VpiListener.h>
+#include <uhdm/uhdm-version.h>
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_visitor.h>
 
@@ -77,8 +78,10 @@ static int usage(const char *progname) {
           "Options:\n"
           "\t--elab          : Elaborate the restored design.\n"
           "\t--verbose       : print diagnostic messages.\n"
+          "\t--version       : print version and exit.\n"
           "\nIf golden file is given to compare, exit code represent if output "
           "matches.\n");
+
   return 1;
 }
 
@@ -94,16 +97,20 @@ int main(int argc, char **argv) {
   for (int i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
     // Also supporting legacy long option with single dash
-    if (arg == "-elab" || arg == "--elab")
+    if (arg == "-elab" || arg == "--elab") {
       elab = true;
-    else if (arg == "--verbose")
+    } else if (arg == "--verbose") {
       verbose = true;
-    else if (uhdmFile.empty())
+    } else if (arg == "--version") {
+      fprintf(stderr, "%d.%d\n", UHDM_VERSION_MAJOR, UHDM_VERSION_MINOR);
+      return 0;
+    } else if (uhdmFile.empty()) {
       uhdmFile = arg;
-    else if (goldenFile.empty())
+    } else if (goldenFile.empty()) {
       goldenFile = arg;
-    else
+    } else {
       return usage(argv[0]);
+    }
   }
 
   if (uhdmFile.empty()) {
