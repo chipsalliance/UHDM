@@ -7,7 +7,7 @@ def _get_group_headers(type, real_type):
     return [ f'#include "{real_type}.h"' ] if type == 'any' else []
 
 
-def _get_declarations(classname, type, vpi, card, real_type='',swig=False):
+def _get_declarations(classname, type, vpi, card, real_type=''):
     content = []
     if type in ['string', 'value', 'delay']:
         type = 'std::string'
@@ -36,23 +36,13 @@ def _get_declarations(classname, type, vpi, card, real_type='',swig=False):
 
         if type == 'std::string':
             content.append(f'  {virtual}bool {Vpi_}(std::string_view data){final};')
-            content.append(f'#ifdef SWIG\n  {virtual}bool {Vpi_}(const std::string &data) {{ return {Vpi_}( std::string_view(data.c_str())); }}\n#endif')
             content.append(f'  {virtual}std::string_view {Vpi_}() const{final};')
-
         else:
-            if not swig:
-                content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
-                content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final} {{ {check}{vpi}_ = data; return true; }}')
-            else:
-                content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final};')
-                content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final};')
+            content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
+            content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final} {{ {check}{vpi}_ = data; return true; }}')
     elif card == 'any':
-        if not swig:
-            content.append(f'  VectorOf{type}* {Vpi_}() const {{ return {vpi}_; }}')
-            content.append(f'  bool {Vpi_}(VectorOf{type}* data) {{ {check}{vpi}_ = data; return true; }}')
-        else:
-            content.append(f'  VectorOf{type}* {Vpi_}() const;')
-            content.append(f'  bool {Vpi_}(VectorOf{type}* data);')
+        content.append(f'  VectorOf{type}* {Vpi_}() const {{ return {vpi}_; }}')
+        content.append(f'  bool {Vpi_}(VectorOf{type}* data) {{ {check}{vpi}_ = data; return true; }}')
 
     return content
 
@@ -704,12 +694,10 @@ def _generate_group_checker(model, models, templates):
 def _generate_one_class(model, models, templates):
     header_file_content = templates['class_header.h']
     source_file_content = templates['class_source.cpp']
-    header_swig_content = templates['class_header.i']
     classname = model['name']
     modeltype = model['type']
     group_headers = set()
     declarations = []
-    declarations_swig = []
     data_members = []
     implementations = []
     forward_declares = set()
@@ -722,28 +710,19 @@ def _generate_one_class(model, models, templates):
         # Builtin properties do not need to be specified in each models
         # Builtins: "vpiParent, Parent type, vpiFile, Id" method and field
         data_members.extend(_get_data_member('BaseClass', 'vpiParent', '1'))
-        declarations.extend(_get_declarations(classname, 'BaseClass',
-                                              'vpiParent', '1',swig=False))
-        declarations_swig.extend(_get_declarations(classname, 'BaseClass',
-                                                   'vpiParent', '1',swig=True))
+        declarations.extend(_get_declarations(classname, 'BaseClass', 'vpiParent', '1'))
         func_body, func_includes = _get_implementations(classname, 'BaseClass', 'vpiParent', '1')
         implementations.extend(func_body)
         includes.update(func_includes)
 
         data_members.extend(_get_data_member('string', 'vpiFile', '1'))
-        declarations.extend(_get_declarations(classname, 'string','vpiFile',
-                                              '1',swig=False))
-        declarations_swig.extend(_get_declarations(classname, 'string','vpiFile',
-                                              '1',swig=True))
+        declarations.extend(_get_declarations(classname, 'string','vpiFile', '1'))
         func_body, func_includes = _get_implementations(classname, 'string','vpiFile', '1')
         implementations.extend(func_body)
         includes.update(func_includes)
 
         data_members.extend(_get_data_member('unsigned int', 'uhdmId', '1'))
-        declarations.extend(_get_declarations(classname, 'unsigned int',
-                                              'uhdmId', '1',swig=False))
-        declarations_swig.extend(_get_declarations(classname, 'unsigned int',
-                                                   'uhdmId', '1',swig=True))
+        declarations.extend(_get_declarations(classname, 'unsigned int', 'uhdmId', '1'))
         func_body, func_includes = _get_implementations(classname, 'unsigned int', 'uhdmId', '1')
         implementations.extend(func_body)
         includes.update(func_includes)
@@ -763,8 +742,7 @@ def _generate_one_class(model, models, templates):
                 declarations.append(f'  {type} {Vpi}() const final {{ return {value.get("vpiname")}; }}')
             else: # properties are already defined in vpi_user.h, no need to redefine them
                 data_members.extend(_get_data_member(type, vpi, card))
-                declarations.extend(_get_declarations(classname, type, vpi, card,swig=False))
-                declarations_swig.extend(_get_declarations(classname, type, vpi, card,swig=True))
+                declarations.extend(_get_declarations(classname, type, vpi, card))
                 func_body, func_includes = _get_implementations(classname, type, vpi, card)
                 implementations.extend(func_body)
                 includes.update(func_includes)
@@ -772,7 +750,6 @@ def _generate_one_class(model, models, templates):
         elif key == 'extends' and value:
             header_file_content = header_file_content.replace('<EXTENDS>', value)
             source_file_content = source_file_content.replace('<EXTENDS>', value)
-            header_swig_content = header_swig_content.replace('<EXTENDS>', value)
 
         elif key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
             name = value.get('name')
@@ -792,10 +769,7 @@ def _generate_one_class(model, models, templates):
 
             group_headers.update(_get_group_headers(type, real_type))
             data_members.extend(_get_data_member(type, name, card))
-            declarations.extend(_get_declarations(classname, type, name, card,
-                                                  real_type,swig=False))
-            declarations_swig.extend(_get_declarations(classname, type, name, card,
-                                                  real_type,swig=True))
+            declarations.extend(_get_declarations(classname, type, name, card, real_type))
             func_body, func_includes = _get_implementations(classname, type, name, card, real_type)
             implementations.extend(func_body)
             includes.update(func_includes)
@@ -813,7 +787,7 @@ def _generate_one_class(model, models, templates):
 
     declarations.append('  virtual const BaseClass* GetByVpiName(std::string_view name) const override;')
     declarations.append('  virtual std::tuple<const BaseClass*, UHDM_OBJECT_TYPE, const std::vector<const BaseClass*>*> GetByVpiType(int type) const override;')
-    declarations.append('  virtual vpi_property_value_t GetVpiPropertyValue(int property) const override;\n')
+    declarations.append('  virtual vpi_property_value_t GetVpiPropertyValue(int property) const override;')
     declarations.append('  virtual int Compare(const BaseClass* const other, AnySet& visited) const override;')
 
     func_body, func_includes = _get_GetByVpiName_implementation(model)
@@ -837,8 +811,6 @@ def _generate_one_class(model, models, templates):
         header_file_content = header_file_content.replace('<FINAL_CLASS>', '')
         header_file_content = header_file_content.replace('<FINAL_DESTRUCTOR>', '')
         header_file_content = header_file_content.replace('<VIRTUAL>', 'virtual ')
-        header_swig_content = header_swig_content.replace('<VIRTUAL>', 'virtual ')
-
         header_file_content = header_file_content.replace('<OVERRIDE_OR_FINAL>', 'override')
         header_file_content = header_file_content.replace('<DISABLE_OBJECT_FACTORY>', '#if 0 // This class cannot be instantiated')
         header_file_content = header_file_content.replace('<END_DISABLE_OBJECT_FACTORY>', '#endif')
@@ -846,18 +818,14 @@ def _generate_one_class(model, models, templates):
         header_file_content = header_file_content.replace('<FINAL_CLASS>', ' final')
         header_file_content = header_file_content.replace('<FINAL_DESTRUCTOR>', ' final')
         header_file_content = header_file_content.replace('<VIRTUAL>', 'virtual ')
-        header_swig_content = header_swig_content.replace('<VIRTUAL>', 'virtual ')
         header_file_content = header_file_content.replace('<OVERRIDE_OR_FINAL>', 'final')
         header_file_content = header_file_content.replace('<DISABLE_OBJECT_FACTORY>', '')
         header_file_content = header_file_content.replace('<END_DISABLE_OBJECT_FACTORY>', '')
 
     header_file_content = header_file_content.replace('<EXTENDS>', 'BaseClass')
-    header_swig_content = header_swig_content.replace('<EXTENDS>', 'BaseClass')
     header_file_content = header_file_content.replace('<CLASSNAME>', classname)
-    header_swig_content = header_swig_content.replace('<CLASSNAME>', classname)
     header_file_content = header_file_content.replace('<UPPER_CLASSNAME>', classname.upper())
     header_file_content = header_file_content.replace('<METHODS>', '\n\n'.join(declarations))
-    header_swig_content = header_swig_content.replace('<METHODS>', '\n\n'.join(declarations))
     header_file_content = header_file_content.replace('<MEMBERS>', '\n\n'.join(data_members))
     header_file_content = header_file_content.replace('<GROUP_HEADER_DEPENDENCY>', '\n'.join(sorted(group_headers)))
     header_file_content = header_file_content.replace('<TYPE_FORWARD_DECLARE>', '\n'.join([f'class {type};' for type in sorted(forward_declares)]))
@@ -868,15 +836,12 @@ def _generate_one_class(model, models, templates):
 
     file_utils.set_content_if_changed(config.get_output_header_filepath(f'{classname}.h'), header_file_content)
     file_utils.set_content_if_changed(config.get_output_source_filepath(f'{classname}.cpp'), source_file_content)
-    file_utils.set_content_if_changed(config.get_output_header_filepath(f'{classname}.i'),
-                                      header_swig_content)
     return True
 
 
 def generate(models):
     templates = {}
-    for filename in [ 'class_header.h', 'class_source.cpp', 'group_header.h',
-                     'group_header.cpp','class_header.i' ]:
+    for filename in [ 'class_header.h', 'class_source.cpp', 'group_header.h', 'group_header.cpp' ]:
         template_filepath = config.get_template_filepath(filename)
         with open(template_filepath, 'rt') as strm:
             templates[filename] = strm.read()

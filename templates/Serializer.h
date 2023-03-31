@@ -84,10 +84,10 @@ class Serializer {
   Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {}
   ~Serializer();
 
+#ifndef SWIG
   void Save(const std::filesystem::path& filepath);
   void Save(const std::string& filepath);
   void Purge();
-#ifndef SWIG
   void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
   ErrorHandler GetErrorHandler() { return errorHandler; }
 #endif
@@ -102,7 +102,6 @@ class Serializer {
 
   template <typename T>
   std::vector<T*>* Make(FactoryT<std::vector<T*>>* const factory);
-#endif
  public:
 <FACTORY_FUNCTION_DECLARATIONS>
   std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
@@ -110,7 +109,6 @@ class Serializer {
   vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) {
     return uhdm_handleMaker.Make(type, object);
   }
-#ifndef SWIG
   VectorOfanyFactory anyVectMaker;
   SymbolFactory symbolMaker;
   uhdm_handleFactory uhdm_handleMaker;

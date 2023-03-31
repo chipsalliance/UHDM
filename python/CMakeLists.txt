@@ -19,7 +19,7 @@ swig_add_library(py_uhdm
 	TYPE MODULE
 	LANGUAGE python
 	SOURCES 
-	${PROJECT_NAME}.i
+	${PROJECT_NAME}.i swig_test.cpp
 )
 target_link_libraries(py_uhdm 
 	PRIVATE uhdm ${PYTHON_LIBRARIES}
@@ -46,6 +46,10 @@ install(
 
 add_test(
 	NAME python-tests-import
-	COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=$<TARGET_PROPERTY:uhdm,SWIG_SUPPORT_FILES_DIRECTORY>${PS}$<TARGET_FILE_DIR:uhdm>" "${Python3_EXECUTABLE}" -c "import uhdm"
+	COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" "${Python3_EXECUTABLE}" -c "import uhdm"
 )
 
+add_test(
+	NAME python-tests-unit-module
+	COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" "${Python3_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_module.py
+)

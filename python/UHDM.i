@@ -7,11 +7,9 @@ It is not parsed or interpreted by swig
 #include <stdarg.h>
 #include "vpi_user.h"
 #include "sv_vpi_user.h"
-#include "uhdm_vpi_user.h"
 #include "Serializer.h"
-#include "BaseClass.h"
 
-#include "uhdm.h"
+#include "swig_test.h"
 
 %}
 %include "std_vector.i"
@@ -20,20 +18,13 @@ It is not parsed or interpreted by swig
 /* some api function using va_list are exclude using #ifndef SWIG/#endif */
 %include "vpi_user.h"
 %include "sv_vpi_user.h"
-%include "uhdm_vpi_user.h"
 
 %include "Serializer.h"
-%include "BaseClass.i"
-
-%include "uhdm_swig_type.i"
-
-
+%include "uhdm_types.h"
+%include "swig_test.h"
 %include stl.i
+
 namespace std {
   %template(vpiHandleVector) vector<vpiHandle>;
 }
-
-%insert("header") %{
-using namespace UHDM;
-%}
 
