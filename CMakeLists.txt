@@ -386,3 +386,8 @@ install(
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc
   DESTINATION lib/pkgconfig)
+
+
+if(BUILD_SHARED_LIBS)
+  add_subdirectory(python)
+endif()

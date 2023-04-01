@@ -392,3 +392,70 @@ vpiHandle vpi_handle_by_multi_index(vpiHandle obj, PLI_INT32 num_index,
                                     PLI_INT32* index_array) {
   return 0;
 }
+
+
+vpiHandle vpi_register_assertion_cb( vpiHandle assertion, PLI_INT32 reason, vpi_assertion_callback_func *cb_rtn, PLI_BYTE8 *user_data) {
+  return 0;
+}
+
+
+PLI_INT32 vpi_printf(PLI_BYTE8 *format, ...){
+  return 0;
+};
+
+/* callback related */
+vpiHandle vpi_register_cb(p_cb_data cb_data_p){
+  return 0;
+}
+
+PLI_INT32 vpi_remove_cb(vpiHandle cb_obj){
+  return 0;
+}
+
+void vpi_get_cb_info(vpiHandle object, p_cb_data cb_data_p){
+}
+
+vpiHandle vpi_register_systf(p_vpi_systf_data systf_data_p){
+  return 0;
+}
+
+void vpi_get_systf_info(vpiHandle object, p_vpi_systf_data systf_data_p){
+}
+
+PLI_UINT32 vpi_mcd_open(PLI_BYTE8 *fileName){
+  return 0;
+}
+PLI_UINT32 vpi_mcd_close(PLI_UINT32 mcd){
+  return 0;
+}
+PLI_BYTE8 *vpi_mcd_name(PLI_UINT32 cd){
+  return 0;
+}
+PLI_INT32 vpi_mcd_printf(PLI_UINT32 mcd,PLI_BYTE8 *format, ...){
+  return 0;
+}
+
+PLI_INT32 vpi_chk_error(p_vpi_error_info error_info_p){
+  return 0;
+}
+PLI_INT32 vpi_get_vlog_info(p_vpi_vlog_info vlog_info_p){
+  return 0;
+}
+
+PLI_INT32 vpi_flush(void) {
+  return 0;
+}
+PLI_INT32 vpi_mcd_flush(PLI_UINT32 mcd){
+  return 0;
+}
+PLI_INT32 vpi_control(PLI_INT32 operation, ...){
+  return 0;
+}
+
+/* 
+ * 38.37.1 System task and system function callbacks
+ * Global variable
+ */
+void (*vlog_startup_routines[]) () = {
+  0
+};

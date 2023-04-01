@@ -65,6 +65,7 @@ enum ErrorType {
   UHDM_INVALID_CASE_STMT_VALUE = 727
 };
 
+#ifndef SWIG
 typedef std::function<void(ErrorType errType, const std::string&,
                            const any* object1, const any* object2)>
     ErrorHandler;
@@ -74,6 +75,7 @@ void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg,
 
 template <typename T>
 class FactoryT;
+#endif
 
 class Serializer {
  public:
@@ -82,21 +84,24 @@ class Serializer {
   Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {}
   ~Serializer();
 
+#ifndef SWIG
   void Save(const std::filesystem::path& filepath);
+  void Save(const std::string& filepath);
   void Purge();
   void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
   ErrorHandler GetErrorHandler() { return errorHandler; }
+#endif
   const std::vector<vpiHandle> Restore(const std::filesystem::path& filepath);
+  const std::vector<vpiHandle> Restore(const std::string& filepath);
   std::map<std::string, unsigned long, std::less<>> ObjectStats() const;
   void PrintStats(std::ostream& strm, std::string_view infoText) const;
-
+#ifndef SWIG
  private:
   template <typename T>
   T* Make(FactoryT<T>* const factory);
 
   template <typename T>
   std::vector<T*>* Make(FactoryT<std::vector<T*>>* const factory);
-
  public:
 <FACTORY_FUNCTION_DECLARATIONS>
   std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
@@ -104,7 +109,6 @@ class Serializer {
   vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) {
     return uhdm_handleMaker.Make(type, object);
   }
-
   VectorOfanyFactory anyVectMaker;
   SymbolFactory symbolMaker;
   uhdm_handleFactory uhdm_handleMaker;
@@ -138,6 +142,7 @@ class Serializer {
   unsigned long objId_;   // ID for property annotations
 
   ErrorHandler errorHandler;
+#endif
 };
 };  // namespace UHDM
 
