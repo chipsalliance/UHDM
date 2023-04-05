@@ -364,7 +364,6 @@ configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/UHDMConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake
   INSTALL_DESTINATION cmake
-  PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR BIN_INSTALL_DIR
 )
 write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfigVersion.cmake
