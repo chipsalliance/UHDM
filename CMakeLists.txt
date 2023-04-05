@@ -378,6 +378,7 @@ if(UHDM_USE_HOST_CAPNP)
 else()
   set(PC_OPTIONAL_LOCAL_CAPNP "-lcapnp -lkj")
 endif()
+
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/UHDM.pc.in
   "${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc"
