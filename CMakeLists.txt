@@ -338,6 +338,7 @@ endif()
 if(NOT UHDM_USE_HOST_CAPNP)
   install(
     TARGETS capnp kj
+    EXPORT uhdmTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
@@ -346,6 +347,7 @@ endif()
 # Installation target
 install(
   TARGETS uhdm uhdm-cmp uhdm-dump uhdm-hier
+  EXPORT uhdmTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
@@ -359,11 +361,15 @@ include(CMakePackageConfigHelpers)
 
 # generate the config file that is includes the exports
 configure_package_config_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/install/Config.cmake.in
-  "${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake"
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/UHDMConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake
   INSTALL_DESTINATION cmake
-  NO_SET_AND_CHECK_MACRO
-  NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+)
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfigVersion.cmake
+  VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+  COMPATIBILITY SameMajorVersion
+)
 
 # Depending on if we compile capnp from here or got from the host, the
 # package config refers to different libraries.
@@ -372,21 +378,27 @@ if(UHDM_USE_HOST_CAPNP)
 else()
   set(PC_OPTIONAL_LOCAL_CAPNP "-lcapnp -lkj")
 endif()
+
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/install/UHDM.pc.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/UHDM.pc.in
   "${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc"
   @ONLY)
 
 # install the configuration file
+install(EXPORT uhdmTargets
+    FILE UHDMTargets.cmake
+    NAMESPACE uhdm::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/UHDM
+)
 install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake
-  DESTINATION lib/cmake)
-
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/UHDM
+)
+  
 # install the configuration file
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc
   DESTINATION lib/pkgconfig)
-
 
 if(BUILD_SHARED_LIBS)
   add_subdirectory(python)
