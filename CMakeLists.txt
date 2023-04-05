@@ -360,10 +360,6 @@ install(FILES ${GENDIR}/src/UHDM.capnp
 include(CMakePackageConfigHelpers)
 
 # generate the config file that is includes the exports
-set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/UHDM CACHE PATH "Location of header files")
-set(LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/uhdm CACHE PATH "Location of library")
-set(BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR} CACHE PATH "Location of binaries")
-
 configure_package_config_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/configs/UHDMConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake
