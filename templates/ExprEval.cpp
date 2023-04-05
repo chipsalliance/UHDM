@@ -717,6 +717,13 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
               c->VpiSize(static_cast<int32_t>(size));
             }
           }
+        } else {
+          if (patt->UhdmType() == uhdmoperation) {
+            operation* patt_op = (operation*)patt;
+            if (patt_op->VpiOpType() == vpiAssignmentPatternOp) {
+              op = flattenPatternAssignments(s, fieldTypes[index], patt_op);
+            }
+          }
         }
       }
       ordered->push_back(op);
