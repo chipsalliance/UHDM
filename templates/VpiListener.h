@@ -53,7 +53,7 @@ public:
   virtual void leaveAny(const any* object, vpiHandle handle) {}
 
 <VPI_ENTER_LEAVE_DECLARATIONS>
-  bool isInUhdmAllIterator() { return uhdmAllIterator; }
+  bool isInUhdmAllIterator() const { return uhdmAllIterator; }
   bool inCallstackOfType(UHDM_OBJECT_TYPE type);
   design* currentDesign() { return currentDesign_; }
 protected:
