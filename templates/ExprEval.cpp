@@ -2330,6 +2330,7 @@ static std::string hexToBinary(char input[2]) {
 
 expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                            const any *inst, const any *pexpr, bool muteError) {
+  if (!result) return nullptr;
   Serializer &s = *result->GetSerializer();
   UHDM_OBJECT_TYPE objtype = result->UhdmType();
   if (objtype == uhdmoperation) {

@@ -329,6 +329,10 @@ def _get_DeepClone_implementation(model, models):
                 content.append( '    }')
                 content.append( '  }')
 
+            elif classname == 'module_inst' and method == 'Ref_modules':
+                # No cloning
+                content.append( '')
+
             else:
                 content.append(f'  if (auto vec = {method}()) {{')
                 content.append(f'    auto clone_vec = serializer->Make{Cast}Vec();')

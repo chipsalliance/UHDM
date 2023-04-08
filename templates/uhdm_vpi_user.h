@@ -72,4 +72,5 @@
 #define vpiCheckerPort      5008 // Handle to checker_port
 #define vpiCheckerInstPort  5009 // Handle to checker_inst_port
 #define vpiArrayExpr        5010 // Handle to array_expr
+#define vpiRefModule        5011 // Handle to module ref for folded (Non-elaborated) model 
 #endif  // UHDM_VPI_USER_H
