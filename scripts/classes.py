@@ -3,6 +3,7 @@ import os
 import config
 import file_utils
 
+
 def _get_group_headers(type, real_type):
     return [ f'#include "{real_type}.h"' ] if type == 'any' else []
 
@@ -30,7 +31,7 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
     if card == '1':
         pointer = ''
         const = ''
-        if type not in ['unsigned int', 'int', 'bool', 'std::string']:
+        if type not in ['uint32_t', 'int32_t', 'bool', 'std::string']:
             pointer = '*'
             const = 'const '
 
@@ -64,7 +65,7 @@ def _get_implementations(classname, type, vpi, card, real_type=''):
 
     pointer = ''
     const = ''
-    if type not in ['unsigned int', 'int', 'bool', 'std::string']:
+    if type not in ['uint32_t', 'int32_t', 'bool', 'std::string']:
         pointer = '*'
         const = 'const '
 
@@ -146,7 +147,7 @@ def _get_data_member(type, vpi, card):
     if card == '1':
         pointer = ''
         default_assignment = 'false' if type == 'bool' else '0'
-        if type not in ['unsigned int', 'int', 'bool', 'std::string']:
+        if type not in ['uint32_t', 'int32_t', 'bool', 'std::string']:
             pointer = '*'
             default_assignment = 'nullptr'
 
@@ -374,7 +375,7 @@ def _get_DeepClone_implementation(model, models):
         else:
             content.append(f'  {classname}* const clone = serializer->Make{Classname}();')
 
-        content.append('  const unsigned long id = clone->UhdmId();')
+        content.append('  const uint32_t id = clone->UhdmId();')
         content.append('  *clone = *this;')
         content.append('  clone->UhdmId(id);')
         content.append('  DeepCopy(clone, serializer, elaborator, parent);')
@@ -446,7 +447,7 @@ def _get_GetByVpiType_implementation(model):
                 case_bodies[vpi] = (case_bodies.get(vpi, (None, None))[0], name)
 
     content = []
-    content.append(f'std::tuple<const BaseClass*, UHDM_OBJECT_TYPE, const std::vector<const BaseClass*>*> {classname}::GetByVpiType(int type) const {{')
+    content.append(f'std::tuple<const BaseClass*, UHDM_OBJECT_TYPE, const std::vector<const BaseClass*>*> {classname}::GetByVpiType(int32_t type) const {{')
 
     if modeltype == 'obj_def' or case_bodies:
         content.append(f'  switch (type) {{')
@@ -515,7 +516,7 @@ def _get_GetVpiPropertyValue_implementation(model):
         case_bodies['vpiType']= [ f'    case vpiType: return vpi_property_value_t(VpiType());' ]
 
     content = []
-    content.append(f'{classname}::vpi_property_value_t {classname}::GetVpiPropertyValue(int property) const {{')
+    content.append(f'{classname}::vpi_property_value_t {classname}::GetVpiPropertyValue(int32_t property) const {{')
 
     if case_bodies:
         content.append(f'  switch (property) {{')
@@ -553,8 +554,8 @@ def _get_Compare_implementation(model):
 
     includes = set()
     content = [
-        f'int {classname}::Compare(const BaseClass *const other, AnySet& visited) const {{',
-         '  int r = 0;'
+        f'int32_t {classname}::Compare(const BaseClass *const other, AnySet& visited) const {{',
+         '  int32_t r = 0;'
     ]
 
     if not model['subclasses']:
@@ -592,7 +593,7 @@ def _get_Compare_implementation(model):
         if card == '1':
             if type == 'string':
                 content.append(f'  if ((r = lhs->{Vpi_}().compare(rhs->{Vpi_}())) != 0) return r;')
-            elif type in ['unsigned int', 'int']:
+            elif type in ['uint32_t', 'int32_t']:
                 content.append(f'  if ((r = lhs->{Vpi_}() - rhs->{Vpi_}()) != 0) return r;')
             elif type == 'bool':
                 content.append(f'  if ((r = (lhs->{Vpi_}() == rhs->{Vpi_}()) ? 0 : (lhs->{Vpi_}() ? 1 : -1)) != 0) return r;')
@@ -622,7 +623,7 @@ def _get_Compare_implementation(model):
                 f'  auto lhs_{name} = lhs->{Name}();',
                 f'  auto rhs_{name} = rhs->{Name}();',
                 f'  if ((lhs_{name} != nullptr) && (rhs_{name} != nullptr)) {{',
-                f'    if ((r = static_cast<int>(lhs_{name}->size() - rhs_{name}->size())) != 0) return r;',
+                f'    if ((r = static_cast<int32_t>(lhs_{name}->size() - rhs_{name}->size())) != 0) return r;',
                  '',
                 f'    for (size_t i = 0, n = lhs_{name}->size(); i < n; ++i) {{',
                 f'      if ((r = lhs_{name}->at(i)->Compare(rhs_{name}->at(i), visited)) != 0) return r;',
@@ -725,9 +726,9 @@ def _generate_one_class(model, models, templates):
         implementations.extend(func_body)
         includes.update(func_includes)
 
-        data_members.extend(_get_data_member('unsigned int', 'uhdmId', '1'))
-        declarations.extend(_get_declarations(classname, 'unsigned int', 'uhdmId', '1'))
-        func_body, func_includes = _get_implementations(classname, 'unsigned int', 'uhdmId', '1')
+        data_members.extend(_get_data_member('uint32_t', 'uhdmId', '1'))
+        declarations.extend(_get_declarations(classname, 'uint32_t', 'uhdmId', '1'))
+        func_body, func_includes = _get_implementations(classname, 'uint32_t', 'uhdmId', '1')
         implementations.extend(func_body)
         includes.update(func_includes)
 
@@ -780,7 +781,7 @@ def _generate_one_class(model, models, templates):
 
     if not type_specified and (modeltype == 'obj_def'):
         vpiclasstype = config.make_vpi_name(classname)
-        declarations.append(f'  virtual unsigned int VpiType() const final {{ return {vpiclasstype}; }}')
+        declarations.append(f'  virtual uint32_t VpiType() const final {{ return {vpiclasstype}; }}')
 
     if modeltype == 'class_def':
         # DeepClone() not implemented for class_def; just declare to narrow the covariant return type.
@@ -790,9 +791,9 @@ def _generate_one_class(model, models, templates):
         declarations.append(f'  virtual {return_type}* DeepClone(Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const override;')
 
     declarations.append('  virtual const BaseClass* GetByVpiName(std::string_view name) const override;')
-    declarations.append('  virtual std::tuple<const BaseClass*, UHDM_OBJECT_TYPE, const std::vector<const BaseClass*>*> GetByVpiType(int type) const override;')
-    declarations.append('  virtual vpi_property_value_t GetVpiPropertyValue(int property) const override;')
-    declarations.append('  virtual int Compare(const BaseClass* const other, AnySet& visited) const override;')
+    declarations.append('  virtual std::tuple<const BaseClass*, UHDM_OBJECT_TYPE, const std::vector<const BaseClass*>*> GetByVpiType(int32_t type) const override;')
+    declarations.append('  virtual vpi_property_value_t GetVpiPropertyValue(int32_t property) const override;')
+    declarations.append('  virtual int32_t Compare(const BaseClass* const other, AnySet& visited) const override;')
 
     func_body, func_includes = _get_GetByVpiName_implementation(model)
     implementations.extend(func_body)

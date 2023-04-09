@@ -80,13 +80,13 @@ set(GENDIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
 if(MSVC)
   set(CMAKE_CXX_FLAGS_DEBUG
-      "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj ${MY_CXX_WARNING_FLAGS}"
+      "${CMAKE_CXX_FLAGS_DEBUG} ${TCMALLOC_COMPILE_OPTIONS} /W4 /bigobj ${MY_CXX_WARNING_FLAGS}"
   )
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO
-      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /Zi /W3 /bigobj ${MY_CXX_WARNING_FLAGS}"
+      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /Zi /W4 /bigobj ${MY_CXX_WARNING_FLAGS}"
   )
   set(CMAKE_CXX_FLAGS_RELEASE
-      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /W3 /bigobj ${MY_CXX_WARNING_FLAGS}"
+      "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} /W4 /bigobj ${MY_CXX_WARNING_FLAGS}"
   )
   set(CMAKE_EXE_LINKER_FLAGS /STACK:8388608)  # 8MB stack size
 else()
@@ -198,7 +198,6 @@ configure_file(${PROJECT_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uh
 
 add_library(uhdm ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
-
 configure_file(${PROJECT_SOURCE_DIR}/include/config.h.in ${GENDIR}/uhdm/config.h)
 target_compile_options(uhdm PRIVATE
   $<IF:$<CXX_COMPILER_ID:MSVC>,/FIuhdm/config.h,-include uhdm/config.h>)

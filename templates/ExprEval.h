@@ -93,7 +93,7 @@ class ExprEval {
   expr* reduceCompOp(operation* op, bool& invalidValue, const any* inst,
                      const any* pexpr, bool muteError = false);
 
-  expr* reduceBitSelect(expr* op, unsigned int index_val, bool& invalidValue,
+  expr* reduceBitSelect(expr* op, uint32_t index_val, bool& invalidValue,
                         const any* inst, const any* pexpr,
                         bool muteError = false);
 
@@ -106,7 +106,7 @@ class ExprEval {
                       bool muteError = false);
 
   any* hierarchicalSelector(std::vector<std::string>& select_path,
-                            unsigned int level, UHDM::any* object,
+                            uint32_t level, UHDM::any* object,
                             bool& invalidValue, const any* inst,
                             const UHDM::any* pexpr, bool returnTypespec,
                             bool muteError = false);

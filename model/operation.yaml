@@ -19,7 +19,7 @@
   - property: operation_type
     name: operation type
     vpi: vpiOpType
-    type: int
+    type: int32_t
     card: 1
   - property: reordered
     name: reordered

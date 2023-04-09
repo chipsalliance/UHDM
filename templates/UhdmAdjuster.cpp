@@ -36,7 +36,7 @@
 
 namespace UHDM {
 
-const any* UhdmAdjuster::resize(const any* object, int maxsize,
+const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
                                 bool is_overall_unsigned) {
   if (object == nullptr) {
     return nullptr;
@@ -48,7 +48,7 @@ const any* UhdmAdjuster::resize(const any* object, int maxsize,
     if (c->VpiSize() < maxsize) {
       ElaboratorListener listener(serializer_);
       c = (constant*)UHDM::clone_tree(c, *serializer_, &listener);
-      int constType = c->VpiConstType();
+      int32_t constType = c->VpiConstType();
       const typespec* tps = c->Typespec();
       bool is_signed = false;
       if (tps) {
@@ -100,7 +100,7 @@ const any* UhdmAdjuster::resize(const any* object, int maxsize,
 
 void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
   // Make all expressions match the largest expression size per LRM
-  int maxsize = 0;
+  int32_t maxsize = 0;
   bool is_overall_unsigned = false;
   {
     // Find maxsize and is any expression is unsigned
@@ -204,14 +204,14 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
     if (parent) {
       if (parent->UhdmType() == uhdmoperation) {
         operation* op = (operation*)parent;
-        int size = object->VpiSize();
-        int indexSelf = 0;
-        int i = 0;
+        int32_t size = object->VpiSize();
+        int32_t indexSelf = 0;
+        int32_t i = 0;
         for (any* oper : *op->Operands()) {
           if (oper != object) {
             ExprEval eval;
             bool invalidValue = false;
-            int tmp = static_cast<int>(eval.size(
+            int32_t tmp = static_cast<int32_t>(eval.size(
                 oper, invalidValue, currentInstance_, op, true, true));
             if (!invalidValue) {
               size = tmp;

@@ -19,12 +19,12 @@
   - property: is_deferred
     name: is deferred
     vpi: vpiIsDeferred
-    type: int
+    type: int32_t
     card: 1
   - property: is_final
     name: is final
     vpi: vpiIsFinal
-    type: int
+    type: int32_t
     card: 1
   - class_ref: expr
     name: expr
@@ -39,22 +39,22 @@
   - property: start_line
     name: start line
     vpi: vpiStartLine
-    type: int
+    type: int32_t
     card: 1
   - property: column
     name: column
     vpi: vpiColumn
-    type: int
+    type: int32_t
     card: 1
   - property: end_line
     name: end line
     vpi: vpiEndLine
-    type: int
+    type: int32_t
     card: 1
   - property: end_column
     name: end column
     vpi: vpiEndColumn
-    type: int
+    type: int32_t
     card: 1
   - obj_ref: clocking_block
     name: clocking block

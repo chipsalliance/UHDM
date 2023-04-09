@@ -19,7 +19,7 @@
   - property: operator
     name: operator
     vpi: vpiOpType
-    type: int
+    type: int32_t
     card: 1
   - property: blocking
     name: blocking

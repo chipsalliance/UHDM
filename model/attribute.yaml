@@ -38,5 +38,5 @@
   - property: definition_location_line
     name: definition location line
     vpi: vpiDefLineNo
-    type: int
+    type: int32_t
     card: 1 

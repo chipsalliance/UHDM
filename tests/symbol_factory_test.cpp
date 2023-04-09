@@ -77,7 +77,7 @@ TEST(SymbolFactoryTest, SymbolStringsAreStable) {
   // We want to make sure that even after reallocing the underlying
   // data structure, the symbol reference does not change. Let's enforce
   // some reallocs by creating a bunch of symbols.
-  for (int i = 0; i < 100000; ++i) {
+  for (int32_t i = 0; i < 100000; ++i) {
     table.Make("bar" + std::to_string(i));
   }
 

@@ -67,7 +67,7 @@ static bool CompareContentWithFile(const std::string &content,
   return true;
 }
 
-static int usage(const char *progname) {
+static int32_t usage(const char *progname) {
   fprintf(stderr,
           "Usage:\n%s [options] <uhdm-file> [<golden-file-to-compare>]\n",
           progname);
@@ -85,7 +85,7 @@ static int usage(const char *progname) {
   return 1;
 }
 
-int main(int argc, char **argv) {
+int32_t main(int32_t argc, char **argv) {
   std::ios::sync_with_stdio(false);
 
   bool elab = false;
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
   std::string goldenFile;
 
   // Simple option parsing that works on all platforms.
-  for (int i = 1; i < argc; ++i) {
+  for (int32_t i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
     // Also supporting legacy long option with single dash
     if (arg == "-elab" || arg == "--elab") {

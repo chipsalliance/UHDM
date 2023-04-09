@@ -19,5 +19,5 @@
   - property: type
     name: vpiBreak
     vpi: vpiType
-    type: unsigned int
+    type: uint32_t
     card: 1

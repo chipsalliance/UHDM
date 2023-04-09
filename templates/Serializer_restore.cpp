@@ -69,8 +69,8 @@ inline std::vector<T*>* Serializer::Make(FactoryT<std::vector<T*>>* const factor
 <FACTORY_FUNCTION_IMPLEMENTATIONS>
 
 template<typename T, typename>
-inline void Serializer::SetRestoreId_(FactoryT<T>* const factory, unsigned long count) {
-  for (unsigned int i = 0; i < count; ++i) {
+inline void Serializer::SetRestoreId_(FactoryT<T>* const factory, uint32_t count) {
+  for (uint32_t i = 0; i < count; ++i) {
     SetId(Make<T>(factory), i);
   }
 }
@@ -90,7 +90,7 @@ struct Serializer::RestoreAdapter {
 
   template<typename T, typename U, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
   void operator()(typename ::capnp::List<U>::Reader reader, Serializer *serializer, typename FactoryT<T>::objects_t &objects) const {
-    unsigned long index = 0;
+    uint32_t index = 0;
     for (typename U::Reader obj : reader)
       operator()(obj, serializer, objects[index++]);
   }
@@ -103,7 +103,7 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& filepath) {
   Purge();
   std::vector<vpiHandle> designs;
   const std::string file = filepath;
-  int fileid = open(file.c_str(), O_RDONLY | O_BINARY);
+  int32_t fileid = open(file.c_str(), O_RDONLY | O_BINARY);
   ::capnp::ReaderOptions options;
   options.traversalLimitInWords = ULLONG_MAX;
   options.nestingLimit = 1024;

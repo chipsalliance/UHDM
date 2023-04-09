@@ -54,12 +54,12 @@
   - property: net_type
     name: net type
     vpi: vpiNetType
-    type: int
+    type: int32_t
     card: 1
   - property: resolved_net_type
     name: resolved net type
     vpi: vpiResolvedNetType
-    type: int
+    type: int32_t
     card: 1
   - property: scalar
     name: scalar
@@ -79,17 +79,17 @@
   - property: strength0
     name: strength0
     vpi: vpiStrength0
-    type: int
+    type: int32_t
     card: 1
   - property: strength1
     name: strength1
     vpi: vpiStrength1
-    type: int
+    type: int32_t
     card: 1
   - property: charge_strength
     name: charge strength
     vpi: vpiChargeStrength
-    type: int
+    type: int32_t
     card: 1
   - property: vector
     name: vector

@@ -23,7 +23,7 @@
   - property: direction
     name: direction
     vpi: vpiDirection
-    type: int
+    type: int32_t
     card: 1
   - group_ref: vpiExpr
     name: vpiExpr

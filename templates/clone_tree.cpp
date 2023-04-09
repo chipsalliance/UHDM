@@ -41,7 +41,7 @@ tf_call* sys_func_call::DeepClone(Serializer* serializer,
                                   ElaboratorListener* elaborator,
                                   BaseClass* parent) const {
   sys_func_call* const clone = serializer->MakeSys_func_call();
-  const unsigned long id = clone->UhdmId();
+  const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
@@ -66,7 +66,7 @@ tf_call* sys_task_call::DeepClone(Serializer* serializer,
                                   ElaboratorListener* elaborator,
                                   BaseClass* parent) const {
   sys_task_call* const clone = serializer->MakeSys_task_call();
-  const unsigned long id = clone->UhdmId();
+  const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
@@ -99,7 +99,7 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
   if (is_function) {
     method_func_call* const clone = serializer->MakeMethod_func_call();
     the_clone = clone;
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
@@ -167,7 +167,7 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
   } else {
     method_task_call* const clone = serializer->MakeMethod_task_call();
     the_clone = clone;
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     //*clone = *this;
     clone->VpiName(VpiName());
     clone->Tf_call_args(Tf_call_args());
@@ -206,7 +206,7 @@ constant* constant::DeepClone(Serializer* serializer,
                               BaseClass* parent) const {
   if (elaborator->uniquifyTypespec() || (VpiSize() == -1)) {
     constant* const clone = serializer->MakeConstant();
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
@@ -223,7 +223,7 @@ tagged_pattern* tagged_pattern::DeepClone(Serializer* serializer,
                                           BaseClass* parent) const {
   if (elaborator->uniquifyTypespec()) {
     tagged_pattern* const clone = serializer->MakeTagged_pattern();
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
@@ -249,7 +249,7 @@ tf_call* method_task_call::DeepClone(Serializer* serializer,
   if (is_task) {
     method_task_call* const clone = serializer->MakeMethod_task_call();
     the_clone = clone;
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
@@ -275,7 +275,7 @@ tf_call* method_task_call::DeepClone(Serializer* serializer,
   } else {
     method_func_call* const clone = serializer->MakeMethod_func_call();
     the_clone = clone;
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     //*clone = *this;
     clone->VpiName(VpiName());
     clone->Tf_call_args(Tf_call_args());
@@ -317,7 +317,7 @@ tf_call* func_call::DeepClone(Serializer* serializer,
   if (is_function) {
     func_call* const clone = serializer->MakeFunc_call();
     the_clone = clone;
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
@@ -336,7 +336,7 @@ tf_call* func_call::DeepClone(Serializer* serializer,
   } else {
     task_call* const clone = serializer->MakeTask_call();
     the_clone = clone;
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     //*clone = *this;
     clone->VpiName(VpiName());
     clone->Tf_call_args(Tf_call_args());
@@ -372,7 +372,7 @@ tf_call* task_call::DeepClone(Serializer* serializer,
   if (is_task) {
     task_call* const clone = serializer->MakeTask_call();
     the_clone = clone;
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
@@ -391,7 +391,7 @@ tf_call* task_call::DeepClone(Serializer* serializer,
   } else {
     func_call* const clone = serializer->MakeFunc_call();
     the_clone = clone;
-    const unsigned long id = clone->UhdmId();
+    const uint32_t id = clone->UhdmId();
     //*clone = *this;
     clone->VpiName(VpiName());
     clone->VpiFile(VpiFile());
@@ -422,7 +422,7 @@ gen_scope_array* gen_scope_array::DeepClone(Serializer* serializer,
                                             ElaboratorListener* elaborator,
                                             BaseClass* parent) const {
   gen_scope_array* const clone = serializer->MakeGen_scope_array();
-  const unsigned long id = clone->UhdmId();
+  const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
@@ -447,7 +447,7 @@ function* function::DeepClone(Serializer* serializer,
                               ElaboratorListener* elaborator,
                               BaseClass* parent) const {
   function* const clone = serializer->MakeFunction();
-  const unsigned long id = clone->UhdmId();
+  const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
@@ -602,7 +602,7 @@ function* function::DeepClone(Serializer* serializer,
 task* task::DeepClone(Serializer* serializer, ElaboratorListener* elaborator,
                       BaseClass* parent) const {
   task* const clone = serializer->MakeTask();
-  const unsigned long id = clone->UhdmId();
+  const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
@@ -759,7 +759,7 @@ cont_assign* cont_assign::DeepClone(Serializer* serializer,
                                     ElaboratorListener* elaborator,
                                     BaseClass* parent) const {
   cont_assign* const clone = serializer->MakeCont_assign();
-  const unsigned long id = clone->UhdmId();
+  const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
@@ -874,7 +874,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                                 ElaboratorListener* elaborator,
                                 BaseClass* parent) const {
   hier_path* const clone = serializer->MakeHier_path();
-  const unsigned long id = clone->UhdmId();
+  const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
@@ -1734,7 +1734,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 VectorOfany* orig = op->Operands();
                 any* defaultOp = nullptr;
                 any* res = nullptr;
-                int index = 0;
+                int32_t index = 0;
                 for (auto oper : *orig) {
                   if (oper->UhdmType() == uhdmtagged_pattern) {
                     tagged_pattern* tp = (tagged_pattern*)oper;
@@ -1745,7 +1745,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                       defaultOp = oper;
                       found = true;
                     }
-                    for (unsigned int i = 0; i < fieldNames.size(); i++) {
+                    for (uint32_t i = 0; i < fieldNames.size(); i++) {
                       if (tname == fieldNames[i]) {
                         tmp[i] = oper;
                         found = true;
@@ -1754,7 +1754,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                       }
                     }
                     if (found == false) {
-                      for (unsigned int i = 0; i < fieldTypes.size(); i++) {
+                      for (uint32_t i = 0; i < fieldTypes.size(); i++) {
                         if (ttp->UhdmType() == fieldTypes[i]->UhdmType()) {
                           tmp[i] = oper;
                           found = true;
@@ -1764,7 +1764,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                       }
                     }
                   } else {
-                    if (index < (int)tmp.size()) {
+                    if (index < (int32_t)tmp.size()) {
                       tmp[index] = oper;
                       found = true;
                       res = tmp[index];

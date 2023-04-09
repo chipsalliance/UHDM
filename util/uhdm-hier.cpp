@@ -38,18 +38,18 @@
 
 using namespace UHDM;
 
-static int usage(const char* progname) {
+static int32_t usage(const char* progname) {
   fprintf(stderr, "Usage:\n%s [options] <uhdm-file> ?--line?\n", progname);
   fprintf(stderr,
           "Reads UHDM binary representation and prints hierarchy tree.\n");
   return 1;
 }
 
-int main(int argc, char** argv) {
+int32_t main(int32_t argc, char** argv) {
   std::string uhdmFile;
   bool printLineInfo = false;
   // Simple option parsing that works on all platforms.
-  for (int i = 1; i < argc; ++i) {
+  for (int32_t i = 1; i < argc; ++i) {
     const std::string arg = argv[i];
     if (arg == "--line") {
       printLineInfo = true;

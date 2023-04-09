@@ -38,7 +38,9 @@
 namespace UHDM {
 
 // Visit an object, dump to given stream.
-void visit_object (vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit = false);
+void visit_object(vpiHandle obj_h, int32_t indent, const char* relation,
+                  VisitedContainer* visited, std::ostream& out,
+                  bool shallowVisit = false);
 
 // Visit designs, dump to given stream.
 void visit_designs (const std::vector<vpiHandle>& designs, std::ostream &out);

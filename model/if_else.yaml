@@ -19,7 +19,7 @@
   - property: qualifier
     name: qualifier
     vpi: vpiQualifier
-    type: int
+    type: int32_t
     card: 1
   - class_ref: vpiCondition
     name: condition

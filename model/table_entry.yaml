@@ -18,7 +18,7 @@
   - property: number_of_symbol_entries
     name: number of symbol entries
     vpi: vpiSize
-    type: int
+    type: int32_t
     card: 1
   - property: vpi_get_value
     name: vpi_get_value

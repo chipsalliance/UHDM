@@ -114,7 +114,7 @@ void UhdmLint::leaveModule_inst(const module_inst* object, vpiHandle handle) {
 
 void UhdmLint::checkMultiContAssign(
     const std::vector<UHDM::cont_assign*>* assigns) {
-  for (unsigned int i = 0; i < assigns->size() - 1; i++) {
+  for (uint32_t i = 0; i < assigns->size() - 1; i++) {
     cont_assign* cassign = assigns->at(i);
     const expr* lhs_exp = cassign->Lhs();
     const expr* rhs_exp = cassign->Rhs();
@@ -132,7 +132,7 @@ void UhdmLint::checkMultiContAssign(
       }
       if (triStatedOp) continue;
     }
-    for (unsigned int j = i + 1; j < assigns->size(); j++) {
+    for (uint32_t j = i + 1; j < assigns->size(); j++) {
       cont_assign* as = assigns->at(j);
       const UHDM::expr* lhs = as->Lhs();
       const UHDM::expr* rhs = as->Rhs();
@@ -144,7 +144,7 @@ void UhdmLint::checkMultiContAssign(
           if (actual) {
             if (actual->UhdmType() == uhdmlogic_net) {
               logic_net* net = (logic_net*)actual;
-              int nettype = net->VpiNetType();
+              int32_t nettype = net->VpiNetType();
               if (nettype == vpiWor || nettype == vpiWand ||
                   nettype == vpiTri || nettype == vpiTriAnd ||
                   nettype == vpiTriOr || nettype == vpiTri0 ||

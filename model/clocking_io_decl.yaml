@@ -18,7 +18,7 @@
   - property: direction
     name: direction
     vpi: vpiDirection
-    type: int
+    type: int32_t
     card: 1
   - property: name
     name: name
@@ -28,12 +28,12 @@
   - property: input_edge
     name: input edge
     vpi: vpiInputEdge
-    type: int
+    type: int32_t
     card: 1
   - property: output_edge
     name: output edge
     vpi: vpiOutputEdge
-    type: int
+    type: int32_t
     card: 1
   - obj_ref: input_skew
     name: input skew

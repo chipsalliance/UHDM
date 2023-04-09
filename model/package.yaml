@@ -19,7 +19,7 @@
   - property: type
     name: vpiPackage
     vpi: vpiType
-    type: unsigned int
+    type: uint32_t
     card: 1    
   - property: compile_unit
     name: compile unit

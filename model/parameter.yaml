@@ -19,7 +19,7 @@
   - property: constant_type
     name: constant type
     vpi: vpiConstType
-    type: int
+    type: int32_t
     card: 1
   - property: sign
     name: sign

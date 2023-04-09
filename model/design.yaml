@@ -28,7 +28,7 @@
   - property: type
     name: vpiDesign
     vpi: vpiType
-    type: unsigned int
+    type: uint32_t
     card: 1
   - obj_ref: include_file_infos
     vpi: vpiIncludeFileInfo

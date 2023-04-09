@@ -44,7 +44,7 @@
   - property: memory_allocation
     name: memory allocation
     vpi: vpiAllocScheme
-    type: int
+    type: int32_t
     card: 1
   - property: constant_variable
     name: constant variable
@@ -59,7 +59,7 @@
   - property: randomization_type
     name: randomization type
     vpi: vpiRandType
-    type: int
+    type: int32_t
     card: 1
   - property: member
     name: member
@@ -74,7 +74,7 @@
   - property: visibility
     name: visibility
     vpi: vpiVisibility
-    type: int
+    type: int32_t
     card: 1
   - property: vector
     name: vector

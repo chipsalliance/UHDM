@@ -19,7 +19,7 @@
   - property: join_type
     name: join type
     vpi: vpiJoinType
-    type: int
+    type: int32_t
     card: 1
   - group_ref: stmts
     name: stmts

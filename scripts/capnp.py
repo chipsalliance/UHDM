@@ -12,7 +12,9 @@ def _get_schema(type, vpi, card):
     mapping = {
       'string': 'UInt64',
       'unsigned int': 'UInt64',
+      'uint32_t': 'UInt64',
       'int': 'Int64',
+      'int32_t': 'Int64',
       'any': 'Int64',
       'bool': 'Bool',
       'value': 'UInt64',

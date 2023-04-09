@@ -87,12 +87,12 @@ SynthSubset::SynthSubset(Serializer* serializer,
 
 void SynthSubset::report(std::ostream& out) {
   for (auto object : nonSynthesizableObjects_) {
-    VisitedContainer visited;
+    VisitedContainer visitedObjects;
 
     vpiHandle dh =
         object->GetSerializer()->MakeUhdmHandle(object->UhdmType(), object);
 
-    visit_object(dh, 0, "", &visited, out, true);
+    visit_object(dh, 0, "", &visitedObjects, out, true);
     vpi_release_handle(dh);
   }
 }

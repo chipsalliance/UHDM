@@ -19,12 +19,12 @@
   - property: index
     name: index
     vpi: vpiIndex
-    type: int
+    type: int32_t
     card: 1
   - property: type
     name: vpiProgram
     vpi: vpiType
-    type: unsigned int
+    type: uint32_t
     card: 1
   - obj_ref: default_clocking
     name: default clocking

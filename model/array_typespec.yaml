@@ -19,7 +19,7 @@
   - property: array_type
     name: array type
     vpi: vpiArrayType
-    type: int
+    type: int32_t
     card: 1
   - obj_ref: ranges
     name: ranges

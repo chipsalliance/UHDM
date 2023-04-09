@@ -20,7 +20,7 @@
   - property: class_type
     name: class type
     vpi: vpiClassType
-    type: int
+    type: int32_t
     card: 1
   - property: declared_lifetime
     name: declared lifetime

@@ -43,17 +43,17 @@
   - property: primitive_type
     name: primitive type
     vpi: vpiPrimType
-    type: int
+    type: int32_t
     card: 1
   - property: strength0
     name: strength 0
     vpi: vpiStrength0
-    type: int
+    type: int32_t
     card: 1
   - property: strength1
     name: strength 1
     vpi: vpiStrength1
-    type: int
+    type: int32_t
     card: 1 
   - obj_ref: attributes
     name: attributes

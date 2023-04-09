@@ -23,7 +23,7 @@
   - property: number_of_inputs
     name: number of inputs
     vpi: vpiSize
-    type: int
+    type: int32_t
     card: 1
   - property: protected
     name: protected
@@ -33,7 +33,7 @@
   - property: primitive_type
     name: primitive type
     vpi: vpiPrimType
-    type: int
+    type: int32_t
     card: 1
   - obj_ref: attributes
     name: attributes

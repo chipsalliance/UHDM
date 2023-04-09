@@ -23,7 +23,7 @@
   - property: direction
     name: direction
     vpi: vpiDirection
-    type: int
+    type: int32_t
     card: 1
   - obj_ref: attributes
     name: attributes

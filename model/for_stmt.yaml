@@ -19,12 +19,12 @@
   - property: type
     name: vpiFor
     vpi: vpiType
-    type: unsigned int
+    type: uint32_t
     card: 1
   - property: has_local_variables
     name: has local variables
     vpi: vpiLocalVarDecls
-    type: int
+    type: int32_t
     card: 1
   - group_ref: vpiForInitStmts
     name: init stmts

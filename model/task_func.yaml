@@ -24,12 +24,12 @@
   - property: access
     name: access
     vpi: vpiAccessType
-    type: int
+    type: int32_t
     card: 1
   - property: visibility
     name: visibility
     vpi: vpiVisibility
-    type: int
+    type: int32_t
     card: 1
   - property: virtual
     name: virtual
@@ -54,7 +54,7 @@
   - property: dpi_qualifier
     name: DPI qualifier
     vpi: vpiDPICStr
-    type: int
+    type: int32_t
     card: 1
   - property: identifier
     name: identifier
