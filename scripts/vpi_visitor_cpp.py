@@ -35,7 +35,7 @@ def _get_implementation(classname, vpi, card):
         shallow_visit = 'false'
         if 'module_inst' in classname and vpi == 'vpiRefModule':
             # Prevent stepping inside ref_modules while processing module_inst
-            shallow_visit = 'true
+            shallow_visit = 'true'
 
         content.append(f'  if (vpiHandle itr = vpi_iterate({vpi}, obj_h)) {{')
         content.append( '    while (vpiHandle obj = vpi_scan(itr)) {')
