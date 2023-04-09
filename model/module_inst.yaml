@@ -139,3 +139,7 @@
     vpi: vpiSysTaskCall
     type: tf_call
     card: any
+  - obj_ref: ref_modules
+    vpi: vpiRefModule
+    type: ref_module
+    card: any

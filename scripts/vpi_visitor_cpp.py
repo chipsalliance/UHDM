@@ -6,6 +6,7 @@ import file_utils
 
 def _get_implementation(classname, vpi, card):
     content = []
+
     if card == '1':
         shallow_visit = 'false'
 
@@ -31,9 +32,14 @@ def _get_implementation(classname, vpi, card):
         content.append( '    release_handle(itr);')
         content.append( '  }')
     else:
+        shallow_visit = 'false'
+        if 'module_inst' in classname and vpi == 'vpiRefModule':
+            # Prevent stepping inside ref_modules while processing module_inst
+            shallow_visit = 'true'
+
         content.append(f'  if (vpiHandle itr = vpi_iterate({vpi}, obj_h)) {{')
         content.append( '    while (vpiHandle obj = vpi_scan(itr)) {')
-        content.append(f'      visit_object(obj, indent + kLevelIndent, "{vpi}", visited, out, false);')
+        content.append(f'      visit_object(obj, indent + kLevelIndent, "{vpi}", visited, out, {shallow_visit});')
         content.append( '      release_handle(obj);')
         content.append( '    }')
         content.append( '    release_handle(itr);')
