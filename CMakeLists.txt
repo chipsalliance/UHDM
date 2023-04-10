@@ -24,6 +24,7 @@ option(UHDM_USE_HOST_GTEST "Use gtest from host system, not third_party/"
                            OFF)
 option(UHDM_USE_HOST_CAPNP "Use capnproto from host system, not third_party/"
                            OFF)
+option(UHDM_SYMBOLID_DEBUG_ENABLED "Enable SymbolId debugging" OFF)
 
 include(GNUInstallDirs)
 
@@ -197,6 +198,10 @@ configure_file(${PROJECT_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uh
 
 add_library(uhdm ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
+
+configure_file(${PROJECT_SOURCE_DIR}/include/config.h.in ${GENDIR}/uhdm/config.h)
+target_compile_options(uhdm PRIVATE
+  $<IF:$<CXX_COMPILER_ID:MSVC>,/FIuhdm/config.h,-include uhdm/config.h>)
 
 if(BUILD_SHARED_LIBS)
   set_property(TARGET uhdm PROPERTY POSITION_INDEPENDENT_CODE 1)
