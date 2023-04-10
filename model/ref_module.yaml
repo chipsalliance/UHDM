@@ -32,3 +32,8 @@
     vpi: vpiActual
     type: actual_group
     card: 1
+  - obj_ref: ports
+    vpi: vpiPort
+    name: port
+    type: port
+    card: any
