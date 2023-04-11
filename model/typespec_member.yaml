@@ -43,20 +43,20 @@
   - property: ref_line
     name: ref location line
     vpi: vpiRefLineNo
-    type: int
+    type: int32_t
     card: 1
   - property: ref_column
     name: ref location column
     vpi: vpiRefColumnNo
-    type: int
+    type: int32_t
     card: 1
   - property: ref_end_line
     name: ref location end line
     vpi: vpiRefEndLineNo
-    type: int
+    type: int32_t
     card: 1
   - property: ref_end_column
     name: ref location end column
     vpi: vpiRefEndColumnNo
-    type: int
+    type: int32_t
     card: 1

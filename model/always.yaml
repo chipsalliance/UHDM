@@ -18,7 +18,7 @@
   - extends: process_stmt
   - property: always_type
     name: always type
-    type: int
+    type: int32_t
     vpi: vpiAlwaysType
     card: 1
 

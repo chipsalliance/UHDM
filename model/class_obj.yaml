@@ -19,7 +19,7 @@
   - property: my_identity
     name: my identity
     vpi: vpiObjId
-    type: int
+    type: int32_t
     card: 1
   - obj_ref: class_typespec
     name: class typespec

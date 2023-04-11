@@ -293,7 +293,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
     ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
     if (itrDef != flatComponentMap_.end()) {
       const BaseClass* comp = (*itrDef).second;
-      int compType = comp->VpiType();
+      int32_t compType = comp->VpiType();
       switch (compType) {
         case vpiModule: {
           module_inst* defMod = (module_inst*)comp;
@@ -389,12 +389,12 @@ void ElaboratorListener::elabModule_inst(const module_inst* object,
     // Check if Module instance has a definition
     if (itrDef != flatComponentMap_.end()) {
       const BaseClass* comp = (*itrDef).second;
-      int compType = comp->VpiType();
+      int32_t compType = comp->VpiType();
       switch (compType) {
         case vpiModule: {
           module_inst* defMod = (module_inst*)comp;
           if (clone_) {
-            <MODULE_ELABORATOR_LISTENER>
+<MODULE_ELABORATOR_LISTENER>
           }
           break;
         }
@@ -692,7 +692,7 @@ void ElaboratorListener::enterInterface_inst(const interface_inst* object,
     ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
     if (itrDef != flatComponentMap_.end()) {
       const BaseClass* comp = (*itrDef).second;
-      int compType = comp->VpiType();
+      int32_t compType = comp->VpiType();
       switch (compType) {
         case vpiModule: {
           module_inst* defMod = (module_inst*)comp;
@@ -741,7 +741,7 @@ void ElaboratorListener::enterInterface_inst(const interface_inst* object,
     // Check if Module instance has a definition
     if (itrDef != flatComponentMap_.end()) {
       const BaseClass* comp = (*itrDef).second;
-      int compType = comp->VpiType();
+      int32_t compType = comp->VpiType();
       switch (compType) {
         case vpiInterface: {
           //  interface* defMod = (interface*)comp;
@@ -855,8 +855,8 @@ any* ElaboratorListener::bindTaskFunc(std::string_view name,
         }
         const UHDM::extends* ext = def->Extends();
         if (ext) {
-          const class_typespec* tps = ext->Class_typespec();
-          def = tps->Class_defn();
+          const class_typespec* ctps = ext->Class_typespec();
+          def = ctps->Class_defn();
         } else {
           break;
         }
@@ -868,14 +868,12 @@ any* ElaboratorListener::bindTaskFunc(std::string_view name,
 
 bool ElaboratorListener::isFunctionCall(std::string_view name,
                                         const expr* prefix) {
-  if (instStack_.size()) {
-    for (InstStack::reverse_iterator i = instStack_.rbegin();
-         i != instStack_.rend(); ++i) {
-      ComponentMap& funcMap = std::get<2>((*i).second);
-      ComponentMap::iterator funcItr = funcMap.find(name);
-      if (funcItr != funcMap.end()) {
-        return ((*funcItr).second->UhdmType() == uhdmfunction);
-      }
+  for (InstStack::reverse_iterator i = instStack_.rbegin();
+       i != instStack_.rend(); ++i) {
+    ComponentMap& funcMap = std::get<2>((*i).second);
+    ComponentMap::iterator funcItr = funcMap.find(name);
+    if (funcItr != funcMap.end()) {
+      return ((*funcItr).second->UhdmType() == uhdmfunction);
     }
   }
   if (prefix) {
@@ -895,14 +893,12 @@ bool ElaboratorListener::isFunctionCall(std::string_view name,
 }
 
 bool ElaboratorListener::isTaskCall(std::string_view name, const expr* prefix) {
-  if (instStack_.size()) {
-    for (InstStack::reverse_iterator i = instStack_.rbegin();
-         i != instStack_.rend(); ++i) {
-      ComponentMap& funcMap = std::get<2>((*i).second);
-      ComponentMap::iterator funcItr = funcMap.find(name);
-      if (funcItr != funcMap.end()) {
-        return ((*funcItr).second->UhdmType() == uhdmtask);
-      }
+  for (InstStack::reverse_iterator i = instStack_.rbegin();
+       i != instStack_.rend(); ++i) {
+    ComponentMap& funcMap = std::get<2>((*i).second);
+    ComponentMap::iterator funcItr = funcMap.find(name);
+    if (funcItr != funcMap.end()) {
+      return ((*funcItr).second->UhdmType() == uhdmtask);
     }
   }
   if (prefix) {
@@ -1075,13 +1071,9 @@ void ElaboratorListener::leaveBegin(const begin* object, vpiHandle handle) {
 void ElaboratorListener::enterNamed_begin(const named_begin* object,
                                           vpiHandle handle) {
   ComponentMap varMap;
-  if (instStack_.size()) {
-    for (InstStack::reverse_iterator i = instStack_.rbegin();
-         i != instStack_.rend(); ++i) {
-      ComponentMap& modMap = std::get<3>((*i).second);
-      modMap.emplace(object->VpiName(), object);
-      break;
-    }
+  if (!instStack_.empty()) {
+    ComponentMap& modMap = std::get<3>(instStack_.back().second);
+    modMap.emplace(object->VpiName(), object);
   }
   if (object->Array_vars()) {
     for (variables* var : *object->Array_vars()) {
@@ -1137,13 +1129,9 @@ void ElaboratorListener::leaveFork_stmt(const fork_stmt* object,
 void ElaboratorListener::enterNamed_fork(const named_fork* object,
                                          vpiHandle handle) {
   ComponentMap varMap;
-  if (instStack_.size()) {
-    for (InstStack::reverse_iterator i = instStack_.rbegin();
-         i != instStack_.rend(); ++i) {
-      ComponentMap& modMap = std::get<3>((*i).second);
-      modMap.emplace(object->VpiName(), object);
-      break;
-    }
+  if (!instStack_.empty()) {
+    ComponentMap& modMap = std::get<3>(instStack_.back().second);
+    modMap.emplace(object->VpiName(), object);
   }
   if (object->Array_vars()) {
     for (variables* var : *object->Array_vars()) {

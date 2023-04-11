@@ -32,7 +32,7 @@
 #include <vector>
 
 static bool showIDs = false;
-static constexpr int kLevelIndent = 2;
+static constexpr int32_t kLevelIndent = 2;
 
 
 #ifdef STANDARD_VPI
@@ -102,7 +102,7 @@ std::string decompile(UHDM::any* handle) {
 #ifdef STANDARD_VPI
 
 static std::string vpiTypeName(vpiHandle h) {
-  int type = vpi_get(vpiType, h);
+  int32_t type = vpi_get(vpiType, h);
   switch (type) {
     case 35: return "vpiNamedFork";
     case 611: return "vpiShortIntVar";
@@ -474,13 +474,13 @@ static std::string visit_delays(s_vpi_delay* delay) {
   return "";
 }
 
-static std::ostream &stream_indent(std::ostream &out, int indent) {
+static std::ostream& stream_indent(std::ostream& out, int32_t indent) {
   out << std::string(indent, ' ');
   return out;
 }
 
 <PRIVATE_OBJECT_VISITORS>
-void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit) {
+void visit_object(vpiHandle obj_h, int32_t indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit) {
   if (!obj_h)
     return;
 #ifdef STANDARD_VPI
@@ -498,7 +498,7 @@ void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedCont
 
 #endif
 
-  const unsigned int objectType = vpi_get(vpiType, obj_h);
+  const uint32_t objectType = vpi_get(vpiType, obj_h);
 
   {
     std::string hspaces;
@@ -552,11 +552,11 @@ void visit_object(vpiHandle obj_h, int indent, const char *relation, VisitedCont
       }
     }
 
-    if (int l = vpi_get(vpiLineNo, obj_h)) {
-      out << ", line:" << l << ":" << vpi_get(vpiColumnNo, obj_h);
+    if (uint32_t sl = vpi_get(vpiLineNo, obj_h)) {
+      out << ", line:" << sl << ":" << vpi_get(vpiColumnNo, obj_h);
 
-      if (int l = vpi_get(vpiEndLineNo, obj_h)) {
-        out << ", endln:" << l << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
+      if (uint32_t el = vpi_get(vpiEndLineNo, obj_h)) {
+        out << ", endln:" << el << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
       }
     }
     out << "\n";

@@ -24,11 +24,11 @@
   - property: size
     name: size
     vpi: vpiSize
-    type: int
+    type: int32_t
     card: 1
   - property: func_type
     name: type
     vpi: vpiFuncType
-    type: int
+    type: int32_t
     card: 1
 

@@ -228,7 +228,7 @@ class MyElaboratorListener : public VpiListener {
       ComponentMap::iterator itrDef = flatComponentMap_.find(defName);
       if (itrDef != flatComponentMap_.end()) {
         const BaseClass* comp = (*itrDef).second;
-        int compType = comp->VpiType();
+        int32_t compType = comp->VpiType();
         switch (compType) {
           case vpiModule: {
             module_inst* defMod = (module_inst*)comp;

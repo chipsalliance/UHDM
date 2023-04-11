@@ -18,7 +18,7 @@
   - property: access_type
     name: access type
     vpi: vpiAccessType
-    type: unsigned int
+    type: uint32_t
     card: 1
   - obj_ref: tasks
     name: task

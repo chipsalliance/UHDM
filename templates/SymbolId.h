@@ -9,9 +9,6 @@
 #include <unordered_set>
 #include <vector>
 
-// TODO(hs-apotell) SYMBOLID_DEBUG_ENABLED should be part of a config.h
-// so header and corresponding binary library match up.
-
 namespace UHDM {
 /**
  * class SymbolId
@@ -28,7 +25,7 @@ class SymbolFactory;
 
 class SymbolId final {
  public:
-#if SYMBOLID_DEBUG_ENABLED
+#if UHDM_SYMBOLID_DEBUG_ENABLED
   SymbolId() : m_id(BadRawSymbolId), m_value(BadRawSymbol) {}
   SymbolId(RawSymbolId id, std::string_view value) : m_id(id), m_value(value) {}
   SymbolId(const SymbolId &rhs) : m_id(rhs.m_id), m_value(rhs.m_value) {}
@@ -41,7 +38,7 @@ class SymbolId final {
   SymbolId &operator=(const SymbolId &rhs) {
     if (this != &rhs) {
       m_id = rhs.m_id;
-#if SYMBOLID_DEBUG_ENABLED
+#if UHDM_SYMBOLID_DEBUG_ENABLED
       m_value = rhs.m_value;
 #endif
     }
@@ -51,7 +48,7 @@ class SymbolId final {
   explicit operator RawSymbolId() const { return m_id; }
   explicit operator bool() const { return m_id != BadRawSymbolId; }
   explicit operator std::string_view() {
-#if SYMBOLID_DEBUG_ENABLED
+#if UHDM_SYMBOLID_DEBUG_ENABLED
     return m_value;
 #else
     static constexpr std::string_view kEmpty;
@@ -64,14 +61,14 @@ class SymbolId final {
 
  private:
   RawSymbolId m_id;
-#if SYMBOLID_DEBUG_ENABLED
+#if UHDM_SYMBOLID_DEBUG_ENABLED
   std::string_view m_value;
 #endif
 
   friend std::ostream &operator<<(std::ostream &strm, const SymbolId &symbolId);
 };
 
-#if !SYMBOLID_DEBUG_ENABLED
+#if !UHDM_SYMBOLID_DEBUG_ENABLED
 static_assert(sizeof(SymbolId) == sizeof(RawSymbolId), "SymboldId type grew?");
 #endif
 

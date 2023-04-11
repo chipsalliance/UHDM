@@ -42,7 +42,7 @@ struct uhdm_handle {
     type(type), object(object), index(0) {}
   const UHDM::UHDM_OBJECT_TYPE type;
   const void* object;
-  unsigned int index;
+  uint32_t index;
 };
 
 class uhdm_handleFactory {

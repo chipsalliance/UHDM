@@ -34,7 +34,7 @@
   - property: default_net_type
     name: default net type
     vpi: vpiDefNetType
-    type: int
+    type: int32_t
     card: 1
   - property: definition_location_file
     name: definition location file
@@ -44,12 +44,12 @@
   - property: definition_location_line
     name: definition location line
     vpi: vpiDefLineNo
-    type: int
+    type: int32_t
     card: 1
   - property: delay_mode
     name: delay mode
     vpi: vpiDefDelayMode
-    type: int
+    type: int32_t
     card: 1
   - property: protected
     name: protected
@@ -59,17 +59,17 @@
   - property: timeprecision
     name: timeprecision
     vpi: vpiTimePrecision
-    type: int
+    type: int32_t
     card: 1
   - property: timeunit
     name: timeunit
     vpi: vpiTimeUnit
-    type: int
+    type: int32_t
     card: 1
   - property: unconnected_drive
     name: unconnected drive
     vpi: vpiUnconnDrive
-    type: int
+    type: int32_t
     card: 1
   - property: library_configuration
     name: library configuration

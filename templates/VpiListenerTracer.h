@@ -62,7 +62,7 @@ namespace UHDM {
 
   protected:
    std::ostream &strm;
-   int indent = -1;
+   int32_t indent = -1;
   };
 };
 

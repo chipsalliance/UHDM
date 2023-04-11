@@ -43,7 +43,7 @@ void VpiListener::listenAny(vpiHandle handle) {
   const bool revisiting = visited.find(object) != visited.end();
   if (!revisiting) enterAny(object, handle);
 
-  unsigned int type = ((const uhdm_handle*)handle)->type;
+  uint32_t type = ((const uhdm_handle*)handle)->type;
   switch (type) {
 <VPI_LISTENANY_IMPLEMENTATION>
     default : break;

@@ -24,7 +24,7 @@
   - property: index_part_select_type
     name: index part select type
     vpi: vpiIndexedPartSelectType
-    type: int
+    type: int32_t
     card: 1
   - class_ref: base_expr
     name: base expr

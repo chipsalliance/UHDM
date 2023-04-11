@@ -32,12 +32,12 @@ const BaseClass* BaseClass::GetByVpiName(std::string_view name) const {
 
 std::tuple<const BaseClass*, UHDM_OBJECT_TYPE,
            const std::vector<const BaseClass*>*>
-BaseClass::GetByVpiType(int type) const {
+BaseClass::GetByVpiType(int32_t type) const {
   return std::make_tuple(nullptr, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);
 }
 
 BaseClass::vpi_property_value_t BaseClass::GetVpiPropertyValue(
-    int property) const {
+    int32_t property) const {
   switch (property) {
     case vpiLineNo:
       return vpi_property_value_t(vpiLineNo_);
@@ -81,8 +81,9 @@ void BaseClass::DeepCopy(BaseClass* clone, Serializer* serializer,
                          ElaboratorListener* elaborator,
                          BaseClass* parent) const {}
 
-int BaseClass::Compare(const BaseClass* const other, AnySet& visited) const {
-  int r = 0;
+int32_t BaseClass::Compare(const BaseClass* const other,
+                           AnySet& visited) const {
+  int32_t r = 0;
 
   if ((r = VpiType() - other->VpiType()) != 0) return r;
   if ((r = VpiName().compare(other->VpiName())) != 0) return r;
@@ -91,7 +92,7 @@ int BaseClass::Compare(const BaseClass* const other, AnySet& visited) const {
   return r;
 }
 
-int BaseClass::Compare(const BaseClass *const other) const {
+int32_t BaseClass::Compare(const BaseClass* const other) const {
   AnySet visited;
   return Compare(other, visited);
 }

@@ -120,12 +120,12 @@ def generate(models):
 
                     saves_adapters.append(f'    if (obj->{Name_}() != nullptr) {{')
                     saves_adapters.append(f'      ::capnp::List<{obj_key}>::Builder {Name}s = builder.init{Name}(obj->{Name_}()->size());')
-                    saves_adapters.append(f'      for (unsigned int i = 0, n = obj->{Name_}()->size(); i < n; ++i) {{')
+                    saves_adapters.append(f'      for (int32_t i = 0, n = obj->{Name_}()->size(); i < n; ++i) {{')
 
-                    restore_adapters.append(f'    if (unsigned int n = reader.get{Name}().size()) {{')
+                    restore_adapters.append(f'    if (uint32_t n = reader.get{Name}().size()) {{')
                     restore_adapters.append(f'      std::vector<{type}*>* vect = serializer->{type}VectMaker.Make();')
                     restore_adapters.append(f'      vect->reserve(n);')
-                    restore_adapters.append(f'      for (unsigned int i = 0; i < n; ++i) {{')
+                    restore_adapters.append(f'      for (uint32_t i = 0; i < n; ++i) {{')
 
                     if key in ['class_ref', 'group_ref']:
                         saves_adapters.append(f'        ::ObjIndexType::Builder tmp = {Name}s[i];')

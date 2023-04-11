@@ -19,6 +19,6 @@
   - property: type
     name: vpiContinue
     vpi: vpiType
-    type: unsigned int
+    type: uint32_t
     card: 1
  

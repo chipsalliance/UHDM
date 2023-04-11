@@ -19,7 +19,7 @@
   - property: type
     name: vpiWhile
     vpi: vpiType
-    type: unsigned int
+    type: uint32_t
     card: 1
   - class_ref: vpiCondition
     name: condition

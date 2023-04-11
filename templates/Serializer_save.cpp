@@ -56,7 +56,7 @@
 namespace UHDM {
 template <typename T, typename>
 void Serializer::SetSaveId_(FactoryT<T> *const factory) {
-  unsigned long index = 0;
+  uint32_t index = 0;
   for (auto obj : factory->objects_) {
     SetId(obj, ++index);
   }
@@ -81,7 +81,7 @@ struct Serializer::SaveAdapter {
 
   template<typename T, typename U, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
   void operator()(const typename FactoryT<T>::objects_t &objects, Serializer *serializer, typename ::capnp::List<U>::Builder builder) const {
-    unsigned long index = 0;
+    uint32_t index = 0;
     for (const T* obj : objects)
       operator()(obj, serializer, builder[index++]);
   }
@@ -91,12 +91,13 @@ void Serializer::Save(const std::filesystem::path& filepath) {
     Save(filepath.string());
 }
 void Serializer::Save(const std::string& filepath) {
-  unsigned long index = 0;
+  uint32_t index = 0;
 
 <CAPNP_ID>
 
   const std::string file = filepath;
-  const int fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
+  const int32_t fileid =
+      open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
   ::capnp::MallocMessageBuilder message;
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
 

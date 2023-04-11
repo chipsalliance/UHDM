@@ -44,11 +44,11 @@ void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const a
   std::cerr << errorMsg << std::endl;
 }
 
-void Serializer::SetId(const BaseClass* p, unsigned long id) {
+void Serializer::SetId(const BaseClass* p, uint32_t id) {
   allIds_.emplace(p, id);
 }
 
-unsigned long Serializer::GetId(const BaseClass* p) {
+uint32_t Serializer::GetId(const BaseClass* p) {
   auto inserted = allIds_.emplace(p, incrId_);
   if (inserted.second) {
     ++incrId_;
@@ -65,9 +65,9 @@ std::string VpiTypeName(vpiHandle h) {
   return UhdmName(obj->UhdmType());
 }
 
-static constexpr unsigned int badIndex = -1;
+static constexpr uint32_t badIndex = static_cast<uint32_t>(-1);
 
-BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
+BaseClass* Serializer::GetObject(uint32_t objectType, uint32_t index) {
   if (index == badIndex)
     return nullptr;
 
@@ -77,8 +77,8 @@ BaseClass* Serializer::GetObject(unsigned int objectType, unsigned int index) {
   }
 }
 
-std::map<std::string, unsigned long, std::less<>> Serializer::ObjectStats() const {
-  std::map<std::string, unsigned long, std::less<>> stats;
+std::map<std::string, uint32_t, std::less<>> Serializer::ObjectStats() const {
+  std::map<std::string, uint32_t, std::less<>> stats;
 <FACTORY_STATS>
   return stats;
 }

@@ -41,7 +41,7 @@ class UhdmAdjuster final : public VpiListener {
   void leaveConstant(const constant* object, vpiHandle handle) final;
   void enterModule_inst(const module_inst* object, vpiHandle handle) final;
 
-  const any* resize(const any* object, int maxsize, bool is_unsigned);
+  const any* resize(const any* object, int32_t maxsize, bool is_unsigned);
   Serializer* serializer_ = nullptr;
   design* design_ = nullptr;
   const instance* currentInstance_ = nullptr;

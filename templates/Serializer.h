@@ -79,7 +79,7 @@ class FactoryT;
 
 class Serializer {
  public:
-  using IdMap = std::map<const BaseClass*, unsigned long>;
+  using IdMap = std::map<const BaseClass*, uint32_t>;
 
   Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {}
   ~Serializer();
@@ -93,7 +93,7 @@ class Serializer {
 #endif
   const std::vector<vpiHandle> Restore(const std::filesystem::path& filepath);
   const std::vector<vpiHandle> Restore(const std::string& filepath);
-  std::map<std::string, unsigned long, std::less<>> ObjectStats() const;
+  std::map<std::string, uint32_t, std::less<>> ObjectStats() const;
   void PrintStats(std::ostream& strm, std::string_view infoText) const;
 #ifndef SWIG
  private:
@@ -125,7 +125,7 @@ class Serializer {
 
   template <typename T, typename = typename std::enable_if<
                             std::is_base_of<BaseClass, T>::value>::type>
-  void SetRestoreId_(FactoryT<T>* const factory, unsigned long count);
+  void SetRestoreId_(FactoryT<T>* const factory, uint32_t count);
 
   struct SaveAdapter;
   friend struct SaveAdapter;
@@ -134,12 +134,12 @@ class Serializer {
   friend struct RestoreAdapter;
 
  private:
-  BaseClass* GetObject(unsigned int objectType, unsigned int index);
-  void SetId(const BaseClass* p, unsigned long id);
-  unsigned long GetId(const BaseClass* p);
+  BaseClass* GetObject(uint32_t objectType, uint32_t index);
+  void SetId(const BaseClass* p, uint32_t id);
+  uint32_t GetId(const BaseClass* p);
   IdMap allIds_;
-  unsigned long incrId_;  // Capnp id
-  unsigned long objId_;   // ID for property annotations
+  uint32_t incrId_;  // Capnp id
+  uint32_t objId_;   // ID for property annotations
 
   ErrorHandler errorHandler;
 #endif

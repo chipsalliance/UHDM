@@ -19,12 +19,12 @@
   - property: index
     name: index
     vpi: vpiIndex
-    type: int
+    type: int32_t
     card: 1
   - property: type
     name: vpiModule
     vpi: vpiType
-    type: unsigned int
+    type: uint32_t
     card: 1
   - property: top_module
     name: top module
@@ -33,7 +33,7 @@
     card: 1
   - property: decay_time
     name: decay time
-    type: int
+    type: int32_t
     vpi: vpiDefDecayTime
     card: 1
   - obj_ref: global_clocking

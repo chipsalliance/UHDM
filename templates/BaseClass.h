@@ -78,53 +78,54 @@ namespace UHDM {
 
     virtual bool VpiFile(std::string_view data) = 0;
 
-    virtual int VpiLineNo() const final { return vpiLineNo_; }
+    virtual uint32_t VpiLineNo() const final { return vpiLineNo_; }
 
-    virtual bool VpiLineNo(int data) final { vpiLineNo_ = data; return true; }
+    virtual bool VpiLineNo(uint32_t data) final { vpiLineNo_ = data; return true; }
 
-    virtual short int VpiColumnNo() const final { return vpiColumnNo_; }
+    virtual uint16_t VpiColumnNo() const final { return vpiColumnNo_; }
 
-    virtual bool VpiColumnNo(short int data) final { vpiColumnNo_ = data; return true; }
+    virtual bool VpiColumnNo(uint16_t data) final { vpiColumnNo_ = data; return true; }
 
-    virtual int VpiEndLineNo() const final { return vpiEndLineNo_; }
+    virtual uint32_t VpiEndLineNo() const final { return vpiEndLineNo_; }
 
-    virtual bool VpiEndLineNo(int data) final { vpiEndLineNo_ = data; return true; }
+    virtual bool VpiEndLineNo(uint32_t data) final { vpiEndLineNo_ = data; return true; }
 
-    virtual short int VpiEndColumnNo() const final { return vpiEndColumnNo_; }
+    virtual uint16_t VpiEndColumnNo() const final { return vpiEndColumnNo_; }
 
-    virtual bool VpiEndColumnNo(short int data) final { vpiEndColumnNo_ = data; return true; }
+    virtual bool VpiEndColumnNo(uint16_t data) final { vpiEndColumnNo_ = data; return true; }
 
     virtual std::string_view VpiName() const { return kEmpty; }
 
     virtual std::string_view VpiDefName() const { return kEmpty; }
 
-    virtual unsigned int VpiType() const = 0;
+    virtual uint32_t VpiType() const = 0;
 
     ClientData* Data() const { return clientData_; }
 
     void Data(ClientData* data) { clientData_ = data; }
 
-    virtual unsigned int UhdmId() const = 0;
+    virtual uint32_t UhdmId() const = 0;
 
-    virtual bool UhdmId(unsigned int id) = 0;
+    virtual bool UhdmId(uint32_t id) = 0;
 
     // TODO: Make the next three functions pure-virtual after transition to pygen.
     virtual const BaseClass* GetByVpiName(std::string_view name) const;
 
     virtual std::tuple<const BaseClass*, UHDM_OBJECT_TYPE,
                        const std::vector<const BaseClass*>*>
-    GetByVpiType(int type) const;
+    GetByVpiType(int32_t type) const;
 
     typedef std::variant<int64_t, const char*> vpi_property_value_t;
-    virtual vpi_property_value_t GetVpiPropertyValue(int property) const;
+    virtual vpi_property_value_t GetVpiPropertyValue(int32_t property) const;
 
     // Create a deep copy of this object.
     virtual BaseClass* DeepClone(Serializer* serializer,
                                  ElaboratorListener* elaborator,
                                  BaseClass* parent) const = 0;
 
-    virtual int Compare(const BaseClass* const other, AnySet& visited) const;
-    int Compare(const BaseClass* const other) const;
+    virtual int32_t Compare(const BaseClass* const other,
+                            AnySet& visited) const;
+    int32_t Compare(const BaseClass* const other) const;
 
   protected:
     void DeepCopy(BaseClass* clone, Serializer* serializer,
@@ -137,10 +138,10 @@ namespace UHDM {
     ClientData* clientData_ = nullptr;
 
   private:
-    int vpiLineNo_ = 0;
-    int vpiEndLineNo_ = 0;
-    short int vpiColumnNo_ = 0;
-    short int vpiEndColumnNo_ = 0;
+    uint32_t vpiLineNo_ = 0;
+    uint32_t vpiEndLineNo_ = 0;
+    uint16_t vpiColumnNo_ = 0;
+    uint16_t vpiEndColumnNo_ = 0;
   };
 
   template<typename T>

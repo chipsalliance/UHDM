@@ -15,10 +15,10 @@ using namespace UHDM;
 
 class MyPayLoad : public ClientData {
  public:
-  MyPayLoad(int f) { foo_ = f; }
+  MyPayLoad(int32_t f) { foo_ = f; }
 
  private:
-  int foo_;
+  int32_t foo_;
 };
 
 static std::vector<vpiHandle> buildModulePortDesign(Serializer* s) {

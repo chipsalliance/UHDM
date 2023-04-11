@@ -69,7 +69,7 @@ def _get_vpi_xxx_visitor(type, vpi, card):
             content.append(f'  if (const char* s = vpi_get_str({vpi}, obj_h))')
             content.append(f'    stream_indent(out, indent) << "|{vpi}:" << s << "\\n";') # no std::endl, avoid flush
         else:
-            content.append(f'  if (const int n = vpi_get({vpi}, obj_h))')
+            content.append(f'  if (const int32_t n = vpi_get({vpi}, obj_h))')
             content.append(f'    stream_indent(out, indent) << "|{vpi}:" << n << "\\n";') # no std::endl, avoid flush
     return content
 
@@ -93,7 +93,7 @@ def generate(models):
         if vpi_name not in ignored_objects:
             visit_object_body.append(f'    case {vpi_name}: visit_{classname}(obj_h, indent, relation, visited, out, shallowVisit); break;')
 
-        private_visitor_bodies.append(f'static void visit_{classname}(vpiHandle obj_h, int indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit) {{')
+        private_visitor_bodies.append(f'static void visit_{classname}(vpiHandle obj_h, int32_t indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit) {{')
 
         # Make sure vpiParent is called before the base class visit.
         if modeltype != 'class_def':
@@ -124,7 +124,7 @@ def generate(models):
                 private_visitor_bodies.extend(_get_implementation(classname, vpi, card))
 
         if not type_specified and (modeltype == 'obj_def'):
-            private_visitor_bodies.extend(_get_vpi_xxx_visitor('unsigned int', 'vpiType', '1'))
+            private_visitor_bodies.extend(_get_vpi_xxx_visitor('uint32_t', 'vpiType', '1'))
 
         private_visitor_bodies.append(f'}}')
         private_visitor_bodies.append('')

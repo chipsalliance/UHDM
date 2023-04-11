@@ -52,7 +52,7 @@
     card: 1
   - property: tchk_type
     name: tchk type
-    type: int
+    type: int32_t
     vpi: vpiTchkType
     card: 1
   - obj_ref: attributes

@@ -19,22 +19,22 @@
   - property: type
     name: vpiCase
     vpi: vpiType
-    type: unsigned int
+    type: uint32_t
     card: 1
   - property: randtype
     name: rand type
     vpi: vpiRandType
-    type: unsigned int
+    type: uint32_t
     card: 1  
   - property: case_type
     name: case type
     vpi: vpiCaseType
-    type: int
+    type: int32_t
     card: 1
   - property: qualifier
     name: qualifier
     vpi: vpiQualifier
-    type: int
+    type: int32_t
     card: 1
   - class_ref: vpiCondition
     name: condition

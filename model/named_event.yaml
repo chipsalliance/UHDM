@@ -38,7 +38,7 @@
   - property: memory_allocation
     name: memory allocation
     vpi: vpiAllocScheme
-    type: int
+    type: int32_t
     card: 1
   - obj_ref: attributes
     name: attributes

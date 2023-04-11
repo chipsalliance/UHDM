@@ -45,7 +45,7 @@ bool UhdmListener::didVisitAll(const Serializer& serializer) const {
   std::transform(
       serializer.AllObjects().begin(), serializer.AllObjects().end(),
       std::inserter(allObjects, allObjects.begin()),
-      [](std::unordered_map<const BaseClass*, unsigned long>::const_reference
+      [](std::unordered_map<const BaseClass*, uint32_t>::const_reference
              entry) { return entry.first; });
 
   std::set<const any*> diffObjects;

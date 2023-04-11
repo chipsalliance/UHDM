@@ -55,9 +55,9 @@ std::string NumUtils::hexToBin(std::string_view s) {
 std::string NumUtils::binToHex(std::string_view s) {
   std::string out;
   out.reserve((s.length() + 3) / 4);
-  for (unsigned int i = 0; i < s.size(); i += 4) {
+  for (uint32_t i = 0; i < s.size(); i += 4) {
     int8_t n = 0;
-    for (unsigned int j = i; j < i + 4; ++j) {
+    for (uint32_t j = i; j < i + 4; ++j) {
       n <<= 1;
       if (s[j] == '1') n |= 1;
     }
@@ -70,11 +70,11 @@ std::string NumUtils::binToHex(std::string_view s) {
   return out;
 }
 
-std::string NumUtils::toBinary(int size, uint64_t val) {
-  int constexpr bitFieldSize = 64;
+std::string NumUtils::toBinary(int32_t size, uint64_t val) {
+  int32_t constexpr bitFieldSize = 64;
   std::string tmp = std::bitset<64>(val).to_string();
   if (size <= 0) {
-    for (unsigned int i = 0; i < bitFieldSize; i++) {
+    for (uint32_t i = 0; i < bitFieldSize; i++) {
       if (tmp[i] == '1') {
         size = bitFieldSize - i;
         break;
@@ -84,14 +84,14 @@ std::string NumUtils::toBinary(int size, uint64_t val) {
   std::string result;
   if (size < bitFieldSize) {
     result.reserve(bitFieldSize - size + 1);
-    for (unsigned int i = bitFieldSize - size; i < bitFieldSize; i++)
+    for (uint32_t i = bitFieldSize - size; i < bitFieldSize; i++)
       result += tmp[i];
   } else {
     result.reserve(size);
-    for (unsigned int i = 0; i < (unsigned int) (size - bitFieldSize); i++) {
+    for (uint32_t i = 0; i < (uint32_t) (size - bitFieldSize); i++) {
       result += "0";
     }
-    for (unsigned int i = 0; i < bitFieldSize; i++) {
+    for (uint32_t i = 0; i < bitFieldSize; i++) {
       result += tmp[i];
     }
   }
@@ -129,6 +129,10 @@ struct from_chars_available<
 template <typename T>
 inline constexpr bool from_chars_available_v = from_chars_available<T>::value;
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable: 4505)  // unreferenced function with internal linkage has been removed
+#endif
 // Copy everything that looks like a number into output iterator.
 static void CopyNumberTo(const char *in_begin, const char *in_end,
                          char *out_begin, const char *out_end) {
@@ -152,6 +156,9 @@ static void CopyNumberTo(const char *in_begin, const char *in_end,
   }
   *dst = '\0';
 }
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 template <typename T, T (*strto_fallback_fun)(const char *, char **)>
 static const char *strToIeee(std::string_view s, T *result) {
@@ -162,22 +169,23 @@ static const char *strToIeee(std::string_view s, T *result) {
     if (s.empty()) return nullptr;
     auto success = std::from_chars(s.data(), s.data() + s.size(), *result);
     return (success.ec == std::errc()) ? success.ptr : nullptr;
+  } else {
+    if (s.empty()) return nullptr;
+
+    // Fallback in case std::from_chars() does not exist for this type. Here,
+    // we just call the corresponding C-function, but first have to copy
+    // the number to a local buffer, as that one requires \0-termination.
+    char buffer[64] = {'\0'};
+
+    CopyNumberTo(s.data(), s.data() + s.size(), buffer,
+                 buffer + sizeof(buffer));
+    char *endptr = nullptr;
+    *result = strto_fallback_fun(buffer, &endptr);
+    if (endptr == buffer) return nullptr;  // Error.
+
+    // Now, convert our offset back relative to the original string.
+    return s.data() + (endptr - buffer);
   }
-
-  if (s.empty()) return nullptr;
-
-  // Fallback in case std::from_chars() does not exist for this type. Here,
-  // we just call the corresponding C-function, but first have to copy
-  // the number to a local buffer, as that one requires \0-termination.
-  char buffer[64] = {'\0'};
-
-  CopyNumberTo(s.data(), s.data() + s.size(), buffer, buffer + sizeof(buffer));
-  char *endptr = nullptr;
-  *result = strto_fallback_fun(buffer, &endptr);
-  if (endptr == buffer) return nullptr;  // Error.
-
-  // Now, convert our offset back relative to the original string.
-  return s.data() + (endptr - buffer);
 }
 
 const char *NumUtils::parseFloat(std::string_view s, float *result) {

@@ -18,7 +18,7 @@
   - extends: tf_call
   - property: func_type
     name: type
-    type: int
+    type: int32_t
     vpi: vpiFuncType
     card: 1
   - obj_ref: function

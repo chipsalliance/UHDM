@@ -18,7 +18,7 @@
   - property: size
     name: size
     vpi: vpiSize
-    type: int
+    type: int32_t
     card: 1
   - property: name
     name: name

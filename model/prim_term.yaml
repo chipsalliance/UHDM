@@ -18,12 +18,12 @@
   - property: direction
     name: direction
     vpi: vpiDirection
-    type: int
+    type: int32_t
     card: 1
   - property: index
     name: index
     vpi: vpiTermIndex
-    type: int
+    type: int32_t
     card: 1   
   - property: vpi_get_value
     name: vpi_get_value
