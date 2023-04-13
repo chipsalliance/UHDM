@@ -199,7 +199,7 @@ configure_file(${PROJECT_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uh
 add_library(uhdm ${uhdm-GENERATED_SRC})
 set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
 configure_file(${PROJECT_SOURCE_DIR}/include/config.h.in ${GENDIR}/uhdm/config.h)
-target_compile_options(uhdm PRIVATE
+target_compile_options(uhdm PUBLIC
   $<IF:$<CXX_COMPILER_ID:MSVC>,/FIuhdm/config.h,-include uhdm/config.h>)
 
 if(BUILD_SHARED_LIBS)
