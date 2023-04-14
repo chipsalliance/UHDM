@@ -1,7 +1,7 @@
 # -*- mode:cmake -*-
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-project(UHDM VERSION 1.54)
+project(UHDM VERSION 1.55)
 
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
@@ -398,7 +398,7 @@ install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/UHDMConfigVersion.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/UHDM
 )
-  
+
 # install the configuration file
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/UHDM.pc
