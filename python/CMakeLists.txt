@@ -3,9 +3,8 @@ find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
 # Include python
-find_package(PythonLibs REQUIRED)
-include_directories(${PYTHON_INCLUDE_PATH} ${GENDIR}/uhdm ${CMAKE_CURRENT_SOURCE_DIR})
-
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+include_directories(${Python3_INCLUDE_DIRS} ${GENDIR}/uhdm ${CMAKE_CURRENT_SOURCE_DIR})
 
 set_source_files_properties(${PROJECT_NAME}.i 
 	PROPERTIES CPLUSPLUS ON 
@@ -22,7 +21,7 @@ swig_add_library(py_uhdm
 	${PROJECT_NAME}.i swig_test.cpp
 )
 target_link_libraries(py_uhdm 
-	PRIVATE uhdm ${PYTHON_LIBRARIES}
+	PRIVATE uhdm ${Python3_LIBRARIES}
 )
 set_target_properties(py_uhdm PROPERTIES 
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
