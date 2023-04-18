@@ -127,7 +127,7 @@
  * Other parsers are welcome to generate UHDM databases
 
 # Python API
- * When uhdm is compile as a shared library (`-DBUILD_SHARED_LIBS=ON` on `cmake` command) it also build a swig wrapper for python. The python wrapper implement almost VPI getter API from systemVerilog. See chapter *38. VPI routine definitions* of Ieee1800-2017 for details.
+ * When uhdm is compiled as a shared library (`-DBUILD_SHARED_LIBS=ON` on `cmake` command) it also build a swig wrapper for python. The python wrapper implement almost VPI getter API from systemVerilog. See chapter *38. VPI routine definitions* of Ieee1800-2017 for details.
  * Find here a short example that assume an existing database. It will print all module name existing in the first design :
 ```python
 import uhdm
