@@ -38,6 +38,11 @@ test: build
 	cmake --build build --target UnitTests --config Release -j $(CPU_CORES)
 	cd build && ctest -C Release --output-on-failure
 
+test-shared: build-shared
+	cmake --build build --target UnitTests --config Release -j $(CPU_CORES)
+	cd build && ctest -C Release --output-on-failure
+
+
 test-junit: release
 	cd build && ctest --no-compress-output -T Test -C RelWithDebInfo --output-on-failure
 	xsltproc .github/kokoro/ctest2junit.xsl build/Testing/*/Test.xml > build/test_results.xml

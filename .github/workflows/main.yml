@@ -94,7 +94,7 @@ jobs:
     - name: Build & Test (Shared)
       run: |
         make release-shared
-        make test
+        make test-shared
         make install-shared
         make test_install
       if: ${{ !matrix.vendored_dependencies }}
