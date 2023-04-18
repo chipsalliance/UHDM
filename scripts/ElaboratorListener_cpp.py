@@ -44,7 +44,7 @@ def _generate_module_listeners(models, classname):
                     listeners.append( '    clone_vec->push_back(tf);')
                     listeners.append( '  }')
                     listeners.append( '}')
-                elif method in ['Cont_assigns']:
+                elif method in ['Cont_assigns', 'Primitives', 'Primitive_arrays']:
                     # We want to deep clone existing instance cont assign to perform binding
                     listeners.append(f'if (auto vec = inst->{method}()) {{')
                     listeners.append(f'  auto clone_vec = serializer_->Make{Cast}Vec();')
