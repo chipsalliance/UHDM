@@ -126,6 +126,31 @@
  * Surelog generates natively UHDM databases (surelog.uhdm)
  * Other parsers are welcome to generate UHDM databases
 
+# Python API
+ * When uhdm is compiled as a shared library (`-DBUILD_SHARED_LIBS=ON` on `cmake` command) it also build a swig wrapper for python. The python wrapper implement almost VPI getter API from systemVerilog. See chapter *38. VPI routine definitions* of Ieee1800-2017 for details.
+ * Find here a short example that assume an existing database. It will print all module name existing in the first design :
+```python
+import uhdm
+
+#build uhdm Serializer object
+s = uhdm.Serializer()
+#Read and uhdm database
+data = s.Restore('surelog.uhdm')
+
+#Your specific application
+#Here create an iterator on all module in the first design
+module_iterator = uhdm.vpi_iterate(uhdm.uhdmallModules,data[0])
+
+#iterate on all module
+while(True):
+   vpiObj_module = uhdm.vpi_scan(module_iterator)
+   if vpiObj_module is None:
+       break
+   #print the string pointed by vpiName attribut of vpiObj_module
+   print(uhdm.vpi_get_str(uhdm.vpiName,vpiObj_module))
+
+```
+
 
 # Useful links
 * [Verilog_Object_Model.pdf](third_party/Verilog_Object_Model.pdf) - Object Model section of the IEEE_Std1800-2017_8299595.pdf (Practical for searches)
