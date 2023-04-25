@@ -1948,39 +1948,43 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
   if (variables *var = any_cast<variables *>(object)) {
     UHDM_OBJECT_TYPE ttps = var->UhdmType();
     if (ttps == uhdmstruct_var) {
-      struct_typespec *stpt =
-          (struct_typespec *)((struct_var *)var)->Typespec();
-      for (typespec_member *member : *stpt->Members()) {
-        if (member->VpiName() == elemName) {
-          if (returnTypespec)
-            return (expr *)member->Typespec();
-          else
-            return (expr *)member->Default_value();
+      const typespec *stp = ((struct_var *)var)->Typespec();
+      if (stp->UhdmType() == uhdmstruct_typespec) {
+        struct_typespec *stpt = (struct_typespec *)stp;
+        for (typespec_member *member : *stpt->Members()) {
+          if (member->VpiName() == elemName) {
+            if (returnTypespec)
+              return (expr *)member->Typespec();
+            else
+              return (expr *)member->Default_value();
+          }
         }
       }
     } else if (ttps == uhdmclass_var) {
-      class_typespec *stpt = (class_typespec *)((class_var *)var)->Typespec();
-      const class_defn *defn = stpt->Class_defn();
-      while (defn) {
-        if (defn->Variables()) {
-          for (variables *member : *defn->Variables()) {
-            if (member->VpiName() == elemName) {
-              if (returnTypespec)
-                return (typespec *)member->Typespec();
-              else
-                return member;
+      const typespec *stpt = ((class_var *)var)->Typespec();
+      if (stpt->UhdmType() == uhdmclass_typespec) {
+        class_typespec* ctps = (class_typespec*) stpt;
+        const class_defn *defn = ctps->Class_defn();
+        while (defn) {
+          if (defn->Variables()) {
+            for (variables *member : *defn->Variables()) {
+              if (member->VpiName() == elemName) {
+                if (returnTypespec)
+                  return (typespec *)member->Typespec();
+                else
+                  return member;
+              }
+            }
+          }
+          const class_defn *tmp = defn;
+          defn = nullptr;
+          if (const extends *ext = tmp->Extends()) {
+            if (const class_typespec *tp = ext->Class_typespec()) {
+              defn = tp->Class_defn();
             }
           }
         }
-        const class_defn *tmp = defn;
-        defn = nullptr;
-        if (const extends *ext = tmp->Extends()) {
-          if (const class_typespec *tp = ext->Class_typespec()) {
-            defn = tp->Class_defn();
-          }
-        }
       }
-
     } else if (ttps == uhdmarray_var) {
       if (returnTypespec) return (typespec *)var->Typespec();
     }
@@ -2011,14 +2015,17 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     if (exp) {
       UHDM_OBJECT_TYPE ttps = exp->UhdmType();
       if (ttps == uhdmstruct_var) {
-        struct_typespec *stpt =
-            (struct_typespec *)((struct_var *)exp)->Typespec();
-        for (typespec_member *member : *stpt->Members()) {
-          if (member->VpiName() == elemName) {
-            if (returnTypespec)
-              return (expr *)member->Typespec();
-            else
-              return (expr *)member->Default_value();
+        const typespec *stp = ((struct_var *)exp)->Typespec();
+        if (stp->UhdmType() == uhdmstruct_typespec) {
+          struct_typespec *stpt = (struct_typespec *)stp;
+
+          for (typespec_member *member : *stpt->Members()) {
+            if (member->VpiName() == elemName) {
+              if (returnTypespec)
+                return (expr *)member->Typespec();
+              else
+                return (expr *)member->Default_value();
+            }
           }
         }
       }
