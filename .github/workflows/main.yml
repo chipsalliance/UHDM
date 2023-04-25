@@ -94,7 +94,7 @@ jobs:
     - name: Build & Test (Shared)
       run: |
         make release-shared
-        make test-shared
+        make test-shared UHDM_WITH_PYTHON=1
         make install-shared
         make test_install
       if: ${{ !matrix.vendored_dependencies }}

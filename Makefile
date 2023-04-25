@@ -67,7 +67,7 @@ build:
 
 build-shared:
 	mkdir -p build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DBUILD_SHARED_LIBS=ON $(ADDITIONAL_CMAKE_OPTIONS) -S . -B build
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(PREFIX) -DBUILD_SHARED_LIBS=ON -DUHDM_WITH_PYTHON=$(UHDM_WITH_PYTHON) $(ADDITIONAL_CMAKE_OPTIONS) -S . -B build
 
 test_install:
 	cmake --build build --target test_inst --config Release -j $(CPU_CORES)
