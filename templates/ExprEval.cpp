@@ -3711,6 +3711,15 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             UHDM::VectorOfany *ops = op->Operands();
             if (ops && (index_val < ops->size())) {
               result = ops->at(index_val);
+              if (const typespec* optps = op->Typespec()) {
+                if (optps->UhdmType() == uhdmarray_typespec) {
+                  array_typespec* atps = (array_typespec*) optps;
+                  const typespec* elemtps = atps->Elem_typespec();
+                  if (result->UhdmType() == uhdmoperation) {
+                    ((operation*)result)->Typespec((typespec*) elemtps);
+                  }
+                }
+              }
             } else if (ops) {
               bool defaultTaggedPattern = false;
               for (auto op : *ops) {
