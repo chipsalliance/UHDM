@@ -193,7 +193,7 @@ else()
 endif()
 
 set(UHDM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-message("Building version v${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} [${UHDM_VERSION_COMMIT_SHA}]")
+message("Building UHDM version v${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} [${UHDM_VERSION_COMMIT_SHA}]")
 configure_file(${PROJECT_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uhdm-version.h)
 
 add_library(uhdm ${uhdm-GENERATED_SRC})
