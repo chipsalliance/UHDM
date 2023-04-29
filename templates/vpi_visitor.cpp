@@ -34,12 +34,12 @@
 static bool showIDs = false;
 static constexpr int32_t kLevelIndent = 2;
 
-
 #ifdef STANDARD_VPI
 
 #include <sv_vpi_user.h>
 
-// Missing defines from vpi_user.h, sv_vpi_user.h, They are no-op in the Standard implementation.
+// Missing defines from vpi_user.h, sv_vpi_user.h, They are no-op in the
+// Standard implementation.
 #define uhdmdesign 2569
 #define uhdmallPackages 2570
 #define uhdmallClasses 2571
@@ -60,13 +60,13 @@ static constexpr int32_t kLevelIndent = 2;
 
 #else
 
-#include <uhdm/sv_vpi_user.h>
-#include <uhdm/vhpi_user.h>
-#include <uhdm/uhdm_types.h>
-#include <uhdm/containers.h>
-#include <uhdm/vpi_uhdm.h>
-#include <uhdm/uhdm.h>
 #include <uhdm/Serializer.h>
+#include <uhdm/containers.h>
+#include <uhdm/sv_vpi_user.h>
+#include <uhdm/uhdm.h>
+#include <uhdm/uhdm_types.h>
+#include <uhdm/vhpi_user.h>
+#include <uhdm/vpi_uhdm.h>
 
 #endif
 
@@ -74,31 +74,12 @@ static constexpr int32_t kLevelIndent = 2;
 
 // UHDM implementation redefine these
 #ifndef vpiVarBit
-  #define vpiVarBit          vpiRegBit
-  #define vpiLogicVar        vpiReg
-  #define vpiArrayVar        vpiRegArray
+  #define vpiVarBit   vpiRegBit
+  #define vpiLogicVar vpiReg
+  #define vpiArrayVar vpiRegArray
 #endif
 
-
 namespace UHDM {
-
-
-std::string decompile(UHDM::any* handle) {
-  UHDM::VisitedContainer visited;
-  vpi_show_ids(true);
-  if (handle == nullptr) {
-    std::cout << "NULL HANDLE\n";
-    return "NULL HANDLE";
-  }
-  vpiHandle dh = handle->GetSerializer()->MakeUhdmHandle(handle->UhdmType(), handle);
-  std::stringstream out;
-  visit_object(dh, 0, "decompile", &visited, out);
-  std::cout << out.str() << "\n";
-  vpi_release_handle(dh);
-  return out.str();
-}
-
-
 #ifdef STANDARD_VPI
 
 static std::string vpiTypeName(vpiHandle h) {
@@ -421,86 +402,84 @@ static void release_handle(vpiHandle obj_h) {
 }
 
 static std::string visit_value(s_vpi_value* value) {
-  if (value == nullptr)
-    return "";
+  if (value == nullptr) return "";
   switch (value->format) {
-  case vpiIntVal:
+    case vpiIntVal:
       return std::string("|INT:")
           .append(std::to_string(value->value.integer))
           .append("\n");
-  case vpiUIntVal:
-    return std::string("|UINT:")
-        .append(std::to_string(value->value.uint))
-        .append("\n");
-  case vpiStringVal:
-    return std::string("|STRING:")
-        .append((const char*)value->value.str)
-        .append("\n");
-  case vpiBinStrVal:
-    return std::string("|BIN:")
-        .append((const char*)value->value.str)
-        .append("\n");
-  case vpiHexStrVal:
-    return std::string("|HEX:")
-        .append((const char*)value->value.str)
-        .append("\n");
-  case vpiOctStrVal:
-    return std::string("|OCT:")
-        .append((const char*)value->value.str)
-        .append("\n");
-  case vpiRealVal:
-    return std::string("|REAL:")
-        .append(std::to_string(value->value.real))
-        .append("\n");
-  case vpiScalarVal:
-    return std::string("|SCAL:")
-        .append(std::to_string(value->value.scalar))
-        .append("\n");
-  case vpiDecStrVal:
-    return std::string("|DEC:")
-        .append((const char*)value->value.str)
-        .append("\n");
+    case vpiUIntVal:
+      return std::string("|UINT:")
+          .append(std::to_string(value->value.uint))
+          .append("\n");
+    case vpiStringVal:
+      return std::string("|STRING:")
+          .append((const char*)value->value.str)
+          .append("\n");
+    case vpiBinStrVal:
+      return std::string("|BIN:")
+          .append((const char*)value->value.str)
+          .append("\n");
+    case vpiHexStrVal:
+      return std::string("|HEX:")
+          .append((const char*)value->value.str)
+          .append("\n");
+    case vpiOctStrVal:
+      return std::string("|OCT:")
+          .append((const char*)value->value.str)
+          .append("\n");
+    case vpiRealVal:
+      return std::string("|REAL:")
+          .append(std::to_string(value->value.real))
+          .append("\n");
+    case vpiScalarVal:
+      return std::string("|SCAL:")
+          .append(std::to_string(value->value.scalar))
+          .append("\n");
+    case vpiDecStrVal:
+      return std::string("|DEC:")
+          .append((const char*)value->value.str)
+          .append("\n");
   }
   return "";
 }
 
 static std::string visit_delays(s_vpi_delay* delay) {
-  if (delay == nullptr)
-    return "";
+  if (delay == nullptr) return "";
   switch (delay->time_type) {
-  case vpiScaledRealTime:
-    return std::string("|#").append(std::to_string(delay->da[0].low)).append("\n");
+    case vpiScaledRealTime:
+      return std::string("|#")
+          .append(std::to_string(delay->da[0].low))
+          .append("\n");
   }
   return "";
 }
 
-static std::ostream& stream_indent(std::ostream& out, int32_t indent) {
-  out << std::string(indent, ' ');
-  return out;
-}
+class VpiVisitor {
+ private:
+  inline std::ostream &stream_indent(int32_t indent) const {
+    return m_out << std::string(indent, ' ');
+  }
 
 <PRIVATE_OBJECT_VISITORS>
-void visit_object(vpiHandle obj_h, int32_t indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit) {
-  if (!obj_h)
-    return;
+
+ public:
+  void visit_object(vpiHandle obj_h, int32_t indent, const char *relation, bool shallowVisit) {
+    if (!obj_h) return;
+
 #ifdef STANDARD_VPI
-
-  const bool alreadyVisited = visited->find(obj_h) != visited->end();
-  visited->insert(obj_h);
-
+    const bool alreadyVisited = m_visited,find(obj_h) != m_visited.end();
+    m_visited.insert(obj_h);
 #else
-
-  const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
-  const BaseClass* const object = (const BaseClass*) handle->object;
-  const bool alreadyVisited = (visited->find(object) != visited->end());
-  if (!shallowVisit)
-    visited->insert(object);
-
+    const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
+    const BaseClass* const object = (const BaseClass*) handle->object;
+    const bool alreadyVisited = (m_visited.find(object) != m_visited.end());
+    if (!shallowVisit)
+      m_visited.insert(object);
 #endif
 
-  const uint32_t objectType = vpi_get(vpiType, obj_h);
+    const uint32_t objectType = vpi_get(vpiType, obj_h);
 
-  {
     std::string hspaces;
     std::string rspaces;
     if (indent >= kLevelIndent) {
@@ -510,37 +489,30 @@ void visit_object(vpiHandle obj_h, int32_t indent, const char *relation, Visited
     }
 
     if (strlen(relation) != 0) {
-      out << rspaces << relation << ":\n";
+      m_out << rspaces << relation << ":\n";
     }
 
 #ifdef STANDARD_VPI
-
-    out << hspaces << vpiTypeName(obj_h) << "(" << vpi_get(vpiType, obj_h) << "): ";
-
+    m_out << hspaces << vpiTypeName(obj_h) << "(" << vpi_get(vpiType, obj_h) << "): ";
 #else
-
-    out << hspaces << UHDM::VpiTypeName(obj_h) << ": ";
-
+    m_out << hspaces << UHDM::VpiTypeName(obj_h) << ": ";
 #endif
 
     bool needs_separator = false;
     if (const char* s = vpi_get_str(vpiDefName, obj_h)) {  // defName
-      out << s;
+      m_out << s;
       needs_separator = true;
     }
-    if (const char* s = vpi_get_str(vpiFullName, obj_h)) {   // objectName
-      if (needs_separator) out << " ";
-      out << "(" << s << ")";  // objectName
-    } else if (const char* s = vpi_get_str(vpiName, obj_h)) {   // objectName
-      if (needs_separator) out << " ";
-      out << "(" << s << ")";  // objectName
+    if (const char* s1 = vpi_get_str(vpiFullName, obj_h)) {   // objectName
+      if (needs_separator) m_out << " ";
+      m_out << "(" << s1 << ")";  // objectName
+    } else if (const char* s2 = vpi_get_str(vpiName, obj_h)) {   // objectName
+      if (needs_separator) m_out << " ";
+      m_out << "(" << s2 << ")";  // objectName
     }
 
 #ifndef STANDARD_VPI
-
-    if (showIDs)
-      out << ", id:" << object->UhdmId();
-
+    if (showIDs) m_out << ", id:" << object->UhdmId();
 #endif
 
     if ((objectType == vpiModule) || (objectType == vpiProgram) ||
@@ -548,40 +520,70 @@ void visit_object(vpiHandle obj_h, int32_t indent, const char *relation, Visited
         (objectType == vpiInterface) || (objectType == vpiUdp) ||
         (objectType == vpiIncludeFileInfo)) {
       if (const char* s = vpi_get_str(vpiFile, obj_h)) {
-        out << ", file:" << s;  // fileName
+        m_out << ", file:" << s;  // fileName
       }
     }
 
     if (uint32_t sl = vpi_get(vpiLineNo, obj_h)) {
-      out << ", line:" << sl << ":" << vpi_get(vpiColumnNo, obj_h);
+      m_out << ", line:" << sl << ":" << vpi_get(vpiColumnNo, obj_h);
 
       if (uint32_t el = vpi_get(vpiEndLineNo, obj_h)) {
-        out << ", endln:" << el << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
+        m_out << ", endln:" << el << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
       }
     }
-    out << "\n";
+    m_out << "\n";
+
+    // Force shallow visit for all vpiParent except for vpiRefObj
+    if (strcmp(relation, "vpiParent") == 0) {
+      shallowVisit = (objectType != vpiRefObj);
+    }
+
+    if (alreadyVisited || shallowVisit) {
+      return;
+    }
+
+    switch (objectType) {
+<VISITOR_CASE_STATEMENTS>
+     }
   }
 
-  // Force shallow visit for all vpiParent except for vpiRefObj
-  if (strcmp(relation, "vpiParent") == 0) {
-    shallowVisit = (objectType != vpiRefObj);
-  }
+  explicit VpiVisitor(std::ostream& out) : m_out(out) {}
 
-  if (alreadyVisited || shallowVisit) {
-    return;
-  }
-<OBJECT_VISITORS>
+ private:
+  std::ostream& m_out;
+  VisitedContainer m_visited;
+};
+
+void visit_object(vpiHandle obj_h, std::ostream& out, bool shallowVisit /* = false */) {
+  VpiVisitor visitor(out);
+  visitor.visit_object(obj_h, 0, "", shallowVisit);
 }
 
 // Public interface
 void visit_designs(const std::vector<vpiHandle>& designs, std::ostream &out) {
   for (auto design : designs) {
-    VisitedContainer visited;
-    visit_object(design, 0, "", &visited, out);
+    VpiVisitor visitor(out);
+    visitor.visit_object(design, 0, "", false);
   }
 }
 
-};
+std::string decompile(UHDM::any* handle) {
+  UHDM::VisitedContainer visited;
+  vpi_show_ids(true);
+  if (handle == nullptr) {
+    std::cout << "NULL HANDLE\n";
+    return "NULL HANDLE";
+  }
+  vpiHandle dh =
+      handle->GetSerializer()->MakeUhdmHandle(handle->UhdmType(), handle);
+  std::stringstream out;
+  VpiVisitor visitor(out);
+  visitor.visit_object(dh, 0, "decompile", false);
+  std::cout << out.str() << std::endl;
+  vpi_release_handle(dh);
+  return out.str();
+}
+} // namespace UHDM
 
 void vpi_show_ids(bool show) {
   showIDs = show;

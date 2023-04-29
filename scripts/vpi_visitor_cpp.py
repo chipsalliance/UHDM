@@ -31,18 +31,18 @@ def _get_implementation(classname, vpi, card):
             # Ref_obj are always printed shallow
             shallow_visit = 'true'
 
-        content.append(f'  if (vpiHandle itr = vpi_handle({vpi}, obj_h)) {{')
-        content.append(f'    visit_object(itr, indent + kLevelIndent, "{vpi}", visited, out, {shallow_visit});')
-        content.append( '    release_handle(itr);')
-        content.append( '  }')
-    else:
-        content.append(f'  if (vpiHandle itr = vpi_iterate({vpi}, obj_h)) {{')
-        content.append( '    while (vpiHandle obj = vpi_scan(itr)) {')
-        content.append(f'      visit_object(obj, indent + kLevelIndent, "{vpi}", visited, out, false);')
-        content.append( '      release_handle(obj);')
+        content.append(f'    if (vpiHandle itr = vpi_handle({vpi}, obj_h)) {{')
+        content.append(f'      visit_object(itr, indent + kLevelIndent, "{vpi}", {shallow_visit});')
+        content.append( '      release_handle(itr);')
         content.append( '    }')
-        content.append( '    release_handle(itr);')
-        content.append( '  }')
+    else:
+        content.append(f'    if (vpiHandle itr = vpi_iterate({vpi}, obj_h)) {{')
+        content.append( '      while (vpiHandle obj = vpi_scan(itr)) {')
+        content.append(f'        visit_object(obj, indent + kLevelIndent, "{vpi}", false);')
+        content.append( '        release_handle(obj);')
+        content.append( '      }')
+        content.append( '      release_handle(itr);')
+        content.append( '    }')
 
     return content
 
@@ -50,32 +50,32 @@ def _get_implementation(classname, vpi, card):
 def _get_vpi_xxx_visitor(type, vpi, card):
     content = []
     if vpi == 'vpiValue':
-        content.append('  s_vpi_value value;')
-        content.append('  vpi_get_value(obj_h, &value);')
-        content.append('  if (value.format) {')
-        content.append('    std::string val = visit_value(&value);')
-        content.append('    if (!val.empty()) {')
-        content.append('      stream_indent(out, indent) << val;')
+        content.append('    s_vpi_value value;')
+        content.append('    vpi_get_value(obj_h, &value);')
+        content.append('    if (value.format) {')
+        content.append('      std::string val = visit_value(&value);')
+        content.append('      if (!val.empty()) {')
+        content.append('        stream_indent(indent) << val;')
+        content.append('      }')
         content.append('    }')
-        content.append('  }')
     elif vpi == 'vpiDelay':
-        content.append('  s_vpi_delay delay;')
-        content.append('  vpi_get_delays(obj_h, &delay);')
-        content.append('  if (delay.da != nullptr) {')
-        content.append('    stream_indent(out, indent) << visit_delays(&delay);')
-        content.append('  }')
+        content.append('    s_vpi_delay delay;')
+        content.append('    vpi_get_delays(obj_h, &delay);')
+        content.append('    if (delay.da != nullptr) {')
+        content.append('      stream_indent(indent) << visit_delays(&delay);')
+        content.append('    }')
     elif (card == '1') and (vpi not in ['vpiType', 'vpiFile', 'vpiLineNo', 'vpiColumnNo', 'vpiEndLineNo', 'vpiEndColumnNo']):
         if type == 'string':
-            content.append(f'  if (const char* s = vpi_get_str({vpi}, obj_h))')
-            content.append(f'    stream_indent(out, indent) << "|{vpi}:" << s << "\\n";') # no std::endl, avoid flush
+            content.append(f'    if (const char* s = vpi_get_str({vpi}, obj_h))')
+            content.append(f'      stream_indent(indent) << "|{vpi}:" << s << "\\n";') # no std::endl, avoid flush
         else:
-            content.append(f'  if (const int32_t n = vpi_get({vpi}, obj_h))')
-            content.append(f'    stream_indent(out, indent) << "|{vpi}:" << n << "\\n";') # no std::endl, avoid flush
+            content.append(f'    if (const int32_t n = vpi_get({vpi}, obj_h))')
+            content.append(f'      stream_indent(indent) << "|{vpi}:" << n << "\\n";') # no std::endl, avoid flush
     return content
 
 
 def generate(models):
-    visit_object_body = []
+    visitor_case_statements = []
     private_visitor_bodies = []
 
     ignored_objects = set(['vpiNet'])
@@ -91,9 +91,9 @@ def generate(models):
 
         vpi_name = config.make_vpi_name(classname)
         if vpi_name not in ignored_objects:
-            visit_object_body.append(f'    case {vpi_name}: visit_{classname}(obj_h, indent, relation, visited, out, shallowVisit); break;')
+            visitor_case_statements.append(f'      case {vpi_name}: visit_{classname}(obj_h, indent, relation, shallowVisit); break;')
 
-        private_visitor_bodies.append(f'static void visit_{classname}(vpiHandle obj_h, int32_t indent, const char *relation, VisitedContainer* visited, std::ostream& out, bool shallowVisit) {{')
+        private_visitor_bodies.append(f'  void visit_{classname}(vpiHandle obj_h, int32_t indent, const char *relation, bool shallowVisit) {{')
 
         # Make sure vpiParent is called before the base class visit.
         if modeltype != 'class_def':
@@ -101,7 +101,7 @@ def generate(models):
 
         baseclass = model.get('extends', None)
         if baseclass:
-            private_visitor_bodies.append(f'  visit_{baseclass}(obj_h, indent, relation, visited, out, shallowVisit);')
+            private_visitor_bodies.append(f'    visit_{baseclass}(obj_h, indent, relation, shallowVisit);')
 
         if modeltype != 'class_def':
             private_visitor_bodies.extend(_get_vpi_xxx_visitor('string', 'vpiFile', '1'))
@@ -126,16 +126,14 @@ def generate(models):
         if not type_specified and (modeltype == 'obj_def'):
             private_visitor_bodies.extend(_get_vpi_xxx_visitor('uint32_t', 'vpiType', '1'))
 
-        private_visitor_bodies.append(f'}}')
+        private_visitor_bodies.append(f'  }}')
         private_visitor_bodies.append('')
-
-    visitors = [ f'  switch (objectType) {{' ] + sorted(visit_object_body) + [ f'  }}' ]
 
     # vpi_visitor.cpp
     with open(config.get_template_filepath('vpi_visitor.cpp'), 'rt') as strm:
         file_content = strm.read()
 
-    file_content = file_content.replace('<OBJECT_VISITORS>', '\n'.join(visitors))
+    file_content = file_content.replace('<VISITOR_CASE_STATEMENTS>', '\n'.join(visitor_case_statements))
     file_content = file_content.replace('<PRIVATE_OBJECT_VISITORS>', '\n'.join(private_visitor_bodies))
     file_utils.set_content_if_changed(config.get_output_source_filepath('vpi_visitor.cpp'), file_content)
 
