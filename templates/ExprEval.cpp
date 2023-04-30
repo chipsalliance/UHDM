@@ -604,11 +604,22 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
     if (op->VpiOpType() != vpiAssignmentPatternOp) {
       return result;
     }
+    if (tps->UhdmType() == uhdmarray_typespec) {
+      array_typespec* atps = (array_typespec*) tps;
+      tps = atps->Elem_typespec();
+    }
+    if (tps == nullptr) {
+      return result;
+    }
     if (tps->UhdmType() != uhdmstruct_typespec) {
       tps = op->Typespec();
     }
     if (tps == nullptr) {
       return result;
+    }
+    if (tps->UhdmType() == uhdmarray_typespec) {
+      array_typespec* atps = (array_typespec*) tps;
+      tps = atps->Elem_typespec();
     }
     if (tps->UhdmType() != uhdmstruct_typespec) {
       return result;
@@ -624,6 +635,18 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       fieldTypes.emplace_back(memb->Typespec());
     }
     VectorOfany *orig = op->Operands();
+    if (orig->size() == 1) {
+      for (auto oper : *orig) {
+        if (oper->UhdmType() == uhdmoperation) {
+          operation *opi = (operation *)oper;
+          if (opi->VpiOpType() == vpiAssignmentPatternOp) {
+            op = opi;
+            orig = op->Operands();
+            break;
+          }
+        }
+      }
+    }
     VectorOfany *ordered = s.MakeAnyVec();
     std::vector<any *> tmp(fieldNames.size());
     any *defaultOp = nullptr;
@@ -663,6 +686,8 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
           }
           return result;
         }
+      } else if (oper->UhdmType() == uhdmoperation) {
+        return result;
       } else {
         if (index < (int32_t)tmp.size()) {
           tmp[index] = oper;
@@ -677,13 +702,13 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
     }
     index = 0;
     ElaboratorListener listener(&s, false, m_muteError);
-    for (auto op : tmp) {
+    for (auto opi : tmp) {
       if (defaultOp) {
-        if (op == nullptr) {
-          op = clone_tree((any *)defaultOp, s, &listener);
+        if (opi == nullptr) {
+          opi = clone_tree((any *)defaultOp, s, &listener);
         }
       }
-      if (op == nullptr) {
+      if (opi == nullptr) {
         if (!m_muteError) {
           const std::string errMsg(fieldNames[index]);
           s.GetErrorHandler()(ErrorType::UHDM_UNMATCHED_FIELD_IN_PATTERN_ASSIGN,
@@ -691,8 +716,8 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
         }
         return result;
       }
-      if (op->UhdmType() == uhdmtagged_pattern) {
-        tagged_pattern *tp = (tagged_pattern *)op;
+      if (opi->UhdmType() == uhdmtagged_pattern) {
+        tagged_pattern *tp = (tagged_pattern *)opi;
         const any *patt = tp->Pattern();
         if (patt->UhdmType() == uhdmconstant) {
           constant *c = (constant *)patt;
@@ -721,12 +746,12 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
           if (patt->UhdmType() == uhdmoperation) {
             operation* patt_op = (operation*)patt;
             if (patt_op->VpiOpType() == vpiAssignmentPatternOp) {
-              op = flattenPatternAssignments(s, fieldTypes[index], patt_op);
+              opi = flattenPatternAssignments(s, fieldTypes[index], patt_op);
             }
           }
         }
       }
-      ordered->push_back(op);
+      ordered->push_back(opi);
       index++;
     }
     operation *opres = (operation *)clone_tree((any *)op, s, &listener);
