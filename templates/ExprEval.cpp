@@ -543,7 +543,8 @@ void ExprEval::recursiveFlattening(Serializer &s, VectorOfany *flattened,
                     } else if (moldtype == uhdmlogic_typespec) {
                       logic_typespec *molds = (logic_typespec *)mold;
                       VectorOfrange *ranges = molds->Ranges();
-                      for (range *r : *ranges) {
+                      if (!ranges->empty()) {
+                        range *r = ranges->front();
                         uint64_t from = getValue(r->Left_expr());
                         uint64_t to = getValue(r->Right_expr());
                         if (from > to) {
@@ -553,7 +554,6 @@ void ExprEval::recursiveFlattening(Serializer &s, VectorOfany *flattened,
                           sops->push_back((any *)patt);
                         }
                         // TODO: Multidimension
-                        break;
                       }
                     }
                     substituted = true;

@@ -92,7 +92,7 @@ void SynthSubset::report(std::ostream& out) {
     vpiHandle dh =
         object->GetSerializer()->MakeUhdmHandle(object->UhdmType(), object);
 
-    visit_object(dh, 0, "", &visitedObjects, out, true);
+    visit_object(dh, out, true);
     vpi_release_handle(dh);
   }
 }

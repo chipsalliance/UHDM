@@ -24,7 +24,7 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
     check = ''
     group_headers = []
     if type == 'any':
-        check = f'if (!{real_type}GroupCompliant(data)) return false; '
+        check = f'if (!{real_type}GroupCompliant(data)) return false;\n    '
 
     Vpi_ = vpi[:1].upper() + vpi[1:]
 
@@ -40,10 +40,10 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
             content.append(f'  {virtual}std::string_view {Vpi_}() const{final};')
         else:
             content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
-            content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final} {{ {check}{vpi}_ = data; return true; }}')
+            content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final} {{\n    {check}{vpi}_ = data;\n    return true;\n  }}')
     elif card == 'any':
         content.append(f'  VectorOf{type}* {Vpi_}() const {{ return {vpi}_; }}')
-        content.append(f'  bool {Vpi_}(VectorOf{type}* data) {{ {check}{vpi}_ = data; return true; }}')
+        content.append(f'  bool {Vpi_}(VectorOf{type}* data) {{\n    {check}{vpi}_ = data;\n    return true;\n  }}')
 
     return content
 
@@ -129,10 +129,15 @@ def _get_implementations(classname, type, vpi, card, real_type=''):
         content.append( '  }')
         content.append( '}')
     else:
-        content.append(f'std::string_view {classname}::{Vpi_}() const {{ return {vpi}_ ? serializer_->symbolMaker.GetSymbol({vpi}_) : kEmpty; }}')
+        content.append(f'std::string_view {classname}::{Vpi_}() const {{')
+        content.append(f'  return {vpi}_ ? serializer_->symbolMaker.GetSymbol({vpi}_) : kEmpty;')
+        content.append(f'}}')
 
     content.append('')
-    content.append(f'bool {classname}::{Vpi_}(std::string_view data) {{ {vpi}_ = serializer_->symbolMaker.Make(data); return true; }}')
+    content.append(f'bool {classname}::{Vpi_}(std::string_view data) {{')
+    content.append(f'  {vpi}_ = serializer_->symbolMaker.Make(data);')
+    content.append(f'  return true;')
+    content.append(f'}}')
     content.append('')
 
     return content, includes
