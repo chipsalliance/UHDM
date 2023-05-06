@@ -3599,6 +3599,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     } else if (name == "$signed" || name == "$unsigned") {
       bool invalidTmpValue = false;
       if (scall->Tf_call_args()) {
+        const typespec* optps = scall->Typespec();
         for (auto arg : *scall->Tf_call_args()) {
           expr *val = reduceExpr(arg, invalidTmpValue, inst, pexpr, muteError);
           if (val && (val->UhdmType() == uhdmconstant) &&
@@ -3636,9 +3637,31 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (name == "$signed") {
                 int64_t res = value;
                 bool negsign = value & (1ULL << (size - 1));
-                if (negsign) {
-                  res &= ~(1ULL << (size - 1));
-                  res = -res;
+                if (optps) {
+                  uint32_t bits = ExprEval::size(optps, invalidValue, inst, pexpr,
+                                       false);
+                  bool is_signed = false;
+                  if (optps->UhdmType() == uhdmlogic_typespec) {
+                    logic_typespec* ltps = (logic_typespec*) optps;
+                    is_signed = ltps->VpiSigned();
+                  }
+                  if (!is_signed) {
+                    if ((size >= 0) && (bits > size)) {
+                      for (uint32_t i = (uint32_t) size ; i < bits; i++) {
+                        res |= 1ULL << i;
+                      }
+                    }
+                  } else {
+                    uint32_t half = (2 << (size - 2));
+                    if (res >= half) {
+                      res =  (-(2 << (size - 1))) + res;
+                    }
+                  }
+                } else {
+                  if (negsign) {
+                   res &= ~(1ULL << (size - 1));
+                   res = -res;
+                  }
                 }
                 UHDM::constant *c = s.MakeConstant();
                 c->VpiValue("INT:" + std::to_string(res));
