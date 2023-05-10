@@ -3737,7 +3737,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         if (otype == uhdmpacked_array_var) {
           packed_array_var *array = (packed_array_var *)object;
           VectorOfany *elems = array->Elements();
-          if (index_val < elems->size()) {
+          if (elems && index_val < elems->size()) {
             any *elem = elems->at(index_val);
             if (elem->UhdmType() == uhdmenum_var ||
                 elem->UhdmType() == uhdmstruct_var ||
