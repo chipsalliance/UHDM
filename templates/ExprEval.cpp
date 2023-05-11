@@ -1704,6 +1704,10 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr,
       case vpiStringConst: {
         sv.remove_prefix(std::string_view("STRING:").length());
         result = 0;
+        if (sv.size() > 8) {
+          invalidValue = true;
+          break;
+        }
         for (uint32_t i = 0; i < sv.size(); i++) {
           result += (sv[i] << ((sv.size() - (i + 1)) * 8));
         }
@@ -1810,6 +1814,10 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr,
       case vpiStringConst: {
         sv.remove_prefix(std::string_view("STRING:").length());
         result = 0;
+        if (sv.size() > 8) {
+          invalidValue = true;
+          break;
+        }
         for (uint32_t i = 0; i < sv.size(); i++) {
           result += (sv[i] << ((sv.size() - (i + 1)) * 8));
         }
