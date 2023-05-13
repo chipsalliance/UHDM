@@ -201,16 +201,17 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
   if (!elaboratedTree_) return;
   if (object->VpiSize() == -1) {
     const any* parent = object->VpiParent();
+    int32_t size = object->VpiSize();
+    bool invalidValue = false;
+    UHDM::ExprEval eval;
+    ElaboratorListener listener(serializer_);
     if (parent) {
       if (parent->UhdmType() == uhdmoperation) {
         operation* op = (operation*)parent;
-        int32_t size = object->VpiSize();
         int32_t indexSelf = 0;
         int32_t i = 0;
         for (any* oper : *op->Operands()) {
           if (oper != object) {
-            ExprEval eval;
-            bool invalidValue = false;
             int32_t tmp = static_cast<int32_t>(eval.size(
                 oper, invalidValue, currentInstance_, op, true, true));
             if (!invalidValue) {
@@ -222,12 +223,9 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           i++;
         }
         if (size != object->VpiSize()) {
-          ElaboratorListener listener(serializer_);
           constant* newc =
               (constant*)UHDM::clone_tree(object, *serializer_, &listener);
           newc->VpiSize(size);
-          bool invalidValue = false;
-          UHDM::ExprEval eval;
           int64_t val = eval.get_value(invalidValue, object);
           if (val == 1) {
             uint64_t mask = NumUtils::getMask(size);
@@ -236,6 +234,43 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
             newc->VpiConstType(vpiUIntConst);
           }
           op->Operands()->at(indexSelf) = newc;
+        }
+      } else if (parent->UhdmType() == uhdmcont_assign) {
+        cont_assign* assign = (cont_assign*) parent;
+        const any* lhs = assign->Lhs();
+        if (lhs->UhdmType() == uhdmhier_path) {
+          hier_path* path = (hier_path*) lhs;
+          any* last = path->Path_elems()->back();
+          if (last->UhdmType() == uhdmref_obj) {
+            ref_obj* ref = (ref_obj*) last;
+            if (const any* actual = ref->Actual_group()) {
+              const typespec* tps = nullptr;
+              if (actual->UhdmType() == uhdmtypespec_member) {
+                typespec_member* member = (typespec_member*) actual;
+                tps = member->Typespec();
+              }
+              if (tps) {
+                int32_t tmp = static_cast<int32_t>(eval.size(
+                    tps, invalidValue, currentInstance_, assign, true, true));
+                if (!invalidValue) {
+                  size = tmp;
+                }
+              }
+            }
+          }
+        }
+        if (size != object->VpiSize()) {
+          constant* newc =
+              (constant*)UHDM::clone_tree(object, *serializer_, &listener);
+          newc->VpiSize(size);
+          int64_t val = eval.get_value(invalidValue, object);
+          if (val == 1) {
+            uint64_t mask = NumUtils::getMask(size);
+            newc->VpiValue("UINT:" + std::to_string(mask));
+            newc->VpiDecompile(std::to_string(mask));
+            newc->VpiConstType(vpiUIntConst);
+          }
+          assign->Rhs(newc);
         }
       }
     }
