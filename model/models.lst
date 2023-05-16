@@ -263,4 +263,6 @@ constr_if.yaml
 constr_if_else.yaml
 constr_foreach.yaml
 soft_disable.yaml
+gen_stmt.yaml
+gen_if.yaml
 design.yaml
