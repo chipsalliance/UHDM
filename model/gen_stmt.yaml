@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "interface_array" formal description
- 
-- obj_def: interface_array
-  - extends: instance_array
-  - obj_ref: param_assigns
-    name: param assign
-    vpi: vpiParamAssign
-    type: param_assign
+# Universal Hardware Data Model (UHDM) "gen_stmt" formal description
+# This model is not in the standard, it enables modeling generate statements
+# in the non-elaborate tree
+
+- class_def: gen_stmt
+  - property: label
+    name: label
+    vpi: vpiName
+    type: string
+    card: 1
+  - obj_ref: attributes
+    name: attributes
+    vpi: vpiAttribute
+    type: attribute
     card: any

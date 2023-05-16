@@ -19,5 +19,7 @@
   - class_ref: atomic_stmt
   - class_ref: expr
   - group_ref: assertion
-  
+# Non standard for non-elab model
+  - obj_ref: cont_assign
+
 

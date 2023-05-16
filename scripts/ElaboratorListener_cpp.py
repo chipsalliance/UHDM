@@ -98,7 +98,7 @@ def _generate_module_listeners(models, classname):
                     listeners.append( '  }')
                     listeners.append( '}')
 
-                elif method in ['Ref_modules']:
+                elif method in ['Ref_modules', 'Gen_stmts']:
                     # No elab
                     listeners.append( '')
 
