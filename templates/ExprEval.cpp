@@ -4312,7 +4312,14 @@ bool ExprEval::setValueInInstance(
               lhsbinary += "x";
             }
           }
-          lhsbinary[index] = std::to_string(valUI)[0];
+
+          uint64_t size_rhs = ((constant*)rhsexp)->VpiSize();
+          std::string tobinary = NumUtils::toBinary(size_rhs,valUI);
+          for (uint32_t i = 0; i < size_rhs; i++) {
+            if (((index * size_rhs) + i) < si) {
+              lhsbinary[(index * size_rhs) + i] = tobinary[i];
+            }
+          }
           std::reverse(lhsbinary.begin(), lhsbinary.end());
           c = s.MakeConstant();
           c->VpiValue("BIN:" + lhsbinary);
