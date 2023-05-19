@@ -152,6 +152,31 @@ std::string ExprEval::toBinary(const UHDM::constant *c) {
       result = NumUtils::toBinary(c->VpiSize(), res);
       break;
     }
+    case vpiScalar: {
+      sv.remove_prefix(std::string_view("SCAL:").length());
+      uint64_t res = 0;
+      if (NumUtils::parseBinary(sv, &res) == nullptr) {
+        res = 0;
+      }
+      result = NumUtils::toBinary(c->VpiSize(), res);
+      break;
+    }
+    case vpiStringConst: {
+      sv.remove_prefix(std::string_view("STRING:").length());
+      if (sv.size() > 32) {
+        return result;
+      }
+      uint64_t res = 0;
+      for (uint32_t i = 0; i < sv.size(); i++) {
+        res += (sv[i] << ((sv.size() - (i + 1)) * 8));
+      }
+      result = NumUtils::toBinary(c->VpiSize(), res);
+      break;
+    }
+    case vpiRealConst: {
+      // Don't do the double precision math, leave it to client tools
+      break;
+    }
     default: {
       if (sv.find("UINT:") == 0) {
         sv.remove_prefix(std::string_view("UINT:").length());
@@ -1584,19 +1609,8 @@ expr *ExprEval::reduceBitSelect(expr *op, uint32_t index_val,
   expr *result = nullptr;
   expr *exp = reduceExpr(op, invalidValue, inst, pexpr, muteError);
   if (exp && (exp->UhdmType() == uhdmconstant)) {
-    std::string binary;
     constant *cexp = (constant *)exp;
-    if (cexp->VpiConstType() == vpiBinaryConst) {
-      binary = cexp->VpiValue();
-      binary = binary.substr(std::string_view("BIN:").length());
-    } else if (cexp->VpiConstType() == vpiHexConst) {
-      std::string_view hex = cexp->VpiValue();
-      hex.remove_prefix(std::string_view("HEX:").length());
-      binary = NumUtils::hexToBin(hex);
-    } else {
-      int64_t val = get_value(invalidValue, exp);
-      binary = NumUtils::toBinary(exp->VpiSize(), val);
-    }
+    std::string binary = toBinary(cexp);
     uint64_t wordSize = 1;
     if (typespec *cts = (typespec *)cexp->Typespec()) {
       if (cts->UhdmType() == uhdmint_typespec) {
@@ -2454,12 +2468,6 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     }
   }
   return nullptr;
-}
-
-static std::string hexToBinary(char input[2]) {
-  uint32_t x = std::stoul(input, nullptr, 16);
-  std::string result = std::bitset<4>(x).to_string();
-  return result;
 }
 
 expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
@@ -3944,23 +3952,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
     if (object && (object->UhdmType() == uhdmconstant)) {
       constant *co = (constant *)object;
-      std::string binary;
-      if (co->VpiConstType() == vpiBinaryConst) {
-        binary = co->VpiValue();
-        binary.erase(0, 4);
-      } else if (co->VpiConstType() == vpiHexConst) {
-        std::string_view val = co->VpiValue();
-        val.remove_prefix(4);
-        for (char ch : val) {
-          char tmp[2] = {ch, '\0'};
-          binary += hexToBinary(tmp);
-        }
-      } else {
-        int64_t val = get_value(invalidValue, co);
-        if (invalidValue == false) {
-          binary = NumUtils::toBinary(co->VpiSize(), val);
-        }
-      }
+      std::string binary = toBinary(co);
       int64_t l = get_value(
           invalidValue,
           reduceExpr(sel->Left_range(), invalidValue, inst, pexpr, muteError));
