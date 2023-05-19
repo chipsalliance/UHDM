@@ -83,6 +83,97 @@ bool ExprEval::isFullySpecified(const UHDM::typespec *tps) {
   return true;
 }
 
+std::string ExprEval::toBinary(const UHDM::constant *c) {
+  std::string result;
+  if (c == nullptr) return result;
+  int32_t type = c->VpiConstType();
+  std::string_view sv = c->VpiValue();
+  switch (type) {
+    case vpiBinaryConst: {
+      sv.remove_prefix(std::string_view("BIN:").length());
+      result = sv;
+      if (c->VpiSize() >=0 ) { 
+      if (result.size() < (uint32_t) c->VpiSize()) {
+        for (uint32_t i = 0; i < (uint32_t) c->VpiSize() - result.size(); i++) {
+          result = "0" + result;
+        }
+      }
+      }
+      break;
+    }
+    case vpiDecConst: {
+      sv.remove_prefix(std::string_view("DEC:").length());
+      uint64_t res = 0;
+      if (NumUtils::parseIntLenient(sv, &res) == nullptr) {
+        res = 0;
+      }
+      result = NumUtils::toBinary(c->VpiSize(), res);
+      break;
+    }
+    case vpiHexConst: {
+      sv.remove_prefix(std::string_view("HEX:").length());
+      result = NumUtils::hexToBin(sv);
+      if (c->VpiSize() >=0 ) { 
+      if (result.size() < (uint32_t) c->VpiSize()) {
+        for (uint32_t i = 0; i < (uint32_t) c->VpiSize() - result.size(); i++) {
+          result = "0" + result;
+        }
+      }
+      }
+      break;
+    }
+    case vpiOctConst: {
+      sv.remove_prefix(std::string_view("OCT:").length());
+      result = NumUtils::hexToBin(sv);
+      if (c->VpiSize() >=0 ) { 
+      if (result.size() < (uint32_t) c->VpiSize()) {
+        for (uint32_t i = 0; i < (uint32_t) c->VpiSize() - result.size(); i++) {
+          result = "0" + result;
+        }
+      }
+      }
+      break;
+    }
+    case vpiIntConst: {
+      sv.remove_prefix(std::string_view("INT:").length());
+      uint64_t res = 0;
+      if (NumUtils::parseIntLenient(sv, &res) == nullptr) {
+        res = 0;
+      }
+      result = NumUtils::toBinary(c->VpiSize(), res);
+      break;
+    }
+    case vpiUIntConst: {
+      sv.remove_prefix(std::string_view("UINT:").length());
+      uint64_t res = 0;
+      if (NumUtils::parseUint64(sv, &res) == nullptr) {
+        res = 0;
+      }
+      result = NumUtils::toBinary(c->VpiSize(), res);
+      break;
+    }
+    default: {
+      if (sv.find("UINT:") == 0) {
+        sv.remove_prefix(std::string_view("UINT:").length());
+        uint64_t res = 0;
+        if (NumUtils::parseUint64(sv, &res) == nullptr) {
+          res = 0;
+        }
+        result = NumUtils::toBinary(c->VpiSize(), res);
+      } else {
+        sv.remove_prefix(std::string_view("INT:").length());
+        uint64_t res = 0;
+        if (NumUtils::parseIntLenient(sv, &res) == nullptr) {
+          res = 0;
+        }
+        result = NumUtils::toBinary(c->VpiSize(), res);
+      }
+      break;
+    }
+  }
+  return result;
+}
+
 static std::vector<std::string_view> tokenizeMulti(
     std::string_view str, std::string_view multichar_separator) {
   std::vector<std::string_view> result;
@@ -3908,8 +3999,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
     if (object && (object->UhdmType() == uhdmconstant)) {
       constant *co = (constant *)object;
-      int64_t val = get_value(invalidValue, co);
-      std::string binary = NumUtils::toBinary(co->VpiSize(), val);
+      std::string binary = toBinary(co);
       int64_t base = get_value(
           invalidValue,
           reduceExpr(sel->Base_expr(), invalidValue, inst, pexpr, muteError));
@@ -3919,9 +4009,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       std::reverse(binary.begin(), binary.end());
       std::string sub;
       if (sel->VpiIndexedPartSelectType() == vpiPosIndexed) {
-        sub = binary.substr(base, base + offset);
+        if ((uint32_t) (base + offset) <= binary.size())
+          sub = binary.substr(base, offset);
       } else {
-        sub = binary.substr(base, base - offset);
+        if ((uint32_t)base < binary.size())
+          sub = binary.substr(base - offset, offset);
       }
       std::reverse(sub.begin(), sub.end());
       UHDM::constant *c = s.MakeConstant();
@@ -4105,7 +4197,7 @@ bool ExprEval::setValueInInstance(
         }
         operation *op = (operation *)lhsexp;
         if (op->VpiOpType() == vpiConcatOp) {
-          std::string rhsbinary = NumUtils::toBinary(c->VpiSize(), valUI);
+          std::string rhsbinary = toBinary(c);
           std::reverse(rhsbinary.begin(), rhsbinary.end());
           VectorOfany *operands = op->Operands();
           uint64_t accumul = 0;
@@ -4158,14 +4250,7 @@ bool ExprEval::setValueInInstance(
           uint64_t si = size(tps, invalidValue, inst, lhsexp, true, muteError);
           if (prevRhs && prevRhs->UhdmType() == uhdmconstant) {
             const constant *prev = (constant *)prevRhs;
-            if (prev->VpiConstType() == vpiBinaryConst) {
-              std::string_view val = prev->VpiValue();
-              val.remove_prefix(std::string_view("BIN:").length());
-              lhsbinary = val;
-            } else {
-              lhsbinary = NumUtils::toBinary(static_cast<int32_t>(si),
-                                             get_uvalue(invalidValue, prev));
-            }
+            lhsbinary = toBinary(prev);
             std::reverse(lhsbinary.begin(), lhsbinary.end());
           } else {
             for (uint32_t i = 0; i < si; i++) {
@@ -4178,7 +4263,7 @@ bool ExprEval::setValueInInstance(
           uint64_t offset = get_uvalue(
               invalidValue, reduceExpr(sel->Width_expr(), invalidValue, inst,
                                        lhsexp, muteError));
-          std::string rhsbinary = NumUtils::toBinary(c->VpiSize(), valUI);
+          std::string rhsbinary = toBinary(c);
           std::reverse(rhsbinary.begin(), rhsbinary.end());
           if (sel->VpiIndexedPartSelectType() == vpiPosIndexed) {
             int32_t index = 0;
@@ -4221,14 +4306,7 @@ bool ExprEval::setValueInInstance(
           uint64_t si = size(tps, invalidValue, inst, lhsexp, true, muteError);
           if (prevRhs && prevRhs->UhdmType() == uhdmconstant) {
             const constant *prev = (constant *)prevRhs;
-            if (prev->VpiConstType() == vpiBinaryConst) {
-              std::string_view val = prev->VpiValue();
-              val.remove_prefix(std::string_view("BIN:").length());
-              lhsbinary = val;
-            } else {
-              lhsbinary = NumUtils::toBinary(static_cast<int32_t>(si),
-                                             get_uvalue(invalidValue, prev));
-            }
+            lhsbinary = toBinary(prev);
             std::reverse(lhsbinary.begin(), lhsbinary.end());
           } else {
             for (uint32_t i = 0; i < si; i++) {
@@ -4241,7 +4319,7 @@ bool ExprEval::setValueInInstance(
           uint64_t right = get_uvalue(
               invalidValue, reduceExpr(sel->Right_range(), invalidValue, inst,
                                        lhsexp, muteError));
-          std::string rhsbinary = NumUtils::toBinary(c->VpiSize(), valUI);
+          std::string rhsbinary = toBinary(c);
           std::reverse(rhsbinary.begin(), rhsbinary.end());
           if (left > right) {
             int32_t index = 0;
