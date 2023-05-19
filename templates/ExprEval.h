@@ -70,6 +70,8 @@ class ExprEval {
 
   uint64_t getValue(const UHDM::expr* expr);
 
+  std::string toBinary(const UHDM::constant* c);
+
   any* getValue(std::string_view name, const any* inst, const any* pexpr,
                 bool muteError = false);
 
