@@ -60,6 +60,19 @@ class DetectRefObj : public VpiListener {
   void leaveRef_obj(const ref_obj *object, vpiHandle handle) final {
     hasRef_obj = true;
   }
+  void leaveBit_select(const bit_select *object, vpiHandle handle) {
+    hasRef_obj = true;
+  }
+  void leaveIndexed_part_select(const indexed_part_select *object,
+                                vpiHandle handle) {
+    hasRef_obj = true;
+  }
+  void leavePart_select(const part_select *object, vpiHandle handle) {
+    hasRef_obj = true;
+  }
+  void leaveVar_select(const var_select *object, vpiHandle handle) {
+    hasRef_obj = true;
+  }
   void leaveHier_path(const hier_path *object, vpiHandle handle) final {
     hasRef_obj = true;
   }
@@ -92,12 +105,13 @@ std::string ExprEval::toBinary(const UHDM::constant *c) {
     case vpiBinaryConst: {
       sv.remove_prefix(std::string_view("BIN:").length());
       result = sv;
-      if (c->VpiSize() >=0 ) { 
-      if (result.size() < (uint32_t) c->VpiSize()) {
-        for (uint32_t i = 0; i < (uint32_t) c->VpiSize() - result.size(); i++) {
-          result = "0" + result;
+      if (c->VpiSize() >= 0) {
+        if (result.size() < (uint32_t)c->VpiSize()) {
+          for (uint32_t i = 0; i < (uint32_t)c->VpiSize() - result.size();
+               i++) {
+            result = "0" + result;
+          }
         }
-      }
       }
       break;
     }
@@ -113,24 +127,26 @@ std::string ExprEval::toBinary(const UHDM::constant *c) {
     case vpiHexConst: {
       sv.remove_prefix(std::string_view("HEX:").length());
       result = NumUtils::hexToBin(sv);
-      if (c->VpiSize() >=0 ) { 
-      if (result.size() < (uint32_t) c->VpiSize()) {
-        for (uint32_t i = 0; i < (uint32_t) c->VpiSize() - result.size(); i++) {
-          result = "0" + result;
+      if (c->VpiSize() >= 0) {
+        if (result.size() < (uint32_t)c->VpiSize()) {
+          for (uint32_t i = 0; i < (uint32_t)c->VpiSize() - result.size();
+               i++) {
+            result = "0" + result;
+          }
         }
-      }
       }
       break;
     }
     case vpiOctConst: {
       sv.remove_prefix(std::string_view("OCT:").length());
       result = NumUtils::hexToBin(sv);
-      if (c->VpiSize() >=0 ) { 
-      if (result.size() < (uint32_t) c->VpiSize()) {
-        for (uint32_t i = 0; i < (uint32_t) c->VpiSize() - result.size(); i++) {
-          result = "0" + result;
+      if (c->VpiSize() >= 0) {
+        if (result.size() < (uint32_t)c->VpiSize()) {
+          for (uint32_t i = 0; i < (uint32_t)c->VpiSize() - result.size();
+               i++) {
+            result = "0" + result;
+          }
         }
-      }
       }
       break;
     }
@@ -721,7 +737,7 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       return result;
     }
     if (tps->UhdmType() == uhdmarray_typespec) {
-      array_typespec* atps = (array_typespec*) tps;
+      array_typespec *atps = (array_typespec *)tps;
       tps = atps->Elem_typespec();
     }
     if (tps == nullptr) {
@@ -734,7 +750,7 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       return result;
     }
     if (tps->UhdmType() == uhdmarray_typespec) {
-      array_typespec* atps = (array_typespec*) tps;
+      array_typespec *atps = (array_typespec *)tps;
       tps = atps->Elem_typespec();
     }
     if (tps->UhdmType() != uhdmstruct_typespec) {
@@ -860,7 +876,7 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
           }
         } else {
           if (patt->UhdmType() == uhdmoperation) {
-            operation* patt_op = (operation*)patt;
+            operation *patt_op = (operation *)patt;
             if (patt_op->VpiOpType() == vpiAssignmentPatternOp) {
               opi = flattenPatternAssignments(s, fieldTypes[index], patt_op);
             }
@@ -2046,11 +2062,11 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
     // Substitution
     if (param_assign *pass = any_cast<param_assign *>(object)) {
       const any *rhs = pass->Rhs();
-      object = reduceExpr((any *)rhs, invalidValue, inst, pexpr, muteError);
+      object = reduceExpr(rhs, invalidValue, inst, pexpr, muteError);
     } else if (bit_select *bts = any_cast<bit_select *>(object)) {
-      object = reduceExpr((any *)bts, invalidValue, inst, pexpr, muteError);
+      object = reduceExpr(bts, invalidValue, inst, pexpr, muteError);
     } else if (ref_obj *ref = any_cast<ref_obj *>(object)) {
-      object = reduceExpr((any *)ref, invalidValue, inst, pexpr, muteError);
+      object = reduceExpr(ref, invalidValue, inst, pexpr, muteError);
     } else if (constant *cons = any_cast<constant *>(object)) {
       ElaboratorListener listener(&s);
       object = UHDM::clone_tree((any *)cons, s, &listener);
@@ -2114,7 +2130,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     } else if (ttps == uhdmclass_var) {
       const typespec *stpt = ((class_var *)var)->Typespec();
       if (stpt->UhdmType() == uhdmclass_typespec) {
-        class_typespec* ctps = (class_typespec*) stpt;
+        class_typespec *ctps = (class_typespec *)stpt;
         const class_defn *defn = ctps->Class_defn();
         while (defn) {
           if (defn->Variables()) {
@@ -3736,7 +3752,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     } else if (name == "$signed" || name == "$unsigned") {
       bool invalidTmpValue = false;
       if (scall->Tf_call_args()) {
-        const typespec* optps = scall->Typespec();
+        const typespec *optps = scall->Typespec();
         for (auto arg : *scall->Tf_call_args()) {
           expr *val = reduceExpr(arg, invalidTmpValue, inst, pexpr, muteError);
           if (val && (val->UhdmType() == uhdmconstant) &&
@@ -3775,29 +3791,29 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 int64_t res = value;
                 bool negsign = value & (1ULL << (size - 1));
                 if (optps) {
-                  uint32_t bits = ExprEval::size(optps, invalidValue, inst, pexpr,
-                                       false);
+                  uint32_t bits =
+                      ExprEval::size(optps, invalidValue, inst, pexpr, false);
                   bool is_signed = false;
                   if (optps->UhdmType() == uhdmlogic_typespec) {
-                    logic_typespec* ltps = (logic_typespec*) optps;
+                    logic_typespec *ltps = (logic_typespec *)optps;
                     is_signed = ltps->VpiSigned();
                   }
                   if (!is_signed) {
                     if ((size >= 0) && (bits > size)) {
-                      for (uint32_t i = (uint32_t) size ; i < bits; i++) {
+                      for (uint32_t i = (uint32_t)size; i < bits; i++) {
                         res |= 1ULL << i;
                       }
                     }
                   } else {
                     uint32_t half = (2 << (size - 2));
                     if (res >= half) {
-                      res =  (-(2 << (size - 1))) + res;
+                      res = (-(2 << (size - 1))) + res;
                     }
                   }
                 } else {
                   if (negsign) {
-                   res &= ~(1ULL << (size - 1));
-                   res = -res;
+                    res &= ~(1ULL << (size - 1));
+                    res = -res;
                   }
                 }
                 UHDM::constant *c = s.MakeConstant();
@@ -3896,12 +3912,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             UHDM::VectorOfany *ops = op->Operands();
             if (ops && (index_val < ops->size())) {
               result = ops->at(index_val);
-              if (const typespec* optps = op->Typespec()) {
+              if (const typespec *optps = op->Typespec()) {
                 if (optps->UhdmType() == uhdmarray_typespec) {
-                  array_typespec* atps = (array_typespec*) optps;
-                  const typespec* elemtps = atps->Elem_typespec();
+                  array_typespec *atps = (array_typespec *)optps;
+                  const typespec *elemtps = atps->Elem_typespec();
                   if (result->UhdmType() == uhdmoperation) {
-                    ((operation*)result)->Typespec((typespec*) elemtps);
+                    ((operation *)result)->Typespec((typespec *)elemtps);
                   }
                 }
               }
@@ -3964,13 +3980,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
   } else if (objtype == uhdmpart_select) {
     part_select *sel = (part_select *)result;
-    any *parent = (any *)sel->VpiParent();
-    std::string_view name = parent->VpiName();
-    if (name.empty()) {
-      if (ref_obj *ref = any_cast<ref_obj *>(parent)) {
-        name = ref->VpiDefName();
-      }
-    }
+    std::string_view name = sel->VpiName();
+    if (name.empty()) name = sel->VpiDefName();
     any *object = getObject(name, inst, pexpr, muteError);
     if (object) {
       if (UHDM::param_assign *passign = any_cast<param_assign *>(object)) {
@@ -4009,7 +4020,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
   } else if (objtype == uhdmindexed_part_select) {
     indexed_part_select *sel = (indexed_part_select *)result;
-    const std::string_view name = sel->VpiParent()->VpiName();
+    std::string_view name = sel->VpiName();
+    if (name.empty()) name = sel->VpiDefName();
     any *object = getObject(name, inst, pexpr, muteError);
     if (object) {
       if (UHDM::param_assign *passign = any_cast<param_assign *>(object)) {
@@ -4031,7 +4043,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       std::reverse(binary.begin(), binary.end());
       std::string sub;
       if (sel->VpiIndexedPartSelectType() == vpiPosIndexed) {
-        if ((uint32_t) (base + offset) <= binary.size())
+        if ((uint32_t)(base + offset) <= binary.size())
           sub = binary.substr(base, offset);
       } else {
         if ((uint32_t)base < binary.size())
@@ -4131,9 +4143,7 @@ bool ExprEval::setValueInInstance(
   bool invalidValueD = false;
   bool opRhs = false;
   std::string_view lhsname = lhs;
-  if (lhsname.empty()) {
-    lhsname = lhsexp->VpiParent()->VpiName();
-  }
+  if (lhsname.empty()) lhsname = lhsexp->VpiName();
   rhsexp = reduceExpr(rhsexp, invalidValue, inst, nullptr, muteError);
   int64_t valI = get_value(invalidValueI, rhsexp);
   uint64_t valUI = get_uvalue(invalidValueUI, rhsexp);
@@ -4224,16 +4234,7 @@ bool ExprEval::setValueInInstance(
           VectorOfany *operands = op->Operands();
           uint64_t accumul = 0;
           for (any *oper : *operands) {
-            std::string name;
-            if (oper->UhdmType() == uhdmindexed_part_select) {
-              name = oper->VpiParent()->VpiName();
-            } else if (oper->UhdmType() == uhdmpart_select) {
-              name = oper->VpiParent()->VpiName();
-            } else if (lhsexp->UhdmType() == uhdmbit_select) {
-              name = oper->VpiParent()->VpiName();
-            } else {
-              name = oper->VpiName();
-            }
+            const std::string_view name = oper->VpiName();
             uint64_t si =
                 size(oper, invalidValue, inst, lhsexp, true, muteError);
             std::string part;
@@ -4261,7 +4262,7 @@ bool ExprEval::setValueInInstance(
           }
         }
         indexed_part_select *sel = (indexed_part_select *)lhsexp;
-        const std::string_view name = lhsexp->VpiParent()->VpiName();
+        const std::string_view name = lhsexp->VpiName();
         any *object = getObject(name, inst, scope_exp, muteError);
         if (object) {
           std::string lhsbinary;
@@ -4317,7 +4318,7 @@ bool ExprEval::setValueInInstance(
           }
         }
         part_select *sel = (part_select *)lhsexp;
-        const std::string_view name = lhsexp->VpiParent()->VpiName();
+        const std::string_view name = lhsexp->VpiName();
         any *object = getObject(name, inst, scope_exp, muteError);
         if (object) {
           std::string lhsbinary;
@@ -4368,7 +4369,7 @@ bool ExprEval::setValueInInstance(
         uint64_t index = get_uvalue(
             invalidValue,
             reduceExpr(sel->VpiIndex(), invalidValue, inst, lhsexp, muteError));
-        const std::string_view name = lhsexp->VpiParent()->VpiName();
+        const std::string_view name = lhsexp->VpiName();
         any *object = getObject(name, inst, scope_exp, muteError);
         if (object) {
           if (object->UhdmType() == uhdmparam_assign) {
@@ -4413,8 +4414,8 @@ bool ExprEval::setValueInInstance(
             }
           }
 
-          uint64_t size_rhs = ((constant*)rhsexp)->VpiSize();
-          std::string tobinary = NumUtils::toBinary(size_rhs,valUI);
+          uint64_t size_rhs = ((constant *)rhsexp)->VpiSize();
+          std::string tobinary = NumUtils::toBinary(size_rhs, valUI);
           for (uint32_t i = 0; i < size_rhs; i++) {
             if (((index * size_rhs) + i) < si) {
               lhsbinary[(index * size_rhs) + i] = tobinary[i];

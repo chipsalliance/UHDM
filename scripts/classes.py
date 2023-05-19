@@ -174,29 +174,33 @@ def _get_DeepClone_implementation(model, models):
     content = []
     content.append(f'void {classname}::DeepCopy({classname}* clone, Serializer* serializer, ElaboratorListener* elaborator, BaseClass* parent) const {{')
     if modeltype != 'class_def':
-        content.append(f'  elaborator->enter{Classname}(clone,nullptr);')
+        content.append(f'  elaborator->enter{Classname}(clone, nullptr);')
+
+    if classname in ['bit_select']:
+        includes.add('ElaboratorListener')
+        includes.add('ExprEval')
+        content.append(f'  ExprEval eval;')
+        content.append(f'  bool invalidValue = false;')
+        content.append( '  if (any* val = eval.reduceExpr(VpiIndex(), invalidValue, parent, parent, true)) {')
+        content.append( '    if (!invalidValue) {')
+        content.append(f'      std::string indexName = eval.prettyPrint(val);')
+        content.append( '      if (any* indexVal = elaborator->bindAny(indexName)) {')
+        content.append(f'        val = eval.reduceExpr(indexVal, invalidValue, parent, parent, true);')
+        content.append(f'        if (!invalidValue) indexName = eval.prettyPrint(val);')
+        content.append( '      }')
+        content.append( '      const std::string_view name(VpiName());')
+        content.append( '      std::string fullIndexName(name);')
+        content.append( '      fullIndexName.append("[").append(indexName).append("]");')
+        content.append(f'      clone->Actual_group(elaborator->bindAny(fullIndexName));')
+        content.append(f'      if (!clone->Actual_group()) clone->Actual_group(elaborator->bindAny(name));')
+        content.append(f'      if (!clone->Actual_group()) clone->Actual_group((any*) Actual_group());')
+        content.append( '    }')
+        content.append( '  }')
+
     content.append(f'  basetype_t::DeepCopy(clone, serializer, elaborator, parent);')
-    basename = model.get('extends', 'BaseClass')
     vpi_name = config.make_vpi_name(classname)
 
-    if classname in ['part_select', 'bit_select', 'indexed_part_select']:
-        includes.add('ElaboratorListener')
-        includes.add('ref_obj')
-        content.append('  if (const any* thisParent = VpiParent()) {')
-        content.append('    if (thisParent->UhdmType() == uhdmref_obj) {')
-        content.append('      clone->VpiParent(thisParent->DeepClone(serializer, elaborator, parent));')
-        content.append('    } else {')
-        content.append('      ref_obj* ref = serializer->MakeRef_obj();')
-        content.append('      clone->VpiParent(ref);')
-        content.append('      ref->VpiName(thisParent->VpiName());')
-        content.append('      ref->VpiParent(parent);')
-        content.append('      ref->Actual_group(elaborator->bindAny(thisParent->VpiName()));')
-        content.append('    }')
-        content.append('  }')
-    elif modeltype == 'obj_def':
-        content.append('  clone->VpiParent(parent);')
-
-    if 'BitSelect' in vpi_name:
+    if 'Select' in vpi_name:
         includes.add('ElaboratorListener')
         includes.add('net')
         content.append('  if (any* n = elaborator->bindNet(VpiName())) {')
@@ -220,35 +224,14 @@ def _get_DeepClone_implementation(model, models):
 
             # Unary relations
             if card == '1':
-                if (classname in ['ref_obj', 'ref_var', 'part_select']) and (method == 'Actual_group'):
+                if (classname in ['ref_obj', 'ref_var']) and (method == 'Actual_group'):
                     includes.add('ElaboratorListener')
-                    content.append(f'  clone->{method}(elaborator->bindAny(VpiName()));')
-                    content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')
-
-                elif (classname in ['bit_select']) and (method == 'Actual_group'):
-                    includes.add('ElaboratorListener')
-                    includes.add('ExprEval')
-                    content.append(f'  std::string_view name = VpiName();')
-                    content.append(f'  ExprEval eval;')
-                    content.append(f'  bool invalidValue = false;')
-                    content.append( '  if (any* val = eval.reduceExpr(VpiIndex(), invalidValue, parent, parent, true)) {')
-                    content.append( '    if (!invalidValue) {')
-                    content.append(f'      std::string indexName = eval.prettyPrint(val);')
-                    content.append( '      if (any* indexVal = elaborator->bindAny(indexName)) {')
-                    content.append(f'        val = eval.reduceExpr(indexVal, invalidValue, parent, parent, true);')
-                    content.append(f'        if (!invalidValue) indexName = eval.prettyPrint(val);')
-                    content.append( '      }')
-                    content.append( '      std::string fullIndexName;')
-                    content.append( '      fullIndexName.assign(name).append("[").append(indexName).append("]");')
-                    content.append(f'      clone->{method}(elaborator->bindAny(fullIndexName));')
-                    content.append( '    }')
-                    content.append( '  }')
-                    content.append(f'  if (!clone->{method}()) clone->{method}(elaborator->bindAny(name));')
+                    content.append(f'  if (!clone->{method}()) clone->{method}(elaborator->bindAny(VpiName()));')
                     content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')
 
                 elif classname == 'udp' and method == 'Udp_defn':
                     includes.add('ElaboratorListener')
-                    content.append(f'  clone->{method}((udp_defn*) elaborator->bindAny(VpiDefName()));')
+                    content.append(f'  if (!clone->{method}()) clone->{method}((udp_defn*) elaborator->bindAny(VpiDefName()));')
                     content.append(f'  if (!clone->{method}()) clone->{method}((udp_defn*) {method}());')
 
                 elif method in ['Task', 'Function']:
@@ -430,9 +413,13 @@ def _get_GetByVpiName_implementation(model):
     return content, includes
 
 
-def _get_GetByVpiType_implementation(model):
+def _get_GetByVpiType_implementation(model, models):
     classname = model['name']
     modeltype = model['type']
+
+    baseclass_name = model.get('extends', 'BaseClass')
+    baseclass_model = models.get(baseclass_name, {})
+    baseclass_type = baseclass_model.get('type')
 
     case_bodies = {}
     for key, value in model.allitems():
@@ -475,9 +462,13 @@ def _get_GetByVpiType_implementation(model):
     return content
 
 
-def _get_GetVpiPropertyValue_implementation(model):
+def _get_GetVpiPropertyValue_implementation(model, models):
     classname = model['name']
     modeltype = model['type']
+
+    baseclass_name = model.get('extends', 'BaseClass')
+    baseclass_model = models.get(baseclass_name, {})
+    baseclass_type = baseclass_model.get('type')
 
     type_specified = False
     case_bodies = {}
@@ -512,7 +503,7 @@ def _get_GetVpiPropertyValue_implementation(model):
                 else:
                     case_bodies[vpi] = [ f'    case {vpi}: return vpi_property_value_t({Vpi_}());' ]
 
-    if not type_specified and (modeltype == 'obj_def'):
+    if not type_specified and (modeltype == 'obj_def') and (baseclass_type != 'obj_def'):
         case_bodies['vpiType']= [ f'    case vpiType: return vpi_property_value_t(VpiType());' ]
 
     content = []
@@ -550,7 +541,6 @@ def _get_Compare_implementation(model):
     ]
 
     classname = model['name']
-    modeltype = model['type']
 
     includes = set()
     content = [
@@ -707,6 +697,11 @@ def _generate_one_class(model, models, templates):
     implementations = []
     forward_declares = set()
     includes = set(['Serializer'])
+    leaf = (modeltype == 'obj_def') and (len(model['subclasses']) == 0)
+
+    baseclass_name = model.get('extends', 'BaseClass')
+    baseclass_model = models.get(baseclass_name, {})
+    baseclass_type = baseclass_model.get('type')
 
     type_specified = False
     for key, value in model.allitems():
@@ -720,7 +715,7 @@ def _generate_one_class(model, models, templates):
 
             if name == 'type':
                 type_specified = True
-                declarations.append(f'  {type} {Vpi}() const final {{ return {value.get("vpiname")}; }}')
+                declarations.append(f'  {type} {Vpi}() const {"final" if leaf else "override"} {{ return {value.get("vpiname")}; }}')
             else: # properties are already defined in vpi_user.h, no need to redefine them
                 data_members.extend(_get_data_member(type, vpi, card))
                 declarations.extend(_get_declarations(type, vpi, card))
@@ -757,7 +752,7 @@ def _generate_one_class(model, models, templates):
 
     if not type_specified and (modeltype == 'obj_def'):
         vpiclasstype = config.make_vpi_name(classname)
-        declarations.append(f'  virtual uint32_t VpiType() const final {{ return {vpiclasstype}; }}')
+        declarations.append(f'  virtual uint32_t VpiType() const {"final" if leaf else "override"} {{ return {vpiclasstype}; }}')
 
     if modeltype == 'class_def':
         # DeepClone() not implemented for class_def; just declare to narrow the covariant return type.
@@ -775,8 +770,8 @@ def _generate_one_class(model, models, templates):
     implementations.extend(func_body)
     includes.update(func_includes)
 
-    implementations.extend(_get_GetByVpiType_implementation(model))
-    implementations.extend(_get_GetVpiPropertyValue_implementation(model))
+    implementations.extend(_get_GetByVpiType_implementation(model, models))
+    implementations.extend(_get_GetVpiPropertyValue_implementation(model, models))
 
     func_body, func_includes = _get_DeepClone_implementation(model, models)
     implementations.extend(func_body)
@@ -788,20 +783,13 @@ def _generate_one_class(model, models, templates):
 
     includes.update(forward_declares)
 
-    if modeltype == 'class_def':
-        header_file_content = header_file_content.replace('<FINAL_CLASS>', '')
-        header_file_content = header_file_content.replace('<FINAL_DESTRUCTOR>', '')
-        header_file_content = header_file_content.replace('<VIRTUAL>', 'virtual ')
-        header_file_content = header_file_content.replace('<OVERRIDE_OR_FINAL>', 'override')
-        header_file_content = header_file_content.replace('<DISABLE_OBJECT_FACTORY>', '#if 0 // This class cannot be instantiated')
-        header_file_content = header_file_content.replace('<END_DISABLE_OBJECT_FACTORY>', '#endif')
-    else:
-        header_file_content = header_file_content.replace('<FINAL_CLASS>', ' final')
-        header_file_content = header_file_content.replace('<FINAL_DESTRUCTOR>', ' final')
-        header_file_content = header_file_content.replace('<VIRTUAL>', 'virtual ')
-        header_file_content = header_file_content.replace('<OVERRIDE_OR_FINAL>', 'final')
-        header_file_content = header_file_content.replace('<DISABLE_OBJECT_FACTORY>', '')
-        header_file_content = header_file_content.replace('<END_DISABLE_OBJECT_FACTORY>', '')
+    is_class_def = modeltype == 'class_def'
+    header_file_content = header_file_content.replace('<VIRTUAL>', 'virtual ')
+    header_file_content = header_file_content.replace('<FINAL_CLASS>', ' final' if leaf and not is_class_def else '')
+    header_file_content = header_file_content.replace('<FINAL_DESTRUCTOR>', ' final' if leaf and not is_class_def else '')
+    header_file_content = header_file_content.replace('<OVERRIDE_OR_FINAL>', 'final' if leaf and not is_class_def else 'override')
+    header_file_content = header_file_content.replace('<DISABLE_OBJECT_FACTORY>', '' if leaf or not is_class_def else '#if 0 // This class cannot be instantiated')
+    header_file_content = header_file_content.replace('<END_DISABLE_OBJECT_FACTORY>', '' if leaf or not is_class_def else '#endif')
 
     header_file_content = header_file_content.replace('<EXTENDS>', 'BaseClass')
     header_file_content = header_file_content.replace('<CLASSNAME>', classname)

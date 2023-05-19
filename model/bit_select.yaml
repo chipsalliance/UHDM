@@ -15,29 +15,14 @@
 # Universal Hardware Data Model (UHDM) "bit_select" formal description
  
 - obj_def: bit_select
-  - extends: simple_expr
+  - extends: ref_obj
   - property: constant_selection
     name: constant selection
     vpi: vpiConstantSelect
     type: bool
     card: 1
-  - property: name
-    name: name
-    vpi: vpiName
-    type: string
-    card: 1
-  - property: full_name
-    name: full name
-    vpi: vpiFullName
-    type: string
-    card: 1  
   - class_ref: vpiIndex
     name: vpiIndex
     vpi: vpiIndex
     type: expr
-    card: 1
-  - group_ref: actual_group
-    name: actual group
-    vpi: vpiActual
-    type: actual_group
     card: 1

@@ -96,6 +96,10 @@ class ElaboratorListener final : public VpiListener {
   void leaveGen_scope(const gen_scope* object, vpiHandle handle) final;
 
   void leaveRef_obj(const ref_obj* object, vpiHandle handle) final;
+  void leaveBit_select(const bit_select* object, vpiHandle handle) final;
+  void leaveIndexed_part_select(const indexed_part_select* object, vpiHandle handle) final;
+  void leavePart_select(const part_select* object, vpiHandle handle) final;
+  void leaveVar_select(const var_select* object, vpiHandle handle) final;
 
   void enterFunction(const function* object, vpiHandle handle) final;
   void leaveFunction(const function* object, vpiHandle handle) final;
