@@ -88,8 +88,10 @@ class Serializer {
   void Save(const std::filesystem::path& filepath);
   void Save(const std::string& filepath);
   void Purge();
+  void GarbageCollect();
   void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
   ErrorHandler GetErrorHandler() { return errorHandler; }
+  void MarkKeeper(const any* object) { keepers_.insert(object); }
 #endif
   const std::vector<vpiHandle> Restore(const std::filesystem::path& filepath);
   const std::vector<vpiHandle> Restore(const std::string& filepath);
@@ -127,6 +129,10 @@ class Serializer {
                             std::is_base_of<BaseClass, T>::value>::type>
   void SetRestoreId_(FactoryT<T>* const factory, uint32_t count);
 
+  template <typename T, typename = typename std::enable_if<
+                            std::is_base_of<BaseClass, T>::value>::type>
+  void GC_(FactoryT<T>* const factory);
+
   struct SaveAdapter;
   friend struct SaveAdapter;
 
@@ -140,7 +146,7 @@ class Serializer {
   IdMap allIds_;
   uint32_t incrId_;  // Capnp id
   uint32_t objId_;   // ID for property annotations
-
+  std::set<const any*> keepers_;
   ErrorHandler errorHandler;
 #endif
 };

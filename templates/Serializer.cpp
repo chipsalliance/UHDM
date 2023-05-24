@@ -23,6 +23,8 @@
  * Created on October 4, 2021, 10:53 PM
  */
 #include <uhdm/Serializer.h>
+#include <uhdm/VpiListener.h>
+#include <uhdm/vpi_visitor.h>
 
 #include <algorithm>
 #include <iomanip>
@@ -39,6 +41,68 @@
 #endif
 
 namespace UHDM {
+
+class MarkKeepers final : public VpiListener {
+ public:
+  MarkKeepers(Serializer* serializer) : serializer_(serializer){}
+  void enterAny(const any* object, vpiHandle handle) override {
+    serializer_->MarkKeeper(object);
+    serializer_->MarkKeeper(object->VpiParent()); // Need to be removed after fixing out-of-tree back pointers
+  }
+ private:
+  
+  Serializer* serializer_ = nullptr;
+};
+
+template <typename T, typename>
+void Serializer::GC_(FactoryT<T>* const factory) {
+  bool change = true;
+  while (change) {
+    change = false;
+    for (auto p = factory->objects_.begin();
+         p != factory->objects_.end(); ++p) {
+      if (keepers_.find((*p)) == keepers_.end()) {
+        delete (*p);
+        factory->objects_.erase(p);
+        change = true;
+        break;
+      }
+    }
+  }
+}
+
+void Serializer::GarbageCollect() {
+  // Only keep objects that belong to a design
+  // Mark the objects
+  MarkKeepers* marker = new MarkKeepers(this);
+  std::vector<vpiHandle> designs;
+  for (auto p : designMaker.objects_) {
+    designs.push_back(
+        reinterpret_cast<vpiHandle>(new uhdm_handle(uhdmdesign, p)));
+  }
+  marker->listenDesigns(designs);
+
+  // Mark the transitive cone including the object parents and their children to cover
+  // relations that still point to out-of-tree objects
+  std::set<const any*> topset;
+  topset = keepers_;
+  // This is very inneficient implementation.
+  // This step can be removed when we can remove the out-of-tree back pointer dependance in MarkKeepers
+  for (auto p : topset) {
+    if (p) {
+      vpiHandle h = reinterpret_cast<vpiHandle>(new uhdm_handle(p->UhdmType(), p));
+      marker->listenAny(h);
+      delete h;
+    }
+  }
+  delete marker;
+
+  // Delete the ones that are not required
+<FACTORY_GC>
+
+  // Clear keeper
+  keepers_.clear();
+}
 
 void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const any* object1, const any* object2) {
   std::cerr << errorMsg << std::endl;
