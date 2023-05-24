@@ -10,6 +10,7 @@ def generate(models):
     factory_function_declarations = []
     factory_function_implementations = []
     factory_purge = []
+    factory_gc = []
     factory_stats = []
     factory_object_type_map = []
 
@@ -48,6 +49,8 @@ def generate(models):
             restore_objects.append(f'  adapter.template operator()<{classname}, {Classname}>(cap_root.getFactory{Classname}(), this, {classname}Maker.objects_);')
 
             factory_purge.append(f'  {classname}Maker.Purge();')
+            if classname != 'package':
+                factory_gc.append(f'  GC_<{classname}>(&{classname}Maker);') 
             factory_stats.append(f'  stats.insert(std::make_pair("{classname}", {classname}Maker.objects_.size()));')
 
         factory_data_members.append(f'  VectorOf{classname}Factory {classname}VectMaker;')
@@ -172,6 +175,7 @@ def generate(models):
     with open(config.get_template_filepath('Serializer.cpp'), 'rt') as strm:
         file_content = strm.read()
 
+    file_content = file_content.replace('<FACTORY_GC>', '\n'.join(factory_gc))
     file_content = file_content.replace('<UHDM_NAME_MAP>', '\n'.join(uhdm_name_map))
     file_content = file_content.replace('<FACTORY_PURGE>', '\n'.join(factory_purge))
     file_content = file_content.replace('<FACTORY_STATS>', '\n'.join(factory_stats))
