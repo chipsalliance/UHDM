@@ -907,10 +907,12 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
     case uhdmsys_func_call: {
       sys_func_call *sysFuncCall = (sys_func_call *)object;
       out << sysFuncCall->VpiName() << "(";
-      for (uint32_t i = 0; i < sysFuncCall->Tf_call_args()->size(); i++) {
-        prettyPrint(s, sysFuncCall->Tf_call_args()->at(i), 0, out);
-        if (i < sysFuncCall->Tf_call_args()->size() - 1) {
-          out << ",";
+      if (sysFuncCall->Tf_call_args()) {
+        for (uint32_t i = 0; i < sysFuncCall->Tf_call_args()->size(); i++) {
+          prettyPrint(s, sysFuncCall->Tf_call_args()->at(i), 0, out);
+          if (i < sysFuncCall->Tf_call_args()->size() - 1) {
+            out << ",";
+          }
         }
       }
       out << ")";
@@ -1170,6 +1172,17 @@ void ExprEval::prettyPrint(Serializer &s, const any *object, uint32_t indent,
       prettyPrint(s, ps->Left_range(), 0, out);
       out << ":";
       prettyPrint(s, ps->Right_range(), 0, out);
+      break;
+    }
+    case uhdmindexed_part_select: {
+      indexed_part_select *ps = (indexed_part_select *)object;
+      prettyPrint(s, ps->Base_expr(), 0, out);
+      if (ps->VpiIndexedPartSelectType() == vpiPosIndexed)
+        out << "+";
+      else
+        out << "-";
+      out << ":";
+      prettyPrint(s, ps->Width_expr(), 0, out);
       break;
     }
     case uhdmref_obj: {
