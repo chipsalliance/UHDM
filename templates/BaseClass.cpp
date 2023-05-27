@@ -26,6 +26,15 @@
 #include <uhdm/Serializer.h>
 
 namespace UHDM {
+std::string_view BaseClass::VpiFile() const {
+  return vpiFile_ ? serializer_->symbolMaker.GetSymbol(vpiFile_) : kEmpty;
+}
+
+bool BaseClass::VpiFile(std::string_view data) {
+  vpiFile_ = serializer_->symbolMaker.Make(data);
+  return true;
+}
+
 const BaseClass* BaseClass::GetByVpiName(std::string_view name) const {
   return nullptr;
 }
@@ -33,7 +42,12 @@ const BaseClass* BaseClass::GetByVpiName(std::string_view name) const {
 std::tuple<const BaseClass*, UHDM_OBJECT_TYPE,
            const std::vector<const BaseClass*>*>
 BaseClass::GetByVpiType(int32_t type) const {
-  return std::make_tuple(nullptr, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);
+  switch (type) {
+    case vpiParent:
+      return std::make_tuple(vpiParent_, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);
+    default:
+      return std::make_tuple(nullptr, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);
+  };
 }
 
 BaseClass::vpi_property_value_t BaseClass::GetVpiPropertyValue(
@@ -79,7 +93,9 @@ BaseClass* BaseClass::DeepClone(Serializer* serializer,
 
 void BaseClass::DeepCopy(BaseClass* clone, Serializer* serializer,
                          ElaboratorListener* elaborator,
-                         BaseClass* parent) const {}
+                         BaseClass* parent) const {
+  clone->VpiParent(parent);
+}
 
 int32_t BaseClass::Compare(const BaseClass* const other,
                            AnySet& visited) const {

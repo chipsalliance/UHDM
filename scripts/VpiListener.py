@@ -105,7 +105,7 @@ def generate(models):
 
         public_declarations.append(f'  void listen{Classname_}(vpiHandle handle);')
 
-   # VpiListener.h
+    # VpiListener.h
     with open(config.get_template_filepath('VpiListener.h'), 'rt') as strm:
         file_content = strm.read()
 

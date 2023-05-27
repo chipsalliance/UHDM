@@ -68,45 +68,55 @@ namespace UHDM {
 
     Serializer* GetSerializer() const { return serializer_; }
 
-    virtual UHDM_OBJECT_TYPE UhdmType() const = 0;
+    uint32_t UhdmId() const { return uhdmId_; }
+    bool UhdmId(uint32_t data) {
+      uhdmId_ = data;
+      return true;
+    }
 
-    virtual const BaseClass* VpiParent() const = 0;
+    const BaseClass* VpiParent() const { return vpiParent_; }
+    bool VpiParent(BaseClass *data) {
+      vpiParent_ = data;
+      return true;
+    }
 
-    virtual bool VpiParent(BaseClass* data) = 0;
+    std::string_view VpiFile() const;
+    bool VpiFile(std::string_view data);
 
-    virtual std::string_view VpiFile() const = 0;
+    uint32_t VpiLineNo() const { return vpiLineNo_; }
+    bool VpiLineNo(uint32_t data) {
+      vpiLineNo_ = data;
+      return true;
+    }
 
-    virtual bool VpiFile(std::string_view data) = 0;
+    uint16_t VpiColumnNo() const { return vpiColumnNo_; }
+    bool VpiColumnNo(uint16_t data) {
+      vpiColumnNo_ = data;
+      return true;
+    }
 
-    virtual uint32_t VpiLineNo() const final { return vpiLineNo_; }
+    uint32_t VpiEndLineNo() const { return vpiEndLineNo_; }
+    bool VpiEndLineNo(uint32_t data) {
+      vpiEndLineNo_ = data;
+      return true;
+    }
 
-    virtual bool VpiLineNo(uint32_t data) final { vpiLineNo_ = data; return true; }
-
-    virtual uint16_t VpiColumnNo() const final { return vpiColumnNo_; }
-
-    virtual bool VpiColumnNo(uint16_t data) final { vpiColumnNo_ = data; return true; }
-
-    virtual uint32_t VpiEndLineNo() const final { return vpiEndLineNo_; }
-
-    virtual bool VpiEndLineNo(uint32_t data) final { vpiEndLineNo_ = data; return true; }
-
-    virtual uint16_t VpiEndColumnNo() const final { return vpiEndColumnNo_; }
-
-    virtual bool VpiEndColumnNo(uint16_t data) final { vpiEndColumnNo_ = data; return true; }
+    uint16_t VpiEndColumnNo() const { return vpiEndColumnNo_; }
+    bool VpiEndColumnNo(uint16_t data) {
+      vpiEndColumnNo_ = data;
+      return true;
+    }
 
     virtual std::string_view VpiName() const { return kEmpty; }
-
     virtual std::string_view VpiDefName() const { return kEmpty; }
 
     virtual uint32_t VpiType() const = 0;
+    virtual UHDM_OBJECT_TYPE UhdmType() const = 0;
 
     ClientData* Data() const { return clientData_; }
-
-    void Data(ClientData* data) { clientData_ = data; }
-
-    virtual uint32_t UhdmId() const = 0;
-
-    virtual bool UhdmId(uint32_t id) = 0;
+    void Data(ClientData* data) {
+      clientData_ = data;
+    }
 
     // TODO: Make the next three functions pure-virtual after transition to pygen.
     virtual const BaseClass* GetByVpiName(std::string_view name) const;
@@ -137,7 +147,11 @@ namespace UHDM {
 
     ClientData* clientData_ = nullptr;
 
-  private:
+  protected:
+    uint32_t uhdmId_ = 0;
+    BaseClass* vpiParent_ = nullptr;
+    SymbolId vpiFile_;
+
     uint32_t vpiLineNo_ = 0;
     uint32_t vpiEndLineNo_ = 0;
     uint16_t vpiColumnNo_ = 0;
