@@ -81,11 +81,6 @@
     vpi: vpiClassDefn
     type: clocking_block
     card: 1
-  - obj_ref: ref_obj
-    name: ref obj
-    vpi: vpiParent
-    type: ref_obj
-    card: 1
   - obj_ref: io_decl
     name: io decl
     vpi: vpiIODecl

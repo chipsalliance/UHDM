@@ -461,8 +461,6 @@ function* function::DeepClone(Serializer* serializer,
   if (instance* inst = any_cast<instance*>(parent)) clone->Instance(inst);
   if (auto obj = Class_defn())
     clone->Class_defn(obj->DeepClone(serializer, elaborator, clone));
-  if (auto obj = Ref_obj())
-    clone->Ref_obj(obj->DeepClone(serializer, elaborator, clone));
   if (auto vec = Io_decls()) {
     auto clone_vec = serializer->MakeIo_declVec();
     clone->Io_decls(clone_vec);
@@ -617,8 +615,6 @@ task* task::DeepClone(Serializer* serializer, ElaboratorListener* elaborator,
   if (instance* inst = any_cast<instance*>(parent)) clone->Instance(inst);
   if (auto obj = Class_defn())
     clone->Class_defn(obj->DeepClone(serializer, elaborator, clone));
-  if (auto obj = Ref_obj())
-    clone->Ref_obj(obj->DeepClone(serializer, elaborator, clone));
   if (auto vec = Io_decls()) {
     auto clone_vec = serializer->MakeIo_declVec();
     clone->Io_decls(clone_vec);
