@@ -134,9 +134,8 @@ class ElaboratorListener final : public VpiListener {
   void leaveTask_func(const task_func* object, vpiHandle handle);
 
   // Instance context stack
-  typedef std::vector<
-      std::pair<const BaseClass*, std::tuple<ComponentMap, ComponentMap,
-                                             ComponentMap, ComponentMap>>>
+  typedef std::vector<std::tuple<const BaseClass*, ComponentMap, ComponentMap,
+                                 ComponentMap, ComponentMap>>
       InstStack;
   InstStack instStack_;
 
