@@ -455,116 +455,153 @@ static std::string visit_delays(s_vpi_delay* delay) {
   return "";
 }
 
-class VpiVisitor {
- private:
-  inline std::ostream &stream_indent(int32_t indent) const {
-    return m_out << std::string(indent, ' ');
+std::ostream& VpiVisitor::stream_indent(int32_t indent) const {
+  return m_out << std::string(indent, ' ');
+}
+
+void VpiVisitor::visit_baseclass(vpiHandle obj_h, int32_t indent,
+                                     const char* relation, bool shallowVisit) {
+  if (vpiHandle itr = vpi_handle(vpiParent, obj_h)) {
+    visit_object(itr, indent + kLevelIndent, "vpiParent", true);
+    release_handle(itr);
+  }
+}
+
+<VISITOR_PRIVATE_IMPLEMENTATIONS>
+
+void VpiVisitor::visit_object(vpiHandle obj_h, int32_t indent,
+                              const char* relation, bool shallowVisit) {
+  if (!obj_h) return;
+
+#ifdef STANDARD_VPI
+  const bool alreadyVisited = m_visited,find(obj_h) != m_visited.end();
+  m_visited.insert(obj_h);
+#else
+  const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
+  const BaseClass* const object = (const BaseClass*) handle->object;
+  const bool alreadyVisited = (m_visited.find(object) != m_visited.end());
+  if (!shallowVisit)
+    m_visited.insert(object);
+#endif
+
+  const uint32_t objectType = vpi_get(vpiType, obj_h);
+
+  std::string hspaces;
+  std::string rspaces;
+  if (indent >= kLevelIndent) {
+    hspaces = std::string(indent - 2, ' ');
+    rspaces.assign(hspaces).append("|");
+    hspaces.append("\\_");
   }
 
-<PRIVATE_OBJECT_VISITORS>
-
- public:
-  void visit_object(vpiHandle obj_h, int32_t indent, const char *relation, bool shallowVisit) {
-    if (!obj_h) return;
+  if (strlen(relation) != 0) {
+    m_out << rspaces << relation << ":\n";
+  }
 
 #ifdef STANDARD_VPI
-    const bool alreadyVisited = m_visited,find(obj_h) != m_visited.end();
-    m_visited.insert(obj_h);
+  m_out << hspaces << vpiTypeName(obj_h) << "(" << vpi_get(vpiType, obj_h) << "): ";
 #else
-    const uhdm_handle* const handle = (const uhdm_handle*) obj_h;
-    const BaseClass* const object = (const BaseClass*) handle->object;
-    const bool alreadyVisited = (m_visited.find(object) != m_visited.end());
-    if (!shallowVisit)
-      m_visited.insert(object);
+  m_out << hspaces << UHDM::VpiTypeName(obj_h) << ": ";
 #endif
 
-    const uint32_t objectType = vpi_get(vpiType, obj_h);
-
-    std::string hspaces;
-    std::string rspaces;
-    if (indent >= kLevelIndent) {
-      hspaces = std::string(indent - 2, ' ');
-      rspaces.assign(hspaces).append("|");
-      hspaces.append("\\_");
-    }
-
-    if (strlen(relation) != 0) {
-      m_out << rspaces << relation << ":\n";
-    }
-
-#ifdef STANDARD_VPI
-    m_out << hspaces << vpiTypeName(obj_h) << "(" << vpi_get(vpiType, obj_h) << "): ";
-#else
-    m_out << hspaces << UHDM::VpiTypeName(obj_h) << ": ";
-#endif
-
-    bool needs_separator = false;
-    if (const char* s = vpi_get_str(vpiDefName, obj_h)) {  // defName
-      m_out << s;
-      needs_separator = true;
-    }
-    if (const char* s1 = vpi_get_str(vpiFullName, obj_h)) {   // objectName
-      if (needs_separator) m_out << " ";
-      m_out << "(" << s1 << ")";  // objectName
-    } else if (const char* s2 = vpi_get_str(vpiName, obj_h)) {   // objectName
-      if (needs_separator) m_out << " ";
-      m_out << "(" << s2 << ")";  // objectName
-    }
+  bool needs_separator = false;
+  if (const char* s = vpi_get_str(vpiDefName, obj_h)) {  // defName
+    m_out << s;
+    needs_separator = true;
+  }
+  if (const char* s1 = vpi_get_str(vpiFullName, obj_h)) {   // objectName
+    if (needs_separator) m_out << " ";
+    m_out << "(" << s1 << ")";  // objectName
+  } else if (const char* s2 = vpi_get_str(vpiName, obj_h)) {   // objectName
+    if (needs_separator) m_out << " ";
+    m_out << "(" << s2 << ")";  // objectName
+  }
 
 #ifndef STANDARD_VPI
-    if (showIDs) m_out << ", id:" << object->UhdmId();
+  if (showIDs) m_out << ", id:" << object->UhdmId();
 #endif
 
-    if ((objectType == vpiModule) || (objectType == vpiProgram) ||
-        (objectType == vpiClassDefn) || (objectType == vpiPackage) ||
-        (objectType == vpiInterface) || (objectType == vpiUdp) ||
-        (objectType == vpiIncludeFileInfo)) {
-      if (const char* s = vpi_get_str(vpiFile, obj_h)) {
-        m_out << ", file:" << s;  // fileName
-      }
+  if ((objectType == vpiModule) || (objectType == vpiProgram) ||
+      (objectType == vpiClassDefn) || (objectType == vpiPackage) ||
+      (objectType == vpiInterface) || (objectType == vpiUdp) ||
+      (objectType == vpiIncludeFileInfo)) {
+    if (const char* s = vpi_get_str(vpiFile, obj_h)) {
+      m_out << ", file:" << s;  // fileName
     }
-
-    if (uint32_t sl = vpi_get(vpiLineNo, obj_h)) {
-      m_out << ", line:" << sl << ":" << vpi_get(vpiColumnNo, obj_h);
-
-      if (uint32_t el = vpi_get(vpiEndLineNo, obj_h)) {
-        m_out << ", endln:" << el << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
-      }
-    }
-    m_out << "\n";
-
-    // Force shallow visit for all vpiParent except for vpiRefObj
-    if (strcmp(relation, "vpiParent") == 0) {
-      shallowVisit = (objectType != vpiRefObj);
-    }
-
-    if (alreadyVisited || shallowVisit) {
-      return;
-    }
-
-    switch (objectType) {
-<VISITOR_CASE_STATEMENTS>
-     }
   }
 
-  explicit VpiVisitor(std::ostream& out) : m_out(out) {}
+  if (uint32_t sl = vpi_get(vpiLineNo, obj_h)) {
+    m_out << ", line:" << sl << ":" << vpi_get(vpiColumnNo, obj_h);
 
- private:
-  std::ostream& m_out;
-  VisitedContainer m_visited;
-};
+    if (uint32_t el = vpi_get(vpiEndLineNo, obj_h)) {
+      m_out << ", endln:" << el << ":" << vpi_get(vpiEndColumnNo, obj_h);  // , endline, endCol
+    }
+  }
+  m_out << "\n";
+
+  // Force shallow visit for all vpiParent except for vpiRefObj
+  if (strcmp(relation, "vpiParent") == 0) {
+    shallowVisit = (objectType != vpiRefObj);
+  }
+
+  if (!alreadyVisited && shallowVisit) {
+    m_weaklyReferenced1.emplace(object);
+  }
+
+  if (alreadyVisited || shallowVisit) {
+    return;
+  }
+
+  AnySet::const_iterator it = m_weaklyReferenced1.find(object);
+  if (it != m_weaklyReferenced1.end()) m_weaklyReferenced1.erase(it);
+
+  switch (objectType) {
+<VISITOR_CASE_STATEMENTS>
+  }
+}
+
+void VpiVisitor::visit_weakly_referenced() {
+  if (m_weaklyReferenced1.empty()) return;
+  m_out << "\\_weaklyReferenced:" << std::endl;
+  while (!m_weaklyReferenced1.empty()) {
+    AnySet::const_iterator it = std::min_element(
+        m_weaklyReferenced1.begin(), m_weaklyReferenced1.end(),
+        [](const UHDM::any* const lhs, const UHDM::any* const rhs) {
+          return lhs->UhdmId() < rhs->UhdmId();
+        });
+    const UHDM::BaseClass* const object = *it;
+    m_weaklyReferenced2.emplace(object);
+    vpiHandle h =
+        object->GetSerializer()->MakeUhdmHandle(object->UhdmType(), object);
+    visit_object(h, kLevelIndent, "", false);
+    release_handle(h);
+  }
+}
+
+void visit_object(vpiHandle obj_h, VpiVisitor *visitor) {
+  visitor->visit_object(obj_h, 0, "", false);
+  if (visitor->getVisitWeaklyReferenced()) {
+    visitor->visit_weakly_referenced();
+  }
+}
 
 void visit_object(vpiHandle obj_h, std::ostream& out, bool shallowVisit /* = false */) {
   VpiVisitor visitor(out);
-  visitor.visit_object(obj_h, 0, "", shallowVisit);
+  visit_object(obj_h, &visitor);
 }
 
-// Public interface
-void visit_designs(const std::vector<vpiHandle>& designs, std::ostream &out) {
+void visit_designs(const std::vector<vpiHandle>& designs, VpiVisitor* visitor) {
   for (auto design : designs) {
-    VpiVisitor visitor(out);
-    visitor.visit_object(design, 0, "", false);
+    visitor->visit_object(design, 0, "", false);
+    if (visitor->getVisitWeaklyReferenced()) {
+      visitor->visit_weakly_referenced();
+    }
   }
+}
+
+void visit_designs(const std::vector<vpiHandle>& designs, std::ostream &out) {
+  VpiVisitor visitor(out);
+  visit_designs(designs, &visitor);
 }
 
 std::string decompile(UHDM::any* handle) {

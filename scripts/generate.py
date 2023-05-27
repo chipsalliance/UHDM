@@ -17,7 +17,7 @@ import uhdm_h
 import uhdm_types_h
 import UhdmListener
 import vpi_user_cpp
-import vpi_visitor_cpp
+import vpi_visitor
 import VpiListener
 import VpiListenerTracer_h
 
@@ -65,8 +65,8 @@ def _worker(params):
     elif key == 'vpi_user_cpp':
         return vpi_user_cpp.generate(*args)
 
-    elif key == 'vpi_visitor_cpp':
-        return vpi_visitor_cpp.generate(*args)
+    elif key == 'vpi_visitor':
+        return vpi_visitor.generate(*args)
 
     elif key == 'VpiListener':
         return VpiListener.generate(*args)
@@ -137,7 +137,6 @@ def _main():
             config.get_template_filepath('SymbolFactory.cpp'): config.get_output_source_filepath('SymbolFactory.cpp'),
             config.get_template_filepath('uhdm_vpi_user.h'): config.get_output_header_filepath('uhdm_vpi_user.h'),
             config.get_template_filepath('vpi_uhdm.h'): config.get_output_header_filepath('vpi_uhdm.h'),
-            config.get_template_filepath('vpi_visitor.h'): config.get_output_header_filepath('vpi_visitor.h'),
 
             config.get_include_filepath('sv_vpi_user.h'): config.get_output_header_filepath('sv_vpi_user.h'),
             config.get_include_filepath('vhpi_user.h'): config.get_output_header_filepath('vhpi_user.h'),
@@ -149,7 +148,7 @@ def _main():
         ('uhdm_types_h', [models]),
         ('UhdmListener', [models]),
         ('vpi_user_cpp', [models]),
-        ('vpi_visitor_cpp', [models]),
+        ('vpi_visitor', [models]),
         ('VpiListener', [models]),
         ('VpiListenerTracer_h', [models]),
     ]
