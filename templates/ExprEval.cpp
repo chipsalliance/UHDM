@@ -4899,6 +4899,15 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
     }
     for (auto p : *scope->Param_assigns()) {
       if (p->Lhs()->VpiName() == name) {
+        if (p->Rhs() && (p->Rhs()->UhdmType() == uhdmconstant)) {
+          constant *c = (constant *)p->Rhs();
+          std::string_view val = c->VpiValue();
+          if ((val.find("X") != std::string::npos) ||
+              (val.find("x") != std::string::npos)) {
+            invalidValue = true;
+            return nullptr;
+          }
+        }
         const typespec *tps = nullptr;
         if (func->Return()) tps = func->Return()->Typespec();
         if (tps && (tps->UhdmType() == uhdmlogic_typespec)) {
