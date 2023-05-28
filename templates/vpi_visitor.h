@@ -26,26 +26,60 @@
 #ifndef UHDM_VPI_VISITOR_H
 #define UHDM_VPI_VISITOR_H
 
-#include <string>
-#include <vector>
-#include <set>
-
-#include <uhdm/sv_vpi_user.h>
-
 #include <uhdm/BaseClass.h>
+#include <uhdm/sv_vpi_user.h>
 #include <uhdm/uhdm_forward_decl.h>
 
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 namespace UHDM {
+class VpiVisitor;
 
 // Visit an object, dump to given stream.
-void visit_object(vpiHandle obj_h, std::ostream& out, bool shallowVisit = false);
+void visit_object(vpiHandle obj_h, VpiVisitor* visitor);
+void visit_object(vpiHandle obj_h, std::ostream& out,
+                  bool shallowVisit = false);
 
 // Visit designs, dump to given stream.
-void visit_designs (const std::vector<vpiHandle>& designs, std::ostream &out);
+void visit_designs(const std::vector<vpiHandle>& designs, VpiVisitor* visitor);
+void visit_designs(const std::vector<vpiHandle>& designs, std::ostream& out);
 
 // For debug use in GDB
 std::string decompile(UHDM::any* handle);
 
+class VpiVisitor final {
+ private:
+  std::ostream& stream_indent(int32_t indent) const;
+
+  void visit_baseclass(vpiHandle obj_h, int32_t indent, const char* relation, bool shallowVisit);
+<VISITOR_PRIVATE_DECLARATIONS>
+
+ public:
+  void visit_object(vpiHandle obj_h, int32_t indent,
+                    const char* relation, bool shallowVisit);
+  void visit_weakly_referenced();
+
+  bool getVisitWeaklyReferenced() const { return m_visitWeaklyReferenced; }
+  void setVisitWeaklyReferenced(bool enable) {
+    m_visitWeaklyReferenced = enable;
+  }
+
+  const VisitedContainer& getVisited() const { return m_visited; }
+  const AnySet& getWeaklyReferenced() const { return m_weaklyReferenced2; }
+
+  explicit VpiVisitor(std::ostream& out) : m_out(out) {}
+
+ private:
+  std::ostream& m_out;
+  AnySet m_weaklyReferenced1;
+  AnySet m_weaklyReferenced2;
+  VisitedContainer m_visited;
+  bool m_visitWeaklyReferenced = false;
 };
 
-#endif
+}  // namespace UHDM
+
+#endif  // UHDM_VPI_VISITOR_H

@@ -8,7 +8,7 @@ def _get_group_headers(type, real_type):
     return [ f'#include "{real_type}.h"' ] if type == 'any' else []
 
 
-def _get_declarations(classname, type, vpi, card, real_type=''):
+def _get_declarations(type, vpi, card, real_type=''):
     content = []
     if type in ['string', 'value', 'delay']:
         type = 'std::string'
@@ -17,12 +17,11 @@ def _get_declarations(classname, type, vpi, card, real_type=''):
 
     final = ''
     virtual = ''
-    if vpi in ['vpiParent', 'uhdmType', 'vpiLineNo', 'vpiColumnNo', 'vpiEndLineNo', 'vpiEndColumnNo', 'vpiFile', 'vpiName', 'vpiDefName', 'uhdmId']:
+    if vpi in ['uhdmType', 'vpiName', 'vpiDefName']:
         final = ' final'
         virtual = 'virtual '
 
     check = ''
-    group_headers = []
     if type == 'any':
         check = f'if (!{real_type}GroupCompliant(data)) return false;\n    '
 
@@ -336,8 +335,7 @@ def _get_DeepClone_implementation(model, models):
                 content.append( '  }')
 
             elif classname == 'module_inst' and method == 'Ref_modules':
-                # No cloning
-                content.append( '')
+                pass # No cloning
 
             else:
                 content.append(f'  if (auto vec = {method}()) {{')
@@ -384,7 +382,7 @@ def _get_DeepClone_implementation(model, models):
         content.append('  *clone = *this;')
         content.append('  clone->UhdmId(id);')
         content.append('  DeepCopy(clone, serializer, elaborator, parent);')
-        
+
         if classname in ['begin', 'named_begin', 'fork', 'named_fork']:
             content.append(f'  elaborator->leave{Classname}(this, nullptr);')
 
@@ -454,11 +452,8 @@ def _get_GetByVpiType_implementation(model):
     content = []
     content.append(f'std::tuple<const BaseClass*, UHDM_OBJECT_TYPE, const std::vector<const BaseClass*>*> {classname}::GetByVpiType(int32_t type) const {{')
 
-    if modeltype == 'obj_def' or case_bodies:
+    if (modeltype == 'obj_def') or case_bodies:
         content.append(f'  switch (type) {{')
-
-    if modeltype == 'obj_def':
-        content.append( '    case vpiParent: return std::make_tuple(vpiParent_, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);')
 
     if case_bodies:
         for vpi in sorted(case_bodies.keys()):
@@ -713,30 +708,6 @@ def _generate_one_class(model, models, templates):
     forward_declares = set()
     includes = set(['Serializer'])
 
-    Classname_ = classname[:1].upper() + classname[1:]
-    Classname = Classname_.replace('_', '')
-
-    if modeltype != 'class_def':
-        # Builtin properties do not need to be specified in each models
-        # Builtins: "vpiParent, Parent type, vpiFile, Id" method and field
-        data_members.extend(_get_data_member('BaseClass', 'vpiParent', '1'))
-        declarations.extend(_get_declarations(classname, 'BaseClass', 'vpiParent', '1'))
-        func_body, func_includes = _get_implementations(classname, 'BaseClass', 'vpiParent', '1')
-        implementations.extend(func_body)
-        includes.update(func_includes)
-
-        data_members.extend(_get_data_member('string', 'vpiFile', '1'))
-        declarations.extend(_get_declarations(classname, 'string','vpiFile', '1'))
-        func_body, func_includes = _get_implementations(classname, 'string','vpiFile', '1')
-        implementations.extend(func_body)
-        includes.update(func_includes)
-
-        data_members.extend(_get_data_member('uint32_t', 'uhdmId', '1'))
-        declarations.extend(_get_declarations(classname, 'uint32_t', 'uhdmId', '1'))
-        func_body, func_includes = _get_implementations(classname, 'uint32_t', 'uhdmId', '1')
-        implementations.extend(func_body)
-        includes.update(func_includes)
-
     type_specified = False
     for key, value in model.allitems():
         if key == 'property':
@@ -752,7 +723,7 @@ def _generate_one_class(model, models, templates):
                 declarations.append(f'  {type} {Vpi}() const final {{ return {value.get("vpiname")}; }}')
             else: # properties are already defined in vpi_user.h, no need to redefine them
                 data_members.extend(_get_data_member(type, vpi, card))
-                declarations.extend(_get_declarations(classname, type, vpi, card))
+                declarations.extend(_get_declarations(type, vpi, card))
                 func_body, func_includes = _get_implementations(classname, type, vpi, card)
                 implementations.extend(func_body)
                 includes.update(func_includes)
@@ -779,7 +750,7 @@ def _generate_one_class(model, models, templates):
 
             group_headers.update(_get_group_headers(type, real_type))
             data_members.extend(_get_data_member(type, name, card))
-            declarations.extend(_get_declarations(classname, type, name, card, real_type))
+            declarations.extend(_get_declarations(type, name, card, real_type))
             func_body, func_includes = _get_implementations(classname, type, name, card, real_type)
             implementations.extend(func_body)
             includes.update(func_includes)

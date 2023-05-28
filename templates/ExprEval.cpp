@@ -63,7 +63,7 @@ class DetectRefObj : public VpiListener {
   void leaveHier_path(const hier_path *object, vpiHandle handle) final {
     hasRef_obj = true;
   }
-  bool refObjDetected() { return hasRef_obj; }
+  bool refObjDetected() const { return hasRef_obj; }
 
  private:
   bool hasRef_obj = false;
