@@ -12,27 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "if_else_stmt" formal description
- 
-- obj_def: if_else
-  - extends: atomic_stmt
-  - property: qualifier
-    name: qualifier
-    vpi: vpiQualifier
-    type: int32_t
-    card: 1
+# Universal Hardware Data Model (UHDM) "gen_case" formal description
+# This model is not in the standard, it enables modeling case-generate statements
+# in the non-elaborate tree
+
+- obj_def: gen_case
+  - extends: gen_stmt
   - class_ref: vpiCondition
     name: condition
     vpi: vpiCondition
     type: expr
     card: 1
-  - group_ref: vpiStmt
-    name: stmt
-    vpi: vpiStmt
-    type: stmt
-    card: 1
-  - group_ref: vpiElseStmt
-    name: else stmt
-    vpi: vpiElseStmt
-    type: stmt
-    card: 1
+  - obj_ref: case_items
+    name: case items
+    vpi: vpiCaseItem
+    type: case_item
+    card: any

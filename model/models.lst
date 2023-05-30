@@ -265,4 +265,7 @@ constr_foreach.yaml
 soft_disable.yaml
 gen_stmt.yaml
 gen_if.yaml
+gen_if_else.yaml
+gen_for.yaml
+gen_case.yaml
 design.yaml
