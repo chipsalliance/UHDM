@@ -140,6 +140,7 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
                       variables* clone =
                           (variables*)clone_tree(var, *serializer, elaborator);
                       clone->VpiName(obj->VpiName());
+                      clone->VpiParent(const_cast<any*>(obj->VpiParent()));
                       actual = clone;
                       elaborator->pushVar(clone);
                       pushedVar = clone;
@@ -1059,6 +1060,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     name == "max" || name == "min") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
+                  call->VpiParent(clone);
                   if (ref_obj* cro = any_cast<ref_obj*>(current)) {
                     cro->Actual_group(call);
                   }
@@ -1082,6 +1084,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     name == "max" || name == "min") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
+                  call->VpiParent(clone);
                   if (ref_obj* cro = any_cast<ref_obj*>(current)) {
                     cro->Actual_group(call);
                   }
@@ -1105,6 +1108,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     name == "max" || name == "min") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
+                  call->VpiParent(clone);
                   if (ref_obj* cro = any_cast<ref_obj*>(current)) {
                     cro->Actual_group(call);
                   }
@@ -1125,6 +1129,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     name == "max" || name == "min") {
                   func_call* call = serializer->MakeFunc_call();
                   call->VpiName(name);
+                  call->VpiParent(clone);
                   if (ref_obj* cro = any_cast<ref_obj*>(current)) {
                     cro->Actual_group(call);
                   }
