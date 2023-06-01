@@ -23,6 +23,8 @@
   - obj_ref: cont_assign
   - obj_ref: ref_module
   - obj_ref: module_array
+  - class_ref: gen_stmt
+
 
 
 
