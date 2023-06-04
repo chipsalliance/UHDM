@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "stmt" formal description
- 
-- group_def: stmt
-  - class_ref: scope
-  - class_ref: atomic_stmt
-  - class_ref: expr
-  - group_ref: assertion
-# Non standard for non-elab model generate block
-  - obj_ref: cont_assign
-  - obj_ref: ref_module
-  - obj_ref: module_array
-  - class_ref: gen_stmt
-  - class_ref: process_stmt
-  - obj_ref: param_assign
+# Universal Hardware Data Model (UHDM) "gen_region" formal description
+# This model is not in the standard, it enables modeling generate region statements
+# in the non-elaborate tree
 
-
-
-
+- obj_def: gen_region
+  - extends: gen_stmt
+  - group_ref: vpiStmt
+    name: stmt
+    vpi: vpiStmt
+    type: stmt
+    card: 1
 
