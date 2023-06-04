@@ -268,4 +268,5 @@ gen_if.yaml
 gen_if_else.yaml
 gen_for.yaml
 gen_case.yaml
+gen_region.yaml
 design.yaml

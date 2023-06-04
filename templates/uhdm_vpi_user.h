@@ -78,4 +78,5 @@
 #define vpiGenIfElse        5014 // Handle to if-else-generate for folded (Non-elaborated) model
 #define vpiGenFor           5015 // Handle to for-generate for folded (Non-elaborated) model
 #define vpiGenCase          5016 // Handle to case-generate for folded (Non-elaborated) model
+#define vpiGenRegion        5017 // Handle to generate region for folded (Non-elaborated) model
 #endif  // UHDM_VPI_USER_H
