@@ -277,4 +277,37 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
   }
 }
 
+void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
+  if (!elaboratedTree_) return;
+  bool invalidValue = false;
+  UHDM::ExprEval eval(true);
+  const any* parent = object->VpiParent();
+  if (parent == nullptr) return;
+  if (parent->UhdmType() == uhdmcont_assign) {
+    cont_assign* assign = (cont_assign*) parent;
+    expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
+    if (invalidValue) return;
+    if (tmp) {
+      assign->Rhs(tmp);
+    }
+  } else if (parent->UhdmType() == uhdmoperation) {
+    /* TODO: const propagation
+    operation* poper = (operation*) parent;
+    VectorOfany* operands = poper->Operands();
+    expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
+    if (invalidValue) return;
+    if (tmp) {
+      uint64_t index = 0;
+      for (any* oper : *operands) {
+        if (oper == object) {
+          operands->at(index) = tmp;
+          break;
+        }
+        index++;
+      }
+    }
+    */
+  }
+}
+
 }  // namespace UHDM

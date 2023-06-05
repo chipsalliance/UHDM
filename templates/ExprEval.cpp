@@ -2523,9 +2523,15 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           case vpiArithRShiftOp:
           case vpiRShiftOp: {
             if (operands.size() == 2) {
+              expr* arg0 = reduceExpr(operands[0], invalidValue,
+                                                     inst, pexpr, muteError);
+              if (arg0 && arg0->UhdmType() == uhdmconstant) {
+                constant* c = (constant*) arg0;
+                if (c->VpiSize() == -1)
+                  invalidValue = true;
+              }
               int64_t val0 =
-                  get_value(invalidValue, reduceExpr(operands[0], invalidValue,
-                                                     inst, pexpr, muteError));
+                  get_value(invalidValue, arg0);
               int64_t val1 =
                   get_value(invalidValue, reduceExpr(operands[1], invalidValue,
                                                      inst, pexpr, muteError));
@@ -2606,9 +2612,15 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           case vpiArithLShiftOp:
           case vpiLShiftOp: {
             if (operands.size() == 2) {
+              expr* arg0 = reduceExpr(operands[0], invalidValue,
+                                                     inst, pexpr, muteError);
+              if (arg0 && arg0->UhdmType() == uhdmconstant) {
+                constant* c = (constant*) arg0;
+                if (c->VpiSize() == -1)
+                  invalidValue = true;
+              }
               int64_t val0 =
-                  get_value(invalidValue, reduceExpr(operands[0], invalidValue,
-                                                     inst, pexpr, muteError));
+                  get_value(invalidValue, arg0);
               int64_t val1 =
                   get_value(invalidValue, reduceExpr(operands[1], invalidValue,
                                                      inst, pexpr, muteError));
@@ -3204,7 +3216,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 if (const gen_scope_array *in =
                         any_cast<gen_scope_array *>(inst)) {
                   fullPath = in->VpiFullName();
-                } else if (inst->UhdmType() == uhdmdesign) {
+                } else if (inst && inst->UhdmType() == uhdmdesign) {
                   fullPath = inst->VpiName();
                 } else if (any_cast<scope *>(inst)) {
                   fullPath = ((scope *)inst)->VpiFullName();
@@ -3610,7 +3622,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           const std::string_view objname = ref->VpiName();
           any *object = getObject(objname, inst, pexpr, muteError);
           if (object == nullptr) {
-            if (inst->UhdmType() == uhdmpackage) {
+            if (inst && inst->UhdmType() == uhdmpackage) {
               std::string name(inst->VpiName());
               name.append("::").append(objname);
               object = getObject(name, inst, pexpr, muteError);

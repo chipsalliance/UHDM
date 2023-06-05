@@ -38,6 +38,7 @@ class UhdmAdjuster final : public VpiListener {
  private:
   
   void leaveCase_stmt(const case_stmt* object, vpiHandle handle) final;
+  void leaveOperation(const operation* object, vpiHandle handle) final;
   void leaveConstant(const constant* object, vpiHandle handle) final;
   void enterModule_inst(const module_inst* object, vpiHandle handle) final;
 
