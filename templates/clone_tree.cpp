@@ -920,7 +920,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
       if (previous) {
         std::string_view name = obj->VpiName();
         std::string nameIndexed(name);
-        if (name.empty()) {
+        if (name.empty() || name.find('[') == 0) {
           if (obj->UhdmType() == uhdmpart_select) {
             if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
             part_select* sel = (part_select*)obj;
