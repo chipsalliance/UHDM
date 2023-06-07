@@ -285,6 +285,7 @@ void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
   if (parent == nullptr) return;
   if (parent->UhdmType() == uhdmcont_assign) {
     cont_assign* assign = (cont_assign*) parent;
+    if (assign->Lhs() == object) return;
     expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
     if (invalidValue) return;
     if (tmp) {
