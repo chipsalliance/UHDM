@@ -62,6 +62,9 @@ class ExprEval {
       bool full /* false: use only last range size, true: use all ranges */,
       bool muteError = false);
 
+  void reduceExceptions(const std::vector<int32_t> operationTypes) {
+    m_skipOperationTypes = operationTypes;
+  }
   /* Tries to reduce any expression into a constant, returns the orignal
      expression if fails. If an invalid value is found in the process,
      invalidValue will be set to true */
@@ -147,6 +150,7 @@ class ExprEval {
   GetTaskFuncFunctor getTaskFuncFunctor = nullptr;
   const UHDM::design* m_design = nullptr;
   bool m_muteError = false;
+  std::vector<int32_t> m_skipOperationTypes;
 };
 
 std::string vPrint(UHDM::any* handle);

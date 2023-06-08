@@ -1714,7 +1714,7 @@ expr *ExprEval::reduceBitSelect(expr *op, uint32_t index_val,
         std::string fullPath;
         if (const gen_scope_array *in = any_cast<gen_scope_array *>(inst)) {
           fullPath = in->VpiFullName();
-        } else if (inst->UhdmType() == uhdmdesign) {
+        } else if (inst && inst->UhdmType() == uhdmdesign) {
           fullPath = inst->VpiName();
         } else if (any_cast<scope *>(inst)) {
           fullPath = ((scope *)inst)->VpiFullName();
@@ -2490,6 +2490,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
   UHDM_OBJECT_TYPE objtype = result->UhdmType();
   if (objtype == uhdmoperation) {
     UHDM::operation *op = (UHDM::operation *)result;
+    for (auto t : m_skipOperationTypes) {
+      if (op->VpiOpType() == t) {
+        return (expr*) result;
+      }
+    }
     UHDM::VectorOfany *operands = op->Operands();
     bool constantOperands = true;
     if (operands) {
@@ -3117,7 +3122,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   if (const gen_scope_array *in =
                           any_cast<gen_scope_array *>(inst)) {
                     fullPath = in->VpiFullName();
-                  } else if (inst->UhdmType() == uhdmdesign) {
+                  } else if (inst && inst->UhdmType() == uhdmdesign) {
                     fullPath = inst->VpiName();
                   } else if (any_cast<scope *>(inst)) {
                     fullPath = ((scope *)inst)->VpiFullName();
@@ -3513,7 +3518,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   if (const gen_scope_array *in =
                           any_cast<gen_scope_array *>(inst)) {
                     fullPath = in->VpiFullName();
-                  } else if (inst->UhdmType() == uhdmdesign) {
+                  } else if (inst && inst->UhdmType() == uhdmdesign) {
                     fullPath = inst->VpiName();
                   } else if (any_cast<scope *>(inst)) {
                     fullPath = ((scope *)inst)->VpiFullName();
@@ -4137,8 +4142,8 @@ bool ExprEval::setValueInInstance(
     valD = get_double(invalidValueD, rhsexp);
   }
   UHDM::VectorOfparam_assign *param_assigns = nullptr;
-  if (inst->UhdmType() == uhdmgen_scope_array) {
-  } else if (inst->UhdmType() == uhdmdesign) {
+  if (inst && inst->UhdmType() == uhdmgen_scope_array) {
+  } else if (inst && inst->UhdmType() == uhdmdesign) {
     param_assigns = ((design *)inst)->Param_assigns();
     if (param_assigns == nullptr) {
       ((design *)inst)->Param_assigns(s.MakeParam_assignVec());
@@ -4795,8 +4800,8 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
     scope->Parameters(pack->Parameters());
   }
   UHDM::VectorOfparam_assign *param_assigns = nullptr;
-  if (inst->UhdmType() == uhdmgen_scope_array) {
-  } else if (inst->UhdmType() == uhdmdesign) {
+  if (inst && inst->UhdmType() == uhdmgen_scope_array) {
+  } else if (inst && inst->UhdmType() == uhdmdesign) {
     param_assigns = ((design *)inst)->Param_assigns();
   } else if (any_cast<UHDM::scope *>(inst)) {
     param_assigns = ((UHDM::scope *)inst)->Param_assigns();

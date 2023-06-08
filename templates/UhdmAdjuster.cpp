@@ -292,22 +292,30 @@ void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
       assign->Rhs(tmp);
     }
   } else if (parent->UhdmType() == uhdmoperation) {
-    /* TODO: const propagation
-    operation* poper = (operation*) parent;
+    operation* poper = (operation*)parent;
     VectorOfany* operands = poper->Operands();
-    expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
-    if (invalidValue) return;
-    if (tmp) {
-      uint64_t index = 0;
-      for (any* oper : *operands) {
-        if (oper == object) {
-          operands->at(index) = tmp;
-          break;
+    if (operands) {
+      eval.reduceExceptions({vpiAssignmentPatternOp,
+                             vpiMultiAssignmentPatternOp, vpiConcatOp,
+                             vpiMultiConcatOp, vpiBitNegOp});
+      expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
+      if (invalidValue) return;
+      if (tmp && tmp->UhdmType() == uhdmconstant) {
+        tmp->VpiFile(poper->VpiFile());
+        tmp->VpiLineNo(poper->VpiLineNo());
+        tmp->VpiColumnNo(poper->VpiColumnNo());
+        tmp->VpiEndLineNo(poper->VpiEndLineNo());
+        tmp->VpiEndColumnNo(poper->VpiEndColumnNo());
+        uint64_t index = 0;
+        for (any* oper : *operands) {
+          if (oper == object) {
+            operands->at(index) = tmp;
+            break;
+          }
+          index++;
         }
-        index++;
       }
     }
-    */
   }
 }
 
