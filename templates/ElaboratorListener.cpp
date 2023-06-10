@@ -205,8 +205,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
     if (object->Ports()) {
       for (port* port : *object->Ports()) {
         if (const any* low = port->Low_conn()) {
-          if (low->UhdmType() == uhdmref_obj) {
-            ref_obj* ref = (ref_obj*)low;
+          if (const ref_obj *ref = any_cast<const ref_obj*>(low)) {
             if (const any* actual = ref->Actual_group()) {
               if (actual->UhdmType() == uhdmmodport) {
                 // If the interface of the modport is not yet in the map
@@ -267,8 +266,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
     if (object->Ports()) {
       for (ports* port : *object->Ports()) {
         if (const any* low = port->Low_conn()) {
-          if (low->UhdmType() == uhdmref_obj) {
-            ref_obj* r = (ref_obj*)low;
+          if (const ref_obj *r = any_cast<const ref_obj*>(low)) {
             if (const any* actual = r->Actual_group()) {
               if (actual->UhdmType() == uhdminterface_inst) {
                 netMap.emplace(port->VpiName(), actual);
@@ -662,8 +660,7 @@ void ElaboratorListener::enterInterface_inst(const interface_inst* object,
     if (object->Ports()) {
       for (ports* port : *object->Ports()) {
         if (const any* low = port->Low_conn()) {
-          if (low->UhdmType() == uhdmref_obj) {
-            ref_obj* r = (ref_obj*)low;
+          if (const ref_obj* r = any_cast<const ref_obj*>(low)) {
             if (const any* actual = r->Actual_group()) {
               if (actual->UhdmType() == uhdminterface_inst) {
                 netMap.emplace(port->VpiName(), actual);
@@ -1267,6 +1264,26 @@ void ElaboratorListener::leaveMethod_func_call(const method_func_call* object,
 void ElaboratorListener::leaveRef_obj(const ref_obj* object, vpiHandle handle) {
   if (!object->Actual_group())
     ((ref_obj*)object)->Actual_group(bindAny(object->VpiName()));
+}
+
+void ElaboratorListener::leaveBit_select(const bit_select* object,
+                                         vpiHandle handle) {
+  leaveRef_obj(object, handle);
+}
+
+void ElaboratorListener::leaveIndexed_part_select(
+    const indexed_part_select* object, vpiHandle handle) {
+  leaveRef_obj(object, handle);
+}
+
+void ElaboratorListener::leavePart_select(const part_select* object,
+                                          vpiHandle handle) {
+  leaveRef_obj(object, handle);
+}
+
+void ElaboratorListener::leaveVar_select(const var_select* object,
+                                         vpiHandle handle) {
+  leaveRef_obj(object, handle);
 }
 
 }  // namespace UHDM
