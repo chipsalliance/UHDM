@@ -21,26 +21,6 @@
     vpi: vpiIsCoverSequence
     type: bool
     card: 1
-  - property: start_line
-    name: start line
-    vpi: vpiStartLine
-    type: int32_t
-    card: 1
-  - property: column
-    name: column
-    vpi: vpiColumn
-    type: int32_t
-    card: 1
-  - property: end_line
-    name: end line
-    vpi: vpiEndLine
-    type: int32_t
-    card: 1
-  - property: end_column
-    name: end column
-    vpi: vpiEndColumn
-    type: int32_t
-    card: 1
   - obj_ref: clocking_block
     name: clocking block
     vpi: vpiClockingBlock
