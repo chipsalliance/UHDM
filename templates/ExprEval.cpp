@@ -344,15 +344,17 @@ any *ExprEval::getValue(std::string_view name, const any *inst,
     if (resultType == uhdmconstant) {
     } else if (resultType == uhdmref_obj) {
       if (result->VpiName() != name) {
-        any *tmp = getValue(result->VpiName(), inst, pexpr, muteError);
-        if (tmp) result = tmp;
+        if (any *rval = getValue(result->VpiName(), inst, pexpr, muteError)) {
+          result = rval;
+        }
       }
     } else if (resultType == uhdmoperation || resultType == uhdmhier_path ||
                resultType == uhdmbit_select ||
                resultType == uhdmsys_func_call) {
       bool invalidValue = false;
-      any *tmp = reduceExpr(result, invalidValue, inst, pexpr, muteError);
-      if (tmp) result = tmp;
+      if (any *rval = reduceExpr(result, invalidValue, inst, pexpr, muteError)) {
+        result = rval;
+      }
     }
   }
   if ((result == nullptr) && getValueFunctor) {
@@ -1407,9 +1409,9 @@ uint64_t ExprEval::size(const any *typespec, bool &invalidValue,
         break;
       }
       case uhdmoperation: {
-        operation *op = (operation *)typespec;
-        if (op->VpiOpType() == vpiConcatOp) {
-          if (auto ops = op->Operands()) {
+        operation *tsop = (operation *)typespec;
+        if (tsop->VpiOpType() == vpiConcatOp) {
+          if (auto ops = tsop->Operands()) {
             for (auto op : *ops) {
               bits += size(op, invalidValue, inst, pexpr, full);
             }
@@ -1591,27 +1593,27 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
       }
     } else {
       invalidValueD = false;
-      long double v0 = get_double(invalidValueD, reduc0);
-      long double v1 = get_double(invalidValueD, reduc1);
+      long double ld0 = get_double(invalidValueD, reduc0);
+      long double ld1 = get_double(invalidValueD, reduc1);
       if ((invalidValue == false) && (invalidValueD == false)) {
         switch (optype) {
           case vpiEqOp:
-            val = (v0 == v1);
+            val = (ld0 == ld1);
             break;
           case vpiNeqOp:
-            val = (v0 != v1);
+            val = (ld0 != ld1);
             break;
           case vpiGtOp:
-            val = (v0 > v1);
+            val = (ld0 > ld1);
             break;
           case vpiGeOp:
-            val = (v0 >= v1);
+            val = (ld0 >= ld1);
             break;
           case vpiLtOp:
-            val = (v0 < v1);
+            val = (ld0 < ld1);
             break;
           case vpiLeOp:
-            val = (v0 <= v1);
+            val = (ld0 <= ld1);
             break;
           default:
             break;
@@ -1686,30 +1688,27 @@ expr *ExprEval::reduceBitSelect(expr *op, uint32_t index_val,
     if (const typespec *tps = exp->Typespec()) {
       if (tps->UhdmType() == uhdmlogic_typespec) {
         logic_typespec *lts = (logic_typespec *)tps;
-        VectorOfrange *ranges = lts->Ranges();
-        if (ranges) {
+        if (VectorOfrange *ranges = lts->Ranges()) {
           range *r = ranges->at(0);
-          bool invalidValue = false;
-          lr = static_cast<uint16_t>(get_value(invalidValue, r->Left_expr()));
-          rr = static_cast<uint16_t>(get_value(invalidValue, r->Right_expr()));
+          bool invalid = false;
+          lr = static_cast<uint16_t>(get_value(invalid, r->Left_expr()));
+          rr = static_cast<uint16_t>(get_value(invalid, r->Right_expr()));
         }
       } else if (tps->UhdmType() == uhdmint_typespec) {
         int_typespec *lts = (int_typespec *)tps;
-        VectorOfrange *ranges = lts->Ranges();
-        if (ranges) {
+        if (VectorOfrange *ranges = lts->Ranges()) {
           range *r = ranges->at(0);
-          bool invalidValue = false;
-          lr = static_cast<uint16_t>(get_value(invalidValue, r->Left_expr()));
-          rr = static_cast<uint16_t>(get_value(invalidValue, r->Right_expr()));
+          bool invalid = false;
+          lr = static_cast<uint16_t>(get_value(invalid, r->Left_expr()));
+          rr = static_cast<uint16_t>(get_value(invalid, r->Right_expr()));
         }
       } else if (tps->UhdmType() == uhdmbit_typespec) {
         bit_typespec *lts = (bit_typespec *)tps;
-        VectorOfrange *ranges = lts->Ranges();
-        if (ranges) {
+        if (VectorOfrange *ranges = lts->Ranges()) {
           range *r = ranges->at(0);
-          bool invalidValue = false;
-          lr = static_cast<uint16_t>(get_value(invalidValue, r->Left_expr()));
-          rr = static_cast<uint16_t>(get_value(invalidValue, r->Right_expr()));
+          bool invalid = false;
+          lr = static_cast<uint16_t>(get_value(invalid, r->Left_expr()));
+          rr = static_cast<uint16_t>(get_value(invalid, r->Right_expr()));
         }
       }
     }
@@ -1768,11 +1767,11 @@ int64_t ExprEval::get_value(bool &invalidValue, const UHDM::expr *expr,
   if (const UHDM::constant *c = any_cast<const UHDM::constant *>(expr)) {
     type = c->VpiConstType();
     sv = c->VpiValue();
-  } else if (const UHDM::variables *c =
+  } else if (const UHDM::variables *v =
                  any_cast<const UHDM::variables *>(expr)) {
-    if (c->UhdmType() == uhdmenum_var) {
+    if (v->UhdmType() == uhdmenum_var) {
       type = vpiUIntConst;
-      sv = c->VpiValue();
+      sv = v->VpiValue();
     }
   } else {
     invalidValue = true;
@@ -1878,11 +1877,11 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const UHDM::expr *expr,
   if (const UHDM::constant *c = any_cast<const UHDM::constant *>(expr)) {
     type = c->VpiConstType();
     sv = c->VpiValue();
-  } else if (const UHDM::variables *c =
+  } else if (const UHDM::variables *v =
                  any_cast<const UHDM::variables *>(expr)) {
-    if (c->UhdmType() == uhdmenum_var) {
+    if (v->UhdmType() == uhdmenum_var) {
       type = vpiUIntConst;
-      sv = c->VpiValue();
+      sv = v->VpiValue();
     }
   } else {
     invalidValue = true;
@@ -2156,10 +2155,10 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     } else if (ttps == uhdmarray_var) {
       if (returnTypespec) return (typespec *)var->Typespec();
     }
-  } else if (typespec *var = any_cast<typespec *>(object)) {
-    UHDM_OBJECT_TYPE ttps = var->UhdmType();
+  } else if (typespec *tps = any_cast<typespec *>(object)) {
+    UHDM_OBJECT_TYPE ttps = tps->UhdmType();
     if (ttps == uhdmstruct_typespec) {
-      struct_typespec *stpt = (struct_typespec *)(var);
+      struct_typespec *stpt = (struct_typespec *)(tps);
       for (typespec_member *member : *stpt->Members()) {
         if (member->VpiName() == elemName) {
           expr *res = nullptr;
@@ -2230,11 +2229,11 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         }
       }
     }
-  } else if (nets *var = any_cast<nets *>(object)) {
-    UHDM_OBJECT_TYPE ttps = var->UhdmType();
+  } else if (nets *nt = any_cast<nets *>(object)) {
+    UHDM_OBJECT_TYPE ttps = nt->UhdmType();
     if (ttps == uhdmstruct_net) {
       struct_typespec *stpt =
-          (struct_typespec *)((struct_net *)var)->Typespec();
+          (struct_typespec *)((struct_net *)nt)->Typespec();
       for (typespec_member *member : *stpt->Members()) {
         if (member->VpiName() == elemName) {
           if (returnTypespec)
@@ -2245,8 +2244,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
       }
     }
   } else if (constant *cons = any_cast<constant *>(object)) {
-    const typespec *ts = cons->Typespec();
-    if (ts) {
+    if (const typespec *ts = cons->Typespec()) {
       UHDM_OBJECT_TYPE ttps = ts->UhdmType();
       if (ttps == uhdmstruct_typespec) {
         struct_typespec *stpt = (struct_typespec *)ts;
@@ -2380,8 +2378,8 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
           const typespec *tps = nullptr;
           if (parameter *p = any_cast<parameter *>(baseP)) {
             tps = p->Typespec();
-          } else if (operation *p = any_cast<operation *>(baseP)) {
-            tps = p->Typespec();
+          } else if (operation *op = any_cast<operation *>(baseP)) {
+            tps = op->Typespec();
           }
 
           if (tps) {
@@ -2512,10 +2510,10 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         return (expr*) result;
       }
     }
-    UHDM::VectorOfany *operands = op->Operands();
     bool constantOperands = true;
-    if (operands) {
-      for (auto oper : *operands) {
+    if (UHDM::VectorOfany *oprns = op->Operands()) {
+      UHDM::VectorOfany &operands = *oprns;
+      for (auto oper : operands) {
         UHDM_OBJECT_TYPE optype = oper->UhdmType();
         if (optype == uhdmref_obj) {
           ref_obj *ref = (ref_obj *)oper;
@@ -2539,7 +2537,6 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         }
       }
       if (constantOperands) {
-        UHDM::VectorOfany &operands = *op->Operands();
         int32_t optype = op->VpiOpType();
         switch (optype) {
           case vpiArithRShiftOp:

@@ -28,26 +28,32 @@ def _get_declarations(type, vpi, card, real_type=''):
     Vpi_ = vpi[:1].upper() + vpi[1:]
 
     if card == '1':
-        pointer = ''
-        const = ''
-        if type not in ['uint32_t', 'int32_t', 'bool', 'std::string']:
-            pointer = '*'
-            const = 'const '
-
         if type == 'std::string':
             content.append(f'  {virtual}bool {Vpi_}(std::string_view data){final};')
             content.append(f'  {virtual}std::string_view {Vpi_}() const{final};')
+        elif type in ['uint32_t', 'int32_t', 'bool']:
+            content.append(f'  {virtual}{type} {Vpi_}() const{final} {{ return {vpi}_; }}')
+            content.append(f'  {virtual}bool {Vpi_}({type} data){final} {{\n    {check}{vpi}_ = data;\n    return true;\n  }}')
         else:
-            content.append(f'  {virtual}{const}{type}{pointer} {Vpi_}() const{final} {{ return {vpi}_; }}')
-            content.append(f'  {virtual}bool {Vpi_}({type}{pointer} data){final} {{\n    {check}{vpi}_ = data;\n    return true;\n  }}')
+            content.append(f'  {virtual}{type}* {Vpi_}() {final} {{ return {vpi}_; }}')
+            content.append(f'  {virtual}const {type}* {Vpi_}() const{final} {{ return {vpi}_; }}')
+            content.append( '  template <typename T>')
+            content.append(f'  T* {Vpi_}() {{')
+            content.append(f'    return ({vpi}_ == nullptr) ? nullptr : any_cast<T*>({vpi}_);')
+            content.append( '  }')
+            content.append( '  template <typename T>')
+            content.append(f'  const T* {Vpi_}() const {{')
+            content.append(f'    return ({vpi}_ == nullptr) ? nullptr : any_cast<const T*>({vpi}_);')
+            content.append( '  }')
+            content.append(f'  {virtual}bool {Vpi_}({type}* data){final} {{\n    {check}{vpi}_ = data;\n    return true;\n  }}')
     elif card == 'any':
         content.append(f'  VectorOf{type}* {Vpi_}() const {{ return {vpi}_; }}')
         content.append(f'  bool {Vpi_}(VectorOf{type}* data) {{\n    {check}{vpi}_ = data;\n    return true;\n  }}')
 
-    return content
+    return '\n'.join(content)
 
 
-def _get_implementations(classname, type, vpi, card, real_type=''):
+def _get_implementations(classname, type, vpi, card):
     includes = set()
     content = []
     if card != '1':
@@ -61,12 +67,6 @@ def _get_implementations(classname, type, vpi, card, real_type=''):
 
     if vpi == 'uhdmType':
         type = 'UHDM_OBJECT_TYPE'
-
-    pointer = ''
-    const = ''
-    if type not in ['uint32_t', 'int32_t', 'bool', 'std::string']:
-        pointer = '*'
-        const = 'const '
 
     Vpi_ = vpi[:1].upper() + vpi[1:]
 
@@ -211,7 +211,6 @@ def _get_DeepClone_implementation(model, models):
     for key, value in model.allitems():
         if key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
             name = value.get('name')
-            vpi = value.get('vpi')
             type = value.get('type')
             card = value.get('card')
 
@@ -386,7 +385,6 @@ def _get_GetByVpiName_implementation(model):
     for key, value in model.allitems():
         if key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
             name = value.get('name')
-            vpi = value.get('vpi')
             card = value.get('card')
 
             if (card == 'any') and not name.endswith('s'):
@@ -416,10 +414,6 @@ def _get_GetByVpiName_implementation(model):
 def _get_GetByVpiType_implementation(model, models):
     classname = model['name']
     modeltype = model['type']
-
-    baseclass_name = model.get('extends', 'BaseClass')
-    baseclass_model = models.get(baseclass_name, {})
-    baseclass_type = baseclass_model.get('type')
 
     case_bodies = {}
     for key, value in model.allitems():
@@ -718,7 +712,7 @@ def _generate_one_class(model, models, templates):
                 declarations.append(f'  {type} {Vpi}() const {"final" if leaf else "override"} {{ return {value.get("vpiname")}; }}')
             else: # properties are already defined in vpi_user.h, no need to redefine them
                 data_members.extend(_get_data_member(type, vpi, card))
-                declarations.extend(_get_declarations(type, vpi, card))
+                declarations.append(_get_declarations(type, vpi, card))
                 func_body, func_includes = _get_implementations(classname, type, vpi, card)
                 implementations.extend(func_body)
                 includes.update(func_includes)
@@ -745,8 +739,8 @@ def _generate_one_class(model, models, templates):
 
             group_headers.update(_get_group_headers(type, real_type))
             data_members.extend(_get_data_member(type, name, card))
-            declarations.extend(_get_declarations(type, name, card, real_type))
-            func_body, func_includes = _get_implementations(classname, type, name, card, real_type)
+            declarations.append(_get_declarations(type, name, card, real_type))
+            func_body, func_includes = _get_implementations(classname, type, name, card)
             implementations.extend(func_body)
             includes.update(func_includes)
 

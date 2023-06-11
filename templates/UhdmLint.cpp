@@ -33,16 +33,11 @@
 namespace UHDM {
 
 void UhdmLint::leaveBit_select(const bit_select* object, vpiHandle handle) {
-  const expr* index = object->VpiIndex();
-  if (index) {
-    if (index->UhdmType() == uhdmref_obj) {
-      ref_obj* ref = (ref_obj*)index;
-      const any* act = ref->Actual_group();
-      if (act && act->UhdmType() == uhdmreal_var) {
-        const std::string errMsg(act->VpiName());
-        serializer_->GetErrorHandler()(ErrorType::UHDM_REAL_TYPE_AS_SELECT,
-                                       errMsg, ref, nullptr);
-      }
+  if (const ref_obj* index = object->VpiIndex<ref_obj>()) {
+    if (const real_var* actual = index->Actual_group<real_var>()) {
+      const std::string errMsg(actual->VpiName());
+      serializer_->GetErrorHandler()(ErrorType::UHDM_REAL_TYPE_AS_SELECT,
+                                     errMsg, index, nullptr);
     }
   }
 }
@@ -81,8 +76,7 @@ static const any* returnWithValue(const any* stmt) {
 void UhdmLint::leaveFunction(const function* object, vpiHandle handle) {
   if (object->Return() == nullptr) {
     if (const any* st = object->Stmt()) {
-      const any* ret = returnWithValue(st);
-      if (ret) {
+      if (const any* ret = returnWithValue(st)) {
         const std::string errMsg(object->VpiName());
         serializer_->GetErrorHandler()(
             ErrorType::UHDM_RETURN_VALUE_VOID_FUNCTION, errMsg, ret, nullptr);
@@ -93,14 +87,12 @@ void UhdmLint::leaveFunction(const function* object, vpiHandle handle) {
 
 void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
                                     vpiHandle handle) {
-  if (object->VpiPacked()) {
-    if (object->Members()) {
-      for (typespec_member* member : *object->Members()) {
-        if (member->Default_value()) {
-          serializer_->GetErrorHandler()(ErrorType::UHDM_ILLEGAL_DEFAULT_VALUE,
-                                         std::string(""),
-                                         member->Default_value(), nullptr);
-        }
+  if (object->VpiPacked() && (object->Members() != nullptr)) {
+    for (typespec_member* member : *object->Members()) {
+      if (member->Default_value()) {
+        serializer_->GetErrorHandler()(ErrorType::UHDM_ILLEGAL_DEFAULT_VALUE,
+                                       std::string(""), member->Default_value(),
+                                       nullptr);
       }
     }
   }
@@ -115,11 +107,11 @@ void UhdmLint::leaveModule_inst(const module_inst* object, vpiHandle handle) {
 void UhdmLint::checkMultiContAssign(
     const std::vector<UHDM::cont_assign*>* assigns) {
   for (uint32_t i = 0; i < assigns->size() - 1; i++) {
-    cont_assign* cassign = assigns->at(i);
+    const cont_assign* cassign = assigns->at(i);
+    if (cassign->VpiStrength0() || cassign->VpiStrength1()) continue;
+
     const expr* lhs_exp = cassign->Lhs();
-    const expr* rhs_exp = cassign->Rhs();
-    if (rhs_exp->UhdmType() == uhdmoperation) {
-      operation* op = (operation*)rhs_exp;
+    if (const operation* op = cassign->Rhs<operation>()) {
       bool triStatedOp = false;
       for (auto operand : *op->Operands()) {
         if (operand->UhdmType() == uhdmconstant) {
@@ -133,29 +125,20 @@ void UhdmLint::checkMultiContAssign(
       if (triStatedOp) continue;
     }
     for (uint32_t j = i + 1; j < assigns->size(); j++) {
-      cont_assign* as = assigns->at(j);
-      const UHDM::expr* lhs = as->Lhs();
-      const UHDM::expr* rhs = as->Rhs();
-      if (lhs->UhdmType() == uhdmref_obj) {
-        const std::string_view n = lhs->VpiName();
-        if (n == lhs_exp->VpiName()) {
-          ref_obj* ref = (ref_obj*)lhs;
-          const any* actual = ref->Actual_group();
-          if (actual) {
-            if (actual->UhdmType() == uhdmlogic_net) {
-              logic_net* net = (logic_net*)actual;
-              int32_t nettype = net->VpiNetType();
-              if (nettype == vpiWor || nettype == vpiWand ||
-                  nettype == vpiTri || nettype == vpiTriAnd ||
-                  nettype == vpiTriOr || nettype == vpiTri0 ||
-                  nettype == vpiTri1 || nettype == vpiTriReg)
-                continue;
-            }
+      const cont_assign* as = assigns->at(j);
+      if (as->VpiStrength0() || as->VpiStrength1()) continue;
+
+      if (const UHDM::ref_obj* ref = as->Lhs<ref_obj>()) {
+        if (ref->VpiName() == lhs_exp->VpiName()) {
+          if (const logic_net* ln = ref->Actual_group<logic_net>()) {
+            int32_t nettype = ln->VpiNetType();
+            if (nettype == vpiWor || nettype == vpiWand || nettype == vpiTri ||
+                nettype == vpiTriAnd || nettype == vpiTriOr ||
+                nettype == vpiTri0 || nettype == vpiTri1 ||
+                nettype == vpiTriReg)
+              continue;
           }
-          if (as->VpiStrength0() || cassign->VpiStrength0()) continue;
-          if (as->VpiStrength1() || cassign->VpiStrength1()) continue;
-          if (rhs->UhdmType() == uhdmoperation) {
-            operation* op = (operation*)rhs;
+          if (const operation* op = as->Rhs<operation>()) {
             bool triStatedOp = false;
             for (auto operand : *op->Operands()) {
               if (operand->UhdmType() == uhdmconstant) {
@@ -177,14 +160,8 @@ void UhdmLint::checkMultiContAssign(
 }
 
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
-  const any* lhs = object->Lhs();
-  if (!lhs) return;
-  if (lhs->UhdmType() == uhdmref_obj) {
-    ref_obj* ref = (ref_obj*)lhs;
-    const any* actual = ref->Actual_group();
-    if (!actual) return;
-    if (actual->UhdmType() == uhdmlogic_net) {
-      logic_net* n = (logic_net*)actual;
+  if (const ref_obj* lhs = object->Lhs<ref_obj>()) {
+    if (const logic_net* n = lhs->Actual_group<logic_net>()) {
       if (n->VpiNetType() == vpiWire) {
         bool inProcess = false;
         const any* tmp = object;
@@ -206,15 +183,10 @@ void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
 }
 
 void UhdmLint::leaveLogic_net(const logic_net* object, vpiHandle handle) {
-  const logic_typespec* tps =
-      any_cast<const logic_typespec*>(object->Typespec());
-  if (tps) {
-    VectorOfrange* ranges = tps->Ranges();
-    if (ranges) {
+  if (const logic_typespec* tps = object->Typespec<logic_typespec>()) {
+    if (const VectorOfrange* ranges = tps->Ranges()) {
       range* r0 = ranges->at(0);
-      const expr* rhs = r0->Right_expr();
-      if (rhs->UhdmType() == uhdmconstant) {
-        constant* c = (constant*)rhs;
+      if (const constant* c = r0->Right_expr<constant>()) {
         if (c->VpiValue() == "STRING:unsized") {
           const std::string errMsg(object->VpiName());
           serializer_->GetErrorHandler()(
