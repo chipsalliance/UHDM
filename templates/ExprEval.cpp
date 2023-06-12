@@ -835,9 +835,10 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
     index = 0;
     ElaboratorListener listener(&s, false, m_muteError);
     for (auto opi : tmp) {
-      if (defaultOp) {
-        if (opi == nullptr) {
-          opi = clone_tree((any *)defaultOp, s, &listener);
+      if (defaultOp && (opi == nullptr)) {
+        opi = clone_tree((any *)defaultOp, s, &listener);
+        if (opi != nullptr) {
+          opi->VpiParent(const_cast<any *>(defaultOp->VpiParent()));
         }
       }
       if (opi == nullptr) {
@@ -874,12 +875,10 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
               c->VpiSize(static_cast<int32_t>(size));
             }
           }
-        } else {
-          if (patt->UhdmType() == uhdmoperation) {
-            operation *patt_op = (operation *)patt;
-            if (patt_op->VpiOpType() == vpiAssignmentPatternOp) {
-              opi = flattenPatternAssignments(s, fieldTypes[index], patt_op);
-            }
+        } else if (patt->UhdmType() == uhdmoperation) {
+          operation *patt_op = (operation *)patt;
+          if (patt_op->VpiOpType() == vpiAssignmentPatternOp) {
+            opi = flattenPatternAssignments(s, fieldTypes[index], patt_op);
           }
         }
       }
@@ -887,6 +886,7 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       index++;
     }
     operation *opres = (operation *)clone_tree((any *)op, s, &listener);
+    opres->VpiParent(const_cast<any *>(op->VpiParent()));
     opres->Operands(ordered);
     if (flatten) {
       opres->VpiFlattened(true);
@@ -894,6 +894,7 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
     // Flattening
     VectorOfany *flattened = s.MakeAnyVec();
     recursiveFlattening(s, flattened, ordered, fieldTypes);
+    for (auto o : *flattened) o->VpiParent(opres);
     opres->Operands(flattened);
     result = opres;
   }

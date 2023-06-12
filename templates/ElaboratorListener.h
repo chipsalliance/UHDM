@@ -50,22 +50,22 @@ class ElaboratorListener final : public VpiListener {
   bool uniquifyTypespec() { return uniquifyTypespec_; }
   void bindOnly(bool bindOnly) { clone_ = !bindOnly; }
   bool bindOnly() { return !clone_; }
-  bool isFunctionCall(std::string_view name, const expr* prefix);
+  bool isFunctionCall(std::string_view name, const expr* prefix) const;
   bool muteErrors() { return muteErrors_; }
-  bool isTaskCall(std::string_view name, const expr* prefix);
+  bool isTaskCall(std::string_view name, const expr* prefix) const;
   void ignoreLastInstance(bool ignore) { ignoreLastInstance_ = ignore; }
 
   // Bind to a net in the current instance
-  any* bindNet(std::string_view name);
+  any* bindNet(std::string_view name) const;
 
   // Bind to a net or parameter in the current instance
-  any* bindAny(std::string_view name);
+  any* bindAny(std::string_view name) const;
 
   // Bind to a param in the current instance
-  any* bindParam(std::string_view name);
+  any* bindParam(std::string_view name) const;
 
   // Bind to a function or task in the current scope
-  any* bindTaskFunc(std::string_view name, const class_var* prefix = nullptr);
+  any* bindTaskFunc(std::string_view name, const class_var* prefix = nullptr) const;
 
   void scheduleTaskFuncBinding(tf_call* clone, const class_var* prefix) {
     scheduledTfCallBinding_.push_back(std::make_pair(clone, prefix));

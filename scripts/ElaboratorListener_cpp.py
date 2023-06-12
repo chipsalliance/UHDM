@@ -40,7 +40,6 @@ def _generate_module_listeners(models, classname):
                     listeners.append( '    if (it != funcMap.end()) funcMap.erase(it);')
                     listeners.append( '    funcMap.emplace(tf->VpiName(), tf);')
                     listeners.append( '    leaveTask_func(obj, nullptr);')
-                    listeners.append( '    tf->VpiParent(inst);')
                     listeners.append( '    clone_vec->push_back(tf);')
                     listeners.append( '  }')
                     listeners.append( '}')
@@ -51,7 +50,6 @@ def _generate_module_listeners(models, classname):
                     listeners.append(f'  inst->{method}(clone_vec);')
                     listeners.append( '  for (auto obj : *vec) {')
                     listeners.append( '    auto* stmt = obj->DeepClone(serializer_, this, inst);')
-                    listeners.append( '    stmt->VpiParent(inst);')
                     listeners.append( '    clone_vec->push_back(stmt);')
                     listeners.append( '  }')
                     listeners.append( '}')
@@ -63,7 +61,6 @@ def _generate_module_listeners(models, classname):
                     listeners.append(f'  inst->{method}(clone_vec);')
                     listeners.append( '  for (auto obj : *vec) {')
                     listeners.append( '    auto* stmt = obj->DeepClone(serializer_, this, inst);')
-                    listeners.append( '    stmt->VpiParent(inst);')
                     listeners.append( '    clone_vec->push_back(stmt);')
                     listeners.append( '  }')
                     listeners.append( '}')
@@ -76,7 +73,6 @@ def _generate_module_listeners(models, classname):
                     listeners.append(f'  auto clone_vec = inst->{method}();')
                     listeners.append( '  for (auto obj : *vec) {')
                     listeners.append( '    auto* stmt = obj->DeepClone(serializer_, this, inst);')
-                    listeners.append( '    stmt->VpiParent(inst);')
                     listeners.append( '    clone_vec->push_back(stmt);')
                     listeners.append( '  }')
                     listeners.append( '}')
@@ -89,18 +85,15 @@ def _generate_module_listeners(models, classname):
                     listeners.append( '  for (auto obj : *vec) {')
                     listeners.append( '    if (uniquifyTypespec()) {')
                     listeners.append( '      auto* stmt = obj->DeepClone(serializer_, this, inst);')
-                    listeners.append( '      stmt->VpiParent(inst);')
                     listeners.append( '      clone_vec->push_back(stmt);')
                     listeners.append( '    } else {')
-                    listeners.append( '      auto* stmt = obj;')
-                    listeners.append( '      clone_vec->push_back(stmt);')
+                    listeners.append( '      clone_vec->push_back(obj);')
                     listeners.append( '    }')
                     listeners.append( '  }')
                     listeners.append( '}')
 
                 elif method in ['Ref_modules', 'Gen_stmts']:
-                    # No elab
-                    listeners.append( '')
+                    pass # No elab
 
                 elif method not in ['Ports', 'Nets', 'Parameters', 'Param_assigns', 'Interface_arrays', 'Module_arrays']:
                     # We don't want to override the elaborated instance ports by the module def ports, same for nets, params and param_assigns
@@ -109,7 +102,6 @@ def _generate_module_listeners(models, classname):
                     listeners.append(f'  inst->{method}(clone_vec);')
                     listeners.append( '  for (auto obj : *vec) {')
                     listeners.append( '    auto* stmt = obj->DeepClone(serializer_, this, inst);')
-                    listeners.append( '    stmt->VpiParent(inst);')
                     listeners.append( '    clone_vec->push_back(stmt);')
                     listeners.append( '  }')
                     listeners.append( '}')
@@ -120,7 +112,6 @@ def _generate_module_listeners(models, classname):
                     listeners.append(f'  inst->{method}(clone_vec);')
                     listeners.append( '  for (auto obj : *vec) {')
                     listeners.append( '    auto* stmt = obj->DeepClone(serializer_, this, inst);')
-                    listeners.append( '    stmt->VpiParent(inst);')
                     listeners.append( '    clone_vec->push_back(stmt);')
                     listeners.append( '  }')
                     listeners.append( '}')
@@ -161,7 +152,6 @@ def _generate_class_listeners(models):
                     if card == '1':
                         listeners.append(f'if (auto obj = cl->{method}()) {{')
                         listeners.append( '  auto* stmt = obj->DeepClone(serializer_, this, cl);')
-                        listeners.append( '  stmt->VpiParent(cl);')
                         listeners.append(f'  cl->{method}(stmt);')
                         listeners.append( '}')
 
@@ -171,8 +161,7 @@ def _generate_class_listeners(models):
                         listeners.append(f'  auto clone_vec = serializer_->Make{Cast}Vec();')
                         listeners.append(f'  cl->{method}(clone_vec);')
                         listeners.append( '  for (auto obj : *vec) {')
-                        listeners.append( '    auto* stmt = obj;')
-                        listeners.append( '    clone_vec->push_back(stmt);')
+                        listeners.append( '    clone_vec->push_back(obj);')
                         listeners.append( '  }')
                         listeners.append( '}')
 
@@ -182,7 +171,6 @@ def _generate_class_listeners(models):
                         listeners.append(f'  cl->{method}(clone_vec);')
                         listeners.append( '  for (auto obj : *vec) {')
                         listeners.append( '    auto* stmt = obj->DeepClone(serializer_, this, cl);')
-                        listeners.append( '    stmt->VpiParent(cl);')
                         listeners.append( '    clone_vec->push_back(stmt);')
                         listeners.append( '  }')
                         listeners.append( '}')
@@ -200,9 +188,9 @@ def generate(models):
     with open(config.get_template_filepath('ElaboratorListener.cpp'), 'rt') as strm:
         file_content = strm.read()
 
-    file_content = file_content.replace('<MODULE_ELABORATOR_LISTENER>', (' ' * 10) + ('\n' + (' ' * 10)).join(module_listeners))
+    file_content = file_content.replace('<MODULE_ELABORATOR_LISTENER>', (' ' * 6) + ('\n' + (' ' * 6)).join(module_listeners))
     file_content = file_content.replace('<INTERFACE_ELABORATOR_LISTENER>', (' ' * 10) + ('\n' + (' ' * 10)).join(interface_listeners))
-    file_content = file_content.replace('<CLASS_ELABORATOR_LISTENER>', (' ' * 4) + ('\n' + (' ' * 4)).join(class_listeners))
+    file_content = file_content.replace('<CLASS_ELABORATOR_LISTENER>', (' ' * 2) + ('\n' + (' ' * 2)).join(class_listeners))
     file_utils.set_content_if_changed(config.get_output_source_filepath('ElaboratorListener.cpp'), file_content)
 
     return True
