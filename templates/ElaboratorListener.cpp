@@ -173,7 +173,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
         netMap.emplace(var->VpiName(), var);
         if (var->UhdmType() == uhdmenum_var) {
           enum_var* evar = (enum_var*)var;
-          enum_typespec* etps = (enum_typespec*)evar->Typespec();
+          enum_typespec* etps = evar->Typespec<enum_typespec>();
           for (auto c : *etps->Enum_consts()) {
             netMap.emplace(c->VpiName(), c);
           }
@@ -198,14 +198,10 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
 
     if (object->Ports()) {
       for (port* port : *object->Ports()) {
-        if (const any* low = port->Low_conn()) {
-          if (const ref_obj *ref = any_cast<const ref_obj*>(low)) {
-            if (const any* actual = ref->Actual_group()) {
-              if (actual->UhdmType() == uhdmmodport) {
-                // If the interface of the modport is not yet in the map
-                netMap.emplace(port->VpiName(), actual);
-              }
-            }
+        if (const ref_obj* low = port->Low_conn<ref_obj>()) {
+          if (const any* actual = low->Actual_group<modport>()) {
+            // If the interface of the modport is not yet in the map
+            netMap.emplace(port->VpiName(), actual);
           }
         }
       }
@@ -259,13 +255,10 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
     }
     if (object->Ports()) {
       for (ports* port : *object->Ports()) {
-        if (const any* low = port->Low_conn()) {
-          if (const ref_obj *r = any_cast<const ref_obj*>(low)) {
-            if (const any* actual = r->Actual_group()) {
-              if (actual->UhdmType() == uhdminterface_inst) {
-                netMap.emplace(port->VpiName(), actual);
-              }
-            }
+        if (const ref_obj* low = port->Low_conn<ref_obj>()) {
+          if (const interface_inst* actual =
+                  low->Actual_group<interface_inst>()) {
+            netMap.emplace(port->VpiName(), actual);
           }
         }
       }

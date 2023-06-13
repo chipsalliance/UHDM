@@ -74,7 +74,17 @@ namespace UHDM {
       return true;
     }
 
+    BaseClass* VpiParent() { return vpiParent_; }
     const BaseClass* VpiParent() const { return vpiParent_; }
+    template <typename T>
+    T* VpiParent() {
+      return (vpiParent_ == nullptr) ? nullptr : vpiParent_->template Cast<T*>();
+    }
+    template <typename T>
+    const T* VpiParent() const {
+      return (vpiParent_ == nullptr) ? nullptr
+                                     : vpiParent_->template Cast<const T*>();
+    }
     bool VpiParent(BaseClass *data) {
       vpiParent_ = data;
       return true;
@@ -113,7 +123,8 @@ namespace UHDM {
     virtual uint32_t VpiType() const = 0;
     virtual UHDM_OBJECT_TYPE UhdmType() const = 0;
 
-    ClientData* Data() const { return clientData_; }
+    ClientData* Data() { return clientData_; }
+    const ClientData* Data() const { return clientData_; }
     void Data(ClientData* data) {
       clientData_ = data;
     }

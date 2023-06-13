@@ -106,9 +106,9 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
-    const class_var* prefix = nullptr;
-    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    elaborator->scheduleTaskFuncBinding(clone, prefix);
+    const class_var* varprefix = nullptr;
+    if (ref) varprefix = any_cast<const class_var*>(ref->Actual_group());
+    elaborator->scheduleTaskFuncBinding(clone, varprefix);
     any* pushedVar = nullptr;
     if (auto vec = Tf_call_args()) {
       auto clone_vec = serializer->MakeAnyVec();
@@ -137,13 +137,14 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
                     array_var* arr = (array_var*)actual;
                     if (!arr->Variables()->empty()) {
                       variables* var = arr->Variables()->front();
-                      variables* clone =
-                          (variables*)clone_tree(var, *serializer, elaborator);
-                      clone->VpiName(obj->VpiName());
-                      clone->VpiParent(const_cast<any*>(obj->VpiParent()));
-                      actual = clone;
-                      elaborator->pushVar(clone);
-                      pushedVar = clone;
+                      if (variables* varclone = (variables*)clone_tree(
+                              var, *serializer, elaborator)) {
+                        varclone->VpiName(obj->VpiName());
+                        varclone->VpiParent(const_cast<any*>(obj->VpiParent()));
+                        actual = varclone;
+                        elaborator->pushVar(varclone);
+                        pushedVar = varclone;
+                      }
                     }
                   }
                   refarg->Actual_group((any*)actual);
@@ -181,9 +182,9 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
-    const class_var* prefix = nullptr;
-    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    elaborator->scheduleTaskFuncBinding(clone, prefix);
+    const class_var* varprefix = nullptr;
+    if (ref) varprefix = any_cast<const class_var*>(ref->Actual_group());
+    elaborator->scheduleTaskFuncBinding(clone, varprefix);
     if (auto obj = With())
       clone->With(obj->DeepClone(serializer, elaborator, clone));
     if (auto obj = Scope())
@@ -256,9 +257,9 @@ tf_call* method_task_call::DeepClone(Serializer* serializer,
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
-    const class_var* prefix = nullptr;
-    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    elaborator->scheduleTaskFuncBinding(clone, prefix);
+    const class_var* varprefix = nullptr;
+    if (ref) varprefix = any_cast<const class_var*>(ref->Actual_group());
+    elaborator->scheduleTaskFuncBinding(clone, varprefix);
     if (auto obj = With())
       clone->With(obj->DeepClone(serializer, elaborator, clone));
     if (auto obj = Scope())
@@ -289,9 +290,9 @@ tf_call* method_task_call::DeepClone(Serializer* serializer,
     if (auto obj = Prefix())
       clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
-    const class_var* prefix = nullptr;
-    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    elaborator->scheduleTaskFuncBinding(clone, prefix);
+    const class_var* varprefix = nullptr;
+    if (ref) varprefix = any_cast<const class_var*>(ref->Actual_group());
+    elaborator->scheduleTaskFuncBinding(clone, varprefix);
     if (auto obj = With())
       clone->With(obj->DeepClone(serializer, elaborator, clone));
     if (auto obj = Scope())
@@ -1361,20 +1362,20 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     if (mport->Io_decls()) {
                       for (io_decl* decl : *mport->Io_decls()) {
                         if (decl->VpiName() == name) {
-                          any* actual = decl;
+                          any* actual_decl = decl;
                           if (const any* exp = decl->Expr()) {
-                            actual = (any*)exp;
+                            actual_decl = (any*)exp;
                           }
-                          if (actual->UhdmType() == uhdmref_obj) {
-                            ref_obj* ref = (ref_obj*)actual;
+                          if (actual_decl->UhdmType() == uhdmref_obj) {
+                            ref_obj* ref = (ref_obj*)actual_decl;
                             if (const any* act = ref->Actual_group()) {
-                              actual = (any*)act;
+                              actual_decl = (any*)act;
                             }
                           }
                           if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                            cro->Actual_group(actual);
+                            cro->Actual_group(actual_decl);
                           }
-                          previous = actual;
+                          previous = actual_decl;
                           found = true;
                           break;
                         }
@@ -1578,24 +1579,24 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     tagged_pattern* tp = (tagged_pattern*)oper;
                     const typespec* ttp = tp->Typespec();
                     const std::string_view tname = ttp->VpiName();
-                    bool found = false;
+                    bool oper_found = false;
                     if (tname == "default") {
                       defaultOp = oper;
-                      found = true;
+                      oper_found = true;
                     }
                     for (uint32_t i = 0; i < fieldNames.size(); i++) {
                       if (tname == fieldNames[i]) {
                         tmp[i] = oper;
-                        found = true;
+                        oper_found = true;
                         res = tmp[i];
                         break;
                       }
                     }
-                    if (found == false) {
+                    if (oper_found == false) {
                       for (uint32_t i = 0; i < fieldTypes.size(); i++) {
                         if (ttp->UhdmType() == fieldTypes[i]->UhdmType()) {
                           tmp[i] = oper;
-                          found = true;
+                          oper_found = true;
                           res = tmp[i];
                           break;
                         }
@@ -1663,11 +1664,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
             if (ttype == uhdmstruct_typespec) {
               struct_typespec* stpt = (struct_typespec*)tps;
-              for (typespec_member* member : *stpt->Members()) {
-                if (member->VpiName() == name) {
+              for (typespec_member* tsmember : *stpt->Members()) {
+                if (tsmember->VpiName() == name) {
                   if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                    cro->Actual_group(member);
-                    previous = member;
+                    cro->Actual_group(tsmember);
+                    previous = tsmember;
                     found = true;
                     break;
                   }
@@ -1675,11 +1676,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
             } else if (ttype == uhdmunion_typespec) {
               union_typespec* stpt = (union_typespec*)tps;
-              for (typespec_member* member : *stpt->Members()) {
-                if (member->VpiName() == name) {
+              for (typespec_member* tsmember : *stpt->Members()) {
+                if (tsmember->VpiName() == name) {
                   if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                    cro->Actual_group(member);
-                    previous = member;
+                    cro->Actual_group(tsmember);
+                    previous = tsmember;
                     found = true;
                     break;
                   }
