@@ -311,6 +311,9 @@ target_link_libraries(uhdm-dump PRIVATE uhdm)
 add_executable(uhdm-hier ${PROJECT_SOURCE_DIR}/util/uhdm-hier.cpp)
 target_link_libraries(uhdm-hier PRIVATE uhdm)
 
+add_executable(uhdm-lint ${PROJECT_SOURCE_DIR}/util/uhdm-lint.cpp)
+target_link_libraries(uhdm-lint PRIVATE uhdm)
+
 # Installation tester
 # TODO: once we have a cmake package (find_package(uhdm)), this installation
 # tester should use that.
@@ -350,7 +353,7 @@ endif()
 
 # Installation target
 install(
-  TARGETS uhdm uhdm-cmp uhdm-dump uhdm-hier
+  TARGETS uhdm uhdm-cmp uhdm-dump uhdm-hier uhdm-lint
   EXPORT uhdmTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
