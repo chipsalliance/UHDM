@@ -51,20 +51,26 @@ class MyLinter : public UHDM::VpiListener {
 
   void leaveUnsupported_expr(const UHDM::unsupported_expr* object,
                              vpiHandle handle) final {
-    serializer_->GetErrorHandler()(UHDM::ErrorType::UHDM_UNSUPPORTED_EXPR, "",
-                                   object, nullptr);
+    if (isInUhdmAllIterator()) return;
+    serializer_->GetErrorHandler()(UHDM::ErrorType::UHDM_UNSUPPORTED_EXPR,
+                                   std::string(object->VpiName()), object,
+                                   nullptr);
   }
 
   void leaveUnsupported_stmt(const UHDM::unsupported_stmt* object,
                              vpiHandle handle) final {
-    serializer_->GetErrorHandler()(UHDM::ErrorType::UHDM_UNSUPPORTED_STMT, "",
-                                   object, nullptr);
+    if (isInUhdmAllIterator()) return;
+    serializer_->GetErrorHandler()(UHDM::ErrorType::UHDM_UNSUPPORTED_STMT,
+                                   std::string(object->VpiName()), object,
+                                   nullptr);
   }
 
   void leaveUnsupported_typespec(const UHDM::unsupported_typespec* object,
                                  vpiHandle handle) final {
+    if (isInUhdmAllIterator()) return;
     serializer_->GetErrorHandler()(UHDM::ErrorType::UHDM_UNSUPPORTED_TYPESPEC,
-                                   "", object, nullptr);
+                                   std::string(object->VpiName()), object,
+                                   nullptr);
   }
 
  private:
@@ -162,14 +168,14 @@ int32_t main(int32_t argc, char **argv) {
 
         if (object1) {
           std::cout << object1->VpiFile() << ":" << object1->VpiLineNo() << ":"
-                    << object1->VpiColumnNo() << " ";
+                    << object1->VpiColumnNo() << ": ";
           std::cout << errmsg << ", " << msg << std::endl;
         } else {
           std::cout << errmsg << ", " << msg << std::endl;
         }
         if (object2) {
           std::cout << "  \\_ " << object2->VpiFile() << ":"
-                    << object2->VpiLineNo() << ":" << object2->VpiColumnNo();
+                    << object2->VpiLineNo() << ":" << object2->VpiColumnNo() << ":" << std::endl;
         }
       };
   serializer.get()->SetErrorHandler(errHandler);
