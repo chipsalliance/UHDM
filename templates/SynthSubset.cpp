@@ -273,11 +273,13 @@ void SynthSubset::leaveClass_typespec(const class_typespec* object,
 }
 
 void SynthSubset::leaveClass_var(const class_var* object, vpiHandle handle) {
-  if (const class_typespec* spec = (class_typespec*)object->Typespec()) {
-    if (const class_defn* def = spec->Class_defn()) {
-      if (reportedParent(def)) {
-        mark(object);
-        return;
+  if (const ref_typespec* rt = object->Typespec()) {
+    if (const class_typespec* spec = rt->Typespec<class_typespec>()) {
+      if (const class_defn* def = spec->Class_defn()) {
+        if (reportedParent(def)) {
+          mark(object);
+          return;
+        }
       }
     }
   }

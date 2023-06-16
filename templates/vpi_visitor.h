@@ -77,7 +77,7 @@ class VpiVisitor final {
   AnySet m_weaklyReferenced1;
   AnySet m_weaklyReferenced2;
   VisitedContainer m_visited;
-  bool m_visitWeaklyReferenced = false;
+  bool m_visitWeaklyReferenced = true;
 };
 
 }  // namespace UHDM

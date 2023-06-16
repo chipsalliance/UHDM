@@ -19,5 +19,4 @@
   - obj_ref: struct_typespec
   - obj_ref: union_typespec
   - obj_ref: packed_array_typespec
-
-
+  - obj_ref: ref_typespec
