@@ -23,12 +23,13 @@
  *
  * Created on Jan 3, 2022, 9:03 PM
  */
-#include <string.h>
-#include <regex>
 #include <uhdm/ExprEval.h>
 #include <uhdm/UhdmLint.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
+
+#include <cstring>
+#include <regex>
 
 namespace UHDM {
 
@@ -132,10 +133,10 @@ void UhdmLint::checkMultiContAssign(
         if (ref->VpiName() == lhs_exp->VpiName()) {
           if (const logic_net* ln = ref->Actual_group<logic_net>()) {
             int32_t nettype = ln->VpiNetType();
-            if (nettype == vpiWor || nettype == vpiWand || nettype == vpiTri ||
-                nettype == vpiTriAnd || nettype == vpiTriOr ||
-                nettype == vpiTri0 || nettype == vpiTri1 ||
-                nettype == vpiTriReg)
+            if ((nettype == vpiWor) || (nettype == vpiWand) ||
+                (nettype == vpiTri) || (nettype == vpiTriAnd) ||
+                (nettype == vpiTriOr) || (nettype == vpiTri0) ||
+                (nettype == vpiTri1) || (nettype == vpiTriReg))
               continue;
           }
           if (const operation* op = as->Rhs<operation>()) {
@@ -151,8 +152,9 @@ void UhdmLint::checkMultiContAssign(
             }
             if (triStatedOp) continue;
           }
-//          serializer_->GetErrorHandler()(ErrorType::UHDM_MULTIPLE_CONT_ASSIGN,
-//                                         lhs_exp->VpiName(), lhs_exp, lhs);
+          // serializer_->GetErrorHandler()(ErrorType::UHDM_MULTIPLE_CONT_ASSIGN,
+          //                                lhs_exp->VpiName(),
+          //                                lhs_exp, lhs);
         }
       }
     }
@@ -168,7 +170,9 @@ void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
         bool inProcess = false;
         const any* tmp = object;
         while (tmp) {
-          if (tmp->UhdmType() == uhdmalways || tmp->UhdmType() == uhdminitial) {
+          if ((tmp->UhdmType() == uhdmalways) ||
+              (tmp->UhdmType() == uhdminitial) ||
+              (tmp->UhdmType() == uhdmfinal_stmt)) {
             inProcess = true;
             break;
           }
@@ -217,7 +221,7 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
   for (auto c : *object->Enum_consts()) {
     const std::string_view val = c->VpiDecompile();
     if (c->VpiSize() == -1) continue;
-    if (!std::regex_match(std::string(val),r)) continue;
+    if (!std::regex_match(std::string(val), r)) continue;
     invalidValue = false;
     const uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
                                       object->VpiParent(), true);
