@@ -160,6 +160,8 @@ void UhdmLint::checkMultiContAssign(
 }
 
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  if (!design_->VpiElaborated()) return; // -uhdmelab
   if (const ref_obj* lhs = object->Lhs<ref_obj>()) {
     if (const logic_net* n = lhs->Actual_group<logic_net>()) {
       if (n->VpiNetType() == vpiWire) {
