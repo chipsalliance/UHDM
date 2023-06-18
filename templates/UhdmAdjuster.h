@@ -46,7 +46,6 @@ class UhdmAdjuster final : public VpiListener {
   Serializer* serializer_ = nullptr;
   design* design_ = nullptr;
   const instance* currentInstance_ = nullptr;
-  bool elaboratedTree_ = false;
 };
 
 }  // namespace UHDM

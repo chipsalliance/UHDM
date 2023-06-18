@@ -99,6 +99,7 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
 }
 
 void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
   // Make all expressions match the largest expression size per LRM
   int32_t maxsize = 0;
   bool is_overall_unsigned = false;
@@ -190,17 +191,11 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
 
 void UhdmAdjuster::enterModule_inst(const module_inst* object,
                                     vpiHandle handle) {
-  const std::string_view instName = object->VpiName();
-  bool flatModule =
-      (instName.empty()) && ((object->VpiParent() == 0) ||
-                             ((object->VpiParent() != 0) &&
-                              (object->VpiParent()->VpiType() != vpiModule)));
-  if (!flatModule) elaboratedTree_ = true;
   currentInstance_ = object;
 }
 
 void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
-  if (!elaboratedTree_) return;
+  if (isInUhdmAllIterator()) return;
   if (object->VpiSize() == -1) {
     const any* parent = object->VpiParent();
     int32_t size = object->VpiSize();
@@ -280,7 +275,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
 }
 
 void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
-  if (!elaboratedTree_) return;
+  if (isInUhdmAllIterator()) return;
   bool invalidValue = false;
   UHDM::ExprEval eval(true);
   const any* parent = object->VpiParent();
