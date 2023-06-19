@@ -194,6 +194,19 @@ void UhdmAdjuster::enterModule_inst(const module_inst* object,
   currentInstance_ = object;
 }
 
+void UhdmAdjuster::leaveModule_inst(const module_inst* object,
+                                    vpiHandle handle) {
+  currentInstance_ = nullptr;
+}
+
+void UhdmAdjuster::enterGen_scope(const gen_scope* object, vpiHandle handle) {
+  currentInstance_ = object;
+}
+
+void UhdmAdjuster::leaveGen_scope(const gen_scope* object, vpiHandle handle) {
+  currentInstance_ = nullptr;
+}
+
 void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
   if (isInUhdmAllIterator()) return;
   if (object->VpiSize() == -1) {
