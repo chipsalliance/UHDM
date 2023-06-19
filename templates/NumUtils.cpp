@@ -44,11 +44,6 @@ std::string NumUtils::hexToBin(std::string_view s) {
       n = 10 + i - 'A';
     for (int8_t j = 3; j >= 0; --j) out.push_back((n & (1 << j)) ? '1' : '0');
   }
-  size_t pos = out.find('1');
-  if (pos == std::string::npos)
-    out.clear();
-  else
-    out = out.substr(pos);
   return out;
 }
 
