@@ -1117,6 +1117,66 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   found = true;
                   previous = (any*)call;
                 }
+                if (found == false) {
+                  if (const typespec* tps = avar->Typespec()) {
+                    UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+                    if (ttype == uhdmpacked_array_typespec) {
+                      packed_array_typespec* ptps = (packed_array_typespec*)tps;
+                      tps = (typespec*)ptps->Elem_typespec();
+                      ttype = tps->UhdmType();
+                    } else if (ttype == uhdmarray_typespec) {
+                      array_typespec* ptps = (array_typespec*)tps;
+                      tps = (typespec*)ptps->Elem_typespec();
+                      ttype = tps->UhdmType();
+                    }
+                    if (ttype == uhdmstring_typespec) {
+                      found = true;
+                    } else if (ttype == uhdmclass_typespec) {
+                      class_typespec* ctps = (class_typespec*)tps;
+                      any* tmp = bindClassTypespec(ctps, current, name, found);
+                      if (found) {
+                        previous = tmp;
+                      }
+                    } else if (ttype == uhdmstruct_typespec) {
+                      struct_typespec* stpt = (struct_typespec*)tps;
+                      for (typespec_member* member : *stpt->Members()) {
+                        if (member->VpiName() == name) {
+                          if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                            cro->Actual_group(member);
+                          }
+                          previous = member;
+                          found = true;
+                          break;
+                        }
+                      }
+                      if (name == "name") {
+                        // Builtin introspection
+                        found = true;
+                      }
+                    } else if (ttype == uhdmenum_typespec) {
+                      if (name == "name") {
+                        // Builtin introspection
+                        found = true;
+                      }
+                    } else if (ttype == uhdmunion_typespec) {
+                      union_typespec* stpt = (union_typespec*)tps;
+                      for (typespec_member* member : *stpt->Members()) {
+                        if (member->VpiName() == name) {
+                          if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                            cro->Actual_group(member);
+                          }
+                          previous = member;
+                          found = true;
+                          break;
+                        }
+                      }
+                      if (name == "name") {
+                        // Builtin introspection
+                        found = true;
+                      }
+                    }
+                  }
+                }
                 break;
               }
               case uhdmpacked_array_net: {
