@@ -3670,8 +3670,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             bits += size(tps, invalidValue, inst, pexpr, (name != "$size"));
             found = true;
           } else {
-            bits += size(object, invalidValue, inst, pexpr, (name != "$size"));
-            found = true;
+            if (object) {
+              bits += size(object, invalidValue, inst, pexpr, (name != "$size"));
+              found = true;
+            } else {
+              invalidValue = true;
+            }
           }
         } else if (argtype == uhdmoperation) {
           operation *oper = (operation *)arg;

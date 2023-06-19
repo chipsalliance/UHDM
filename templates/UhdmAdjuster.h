@@ -41,11 +41,13 @@ class UhdmAdjuster final : public VpiListener {
   void leaveOperation(const operation* object, vpiHandle handle) final;
   void leaveConstant(const constant* object, vpiHandle handle) final;
   void enterModule_inst(const module_inst* object, vpiHandle handle) final;
-
+  void leaveModule_inst(const module_inst* object, vpiHandle handle) final;
+  void enterGen_scope(const gen_scope* object, vpiHandle handle) final;
+  void leaveGen_scope(const gen_scope* object, vpiHandle handle) final;
   const any* resize(const any* object, int32_t maxsize, bool is_unsigned);
   Serializer* serializer_ = nullptr;
   design* design_ = nullptr;
-  const instance* currentInstance_ = nullptr;
+  const scope* currentInstance_ = nullptr;
 };
 
 }  // namespace UHDM
