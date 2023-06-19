@@ -3425,6 +3425,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     std::string value;
                     if (size > (int32_t)tmp.size()) {
                       value.append(size - tmp.size(), '0');
+                    } else if (size < (int32_t)tmp.size()) {
+                      tmp.erase(0, (int32_t)tmp.size() - size);
                     }
                     if (op->VpiReordered()) {
                       std::reverse(tmp.begin(), tmp.end());
