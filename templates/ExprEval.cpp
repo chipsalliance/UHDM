@@ -107,8 +107,8 @@ std::string ExprEval::toBinary(const UHDM::constant *c) {
       result = sv;
       if (c->VpiSize() >= 0) {
         if (result.size() < (uint32_t)c->VpiSize()) {
-          for (uint32_t i = 0; i < (uint32_t)c->VpiSize() - result.size();
-               i++) {
+          uint32_t rsize = result.size();
+          for (uint32_t i = 0; i < (uint32_t)c->VpiSize() - rsize; i++) {
             result = "0" + result;
           }
         }
@@ -129,8 +129,8 @@ std::string ExprEval::toBinary(const UHDM::constant *c) {
       result = NumUtils::hexToBin(sv);
       if (c->VpiSize() >= 0) {
         if (result.size() < (uint32_t)c->VpiSize()) {
-          for (uint32_t i = 0; i < (uint32_t)c->VpiSize() - result.size();
-               i++) {
+          uint32_t rsize = result.size();
+          for (uint32_t i = 0; i < (uint32_t)c->VpiSize() - rsize; i++) {
             result = "0" + result;
           }
         }
@@ -142,8 +142,8 @@ std::string ExprEval::toBinary(const UHDM::constant *c) {
       result = NumUtils::hexToBin(sv);
       if (c->VpiSize() >= 0) {
         if (result.size() < (uint32_t)c->VpiSize()) {
-          for (uint32_t i = 0; i < (uint32_t)c->VpiSize() - result.size();
-               i++) {
+          uint32_t rsize = result.size();
+          for (uint32_t i = 0; i < (uint32_t)c->VpiSize() - rsize; i++) {
             result = "0" + result;
           }
         }
