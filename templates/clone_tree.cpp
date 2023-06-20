@@ -1409,6 +1409,15 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     }
                   }
                 }
+                if (!found && interf->Task_funcs()) {
+                  for (auto tf : *interf->Task_funcs()) {
+                    if (tf->VpiName() == name) {
+                      previous = any_cast<function*>(tf);
+                      found = true;
+                      break;
+                    }
+                  }
+                }
                 if (!found && interf->Modports()) {
                   for (modport* mport : *interf->Modports()) {
                     if (mport->VpiName() == name) {
