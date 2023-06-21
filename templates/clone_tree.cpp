@@ -1714,7 +1714,6 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 break;
             }
             if (!found) {
-              // WIP:
               if ((!elaborator->muteErrors()) &&
                   (!elaborator->isInUhdmAllIterator())) {
                 const std::string errMsg(VpiName());
@@ -1724,9 +1723,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
             }
           } else {
-            // WIP:
             if ((!elaborator->muteErrors()) &&
                 (!elaborator->isInUhdmAllIterator())) {
+              if (previous->UhdmType() == uhdmbit_select) {
+                break;
+              }
               const std::string errMsg(VpiName());
               serializer->GetErrorHandler()(
                   ErrorType::UHDM_UNRESOLVED_HIER_PATH, errMsg, this, nullptr);
