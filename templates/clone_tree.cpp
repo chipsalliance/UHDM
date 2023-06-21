@@ -1025,6 +1025,21 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                       }
                     }
                   }
+                  if (!found && scope->Gen_scope_arrays()) {
+                    for (auto gsa : *scope->Gen_scope_arrays()) {
+                      if (gsa->VpiName() == name ||
+                          gsa->VpiName() == nameIndexed) {
+                        if (!gsa->Gen_scopes()->empty()) {
+                          auto gs = gsa->Gen_scopes()->front();
+                          if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                            cro->Actual_group(gs);
+                          }
+                          previous = gs;
+                          found = true;
+                        }
+                      }
+                    }
+                  }
                 }
                 break;
               }
