@@ -144,9 +144,10 @@ int32_t main(int32_t argc, char **argv) {
   }
 
   if (elab) {
-    ElaboratorListener *listener = new ElaboratorListener(&serializer, false);
-    listener->listenDesigns(restoredDesigns);
-    delete listener;
+    ElaboratorContext *elaboratorContext =
+        new ElaboratorContext(&serializer, false);
+    elaboratorContext->m_elaborator.listenDesigns(restoredDesigns);
+    delete elaboratorContext;
 
     std::cout << uhdmFile << ": Restored design Post-Elab: " << std::endl;
     visit_designs(restoredDesigns, std::cout);

@@ -102,14 +102,13 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
 
 void ElaboratorListener::enterVariables(const variables* object,
                                         vpiHandle handle) {
-  Serializer* s = ((variables*)object)->GetSerializer();
   if (object->UhdmType() == uhdmclass_var) {
     if (!inHierarchy_)
       return;  // Only do class var propagation while in elaboration
     const class_var* cv = (class_var*)object;
     class_var* const rw_cv = (class_var*)cv;
     if (typespec* ctps = (typespec*)cv->Typespec()) {
-      ctps = ctps->DeepClone(s, this, rw_cv);
+      ctps = ctps->DeepClone(rw_cv, context_);
       rw_cv->Typespec(ctps);
       if (class_typespec* cctps = any_cast<class_typespec*>(ctps)) {
         if (VectorOfparam_assign* params = cctps->Param_assigns()) {
@@ -442,7 +441,7 @@ void ElaboratorListener::leavePackage(const package* object, vpiHandle handle) {
       ((package*)object)->Task_funcs(clone_vec);
       for (auto obj : *vec) {
         enterTask_func(obj, nullptr);
-        auto* tf = obj->DeepClone(serializer_, this, (package*)object);
+        auto* tf = obj->DeepClone((package*)object, context_);
         ComponentMap& funcMap =
             std::get<3>(instStack_.at(instStack_.size() - 2));
         auto it = funcMap.find(tf->VpiName());

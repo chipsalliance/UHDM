@@ -44,9 +44,11 @@ std::tuple<const BaseClass*, UHDM_OBJECT_TYPE,
 BaseClass::GetByVpiType(int32_t type) const {
   switch (type) {
     case vpiParent:
-      return std::make_tuple(vpiParent_, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);
+      return std::make_tuple(vpiParent_, static_cast<UHDM_OBJECT_TYPE>(0),
+                             nullptr);
     default:
-      return std::make_tuple(nullptr, static_cast<UHDM_OBJECT_TYPE>(0), nullptr);
+      return std::make_tuple(nullptr, static_cast<UHDM_OBJECT_TYPE>(0),
+                             nullptr);
   };
 }
 
@@ -85,32 +87,40 @@ BaseClass::vpi_property_value_t BaseClass::GetVpiPropertyValue(
   return vpi_property_value_t();
 }
 
-BaseClass* BaseClass::DeepClone(Serializer* serializer,
-                                ElaboratorListener* elaborator,
-                                BaseClass* parent) const {
+BaseClass* BaseClass::DeepClone(BaseClass* parent,
+                                CloneContext* context) const {
   return nullptr;
 }
 
-void BaseClass::DeepCopy(BaseClass* clone, Serializer* serializer,
-                         ElaboratorListener* elaborator,
-                         BaseClass* parent) const {
+void BaseClass::DeepCopy(BaseClass* clone, BaseClass* parent,
+                         CloneContext* context) const {
   clone->VpiParent(parent);
 }
 
 int32_t BaseClass::Compare(const BaseClass* const other,
-                           AnySet& visited) const {
+                           CompareContext* context) const {
   int32_t r = 0;
 
-  if ((r = VpiType() - other->VpiType()) != 0) return r;
-  if ((r = VpiName().compare(other->VpiName())) != 0) return r;
-  if ((r = VpiDefName().compare(other->VpiDefName())) != 0) return r;
+  const thistype_t* const lhs = this;
+  const thistype_t* const rhs = other;
+
+  if ((r = VpiType() - rhs->VpiType()) != 0) {
+    context->m_failedLhs = lhs;
+    context->m_failedRhs = rhs;
+    return r;
+  }
+  if ((r = VpiName().compare(rhs->VpiName())) != 0) {
+    context->m_failedLhs = lhs;
+    context->m_failedRhs = rhs;
+    return r;
+  }
+  if ((r = VpiDefName().compare(rhs->VpiDefName())) != 0) {
+    context->m_failedLhs = lhs;
+    context->m_failedRhs = rhs;
+    return r;
+  }
 
   return r;
-}
-
-int32_t BaseClass::Compare(const BaseClass* const other) const {
-  AnySet visited;
-  return Compare(other, visited);
 }
 
 }  // namespace UHDM

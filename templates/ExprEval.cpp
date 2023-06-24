@@ -835,10 +835,10 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       index++;
     }
     index = 0;
-    ElaboratorListener listener(&s, false, m_muteError);
+    ElaboratorContext elaboratorContext(&s, false, m_muteError);
     for (auto opi : tmp) {
       if (defaultOp && (opi == nullptr)) {
-        opi = clone_tree((any *)defaultOp, s, &listener);
+        opi = clone_tree((any *)defaultOp, &elaboratorContext);
         if (opi != nullptr) {
           opi->VpiParent(const_cast<any *>(defaultOp->VpiParent()));
         }
@@ -887,7 +887,7 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
       ordered->push_back(opi);
       index++;
     }
-    operation *opres = (operation *)clone_tree((any *)op, s, &listener);
+    operation *opres = (operation *)clone_tree((any *)op, &elaboratorContext);
     opres->VpiParent(const_cast<any *>(op->VpiParent()));
     opres->Operands(ordered);
     if (flatten) {
@@ -2068,8 +2068,8 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
     } else if (ref_obj *ref = any_cast<ref_obj *>(object)) {
       object = reduceExpr(ref, invalidValue, inst, pexpr, muteError);
     } else if (constant *cons = any_cast<constant *>(object)) {
-      ElaboratorListener listener(&s);
-      object = UHDM::clone_tree((any *)cons, s, &listener);
+      ElaboratorContext elaboratorContext(&s);
+      object = UHDM::clone_tree((any *)cons, &elaboratorContext);
       cons = any_cast<constant *>(object);
       if (cons->Typespec() == nullptr)
         cons->Typespec((typespec *)path->Typespec());
@@ -4815,8 +4815,8 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
   if (param_assigns) {
     scope->Param_assigns(s.MakeParam_assignVec());
     for (auto p : *param_assigns) {
-      ElaboratorListener listener(&s, false, muteError);
-      any *pp = UHDM::clone_tree(p, s, &listener);
+      ElaboratorContext elaboratorContext(&s, false, muteError);
+      any *pp = UHDM::clone_tree(p, &elaboratorContext);
       scope->Param_assigns()->push_back((param_assign *)pp);
       const typespec *tps = nullptr;
       const expr *lhs = any_cast<const expr *>(p->Lhs());
@@ -4937,8 +4937,8 @@ expr *ExprEval::evalFunc(UHDM::function *func, std::vector<any *> *args,
           uint64_t si = size(tps, invalidValue, inst, pexpr, true, true);
           if (p->Rhs() && (p->Rhs()->UhdmType() == uhdmconstant)) {
             constant *c = (constant *)p->Rhs();
-            ElaboratorListener listener(&s, false, muteError);
-            c = (constant *)UHDM::clone_tree(c, s, &listener);
+            ElaboratorContext elaboratorContext(&s, false, muteError);
+            c = (constant *)UHDM::clone_tree(c, &elaboratorContext);
             if (c->VpiConstType() == vpiBinaryConst) {
               std::string_view val = c->VpiValue();
               val.remove_prefix(std::string_view("BIN:").length());

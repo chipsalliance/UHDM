@@ -2,12 +2,11 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
-#include "uhdm/ElaboratorListener.h"
-#include "uhdm/uhdm.h"
-#include "uhdm/VpiListener.h"
-#include "uhdm/vpi_visitor.h"
-
 #include "test_util.h"
+#include "uhdm/ElaboratorListener.h"
+#include "uhdm/VpiListener.h"
+#include "uhdm/uhdm.h"
+#include "uhdm/vpi_visitor.h"
 
 using namespace UHDM;
 
@@ -117,9 +116,10 @@ TEST(ClassesTest, DesignSaveRestoreRoundtrip) {
   EXPECT_EQ(before, restored);
 
   // Elaborate restored designs
-  ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
-  listener->listenDesigns(restoredDesigns);
-  delete listener;
+  ElaboratorContext* elaboratorContext =
+      new ElaboratorContext(&serializer, true);
+  elaboratorContext->m_elaborator.listenDesigns(restoredDesigns);
+  delete elaboratorContext;
 
   const std::string elaborated = designs_to_string(restoredDesigns);
   EXPECT_NE(restored, elaborated);  // Elaboration should've done _something_
