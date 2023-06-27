@@ -29,11 +29,10 @@
 
 namespace UHDM {
 class BaseClass;
-class ElaboratorListener;
-class Serializer;
+class CloneContext;
 
-BaseClass* clone_tree (const BaseClass* root, Serializer& s, ElaboratorListener* elaborator = nullptr);
+BaseClass* clone_tree(const BaseClass* root, CloneContext* context);
 
-};
+};  // namespace UHDM
 
 #endif  // UHDM_CLONE_TREE_H

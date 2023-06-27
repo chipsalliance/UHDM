@@ -27,6 +27,7 @@
 #ifndef UHDM_ELABORATORLISTENER_H
 #define UHDM_ELABORATORLISTENER_H
 
+#include <uhdm/BaseClass.h>
 #include <uhdm/VpiListener.h>
 
 #include <map>
@@ -35,6 +36,8 @@
 
 namespace UHDM {
 
+class ElaboratorContext;
+class ElaboratorListener;
 class Serializer;
 
 class ElaboratorListener final : public VpiListener {
@@ -43,9 +46,7 @@ class ElaboratorListener final : public VpiListener {
   friend gen_scope_array;
 
  public:
-  ElaboratorListener(Serializer* serializer, bool debug = false,
-                     bool muteErrors = false)
-      : serializer_(serializer), debug_(debug), muteErrors_(muteErrors) {}
+  void setContext(ElaboratorContext* context) { context_ = context; }
   void uniquifyTypespec(bool uniquify) { uniquifyTypespec_ = uniquify; }
   bool uniquifyTypespec() { return uniquifyTypespec_; }
   void bindOnly(bool bindOnly) { clone_ = !bindOnly; }
@@ -65,7 +66,8 @@ class ElaboratorListener final : public VpiListener {
   any* bindParam(std::string_view name) const;
 
   // Bind to a function or task in the current scope
-  any* bindTaskFunc(std::string_view name, const class_var* prefix = nullptr) const;
+  any* bindTaskFunc(std::string_view name,
+                    const class_var* prefix = nullptr) const;
 
   void scheduleTaskFuncBinding(tf_call* clone, const class_var* prefix) {
     scheduledTfCallBinding_.push_back(std::make_pair(clone, prefix));
@@ -82,8 +84,10 @@ class ElaboratorListener final : public VpiListener {
   void elabModule_inst(const module_inst* object, vpiHandle handle);
   void leaveModule_inst(const module_inst* object, vpiHandle handle) final;
 
-  void enterInterface_inst(const interface_inst* object, vpiHandle handle) final;
-  void leaveInterface_inst(const interface_inst* object, vpiHandle handle) final;
+  void enterInterface_inst(const interface_inst* object,
+                           vpiHandle handle) final;
+  void leaveInterface_inst(const interface_inst* object,
+                           vpiHandle handle) final;
 
   void enterPackage(const package* object, vpiHandle handle) final;
   void leavePackage(const package* object, vpiHandle handle) final;
@@ -97,7 +101,8 @@ class ElaboratorListener final : public VpiListener {
 
   void leaveRef_obj(const ref_obj* object, vpiHandle handle) final;
   void leaveBit_select(const bit_select* object, vpiHandle handle) final;
-  void leaveIndexed_part_select(const indexed_part_select* object, vpiHandle handle) final;
+  void leaveIndexed_part_select(const indexed_part_select* object,
+                                vpiHandle handle) final;
   void leavePart_select(const part_select* object, vpiHandle handle) final;
   void leaveVar_select(const var_select* object, vpiHandle handle) final;
 
@@ -125,13 +130,19 @@ class ElaboratorListener final : public VpiListener {
   void enterNamed_fork(const named_fork* object, vpiHandle handle) final;
   void leaveNamed_fork(const named_fork* object, vpiHandle handle) final;
 
-  void enterMethod_func_call(const method_func_call* object, vpiHandle handle) final;
-  void leaveMethod_func_call(const method_func_call* object, vpiHandle handle) final;
+  void enterMethod_func_call(const method_func_call* object,
+                             vpiHandle handle) final;
+  void leaveMethod_func_call(const method_func_call* object,
+                             vpiHandle handle) final;
 
   void pushVar(any* var);
   void popVar(any* var);
 
  private:
+  explicit ElaboratorListener(Serializer* serializer, bool debug = false,
+                              bool muteErrors = false)
+      : serializer_(serializer), debug_(debug), muteErrors_(muteErrors) {}
+
   void enterVariables(const variables* object, vpiHandle handle);
 
   void enterTask_func(const task_func* object, vpiHandle handle);
@@ -147,6 +158,7 @@ class ElaboratorListener final : public VpiListener {
   ComponentMap flatComponentMap_;
 
   Serializer* serializer_ = nullptr;
+  ElaboratorContext* context_ = nullptr;
   bool inHierarchy_ = false;
   bool debug_ = false;
   bool muteErrors_ = false;
@@ -154,6 +166,22 @@ class ElaboratorListener final : public VpiListener {
   bool clone_ = true;
   bool ignoreLastInstance_ = false;
   std::vector<std::pair<tf_call*, const class_var*>> scheduledTfCallBinding_;
+
+  friend class ElaboratorContext;
+};
+
+class ElaboratorContext final : public CloneContext {
+  UHDM_IMPLEMENT_RTTI(ElaboratorContext, CloneContext)
+
+ public:
+  explicit ElaboratorContext(Serializer* serializer, bool debug = false,
+                             bool muteErrors = false)
+      : CloneContext(serializer), m_elaborator(serializer, debug, muteErrors) {
+    m_elaborator.setContext(this);
+  }
+  ~ElaboratorContext() final = default;
+
+  ElaboratorListener m_elaborator;
 };
 
 };  // namespace UHDM

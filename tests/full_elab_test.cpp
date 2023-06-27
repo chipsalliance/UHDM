@@ -29,12 +29,11 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "uhdm/ElaboratorListener.h"
-#include "uhdm/uhdm.h"
-#include "uhdm/VpiListener.h"
-#include "uhdm/vpi_visitor.h"
-
 #include "test_util.h"
+#include "uhdm/ElaboratorListener.h"
+#include "uhdm/VpiListener.h"
+#include "uhdm/uhdm.h"
+#include "uhdm/vpi_visitor.h"
 
 using namespace UHDM;
 
@@ -206,9 +205,10 @@ TEST(FullElabTest, ElaborationRoundtrip) {
             "port 4\n"
             "ref_obj 4\n");
 
-  ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
-  listener->listenDesigns(designs);
-  delete listener;
+  ElaboratorContext* elaboratorContext =
+      new ElaboratorContext(&serializer, true);
+  elaboratorContext->m_elaborator.listenDesigns(designs);
+  delete elaboratorContext;
 
   elaborated = false;
   for (auto design : designs) {

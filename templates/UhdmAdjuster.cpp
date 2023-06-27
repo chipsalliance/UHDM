@@ -46,8 +46,8 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
   if (type == uhdmconstant) {
     constant* c = (constant*)result;
     if (c->VpiSize() < maxsize) {
-      ElaboratorListener listener(serializer_);
-      c = (constant*)UHDM::clone_tree(c, *serializer_, &listener);
+      ElaboratorContext elaboratorContext(serializer_);
+      c = (constant*)UHDM::clone_tree(c, &elaboratorContext);
       int32_t constType = c->VpiConstType();
       const typespec* tps = c->Typespec();
       bool is_signed = false;
@@ -214,7 +214,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
     int32_t size = object->VpiSize();
     bool invalidValue = false;
     UHDM::ExprEval eval;
-    ElaboratorListener listener(serializer_);
+    ElaboratorContext elaboratorContext(serializer_);
     if (parent) {
       if (parent->UhdmType() == uhdmoperation) {
         operation* op = (operation*)parent;
@@ -234,7 +234,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
         }
         if (size != object->VpiSize()) {
           constant* newc =
-              (constant*)UHDM::clone_tree(object, *serializer_, &listener);
+              (constant*)UHDM::clone_tree(object, &elaboratorContext);
           newc->VpiSize(size);
           int64_t val = eval.get_value(invalidValue, object);
           if (val == 1) {
@@ -271,7 +271,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
         }
         if (size != object->VpiSize()) {
           constant* newc =
-              (constant*)UHDM::clone_tree(object, *serializer_, &listener);
+              (constant*)UHDM::clone_tree(object, &elaboratorContext);
           newc->VpiSize(size);
           int64_t val = eval.get_value(invalidValue, object);
           if (val == 1) {

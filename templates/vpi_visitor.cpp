@@ -604,19 +604,18 @@ void visit_designs(const std::vector<vpiHandle>& designs, std::ostream &out) {
   visit_designs(designs, &visitor);
 }
 
-std::string decompile(UHDM::any* handle) {
-  UHDM::VisitedContainer visited;
-  vpi_show_ids(true);
+std::string decompile(const UHDM::any* handle) {
   if (handle == nullptr) {
     std::cout << "NULL HANDLE\n";
     return "NULL HANDLE";
   }
+  UHDM::VisitedContainer visited;
+  vpi_show_ids(true);
   vpiHandle dh =
       handle->GetSerializer()->MakeUhdmHandle(handle->UhdmType(), handle);
   std::stringstream out;
   VpiVisitor visitor(out);
   visitor.visit_object(dh, 0, "decompile", false);
-  std::cout << out.str() << std::endl;
   vpi_release_handle(dh);
   return out.str();
 }

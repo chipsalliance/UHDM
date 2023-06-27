@@ -48,7 +48,7 @@ void visit_designs(const std::vector<vpiHandle>& designs, VpiVisitor* visitor);
 void visit_designs(const std::vector<vpiHandle>& designs, std::ostream& out);
 
 // For debug use in GDB
-std::string decompile(UHDM::any* handle);
+std::string decompile(const UHDM::any* handle);
 
 class VpiVisitor final {
  private:
