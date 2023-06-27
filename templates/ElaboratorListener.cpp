@@ -762,7 +762,11 @@ any* ElaboratorListener::bindNet(std::string_view name) const {
     const ComponentMap& netMap = std::get<1>(*i);
     ComponentMap::const_iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
-      return (any*)netItr->second;
+      const any* p = netItr->second;
+      if (const ref_obj* r = any_cast<const ref_obj*>(p)) {
+        p = r->Actual_group();
+      }
+      return const_cast<any*>(p);
     }
   }
   return nullptr;
@@ -778,19 +782,31 @@ any* ElaboratorListener::bindAny(std::string_view name) const {
     const ComponentMap& netMap = std::get<1>(*i);
     ComponentMap::const_iterator netItr = netMap.find(name);
     if (netItr != netMap.end()) {
-      return (any*)netItr->second;
+      const any* p = netItr->second;
+      if (const ref_obj* r = any_cast<const ref_obj*>(p)) {
+        p = r->Actual_group();
+      }
+      return const_cast<any*>(p);
     }
 
     const ComponentMap& paramMap = std::get<2>(*i);
     ComponentMap::const_iterator paramItr = paramMap.find(name);
     if (paramItr != paramMap.end()) {
-      return (any*)paramItr->second;
+      const any* p = paramItr->second;
+      if (const ref_obj* r = any_cast<const ref_obj*>(p)) {
+        p = r->Actual_group();
+      }
+      return const_cast<any*>(p);
     }
 
     const ComponentMap& modMap = std::get<4>(*i);
     ComponentMap::const_iterator modItr = modMap.find(name);
     if (modItr != modMap.end()) {
-      return (any*)modItr->second;
+      const any* p = modItr->second;
+      if (const ref_obj* r = any_cast<const ref_obj*>(p)) {
+        p = r->Actual_group();
+      }
+      return const_cast<any*>(p);
     }
   }
   return nullptr;
@@ -806,7 +822,11 @@ any* ElaboratorListener::bindParam(std::string_view name) const {
     const ComponentMap& paramMap = std::get<2>(*i);
     ComponentMap::const_iterator paramItr = paramMap.find(name);
     if (paramItr != paramMap.end()) {
-      return (any*)paramItr->second;
+      const any* p = paramItr->second;
+      if (const ref_obj* r = any_cast<const ref_obj*>(p)) {
+        p = r->Actual_group();
+      }
+      return const_cast<any*>(p);
     }
   }
   return nullptr;
@@ -823,7 +843,11 @@ any* ElaboratorListener::bindTaskFunc(std::string_view name,
     const ComponentMap& funcMap = std::get<3>(*i);
     ComponentMap::const_iterator funcItr = funcMap.find(name);
     if (funcItr != funcMap.end()) {
-      return (any*)funcItr->second;
+      const any* p = funcItr->second;
+      if (const ref_obj* r = any_cast<const ref_obj*>(p)) {
+        p = r->Actual_group();
+      }
+      return const_cast<any*>(p);
     }
   }
   if (prefix) {
