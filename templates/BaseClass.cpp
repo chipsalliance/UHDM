@@ -97,6 +97,69 @@ void BaseClass::DeepCopy(BaseClass* clone, BaseClass* parent,
   clone->VpiParent(parent);
 }
 
+std::string BaseClass::ComputeFullName() const {
+  if ((UhdmType() == uhdmmodule_inst) && (VpiParent() != nullptr) &&
+      (VpiParent()->UhdmType() == uhdmmodule_inst)) {
+    return std::string(VpiDefName());
+  }
+  std::vector<std::string_view> names;
+  const BaseClass* parent = this;
+  const BaseClass* child = nullptr;
+  bool column = false;
+  while (parent != nullptr) {
+    const BaseClass* actual_parent = parent->VpiParent();
+    UHDM_OBJECT_TYPE parent_type =
+        (parent != nullptr) ? parent->UhdmType() : uhdmunsupported_stmt;
+    UHDM_OBJECT_TYPE actual_parent_type = (actual_parent != nullptr)
+                                              ? actual_parent->UhdmType()
+                                              : uhdmunsupported_stmt;
+    if (parent_type == uhdmdesign) break;
+    if ((parent_type == uhdmpackage) || (parent_type == uhdmclass_defn))
+      column = true;
+    std::string_view name =
+        parent->VpiName().empty() ? parent->VpiDefName() : parent->VpiName();
+    bool skip_name = (actual_parent_type == uhdmref_obj) ||
+                     (parent_type == uhdmmethod_func_call) ||
+                     (parent_type == uhdmmethod_task_call) ||
+                     (parent_type == uhdmfunc_call) ||
+                     (parent_type == uhdmtask_call) ||
+                     (parent_type == uhdmsys_func_call) ||
+                     (parent_type == uhdmsys_task_call);
+    if (child != nullptr) {
+      UHDM_OBJECT_TYPE child_type = child->UhdmType();
+      if ((child_type == uhdmbit_select) && (parent_type == uhdmport)) {
+        skip_name = true;
+      }
+      if ((child_type == uhdmref_obj) && (parent_type == uhdmbit_select)) {
+        skip_name = true;
+      }
+      if ((child_type == uhdmref_obj) &&
+          (parent_type == uhdmindexed_part_select)) {
+        skip_name = true;
+      }
+      if ((child_type == uhdmref_obj) && (parent_type == uhdmhier_path)) {
+        skip_name = true;
+      }
+    }
+    if ((!name.empty()) && (!skip_name)) {
+      names.emplace_back(name);
+    }
+    child = parent;
+    parent = parent->VpiParent();
+  }
+  std::string fullName;
+  if (!names.empty()) {
+    size_t index = names.size() - 1;
+    while (1) {
+      fullName += names[index];
+      if (index > 0) fullName += column ? "::" : ".";
+      if (index == 0) break;
+      index--;
+    }
+  }
+  return fullName;
+}
+
 int32_t BaseClass::Compare(const BaseClass* const other,
                            CompareContext* context) const {
   int32_t r = 0;

@@ -177,6 +177,8 @@ class BaseClass : public RTTI {
   void DeepCopy(BaseClass* clone, BaseClass* parent,
                 CloneContext* context) const;
 
+  std::string ComputeFullName() const;
+
   void SetSerializer(Serializer* serial) { serializer_ = serial; }
 
  protected:
