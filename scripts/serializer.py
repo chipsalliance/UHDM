@@ -112,7 +112,7 @@ def generate(models):
 
                         restore_adapters.append(f'    obj->{Name_}(({type}*)serializer->GetObject(reader.get{Name}().getType(), reader.get{Name}().getIndex() - 1));')
                     else:
-                        saves_adapters.append(f'    builder.set{Name}(serializer->GetId(obj->{Name_}()));')
+                        saves_adapters.append(f'    if (obj->{Name_}() != nullptr) builder.set{Name}(serializer->GetId(obj->{Name_}()));')
 
                         restore_adapters.append(f'    if (reader.get{Name}()) {{')
                         restore_adapters.append(f'      obj->{Name_}(serializer->{type}Maker.objects_[reader.get{Name}() - 1]);')
