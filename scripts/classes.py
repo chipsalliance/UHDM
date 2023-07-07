@@ -543,7 +543,12 @@ def _get_Compare_implementation(model):
     ]
 
     if modeltype == 'obj_def':
-        # Mark self visited (and check) only for the most derived sub-class
+        if model['subclasses']:
+            content.append('  if ((r = VpiType() - other->VpiType()) != 0) {')
+            content.append('    context->m_failedLhs = this;')
+            content.append('    context->m_failedRhs = other;')
+            content.append('    return r;')
+            content.append('  }')
         content.append('  if (!context->m_visited.insert(this).second) return r;')
 
     content.extend([
