@@ -55,8 +55,8 @@ def generate(models):
             if baseclass:
                 Baseclass_ = baseclass[:1].upper() + baseclass[1:]
                 private_implementations.append(f'  listen{Baseclass_}_(object);')
-
-            private_implementations.extend(_get_listen_implementation(classname, 'vpiParent', 'vpiParent', None, '1'))
+            else:
+                private_implementations.append('  listenBaseClass_(object);')
 
             for key, value in model.allitems():
                 if key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
