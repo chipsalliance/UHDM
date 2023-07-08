@@ -56,6 +56,12 @@ bool UhdmListener::didVisitAll(const Serializer& serializer) const {
   return diffObjects.empty();
 }
 
+void UhdmListener::listenBaseClass_(const any* const object) {
+  if (const any* const vpiParent_ = object->VpiParent()) {
+    listenAny(vpiParent_);
+  }
+}
+
 <UHDM_PRIVATE_LISTEN_IMPLEMENTATIONS>
 <UHDM_PUBLIC_LISTEN_IMPLEMENTATIONS>
 void UhdmListener::listenAny(const any* const object) {
