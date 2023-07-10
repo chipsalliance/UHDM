@@ -1451,6 +1451,23 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                     }
                   }
                 }
+                if (!found && interf->Ports()) {
+                  for (port* p : *interf->Ports()) {
+                    if (p->VpiName() == name) {
+                      if (any* ref = p->Low_conn()) {
+                        if (ref_obj* nref = any_cast<ref_obj*>(ref)) {
+                          any* n = nref->Actual_group();
+                          if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                            cro->Actual_group(n);
+                          }
+                          previous = n;
+                          found = true;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
                 break;
               }
               case uhdmarray_var: {
