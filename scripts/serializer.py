@@ -177,9 +177,9 @@ def generate(models):
 
     file_content = file_content.replace('<FACTORY_GC>', '\n'.join(factory_gc))
     file_content = file_content.replace('<UHDM_NAME_MAP>', '\n'.join(uhdm_name_map))
-    file_content = file_content.replace('<FACTORY_PURGE>', '\n'.join(factory_purge))
-    file_content = file_content.replace('<FACTORY_STATS>', '\n'.join(factory_stats))
-    file_content = file_content.replace('<FACTORY_OBJECT_TYPE_MAP>', '\n'.join(factory_object_type_map))
+    file_content = file_content.replace('<FACTORY_PURGE>', '\n'.join(sorted(factory_purge)))
+    file_content = file_content.replace('<FACTORY_STATS>', '\n'.join(sorted(factory_stats)))
+    file_content = file_content.replace('<FACTORY_OBJECT_TYPE_MAP>', '\n'.join(sorted(factory_object_type_map)))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer.cpp'), file_content)
 
     # Serializer_save.cpp
