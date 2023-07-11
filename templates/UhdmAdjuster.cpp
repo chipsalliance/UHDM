@@ -47,7 +47,7 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
     constant* c = (constant*)result;
     if (c->VpiSize() < maxsize) {
       ElaboratorContext elaboratorContext(serializer_);
-      c = (constant*)UHDM::clone_tree(c, &elaboratorContext);
+      c = (constant*)clone_tree(c, &elaboratorContext);
       int32_t constType = c->VpiConstType();
       const typespec* tps = c->Typespec();
       bool is_signed = false;
@@ -168,8 +168,8 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
   {
     // Resize in place
     case_stmt* mut_object = (case_stmt*)object;
-    if (UHDM::expr* newValue = (UHDM::expr*)resize(
-            object->VpiCondition(), maxsize, is_overall_unsigned)) {
+    if (expr* newValue = (expr*)resize(object->VpiCondition(), maxsize,
+                                       is_overall_unsigned)) {
       if (newValue->UhdmType() == uhdmconstant) {
         mut_object->VpiCondition(newValue);
       }
@@ -213,7 +213,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
     const any* parent = object->VpiParent();
     int32_t size = object->VpiSize();
     bool invalidValue = false;
-    UHDM::ExprEval eval;
+    ExprEval eval;
     ElaboratorContext elaboratorContext(serializer_);
     if (parent) {
       if (parent->UhdmType() == uhdmoperation) {
@@ -233,8 +233,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           i++;
         }
         if (size != object->VpiSize()) {
-          constant* newc =
-              (constant*)UHDM::clone_tree(object, &elaboratorContext);
+          constant* newc = (constant*)clone_tree(object, &elaboratorContext);
           newc->VpiSize(size);
           int64_t val = eval.get_value(invalidValue, object);
           if (val == 1) {
@@ -270,8 +269,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           }
         }
         if (size != object->VpiSize()) {
-          constant* newc =
-              (constant*)UHDM::clone_tree(object, &elaboratorContext);
+          constant* newc = (constant*)clone_tree(object, &elaboratorContext);
           newc->VpiSize(size);
           int64_t val = eval.get_value(invalidValue, object);
           if (val == 1) {
@@ -290,7 +288,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
 void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
   if (isInUhdmAllIterator()) return;
   bool invalidValue = false;
-  UHDM::ExprEval eval(true);
+  ExprEval eval(true);
   const any* parent = object->VpiParent();
   if (parent == nullptr) return;
   if (parent->UhdmType() == uhdmcont_assign) {
