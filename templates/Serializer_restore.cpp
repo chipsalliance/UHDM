@@ -109,6 +109,8 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& filepath) {
   options.nestingLimit = 1024;
   ::capnp::PackedFdMessageReader message(fileid, options);
   UhdmRoot::Reader cap_root = message.getRoot<UhdmRoot>();
+  version_ = cap_root.getVersion();
+  if (version_ == kVersion) return designs;
 
   const ::capnp::List<::capnp::Text>::Reader& symbols = cap_root.getSymbols();
   for (const auto& symbol : symbols) {

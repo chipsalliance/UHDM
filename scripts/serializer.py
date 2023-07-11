@@ -195,8 +195,8 @@ def generate(models):
     with open(config.get_template_filepath('Serializer_restore.cpp'), 'rt') as strm:
         file_content = strm.read()
 
-    file_content = file_content.replace('<CAPNP_INIT_FACTORIES>', '\n'.join(restore_ids))
-    file_content = file_content.replace('<CAPNP_RESTORE_FACTORIES>', '\n'.join(restore_objects))
+    file_content = file_content.replace('<CAPNP_INIT_FACTORIES>', '\n'.join(sorted(restore_ids)))
+    file_content = file_content.replace('<CAPNP_RESTORE_FACTORIES>', '\n'.join(sorted(restore_objects)))
     file_content = file_content.replace('<CAPNP_RESTORE_ADAPTERS>', '\n'.join(restore_adapters))
     file_content = file_content.replace('<FACTORY_FUNCTION_IMPLEMENTATIONS>', '\n'.join(factory_function_implementations))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer_restore.cpp'), file_content)
