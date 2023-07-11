@@ -226,7 +226,6 @@ namespace UHDM
   template<                                                                                                                             \
     typename I,                                                                                                                         \
     typename T = typename std::remove_pointer<I>::type,                                                                                 \
-    typename = typename std::enable_if<std::is_pointer<I>::value>::type,                                                                \
     typename = typename std::enable_if<std::is_base_of<baseType, T>::value>::type>                                                      \
   inline T *fname(baseType *const u) noexcept {                                                                                         \
     return (u == nullptr) ? nullptr : u->template Cast<T>();                                                                            \
@@ -234,7 +233,6 @@ namespace UHDM
   template<                                                                                                                             \
     typename I,                                                                                                                         \
     typename T = typename std::remove_pointer<I>::type,                                                                                 \
-    typename = typename std::enable_if<std::is_pointer<I>::value>::type,                                                                \
     typename = typename std::enable_if<std::is_base_of<baseType, T>::value>::type>                                                      \
   inline const T *fname(const baseType *const u) noexcept {                                                                             \
     return (u == nullptr) ? nullptr : u->template Cast<const T>();                                                                      \
@@ -252,7 +250,6 @@ namespace UHDM
   template<                                                                                                                                   \
     typename I,                                                                                                                               \
     typename T = typename std::remove_pointer<I>::type,                                                                                       \
-    typename = typename std::enable_if<std::is_pointer<I>::value>::type,                                                                      \
     typename = typename std::enable_if<std::is_base_of<baseType, T>::value>::type>                                                            \
   inline T *fname(baseType *const u) noexcept {                                                                                               \
     return (u == nullptr) ? nullptr : u->template VirtualCast<T>();                                                                           \
@@ -260,7 +257,6 @@ namespace UHDM
   template<                                                                                                                                   \
     typename I,                                                                                                                               \
     typename T = typename std::remove_pointer<I>::type,                                                                                       \
-    typename = typename std::enable_if<std::is_pointer<I>::value>::type,                                                                      \
     typename = typename std::enable_if<std::is_base_of<baseType, T>::value>::type>                                                            \
   inline const T *fname(const baseType *const u) noexcept {                                                                                   \
     return (u == nullptr) ? nullptr : u->template VirtualCast<const T>();                                                                     \
