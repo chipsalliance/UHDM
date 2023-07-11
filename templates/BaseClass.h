@@ -181,6 +181,46 @@ class BaseClass : public RTTI {
 
   void SetSerializer(Serializer* serial) { serializer_ = serial; }
 
+  static int32_t SafeCompare(const BaseClass* lhs, const BaseClass* rhs,
+                             CompareContext* context) {
+    if ((lhs != nullptr) && (rhs != nullptr)) {
+      return lhs->Compare(rhs, context);
+    } else if ((lhs != nullptr) && (rhs == nullptr)) {
+      context->m_failedLhs = lhs;
+      return 1;
+    } else if ((lhs == nullptr) && (rhs != nullptr)) {
+      context->m_failedRhs = rhs;
+      return -1;
+    }
+    return 0;
+  }
+
+  template <typename T>
+  static int32_t SafeCompare(const BaseClass* lhs_obj,
+                             const std::vector<T*>* lhs,
+                             const BaseClass* rhs_obj,
+                             const std::vector<T*>* rhs,
+                             CompareContext* context) {
+    if ((lhs != nullptr) && (rhs != nullptr)) {
+      int32_t r = 0;
+      if ((r = static_cast<int32_t>(lhs->size() - rhs->size())) != 0) {
+        context->m_failedLhs = lhs_obj;
+        context->m_failedRhs = rhs_obj;
+        return 1;
+      }
+      for (size_t i = 0, n = lhs->size(); i < n; ++i) {
+        if ((r = SafeCompare(lhs->at(i), rhs->at(i), context)) != 0) return r;
+      }
+    } else if ((lhs != nullptr) && !lhs->empty() && (rhs == nullptr)) {
+      context->m_failedLhs = lhs_obj;
+      return 1;
+    } else if ((lhs == nullptr) && (rhs != nullptr) && !rhs->empty()) {
+      context->m_failedRhs = rhs_obj;
+      return -1;
+    }
+    return 0;
+  }
+
  protected:
   Serializer* serializer_ = nullptr;
   ClientData* clientData_ = nullptr;
