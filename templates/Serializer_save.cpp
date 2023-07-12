@@ -54,19 +54,16 @@
 
 
 namespace UHDM {
-template <typename T, typename>
-void Serializer::SetSaveId_(FactoryT<T> *const factory) {
-  uint32_t index = 0;
-  for (auto obj : factory->objects_) {
-    SetId(obj, ++index);
-  }
+inline static uint32_t GetId(const BaseClass* p, const Serializer::IdMap &idMap) {
+  auto it = idMap.find(p);
+  return (it == idMap.end()) ? Serializer::kBadIndex : it->second;
 }
 
 struct Serializer::SaveAdapter {
-  void operator()(const BaseClass *const obj, Serializer *const serializer, Any::Builder builder) const {
+  void operator()(const BaseClass *const obj, Serializer *const serializer, const IdMap& idMap, Any::Builder builder) const {
     if (obj->VpiParent() != nullptr) {
       ::ObjIndexType::Builder vpiParentBuilder = builder.getVpiParent();
-      vpiParentBuilder.setIndex(serializer->GetId(obj->VpiParent()));
+      vpiParentBuilder.setIndex(GetId(obj->VpiParent(), idMap));
       vpiParentBuilder.setType(obj->VpiParent()->UhdmType());
     }
     builder.setVpiFile((RawSymbolId)obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));
@@ -80,28 +77,28 @@ struct Serializer::SaveAdapter {
 <CAPNP_SAVE_ADAPTERS>
 
   template<typename T, typename U, typename = typename std::enable_if<std::is_base_of<BaseClass, T>::value>::type>
-  void operator()(const typename FactoryT<T>::objects_t &objects, Serializer *serializer, typename ::capnp::List<U>::Builder builder) const {
+  void operator()(const FactoryT<T>& factory, Serializer* serializer, const Serializer::IdMap& idMap,
+                  typename ::capnp::List<U>::Builder builder) const {
     uint32_t index = 0;
-    for (const T* obj : objects)
-      operator()(obj, serializer, builder[index++]);
+    for (const T* obj : factory.objects_)
+      operator()(obj, serializer, idMap, builder[index++]);
   }
 };
 
 void Serializer::Save(const std::filesystem::path& filepath) {
     Save(filepath.string());
 }
+
 void Serializer::Save(const std::string& filepath) {
   uint32_t index = 0;
 
-<CAPNP_ID>
-
   const std::string file = filepath;
-  const int32_t fileid =
-      open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
+  const int32_t fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
+
   ::capnp::MallocMessageBuilder message;
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
   cap_root.setVersion(kVersion);
-  cap_root.setObjectId(objId_);
+  cap_root.setObjectId(m_objId);
 
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designMaker.objects_.size());
   index = 0;
@@ -110,8 +107,9 @@ void Serializer::Save(const std::string& filepath) {
     index++;
   }
 
+  const IdMap idMap = AllObjects();
   SaveAdapter adapter;
-<CAPNP_SAVE>
+  <CAPNP_SAVE>
 
   // Save the symbols after all save function have been invoked, some symbols are made doing so (VpiFullName)
   // This is not ideal.

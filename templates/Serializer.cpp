@@ -63,7 +63,7 @@ void Serializer::GC_(FactoryT<T>* const factory) {
     change = false;
     for (auto p = factory->objects_.begin();
          p != factory->objects_.end(); ++p) {
-      if (keepers_.find((*p)) == keepers_.end()) {
+      if (m_keepers.find((*p)) == m_keepers.end()) {
         delete (*p);
         factory->objects_.erase(p);
         change = true;
@@ -87,7 +87,7 @@ void Serializer::GarbageCollect() {
   // Mark the transitive cone including the object parents and their children to cover
   // relations that still point to out-of-tree objects
   std::set<const any*> topset;
-  topset = keepers_;
+  topset = m_keepers;
   // This is very inneficient implementation.
   // This step can be removed when we can remove the out-of-tree back pointer dependance in MarkKeepers
   for (auto p : topset) {
@@ -103,44 +103,47 @@ void Serializer::GarbageCollect() {
 <FACTORY_GC>
 
   // Clear keeper
-  keepers_.clear();
+  m_keepers.clear();
 }
 
 void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const any* object1, const any* object2) {
   std::cerr << errorMsg << std::endl;
 }
 
-void Serializer::SetId(const BaseClass* p, uint32_t id) {
-  allIds_.emplace(p, id);
+SymbolId Serializer::MakeSymbol(std::string_view symbol) {
+  return symbolMaker.Make(symbol);
 }
 
-uint32_t Serializer::GetId(const BaseClass* p) {
-  auto inserted = allIds_.emplace(p, incrId_);
-  if (inserted.second) {
-    ++incrId_;
-  }
-  return inserted.first->second;
+std::string_view Serializer::GetSymbol(SymbolId id) const {
+  return symbolMaker.GetSymbol(id);
 }
 
+SymbolId Serializer::GetSymbolId(std::string_view symbol) const {
+  return symbolMaker.GetId(symbol);
+}
+
+vpiHandle Serializer::MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) {
+  return uhdm_handleMaker.Make(type, object);
+}
+
+Serializer::IdMap Serializer::AllObjects() const {
+  IdMap idMap;
+<CAPNP_ID>
+  return idMap;
+}
+
+std::string UhdmName(UHDM_OBJECT_TYPE type) {
+  switch (type) {
 <UHDM_NAME_MAP>
+    default: return "NO TYPE";
+  }
+}
 
 // From uhdm_types.h
 std::string VpiTypeName(vpiHandle h) {
-  uhdm_handle* handle = (uhdm_handle*) h;
-  BaseClass* obj = (BaseClass*) handle->object;
+  uhdm_handle* handle = (uhdm_handle*)h;
+  BaseClass* obj = (BaseClass*)handle->object;
   return UhdmName(obj->UhdmType());
-}
-
-static constexpr uint32_t badIndex = static_cast<uint32_t>(-1);
-
-BaseClass* Serializer::GetObject(uint32_t objectType, uint32_t index) {
-  if (index == badIndex)
-    return nullptr;
-
-  switch (objectType) {
-<FACTORY_OBJECT_TYPE_MAP>
-  default: return nullptr;
-  }
 }
 
 std::map<std::string, uint32_t, std::less<>> Serializer::ObjectStats() const {
@@ -172,12 +175,22 @@ void Serializer::PrintStats(std::ostream& strm,
   strm << "=== UHDM Object Stats End ===" << std::endl;
 }
 
+bool Serializer::Erase(const BaseClass* p) {
+  if (p == nullptr) {
+    return true;
+  }
+
+  switch (p->UhdmType()) {
+<FACTORY_ERASE_OBJECT>
+    default: return false;
+  }
+}
+
 Serializer::~Serializer() {
   Purge();
 }
 
 void Serializer::Purge() {
-  allIds_.clear();
   anyVectMaker.Purge();
   symbolMaker.Purge();
   uhdm_handleMaker.Purge();

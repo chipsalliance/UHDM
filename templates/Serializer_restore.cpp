@@ -57,8 +57,13 @@ template <typename T>
 inline T* Serializer::Make(FactoryT<T>* const factory) {
   T* const obj = factory->Make();
   obj->SetSerializer(this);
-  obj->UhdmId(objId_++);
+  obj->UhdmId(++m_objId);
   return obj;
+}
+
+template <typename T>
+void Serializer::Make(FactoryT<T>* const factory, uint32_t count) {
+  for (uint32_t i = 0; i < count; ++i) Make(factory);
 }
 
 template <typename T>
@@ -66,14 +71,18 @@ inline std::vector<T*>* Serializer::Make(FactoryT<std::vector<T*>>* const factor
   return factory->Make();
 }
 
-<FACTORY_FUNCTION_IMPLEMENTATIONS>
+BaseClass* Serializer::GetObject(uint32_t objectType, uint32_t index) const {
+  if (index == kBadIndex) {
+    return nullptr;
+  }
 
-template<typename T, typename>
-inline void Serializer::SetRestoreId_(FactoryT<T>* const factory, uint32_t count) {
-  for (uint32_t i = 0; i < count; ++i) {
-    SetId(Make<T>(factory), i);
+  switch (objectType) {
+<FACTORY_GET_OBJECT>
+    default: return nullptr;
   }
 }
+
+<FACTORY_FUNCTION_IMPLEMENTATIONS>
 
 struct Serializer::RestoreAdapter {
   void operator()(Any::Reader reader, Serializer *const serializer, BaseClass *const obj) const {
@@ -109,8 +118,8 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& filepath) {
   options.nestingLimit = 1024;
   ::capnp::PackedFdMessageReader message(fileid, options);
   UhdmRoot::Reader cap_root = message.getRoot<UhdmRoot>();
-  version_ = cap_root.getVersion();
-  if (version_ != kVersion) return designs;
+  m_version = cap_root.getVersion();
+  if (m_version != kVersion) return designs;
 
   const ::capnp::List<::capnp::Text>::Reader& symbols = cap_root.getSymbols();
   for (const auto& symbol : symbols) {
@@ -119,7 +128,7 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& filepath) {
 
 <CAPNP_INIT_FACTORIES>
   // This assignment should happen only after the necessary objects are created.
-  objId_ = cap_root.getObjectId();
+  m_objId = cap_root.getObjectId();
 
   RestoreAdapter adapter;
 <CAPNP_RESTORE_FACTORIES>

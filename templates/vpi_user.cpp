@@ -232,7 +232,7 @@ vpiHandle vpi_handle_by_index(vpiHandle object, PLI_INT32 indx) { return 0; }
 vpiHandle vpi_handle_by_name(PLI_BYTE8* name, vpiHandle refHandle) {
   const uhdm_handle* const handle = (const uhdm_handle*)refHandle;
   const BaseClass* const object = (const BaseClass*)handle->object;
-  if (object->GetSerializer()->symbolMaker.GetId(name) ==
+  if (object->GetSerializer()->GetSymbolId(name) ==
       SymbolFactory::getBadId()) {
     return nullptr;
   }

@@ -41,9 +41,10 @@ bool UhdmListener::didVisitAll(const Serializer& serializer) const {
   std::copy(visited.begin(), visited.end(),
             std::inserter(allVisited, allVisited.begin()));
 
+  const Serializer::IdMap idMap = serializer.AllObjects();
   std::set<const any*> allObjects;
   std::transform(
-      serializer.AllObjects().begin(), serializer.AllObjects().end(),
+      idMap.cbegin(), idMap.cend(),
       std::inserter(allObjects, allObjects.begin()),
       [](std::unordered_map<const BaseClass*, uint32_t>::const_reference
              entry) { return entry.first; });

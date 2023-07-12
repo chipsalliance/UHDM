@@ -32,6 +32,7 @@
 #include <uhdm/uhdm_types.h>
 
 #include <deque>
+#include <map>
 #include <set>
 #include <string_view>
 #include <tuple>
@@ -252,15 +253,22 @@ class FactoryT final {
     return obj;
   }
 
-  bool Erase(T* tps) {
+  bool Erase(const T* obj) {
     for (typename objects_t::const_iterator itr = objects_.begin();
          itr != objects_.end(); ++itr) {
-      if ((*itr) == tps) {
+      if ((*itr) == obj) {
+        delete obj;
         objects_.erase(itr);
         return true;
       }
     }
     return false;
+  }
+
+  void MapToIndex(std::map<const BaseClass*, uint32_t>& table, uint32_t index = 1) const {
+    for (typename objects_t::const_reference obj : objects_) {
+      table.emplace(obj, index++);
+    }
   }
 
   void Purge() {

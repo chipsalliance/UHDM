@@ -27,11 +27,11 @@
 
 namespace UHDM {
 std::string_view BaseClass::VpiFile() const {
-  return vpiFile_ ? serializer_->symbolMaker.GetSymbol(vpiFile_) : kEmpty;
+  return vpiFile_ ? serializer_->GetSymbol(vpiFile_) : kEmpty;
 }
 
 bool BaseClass::VpiFile(std::string_view data) {
-  vpiFile_ = serializer_->symbolMaker.Make(data);
+  vpiFile_ = serializer_->MakeSymbol(data);
   return true;
 }
 
