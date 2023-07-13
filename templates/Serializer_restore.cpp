@@ -118,6 +118,8 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& filepath) {
   }
 
 <CAPNP_INIT_FACTORIES>
+  // This assignment should happen only after the necessary objects are created.
+  objId_ = cap_root.getObjectId();
 
   RestoreAdapter adapter;
 <CAPNP_RESTORE_FACTORIES>

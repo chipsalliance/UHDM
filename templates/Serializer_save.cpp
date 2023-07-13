@@ -101,6 +101,7 @@ void Serializer::Save(const std::string& filepath) {
   ::capnp::MallocMessageBuilder message;
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
   cap_root.setVersion(kVersion);
+  cap_root.setObjectId(objId_);
 
   ::capnp::List<Design>::Builder designs = cap_root.initDesigns(designMaker.objects_.size());
   index = 0;
