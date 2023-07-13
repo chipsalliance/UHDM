@@ -40,7 +40,7 @@
 #include <uhdm/vpi_uhdm.h>
 #include <uhdm/SymbolFactory.h>
 
-#define UHDM_MAX_BIT_WIDTH 1024*1024
+#define UHDM_MAX_BIT_WIDTH (1024*1024)
 
 namespace UHDM {
 enum ErrorType {
@@ -78,9 +78,10 @@ template <typename T>
 class FactoryT;
 #endif
 
-class Serializer {
+class Serializer final {
  public:
   using IdMap = std::map<const BaseClass*, uint32_t>;
+  static const uint32_t kVersion;
 
   Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {}
   ~Serializer();
@@ -94,10 +95,12 @@ class Serializer {
   ErrorHandler GetErrorHandler() { return errorHandler; }
   void MarkKeeper(const any* object) { keepers_.insert(object); }
 #endif
+
   const std::vector<vpiHandle> Restore(const std::filesystem::path& filepath);
   const std::vector<vpiHandle> Restore(const std::string& filepath);
   std::map<std::string, uint32_t, std::less<>> ObjectStats() const;
   void PrintStats(std::ostream& strm, std::string_view infoText) const;
+
 #ifndef SWIG
  private:
   template <typename T>
@@ -105,6 +108,7 @@ class Serializer {
 
   template <typename T>
   std::vector<T*>* Make(FactoryT<std::vector<T*>>* const factory);
+
  public:
 <FACTORY_FUNCTION_DECLARATIONS>
   std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
@@ -112,6 +116,7 @@ class Serializer {
   vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) {
     return uhdm_handleMaker.Make(type, object);
   }
+
   VectorOfanyFactory anyVectMaker;
   SymbolFactory symbolMaker;
   uhdm_handleFactory uhdm_handleMaker;
@@ -144,6 +149,8 @@ class Serializer {
   BaseClass* GetObject(uint32_t objectType, uint32_t index);
   void SetId(const BaseClass* p, uint32_t id);
   uint32_t GetId(const BaseClass* p);
+
+  uint64_t version_ = 0;
   IdMap allIds_;
   uint32_t incrId_;  // Capnp id
   uint32_t objId_;   // ID for property annotations

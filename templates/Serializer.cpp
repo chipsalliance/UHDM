@@ -42,6 +42,8 @@
 
 namespace UHDM {
 
+const uint32_t Serializer::kVersion = 1;
+
 class MarkKeepers final : public VpiListener {
  public:
   MarkKeepers(Serializer* serializer) : serializer_(serializer){}
