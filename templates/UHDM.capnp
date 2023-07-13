@@ -1,7 +1,7 @@
 @0xfff7299129556877;
 
 struct ObjIndexType {
-  index @0 : UInt64;
+  index @0 : UInt32;
   type  @1 : UInt32;
 }
 
