@@ -177,9 +177,9 @@ def generate(models):
 
     file_content = file_content.replace('<FACTORY_GC>', '\n'.join(factory_gc))
     file_content = file_content.replace('<UHDM_NAME_MAP>', '\n'.join(uhdm_name_map))
-    file_content = file_content.replace('<FACTORY_PURGE>', '\n'.join(factory_purge))
-    file_content = file_content.replace('<FACTORY_STATS>', '\n'.join(factory_stats))
-    file_content = file_content.replace('<FACTORY_OBJECT_TYPE_MAP>', '\n'.join(factory_object_type_map))
+    file_content = file_content.replace('<FACTORY_PURGE>', '\n'.join(sorted(factory_purge)))
+    file_content = file_content.replace('<FACTORY_STATS>', '\n'.join(sorted(factory_stats)))
+    file_content = file_content.replace('<FACTORY_OBJECT_TYPE_MAP>', '\n'.join(sorted(factory_object_type_map)))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer.cpp'), file_content)
 
     # Serializer_save.cpp
@@ -195,8 +195,8 @@ def generate(models):
     with open(config.get_template_filepath('Serializer_restore.cpp'), 'rt') as strm:
         file_content = strm.read()
 
-    file_content = file_content.replace('<CAPNP_INIT_FACTORIES>', '\n'.join(restore_ids))
-    file_content = file_content.replace('<CAPNP_RESTORE_FACTORIES>', '\n'.join(restore_objects))
+    file_content = file_content.replace('<CAPNP_INIT_FACTORIES>', '\n'.join(sorted(restore_ids)))
+    file_content = file_content.replace('<CAPNP_RESTORE_FACTORIES>', '\n'.join(sorted(restore_objects)))
     file_content = file_content.replace('<CAPNP_RESTORE_ADAPTERS>', '\n'.join(restore_adapters))
     file_content = file_content.replace('<FACTORY_FUNCTION_IMPLEMENTATIONS>', '\n'.join(factory_function_implementations))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer_restore.cpp'), file_content)
