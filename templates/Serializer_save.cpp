@@ -90,8 +90,9 @@ void Serializer::Save(const std::filesystem::path& filepath) {
 }
 
 void Serializer::Save(const std::string& filepath) {
-  uint32_t index = 0;
+  if (m_enableGC) GarbageCollect();
 
+  uint32_t index = 0;
   const std::string file = filepath;
   const int32_t fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
 

@@ -90,10 +90,13 @@ class Serializer final {
   void Save(const std::filesystem::path& filepath);
   void Save(const std::string& filepath);
   void Purge();
+
+  void SetGCEnabled(bool enabled) { m_enableGC = enabled; }
   void GarbageCollect();
+
   void SetErrorHandler(ErrorHandler handler) { m_errorHandler = handler; }
   ErrorHandler GetErrorHandler() { return m_errorHandler; }
-  void MarkKeeper(const any* object) { m_keepers.insert(object); }
+
   IdMap AllObjects() const;
 #endif
 
@@ -127,10 +130,6 @@ class Serializer final {
   bool Erase(const BaseClass* p);
 
  private:
-  template <typename T, typename = typename std::enable_if<
-                            std::is_base_of<BaseClass, T>::value>::type>
-  void GC_(FactoryT<T>* const factory);
-
   struct SaveAdapter;
   friend struct SaveAdapter;
 
@@ -142,7 +141,7 @@ class Serializer final {
 
   uint64_t m_version = 0;
   uint32_t m_objId = 0;
-  std::set<const any*> m_keepers;
+  bool m_enableGC = true;
   ErrorHandler m_errorHandler = DefaultErrorHandler;
 
   VectorOfanyFactory anyVectMaker;

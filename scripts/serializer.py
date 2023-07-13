@@ -52,7 +52,7 @@ def generate(models):
 
             factory_purge.append(f'  {classname}Maker.Purge();')
             if classname != 'package':
-                factory_gc.append(f'  GC_<{classname}>(&{classname}Maker);') 
+                factory_gc.append(f'  {classname}Maker.EraseIfNotIn(visited);')
             factory_stats.append(f'  stats.insert(std::make_pair("{classname}", {classname}Maker.objects_.size()));')
 
         factory_data_members.append(f'  VectorOf{classname}Factory {classname}VectMaker;')
