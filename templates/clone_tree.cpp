@@ -741,14 +741,13 @@ cont_assign* cont_assign::DeepClone(BaseClass* parent,
     expr* rhs = obj->DeepClone(clone, context);
     clone->Rhs(rhs);
     if (ref_obj* ref = any_cast<ref_obj*>(lhs)) {
-      const any* actual = ref->Actual_group();
-      if (actual && (actual->UhdmType() == uhdmstruct_var)) {
-        struct_var* stv = (struct_var*)actual;
+      if (struct_var* stv = ref->Actual_group<struct_var>()) {
         ExprEval eval(elaboratorContext->m_elaborator.muteErrors());
-        expr* res = eval.flattenPatternAssignments(*context->m_serializer,
-                                                   stv->Typespec(), rhs);
-        if (res->UhdmType() == uhdmoperation) {
-          ((operation*)rhs)->Operands(((operation*)res)->Operands());
+        if (expr* res = eval.flattenPatternAssignments(*context->m_serializer,
+                                                       stv->Typespec(), rhs)) {
+          if (res->UhdmType() == uhdmoperation) {
+            ((operation*)rhs)->Operands(((operation*)res)->Operands());
+          }
         }
       }
     }
@@ -812,13 +811,14 @@ any* bindClassTypespec(class_typespec* ctps, any* current,
       }
     }
     if (found) break;
-    const class_defn* tmp = defn;
-    defn = nullptr;
-    if (const extends* ext = tmp->Extends()) {
+
+    const class_defn* base_defn = nullptr;
+    if (const extends* ext = defn->Extends()) {
       if (const class_typespec* tp = ext->Class_typespec()) {
-        defn = tp->Class_defn();
+        base_defn = tp->Class_defn();
       }
     }
+    defn = base_defn;
   }
   return previous;
 }
@@ -856,10 +856,8 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
           while (tmp) {
             if (tmp->UhdmType() == uhdmclass_defn) {
               class_defn* def = (class_defn*)tmp;
-              const extends* ext = def->Extends();
-              if (ext) {
-                const class_typespec* ctps = ext->Class_typespec();
-                if (ctps) {
+              if (const extends* ext = def->Extends()) {
+                if (const class_typespec* ctps = ext->Class_typespec()) {
                   ref->Actual_group((any*)ctps->Class_defn());
                   found = true;
                   break;
@@ -1015,9 +1013,9 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 break;
               }
               case uhdmmodport: {
-                UHDM::modport* modport = (UHDM::modport*)actual;
-                if (modport->Io_decls()) {
-                  for (io_decl* decl : *modport->Io_decls()) {
+                modport* mp = (modport*)actual;
+                if (mp->Io_decls()) {
+                  for (io_decl* decl : *mp->Io_decls()) {
                     if (decl->VpiName() == name) {
                       found = true;
                       previous = decl;
@@ -1314,8 +1312,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 break;
               }
               case uhdmclass_var: {
-                const typespec* tps = ((class_var*)actual)->Typespec();
-                if (tps) {
+                if (const typespec* tps = ((class_var*)actual)->Typespec()) {
                   UHDM_OBJECT_TYPE ttype = tps->UhdmType();
                   if (ttype == uhdmclass_typespec) {
                     class_typespec* ctps = (class_typespec*)tps;
@@ -1350,7 +1347,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 } else if (actual->UhdmType() == uhdmstruct_var) {
                   stpt = (struct_typespec*)((struct_var*)actual)->Typespec();
                 }
-                if (stpt) {
+                if (stpt && stpt->Members()) {
                   for (typespec_member* member : *stpt->Members()) {
                     if (member->VpiName() == name) {
                       if (ref_obj* cro = any_cast<ref_obj*>(current)) {
@@ -1418,8 +1415,8 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                       for (io_decl* decl : *mport->Io_decls()) {
                         if (decl->VpiName() == name) {
                           any* actual_decl = decl;
-                          if (const any* exp = decl->Expr()) {
-                            actual_decl = (any*)exp;
+                          if (any* exp = decl->Expr()) {
+                            actual_decl = exp;
                           }
                           if (actual_decl->UhdmType() == uhdmref_obj) {
                             ref_obj* ref = (ref_obj*)actual_decl;
@@ -1723,8 +1720,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
           }
         } else if (previous->UhdmType() == uhdmtypespec_member) {
           typespec_member* member = (typespec_member*)previous;
-          const typespec* tps = member->Typespec();
-          if (tps) {
+          if (const typespec* tps = member->Typespec()) {
             UHDM_OBJECT_TYPE ttype = tps->UhdmType();
             if (ttype == uhdmpacked_array_typespec) {
               packed_array_typespec* ptps = (packed_array_typespec*)tps;

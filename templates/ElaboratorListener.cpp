@@ -55,8 +55,8 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
           }
         }
       }
-      if (const UHDM::extends* extends = defn->Extends()) {
-        propagateParamAssign(pass, extends->Class_typespec());
+      if (const UHDM::extends* ext = defn->Extends()) {
+        propagateParamAssign(pass, ext->Class_typespec());
       }
       if (const auto vars = defn->Variables()) {
         for (auto var : *vars) {
@@ -198,7 +198,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
     if (object->Ports()) {
       for (port* port : *object->Ports()) {
         if (const ref_obj* low = port->Low_conn<ref_obj>()) {
-          if (const any* actual = low->Actual_group<modport>()) {
+          if (const modport* actual = low->Actual_group<modport>()) {
             // If the interface of the modport is not yet in the map
             netMap.emplace(port->VpiName(), actual);
           }
@@ -649,15 +649,13 @@ void ElaboratorListener::enterInterface_inst(const interface_inst* object,
 
     if (object->Ports()) {
       for (ports* port : *object->Ports()) {
-        if (const any* low = port->Low_conn()) {
-          if (const ref_obj* r = any_cast<const ref_obj*>(low)) {
-            if (const any* actual = r->Actual_group()) {
-              if (actual->UhdmType() == uhdminterface_inst) {
-                netMap.emplace(port->VpiName(), actual);
-              } else if (actual->UhdmType() == uhdmmodport) {
-                // If the interface of the modport is not yet in the map
-                netMap.emplace(port->VpiName(), actual);
-              }
+        if (const ref_obj* ro = port->Low_conn<ref_obj>()) {
+          if (const any* actual = ro->Actual_group()) {
+            if (actual->UhdmType() == uhdminterface_inst) {
+              netMap.emplace(port->VpiName(), actual);
+            } else if (actual->UhdmType() == uhdmmodport) {
+              // If the interface of the modport is not yet in the map
+              netMap.emplace(port->VpiName(), actual);
             }
           }
         }
@@ -886,10 +884,10 @@ bool ElaboratorListener::isFunctionCall(std::string_view name,
   }
   if (prefix) {
     if (const ref_obj* ref = any_cast<const ref_obj*>(prefix)) {
-      const class_var* vprefix =
-          any_cast<const class_var*>(ref->Actual_group());
-      if (const any* func = bindTaskFunc(name, vprefix)) {
-        return (func->UhdmType() == uhdmfunction);
+      if (const class_var* vprefix = ref->Actual_group<class_var>()) {
+        if (const any* func = bindTaskFunc(name, vprefix)) {
+          return (func->UhdmType() == uhdmfunction);
+        }
       }
     }
   }
@@ -908,10 +906,10 @@ bool ElaboratorListener::isTaskCall(std::string_view name,
   }
   if (prefix) {
     if (const ref_obj* ref = any_cast<const ref_obj*>(prefix)) {
-      const class_var* vprefix =
-          any_cast<const class_var*>(ref->Actual_group());
-      if (const any* task = bindTaskFunc(name, vprefix)) {
-        return (task->UhdmType() == uhdmtask);
+      if (const class_var* vprefix = ref->Actual_group<class_var>()) {
+        if (const any* task = bindTaskFunc(name, vprefix)) {
+          return (task->UhdmType() == uhdmtask);
+        }
       }
     }
   }

@@ -41,9 +41,10 @@ bool UhdmListener::didVisitAll(const Serializer& serializer) const {
   std::copy(visited.begin(), visited.end(),
             std::inserter(allVisited, allVisited.begin()));
 
+  const Serializer::IdMap idMap = serializer.AllObjects();
   std::set<const any*> allObjects;
   std::transform(
-      serializer.AllObjects().begin(), serializer.AllObjects().end(),
+      idMap.cbegin(), idMap.cend(),
       std::inserter(allObjects, allObjects.begin()),
       [](std::unordered_map<const BaseClass*, uint32_t>::const_reference
              entry) { return entry.first; });
@@ -54,6 +55,12 @@ bool UhdmListener::didVisitAll(const Serializer& serializer) const {
                       std::inserter(diffObjects, diffObjects.begin()));
 
   return diffObjects.empty();
+}
+
+void UhdmListener::listenBaseClass_(const any* const object) {
+  if (const any* const vpiParent_ = object->VpiParent()) {
+    listenAny(vpiParent_);
+  }
 }
 
 <UHDM_PRIVATE_LISTEN_IMPLEMENTATIONS>

@@ -89,6 +89,7 @@ public:
 <UHDM_ENTER_LEAVE_DECLARATIONS>
 <UHDM_ENTER_LEAVE_VECTOR_DECLARATIONS>
 private:
+  void listenBaseClass_(const any *const object);
 <UHDM_PRIVATE_LISTEN_DECLARATIONS>
 };
 }  // namespace UHDM

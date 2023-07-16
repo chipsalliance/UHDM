@@ -23,7 +23,7 @@
  * Created on October 4, 2021, 10:53 PM
  */
 #include <uhdm/Serializer.h>
-#include <uhdm/VpiListener.h>
+#include <uhdm/UhdmListener.h>
 #include <uhdm/vpi_visitor.h>
 
 #include <algorithm>
@@ -42,103 +42,60 @@
 
 namespace UHDM {
 
-class MarkKeepers final : public VpiListener {
- public:
-  MarkKeepers(Serializer* serializer) : serializer_(serializer){}
-  void enterAny(const any* object, vpiHandle handle) override {
-    serializer_->MarkKeeper(object);
-    serializer_->MarkKeeper(object->VpiParent()); // Need to be removed after fixing out-of-tree back pointers
-  }
- private:
-  
-  Serializer* serializer_ = nullptr;
-};
-
-template <typename T, typename>
-void Serializer::GC_(FactoryT<T>* const factory) {
-  bool change = true;
-  while (change) {
-    change = false;
-    for (auto p = factory->objects_.begin();
-         p != factory->objects_.end(); ++p) {
-      if (keepers_.find((*p)) == keepers_.end()) {
-        delete (*p);
-        factory->objects_.erase(p);
-        change = true;
-        break;
-      }
-    }
-  }
-}
+const uint32_t Serializer::kVersion = 1;
 
 void Serializer::GarbageCollect() {
-  // Only keep objects that belong to a design
-  // Mark the objects
-  MarkKeepers* marker = new MarkKeepers(this);
-  std::vector<vpiHandle> designs;
-  for (auto p : designMaker.objects_) {
-    designs.push_back(
-        reinterpret_cast<vpiHandle>(new uhdm_handle(uhdmdesign, p)));
-  }
-  marker->listenDesigns(designs);
+  if (!m_enableGC) return;
 
-  // Mark the transitive cone including the object parents and their children to cover
-  // relations that still point to out-of-tree objects
-  std::set<const any*> topset;
-  topset = keepers_;
-  // This is very inneficient implementation.
-  // This step can be removed when we can remove the out-of-tree back pointer dependance in MarkKeepers
-  for (auto p : topset) {
-    if (p) {
-      vpiHandle h = reinterpret_cast<vpiHandle>(new uhdm_handle(p->UhdmType(), p));
-      marker->listenAny(h);
-      delete h;
-    }
+  UhdmListener* const listener = new UhdmListener();
+  for (auto d : designMaker.objects_) {
+    listener->listenDesign(d);
   }
-  delete marker;
 
-  // Delete the ones that are not required
+  const AnySet visited(listener->getVisited().begin(), listener->getVisited().end());
+  delete listener;
+
 <FACTORY_GC>
-
-  // Clear keeper
-  keepers_.clear();
 }
 
 void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const any* object1, const any* object2) {
   std::cerr << errorMsg << std::endl;
 }
 
-void Serializer::SetId(const BaseClass* p, uint32_t id) {
-  allIds_.emplace(p, id);
+SymbolId Serializer::MakeSymbol(std::string_view symbol) {
+  return symbolMaker.Make(symbol);
 }
 
-uint32_t Serializer::GetId(const BaseClass* p) {
-  auto inserted = allIds_.emplace(p, incrId_);
-  if (inserted.second) {
-    ++incrId_;
-  }
-  return inserted.first->second;
+std::string_view Serializer::GetSymbol(SymbolId id) const {
+  return symbolMaker.GetSymbol(id);
 }
 
+SymbolId Serializer::GetSymbolId(std::string_view symbol) const {
+  return symbolMaker.GetId(symbol);
+}
+
+vpiHandle Serializer::MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) {
+  return uhdm_handleMaker.Make(type, object);
+}
+
+Serializer::IdMap Serializer::AllObjects() const {
+  IdMap idMap;
+<CAPNP_ID>
+  return idMap;
+}
+
+std::string UhdmName(UHDM_OBJECT_TYPE type) {
+  switch (type) {
 <UHDM_NAME_MAP>
+    default: return "NO TYPE";
+  }
+}
 
 // From uhdm_types.h
 std::string VpiTypeName(vpiHandle h) {
-  uhdm_handle* handle = (uhdm_handle*) h;
-  BaseClass* obj = (BaseClass*) handle->object;
+  uhdm_handle* handle = (uhdm_handle*)h;
+  BaseClass* obj = (BaseClass*)handle->object;
   return UhdmName(obj->UhdmType());
-}
-
-static constexpr uint32_t badIndex = static_cast<uint32_t>(-1);
-
-BaseClass* Serializer::GetObject(uint32_t objectType, uint32_t index) {
-  if (index == badIndex)
-    return nullptr;
-
-  switch (objectType) {
-<FACTORY_OBJECT_TYPE_MAP>
-  default: return nullptr;
-  }
 }
 
 std::map<std::string, uint32_t, std::less<>> Serializer::ObjectStats() const {
@@ -170,12 +127,22 @@ void Serializer::PrintStats(std::ostream& strm,
   strm << "=== UHDM Object Stats End ===" << std::endl;
 }
 
+bool Serializer::Erase(const BaseClass* p) {
+  if (p == nullptr) {
+    return true;
+  }
+
+  switch (p->UhdmType()) {
+<FACTORY_ERASE_OBJECT>
+    default: return false;
+  }
+}
+
 Serializer::~Serializer() {
   Purge();
 }
 
 void Serializer::Purge() {
-  allIds_.clear();
   anyVectMaker.Purge();
   symbolMaker.Purge();
   uhdm_handleMaker.Purge();

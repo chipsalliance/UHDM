@@ -78,16 +78,16 @@ def _get_implementations(classname, type, vpi, card):
         content.append(f'      const_cast<{classname}*>(this)->VpiFullName(fullName);')
         content.append( '    }')
         content.append( '  }')
-        content.append(f'  return serializer_->symbolMaker.GetSymbol({vpi}_);')
+        content.append(f'  return serializer_->GetSymbol({vpi}_);')
         content.append( '}')
     else:
         content.append(f'std::string_view {classname}::{Vpi_}() const {{')
-        content.append(f'  return {vpi}_ ? serializer_->symbolMaker.GetSymbol({vpi}_) : kEmpty;')
+        content.append(f'  return {vpi}_ ? serializer_->GetSymbol({vpi}_) : kEmpty;')
         content.append(f'}}')
 
     content.append('')
     content.append(f'bool {classname}::{Vpi_}(std::string_view data) {{')
-    content.append(f'  {vpi}_ = serializer_->symbolMaker.Make(data);')
+    content.append(f'  {vpi}_ = serializer_->MakeSymbol(data);')
     content.append(f'  return true;')
     content.append(f'}}')
     content.append('')
@@ -180,7 +180,7 @@ def _get_DeepClone_implementation(model, models):
                     content.append(f'  if (!clone->{method}()) clone->{method}(elaboratorContext->m_elaborator.bindAny(VpiName()));')
                     content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')
 
-                elif classname == 'udp' and method == 'Udp_defn':
+                elif (classname == 'udp') and (method == 'Udp_defn'):
                     includes.add('ElaboratorListener')
                     content.append(f'  if (!clone->{method}()) clone->{method}((udp_defn*) elaboratorContext->m_elaborator.bindAny(VpiDefName()));')
                     content.append(f'  if (!clone->{method}()) clone->{method}((udp_defn*) {method}());')
@@ -198,25 +198,26 @@ def _get_DeepClone_implementation(model, models):
                         prefix = 'prefix'
                     content.append(f'  elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, {prefix});')
 
-                elif classname == 'disable' and method == 'VpiExpr':
+                elif (classname == 'disable') and (method == 'VpiExpr'):
                     includes.add('expr')
                     content.append(f'  if (auto obj = {method}()) clone->{method}((expr*) obj);')
 
-                elif classname == 'ports' and method == 'High_conn':
-                    content.append(f'  if (auto obj = {method}())')
-                    content.append('    { elaboratorContext->m_elaborator.ignoreLastInstance(true); ')
-                    content.append(f'      clone->{method}(obj->DeepClone(clone, context));')
-                    content.append('      elaboratorContext->m_elaborator.ignoreLastInstance(false); }')
+                elif (classname == 'ports') and (method == 'High_conn'):
+                    content.append(f'  if (auto obj = {method}()) {{')
+                    content.append( '    elaboratorContext->m_elaborator.ignoreLastInstance(true); ')
+                    content.append(f'    clone->{method}(obj->DeepClone(clone, context));')
+                    content.append( '    elaboratorContext->m_elaborator.ignoreLastInstance(false);')
+                    content.append( '  }')
 
-                elif classname == 'int_typespec' and method == 'Cast_to_expr':
+                elif (classname == 'int_typespec') and (method == 'Cast_to_expr'):
                     includes.add('variables')
                     content.append(f'  if (auto obj = {method}()) clone->{method}((variables*) obj);')
 
-                elif classname == 'function' and method == 'Return':
+                elif (classname == 'function') and (method == 'Return'):
                     includes.add('variables')
                     content.append(f'  if (auto obj = {method}()) clone->{method}((variables*) obj);')
 
-                elif classname == 'class_typespec' and method == 'Class_defn':
+                elif (classname == 'class_typespec') and (method == 'Class_defn'):
                     includes.add('class_defn')
                     content.append(f'  if (auto obj = {method}()) clone->{method}((class_defn*) obj);')
 
@@ -241,7 +242,9 @@ def _get_DeepClone_implementation(model, models):
                 else:
                     content.append(f'  if (auto obj = {method}()) clone->{method}(obj->DeepClone(clone, context));')
 
-            # N-ary relations
+            elif (classname == 'module_inst') and (method == 'Ref_modules'):
+                pass # No cloning
+
             elif method == 'Typespecs':
                 content.append(f'  if (auto vec = {method}()) {{')
                 content.append(f'    auto clone_vec = context->m_serializer->Make{Cast}Vec();')
@@ -255,20 +258,16 @@ def _get_DeepClone_implementation(model, models):
                 content.append( '    }')
                 content.append( '  }')
 
-            elif classname == 'class_defn' and method == 'Deriveds':
+            elif (classname == 'class_defn') and (method == 'Deriveds'):
                 # Don't deep clone
                 content.append(f'  if (auto vec = {method}()) {{')
                 content.append(f'    auto clone_vec = context->m_serializer->Make{Cast}Vec();')
                 content.append(f'    clone->{method}(clone_vec);')
-                content.append( '    for (auto obj : *vec) {')
-                content.append( '      clone_vec->push_back(obj);')
-                content.append( '    }')
+                content.append( '    clone_vec->insert(clone_vec->cend(), vec->cbegin(), vec->cend());')
                 content.append( '  }')
 
-            elif classname == 'module_inst' and method == 'Ref_modules':
-                pass # No cloning
-
             else:
+                # N-ary relations
                 content.append(f'  if (auto vec = {method}()) {{')
                 content.append(f'    auto clone_vec = context->m_serializer->Make{Cast}Vec();')
                 content.append(f'    clone->{method}(clone_vec);')
@@ -277,7 +276,8 @@ def _get_DeepClone_implementation(model, models):
                 content.append( '    }')
                 content.append( '  }')
     if modeltype != 'class_def':
-          content.append(f'  elaboratorContext->m_elaborator.leave{Classname}(clone,nullptr);')
+        content.append(f'  elaboratorContext->m_elaborator.leave{Classname}(clone, nullptr);')
+
     content.append('}')
     content.append('')
 
@@ -473,11 +473,13 @@ def _get_Compare_implementation(model):
         'uhdmId',
         'uhdmType',
         'vpiColumnNo',
+        'vpiDefFile',
         'vpiDefLineNo',
         'vpiEndColumnNo',
         'vpiEndLineNo',
         'vpiFile',
         'vpiFullName',
+        'vpiIncludedFile',
         'vpiLineNo',
         'vpiRefColumnNo',
         'vpiRefEndColumnNo',
@@ -541,6 +543,7 @@ def _get_Compare_implementation(model):
                    '    return r;',
                    '  }',
                 ])
+
             elif type in ['uint32_t', 'int32_t']:
                 content.extend([
                   f'  if ((r = lhs->{Vpi_}() - rhs->{Vpi_}()) != 0) {{',
@@ -549,6 +552,7 @@ def _get_Compare_implementation(model):
                    '    return r;',
                    '  }',
                 ])
+
             elif type == 'bool':
                 content.extend([
                   f'  if ((r = (lhs->{Vpi_}() == rhs->{Vpi_}()) ? 0 : (lhs->{Vpi_}() ? 1 : -1)) != 0) {{',
@@ -557,54 +561,18 @@ def _get_Compare_implementation(model):
                    '    return r;',
                    '  }',
                 ])
+
             else:
                 Name = name[:1].upper() + name[1:]
                 includes.add(type)
-                content.extend([
-                   '',
-                  f'  auto lhs_{name} = lhs->{Name}();',
-                  f'  auto rhs_{name} = rhs->{Name}();',
-                  f'  if ((lhs_{name} != nullptr) && (rhs_{name} != nullptr)) {{',
-                  f'    if ((r = lhs_{name}->Compare(rhs_{name}, context)) != 0) return r;',
-                  f'  }} else if ((lhs_{name} != nullptr) && (rhs_{name} == nullptr)) {{',
-                   '    context->m_failedLhs = lhs;',
-                   '    context->m_failedRhs = rhs;',
-                   '    return 1;',
-                  f'  }} else if ((lhs_{name} == nullptr) && (rhs_{name} != nullptr)) {{',
-                   '    context->m_failedLhs = lhs;',
-                   '    context->m_failedRhs = rhs;',
-                   '    return -1;',
-                   '  }'
-                ])
+                content.append(f'  if ((r = SafeCompare(lhs->{Name}(), rhs->{Name}(), context)) != 0) return r;')
         else:
             if not name.endswith('s'):
                 name += 's'
 
             Name = name[:1].upper() + name[1:]
             includes.add(type)
-            content.extend([
-                 '',
-                f'  auto lhs_{name} = lhs->{Name}();',
-                f'  auto rhs_{name} = rhs->{Name}();',
-                f'  if ((lhs_{name} != nullptr) && (rhs_{name} != nullptr)) {{',
-                f'    if ((r = static_cast<int32_t>(lhs_{name}->size() - rhs_{name}->size())) != 0) {{',
-                 '      context->m_failedLhs = lhs;',
-                 '      context->m_failedRhs = rhs;',
-                 '      return 1;',
-                 '    }',
-                f'    for (size_t i = 0, n = lhs_{name}->size(); i < n; ++i) {{',
-                f'      if ((r = lhs_{name}->at(i)->Compare(rhs_{name}->at(i), context)) != 0) return r;',
-                 '    }',
-                f'  }} else if ((lhs_{name} != nullptr) && (rhs_{name} == nullptr)) {{',
-                 '    context->m_failedLhs = lhs;',
-                 '    context->m_failedRhs = rhs;',
-                 '    return 1;',
-                f'  }} else if ((lhs_{name} == nullptr) && (rhs_{name} != nullptr)) {{',
-                 '    context->m_failedLhs = lhs;',
-                 '    context->m_failedRhs = rhs;',
-                 '    return -1;',
-                 '  }',
-            ])
+            content.append(f'  if ((r = SafeCompare(lhs, lhs->{Name}(), rhs, rhs->{Name}(), context)) != 0) return r;')
 
     content.extend([
         '  return r;',
@@ -704,7 +672,7 @@ def _generate_one_class(model, models, templates):
                 implementations.extend(func_body)
                 includes.update(func_includes)
 
-        elif key == 'extends' and value:
+        elif (key == 'extends') and value:
             header_file_content = header_file_content.replace('<EXTENDS>', value)
             source_file_content = source_file_content.replace('<EXTENDS>', value)
 
@@ -721,7 +689,7 @@ def _generate_one_class(model, models, templates):
             if key == 'group_ref':
                 type = 'any'
 
-            if type != 'any' and card == '1':
+            if (type != 'any') and (card == '1'):
                 forward_declares.add(type)
 
             group_headers.update(_get_group_headers(type, real_type))

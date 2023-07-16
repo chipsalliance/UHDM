@@ -27,6 +27,9 @@
 #ifndef UHDM_SERIALIZER_H
 #define UHDM_SERIALIZER_H
 
+#include <uhdm/SymbolFactory.h>
+#include <uhdm/containers.h>
+#include <uhdm/vpi_uhdm.h>
 
 #include <filesystem>
 #include <functional>
@@ -36,11 +39,7 @@
 #include <string_view>
 #include <vector>
 
-#include <uhdm/containers.h>
-#include <uhdm/vpi_uhdm.h>
-#include <uhdm/SymbolFactory.h>
-
-#define UHDM_MAX_BIT_WIDTH 1024*1024
+#define UHDM_MAX_BIT_WIDTH (1024 * 1024)
 
 namespace UHDM {
 enum ErrorType {
@@ -78,62 +77,59 @@ template <typename T>
 class FactoryT;
 #endif
 
-class Serializer {
+class Serializer final {
  public:
   using IdMap = std::map<const BaseClass*, uint32_t>;
+  static constexpr uint32_t kBadIndex = static_cast<uint32_t>(-1);
+  static const uint32_t kVersion;
 
-  Serializer() : incrId_(0), objId_(0), errorHandler(DefaultErrorHandler) {}
+  Serializer() = default;
   ~Serializer();
 
 #ifndef SWIG
   void Save(const std::filesystem::path& filepath);
   void Save(const std::string& filepath);
   void Purge();
+
+  void SetGCEnabled(bool enabled) { m_enableGC = enabled; }
   void GarbageCollect();
-  void SetErrorHandler(ErrorHandler handler) { errorHandler = handler; }
-  ErrorHandler GetErrorHandler() { return errorHandler; }
-  void MarkKeeper(const any* object) { keepers_.insert(object); }
+
+  void SetErrorHandler(ErrorHandler handler) { m_errorHandler = handler; }
+  ErrorHandler GetErrorHandler() { return m_errorHandler; }
+
+  IdMap AllObjects() const;
 #endif
+
   const std::vector<vpiHandle> Restore(const std::filesystem::path& filepath);
   const std::vector<vpiHandle> Restore(const std::string& filepath);
   std::map<std::string, uint32_t, std::less<>> ObjectStats() const;
   void PrintStats(std::ostream& strm, std::string_view infoText) const;
+
 #ifndef SWIG
  private:
   template <typename T>
   T* Make(FactoryT<T>* const factory);
 
   template <typename T>
+  void Make(FactoryT<T>* const factory, uint32_t count);
+
+  template <typename T>
   std::vector<T*>* Make(FactoryT<std::vector<T*>>* const factory);
+
  public:
-<FACTORY_FUNCTION_DECLARATIONS>
-  std::vector<any*>* MakeAnyVec() { return anyVectMaker.Make(); }
-
-  vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) {
-    return uhdm_handleMaker.Make(type, object);
+  <FACTORY_FUNCTION_DECLARATIONS> std::vector<any*>* MakeAnyVec() {
+    return anyVectMaker.Make();
   }
-  VectorOfanyFactory anyVectMaker;
-  SymbolFactory symbolMaker;
-  uhdm_handleFactory uhdm_handleMaker;
-<FACTORY_DATA_MEMBERS>
 
-  const IdMap& AllObjects() const {
-    return allIds_;
-  }
+  SymbolId MakeSymbol(std::string_view symbol);
+  std::string_view GetSymbol(SymbolId id) const;
+  SymbolId GetSymbolId(std::string_view symbol) const;
+
+  vpiHandle MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object);
+
+  bool Erase(const BaseClass* p);
 
  private:
-  template <typename T, typename = typename std::enable_if<
-                            std::is_base_of<BaseClass, T>::value>::type>
-  void SetSaveId_(FactoryT<T>* const factory);
-
-  template <typename T, typename = typename std::enable_if<
-                            std::is_base_of<BaseClass, T>::value>::type>
-  void SetRestoreId_(FactoryT<T>* const factory, uint32_t count);
-
-  template <typename T, typename = typename std::enable_if<
-                            std::is_base_of<BaseClass, T>::value>::type>
-  void GC_(FactoryT<T>* const factory);
-
   struct SaveAdapter;
   friend struct SaveAdapter;
 
@@ -141,14 +137,17 @@ class Serializer {
   friend struct RestoreAdapter;
 
  private:
-  BaseClass* GetObject(uint32_t objectType, uint32_t index);
-  void SetId(const BaseClass* p, uint32_t id);
-  uint32_t GetId(const BaseClass* p);
-  IdMap allIds_;
-  uint32_t incrId_;  // Capnp id
-  uint32_t objId_;   // ID for property annotations
-  std::set<const any*> keepers_;
-  ErrorHandler errorHandler;
+  BaseClass* GetObject(uint32_t objectType, uint32_t index) const;
+
+  uint64_t m_version = 0;
+  uint32_t m_objId = 0;
+  bool m_enableGC = true;
+  ErrorHandler m_errorHandler = DefaultErrorHandler;
+
+  VectorOfanyFactory anyVectMaker;
+  SymbolFactory symbolMaker;
+  uhdm_handleFactory uhdm_handleMaker;
+<FACTORY_DATA_MEMBERS>
 #endif
 };
 };  // namespace UHDM

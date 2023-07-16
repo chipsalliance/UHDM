@@ -6,8 +6,10 @@ struct ObjIndexType {
 }
 
 struct UhdmRoot {
-  designs @0 : List(Design);
-  symbols @1 : List(Text);
+  version  @0 : UInt32;
+  objectId @1 : UInt32;
+  designs  @2 : List(Design);
+  symbols  @3 : List(Text);
 <CAPNP_ROOT_SCHEMA>
 }
 
