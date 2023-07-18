@@ -49,6 +49,11 @@ if (NOT ${EXIT_CODE} EQUAL 0)
     "To install use following command: \"pip3 install orderedmultidict\".")
 endif()
 
+if (WIN32)
+  add_compile_definitions(WIN32_LEAN_AND_MEAN)
+  add_compile_definitions(KJ_MSVC_TRADITIONAL_CPP=1)
+endif()
+
 if(UHDM_USE_HOST_CAPNP)
   find_package(CapnProto)
 else()
@@ -104,10 +109,6 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE
       "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O3 -DNDEBUG ${MSYS_COMPILE_OPTIONS} ${MY_CXX_WARNING_FLAGS}"
   )
-endif()
-
-if (WIN32)
-  add_compile_definitions(WIN32_LEAN_AND_MEAN)
 endif()
 
 # All the files the generator depends on.
