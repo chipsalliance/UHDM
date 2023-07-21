@@ -1309,6 +1309,18 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                     }
                   }
                 }
+                if (!found && mod->Task_funcs()) {
+                  for (auto tsf : *mod->Task_funcs()) {
+                    if (tsf->VpiName() == name ||
+                        tsf->VpiName() == nameIndexed) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(tsf);
+                      }
+                      previous = tsf;
+                      found = true;
+                    }
+                  }
+                }
                 break;
               }
               case uhdmclass_var: {
