@@ -1285,6 +1285,15 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                     }
                   }
                 }
+                if (!found && mod->Interfaces()) {
+                  for (auto m : *mod->Interfaces()) {
+                    if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                      found = true;
+                      previous = m;
+                      break;
+                    }
+                  }
+                }
                 if (!found && mod->Gen_scope_arrays()) {
                   for (auto gsa : *mod->Gen_scope_arrays()) {
                     if (gsa->VpiName() == name ||
@@ -1464,6 +1473,21 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                           found = true;
                           break;
                         }
+                      }
+                    }
+                  }
+                }
+                if (!found && interf->Gen_scope_arrays()) {
+                  for (auto gsa : *interf->Gen_scope_arrays()) {
+                    if (gsa->VpiName() == name ||
+                        gsa->VpiName() == nameIndexed) {
+                      if (!gsa->Gen_scopes()->empty()) {
+                        auto gs = gsa->Gen_scopes()->front();
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(gs);
+                        }
+                        previous = gs;
+                        found = true;
                       }
                     }
                   }
