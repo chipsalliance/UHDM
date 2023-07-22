@@ -306,7 +306,9 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
 
     // Module itself
     std::string_view modName = ltrim_until(object->VpiName(), '@');
-    modMap.emplace(modName, object);
+    modMap.emplace(modName, object); // instance
+    modName = ltrim_until(object->VpiDefName(), '@');
+    modMap.emplace(modName, object); // definition
 
     if (object->Modules()) {
       for (module_inst* mod : *object->Modules()) {
