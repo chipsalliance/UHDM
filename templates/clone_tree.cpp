@@ -1058,12 +1058,25 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 }
                 break;
               }
-              case uhdmarray_var: {
-                array_var* avar = (array_var*)actual;
-                VectorOfvariables* vars = avar->Variables();
-                if (vars && vars->size()) {
-                  actual = vars->at(0);
-                  actual_type = actual->UhdmType();
+              case uhdmarray_var: 
+              case uhdmpacked_array_var: {
+                const typespec* tps = nullptr;
+                if (actual_type == uhdmpacked_array_var) {
+                  packed_array_var* avar = (packed_array_var*)actual;
+                  VectorOfany* vars = avar->Elements();
+                  if (vars && vars->size()) {
+                    actual = vars->at(0);
+                    actual_type = actual->UhdmType();
+                  }
+                  tps = avar->Typespec();
+                } else {
+                  array_var* avar = (array_var*)actual;
+                  VectorOfvariables* vars = avar->Variables();
+                  if (vars && vars->size()) {
+                    actual = vars->at(0);
+                    actual_type = actual->UhdmType();
+                  }
+                  tps = avar->Typespec();
                 }
                 if (name == "size" || name == "exists" || name == "find" ||
                     name == "max" || name == "min") {
@@ -1076,42 +1089,20 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                   // Builtin method
                   found = true;
                   previous = (any*)call;
-                } else if (name == "") {
-                  // One of the Index(es)
-                  found = true;
-                }
-                break;
-              }
-              case uhdmpacked_array_var: {
-                packed_array_var* avar = (packed_array_var*)actual;
-                VectorOfany* vars = avar->Elements();
-                if (vars && vars->size()) {
-                  actual = vars->at(0);
-                  actual_type = actual->UhdmType();
-                }
-                if (name == "size" || name == "exists" || name == "exists" ||
-                    name == "max" || name == "min") {
-                  func_call* call = context->m_serializer->MakeFunc_call();
-                  call->VpiName(name);
-                  call->VpiParent(clone);
-                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                    cro->Actual_group(call);
-                  }
-                  // Builtin method
-                  found = true;
-                  previous = (any*)call;
                 }
                 if (found == false) {
-                  if (const typespec* tps = avar->Typespec()) {
+                  if (tps) {
                     UHDM_OBJECT_TYPE ttype = tps->UhdmType();
                     if (ttype == uhdmpacked_array_typespec) {
                       packed_array_typespec* ptps = (packed_array_typespec*)tps;
                       tps = (typespec*)ptps->Elem_typespec();
-                      ttype = tps->UhdmType();
+                      if (tps)
+                        ttype = tps->UhdmType();
                     } else if (ttype == uhdmarray_typespec) {
                       array_typespec* ptps = (array_typespec*)tps;
                       tps = (typespec*)ptps->Elem_typespec();
-                      ttype = tps->UhdmType();
+                      if (tps)
+                        ttype = tps->UhdmType();
                     }
                     if (ttype == uhdmstring_typespec) {
                       found = true;
