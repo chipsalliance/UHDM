@@ -30,7 +30,7 @@ include(GNUInstallDirs)
 
 # NOTE: Policy changes has to happen before adding any subprojects
 cmake_policy(SET CMP0091 NEW)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -60,9 +60,9 @@ else()
   set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
   set(WITH_FIBERS "OFF" CACHE STRING "Whether or not to build libkj-async with fibers")
   add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
-  set(CAPNP_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/capnproto/c++/src/capnp)
-  set(CAPNP_EXECUTABLE ${CAPNP_DIR}/capnp)
-  set(CAPNPC_CXX_EXECUTABLE ${CAPNP_DIR}/capnpc-c++)
+  set(CAPNP_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/capnproto/c++/src/capnp CACHE PATH "Location of capnp installation" FORCE)
+  set(CAPNP_EXECUTABLE ${CAPNP_DIR}/capnp CACHE FILEPATH "Location of capnp executable" FORCE)
+  set(CAPNPC_CXX_EXECUTABLE ${CAPNP_DIR}/capnpc-c++ CACHE FILEPATH "Location of capnp-c++ executable" FORCE)
 endif()
 
 # NOTE: Set the global output directories after the subprojects have had their go at it
@@ -216,11 +216,13 @@ target_include_directories(uhdm SYSTEM PUBLIC
 target_include_directories(uhdm PRIVATE ${GENDIR}/src)
 
 if (UHDM_USE_HOST_CAPNP)
-  target_include_directories(uhdm PRIVATE ${CAPNP_INCLUDE_DIRS})
-  target_link_libraries(uhdm PRIVATE CapnProto::capnp)
+  target_include_directories(uhdm PUBLIC ${CAPNP_INCLUDE_DIRS})
+  target_link_libraries(uhdm PUBLIC CapnProto::capnp)
 else()
-  target_include_directories(uhdm PRIVATE ${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src)
-  target_link_libraries(uhdm PRIVATE capnp)
+  target_include_directories(uhdm PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src>
+    $<INSTALL_INTERFACE:include>)
+  target_link_libraries(uhdm PUBLIC capnp)
 endif()
 
 target_compile_definitions(uhdm
