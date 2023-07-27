@@ -30,14 +30,8 @@
 
 #if defined(_MSC_VER)
   #include <io.h>
-  #define S_IRWXU (_S_IREAD | _S_IWRITE)
-  #pragma warning(push)
-  #pragma warning(disable : 4267)  // 'var' : conversion from 'size_t' to 'type', possible loss of data
 #else
   #include <unistd.h>
-  #if !(defined(__MINGW32__) || defined(__CYGWIN__))
-    #define O_BINARY 0
-  #endif
 #endif
 
 #include <iostream>
@@ -128,7 +122,3 @@ void Serializer::Save(const std::string& filepath) {
   close(fileid);
 }
 }  // namespace UHDM
-
-#if defined(_MSC_VER)
-  #pragma warning(pop)
-#endif

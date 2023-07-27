@@ -35,11 +35,6 @@
 
 #include <uhdm/uhdm.h>
 
-#if defined(_MSC_VER)
-  #pragma warning(push)
-  #pragma warning(disable : 4267)  // 'var' : conversion from 'size_t' to 'type', possible loss of data
-#endif
-
 namespace UHDM {
 
 const uint32_t Serializer::kVersion = 1;
@@ -149,7 +144,3 @@ void Serializer::Purge() {
 <FACTORY_PURGE>
 }
 }  // namespace UHDM
-
-#if defined(_MSC_VER)
-  #pragma warning(pop)
-#endif
