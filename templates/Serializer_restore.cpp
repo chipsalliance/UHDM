@@ -31,13 +31,8 @@
 
 #if defined(_MSC_VER)
   #include <io.h>
-  #pragma warning(push)
-  #pragma warning(disable : 4244)  // 'argument' : conversion from 'type1' to 'type2', possible loss of data
 #else
   #include <unistd.h>
-  #if !(defined(__MINGW32__) || defined(__CYGWIN__))
-    #define O_BINARY 0
-  #endif
 #endif
 
 #include <iostream>
@@ -142,7 +137,3 @@ const std::vector<vpiHandle> Serializer::Restore(const std::string& filepath) {
   return designs;
 }
 }  // namespace UHDM
-
-#if defined(_MSC_VER)
-  #pragma warning(pop)
-#endif
