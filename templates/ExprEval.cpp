@@ -4260,13 +4260,15 @@ bool ExprEval::setValueInInstance(
           if (sel->VpiIndexedPartSelectType() == vpiPosIndexed) {
             int32_t index = 0;
             for (uint64_t i = base; i < base + offset; i++) {
-              lhsbinary[i] = rhsbinary[index];
+              if (i < lhsbinary.size())
+                lhsbinary[i] = rhsbinary[index];
               index++;
             }
           } else {
             int32_t index = 0;
             for (uint64_t i = base; i > base - offset; i--) {
-              lhsbinary[i] = rhsbinary[index];
+              if (i < lhsbinary.size())
+                lhsbinary[i] = rhsbinary[index];
               index++;
             }
           }
@@ -4315,13 +4317,15 @@ bool ExprEval::setValueInInstance(
           if (left > right) {
             int32_t index = 0;
             for (uint64_t i = right; i <= left; i++) {
-              lhsbinary[i] = rhsbinary[index];
+              if (i < lhsbinary.size())
+                lhsbinary[i] = rhsbinary[index];
               index++;
             }
           } else {
             int32_t index = 0;
             for (uint64_t i = left; i <= right; i++) {
-              lhsbinary[i] = rhsbinary[index];
+              if (i < lhsbinary.size())
+                lhsbinary[i] = rhsbinary[index];
               index++;
             }
           }
@@ -4384,7 +4388,8 @@ bool ExprEval::setValueInInstance(
           uint64_t size_rhs = ((constant *)rhsexp)->VpiSize();
           std::string tobinary = NumUtils::toBinary(size_rhs, valUI);
           for (uint32_t i = 0; i < size_rhs; i++) {
-            if (((index * size_rhs) + i) < si) {
+            if ((((index * size_rhs) + i) < si) &&
+                (((index * size_rhs) + i) < lhsbinary.size())) {
               lhsbinary[(index * size_rhs) + i] = tobinary[i];
             }
           }
