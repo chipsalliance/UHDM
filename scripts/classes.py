@@ -231,6 +231,10 @@ def _get_DeepClone_implementation(model, models):
                     includes.add('module_inst')
                     content.append(f'  if (auto obj = {method}()) clone->{method}((module_inst*) obj);')
 
+                elif method == 'Interface_inst':
+                    includes.add('module_inst')
+                    content.append(f'  if (auto obj = {method}()) clone->{method}((interface_inst*) obj);')
+
                 elif method == 'Typespec':
                     includes.add('typespec')
                     content.append( '  if (elaboratorContext->m_elaborator.uniquifyTypespec()) {')
