@@ -1196,6 +1196,21 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object,
     }
   }
 
+  if (object->Interfaces()) {
+    for (interface_inst* inter : *object->Interfaces()) {
+      netMap.emplace(inter->VpiName(), inter);
+    }
+  }
+  if (object->Interface_arrays()) {
+    for (interface_array* inter : *object->Interface_arrays()) {
+      if (VectorOfinstance* instances = inter->Instances()) {
+        for (instance* interf : *instances) {
+          netMap.emplace(interf->VpiName(), interf);
+        }
+      }
+    }
+  }
+
   // Collect instance parameters, defparams
   ComponentMap paramMap;
   if (object->Parameters()) {
@@ -1211,6 +1226,18 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object,
 
   ComponentMap funcMap;
   ComponentMap modMap;
+
+  if (object->Modules()) {
+    for (module_inst* mod : *object->Modules()) {
+      modMap.emplace(mod->VpiName(), mod);
+    }
+  }
+
+  if (object->Module_arrays()) {
+    for (module_array* mod : *object->Module_arrays()) {
+      modMap.emplace(mod->VpiName(), mod);
+    }
+  }
 
   // Collect gen_scope
   if (object->Gen_scope_arrays()) {
