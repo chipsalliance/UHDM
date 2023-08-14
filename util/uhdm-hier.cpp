@@ -42,7 +42,7 @@ static int32_t usage(const char* progname) {
   fprintf(stderr, "Usage:\n%s [options] <uhdm-file> ?--line?\n", progname);
   fprintf(stderr,
           "Reads UHDM binary representation and prints hierarchy tree.\n");
-  return 1;
+  return 0;
 }
 
 int32_t main(int32_t argc, char** argv) {
