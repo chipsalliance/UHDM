@@ -39,7 +39,7 @@ static int32_t usage(const char *progName) {
             << "  = 0, if input files are equal" << std::endl
             << "  < 0, if input files are not equal" << std::endl
             << "  > 0, for any failures" << std::endl;
-  return 1;
+  return 0;
 }
 
 int32_t main(int32_t argc, char **argv) {

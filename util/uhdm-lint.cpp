@@ -36,7 +36,7 @@ static int32_t usage(const char *progName) {
             << std::endl
             << std::endl
             << "Exits with code" << std::endl;
-  return 1;
+  return 0;
 }
 
 class MyLinter : public UHDM::VpiListener {
