@@ -36,7 +36,7 @@ static int32_t usage(const char *progName) {
             << std::endl
             << std::endl
             << "Exits with code" << std::endl;
-  return 0;
+  return 1;
 }
 
 class MyLinter : public UHDM::VpiListener {
@@ -70,7 +70,7 @@ class MyLinter : public UHDM::VpiListener {
     if (isInUhdmAllIterator()) return;
     serializer_->GetErrorHandler()(UHDM::ErrorType::UHDM_UNSUPPORTED_TYPESPEC,
                                    std::string(object->VpiName()), object,
-                                   nullptr);
+                                   object->VpiParent());
   }
 
  private:
@@ -84,7 +84,6 @@ int32_t main(int32_t argc, char **argv) {
 
   fs::path file = argv[1];
   
-
   std::error_code ec;
   if (!fs::is_regular_file(file, ec) || ec) {
     std::cerr << file << ": File does not exist!" << std::endl;

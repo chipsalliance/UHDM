@@ -132,7 +132,7 @@ class ExprEval {
                           bool& invalidValue, Serializer& s, const any* inst,
                           const any* scope_exp,
                           std::map<std::string, const typespec*>& local_vars,
-                          bool muteError);
+                          int opType, bool muteError);
   void setDesign(design* des) { m_design = des; }
   /* For Surelog or other UHDM clients to use the UHDM expr evaluator in their
    * context */

@@ -617,6 +617,7 @@ std::string decompile(const UHDM::any* handle) {
   VpiVisitor visitor(out);
   visitor.visit_object(dh, 0, "decompile", false);
   vpi_release_handle(dh);
+  std::cout << out.str() << "\n";
   return out.str();
 }
 } // namespace UHDM
