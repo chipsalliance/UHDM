@@ -1404,6 +1404,18 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                     }
                   }
                 }
+                if (!found && interf->Parameters()) {
+                  for (any* var : *interf->Parameters()) {
+                    if (var->VpiName() == name) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(var);
+                      }
+                      previous = var;
+                      found = true;
+                      break;
+                    }
+                  }
+                }
                 if (!found && interf->Task_funcs()) {
                   for (auto tf : *interf->Task_funcs()) {
                     if (tf->VpiName() == name) {
