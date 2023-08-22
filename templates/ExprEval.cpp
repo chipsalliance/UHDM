@@ -4505,7 +4505,13 @@ bool ExprEval::setValueInInstance(
           }
         }
         if (!tmpInvalidValue) {
-          std::string bval = NumUtils::toBinary(size, valUI);
+          std::string bval;
+          if (valUI) {
+            for (uint32_t i = 0; i < size; i++)
+              bval += "1";
+          } else {
+            bval = NumUtils::toBinary(size, valUI);
+          }
           c->VpiValue("BIN:" + bval);
           c->VpiDecompile(bval);
           c->VpiSize(size);
