@@ -57,8 +57,8 @@ install-shared: release-shared
 	cmake --install build --config Release
 
 uninstall:
-	$(RM) $(PREFIX)/bin/uhdm-dump $(PREFIX)/bin/uhdm-dump
-	$(RM) -r $(PREFIX)/lib/uhdm
+	$(RM) $(PREFIX)/bin/uhdm-*
+	$(RM) -r $(PREFIX)/lib/libuhdm*
 	$(RM) -r $(PREFIX)/include/uhdm
 
 build:

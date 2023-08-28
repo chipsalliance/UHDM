@@ -67,7 +67,7 @@ endif()
 
 # NOTE: Set the global output directories after the subprojects have had their go at it
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
@@ -198,7 +198,10 @@ message("Building UHDM version v${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} [${U
 configure_file(${PROJECT_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uhdm-version.h)
 
 add_library(uhdm ${uhdm-GENERATED_SRC})
-set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
+set_target_properties(uhdm PROPERTIES
+  PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h
+  SOVERSION "${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR}"
+)
 configure_file(${PROJECT_SOURCE_DIR}/include/config.h.in ${GENDIR}/uhdm/config.h)
 target_compile_options(uhdm PUBLIC
   "SHELL:$<IF:$<CXX_COMPILER_ID:MSVC>,/FI uhdm/config.h,-include uhdm/config.h>")
@@ -349,8 +352,8 @@ if(NOT UHDM_USE_HOST_CAPNP)
   install(
     TARGETS capnp kj
     EXPORT uhdmTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 endif()
 
@@ -358,13 +361,13 @@ endif()
 install(
   TARGETS uhdm uhdm-cmp uhdm-dump uhdm-hier uhdm-lint
   EXPORT uhdmTargets
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${GENDIR}/uhdm/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/)
 install(FILES ${GENDIR}/src/UHDM.capnp
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 # Generate cmake config files for reuse by downstream packages
 include(CMakePackageConfigHelpers)

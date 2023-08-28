@@ -119,7 +119,7 @@
 
 # Linking libuhdm.a to your application
  * After instaling (`make install`), create your own executable (Read [`Makefile`](Makefile)) , ie:
- * `$(CXX) -std=c++17 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/uhdm/libuhdm.a /usr/local/lib/uhdm/libcapnp.a /usr/local/lib/uhdm/libkj.a -ldl -lutil -lm -lrt -lpthread -o test_inst`
+ * `$(CXX) -std=c++17 tests/test1.cpp -I/usr/local/include/uhdm -I/usr/local/include/uhdm/include /usr/local/lib/libuhdm.a /usr/local/lib/libcapnp.a /usr/local/lib/libkj.a -ldl -lutil -lm -lrt -lpthread -o test_inst`
 
 
 # Generating uhdm databases
