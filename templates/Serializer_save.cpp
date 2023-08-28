@@ -46,6 +46,7 @@
 #include <uhdm/uhdm.h>
 #include <uhdm/uhdm_types.h>
 
+#include "uhdm/config.h"
 
 namespace UHDM {
 inline static uint32_t GetId(const BaseClass* p, const Serializer::IdMap &idMap) {
