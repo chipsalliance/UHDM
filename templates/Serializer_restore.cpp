@@ -44,6 +44,7 @@
 #include "UHDM.capnp.h"
 #include <uhdm/uhdm.h>
 
+#include "uhdm/config.h"
 
 namespace UHDM {
 static constexpr std::string_view kUnknownRawSymbol = "<unknown>";
