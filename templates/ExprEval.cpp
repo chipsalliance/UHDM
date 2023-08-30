@@ -1489,6 +1489,18 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
   return bits;
 }
 
+uint64_t ExprEval::size(
+		const vpiHandle typespec,
+		bool &invalidValue,
+                const vpiHandle inst,
+		const vpiHandle pexpr,
+		bool full,
+                bool muteError) {
+  const UHDM::any* vpiHandle_typespec = (UHDM::any*)((uhdm_handle*)typespec)->object;
+  const UHDM::any* vpiHandle_inst = !inst ? nullptr : (UHDM::any*)((uhdm_handle*)inst)->object;
+  const UHDM::any* vpiHandle_pexpr = !pexpr ? nullptr : (UHDM::any*)((uhdm_handle*)pexpr)->object;
+  return size(vpiHandle_typespec,invalidValue,vpiHandle_inst,vpiHandle_pexpr,full,muteError);
+}
 static bool getStringVal(std::string &result, expr *val) {
   if (const constant *hs0 = any_cast<const constant *>(val)) {
     if (s_vpi_value *sval = String2VpiValue(hs0->VpiValue())) {

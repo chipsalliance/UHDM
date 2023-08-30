@@ -52,14 +52,22 @@ typedef std::function<task_func*(std::string_view name, const any* inst)>
 
 class ExprEval {
  public:
-#ifndef SWIG
   ExprEval(bool muteError = false) : m_muteError(muteError) {}
+#ifndef SWIG
   bool isFullySpecified(const typespec* tps);
-#endif
   /* Computes the size in bits of an object {typespec, var, net, operation...}.
    */
   uint64_t size(
-      const any* object, bool& invalidValue, const any* inst, const any* pexpr,
+      const any* typespec, bool& invalidValue, const any* inst, const any* pexpr,
+      bool full /* false: use only last range size, true: use all ranges */,
+      bool muteError = false);
+#endif
+
+  uint64_t size(
+      const vpiHandle typespec,
+      bool& invalidValue,
+      const vpiHandle inst,
+      const vpiHandle pexpr,
       bool full /* false: use only last range size, true: use all ranges */,
       bool muteError = false);
 
@@ -155,7 +163,9 @@ class ExprEval {
   std::vector<int32_t> m_skipOperationTypes;
 };
 
+#ifndef SWIG
 std::string vPrint(UHDM::any* handle);
+#endif
 
 }  // namespace UHDM
 
