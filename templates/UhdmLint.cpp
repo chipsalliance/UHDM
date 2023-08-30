@@ -45,24 +45,24 @@ void UhdmLint::leaveBit_select(const bit_select* object, vpiHandle handle) {
 
 static const any* returnWithValue(const any* stmt) {
   switch (stmt->UhdmType()) {
-    case uhdmreturn_stmt: {
+    case UHDM_OBJECT_TYPE::uhdmreturn_stmt: {
       return_stmt* ret = (return_stmt*)stmt;
       if (const any* r = ret->VpiCondition()) return r;
       break;
     }
-    case uhdmbegin: {
+    case UHDM_OBJECT_TYPE::uhdmbegin: {
       begin* st = (begin*)stmt;
       for (auto s : *st->Stmts()) {
         if (const any* r = returnWithValue(s)) return r;
       }
       break;
     }
-    case uhdmif_stmt: {
+    case UHDM_OBJECT_TYPE::uhdmif_stmt: {
       if_stmt* st = (if_stmt*)stmt;
       if (const any* r = returnWithValue(st->VpiStmt())) return r;
       break;
     }
-    case uhdmif_else: {
+    case UHDM_OBJECT_TYPE::uhdmif_else: {
       if_else* st = (if_else*)stmt;
       if (const any* r = returnWithValue(st->VpiStmt())) return r;
       if (const any* r = returnWithValue(st->VpiElseStmt())) return r;
@@ -115,7 +115,7 @@ void UhdmLint::checkMultiContAssign(
     if (const operation* op = cassign->Rhs<operation>()) {
       bool triStatedOp = false;
       for (auto operand : *op->Operands()) {
-        if (operand->UhdmType() == uhdmconstant) {
+        if (operand->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
           constant* c = (constant*)operand;
           if (c->VpiValue().find('z') != std::string_view::npos) {
             triStatedOp = true;
@@ -142,7 +142,7 @@ void UhdmLint::checkMultiContAssign(
           if (const operation* op = as->Rhs<operation>()) {
             bool triStatedOp = false;
             for (auto operand : *op->Operands()) {
-              if (operand->UhdmType() == uhdmconstant) {
+              if (operand->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
                 constant* c = (constant*)operand;
                 if (c->VpiValue().find('z') != std::string_view::npos) {
                   triStatedOp = true;
@@ -170,9 +170,9 @@ void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
         bool inProcess = false;
         const any* tmp = object;
         while (tmp) {
-          if ((tmp->UhdmType() == uhdmalways) ||
-              (tmp->UhdmType() == uhdminitial) ||
-              (tmp->UhdmType() == uhdmfinal_stmt)) {
+          if ((tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdmalways) ||
+              (tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdminitial) ||
+              (tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdmfinal_stmt)) {
             inProcess = true;
             break;
           }

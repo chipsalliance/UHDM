@@ -59,7 +59,7 @@ struct Serializer::SaveAdapter {
     if (obj->VpiParent() != nullptr) {
       ::ObjIndexType::Builder vpiParentBuilder = builder.getVpiParent();
       vpiParentBuilder.setIndex(GetId(obj->VpiParent(), idMap));
-      vpiParentBuilder.setType(obj->VpiParent()->UhdmType());
+      vpiParentBuilder.setType(static_cast<uint32_t>(obj->VpiParent()->UhdmType()));
     }
     builder.setVpiFile((RawSymbolId)obj->GetSerializer()->symbolMaker.Make(obj->VpiFile()));
     builder.setVpiLineNo(obj->VpiLineNo());

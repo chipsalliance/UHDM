@@ -34,6 +34,7 @@ namespace UHDM {
 class BaseClass;
 typedef BaseClass any;
 
+// TODO: make enum class at some point.
 enum UHDM_OBJECT_TYPE {
 <DEFINES>
 };

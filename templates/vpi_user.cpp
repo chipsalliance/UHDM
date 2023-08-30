@@ -65,7 +65,7 @@ static int32_t StriCmp(std::string_view lhs, std::string_view rhs) {
 UHDM::design* UhdmDesignFromVpiHandle(vpiHandle hdesign) {
   if (!hdesign) return nullptr;
   UHDM::any* tmp = (UHDM::any*)((uhdm_handle*)hdesign)->object;
-  if (tmp->UhdmType() == uhdmdesign)
+  if (tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign)
     return (UHDM::design*)tmp;
   else
     return nullptr;

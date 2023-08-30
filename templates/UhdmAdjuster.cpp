@@ -43,7 +43,7 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
   }
   any* result = (any*)object;
   UHDM_OBJECT_TYPE type = result->UhdmType();
-  if (type == uhdmconstant) {
+  if (type == UHDM_OBJECT_TYPE::uhdmconstant) {
     constant* c = (constant*)result;
     if (c->VpiSize() < maxsize) {
       ElaboratorContext elaboratorContext(serializer_);
@@ -52,7 +52,7 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
       const typespec* tps = c->Typespec();
       bool is_signed = false;
       if (tps) {
-        if (tps->UhdmType() == uhdmint_typespec) {
+        if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
           int_typespec* itps = (int_typespec*)tps;
           if (itps->VpiSigned()) {
             is_signed = true;
@@ -71,13 +71,13 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
       c->VpiSize(maxsize);
       result = c;
     }
-  } else if (type == uhdmref_obj) {
+  } else if (type == UHDM_OBJECT_TYPE::uhdmref_obj) {
     ref_obj* ref = (ref_obj*)result;
     const any* actual = ref->Actual_group();
     return resize(actual, maxsize, is_overall_unsigned);
-  } else if (type == uhdmlogic_net) {
+  } else if (type == UHDM_OBJECT_TYPE::uhdmlogic_net) {
     const any* parent = result->VpiParent();
-    if (parent && (parent->UhdmType() == uhdmmodule_inst)) {
+    if (parent && (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst)) {
       module_inst* mod = (module_inst*)parent;
       if (mod->Cont_assigns()) {
         for (cont_assign* cass : *mod->Cont_assigns()) {
@@ -122,13 +122,13 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
         continue;
       }
       UHDM_OBJECT_TYPE type = exp->UhdmType();
-      if (type == uhdmconstant) {
+      if (type == UHDM_OBJECT_TYPE::uhdmconstant) {
         constant* ccond = (constant*)exp;
         maxsize = std::max(ccond->VpiSize(), maxsize);
         const typespec* tps = ccond->Typespec();
         bool is_signed = false;
         if (tps) {
-          if (tps->UhdmType() == uhdmint_typespec) {
+          if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
             int_typespec* itps = (int_typespec*)tps;
             if (itps->VpiSigned()) {
               is_signed = true;
@@ -138,13 +138,13 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
         if (is_signed == false) {
           is_overall_unsigned = true;
         }
-      } else if (type == uhdmref_obj) {
+      } else if (type == UHDM_OBJECT_TYPE::uhdmref_obj) {
         ref_obj* ref = (ref_obj*)exp;
         const any* actual = ref->Actual_group();
         expressions.push((const expr*)actual);
-      } else if (type == uhdmlogic_net) {
+      } else if (type == UHDM_OBJECT_TYPE::uhdmlogic_net) {
         const any* parent = exp->VpiParent();
-        if (parent && (parent->UhdmType() == uhdmmodule_inst)) {
+        if (parent && (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst)) {
           module_inst* mod = (module_inst*)parent;
           if (mod->Cont_assigns()) {
             for (cont_assign* cass : *mod->Cont_assigns()) {
@@ -170,7 +170,7 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
     case_stmt* mut_object = (case_stmt*)object;
     if (expr* newValue = (expr*)resize(object->VpiCondition(), maxsize,
                                        is_overall_unsigned)) {
-      if (newValue->UhdmType() == uhdmconstant) {
+      if (newValue->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
         mut_object->VpiCondition(newValue);
       }
     }
@@ -179,7 +179,7 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
         for (uint32_t i = 0; i < citem->VpiExprs()->size(); i++) {
           if (any* newValue = (any*)resize(citem->VpiExprs()->at(i), maxsize,
                                            is_overall_unsigned)) {
-            if (newValue->UhdmType() == uhdmconstant) {
+            if (newValue->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
               citem->VpiExprs()->at(i) = newValue;
             }
           }
@@ -216,7 +216,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
     ExprEval eval;
     ElaboratorContext elaboratorContext(serializer_);
     if (parent) {
-      if (parent->UhdmType() == uhdmoperation) {
+      if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
         operation* op = (operation*)parent;
         int32_t indexSelf = 0;
         int32_t i = 0;
@@ -244,17 +244,17 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           }
           op->Operands()->at(indexSelf) = newc;
         }
-      } else if (parent->UhdmType() == uhdmcont_assign) {
+      } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmcont_assign) {
         cont_assign* assign = (cont_assign*)parent;
         const any* lhs = assign->Lhs();
-        if (lhs->UhdmType() == uhdmhier_path) {
+        if (lhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmhier_path) {
           hier_path* path = (hier_path*)lhs;
           any* last = path->Path_elems()->back();
-          if (last->UhdmType() == uhdmref_obj) {
+          if (last->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj) {
             ref_obj* ref = (ref_obj*)last;
             if (const any* actual = ref->Actual_group()) {
               const typespec* tps = nullptr;
-              if (actual->UhdmType() == uhdmtypespec_member) {
+              if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmtypespec_member) {
                 typespec_member* member = (typespec_member*)actual;
                 tps = member->Typespec();
               }
@@ -291,7 +291,7 @@ void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
   ExprEval eval(true);
   const any* parent = object->VpiParent();
   if (parent == nullptr) return;
-  if (parent->UhdmType() == uhdmcont_assign) {
+  if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmcont_assign) {
     cont_assign* assign = (cont_assign*)parent;
     if (assign->Lhs() == object) return;
     expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
@@ -299,7 +299,7 @@ void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
     if (tmp) {
       assign->Rhs(tmp);
     }
-  } else if (parent->UhdmType() == uhdmoperation) {
+  } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
     operation* poper = (operation*)parent;
     VectorOfany* operands = poper->Operands();
     if (operands) {
@@ -308,7 +308,7 @@ void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
                              vpiMultiConcatOp, vpiBitNegOp});
       expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
       if (invalidValue) return;
-      if (tmp && tmp->UhdmType() == uhdmconstant) {
+      if (tmp && tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
         tmp->VpiFile(poper->VpiFile());
         tmp->VpiLineNo(poper->VpiLineNo());
         tmp->VpiColumnNo(poper->VpiColumnNo());
