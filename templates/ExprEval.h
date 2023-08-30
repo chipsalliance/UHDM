@@ -37,14 +37,14 @@
 
 namespace UHDM {
 class Serializer;
-
+#ifndef SWIG
 typedef std::function<any*(std::string_view name, const any* inst,
                            const any* pexpr)>
     GetObjectFunctor;
 
 typedef std::function<task_func*(std::string_view name, const any* inst)>
     GetTaskFuncFunctor;
-
+#endif
 /* This UHDM extension offers expression reduction and other utilities that can
  be operating either:
  - standalone using UHDM fully elaborated tree
@@ -52,16 +52,17 @@ typedef std::function<task_func*(std::string_view name, const any* inst)>
 
 class ExprEval {
  public:
+#ifndef SWIG
   ExprEval(bool muteError = false) : m_muteError(muteError) {}
   bool isFullySpecified(const typespec* tps);
-
+#endif
   /* Computes the size in bits of an object {typespec, var, net, operation...}.
    */
   uint64_t size(
       const any* object, bool& invalidValue, const any* inst, const any* pexpr,
       bool full /* false: use only last range size, true: use all ranges */,
       bool muteError = false);
-
+#ifndef SWIG
   /* Tries to reduce any expression into a constant, returns the orignal
      expression if fails. If an invalid value is found in the process,
      invalidValue will be set to true */
@@ -138,7 +139,7 @@ class ExprEval {
   }
 
   UHDM::task_func* getTaskFunc(std::string_view name, const any* inst);
-
+#endif
  private:
   GetObjectFunctor getObjectFunctor = nullptr;
   GetObjectFunctor getValueFunctor = nullptr;

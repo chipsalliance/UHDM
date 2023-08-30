@@ -9,6 +9,8 @@ It is not parsed or interpreted by swig
 #include "sv_vpi_user.h"
 #include "Serializer.h"
 
+#include "ExprEval.h"
+
 #include "swig_test.h"
 
 %}
@@ -21,6 +23,7 @@ It is not parsed or interpreted by swig
 
 %include "Serializer.h"
 %include "uhdm_types.h"
+%include "ExprEval.h"
 %include "swig_test.h"
 %include stl.i
 
