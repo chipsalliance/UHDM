@@ -47,7 +47,7 @@ public:
 
 <METHODS>
 
-  <VIRTUAL> UHDM_OBJECT_TYPE UhdmType() const <OVERRIDE_OR_FINAL> { return uhdm<CLASSNAME>; }
+  <VIRTUAL> UHDM_OBJECT_TYPE UhdmType() const <OVERRIDE_OR_FINAL> { return UHDM_OBJECT_TYPE::uhdm<CLASSNAME>; }
 
 protected:
   void DeepCopy(<CLASSNAME>* clone,

@@ -115,86 +115,86 @@ void SynthSubset::reportError(const any* object) {
 
 void SynthSubset::leaveAny(const any* object, vpiHandle handle) {
   switch (object->UhdmType()) {
-    case uhdmfinal_stmt:
-    case uhdmdelay_control:
-    case uhdmdelay_term:
-    case uhdmthread_obj:
-    case uhdmwait_stmt:
-    case uhdmwait_fork:
-    case uhdmordered_wait:
-    case uhdmdisable:
-    case uhdmdisable_fork:
-    case uhdmforce:
-    case uhdmdeassign:
-    case uhdmrelease:
-    case uhdmsequence_inst:
-    case uhdmseq_formal_decl:
-    case uhdmsequence_decl:
-    case uhdmprop_formal_decl:
-    case uhdmproperty_inst:
-    case uhdmproperty_spec:
-    case uhdmproperty_decl:
-    case uhdmclocked_property:
-    case uhdmcase_property_item:
-    case uhdmcase_property:
-    case uhdmmulticlock_sequence_expr:
-    case uhdmclocked_seq:
-    case uhdmreal_var:
-    case uhdmtime_var:
-    case uhdmchandle_var:
-    case uhdmchecker_port:
-    case uhdmchecker_inst_port:
-    case uhdmswitch_tran:
-    case uhdmudp:
-    case uhdmmod_path:
-    case uhdmtchk:
-    case uhdmudp_defn:
-    case uhdmtable_entry:
-    case uhdmclocking_block:
-    case uhdmclocking_io_decl:
-    case uhdmprogram_array:
-    case uhdmswitch_array:
-    case uhdmudp_array:
-    case uhdmtchk_term:
-    case uhdmtime_net:
-    case uhdmnamed_event:
-    case uhdmvirtual_interface_var:
-    case uhdmextends:
-    case uhdmclass_defn:
-    case uhdmclass_obj:
-    case uhdmprogram:
-    case uhdmchecker_decl:
-    case uhdmchecker_inst:
-    case uhdmshort_real_typespec:
-    case uhdmreal_typespec:
-    case uhdmtime_typespec:
-    case uhdmchandle_typespec:
-    case uhdmsequence_typespec:
-    case uhdmproperty_typespec:
-    case uhdmuser_systf:
-    case uhdmmethod_func_call:
-    case uhdmmethod_task_call:
-    case uhdmconstraint_ordering:
-    case uhdmconstraint:
-    case uhdmdistribution:
-    case uhdmdist_item:
-    case uhdmimplication:
-    case uhdmconstr_if:
-    case uhdmconstr_if_else:
-    case uhdmconstr_foreach:
-    case uhdmsoft_disable:
-    case uhdmfork_stmt:
-    case uhdmnamed_fork:
-    case uhdmevent_stmt:
-    case uhdmevent_typespec:
+    case UHDM_OBJECT_TYPE::uhdmfinal_stmt:
+    case UHDM_OBJECT_TYPE::uhdmdelay_control:
+    case UHDM_OBJECT_TYPE::uhdmdelay_term:
+    case UHDM_OBJECT_TYPE::uhdmthread_obj:
+    case UHDM_OBJECT_TYPE::uhdmwait_stmt:
+    case UHDM_OBJECT_TYPE::uhdmwait_fork:
+    case UHDM_OBJECT_TYPE::uhdmordered_wait:
+    case UHDM_OBJECT_TYPE::uhdmdisable:
+    case UHDM_OBJECT_TYPE::uhdmdisable_fork:
+    case UHDM_OBJECT_TYPE::uhdmforce:
+    case UHDM_OBJECT_TYPE::uhdmdeassign:
+    case UHDM_OBJECT_TYPE::uhdmrelease:
+    case UHDM_OBJECT_TYPE::uhdmsequence_inst:
+    case UHDM_OBJECT_TYPE::uhdmseq_formal_decl:
+    case UHDM_OBJECT_TYPE::uhdmsequence_decl:
+    case UHDM_OBJECT_TYPE::uhdmprop_formal_decl:
+    case UHDM_OBJECT_TYPE::uhdmproperty_inst:
+    case UHDM_OBJECT_TYPE::uhdmproperty_spec:
+    case UHDM_OBJECT_TYPE::uhdmproperty_decl:
+    case UHDM_OBJECT_TYPE::uhdmclocked_property:
+    case UHDM_OBJECT_TYPE::uhdmcase_property_item:
+    case UHDM_OBJECT_TYPE::uhdmcase_property:
+    case UHDM_OBJECT_TYPE::uhdmmulticlock_sequence_expr:
+    case UHDM_OBJECT_TYPE::uhdmclocked_seq:
+    case UHDM_OBJECT_TYPE::uhdmreal_var:
+    case UHDM_OBJECT_TYPE::uhdmtime_var:
+    case UHDM_OBJECT_TYPE::uhdmchandle_var:
+    case UHDM_OBJECT_TYPE::uhdmchecker_port:
+    case UHDM_OBJECT_TYPE::uhdmchecker_inst_port:
+    case UHDM_OBJECT_TYPE::uhdmswitch_tran:
+    case UHDM_OBJECT_TYPE::uhdmudp:
+    case UHDM_OBJECT_TYPE::uhdmmod_path:
+    case UHDM_OBJECT_TYPE::uhdmtchk:
+    case UHDM_OBJECT_TYPE::uhdmudp_defn:
+    case UHDM_OBJECT_TYPE::uhdmtable_entry:
+    case UHDM_OBJECT_TYPE::uhdmclocking_block:
+    case UHDM_OBJECT_TYPE::uhdmclocking_io_decl:
+    case UHDM_OBJECT_TYPE::uhdmprogram_array:
+    case UHDM_OBJECT_TYPE::uhdmswitch_array:
+    case UHDM_OBJECT_TYPE::uhdmudp_array:
+    case UHDM_OBJECT_TYPE::uhdmtchk_term:
+    case UHDM_OBJECT_TYPE::uhdmtime_net:
+    case UHDM_OBJECT_TYPE::uhdmnamed_event:
+    case UHDM_OBJECT_TYPE::uhdmvirtual_interface_var:
+    case UHDM_OBJECT_TYPE::uhdmextends:
+    case UHDM_OBJECT_TYPE::uhdmclass_defn:
+    case UHDM_OBJECT_TYPE::uhdmclass_obj:
+    case UHDM_OBJECT_TYPE::uhdmprogram:
+    case UHDM_OBJECT_TYPE::uhdmchecker_decl:
+    case UHDM_OBJECT_TYPE::uhdmchecker_inst:
+    case UHDM_OBJECT_TYPE::uhdmshort_real_typespec:
+    case UHDM_OBJECT_TYPE::uhdmreal_typespec:
+    case UHDM_OBJECT_TYPE::uhdmtime_typespec:
+    case UHDM_OBJECT_TYPE::uhdmchandle_typespec:
+    case UHDM_OBJECT_TYPE::uhdmsequence_typespec:
+    case UHDM_OBJECT_TYPE::uhdmproperty_typespec:
+    case UHDM_OBJECT_TYPE::uhdmuser_systf:
+    case UHDM_OBJECT_TYPE::uhdmmethod_func_call:
+    case UHDM_OBJECT_TYPE::uhdmmethod_task_call:
+    case UHDM_OBJECT_TYPE::uhdmconstraint_ordering:
+    case UHDM_OBJECT_TYPE::uhdmconstraint:
+    case UHDM_OBJECT_TYPE::uhdmdistribution:
+    case UHDM_OBJECT_TYPE::uhdmdist_item:
+    case UHDM_OBJECT_TYPE::uhdmimplication:
+    case UHDM_OBJECT_TYPE::uhdmconstr_if:
+    case UHDM_OBJECT_TYPE::uhdmconstr_if_else:
+    case UHDM_OBJECT_TYPE::uhdmconstr_foreach:
+    case UHDM_OBJECT_TYPE::uhdmsoft_disable:
+    case UHDM_OBJECT_TYPE::uhdmfork_stmt:
+    case UHDM_OBJECT_TYPE::uhdmnamed_fork:
+    case UHDM_OBJECT_TYPE::uhdmevent_stmt:
+    case UHDM_OBJECT_TYPE::uhdmevent_typespec:
       reportError(object);
       break;
-    case uhdmexpect_stmt:
-    case uhdmcover:
-    case uhdmassume:
-    case uhdmrestrict:
-    case uhdmimmediate_assume:
-    case uhdmimmediate_cover:
+    case UHDM_OBJECT_TYPE::uhdmexpect_stmt:
+    case UHDM_OBJECT_TYPE::uhdmcover:
+    case UHDM_OBJECT_TYPE::uhdmassume:
+    case UHDM_OBJECT_TYPE::uhdmrestrict:
+    case UHDM_OBJECT_TYPE::uhdmimmediate_assume:
+    case UHDM_OBJECT_TYPE::uhdmimmediate_cover:
       if (!allowFormal_)
         reportError(object);
       break;  
@@ -209,10 +209,10 @@ void SynthSubset::leaveTask(const task* topobject, vpiHandle handle) {
       [&inst_visit, this](const any* stmt, const any* top) {
         UHDM_OBJECT_TYPE type = stmt->UhdmType();
         UHDM::VectorOfany* stmts = nullptr;
-        if (type == uhdmbegin) {
+        if (type == UHDM_OBJECT_TYPE::uhdmbegin) {
           begin* b = (begin*)stmt;
           stmts = b->Stmts();
-        } else if (type == uhdmnamed_begin) {
+        } else if (type == UHDM_OBJECT_TYPE::uhdmnamed_begin) {
           named_begin* b = (named_begin*)stmt;
           stmts = b->Stmts();
         }
@@ -220,18 +220,18 @@ void SynthSubset::leaveTask(const task* topobject, vpiHandle handle) {
           for (auto st : *stmts) {
             UHDM_OBJECT_TYPE sttype = st->UhdmType();
             switch (sttype) {
-              case uhdmwait_stmt:
-              case uhdmwait_fork:
-              case uhdmordered_wait:
-              case uhdmdisable:
-              case uhdmdisable_fork:
-              case uhdmforce:
-              case uhdmdeassign:
-              case uhdmrelease:
-              case uhdmsoft_disable:
-              case uhdmfork_stmt:
-              case uhdmnamed_fork:
-              case uhdmevent_stmt: {
+              case UHDM_OBJECT_TYPE::uhdmwait_stmt:
+              case UHDM_OBJECT_TYPE::uhdmwait_fork:
+              case UHDM_OBJECT_TYPE::uhdmordered_wait:
+              case UHDM_OBJECT_TYPE::uhdmdisable:
+              case UHDM_OBJECT_TYPE::uhdmdisable_fork:
+              case UHDM_OBJECT_TYPE::uhdmforce:
+              case UHDM_OBJECT_TYPE::uhdmdeassign:
+              case UHDM_OBJECT_TYPE::uhdmrelease:
+              case UHDM_OBJECT_TYPE::uhdmsoft_disable:
+              case UHDM_OBJECT_TYPE::uhdmfork_stmt:
+              case UHDM_OBJECT_TYPE::uhdmnamed_fork:
+              case UHDM_OBJECT_TYPE::uhdmevent_stmt: {
                 reportError(top);
                 break;
               }
@@ -289,9 +289,9 @@ void SynthSubset::mark(const any* object) {
 }
 
 bool SynthSubset::reportedParent(const any* object) {
-  if (object->UhdmType() == uhdmpackage) {
+  if (object->UhdmType() == UHDM_OBJECT_TYPE::uhdmpackage) {
     if (object->VpiName() == "builtin") return true;
-  } else if (object->UhdmType() == uhdmclass_defn) {
+  } else if (object->UhdmType() == UHDM_OBJECT_TYPE::uhdmclass_defn) {
     if (object->VpiName() == "work@semaphore" ||
         object->VpiName() == "work@process" ||
         object->VpiName() == "work@mailbox")

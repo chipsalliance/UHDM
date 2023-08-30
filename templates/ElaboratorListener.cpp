@@ -35,7 +35,7 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
   UHDM_OBJECT_TYPE targetType = target->UhdmType();
   Serializer& s = *pass->GetSerializer();
   switch (targetType) {
-    case uhdmclass_defn: {
+    case UHDM_OBJECT_TYPE::uhdmclass_defn: {
       class_defn* defn = (class_defn*)target;
       const any* lhs = pass->Lhs();
       const std::string_view name = lhs->VpiName();
@@ -65,12 +65,12 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
       }
       break;
     }
-    case uhdmclass_var: {
+    case UHDM_OBJECT_TYPE::uhdmclass_var: {
       class_var* var = (class_var*)target;
       propagateParamAssign(pass, var->Typespec());
       break;
     }
-    case uhdmclass_typespec: {
+    case UHDM_OBJECT_TYPE::uhdmclass_typespec: {
       class_typespec* defn = (class_typespec*)target;
       const any* lhs = pass->Lhs();
       const std::string_view name = lhs->VpiName();
@@ -102,7 +102,7 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
 
 void ElaboratorListener::enterVariables(const variables* object,
                                         vpiHandle handle) {
-  if (object->UhdmType() == uhdmclass_var) {
+  if (object->UhdmType() == UHDM_OBJECT_TYPE::uhdmclass_var) {
     if (!inHierarchy_)
       return;  // Only do class var propagation while in elaboration
     const class_var* cv = (class_var*)object;
@@ -170,7 +170,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
     if (object->Variables()) {
       for (variables* var : *object->Variables()) {
         netMap.emplace(var->VpiName(), var);
-        if (var->UhdmType() == uhdmenum_var) {
+        if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
           enum_var* evar = (enum_var*)var;
           enum_typespec* etps = evar->Typespec<enum_typespec>();
           for (auto c : *etps->Enum_consts()) {
@@ -244,7 +244,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
 
     if (object->Typespecs()) {
       for (typespec* tps : *object->Typespecs()) {
-        if (tps->UhdmType() == uhdmenum_typespec) {
+        if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
           enum_typespec* etps = (enum_typespec*)tps;
           for (auto c : *etps->Enum_consts()) {
             paramMap.emplace(c->VpiName(), c);
@@ -283,7 +283,7 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
           module_inst* defMod = (module_inst*)comp;
           if (defMod->Typespecs()) {
             for (typespec* tps : *defMod->Typespecs()) {
-              if (tps->UhdmType() == uhdmenum_typespec) {
+              if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
                 enum_typespec* etps = (enum_typespec*)tps;
                 for (enum_const* econst : *etps->Enum_consts()) {
                   paramMap.emplace(econst->VpiName(), econst);
@@ -405,7 +405,7 @@ void ElaboratorListener::enterPackage(const package* object, vpiHandle handle) {
   if (object->Variables()) {
     for (variables* var : *object->Variables()) {
       netMap.emplace(var->VpiName(), var);
-      if (var->UhdmType() == uhdmenum_var) {
+      if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
         enum_var* evar = (enum_var*)var;
         enum_typespec* etps = (enum_typespec*)evar->Typespec();
         for (auto c : *etps->Enum_consts()) {
@@ -474,7 +474,7 @@ void ElaboratorListener::enterClass_defn(const class_defn* object,
     if (defn->Variables()) {
       for (variables* var : *defn->Variables()) {
         varMap.emplace(var->VpiName(), var);
-        if (var->UhdmType() == uhdmenum_var) {
+        if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
           enum_var* evar = (enum_var*)var;
           enum_typespec* etps = (enum_typespec*)evar->Typespec();
           for (auto c : *etps->Enum_consts()) {
@@ -537,21 +537,21 @@ void ElaboratorListener::bindScheduledTaskFunc() {
   for (auto& call_prefix : scheduledTfCallBinding_) {
     tf_call* call = call_prefix.first;
     const class_var* prefix = call_prefix.second;
-    if (call->UhdmType() == uhdmfunc_call) {
+    if (call->UhdmType() == UHDM_OBJECT_TYPE::uhdmfunc_call) {
       if (function* f =
               any_cast<function*>(bindTaskFunc(call->VpiName(), prefix))) {
         ((func_call*)call)->Function(f);
       }
-    } else if (call->UhdmType() == uhdmtask_call) {
+    } else if (call->UhdmType() == UHDM_OBJECT_TYPE::uhdmtask_call) {
       if (task* f = any_cast<task*>(bindTaskFunc(call->VpiName(), prefix))) {
         ((task_call*)call)->Task(f);
       }
-    } else if (call->UhdmType() == uhdmmethod_func_call) {
+    } else if (call->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_func_call) {
       if (function* f =
               any_cast<function*>(bindTaskFunc(call->VpiName(), prefix))) {
         ((method_func_call*)call)->Function(f);
       }
-    } else if (call->UhdmType() == uhdmmethod_task_call) {
+    } else if (call->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_task_call) {
       if (task* f = any_cast<task*>(bindTaskFunc(call->VpiName(), prefix))) {
         ((method_task_call*)call)->Task(f);
       }
@@ -604,7 +604,7 @@ void ElaboratorListener::enterInterface_inst(const interface_inst* object,
     if (object->Variables()) {
       for (variables* var : *object->Variables()) {
         netMap.emplace(var->VpiName(), var);
-        if (var->UhdmType() == uhdmenum_var) {
+        if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
           enum_var* evar = (enum_var*)var;
           enum_typespec* etps = (enum_typespec*)evar->Typespec();
           for (auto c : *etps->Enum_consts()) {
@@ -653,9 +653,9 @@ void ElaboratorListener::enterInterface_inst(const interface_inst* object,
       for (ports* port : *object->Ports()) {
         if (const ref_obj* ro = port->Low_conn<ref_obj>()) {
           if (const any* actual = ro->Actual_group()) {
-            if (actual->UhdmType() == uhdminterface_inst) {
+            if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdminterface_inst) {
               netMap.emplace(port->VpiName(), actual);
-            } else if (actual->UhdmType() == uhdmmodport) {
+            } else if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodport) {
               // If the interface of the modport is not yet in the map
               netMap.emplace(port->VpiName(), actual);
             }
@@ -682,7 +682,7 @@ void ElaboratorListener::enterInterface_inst(const interface_inst* object,
           module_inst* defMod = (module_inst*)comp;
           if (defMod->Typespecs()) {
             for (typespec* tps : *defMod->Typespecs()) {
-              if (tps->UhdmType() == uhdmenum_typespec) {
+              if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
                 enum_typespec* etps = (enum_typespec*)tps;
                 for (enum_const* econst : *etps->Enum_consts()) {
                   paramMap.emplace(econst->VpiName(), econst);
@@ -852,7 +852,7 @@ any* ElaboratorListener::bindTaskFunc(std::string_view name,
   }
   if (prefix) {
     const typespec* tps = prefix->Typespec();
-    if (tps && tps->UhdmType() == uhdmclass_typespec) {
+    if (tps && tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
       const class_defn* defn = ((const class_typespec*)tps)->Class_defn();
       while (defn) {
         if (defn->Task_funcs()) {
@@ -881,14 +881,14 @@ bool ElaboratorListener::isFunctionCall(std::string_view name,
     const ComponentMap& funcMap = std::get<3>(*i);
     ComponentMap::const_iterator funcItr = funcMap.find(name);
     if (funcItr != funcMap.end()) {
-      return (funcItr->second->UhdmType() == uhdmfunction);
+      return (funcItr->second->UhdmType() == UHDM_OBJECT_TYPE::uhdmfunction);
     }
   }
   if (prefix) {
     if (const ref_obj* ref = any_cast<const ref_obj*>(prefix)) {
       if (const class_var* vprefix = ref->Actual_group<class_var>()) {
         if (const any* func = bindTaskFunc(name, vprefix)) {
-          return (func->UhdmType() == uhdmfunction);
+          return (func->UhdmType() == UHDM_OBJECT_TYPE::uhdmfunction);
         }
       }
     }
@@ -903,14 +903,14 @@ bool ElaboratorListener::isTaskCall(std::string_view name,
     const ComponentMap& funcMap = std::get<3>(*i);
     ComponentMap::const_iterator funcItr = funcMap.find(name);
     if (funcItr != funcMap.end()) {
-      return (funcItr->second->UhdmType() == uhdmtask);
+      return (funcItr->second->UhdmType() == UHDM_OBJECT_TYPE::uhdmtask);
     }
   }
   if (prefix) {
     if (const ref_obj* ref = any_cast<const ref_obj*>(prefix)) {
       if (const class_var* vprefix = ref->Actual_group<class_var>()) {
         if (const any* task = bindTaskFunc(name, vprefix)) {
-          return (task->UhdmType() == uhdmtask);
+          return (task->UhdmType() == UHDM_OBJECT_TYPE::uhdmtask);
         }
       }
     }
@@ -935,7 +935,7 @@ void ElaboratorListener::enterTask_func(const task_func* object,
   varMap.emplace(object->VpiName(), object->Return());
 
   if (const any* parent = object->VpiParent()) {
-    if (parent->UhdmType() == uhdmclass_defn) {
+    if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmclass_defn) {
       const class_defn* defn = (const class_defn*)parent;
       while (defn) {
         if (defn->Variables()) {
@@ -983,10 +983,10 @@ void ElaboratorListener::enterFor_stmt(const for_stmt* object,
   }
   if (object->VpiForInitStmts()) {
     for (any* stmt : *object->VpiForInitStmts()) {
-      if (stmt->UhdmType() == uhdmassign_stmt) {
+      if (stmt->UhdmType() == UHDM_OBJECT_TYPE::uhdmassign_stmt) {
         assign_stmt* astmt = (assign_stmt*)stmt;
         const any* lhs = astmt->Lhs();
-        if (lhs->UhdmType() != uhdmref_var) {
+        if (lhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_var) {
           varMap.emplace(lhs->VpiName(), lhs);
         }
       }
@@ -1186,7 +1186,7 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object,
   if (object->Variables()) {
     for (variables* var : *object->Variables()) {
       netMap.emplace(var->VpiName(), var);
-      if (var->UhdmType() == uhdmenum_var) {
+      if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
         enum_var* evar = (enum_var*)var;
         enum_typespec* etps = (enum_typespec*)evar->Typespec();
         for (auto c : *etps->Enum_consts()) {

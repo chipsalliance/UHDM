@@ -98,8 +98,8 @@ void BaseClass::DeepCopy(BaseClass* clone, BaseClass* parent,
 }
 
 std::string BaseClass::ComputeFullName() const {
-  if ((UhdmType() == uhdmmodule_inst) && (VpiParent() != nullptr) &&
-      (VpiParent()->UhdmType() == uhdmmodule_inst)) {
+  if ((UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst) && (VpiParent() != nullptr) &&
+      (VpiParent()->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst)) {
     return std::string(VpiDefName());
   }
   std::vector<std::string_view> names;
@@ -113,31 +113,31 @@ std::string BaseClass::ComputeFullName() const {
     UHDM_OBJECT_TYPE actual_parent_type = (actual_parent != nullptr)
                                               ? actual_parent->UhdmType()
                                               : uhdmunsupported_stmt;
-    if (parent_type == uhdmdesign) break;
-    if ((parent_type == uhdmpackage) || (parent_type == uhdmclass_defn))
+    if (parent_type == UHDM_OBJECT_TYPE::uhdmdesign) break;
+    if ((parent_type == UHDM_OBJECT_TYPE::uhdmpackage) || (parent_type == UHDM_OBJECT_TYPE::uhdmclass_defn))
       column = true;
     std::string_view name =
         parent->VpiName().empty() ? parent->VpiDefName() : parent->VpiName();
-    bool skip_name = (actual_parent_type == uhdmref_obj) ||
-                     (parent_type == uhdmmethod_func_call) ||
-                     (parent_type == uhdmmethod_task_call) ||
-                     (parent_type == uhdmfunc_call) ||
-                     (parent_type == uhdmtask_call) ||
-                     (parent_type == uhdmsys_func_call) ||
-                     (parent_type == uhdmsys_task_call);
+    bool skip_name = (actual_parent_type == UHDM_OBJECT_TYPE::uhdmref_obj) ||
+                     (parent_type == UHDM_OBJECT_TYPE::uhdmmethod_func_call) ||
+                     (parent_type == UHDM_OBJECT_TYPE::uhdmmethod_task_call) ||
+                     (parent_type == UHDM_OBJECT_TYPE::uhdmfunc_call) ||
+                     (parent_type == UHDM_OBJECT_TYPE::uhdmtask_call) ||
+                     (parent_type == UHDM_OBJECT_TYPE::uhdmsys_func_call) ||
+                     (parent_type == UHDM_OBJECT_TYPE::uhdmsys_task_call);
     if (child != nullptr) {
       UHDM_OBJECT_TYPE child_type = child->UhdmType();
-      if ((child_type == uhdmbit_select) && (parent_type == uhdmport)) {
+      if ((child_type == UHDM_OBJECT_TYPE::uhdmbit_select) && (parent_type == UHDM_OBJECT_TYPE::uhdmport)) {
         skip_name = true;
       }
-      if ((child_type == uhdmref_obj) && (parent_type == uhdmbit_select)) {
+      if ((child_type == UHDM_OBJECT_TYPE::uhdmref_obj) && (parent_type == UHDM_OBJECT_TYPE::uhdmbit_select)) {
         skip_name = true;
       }
-      if ((child_type == uhdmref_obj) &&
-          (parent_type == uhdmindexed_part_select)) {
+      if ((child_type == UHDM_OBJECT_TYPE::uhdmref_obj) &&
+          (parent_type == UHDM_OBJECT_TYPE::uhdmindexed_part_select)) {
         skip_name = true;
       }
-      if ((child_type == uhdmref_obj) && (parent_type == uhdmhier_path)) {
+      if ((child_type == UHDM_OBJECT_TYPE::uhdmref_obj) && (parent_type == UHDM_OBJECT_TYPE::uhdmhier_path)) {
         skip_name = true;
       }
     }
