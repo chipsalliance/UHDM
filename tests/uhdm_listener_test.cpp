@@ -134,5 +134,8 @@ TEST(UhdmListenerTest, ProgramModule) {
       "Module: u2/M3 parent: -",
   };
   EXPECT_EQ(listener->collected(), expected);
-  EXPECT_TRUE(listener->didVisitAll(serializer));
+
+  // m4 is never visited since though it's parented (back edge),
+  // it isn't connected to the graph with a forward edge.
+  EXPECT_FALSE(listener->didVisitAll(serializer));
 }

@@ -143,3 +143,7 @@
     vpi: vpiRefModule
     type: ref_module
     card: any
+  - class_ref: gen_stmts
+    vpi: vpiGenStmt
+    type: gen_stmt
+    card: any

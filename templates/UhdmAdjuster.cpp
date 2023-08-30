@@ -46,8 +46,8 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
   if (type == uhdmconstant) {
     constant* c = (constant*)result;
     if (c->VpiSize() < maxsize) {
-      ElaboratorListener listener(serializer_);
-      c = (constant*)UHDM::clone_tree(c, *serializer_, &listener);
+      ElaboratorContext elaboratorContext(serializer_);
+      c = (constant*)clone_tree(c, &elaboratorContext);
       int32_t constType = c->VpiConstType();
       const typespec* tps = c->Typespec();
       bool is_signed = false;
@@ -99,6 +99,7 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
 }
 
 void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
   // Make all expressions match the largest expression size per LRM
   int32_t maxsize = 0;
   bool is_overall_unsigned = false;
@@ -167,18 +168,20 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
   {
     // Resize in place
     case_stmt* mut_object = (case_stmt*)object;
-    UHDM::expr* newValue = (UHDM::expr*)resize(object->VpiCondition(), maxsize,
-                                               is_overall_unsigned);
-    if (newValue && (newValue->UhdmType() == uhdmconstant)) {
-      mut_object->VpiCondition(newValue);
+    if (expr* newValue = (expr*)resize(object->VpiCondition(), maxsize,
+                                       is_overall_unsigned)) {
+      if (newValue->UhdmType() == uhdmconstant) {
+        mut_object->VpiCondition(newValue);
+      }
     }
     for (case_item* citem : *object->Case_items()) {
       if (citem->VpiExprs()) {
         for (uint32_t i = 0; i < citem->VpiExprs()->size(); i++) {
-          any* newValue = (any*)resize(citem->VpiExprs()->at(i), maxsize,
-                                       is_overall_unsigned);
-          if (newValue && (newValue->UhdmType() == uhdmconstant)) {
-            citem->VpiExprs()->at(i) = newValue;
+          if (any* newValue = (any*)resize(citem->VpiExprs()->at(i), maxsize,
+                                           is_overall_unsigned)) {
+            if (newValue->UhdmType() == uhdmconstant) {
+              citem->VpiExprs()->at(i) = newValue;
+            }
           }
         }
       }
@@ -188,23 +191,30 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
 
 void UhdmAdjuster::enterModule_inst(const module_inst* object,
                                     vpiHandle handle) {
-  const std::string_view instName = object->VpiName();
-  bool flatModule =
-      (instName.empty()) && ((object->VpiParent() == 0) ||
-                             ((object->VpiParent() != 0) &&
-                              (object->VpiParent()->VpiType() != vpiModule)));
-  if (!flatModule) elaboratedTree_ = true;
   currentInstance_ = object;
 }
 
+void UhdmAdjuster::leaveModule_inst(const module_inst* object,
+                                    vpiHandle handle) {
+  currentInstance_ = nullptr;
+}
+
+void UhdmAdjuster::enterGen_scope(const gen_scope* object, vpiHandle handle) {
+  currentInstance_ = object;
+}
+
+void UhdmAdjuster::leaveGen_scope(const gen_scope* object, vpiHandle handle) {
+  currentInstance_ = nullptr;
+}
+
 void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
-  if (!elaboratedTree_) return;
+  if (isInUhdmAllIterator()) return;
   if (object->VpiSize() == -1) {
     const any* parent = object->VpiParent();
     int32_t size = object->VpiSize();
     bool invalidValue = false;
-    UHDM::ExprEval eval;
-    ElaboratorListener listener(serializer_);
+    ExprEval eval;
+    ElaboratorContext elaboratorContext(serializer_);
     if (parent) {
       if (parent->UhdmType() == uhdmoperation) {
         operation* op = (operation*)parent;
@@ -223,8 +233,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           i++;
         }
         if (size != object->VpiSize()) {
-          constant* newc =
-              (constant*)UHDM::clone_tree(object, *serializer_, &listener);
+          constant* newc = (constant*)clone_tree(object, &elaboratorContext);
           newc->VpiSize(size);
           int64_t val = eval.get_value(invalidValue, object);
           if (val == 1) {
@@ -236,17 +245,17 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           op->Operands()->at(indexSelf) = newc;
         }
       } else if (parent->UhdmType() == uhdmcont_assign) {
-        cont_assign* assign = (cont_assign*) parent;
+        cont_assign* assign = (cont_assign*)parent;
         const any* lhs = assign->Lhs();
         if (lhs->UhdmType() == uhdmhier_path) {
-          hier_path* path = (hier_path*) lhs;
+          hier_path* path = (hier_path*)lhs;
           any* last = path->Path_elems()->back();
           if (last->UhdmType() == uhdmref_obj) {
-            ref_obj* ref = (ref_obj*) last;
+            ref_obj* ref = (ref_obj*)last;
             if (const any* actual = ref->Actual_group()) {
               const typespec* tps = nullptr;
               if (actual->UhdmType() == uhdmtypespec_member) {
-                typespec_member* member = (typespec_member*) actual;
+                typespec_member* member = (typespec_member*)actual;
                 tps = member->Typespec();
               }
               if (tps) {
@@ -260,8 +269,7 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           }
         }
         if (size != object->VpiSize()) {
-          constant* newc =
-              (constant*)UHDM::clone_tree(object, *serializer_, &listener);
+          constant* newc = (constant*)clone_tree(object, &elaboratorContext);
           newc->VpiSize(size);
           int64_t val = eval.get_value(invalidValue, object);
           if (val == 1) {
@@ -271,6 +279,48 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
             newc->VpiConstType(vpiUIntConst);
           }
           assign->Rhs(newc);
+        }
+      }
+    }
+  }
+}
+
+void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  bool invalidValue = false;
+  ExprEval eval(true);
+  const any* parent = object->VpiParent();
+  if (parent == nullptr) return;
+  if (parent->UhdmType() == uhdmcont_assign) {
+    cont_assign* assign = (cont_assign*)parent;
+    if (assign->Lhs() == object) return;
+    expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
+    if (invalidValue) return;
+    if (tmp) {
+      assign->Rhs(tmp);
+    }
+  } else if (parent->UhdmType() == uhdmoperation) {
+    operation* poper = (operation*)parent;
+    VectorOfany* operands = poper->Operands();
+    if (operands) {
+      eval.reduceExceptions({vpiAssignmentPatternOp,
+                             vpiMultiAssignmentPatternOp, vpiConcatOp,
+                             vpiMultiConcatOp, vpiBitNegOp});
+      expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
+      if (invalidValue) return;
+      if (tmp && tmp->UhdmType() == uhdmconstant) {
+        tmp->VpiFile(poper->VpiFile());
+        tmp->VpiLineNo(poper->VpiLineNo());
+        tmp->VpiColumnNo(poper->VpiColumnNo());
+        tmp->VpiEndLineNo(poper->VpiEndLineNo());
+        tmp->VpiEndColumnNo(poper->VpiEndColumnNo());
+        uint64_t index = 0;
+        for (any* oper : *operands) {
+          if (oper == object) {
+            operands->at(index) = tmp;
+            break;
+          }
+          index++;
         }
       }
     }

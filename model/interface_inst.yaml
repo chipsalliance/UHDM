@@ -99,3 +99,7 @@
     vpi: vpiSysTaskCall
     type: tf_call
     card: any
+  - class_ref: gen_stmts
+    vpi: vpiGenStmt
+    type: gen_stmt
+    card: any  

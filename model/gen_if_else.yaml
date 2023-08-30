@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2023 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,37 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "immediate_assert" formal description
- 
-- obj_def: immediate_assert
-  - extends: atomic_stmt
-  - property: is_deferred
-    name: is deferred
-    vpi: vpiIsDeferred
-    type: int32_t
-    card: 1
-  - property: is_final
-    name: is final
-    vpi: vpiIsFinal
-    type: int32_t
-    card: 1
-  - class_ref: expr
-    name: expr
-    vpi: vpiExpr
+# Universal Hardware Data Model (UHDM) "gen_if_else" formal description
+# This model is not in the standard, it enables modeling if-else-generate statements
+# in the non-elaborate tree
+
+- obj_def: gen_if_else
+  - extends: gen_stmt
+  - class_ref: vpiCondition
+    name: condition
+    vpi: vpiCondition
     type: expr
-    card: 1  
-  - group_ref: stmt
+    card: 1
+  - group_ref: vpiStmt
     name: stmt
     vpi: vpiStmt
     type: stmt
-    card: 1  
-  - group_ref: else_stmt
+    card: 1
+  - group_ref: vpiElseStmt
     name: else stmt
     vpi: vpiElseStmt
     type: stmt
     card: 1
-  - obj_ref: clocking_block
-    name: clocking block
-    vpi: vpiClockingBlock
-    type: clocking_block
-    card: 1
+

@@ -31,7 +31,7 @@ def _get_schema(type, vpi, card):
 
 
 def generate(models):
-    root_schema_index = 2
+    root_schema_index = 4
     root_schema = []
     model_schemas = [
       'struct Any {',

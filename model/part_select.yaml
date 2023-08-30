@@ -15,7 +15,7 @@
 # Universal Hardware Data Model (UHDM) "part select" formal description
  
 - obj_def: part_select
-  - extends: expr
+  - extends: ref_obj
   - property: constant_selection
     name: constant selection
     vpi: vpiConstantSelect
@@ -30,9 +30,4 @@
     name: right range
     vpi: vpiRightRange
     type: expr
-    card: 1
-  - group_ref: actual_group
-    name: actual group
-    vpi: vpiActual
-    type: actual_group
     card: 1

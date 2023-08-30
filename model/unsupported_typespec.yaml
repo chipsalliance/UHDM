@@ -16,5 +16,14 @@
  
 - obj_def: unsupported_typespec
   - extends: typespec
-
+  - property: packed
+    name: packed
+    vpi: vpiPacked
+    type: bool
+    card: 1
+  - obj_ref: ranges
+    name: ranges
+    vpi: vpiRange
+    type: range
+    card: any
  

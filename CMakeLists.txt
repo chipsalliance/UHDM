@@ -1,7 +1,7 @@
 # -*- mode:cmake -*-
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-project(UHDM VERSION 1.58)
+project(UHDM VERSION 1.73)
 
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
@@ -30,7 +30,7 @@ include(GNUInstallDirs)
 
 # NOTE: Policy changes has to happen before adding any subprojects
 cmake_policy(SET CMP0091 NEW)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -49,20 +49,25 @@ if (NOT ${EXIT_CODE} EQUAL 0)
     "To install use following command: \"pip3 install orderedmultidict\".")
 endif()
 
+if (WIN32)
+  add_compile_definitions(WIN32_LEAN_AND_MEAN)
+  add_compile_definitions(KJ_MSVC_TRADITIONAL_CPP=1)
+endif()
+
 if(UHDM_USE_HOST_CAPNP)
   find_package(CapnProto)
 else()
   set(BUILD_TESTING OFF CACHE BOOL "Don't build capnproto tests")
   set(WITH_FIBERS "OFF" CACHE STRING "Whether or not to build libkj-async with fibers")
   add_subdirectory(third_party/capnproto EXCLUDE_FROM_ALL)
-  set(CAPNP_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/capnproto/c++/src/capnp)
-  set(CAPNP_EXECUTABLE ${CAPNP_DIR}/capnp)
-  set(CAPNPC_CXX_EXECUTABLE ${CAPNP_DIR}/capnpc-c++)
+  set(CAPNP_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/capnproto/c++/src/capnp CACHE PATH "Location of capnp installation" FORCE)
+  set(CAPNP_EXECUTABLE ${CAPNP_DIR}/capnp CACHE FILEPATH "Location of capnp executable" FORCE)
+  set(CAPNPC_CXX_EXECUTABLE ${CAPNP_DIR}/capnpc-c++ CACHE FILEPATH "Location of capnp-c++ executable" FORCE)
 endif()
 
 # NOTE: Set the global output directories after the subprojects have had their go at it
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
@@ -104,10 +109,6 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE
       "${CMAKE_CXX_FLAGS_RELEASE} ${TCMALLOC_COMPILE_OPTIONS} -Wall -O3 -DNDEBUG ${MSYS_COMPILE_OPTIONS} ${MY_CXX_WARNING_FLAGS}"
   )
-endif()
-
-if (WIN32)
-  add_compile_definitions(WIN32_LEAN_AND_MEAN)
 endif()
 
 # All the files the generator depends on.
@@ -197,7 +198,10 @@ message("Building UHDM version v${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} [${U
 configure_file(${PROJECT_SOURCE_DIR}/include/uhdm-version.h.in ${GENDIR}/uhdm/uhdm-version.h)
 
 add_library(uhdm ${uhdm-GENERATED_SRC})
-set_target_properties(uhdm PROPERTIES PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h)
+set_target_properties(uhdm PROPERTIES
+  PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h
+  SOVERSION "${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR}"
+)
 configure_file(${PROJECT_SOURCE_DIR}/include/config.h.in ${GENDIR}/uhdm/config.h)
 target_compile_options(uhdm PUBLIC
   "SHELL:$<IF:$<CXX_COMPILER_ID:MSVC>,/FI uhdm/config.h,-include uhdm/config.h>")
@@ -215,11 +219,13 @@ target_include_directories(uhdm SYSTEM PUBLIC
 target_include_directories(uhdm PRIVATE ${GENDIR}/src)
 
 if (UHDM_USE_HOST_CAPNP)
-  target_include_directories(uhdm PRIVATE ${CAPNP_INCLUDE_DIRS})
-  target_link_libraries(uhdm PRIVATE CapnProto::capnp)
+  target_include_directories(uhdm PUBLIC ${CAPNP_INCLUDE_DIRS})
+  target_link_libraries(uhdm PUBLIC CapnProto::capnp)
 else()
-  target_include_directories(uhdm PRIVATE ${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src)
-  target_link_libraries(uhdm PRIVATE capnp)
+  target_include_directories(uhdm PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/capnproto/c++/src>
+    $<INSTALL_INTERFACE:include>)
+  target_link_libraries(uhdm PUBLIC capnp)
 endif()
 
 target_compile_definitions(uhdm
@@ -311,6 +317,9 @@ target_link_libraries(uhdm-dump PRIVATE uhdm)
 add_executable(uhdm-hier ${PROJECT_SOURCE_DIR}/util/uhdm-hier.cpp)
 target_link_libraries(uhdm-hier PRIVATE uhdm)
 
+add_executable(uhdm-lint ${PROJECT_SOURCE_DIR}/util/uhdm-lint.cpp)
+target_link_libraries(uhdm-lint PRIVATE uhdm)
+
 # Installation tester
 # TODO: once we have a cmake package (find_package(uhdm)), this installation
 # tester should use that.
@@ -343,22 +352,22 @@ if(NOT UHDM_USE_HOST_CAPNP)
   install(
     TARGETS capnp kj
     EXPORT uhdmTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 endif()
 
 # Installation target
 install(
-  TARGETS uhdm uhdm-cmp uhdm-dump uhdm-hier
+  TARGETS uhdm uhdm-cmp uhdm-dump uhdm-hier uhdm-lint
   EXPORT uhdmTargets
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/uhdm
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm)
 install(DIRECTORY ${GENDIR}/uhdm/
         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/uhdm/)
 install(FILES ${GENDIR}/src/UHDM.capnp
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/uhdm)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 # Generate cmake config files for reuse by downstream packages
 include(CMakePackageConfigHelpers)

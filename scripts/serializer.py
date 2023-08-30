@@ -10,8 +10,10 @@ def generate(models):
     factory_function_declarations = []
     factory_function_implementations = []
     factory_purge = []
+    factory_gc = []
     factory_stats = []
-    factory_object_type_map = []
+    factory_get_object = []
+    factory_erase_object = []
 
     save_ids = []
     save_objects = []
@@ -39,23 +41,26 @@ def generate(models):
             factory_data_members.append(f'  {classname}Factory {classname}Maker;')
             factory_function_declarations.append(f'  {classname}* Make{Classname_}();')
             factory_function_implementations.append(f'{classname}* Serializer::Make{Classname_}() {{ return Make<{classname}>(&{classname}Maker); }}')
-            factory_object_type_map.append(f'  case uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.objects_[index];')
+            factory_get_object.append(f'    case uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.objects_[index];')
+            factory_erase_object.append(f'    case uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.Erase(static_cast<const {classname}*>(p));')
 
-            save_ids.append(f'  SetSaveId_<{classname}>(&{classname}Maker);')
-            save_objects.append(f'  adapter.template operator()<{classname}, {Classname}>({classname}Maker.objects_, this, cap_root.initFactory{Classname}({classname}Maker.objects_.size()));')
+            save_ids.append(f'  {classname}Maker.MapToIndex(idMap);')
+            save_objects.append(f'  adapter.template operator()<{classname}, {Classname}>({classname}Maker, this, idMap, cap_root.initFactory{Classname}({classname}Maker.objects_.size()));')
 
-            restore_ids.append(f'  SetRestoreId_<{classname}>(&{classname}Maker, cap_root.getFactory{Classname}().size());')
+            restore_ids.append(f'  Make(&{classname}Maker, cap_root.getFactory{Classname}().size());')
             restore_objects.append(f'  adapter.template operator()<{classname}, {Classname}>(cap_root.getFactory{Classname}(), this, {classname}Maker.objects_);')
 
             factory_purge.append(f'  {classname}Maker.Purge();')
+            if classname != 'package':
+                factory_gc.append(f'  {classname}Maker.EraseIfNotIn(visited);')
             factory_stats.append(f'  stats.insert(std::make_pair("{classname}", {classname}Maker.objects_.size()));')
 
         factory_data_members.append(f'  VectorOf{classname}Factory {classname}VectMaker;')
         factory_function_declarations.append(f'  std::vector<{classname}*>* Make{Classname_}Vec();')
         factory_function_implementations.append(f'std::vector<{classname}*>* Serializer::Make{Classname_}Vec() {{ return Make<{classname}>(&{classname}VectMaker); }}')
 
-        saves_adapters.append(f'  void operator()(const {classname} *const obj, Serializer *const serializer, {Classname}::Builder builder) const {{')
-        saves_adapters.append(f'    operator()(static_cast<const {basename}*>(obj), serializer, builder.getBase());')
+        saves_adapters.append(f'  void operator()(const {classname} *const obj, Serializer *const serializer, const Serializer::IdMap &idMap, {Classname}::Builder builder) const {{')
+        saves_adapters.append(f'    operator()(static_cast<const {basename}*>(obj), serializer, idMap, builder.getBase());')
 
         restore_adapters.append(f'  void operator()({Classname}::Reader reader, Serializer *const serializer, {classname} *const obj) const {{')
         restore_adapters.append(f'    operator()(reader.getBase(), serializer, static_cast<{basename}*>(obj));')
@@ -103,13 +108,13 @@ def generate(models):
                     if key in ['class_ref', 'group_ref']:
                         saves_adapters.append(f'    if (obj->{Name_}() != nullptr) {{')
                         saves_adapters.append(f'      ::ObjIndexType::Builder tmp = builder.get{Name}();')
-                        saves_adapters.append(f'      tmp.setIndex(serializer->GetId(obj->{Name_}()));')
+                        saves_adapters.append(f'      tmp.setIndex(GetId(obj->{Name_}(), idMap));')
                         saves_adapters.append(f'      tmp.setType((obj->{Name_}())->UhdmType());')
                         saves_adapters.append( '    }')
 
                         restore_adapters.append(f'    obj->{Name_}(({type}*)serializer->GetObject(reader.get{Name}().getType(), reader.get{Name}().getIndex() - 1));')
                     else:
-                        saves_adapters.append(f'    builder.set{Name}(serializer->GetId(obj->{Name_}()));')
+                        saves_adapters.append(f'    if (obj->{Name_}() != nullptr) builder.set{Name}(GetId(obj->{Name_}(), idMap));')
 
                         restore_adapters.append(f'    if (reader.get{Name}()) {{')
                         restore_adapters.append(f'      obj->{Name_}(serializer->{type}Maker.objects_[reader.get{Name}() - 1]);')
@@ -129,12 +134,12 @@ def generate(models):
 
                     if key in ['class_ref', 'group_ref']:
                         saves_adapters.append(f'        ::ObjIndexType::Builder tmp = {Name}s[i];')
-                        saves_adapters.append(f'        tmp.setIndex(serializer->GetId((*obj->{Name_}())[i]));')
+                        saves_adapters.append(f'        tmp.setIndex(GetId((*obj->{Name_}())[i], idMap));')
                         saves_adapters.append(f'        tmp.setType(((BaseClass*)((*obj->{Name_}())[i]))->UhdmType());')
 
                         restore_adapters.append(f'        vect->emplace_back(({type}*)serializer->GetObject(reader.get{Name}()[i].getType(), reader.get{Name}()[i].getIndex() - 1));')
                     else:
-                        saves_adapters.append(f'        {Name}s.set(i, serializer->GetId((*obj->{Name_}())[i]));')
+                        saves_adapters.append(f'        {Name}s.set(i, GetId((*obj->{Name_}())[i], idMap));')
 
                         restore_adapters.append(f'        vect->emplace_back(serializer->{type}Maker.objects_[reader.get{Name}()[i] - 1]);')
 
@@ -151,14 +156,7 @@ def generate(models):
         restore_adapters.append('  }')
         restore_adapters.append('')
 
-    uhdm_name_map = [
-        'std::string UhdmName(UHDM_OBJECT_TYPE type) {',
-        '  switch (type) {'
-    ]
-    uhdm_name_map.extend([ f'  case {name} /* = {id} */: return "{name[4:]}";' for name, id in uhdm_types_h.get_type_map(models).items() ])
-    uhdm_name_map.append('  default: return "NO TYPE";')
-    uhdm_name_map.append('  }')
-    uhdm_name_map.append('}')
+    uhdm_name_map = [ f'    case {name} /* = {id} */: return "{name[4:]}";' for name, id in uhdm_types_h.get_type_map(models).items() ]
 
     # Serializer.h
     with open(config.get_template_filepath('Serializer.h'), 'rt') as strm:
@@ -172,17 +170,18 @@ def generate(models):
     with open(config.get_template_filepath('Serializer.cpp'), 'rt') as strm:
         file_content = strm.read()
 
+    file_content = file_content.replace('<CAPNP_ID>', '\n'.join(save_ids))
+    file_content = file_content.replace('<FACTORY_GC>', '\n'.join(factory_gc))
     file_content = file_content.replace('<UHDM_NAME_MAP>', '\n'.join(uhdm_name_map))
-    file_content = file_content.replace('<FACTORY_PURGE>', '\n'.join(factory_purge))
-    file_content = file_content.replace('<FACTORY_STATS>', '\n'.join(factory_stats))
-    file_content = file_content.replace('<FACTORY_OBJECT_TYPE_MAP>', '\n'.join(factory_object_type_map))
+    file_content = file_content.replace('<FACTORY_PURGE>', '\n'.join(sorted(factory_purge)))
+    file_content = file_content.replace('<FACTORY_STATS>', '\n'.join(sorted(factory_stats)))
+    file_content = file_content.replace('<FACTORY_ERASE_OBJECT>', '\n'.join(sorted(factory_erase_object)))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer.cpp'), file_content)
 
     # Serializer_save.cpp
     with open(config.get_template_filepath('Serializer_save.cpp'), 'rt') as strm:
         file_content = strm.read()
 
-    file_content = file_content.replace('<CAPNP_ID>', '\n'.join(save_ids))
     file_content = file_content.replace('<CAPNP_SAVE>', '\n'.join(save_objects))
     file_content = file_content.replace('<CAPNP_SAVE_ADAPTERS>', '\n'.join(saves_adapters))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer_save.cpp'), file_content)
@@ -191,10 +190,11 @@ def generate(models):
     with open(config.get_template_filepath('Serializer_restore.cpp'), 'rt') as strm:
         file_content = strm.read()
 
-    file_content = file_content.replace('<CAPNP_INIT_FACTORIES>', '\n'.join(restore_ids))
-    file_content = file_content.replace('<CAPNP_RESTORE_FACTORIES>', '\n'.join(restore_objects))
+    file_content = file_content.replace('<CAPNP_INIT_FACTORIES>', '\n'.join(sorted(restore_ids)))
+    file_content = file_content.replace('<CAPNP_RESTORE_FACTORIES>', '\n'.join(sorted(restore_objects)))
     file_content = file_content.replace('<CAPNP_RESTORE_ADAPTERS>', '\n'.join(restore_adapters))
     file_content = file_content.replace('<FACTORY_FUNCTION_IMPLEMENTATIONS>', '\n'.join(factory_function_implementations))
+    file_content = file_content.replace('<FACTORY_GET_OBJECT>', '\n'.join(sorted(factory_get_object)))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer_restore.cpp'), file_content)
 
     return True

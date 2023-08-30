@@ -103,11 +103,11 @@ constant.yaml
 let_expr.yaml
 operand_group.yaml
 operation.yaml
-part_select.yaml
-indexed_part_select.yaml
 actual_group.yaml
 ref_obj.yaml
 ref_module.yaml
+part_select.yaml
+indexed_part_select.yaml
 var_select.yaml
 bit_select.yaml
 variable_drivers_group.yaml
@@ -263,4 +263,10 @@ constr_if.yaml
 constr_if_else.yaml
 constr_foreach.yaml
 soft_disable.yaml
+gen_stmt.yaml
+gen_if.yaml
+gen_if_else.yaml
+gen_for.yaml
+gen_case.yaml
+gen_region.yaml
 design.yaml

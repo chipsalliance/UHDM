@@ -232,7 +232,7 @@ vpiHandle vpi_handle_by_index(vpiHandle object, PLI_INT32 indx) { return 0; }
 vpiHandle vpi_handle_by_name(PLI_BYTE8* name, vpiHandle refHandle) {
   const uhdm_handle* const handle = (const uhdm_handle*)refHandle;
   const BaseClass* const object = (const BaseClass*)handle->object;
-  if (object->GetSerializer()->symbolMaker.GetId(name) ==
+  if (object->GetSerializer()->GetSymbolId(name) ==
       SymbolFactory::getBadId()) {
     return nullptr;
   }
@@ -269,7 +269,8 @@ PLI_INT32 vpi_compare_objects(vpiHandle handle1, vpiHandle handle2) {
   // NOTE: As per the standard, this API is expected to return a 1 for equal.
   // And, yes that is counter intuitive. But BaseClass::Compare returns a 0
   // for equal. Negate the result here to meet standard requirements.
-  return (object1 == object2) ? 1 : ((object1->Compare(object2) == 0) ? 1 : 0);
+  CompareContext context;
+  return (object1 == object2) ? 1 : ((object1->Compare(object2, &context) == 0) ? 1 : 0);
 }
 
 vpiHandle vpi_scan(vpiHandle iterator) {

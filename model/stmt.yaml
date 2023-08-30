@@ -19,5 +19,15 @@
   - class_ref: atomic_stmt
   - class_ref: expr
   - group_ref: assertion
-  
+# Non standard for non-elab model generate block
+  - obj_ref: cont_assign
+  - obj_ref: ref_module
+  - obj_ref: module_array
+  - class_ref: gen_stmt
+  - class_ref: process_stmt
+  - obj_ref: param_assign
+
+
+
+
 

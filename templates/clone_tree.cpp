@@ -24,108 +24,98 @@
  */
 #include <uhdm/ElaboratorListener.h>
 #include <uhdm/ExprEval.h>
-#include <uhdm/RTTI.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
-using namespace UHDM;
-
 namespace UHDM {
 
-BaseClass* clone_tree(const BaseClass* root, Serializer& s,
-                      ElaboratorListener* elaborator) {
-  return root ? root->DeepClone(&s, elaborator, nullptr) : nullptr;
+BaseClass* clone_tree(const BaseClass* root, CloneContext* context) {
+  return root ? root->DeepClone(nullptr, context) : nullptr;
 }
 
-tf_call* sys_func_call::DeepClone(Serializer* serializer,
-                                  ElaboratorListener* elaborator,
-                                  BaseClass* parent) const {
-  sys_func_call* const clone = serializer->MakeSys_func_call();
+tf_call* sys_func_call::DeepClone(BaseClass* parent,
+                                  CloneContext* context) const {
+  sys_func_call* const clone = context->m_serializer->MakeSys_func_call();
   const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
   if (auto obj = User_systf())
-    clone->User_systf(obj->DeepClone(serializer, elaborator, clone));
-  if (auto obj = Scope())
-    clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    clone->User_systf(obj->DeepClone(clone, context));
+  if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
   if (auto vec = Tf_call_args()) {
-    auto clone_vec = serializer->MakeAnyVec();
+    auto clone_vec = context->m_serializer->MakeAnyVec();
     clone->Tf_call_args(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
-  if (auto obj = Typespec())
-    clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
 
   return clone;
 }
 
-tf_call* sys_task_call::DeepClone(Serializer* serializer,
-                                  ElaboratorListener* elaborator,
-                                  BaseClass* parent) const {
-  sys_task_call* const clone = serializer->MakeSys_task_call();
+tf_call* sys_task_call::DeepClone(BaseClass* parent,
+                                  CloneContext* context) const {
+  sys_task_call* const clone = context->m_serializer->MakeSys_task_call();
   const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
   if (auto obj = User_systf())
-    clone->User_systf(obj->DeepClone(serializer, elaborator, clone));
-  if (auto obj = Scope())
-    clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    clone->User_systf(obj->DeepClone(clone, context));
+  if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
   if (auto vec = Tf_call_args()) {
-    auto clone_vec = serializer->MakeAnyVec();
+    auto clone_vec = context->m_serializer->MakeAnyVec();
     clone->Tf_call_args(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
-  if (auto obj = Typespec())
-    clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
 
   return clone;
 }
 
-tf_call* method_func_call::DeepClone(Serializer* serializer,
-                                     ElaboratorListener* elaborator,
-                                     BaseClass* parent) const {
+tf_call* method_func_call::DeepClone(BaseClass* parent,
+                                     CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
   const expr* prefix = Prefix();
   if (prefix) {
-    prefix = prefix->DeepClone(serializer, elaborator, (BaseClass*)this);
+    prefix = prefix->DeepClone((BaseClass*)this, context);
   }
-  bool is_function = elaborator->isFunctionCall(VpiName(), prefix);
+  bool is_function =
+      elaboratorContext->m_elaborator.isFunctionCall(VpiName(), prefix);
   tf_call* the_clone = nullptr;
   if (is_function) {
-    method_func_call* const clone = serializer->MakeMethod_func_call();
+    method_func_call* const clone =
+        context->m_serializer->MakeMethod_func_call();
     the_clone = clone;
     const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (auto obj = Prefix())
-      clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Prefix()) clone->Prefix(obj->DeepClone(clone, context));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
-    const class_var* prefix = nullptr;
-    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    elaborator->scheduleTaskFuncBinding(clone, prefix);
+    const class_var* varprefix = nullptr;
+    if (ref) varprefix = any_cast<const class_var*>(ref->Actual_group());
+    elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, varprefix);
     any* pushedVar = nullptr;
     if (auto vec = Tf_call_args()) {
-      auto clone_vec = serializer->MakeAnyVec();
+      auto clone_vec = context->m_serializer->MakeAnyVec();
       clone->Tf_call_args(clone_vec);
       for (auto obj : *vec) {
-        any* arg = obj->DeepClone(serializer, elaborator, clone);
+        any* arg = obj->DeepClone(clone, context);
         // CB callbacks_to_append[$];
         // unique_callbacks_to_append = callbacks_to_append.unique( cb_ )
         // with ( cb_.get_inst_id );
         if (parent->UhdmType() == uhdmhier_path) {
           hier_path* phier = (hier_path*)parent;
           any* last = phier->Path_elems()->back();
-          if (last->UhdmType() == uhdmref_obj) {
-            ref_obj* last_ref = (ref_obj*)last;
+          if (ref_obj* last_ref = any_cast<ref_obj*>(last)) {
             if (const any* actual = last_ref->Actual_group()) {
-              if (arg->UhdmType() == uhdmref_obj) {
-                ref_obj* refarg = (ref_obj*)arg;
+              if (ref_obj* refarg = any_cast<ref_obj*>(arg)) {
                 bool override = false;
                 if (const any* act = refarg->Actual_group()) {
                   if (act->VpiName() == obj->VpiName()) {
@@ -139,12 +129,14 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
                     array_var* arr = (array_var*)actual;
                     if (!arr->Variables()->empty()) {
                       variables* var = arr->Variables()->front();
-                      variables* clone =
-                          (variables*)clone_tree(var, *serializer, elaborator);
-                      clone->VpiName(obj->VpiName());
-                      actual = clone;
-                      elaborator->pushVar(clone);
-                      pushedVar = clone;
+                      if (variables* varclone =
+                              (variables*)clone_tree(var, context)) {
+                        varclone->VpiName(obj->VpiName());
+                        varclone->VpiParent(const_cast<any*>(obj->VpiParent()));
+                        actual = varclone;
+                        elaboratorContext->m_elaborator.pushVar(varclone);
+                        pushedVar = varclone;
+                      }
                     }
                   }
                   refarg->Actual_group((any*)actual);
@@ -156,17 +148,15 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
         clone_vec->push_back(arg);
       }
     }
-    if (auto obj = With())
-      clone->With(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = With()) clone->With(obj->DeepClone(clone, context));
     if (pushedVar) {
-      elaborator->popVar(pushedVar);
+      elaboratorContext->m_elaborator.popVar(pushedVar);
     }
-    if (auto obj = Scope())
-      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   } else {
-    method_task_call* const clone = serializer->MakeMethod_task_call();
+    method_task_call* const clone =
+        context->m_serializer->MakeMethod_task_call();
     the_clone = clone;
     const uint32_t id = clone->UhdmId();
     //*clone = *this;
@@ -179,102 +169,95 @@ tf_call* method_func_call::DeepClone(Serializer* serializer,
     clone->VpiColumnNo(VpiColumnNo());
     clone->VpiEndLineNo(VpiEndLineNo());
     clone->VpiEndColumnNo(VpiEndColumnNo());
-    if (auto obj = Prefix())
-      clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Prefix()) clone->Prefix(obj->DeepClone(clone, context));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
-    const class_var* prefix = nullptr;
-    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    elaborator->scheduleTaskFuncBinding(clone, prefix);
-    if (auto obj = With())
-      clone->With(obj->DeepClone(serializer, elaborator, clone));
-    if (auto obj = Scope())
-      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    const class_var* varprefix = nullptr;
+    if (ref) varprefix = any_cast<const class_var*>(ref->Actual_group());
+    elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, varprefix);
+    if (auto obj = With()) clone->With(obj->DeepClone(clone, context));
+    if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
     if (auto vec = Tf_call_args()) {
-      auto clone_vec = serializer->MakeAnyVec();
+      auto clone_vec = context->m_serializer->MakeAnyVec();
       clone->Tf_call_args(clone_vec);
       for (auto obj : *vec) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+        clone_vec->push_back(obj->DeepClone(clone, context));
       }
     }
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   }
   return the_clone;
 }
 
-constant* constant::DeepClone(Serializer* serializer,
-                              ElaboratorListener* elaborator,
-                              BaseClass* parent) const {
-  if (elaborator->uniquifyTypespec() || (VpiSize() == -1)) {
-    constant* const clone = serializer->MakeConstant();
+constant* constant::DeepClone(BaseClass* parent, CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
+  if (elaboratorContext->m_elaborator.uniquifyTypespec() || (VpiSize() == -1)) {
+    constant* const clone = context->m_serializer->MakeConstant();
     const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
     return clone;
   } else {
     return (constant*)this;
   }
 }
 
-tagged_pattern* tagged_pattern::DeepClone(Serializer* serializer,
-                                          ElaboratorListener* elaborator,
-                                          BaseClass* parent) const {
-  if (elaborator->uniquifyTypespec()) {
-    tagged_pattern* const clone = serializer->MakeTagged_pattern();
+tagged_pattern* tagged_pattern::DeepClone(BaseClass* parent,
+                                          CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
+  if (elaboratorContext->m_elaborator.uniquifyTypespec()) {
+    tagged_pattern* const clone = context->m_serializer->MakeTagged_pattern();
     const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
-    if (auto obj = Pattern())
-      clone->Pattern(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
+    if (auto obj = Pattern()) clone->Pattern(obj->DeepClone(clone, context));
     return clone;
   } else {
     return (tagged_pattern*)this;
   }
 }
 
-tf_call* method_task_call::DeepClone(Serializer* serializer,
-                                     ElaboratorListener* elaborator,
-                                     BaseClass* parent) const {
+tf_call* method_task_call::DeepClone(BaseClass* parent,
+                                     CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
   const expr* prefix = Prefix();
   if (prefix) {
-    prefix = prefix->DeepClone(serializer, elaborator, (BaseClass*)this);
+    prefix = prefix->DeepClone((BaseClass*)this, context);
   }
-  bool is_task = elaborator->isTaskCall(VpiName(), prefix);
+  bool is_task = elaboratorContext->m_elaborator.isTaskCall(VpiName(), prefix);
   tf_call* the_clone = nullptr;
   if (is_task) {
-    method_task_call* const clone = serializer->MakeMethod_task_call();
+    method_task_call* const clone =
+        context->m_serializer->MakeMethod_task_call();
     the_clone = clone;
     const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    if (auto obj = Prefix())
-      clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Prefix()) clone->Prefix(obj->DeepClone(clone, context));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
-    const class_var* prefix = nullptr;
-    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    elaborator->scheduleTaskFuncBinding(clone, prefix);
-    if (auto obj = With())
-      clone->With(obj->DeepClone(serializer, elaborator, clone));
-    if (auto obj = Scope())
-      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    const class_var* varprefix = nullptr;
+    if (ref) varprefix = any_cast<const class_var*>(ref->Actual_group());
+    elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, varprefix);
+    if (auto obj = With()) clone->With(obj->DeepClone(clone, context));
+    if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
     if (auto vec = Tf_call_args()) {
-      auto clone_vec = serializer->MakeAnyVec();
+      auto clone_vec = context->m_serializer->MakeAnyVec();
       clone->Tf_call_args(clone_vec);
       for (auto obj : *vec) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+        clone_vec->push_back(obj->DeepClone(clone, context));
       }
     }
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   } else {
-    method_func_call* const clone = serializer->MakeMethod_func_call();
+    method_func_call* const clone =
+        context->m_serializer->MakeMethod_func_call();
     the_clone = clone;
     const uint32_t id = clone->UhdmId();
     //*clone = *this;
@@ -287,55 +270,50 @@ tf_call* method_task_call::DeepClone(Serializer* serializer,
     clone->VpiColumnNo(VpiColumnNo());
     clone->VpiEndLineNo(VpiEndLineNo());
     clone->VpiEndColumnNo(VpiEndColumnNo());
-    if (auto obj = Prefix())
-      clone->Prefix(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Prefix()) clone->Prefix(obj->DeepClone(clone, context));
     const ref_obj* ref = any_cast<const ref_obj*>(clone->Prefix());
-    const class_var* prefix = nullptr;
-    if (ref) prefix = any_cast<const class_var*>(ref->Actual_group());
-    elaborator->scheduleTaskFuncBinding(clone, prefix);
-    if (auto obj = With())
-      clone->With(obj->DeepClone(serializer, elaborator, clone));
-    if (auto obj = Scope())
-      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    const class_var* varprefix = nullptr;
+    if (ref) varprefix = any_cast<const class_var*>(ref->Actual_group());
+    elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, varprefix);
+    if (auto obj = With()) clone->With(obj->DeepClone(clone, context));
+    if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
     if (auto vec = Tf_call_args()) {
-      auto clone_vec = serializer->MakeAnyVec();
+      auto clone_vec = context->m_serializer->MakeAnyVec();
       clone->Tf_call_args(clone_vec);
       for (auto obj : *vec) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+        clone_vec->push_back(obj->DeepClone(clone, context));
       }
     }
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   }
   return the_clone;
 }
 
-tf_call* func_call::DeepClone(Serializer* serializer,
-                              ElaboratorListener* elaborator,
-                              BaseClass* parent) const {
-  bool is_function = elaborator->isFunctionCall(VpiName(), nullptr);
+tf_call* func_call::DeepClone(BaseClass* parent, CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
+  bool is_function =
+      elaboratorContext->m_elaborator.isFunctionCall(VpiName(), nullptr);
   tf_call* the_clone = nullptr;
   if (is_function) {
-    func_call* const clone = serializer->MakeFunc_call();
+    func_call* const clone = context->m_serializer->MakeFunc_call();
     the_clone = clone;
     const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    elaborator->scheduleTaskFuncBinding(clone, nullptr);
-    if (auto obj = Scope())
-      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, nullptr);
+    if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
     if (auto vec = Tf_call_args()) {
-      auto clone_vec = serializer->MakeAnyVec();
+      auto clone_vec = context->m_serializer->MakeAnyVec();
       clone->Tf_call_args(clone_vec);
       for (auto obj : *vec) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+        clone_vec->push_back(obj->DeepClone(clone, context));
       }
     }
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   } else {
-    task_call* const clone = serializer->MakeTask_call();
+    task_call* const clone = context->m_serializer->MakeTask_call();
     the_clone = clone;
     const uint32_t id = clone->UhdmId();
     //*clone = *this;
@@ -348,49 +326,45 @@ tf_call* func_call::DeepClone(Serializer* serializer,
     clone->VpiColumnNo(VpiColumnNo());
     clone->VpiEndLineNo(VpiEndLineNo());
     clone->VpiEndColumnNo(VpiEndColumnNo());
-    elaborator->scheduleTaskFuncBinding(clone, nullptr);
-    if (auto obj = Scope())
-      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, nullptr);
+    if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
     if (auto vec = Tf_call_args()) {
-      auto clone_vec = serializer->MakeAnyVec();
+      auto clone_vec = context->m_serializer->MakeAnyVec();
       clone->Tf_call_args(clone_vec);
       for (auto obj : *vec) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+        clone_vec->push_back(obj->DeepClone(clone, context));
       }
     }
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   }
 
   return the_clone;
 }
 
-tf_call* task_call::DeepClone(Serializer* serializer,
-                              ElaboratorListener* elaborator,
-                              BaseClass* parent) const {
-  bool is_task = elaborator->isTaskCall(VpiName(), nullptr);
+tf_call* task_call::DeepClone(BaseClass* parent, CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
+  bool is_task = elaboratorContext->m_elaborator.isTaskCall(VpiName(), nullptr);
   tf_call* the_clone = nullptr;
   if (is_task) {
-    task_call* const clone = serializer->MakeTask_call();
+    task_call* const clone = context->m_serializer->MakeTask_call();
     the_clone = clone;
     const uint32_t id = clone->UhdmId();
     *clone = *this;
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    elaborator->scheduleTaskFuncBinding(clone, nullptr);
-    if (auto obj = Scope())
-      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, nullptr);
+    if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
     if (auto vec = Tf_call_args()) {
-      auto clone_vec = serializer->MakeAnyVec();
+      auto clone_vec = context->m_serializer->MakeAnyVec();
       clone->Tf_call_args(clone_vec);
       for (auto obj : *vec) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+        clone_vec->push_back(obj->DeepClone(clone, context));
       }
     }
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   } else {
-    func_call* const clone = serializer->MakeFunc_call();
+    func_call* const clone = context->m_serializer->MakeFunc_call();
     the_clone = clone;
     const uint32_t id = clone->UhdmId();
     //*clone = *this;
@@ -403,386 +377,374 @@ tf_call* task_call::DeepClone(Serializer* serializer,
     clone->Tf_call_args(Tf_call_args());
     clone->UhdmId(id);
     clone->VpiParent(parent);
-    elaborator->scheduleTaskFuncBinding(clone, nullptr);
-    if (auto obj = Scope())
-      clone->Scope(obj->DeepClone(serializer, elaborator, clone));
+    elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, nullptr);
+    if (auto obj = Scope()) clone->Scope(obj->DeepClone(clone, context));
     if (auto vec = Tf_call_args()) {
-      auto clone_vec = serializer->MakeAnyVec();
+      auto clone_vec = context->m_serializer->MakeAnyVec();
       clone->Tf_call_args(clone_vec);
       for (auto obj : *vec) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+        clone_vec->push_back(obj->DeepClone(clone, context));
       }
     }
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   }
   return the_clone;
 }
 
-gen_scope_array* gen_scope_array::DeepClone(Serializer* serializer,
-                                            ElaboratorListener* elaborator,
-                                            BaseClass* parent) const {
-  gen_scope_array* const clone = serializer->MakeGen_scope_array();
+gen_scope_array* gen_scope_array::DeepClone(BaseClass* parent,
+                                            CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
+  gen_scope_array* const clone = context->m_serializer->MakeGen_scope_array();
   const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
-  if (auto obj = Gen_var())
-    clone->Gen_var(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Gen_var()) clone->Gen_var(obj->DeepClone(clone, context));
   if (auto vec = Gen_scopes()) {
-    auto clone_vec = serializer->MakeGen_scopeVec();
+    auto clone_vec = context->m_serializer->MakeGen_scopeVec();
     clone->Gen_scopes(clone_vec);
     for (auto obj : *vec) {
-      elaborator->enterGen_scope(obj, nullptr);
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
-      elaborator->leaveGen_scope(obj, nullptr);
+      elaboratorContext->m_elaborator.enterGen_scope(obj, nullptr);
+      clone_vec->push_back(obj->DeepClone(clone, context));
+      elaboratorContext->m_elaborator.leaveGen_scope(obj, nullptr);
     }
   }
   if (auto obj = VpiInstance())
-    clone->VpiInstance(obj->DeepClone(serializer, elaborator, clone));
+    clone->VpiInstance(obj->DeepClone(clone, context));
 
   return clone;
 }
 
-function* function::DeepClone(Serializer* serializer,
-                              ElaboratorListener* elaborator,
-                              BaseClass* parent) const {
-  function* const clone = serializer->MakeFunction();
+function* function::DeepClone(BaseClass* parent, CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
+  function* const clone = context->m_serializer->MakeFunction();
   const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
   if (auto obj = Left_range())
-    clone->Left_range(obj->DeepClone(serializer, elaborator, clone));
+    clone->Left_range(obj->DeepClone(clone, context));
   if (auto obj = Right_range())
-    clone->Right_range(obj->DeepClone(serializer, elaborator, clone));
+    clone->Right_range(obj->DeepClone(clone, context));
   if (auto obj = Return()) clone->Return((variables*)obj);
   if (auto obj = Instance()) clone->Instance((instance*)obj);
   if (instance* inst = any_cast<instance*>(parent)) clone->Instance(inst);
   if (auto obj = Class_defn())
-    clone->Class_defn(obj->DeepClone(serializer, elaborator, clone));
-  if (auto obj = Ref_obj())
-    clone->Ref_obj(obj->DeepClone(serializer, elaborator, clone));
+    clone->Class_defn(obj->DeepClone(clone, context));
   if (auto vec = Io_decls()) {
-    auto clone_vec = serializer->MakeIo_declVec();
+    auto clone_vec = context->m_serializer->MakeIo_declVec();
     clone->Io_decls(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Variables()) {
-    auto clone_vec = serializer->MakeVariablesVec();
+    auto clone_vec = context->m_serializer->MakeVariablesVec();
     clone->Variables(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Parameters()) {
-    auto clone_vec = serializer->MakeAnyVec();
+    auto clone_vec = context->m_serializer->MakeAnyVec();
     clone->Parameters(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Scopes()) {
-    auto clone_vec = serializer->MakeScopeVec();
+    auto clone_vec = context->m_serializer->MakeScopeVec();
     clone->Scopes(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Typespecs()) {
-    auto clone_vec = serializer->MakeTypespecVec();
+    auto clone_vec = context->m_serializer->MakeTypespecVec();
     clone->Typespecs(clone_vec);
     for (auto obj : *vec) {
-      if (elaborator->uniquifyTypespec()) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      if (elaboratorContext->m_elaborator.uniquifyTypespec()) {
+        clone_vec->push_back(obj->DeepClone(clone, context));
       } else {
         clone_vec->push_back(obj);
       }
     }
   }
-  elaborator->enterTask_func(clone, nullptr);
+  elaboratorContext->m_elaborator.enterTask_func(clone, nullptr);
   if (auto vec = Concurrent_assertions()) {
-    auto clone_vec = serializer->MakeConcurrent_assertionsVec();
+    auto clone_vec = context->m_serializer->MakeConcurrent_assertionsVec();
     clone->Concurrent_assertions(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Property_decls()) {
-    auto clone_vec = serializer->MakeProperty_declVec();
+    auto clone_vec = context->m_serializer->MakeProperty_declVec();
     clone->Property_decls(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Sequence_decls()) {
-    auto clone_vec = serializer->MakeSequence_declVec();
+    auto clone_vec = context->m_serializer->MakeSequence_declVec();
     clone->Sequence_decls(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Named_events()) {
-    auto clone_vec = serializer->MakeNamed_eventVec();
+    auto clone_vec = context->m_serializer->MakeNamed_eventVec();
     clone->Named_events(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Named_event_arrays()) {
-    auto clone_vec = serializer->MakeNamed_event_arrayVec();
+    auto clone_vec = context->m_serializer->MakeNamed_event_arrayVec();
     clone->Named_event_arrays(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Virtual_interface_vars()) {
-    auto clone_vec = serializer->MakeVirtual_interface_varVec();
+    auto clone_vec = context->m_serializer->MakeVirtual_interface_varVec();
     clone->Virtual_interface_vars(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Logic_vars()) {
-    auto clone_vec = serializer->MakeLogic_varVec();
+    auto clone_vec = context->m_serializer->MakeLogic_varVec();
     clone->Logic_vars(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Array_vars()) {
-    auto clone_vec = serializer->MakeArray_varVec();
+    auto clone_vec = context->m_serializer->MakeArray_varVec();
     clone->Array_vars(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Array_var_mems()) {
-    auto clone_vec = serializer->MakeArray_varVec();
+    auto clone_vec = context->m_serializer->MakeArray_varVec();
     clone->Array_var_mems(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Param_assigns()) {
-    auto clone_vec = serializer->MakeParam_assignVec();
+    auto clone_vec = context->m_serializer->MakeParam_assignVec();
     clone->Param_assigns(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Let_decls()) {
-    auto clone_vec = serializer->MakeLet_declVec();
+    auto clone_vec = context->m_serializer->MakeLet_declVec();
     clone->Let_decls(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Attributes()) {
-    auto clone_vec = serializer->MakeAttributeVec();
+    auto clone_vec = context->m_serializer->MakeAttributeVec();
     clone->Attributes(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Instance_items()) {
-    auto clone_vec = serializer->MakeAnyVec();
+    auto clone_vec = context->m_serializer->MakeAnyVec();
     clone->Instance_items(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
-  if (auto obj = Stmt())
-    clone->Stmt(obj->DeepClone(serializer, elaborator, clone));
-  elaborator->leaveTask_func(clone, nullptr);
+  if (auto obj = Stmt()) clone->Stmt(obj->DeepClone(clone, context));
+  elaboratorContext->m_elaborator.leaveTask_func(clone, nullptr);
   return clone;
 }
 
-task* task::DeepClone(Serializer* serializer, ElaboratorListener* elaborator,
-                      BaseClass* parent) const {
-  task* const clone = serializer->MakeTask();
+task* task::DeepClone(BaseClass* parent, CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
+  task* const clone = context->m_serializer->MakeTask();
   const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
   if (auto obj = Left_range())
-    clone->Left_range(obj->DeepClone(serializer, elaborator, clone));
+    clone->Left_range(obj->DeepClone(clone, context));
   if (auto obj = Right_range())
-    clone->Right_range(obj->DeepClone(serializer, elaborator, clone));
-  if (auto obj = Return())
-    clone->Return(obj->DeepClone(serializer, elaborator, clone));
+    clone->Right_range(obj->DeepClone(clone, context));
+  if (auto obj = Return()) clone->Return(obj->DeepClone(clone, context));
   if (auto obj = Instance()) clone->Instance((instance*)obj);
   if (instance* inst = any_cast<instance*>(parent)) clone->Instance(inst);
   if (auto obj = Class_defn())
-    clone->Class_defn(obj->DeepClone(serializer, elaborator, clone));
-  if (auto obj = Ref_obj())
-    clone->Ref_obj(obj->DeepClone(serializer, elaborator, clone));
+    clone->Class_defn(obj->DeepClone(clone, context));
   if (auto vec = Io_decls()) {
-    auto clone_vec = serializer->MakeIo_declVec();
+    auto clone_vec = context->m_serializer->MakeIo_declVec();
     clone->Io_decls(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Variables()) {
-    auto clone_vec = serializer->MakeVariablesVec();
+    auto clone_vec = context->m_serializer->MakeVariablesVec();
     clone->Variables(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Scopes()) {
-    auto clone_vec = serializer->MakeScopeVec();
+    auto clone_vec = context->m_serializer->MakeScopeVec();
     clone->Scopes(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Typespecs()) {
-    auto clone_vec = serializer->MakeTypespecVec();
+    auto clone_vec = context->m_serializer->MakeTypespecVec();
     clone->Typespecs(clone_vec);
     for (auto obj : *vec) {
-      if (elaborator->uniquifyTypespec()) {
-        clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      if (elaboratorContext->m_elaborator.uniquifyTypespec()) {
+        clone_vec->push_back(obj->DeepClone(clone, context));
       } else {
         clone_vec->push_back(obj);
       }
     }
   }
-  elaborator->enterTask_func(clone, nullptr);
+  elaboratorContext->m_elaborator.enterTask_func(clone, nullptr);
   if (auto vec = Concurrent_assertions()) {
-    auto clone_vec = serializer->MakeConcurrent_assertionsVec();
+    auto clone_vec = context->m_serializer->MakeConcurrent_assertionsVec();
     clone->Concurrent_assertions(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Property_decls()) {
-    auto clone_vec = serializer->MakeProperty_declVec();
+    auto clone_vec = context->m_serializer->MakeProperty_declVec();
     clone->Property_decls(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Sequence_decls()) {
-    auto clone_vec = serializer->MakeSequence_declVec();
+    auto clone_vec = context->m_serializer->MakeSequence_declVec();
     clone->Sequence_decls(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Named_events()) {
-    auto clone_vec = serializer->MakeNamed_eventVec();
+    auto clone_vec = context->m_serializer->MakeNamed_eventVec();
     clone->Named_events(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Named_event_arrays()) {
-    auto clone_vec = serializer->MakeNamed_event_arrayVec();
+    auto clone_vec = context->m_serializer->MakeNamed_event_arrayVec();
     clone->Named_event_arrays(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Virtual_interface_vars()) {
-    auto clone_vec = serializer->MakeVirtual_interface_varVec();
+    auto clone_vec = context->m_serializer->MakeVirtual_interface_varVec();
     clone->Virtual_interface_vars(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Logic_vars()) {
-    auto clone_vec = serializer->MakeLogic_varVec();
+    auto clone_vec = context->m_serializer->MakeLogic_varVec();
     clone->Logic_vars(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Array_vars()) {
-    auto clone_vec = serializer->MakeArray_varVec();
+    auto clone_vec = context->m_serializer->MakeArray_varVec();
     clone->Array_vars(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Array_var_mems()) {
-    auto clone_vec = serializer->MakeArray_varVec();
+    auto clone_vec = context->m_serializer->MakeArray_varVec();
     clone->Array_var_mems(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Param_assigns()) {
-    auto clone_vec = serializer->MakeParam_assignVec();
+    auto clone_vec = context->m_serializer->MakeParam_assignVec();
     clone->Param_assigns(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Let_decls()) {
-    auto clone_vec = serializer->MakeLet_declVec();
+    auto clone_vec = context->m_serializer->MakeLet_declVec();
     clone->Let_decls(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Attributes()) {
-    auto clone_vec = serializer->MakeAttributeVec();
+    auto clone_vec = context->m_serializer->MakeAttributeVec();
     clone->Attributes(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Parameters()) {
-    auto clone_vec = serializer->MakeAnyVec();
+    auto clone_vec = context->m_serializer->MakeAnyVec();
     clone->Parameters(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
   if (auto vec = Instance_items()) {
-    auto clone_vec = serializer->MakeAnyVec();
+    auto clone_vec = context->m_serializer->MakeAnyVec();
     clone->Instance_items(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
-  if (auto obj = Stmt())
-    clone->Stmt(obj->DeepClone(serializer, elaborator, clone));
-  elaborator->leaveTask_func(clone, nullptr);
+  if (auto obj = Stmt()) clone->Stmt(obj->DeepClone(clone, context));
+  elaboratorContext->m_elaborator.leaveTask_func(clone, nullptr);
   return clone;
 }
 
-cont_assign* cont_assign::DeepClone(Serializer* serializer,
-                                    ElaboratorListener* elaborator,
-                                    BaseClass* parent) const {
-  cont_assign* const clone = serializer->MakeCont_assign();
+cont_assign* cont_assign::DeepClone(BaseClass* parent,
+                                    CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
+  cont_assign* const clone = context->m_serializer->MakeCont_assign();
   const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
-  if (auto obj = Delay())
-    clone->Delay(obj->DeepClone(serializer, elaborator, clone));
+  if (auto obj = Delay()) clone->Delay(obj->DeepClone(clone, context));
   expr* lhs = nullptr;
   if (auto obj = Lhs()) {
-    lhs = obj->DeepClone(serializer, elaborator, clone);
+    lhs = obj->DeepClone(clone, context);
     clone->Lhs(lhs);
   }
   if (auto obj = Rhs()) {
-    expr* rhs = obj->DeepClone(serializer, elaborator, clone);
+    expr* rhs = obj->DeepClone(clone, context);
     clone->Rhs(rhs);
-    if (lhs && lhs->UhdmType() == uhdmref_obj) {
-      ref_obj* ref = (ref_obj*)lhs;
-      const any* actual = ref->Actual_group();
-      if (actual) {
-        if (actual->UhdmType() == uhdmstruct_var) {
-          struct_var* stv = (struct_var*)actual;
-          ExprEval eval(elaborator->muteErrors());
-          expr* res =
-              eval.flattenPatternAssignments(*serializer, stv->Typespec(), rhs);
+    if (ref_obj* ref = any_cast<ref_obj*>(lhs)) {
+      if (struct_var* stv = ref->Actual_group<struct_var>()) {
+        ExprEval eval(elaboratorContext->m_elaborator.muteErrors());
+        if (expr* res = eval.flattenPatternAssignments(*context->m_serializer,
+                                                       stv->Typespec(), rhs)) {
           if (res->UhdmType() == uhdmoperation) {
             ((operation*)rhs)->Operands(((operation*)res)->Operands());
           }
@@ -791,10 +753,10 @@ cont_assign* cont_assign::DeepClone(Serializer* serializer,
     }
   }
   if (auto vec = Cont_assign_bits()) {
-    auto clone_vec = serializer->MakeCont_assign_bitVec();
+    auto clone_vec = context->m_serializer->MakeCont_assign_bitVec();
     clone->Cont_assign_bits(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
 
@@ -809,12 +771,8 @@ any* bindClassTypespec(class_typespec* ctps, any* current,
     if (defn->Variables()) {
       for (variables* var : *defn->Variables()) {
         if (var->VpiName() == name) {
-          if (current->UhdmType() == uhdmref_obj) {
-            ((ref_obj*)current)->Actual_group(var);
-          } else if (current->UhdmType() == uhdmbit_select) {
-            const any* parent = current->VpiParent();
-            if (parent && (parent->UhdmType() == uhdmref_obj))
-              ((ref_obj*)parent)->Actual_group(var);
+          if (ref_obj* ro = any_cast<ref_obj*>(current)) {
+            ro->Actual_group(var);
           }
           previous = var;
           found = true;
@@ -825,12 +783,8 @@ any* bindClassTypespec(class_typespec* ctps, any* current,
     if (defn->Named_events()) {
       for (named_event* event : *defn->Named_events()) {
         if (event->VpiName() == name) {
-          if (current->UhdmType() == uhdmref_obj) {
-            ((ref_obj*)current)->Actual_group(event);
-          } else if (current->UhdmType() == uhdmbit_select) {
-            const any* parent = current->VpiParent();
-            if (parent && (parent->UhdmType() == uhdmref_obj))
-              ((ref_obj*)parent)->Actual_group(event);
+          if (ref_obj* ro = any_cast<ref_obj*>(current)) {
+            ro->Actual_group(event);
           }
           previous = event;
           found = true;
@@ -841,12 +795,8 @@ any* bindClassTypespec(class_typespec* ctps, any* current,
     if (defn->Task_funcs()) {
       for (task_func* tf : *defn->Task_funcs()) {
         if (tf->VpiName() == name) {
-          if (current->UhdmType() == uhdmref_obj) {
-            ((ref_obj*)current)->Actual_group(tf);
-          } else if (current->UhdmType() == uhdmbit_select) {
-            const any* parent = current->VpiParent();
-            if (parent && (parent->UhdmType() == uhdmref_obj))
-              ((ref_obj*)parent)->Actual_group(tf);
+          if (ref_obj* ro = any_cast<ref_obj*>(current)) {
+            ro->Actual_group(tf);
           } else if (current->UhdmType() == uhdmmethod_func_call) {
             if (tf->UhdmType() == uhdmfunction)
               ((method_func_call*)current)->Function((function*)tf);
@@ -861,36 +811,36 @@ any* bindClassTypespec(class_typespec* ctps, any* current,
       }
     }
     if (found) break;
-    const class_defn* tmp = defn;
-    defn = nullptr;
-    if (const extends* ext = tmp->Extends()) {
+
+    const class_defn* base_defn = nullptr;
+    if (const extends* ext = defn->Extends()) {
       if (const class_typespec* tp = ext->Class_typespec()) {
-        defn = tp->Class_defn();
+        base_defn = tp->Class_defn();
       }
     }
+    defn = base_defn;
   }
   return previous;
 }
 
-hier_path* hier_path::DeepClone(Serializer* serializer,
-                                ElaboratorListener* elaborator,
-                                BaseClass* parent) const {
-  hier_path* const clone = serializer->MakeHier_path();
+hier_path* hier_path::DeepClone(BaseClass* parent,
+                                CloneContext* context) const {
+  ElaboratorContext* const elaboratorContext =
+      clonecontext_cast<ElaboratorContext*>(context);
+  hier_path* const clone = context->m_serializer->MakeHier_path();
   const uint32_t id = clone->UhdmId();
   *clone = *this;
   clone->UhdmId(id);
   clone->VpiParent(parent);
   if (auto vec = Path_elems()) {
-    auto clone_vec = serializer->MakeAnyVec();
+    auto clone_vec = context->m_serializer->MakeAnyVec();
     clone->Path_elems(clone_vec);
     any* previous = nullptr;
     for (auto obj : *vec) {
-      any* current = nullptr;
-      current = obj->DeepClone(serializer, elaborator, clone);
+      any* current = obj->DeepClone(clone, context);
       clone_vec->push_back(current);
       bool found = false;
-      if (current->UhdmType() == uhdmref_obj) {
-        ref_obj* ref = (ref_obj*)current;
+      if (ref_obj* ref = any_cast<ref_obj*>(current)) {
         if (current->VpiName() == "this") {
           const any* tmp = current;
           while (tmp) {
@@ -906,10 +856,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           while (tmp) {
             if (tmp->UhdmType() == uhdmclass_defn) {
               class_defn* def = (class_defn*)tmp;
-              const extends* ext = def->Extends();
-              if (ext) {
-                const class_typespec* ctps = ext->Class_typespec();
-                if (ctps) {
+              if (const extends* ext = def->Extends()) {
+                if (const class_typespec* ctps = ext->Class_typespec()) {
                   ref->Actual_group((any*)ctps->Class_defn());
                   found = true;
                   break;
@@ -923,82 +871,32 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
       }
       if (previous) {
         std::string_view name = obj->VpiName();
-        std::string nameIndexed(name);
-        if (name.empty()) {
-          if (obj->UhdmType() == uhdmpart_select) {
-            if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
-            part_select* sel = (part_select*)obj;
-            if (const any* actual = sel->Actual_group()) {
+        if (name.empty() || name.find('[') == 0) {
+          if (ref_obj* ro = any_cast<ref_obj*>(obj)) {
+            if (const any* actual = ro->Actual_group()) {
               name = actual->VpiName();
             }
-          } else if (obj->UhdmType() == uhdmindexed_part_select) {
-            if (obj->VpiParent()) name = obj->VpiParent()->VpiName();
-            indexed_part_select* sel = (indexed_part_select*)obj;
-            if (const any* actual = sel->Actual_group()) {
-              name = actual->VpiName();
-            }
-          } else if (obj->UhdmType() == uhdmbit_select) {
             //  a[i][j]
-            bit_select* sel = (bit_select*)obj;
             if (previous->UhdmType() == uhdmbit_select) {
               bit_select* prev = (bit_select*)previous;
-              sel->Actual_group((any*)prev->Actual_group());
+              ro->Actual_group((any*)prev->Actual_group());
               found = true;
             }
           }
         }
+        std::string nameIndexed(name);
         if (obj->UhdmType() == uhdmbit_select) {
-          if (const any* p = obj->VpiParent()) {
-            if (p->UhdmType() == uhdmref_obj) {
-              ref_obj* pr = (ref_obj*)p;
-              const std::string_view pname = pr->VpiName();
-              if (pname.find('[') != std::string::npos) {
-                nameIndexed = pname;
-              }
-            }
-          }
-          bit_select* sel = (bit_select*)obj;
-          if (const any* actual = sel->Actual_group()) {
-            const std::string_view pname = actual->VpiName();
-            if (pname.find('[') != std::string::npos) {
-              nameIndexed = pname;
-            }
+          bit_select* bs = static_cast<bit_select*>(obj);
+          const expr* index = bs->VpiIndex();
+          std::string_view indexName = index->VpiDecompile();
+          if (!indexName.empty()) {
+            nameIndexed.append("[").append(indexName).append("]");
           }
         }
-        if (previous->UhdmType() == uhdmref_obj ||
-            previous->UhdmType() == uhdmbit_select ||
-            previous->UhdmType() == uhdmpart_select ||
-            previous->UhdmType() == uhdmindexed_part_select) {
-          const any* actual = nullptr;
-          if (previous->UhdmType() == uhdmbit_select) {
-            bit_select* sel = (bit_select*)previous;
-            if (const any* p = sel->VpiParent()) {
-              if (p->UhdmType() == uhdmref_obj) {
-                ref_obj* pref = (ref_obj*)p;
-                actual = pref->Actual_group();
-              }
-            }
-            if (const any* actualtmp = sel->Actual_group()) {
-              actual = actualtmp;
-            }
-          } else if (previous->UhdmType() == uhdmpart_select) {
-            part_select* sel = (part_select*)obj;
-            if (const any* actualtmp = sel->Actual_group()) {
-              actual = actualtmp;
-            }
-          } else if (previous->UhdmType() == uhdmindexed_part_select) {
-            indexed_part_select* sel = (indexed_part_select*)obj;
-            if (const any* actualtmp = sel->Actual_group()) {
-              actual = actualtmp;
-            }
-          } else {
-            ref_obj* ref = (ref_obj*)previous;
-            actual = ref->Actual_group();
-            if (actual == nullptr) {
-              if (previous->VpiName() == "$root") {
-                actual = elaborator->currentDesign();
-              }
-            }
+        if (ref_obj* pro = any_cast<ref_obj*>(previous)) {
+          const any* actual = pro->Actual_group();
+          if ((actual == nullptr) && (previous->VpiName() == "$root")) {
+            actual = elaboratorContext->m_elaborator.currentDesign();
           }
           if (actual) {
             UHDM_OBJECT_TYPE actual_type = actual->UhdmType();
@@ -1012,12 +910,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                         modName == std::string("work@").append(name)) {
                       found = true;
                       previous = m;
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(m);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(m);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(m);
                       }
                       break;
                     }
@@ -1052,67 +946,66 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     }
                   }
                 } else {
-                  if (scope->Modules()) {
+                  if (!found && scope->Modules()) {
                     for (auto m : *scope->Modules()) {
                       if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                         found = true;
                         previous = m;
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(m);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(m);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(m);
                         }
                         break;
                       }
                     }
                   }
-                  if (scope->Nets()) {
+                  if (!found && scope->Nets()) {
                     for (auto m : *scope->Nets()) {
                       if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                         found = true;
                         previous = m;
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(m);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(m);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(m);
                         }
                         break;
                       }
                     }
                   }
-                  if (scope->Array_nets()) {
+                  if (!found && scope->Array_nets()) {
                     for (auto m : *scope->Array_nets()) {
                       if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                         found = true;
                         previous = m;
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(m);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(m);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(m);
                         }
                         break;
                       }
                     }
                   }
-                  if (scope->Variables()) {
+                  if (!found && scope->Variables()) {
                     for (auto m : *scope->Variables()) {
                       if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                         found = true;
                         previous = m;
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(m);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(m);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(m);
                         }
                         break;
+                      }
+                    }
+                  }
+                  if (!found && scope->Gen_scope_arrays()) {
+                    for (auto gsa : *scope->Gen_scope_arrays()) {
+                      if (gsa->VpiName() == name ||
+                          gsa->VpiName() == nameIndexed) {
+                        if (!gsa->Gen_scopes()->empty()) {
+                          auto gs = gsa->Gen_scopes()->front();
+                          if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                            cro->Actual_group(gs);
+                          }
+                          previous = gs;
+                          found = true;
+                        }
                       }
                     }
                   }
@@ -1120,14 +1013,14 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 break;
               }
               case uhdmmodport: {
-                UHDM::modport* modport = (UHDM::modport*)actual;
-                if (modport->Io_decls()) {
-                  for (io_decl* decl : *modport->Io_decls()) {
+                modport* mp = (modport*)actual;
+                if (mp->Io_decls()) {
+                  for (io_decl* decl : *mp->Io_decls()) {
                     if (decl->VpiName() == name) {
                       found = true;
                       previous = decl;
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(decl);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(decl);
                       }
                     }
                   }
@@ -1150,10 +1043,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 if (name == "size" || name == "exists" || name == "find" ||
                     name == "max" || name == "min") {
-                  func_call* call = serializer->MakeFunc_call();
+                  func_call* call = context->m_serializer->MakeFunc_call();
                   call->VpiName(name);
-                  if (current->UhdmType() == uhdmref_obj) {
-                    ((ref_obj*)current)->Actual_group(call);
+                  call->VpiParent(clone);
+                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                    cro->Actual_group(call);
                   }
                   // Builtin method
                   found = true;
@@ -1164,46 +1058,99 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 break;
               }
-              case uhdmarray_var: {
-                array_var* avar = (array_var*)actual;
-                VectorOfvariables* vars = avar->Variables();
-                if (vars && vars->size()) {
-                  actual = vars->at(0);
-                  actual_type = actual->UhdmType();
+              case uhdmarray_var: 
+              case uhdmpacked_array_var: {
+                const typespec* tps = nullptr;
+                if (actual_type == uhdmpacked_array_var) {
+                  packed_array_var* avar = (packed_array_var*)actual;
+                  VectorOfany* vars = avar->Elements();
+                  if (vars && vars->size()) {
+                    actual = vars->at(0);
+                    actual_type = actual->UhdmType();
+                  }
+                  tps = avar->Typespec();
+                } else {
+                  array_var* avar = (array_var*)actual;
+                  VectorOfvariables* vars = avar->Variables();
+                  if (vars && vars->size()) {
+                    actual = vars->at(0);
+                    actual_type = actual->UhdmType();
+                  }
+                  tps = avar->Typespec();
                 }
                 if (name == "size" || name == "exists" || name == "find" ||
                     name == "max" || name == "min") {
-                  func_call* call = serializer->MakeFunc_call();
+                  func_call* call = context->m_serializer->MakeFunc_call();
                   call->VpiName(name);
-                  if (current->UhdmType() == uhdmref_obj) {
-                    ((ref_obj*)current)->Actual_group(call);
+                  call->VpiParent(clone);
+                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                    cro->Actual_group(call);
                   }
                   // Builtin method
                   found = true;
                   previous = (any*)call;
-                } else if (name == "") {
-                  // One of the Index(es)
-                  found = true;
                 }
-                break;
-              }
-              case uhdmpacked_array_var: {
-                packed_array_var* avar = (packed_array_var*)actual;
-                VectorOfany* vars = avar->Elements();
-                if (vars && vars->size()) {
-                  actual = vars->at(0);
-                  actual_type = actual->UhdmType();
-                }
-                if (name == "size" || name == "exists" || name == "exists" ||
-                    name == "max" || name == "min") {
-                  func_call* call = serializer->MakeFunc_call();
-                  call->VpiName(name);
-                  if (current->UhdmType() == uhdmref_obj) {
-                    ((ref_obj*)current)->Actual_group(call);
+                if (found == false) {
+                  if (tps) {
+                    UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+                    if (ttype == uhdmpacked_array_typespec) {
+                      packed_array_typespec* ptps = (packed_array_typespec*)tps;
+                      tps = (typespec*)ptps->Elem_typespec();
+                      if (tps)
+                        ttype = tps->UhdmType();
+                    } else if (ttype == uhdmarray_typespec) {
+                      array_typespec* ptps = (array_typespec*)tps;
+                      tps = (typespec*)ptps->Elem_typespec();
+                      if (tps)
+                        ttype = tps->UhdmType();
+                    }
+                    if (ttype == uhdmstring_typespec) {
+                      found = true;
+                    } else if (ttype == uhdmclass_typespec) {
+                      class_typespec* ctps = (class_typespec*)tps;
+                      any* tmp = bindClassTypespec(ctps, current, name, found);
+                      if (found) {
+                        previous = tmp;
+                      }
+                    } else if (ttype == uhdmstruct_typespec) {
+                      struct_typespec* stpt = (struct_typespec*)tps;
+                      for (typespec_member* member : *stpt->Members()) {
+                        if (member->VpiName() == name) {
+                          if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                            cro->Actual_group(member);
+                          }
+                          previous = member;
+                          found = true;
+                          break;
+                        }
+                      }
+                      if (name == "name") {
+                        // Builtin introspection
+                        found = true;
+                      }
+                    } else if (ttype == uhdmenum_typespec) {
+                      if (name == "name") {
+                        // Builtin introspection
+                        found = true;
+                      }
+                    } else if (ttype == uhdmunion_typespec) {
+                      union_typespec* stpt = (union_typespec*)tps;
+                      for (typespec_member* member : *stpt->Members()) {
+                        if (member->VpiName() == name) {
+                          if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                            cro->Actual_group(member);
+                          }
+                          previous = member;
+                          found = true;
+                          break;
+                        }
+                      }
+                      if (name == "name") {
+                        // Builtin introspection
+                        found = true;
+                      }
+                    }
                   }
-                  // Builtin method
-                  found = true;
-                  previous = (any*)call;
                 }
                 break;
               }
@@ -1216,10 +1163,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 }
                 if (name == "size" || name == "exists" || name == "exists" ||
                     name == "max" || name == "min") {
-                  func_call* call = serializer->MakeFunc_call();
+                  func_call* call = context->m_serializer->MakeFunc_call();
                   call->VpiName(name);
-                  if (current->UhdmType() == uhdmref_obj) {
-                    ((ref_obj*)current)->Actual_group(call);
+                  call->VpiParent(clone);
+                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                    cro->Actual_group(call);
                   }
                   // Builtin method
                   found = true;
@@ -1229,33 +1177,25 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
               case uhdmnamed_begin: {
                 named_begin* begin = (named_begin*)actual;
-                if (begin->Variables()) {
+                if (!found && begin->Variables()) {
                   for (auto m : *begin->Variables()) {
                     if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                       found = true;
                       previous = m;
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(m);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(m);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(m);
                       }
                       break;
                     }
                   }
                 }
-                if (begin->Array_vars()) {
+                if (!found && begin->Array_vars()) {
                   for (auto m : *begin->Array_vars()) {
                     if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                       found = true;
                       previous = m;
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(m);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(m);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(m);
                       }
                       break;
                     }
@@ -1265,33 +1205,25 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
               case uhdmnamed_fork: {
                 named_fork* begin = (named_fork*)actual;
-                if (begin->Variables()) {
+                if (!found && begin->Variables()) {
                   for (auto m : *begin->Variables()) {
                     if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                       found = true;
                       previous = m;
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(m);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(m);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(m);
                       }
                       break;
                     }
                   }
                 }
-                if (begin->Array_vars()) {
+                if (!found && begin->Array_vars()) {
                   for (auto m : *begin->Array_vars()) {
                     if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                       found = true;
                       previous = m;
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(m);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(m);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(m);
                       }
                       break;
                     }
@@ -1310,9 +1242,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                   for (clocking_io_decl* decl : *block->Clocking_io_decls()) {
                     if (decl->VpiName() == name) {
                       found = true;
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(decl);
-                        previous = (any*)decl;
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(decl);
                       }
                     }
                   }
@@ -1321,15 +1252,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
               case uhdmmodule_inst: {
                 module_inst* mod = (module_inst*)actual;
-                if (mod->Variables()) {
+                if (!found && mod->Variables()) {
                   for (variables* var : *mod->Variables()) {
                     if (var->VpiName() == name) {
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(var);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(var);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(var);
                       }
                       previous = var;
                       found = true;
@@ -1337,16 +1264,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     }
                   }
                 }
-
-                if (mod->Nets()) {
+                if (!found && mod->Nets()) {
                   for (nets* n : *mod->Nets()) {
                     if (n->VpiName() == name) {
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(n);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(n);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(n);
                       }
                       previous = n;
                       found = true;
@@ -1354,7 +1276,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     }
                   }
                 }
-                if (mod->Modules()) {
+                if (!found && mod->Modules()) {
                   for (auto m : *mod->Modules()) {
                     if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                       found = true;
@@ -1363,18 +1285,23 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     }
                   }
                 }
-                if (mod->Gen_scope_arrays()) {
+                if (!found && mod->Interfaces()) {
+                  for (auto m : *mod->Interfaces()) {
+                    if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                      found = true;
+                      previous = m;
+                      break;
+                    }
+                  }
+                }
+                if (!found && mod->Gen_scope_arrays()) {
                   for (auto gsa : *mod->Gen_scope_arrays()) {
                     if (gsa->VpiName() == name ||
                         gsa->VpiName() == nameIndexed) {
                       if (!gsa->Gen_scopes()->empty()) {
                         auto gs = gsa->Gen_scopes()->front();
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(gs);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(gs);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(gs);
                         }
                         previous = gs;
                         found = true;
@@ -1382,11 +1309,22 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     }
                   }
                 }
+                if (!found && mod->Task_funcs()) {
+                  for (auto tsf : *mod->Task_funcs()) {
+                    if (tsf->VpiName() == name ||
+                        tsf->VpiName() == nameIndexed) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(tsf);
+                      }
+                      previous = tsf;
+                      found = true;
+                    }
+                  }
+                }
                 break;
               }
               case uhdmclass_var: {
-                const typespec* tps = ((class_var*)actual)->Typespec();
-                if (tps) {
+                if (const typespec* tps = ((class_var*)actual)->Typespec()) {
                   UHDM_OBJECT_TYPE ttype = tps->UhdmType();
                   if (ttype == uhdmclass_typespec) {
                     class_typespec* ctps = (class_typespec*)tps;
@@ -1398,12 +1336,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     struct_typespec* stpt = (struct_typespec*)tps;
                     for (typespec_member* member : *stpt->Members()) {
                       if (member->VpiName() == name) {
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(member);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(member);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(member);
                         }
                         previous = member;
                         found = true;
@@ -1425,16 +1359,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 } else if (actual->UhdmType() == uhdmstruct_var) {
                   stpt = (struct_typespec*)((struct_var*)actual)->Typespec();
                 }
-                if (stpt) {
+                if (stpt && stpt->Members()) {
                   for (typespec_member* member : *stpt->Members()) {
                     if (member->VpiName() == name) {
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(member);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        ((bit_select*)current)->Actual_group(member);
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(member);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(member);
                       }
                       previous = member;
                       found = true;
@@ -1450,12 +1379,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 if (stpt) {
                   for (typespec_member* member : *stpt->Members()) {
                     if (member->VpiName() == name) {
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(member);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(member);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(member);
                       }
                       previous = member;
                       found = true;
@@ -1467,15 +1392,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
               case uhdminterface_inst: {
                 interface_inst* interf = (interface_inst*)actual;
-                if (interf->Variables()) {
+                if (!found && interf->Variables()) {
                   for (variables* var : *interf->Variables()) {
                     if (var->VpiName() == name) {
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(var);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(var);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(var);
                       }
                       previous = var;
                       found = true;
@@ -1483,15 +1404,32 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     }
                   }
                 }
-                if (interf->Modports()) {
+                if (!found && interf->Parameters()) {
+                  for (any* var : *interf->Parameters()) {
+                    if (var->VpiName() == name) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(var);
+                      }
+                      previous = var;
+                      found = true;
+                      break;
+                    }
+                  }
+                }
+                if (!found && interf->Task_funcs()) {
+                  for (auto tf : *interf->Task_funcs()) {
+                    if (tf->VpiName() == name) {
+                      previous = any_cast<function*>(tf);
+                      found = true;
+                      break;
+                    }
+                  }
+                }
+                if (!found && interf->Modports()) {
                   for (modport* mport : *interf->Modports()) {
                     if (mport->VpiName() == name) {
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(mport);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(mport);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(mport);
                       }
                       previous = mport;
                       found = true;
@@ -1500,25 +1438,20 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     if (mport->Io_decls()) {
                       for (io_decl* decl : *mport->Io_decls()) {
                         if (decl->VpiName() == name) {
-                          any* actual = decl;
-                          if (const any* exp = decl->Expr()) {
-                            actual = (any*)exp;
+                          any* actual_decl = decl;
+                          if (any* exp = decl->Expr()) {
+                            actual_decl = exp;
                           }
-                          if (actual->UhdmType() == uhdmref_obj) {
-                            ref_obj* ref = (ref_obj*)actual;
+                          if (actual_decl->UhdmType() == uhdmref_obj) {
+                            ref_obj* ref = (ref_obj*)actual_decl;
                             if (const any* act = ref->Actual_group()) {
-                              actual = (any*)act;
+                              actual_decl = (any*)act;
                             }
                           }
-                          if (current->UhdmType() == uhdmref_obj) {
-                            ((ref_obj*)current)->Actual_group(actual);
-                          } else if (current->UhdmType() == uhdmbit_select) {
-                            const any* parent = current->VpiParent();
-                            ((bit_select*)current)->Actual_group(actual);
-                            if (parent && (parent->UhdmType() == uhdmref_obj))
-                              ((ref_obj*)parent)->Actual_group(actual);
+                          if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                            cro->Actual_group(actual_decl);
                           }
-                          previous = actual;
+                          previous = actual_decl;
                           found = true;
                           break;
                         }
@@ -1527,19 +1460,47 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     if (found) break;
                   }
                 }
-                if (interf->Nets()) {
+                if (!found && interf->Nets()) {
                   for (nets* n : *interf->Nets()) {
                     if (n->VpiName() == name) {
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(n);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(n);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(n);
                       }
                       previous = n;
                       found = true;
                       break;
+                    }
+                  }
+                }
+                if (!found && interf->Ports()) {
+                  for (port* p : *interf->Ports()) {
+                    if (p->VpiName() == name) {
+                      if (any* ref = p->Low_conn()) {
+                        if (ref_obj* nref = any_cast<ref_obj*>(ref)) {
+                          any* n = nref->Actual_group();
+                          if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                            cro->Actual_group(n);
+                          }
+                          previous = n;
+                          found = true;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
+                if (!found && interf->Gen_scope_arrays()) {
+                  for (auto gsa : *interf->Gen_scope_arrays()) {
+                    if (gsa->VpiName() == name ||
+                        gsa->VpiName() == nameIndexed) {
+                      if (!gsa->Gen_scopes()->empty()) {
+                        auto gs = gsa->Gen_scopes()->front();
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(gs);
+                        }
+                        previous = gs;
+                        found = true;
+                      }
                     }
                   }
                 }
@@ -1583,12 +1544,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     struct_typespec* stpt = (struct_typespec*)tps;
                     for (typespec_member* member : *stpt->Members()) {
                       if (member->VpiName() == name) {
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(member);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(member);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(member);
                         }
                         previous = member;
                         found = true;
@@ -1608,12 +1565,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     union_typespec* stpt = (union_typespec*)tps;
                     for (typespec_member* member : *stpt->Members()) {
                       if (member->VpiName() == name) {
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(member);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(member);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(member);
                         }
                         previous = member;
                         found = true;
@@ -1661,12 +1614,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     struct_typespec* stpt = (struct_typespec*)tps;
                     for (typespec_member* member : *stpt->Members()) {
                       if (member->VpiName() == name) {
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(member);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(member);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(member);
                         }
                         previous = member;
                         found = true;
@@ -1686,12 +1635,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     union_typespec* stpt = (union_typespec*)tps;
                     for (typespec_member* member : *stpt->Members()) {
                       if (member->VpiName() == name) {
-                        if (current->UhdmType() == uhdmref_obj) {
-                          ((ref_obj*)current)->Actual_group(member);
-                        } else if (current->UhdmType() == uhdmbit_select) {
-                          const any* parent = current->VpiParent();
-                          if (parent && (parent->UhdmType() == uhdmref_obj))
-                            ((ref_obj*)parent)->Actual_group(member);
+                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                          cro->Actual_group(member);
                         }
                         previous = member;
                         found = true;
@@ -1742,24 +1687,24 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                     tagged_pattern* tp = (tagged_pattern*)oper;
                     const typespec* ttp = tp->Typespec();
                     const std::string_view tname = ttp->VpiName();
-                    bool found = false;
+                    bool oper_found = false;
                     if (tname == "default") {
                       defaultOp = oper;
-                      found = true;
+                      oper_found = true;
                     }
                     for (uint32_t i = 0; i < fieldNames.size(); i++) {
                       if (tname == fieldNames[i]) {
                         tmp[i] = oper;
-                        found = true;
+                        oper_found = true;
                         res = tmp[i];
                         break;
                       }
                     }
-                    if (found == false) {
+                    if (oper_found == false) {
                       for (uint32_t i = 0; i < fieldTypes.size(); i++) {
                         if (ttp->UhdmType() == fieldTypes[i]->UhdmType()) {
                           tmp[i] = oper;
-                          found = true;
+                          oper_found = true;
                           res = tmp[i];
                           break;
                         }
@@ -1793,28 +1738,28 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 break;
             }
             if (!found) {
-              // WIP:
-              if ((!elaborator->muteErrors()) &&
-                  (!elaborator->isInUhdmAllIterator())) {
+              if ((!elaboratorContext->m_elaborator.muteErrors()) &&
+                  (!elaboratorContext->m_elaborator.isInUhdmAllIterator())) {
                 const std::string errMsg(VpiName());
-                serializer->GetErrorHandler()(
+                context->m_serializer->GetErrorHandler()(
                     ErrorType::UHDM_UNRESOLVED_HIER_PATH, errMsg, this,
                     nullptr);
               }
             }
           } else {
-            // WIP:
-            if ((!elaborator->muteErrors()) &&
-                (!elaborator->isInUhdmAllIterator())) {
+            if ((!elaboratorContext->m_elaborator.muteErrors()) &&
+                (!elaboratorContext->m_elaborator.isInUhdmAllIterator())) {
+              if (previous->UhdmType() == uhdmbit_select) {
+                break;
+              }
               const std::string errMsg(VpiName());
-              serializer->GetErrorHandler()(
+              context->m_serializer->GetErrorHandler()(
                   ErrorType::UHDM_UNRESOLVED_HIER_PATH, errMsg, this, nullptr);
             }
           }
         } else if (previous->UhdmType() == uhdmtypespec_member) {
           typespec_member* member = (typespec_member*)previous;
-          const typespec* tps = member->Typespec();
-          if (tps) {
+          if (const typespec* tps = member->Typespec()) {
             UHDM_OBJECT_TYPE ttype = tps->UhdmType();
             if (ttype == uhdmpacked_array_typespec) {
               packed_array_typespec* ptps = (packed_array_typespec*)tps;
@@ -1827,11 +1772,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
             if (ttype == uhdmstruct_typespec) {
               struct_typespec* stpt = (struct_typespec*)tps;
-              for (typespec_member* member : *stpt->Members()) {
-                if (member->VpiName() == name) {
-                  if (current->UhdmType() == uhdmref_obj) {
-                    ((ref_obj*)current)->Actual_group(member);
-                    previous = member;
+              for (typespec_member* tsmember : *stpt->Members()) {
+                if (tsmember->VpiName() == name) {
+                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                    cro->Actual_group(tsmember);
+                    previous = tsmember;
                     found = true;
                     break;
                   }
@@ -1839,11 +1784,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
             } else if (ttype == uhdmunion_typespec) {
               union_typespec* stpt = (union_typespec*)tps;
-              for (typespec_member* member : *stpt->Members()) {
-                if (member->VpiName() == name) {
-                  if (current->UhdmType() == uhdmref_obj) {
-                    ((ref_obj*)current)->Actual_group(member);
-                    previous = member;
+              for (typespec_member* tsmember : *stpt->Members()) {
+                if (tsmember->VpiName() == name) {
+                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                    cro->Actual_group(tsmember);
+                    previous = tsmember;
                     found = true;
                     break;
                   }
@@ -1874,12 +1819,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 if (stpt) {
                   for (typespec_member* member : *stpt->Members()) {
                     if (member->VpiName() == name) {
-                      if (current->UhdmType() == uhdmref_obj) {
-                        ((ref_obj*)current)->Actual_group(member);
-                      } else if (current->UhdmType() == uhdmbit_select) {
-                        const any* parent = current->VpiParent();
-                        if (parent && (parent->UhdmType() == uhdmref_obj))
-                          ((ref_obj*)parent)->Actual_group(member);
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(member);
                       }
                       previous = member;
                       found = true;
@@ -1904,12 +1845,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           if (stpt) {
             for (typespec_member* member : *stpt->Members()) {
               if (member->VpiName() == name) {
-                if (current->UhdmType() == uhdmref_obj) {
-                  ((ref_obj*)current)->Actual_group(member);
-                } else if (current->UhdmType() == uhdmbit_select) {
-                  const any* parent = current->VpiParent();
-                  if (parent && (parent->UhdmType() == uhdmref_obj))
-                    ((ref_obj*)parent)->Actual_group(member);
+                if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                  cro->Actual_group(member);
                 }
                 previous = member;
                 found = true;
@@ -1922,12 +1859,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
           if (mod->Variables()) {
             for (variables* var : *mod->Variables()) {
               if (var->VpiName() == name) {
-                if (current->UhdmType() == uhdmref_obj) {
-                  ((ref_obj*)current)->Actual_group(var);
-                } else if (current->UhdmType() == uhdmbit_select) {
-                  const any* parent = current->VpiParent();
-                  if (parent && (parent->UhdmType() == uhdmref_obj))
-                    ((ref_obj*)parent)->Actual_group(var);
+                if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                  cro->Actual_group(var);
                 }
                 previous = var;
                 found = true;
@@ -1936,15 +1869,11 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
             }
           }
 
-          if (mod->Nets()) {
+          if (!found && mod->Nets()) {
             for (nets* n : *mod->Nets()) {
               if (n->VpiName() == name) {
-                if (current->UhdmType() == uhdmref_obj) {
-                  ((ref_obj*)current)->Actual_group(n);
-                } else if (current->UhdmType() == uhdmbit_select) {
-                  const any* parent = current->VpiParent();
-                  if (parent && (parent->UhdmType() == uhdmref_obj))
-                    ((ref_obj*)parent)->Actual_group(n);
+                if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                  cro->Actual_group(n);
                 }
                 previous = n;
                 found = true;
@@ -1952,7 +1881,7 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
               }
             }
           }
-          if (mod->Modules()) {
+          if (!found && mod->Modules()) {
             for (auto m : *mod->Modules()) {
               if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                 found = true;
@@ -1994,12 +1923,8 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
                 if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                   found = true;
                   previous = m;
-                  if (current->UhdmType() == uhdmref_obj) {
-                    ((ref_obj*)current)->Actual_group(m);
-                  } else if (current->UhdmType() == uhdmbit_select) {
-                    const any* parent = current->VpiParent();
-                    if (parent && (parent->UhdmType() == uhdmref_obj))
-                      ((ref_obj*)parent)->Actual_group(m);
+                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                    cro->Actual_group(m);
                   }
                   break;
                 }
@@ -2012,15 +1937,14 @@ hier_path* hier_path::DeepClone(Serializer* serializer,
     }
   }
   if (auto vec = VpiUses()) {
-    auto clone_vec = serializer->MakeAnyVec();
+    auto clone_vec = context->m_serializer->MakeAnyVec();
     clone->VpiUses(clone_vec);
     for (auto obj : *vec) {
-      clone_vec->push_back(obj->DeepClone(serializer, elaborator, clone));
+      clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
-  if (elaborator->uniquifyTypespec()) {
-    if (auto obj = Typespec())
-      clone->Typespec(obj->DeepClone(serializer, elaborator, clone));
+  if (elaboratorContext->m_elaborator.uniquifyTypespec()) {
+    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   } else {
     if (auto obj = Typespec()) clone->Typespec((typespec*)obj);
   }

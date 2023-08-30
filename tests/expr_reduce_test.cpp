@@ -28,13 +28,12 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "uhdm/ElaboratorListener.h"
-#include "uhdm/uhdm.h"
-#include "uhdm/VpiListener.h"
-#include "uhdm/vpi_visitor.h"
-#include "uhdm/ExprEval.h"
-
 #include "test_util.h"
+#include "uhdm/ElaboratorListener.h"
+#include "uhdm/ExprEval.h"
+#include "uhdm/VpiListener.h"
+#include "uhdm/uhdm.h"
+#include "uhdm/vpi_visitor.h"
 
 using namespace UHDM;
 
@@ -104,9 +103,10 @@ TEST(FullElabTest, ElaborationRoundtrip) {
   }
   EXPECT_FALSE(elaborated);
 
-  ElaboratorListener* listener = new ElaboratorListener(&serializer, true);
-  listener->listenDesigns(designs);
-  delete listener;
+  ElaboratorContext* elaboratorContext =
+      new ElaboratorContext(&serializer, true);
+  elaboratorContext->m_elaborator.listenDesigns(designs);
+  delete elaboratorContext;
 
   elaborated = false;
   for (auto design : designs) {
@@ -127,5 +127,4 @@ TEST(FullElabTest, ElaborationRoundtrip) {
       EXPECT_EQ(invalidValue, false);
     }
   }
-
 }

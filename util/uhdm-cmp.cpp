@@ -15,6 +15,7 @@
  */
 
 #include <uhdm/uhdm.h>
+#include <uhdm/vpi_visitor.h>
 #include <uhdm/uhdm-version.h>
 
 #include <algorithm>
@@ -38,7 +39,7 @@ static int32_t usage(const char *progName) {
             << "  = 0, if input files are equal" << std::endl
             << "  < 0, if input files are not equal" << std::endl
             << "  > 0, for any failures" << std::endl;
-  return 1;
+  return 0;
 }
 
 int32_t main(int32_t argc, char **argv) {
@@ -97,8 +98,20 @@ int32_t main(int32_t argc, char **argv) {
                  to_design);
 
   for (size_t i = 0, n = designsA.size(); i < n; ++i) {
-    UHDM::AnySet visited;
-    if (designsA[i]->Compare(designsB[i], visited) != 0) {
+    UHDM::CompareContext context;
+    if (designsA[i]->Compare(designsB[i], &context) != 0) {
+      if (context.m_failedLhs != nullptr) {
+        std::cerr << "LHS:" << std::endl;
+        std::cerr << UHDM::decompile(context.m_failedLhs);
+      } else {
+        std::cerr << "LHS: <null>" << std::endl;
+      }
+      if (context.m_failedRhs != nullptr) {
+        std::cerr << "RHS:" << std::endl;
+        std::cerr << UHDM::decompile(context.m_failedRhs);
+      } else {
+        std::cerr << "RHS: <null>" << std::endl;
+      }
       return -1;
     }
   }

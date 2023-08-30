@@ -62,7 +62,11 @@ class ExprEval {
       const any* object, bool& invalidValue, const any* inst, const any* pexpr,
       bool full /* false: use only last range size, true: use all ranges */,
       bool muteError = false);
+
 #ifndef SWIG
+  void reduceExceptions(const std::vector<int32_t> operationTypes) {
+    m_skipOperationTypes = operationTypes;
+  }
   /* Tries to reduce any expression into a constant, returns the orignal
      expression if fails. If an invalid value is found in the process,
      invalidValue will be set to true */
@@ -71,15 +75,17 @@ class ExprEval {
 
   uint64_t getValue(const UHDM::expr* expr);
 
+  std::string toBinary(const UHDM::constant* c);
+
   any* getValue(std::string_view name, const any* inst, const any* pexpr,
                 bool muteError = false);
 
   any* getObject(std::string_view name, const any* inst, const any* pexpr,
                  bool muteError = false);
 
-  int64_t get_value(bool& invalidValue, const UHDM::expr* expr, bool strict = false);
+  int64_t get_value(bool& invalidValue, const UHDM::expr* expr, bool strict = true);
 
-  uint64_t get_uvalue(bool& invalidValue, const UHDM::expr* expr, bool strict = false);
+  uint64_t get_uvalue(bool& invalidValue, const UHDM::expr* expr, bool strict = true);
 
   long double get_double(bool& invalidValue, const UHDM::expr* expr);
 
@@ -128,7 +134,7 @@ class ExprEval {
                           bool& invalidValue, Serializer& s, const any* inst,
                           const any* scope_exp,
                           std::map<std::string, const typespec*>& local_vars,
-                          bool muteError);
+                          int opType, bool muteError);
   void setDesign(design* des) { m_design = des; }
   /* For Surelog or other UHDM clients to use the UHDM expr evaluator in their
    * context */
@@ -146,6 +152,7 @@ class ExprEval {
   GetTaskFuncFunctor getTaskFuncFunctor = nullptr;
   const UHDM::design* m_design = nullptr;
   bool m_muteError = false;
+  std::vector<int32_t> m_skipOperationTypes;
 };
 
 std::string vPrint(UHDM::any* handle);

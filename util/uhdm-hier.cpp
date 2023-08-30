@@ -42,7 +42,7 @@ static int32_t usage(const char* progname) {
   fprintf(stderr, "Usage:\n%s [options] <uhdm-file> ?--line?\n", progname);
   fprintf(stderr,
           "Reads UHDM binary representation and prints hierarchy tree.\n");
-  return 1;
+  return 0;
 }
 
 int32_t main(int32_t argc, char** argv) {
@@ -111,8 +111,7 @@ int32_t main(int32_t argc, char** argv) {
                               " (" + defName + " " + fileName + ":" +
                               std::to_string(vpi_get(vpiLineNo, obj_h)) + ":)")
                         : "";
-                std::string res = path + objectName + lineInfo + "\n";
-                std::cout << res;
+                std::cout << path << objectName << lineInfo << "\n";
                 path += objectName + ".";
               }
               // Recursive tree traversal
