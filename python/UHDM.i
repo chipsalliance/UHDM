@@ -9,11 +9,17 @@ It is not parsed or interpreted by swig
 #include "sv_vpi_user.h"
 #include "Serializer.h"
 
+#include "ExprEval.h"
+
 #include "swig_test.h"
 
 %}
+%include "typemaps.i"
+%include "stdint.i"
 %include "std_vector.i"
 %include "std_string.i"
+
+%apply bool& INOUT { bool &invalidValue};
 
 /* some api function using va_list are exclude using #ifndef SWIG/#endif */
 %include "vpi_user.h"
@@ -21,8 +27,10 @@ It is not parsed or interpreted by swig
 
 %include "Serializer.h"
 %include "uhdm_types.h"
+%include "ExprEval.h"
 %include "swig_test.h"
-%include stl.i
+%include "stl.i"
+
 
 namespace std {
   %template(vpiHandleVector) vector<vpiHandle>;
