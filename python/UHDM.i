@@ -19,7 +19,7 @@ It is not parsed or interpreted by swig
 %include "std_vector.i"
 %include "std_string.i"
 
-%apply bool& INOUT { bool &invalidValue};
+%apply bool& OUTPUT { bool &invalidValue};
 
 /* some api function using va_list are exclude using #ifndef SWIG/#endif */
 %include "vpi_user.h"
