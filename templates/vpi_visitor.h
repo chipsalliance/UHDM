@@ -36,6 +36,7 @@
 #include <vector>
 
 namespace UHDM {
+#ifndef SWIG
 class VpiVisitor;
 
 // Visit an object, dump to given stream.
@@ -45,8 +46,10 @@ void visit_object(vpiHandle obj_h, std::ostream& out,
 
 // Visit designs, dump to given stream.
 void visit_designs(const std::vector<vpiHandle>& designs, VpiVisitor* visitor);
+#endif
 void visit_designs(const std::vector<vpiHandle>& designs, std::ostream& out);
 
+#ifndef SWIG
 // For debug use in GDB
 std::string decompile(const UHDM::any* handle);
 
@@ -71,7 +74,6 @@ class VpiVisitor final {
   const AnySet& getWeaklyReferenced() const { return m_weaklyReferenced2; }
 
   explicit VpiVisitor(std::ostream& out) : m_out(out) {}
-
  private:
   std::ostream& m_out;
   AnySet m_weaklyReferenced1;
@@ -79,6 +81,7 @@ class VpiVisitor final {
   VisitedContainer m_visited;
   bool m_visitWeaklyReferenced = false;
 };
+#endif
 
 }  // namespace UHDM
 

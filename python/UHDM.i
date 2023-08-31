@@ -8,16 +8,16 @@ It is not parsed or interpreted by swig
 #include "vpi_user.h"
 #include "sv_vpi_user.h"
 #include "Serializer.h"
-
 #include "ExprEval.h"
-
+#include "vpi_visitor.h"
 #include "swig_test.h"
 
 %}
+%include "std_iostream.i"
+%include "std_sstream.i"
 %include "typemaps.i"
 %include "stdint.i"
 %include "std_vector.i"
-%include "std_string.i"
 
 %apply bool& OUTPUT { bool &invalidValue};
 
@@ -28,11 +28,10 @@ It is not parsed or interpreted by swig
 %include "Serializer.h"
 %include "uhdm_types.h"
 %include "ExprEval.h"
+%include "vpi_visitor.h"
 %include "swig_test.h"
-%include "stl.i"
 
 
 namespace std {
   %template(vpiHandleVector) vector<vpiHandle>;
 }
-
