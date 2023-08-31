@@ -91,7 +91,7 @@ def generate(models):
     for classname in sorted(classnames):
         Classname_ = classname[:1].upper() + classname[1:]
 
-        any_implementation.append(f'  case uhdm{classname}: listen{Classname_}(static_cast<const {classname} *>(object)); break;')
+        any_implementation.append(f'  case UHDM_OBJECT_TYPE::uhdm{classname}: listen{Classname_}(static_cast<const {classname} *>(object)); break;')
 
         uhdm_enter_leave_declarations.append(f'  virtual void enter{Classname_}(const {classname}* const object) {{}}')
         uhdm_enter_leave_declarations.append(f'  virtual void leave{Classname_}(const {classname}* const object) {{}}')

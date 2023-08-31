@@ -41,8 +41,8 @@ def generate(models):
             factory_data_members.append(f'  {classname}Factory {classname}Maker;')
             factory_function_declarations.append(f'  {classname}* Make{Classname_}();')
             factory_function_implementations.append(f'{classname}* Serializer::Make{Classname_}() {{ return Make<{classname}>(&{classname}Maker); }}')
-            factory_get_object.append(f'    case uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.objects_[index];')
-            factory_erase_object.append(f'    case uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.Erase(static_cast<const {classname}*>(p));')
+            factory_get_object.append(f'    case UHDM_OBJECT_TYPE::uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.objects_[index];')
+            factory_erase_object.append(f'    case UHDM_OBJECT_TYPE::uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.Erase(static_cast<const {classname}*>(p));')
 
             save_ids.append(f'  {classname}Maker.MapToIndex(idMap);')
             save_objects.append(f'  adapter.template operator()<{classname}, {Classname}>({classname}Maker, this, idMap, cap_root.initFactory{Classname}({classname}Maker.objects_.size()));')
@@ -84,7 +84,7 @@ def generate(models):
                 else:
                     saves_adapters.append(f'    builder.set{Vpi}(obj->{Vpi_}());')
                     restore_adapters.append(f'    obj->{Vpi_}(reader.get{Vpi}());')
-            
+
             elif key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
                 name = value.get('name')
                 type = value.get('type')
@@ -109,7 +109,7 @@ def generate(models):
                         saves_adapters.append(f'    if (obj->{Name_}() != nullptr) {{')
                         saves_adapters.append(f'      ::ObjIndexType::Builder tmp = builder.get{Name}();')
                         saves_adapters.append(f'      tmp.setIndex(GetId(obj->{Name_}(), idMap));')
-                        saves_adapters.append(f'      tmp.setType((obj->{Name_}())->UhdmType());')
+                        saves_adapters.append(f'      tmp.setType(static_cast<uint32_t>((obj->{Name_}())->UhdmType()));')
                         saves_adapters.append( '    }')
 
                         restore_adapters.append(f'    obj->{Name_}(({type}*)serializer->GetObject(reader.get{Name}().getType(), reader.get{Name}().getIndex() - 1));')
@@ -135,7 +135,7 @@ def generate(models):
                     if key in ['class_ref', 'group_ref']:
                         saves_adapters.append(f'        ::ObjIndexType::Builder tmp = {Name}s[i];')
                         saves_adapters.append(f'        tmp.setIndex(GetId((*obj->{Name_}())[i], idMap));')
-                        saves_adapters.append(f'        tmp.setType(((BaseClass*)((*obj->{Name_}())[i]))->UhdmType());')
+                        saves_adapters.append(f'        tmp.setType(static_cast<uint32_t>(((BaseClass*)((*obj->{Name_}())[i]))->UhdmType()));')
 
                         restore_adapters.append(f'        vect->emplace_back(({type}*)serializer->GetObject(reader.get{Name}()[i].getType(), reader.get{Name}()[i].getIndex() - 1));')
                     else:
@@ -156,7 +156,7 @@ def generate(models):
         restore_adapters.append('  }')
         restore_adapters.append('')
 
-    uhdm_name_map = [ f'    case {name} /* = {id} */: return "{name[4:]}";' for name, id in uhdm_types_h.get_type_map(models).items() ]
+    uhdm_name_map = [ f'    case UHDM_OBJECT_TYPE::{name} /* = {id} */: return "{name[4:]}";' for name, id in uhdm_types_h.get_type_map(models).items() ]
 
     # Serializer.h
     with open(config.get_template_filepath('Serializer.h'), 'rt') as strm:
