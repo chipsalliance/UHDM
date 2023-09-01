@@ -36,18 +36,18 @@
     vpi: vpiRightRange
     type: expr
     card: 1
-  - group_ref: elem_typespec
+  - class_ref: elem_typespec
     name: elem typespec
     vpi: vpiElemTypespec
-    type: enum_struct_union_packed_array_typespec_group
+    type: ref_obj
     card: 1
   - class_ref: typespec
     name: typespec
     vpi: vpiIndexTypespec
-    type: typespec
+    type: ref_obj
     card: 1
   - obj_ref: resolution_func
     name: resolution func
     vpi: vpiFunction
     type: function
-    card: 1    
+    card: 1

@@ -34,8 +34,16 @@ std::vector<vpiHandle> build_designs_MinusOp(Serializer* s) {
     p->VpiName("wire_i");
     p->VpiDirection(vpiInput);
 
+    VectorOftypespec* typespecs = s->MakeTypespecVec();
+    dut->Typespecs(typespecs);
+
     logic_typespec* tps = s->MakeLogic_typespec();
-    p->Typespec(tps);
+    typespecs->emplace_back(tps);
+
+    ref_obj* tps_ro = s->MakeRef_obj();
+    tps_ro->Actual_group(tps);
+    tps_ro->VpiParent(p);
+    p->Typespec(tps_ro);
 
     VectorOfrange* ranges = s->MakeRangeVec();
     tps->Ranges(ranges);
@@ -108,7 +116,8 @@ TEST(exprVal, prettyPrint_MinusOp) {
   ExprEval eval;
   for (auto m : *d->TopModules()) {
     for (auto p : *m->Ports()) {
-      logic_typespec* typespec = (logic_typespec*)p->Typespec();
+      const ref_obj* ro = p->Typespec();
+      const logic_typespec* typespec = ro->Actual_group<logic_typespec>();
       VectorOfrange* ranges = typespec->Ranges();
       for (auto range : *ranges) {
         expr* left = (expr*)range->Left_expr();

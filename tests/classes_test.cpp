@@ -75,7 +75,10 @@ static std::vector<vpiHandle> build_designs(Serializer* s) {
   UHDM::class_defn* parent = base;
   UHDM::extends* extends = s->MakeExtends();
   UHDM::class_typespec* tps = s->MakeClass_typespec();
-  extends->Class_typespec(tps);
+  UHDM::ref_obj* ro = s->MakeRef_obj();
+  ro->Actual_group(tps);
+  ro->VpiParent(extends);
+  extends->Class_typespec(ro);
   tps->Class_defn(parent);
   derived->Extends(extends);
   UHDM::VectorOfclass_defn* all_derived = s->MakeClass_defnVec();

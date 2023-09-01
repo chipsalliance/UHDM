@@ -18,7 +18,7 @@
   - obj_ref: class_typespec
     name: class typespec
     vpi: vpiClassTypespec
-    type: class_typespec
+    type: ref_obj
     card: 1
  - class_ref: arguments
     name: arguments

@@ -49,5 +49,5 @@
   - obj_ref: class_typespecs
     name: class typespecs
     vpi: vpiClassTypespec
-    type: class_typespec
+    type: ref_obj
     card: any

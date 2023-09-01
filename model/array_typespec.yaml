@@ -39,12 +39,12 @@
   - class_ref: index_typespec
     name: index typespec
     vpi: vpiIndexTypespec
-    type: typespec
+    type: ref_obj
     card: 1
   - class_ref: elem_typespec
     name: elem typespec
     vpi: vpiElemTypespec
-    type: typespec
+    type: ref_obj
     card: 1
   - obj_ref: resolution_func
     name: resolution func

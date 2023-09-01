@@ -49,11 +49,9 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
       ElaboratorContext elaboratorContext(serializer_);
       c = (constant*)clone_tree(c, &elaboratorContext);
       int32_t constType = c->VpiConstType();
-      const typespec* tps = c->Typespec();
       bool is_signed = false;
-      if (tps) {
-        if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
-          int_typespec* itps = (int_typespec*)tps;
+      if (const ref_obj* ro = c->Typespec()) {
+        if (const int_typespec* itps = ro->Actual_group<int_typespec>()) {
           if (itps->VpiSigned()) {
             is_signed = true;
           }
@@ -125,11 +123,9 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
       if (type == UHDM_OBJECT_TYPE::uhdmconstant) {
         constant* ccond = (constant*)exp;
         maxsize = std::max(ccond->VpiSize(), maxsize);
-        const typespec* tps = ccond->Typespec();
         bool is_signed = false;
-        if (tps) {
-          if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
-            int_typespec* itps = (int_typespec*)tps;
+        if (const ref_obj* ro = ccond->Typespec()) {
+          if (const int_typespec* itps = ro->Actual_group<int_typespec>()) {
             if (itps->VpiSigned()) {
               is_signed = true;
             }
@@ -253,16 +249,17 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
           if (last->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj) {
             ref_obj* ref = (ref_obj*)last;
             if (const any* actual = ref->Actual_group()) {
-              const typespec* tps = nullptr;
-              if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmtypespec_member) {
+              if (actual->UhdmType() == uhdmtypespec_member) {
                 typespec_member* member = (typespec_member*)actual;
-                tps = member->Typespec();
-              }
-              if (tps) {
-                int32_t tmp = static_cast<int32_t>(eval.size(
-                    tps, invalidValue, currentInstance_, assign, true, true));
-                if (!invalidValue) {
-                  size = tmp;
+                if (const ref_obj* ro = member->Typespec()) {
+                  if (const typespec* tps = ro->Actual_group<typespec>()) {
+                    uint64_t tmp =
+                        eval.size(tps, invalidValue, currentInstance_, assign,
+                                  true, true);
+                    if (!invalidValue) {
+                      size = static_cast<int32_t>(tmp);
+                    }
+                  }
                 }
               }
             }

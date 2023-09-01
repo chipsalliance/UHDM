@@ -57,7 +57,10 @@ class DetectRefObj : public VpiListener {
   explicit DetectRefObj() {}
   ~DetectRefObj() override = default;
   void leaveRef_obj(const ref_obj *object, vpiHandle handle) final {
-    hasRef_obj = true;
+    if ((object->Actual_group() == nullptr) ||
+        (object->Actual_group<typespec>() == nullptr)) {
+      hasRef_obj = true;
+    }
   }
   void leaveBit_select(const bit_select *object, vpiHandle handle) {
     hasRef_obj = true;
@@ -322,11 +325,13 @@ any *ExprEval::getValue(std::string_view name, const any *inst,
     }
     if (result && (result->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation)) {
       operation *op = (operation *)result;
-      ExprEval eval;
-      if (expr *res = eval.flattenPatternAssignments(s, op->Typespec(),
-                                                     (expr *)result)) {
-        if (res->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
-          ((operation *)result)->Operands(((operation *)res)->Operands());
+      if (const ref_obj *ro = op->Typespec()) {
+        ExprEval eval;
+        if (expr *res = eval.flattenPatternAssignments(
+                s, ro->Actual_group<typespec>(), (expr *)result)) {
+          if (res->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
+            ((operation *)result)->Operands(((operation *)res)->Operands());
+          }
         }
       }
     }
@@ -344,7 +349,8 @@ any *ExprEval::getValue(std::string_view name, const any *inst,
           result = rval;
         }
       }
-    } else if ((resultType == UHDM_OBJECT_TYPE::uhdmoperation) || (resultType == UHDM_OBJECT_TYPE::uhdmhier_path) ||
+    } else if ((resultType == UHDM_OBJECT_TYPE::uhdmoperation) ||
+               (resultType == UHDM_OBJECT_TYPE::uhdmhier_path) ||
                (resultType == UHDM_OBJECT_TYPE::uhdmbit_select) ||
                (resultType == UHDM_OBJECT_TYPE::uhdmsys_func_call)) {
       bool invalidValue = false;
@@ -424,8 +430,10 @@ any *ExprEval::getObject(std::string_view name, const any *inst,
 
         const class_defn *base_defn = nullptr;
         if (const extends *ext = defn->Extends()) {
-          if (const class_typespec *tp = ext->Class_typespec()) {
-            base_defn = tp->Class_defn();
+          if (const ref_obj *ro = ext->Class_typespec()) {
+            if (const class_typespec *tp = ro->Actual_group<class_typespec>()) {
+              base_defn = tp->Class_defn();
+            }
           }
         }
         defn = base_defn;
@@ -637,7 +645,10 @@ void ExprEval::recursiveFlattening(Serializer &s, VectorOfany *flattened,
   for (any *op : *ordered) {
     if (op->UhdmType() == UHDM_OBJECT_TYPE::uhdmtagged_pattern) {
       tagged_pattern *tp = (tagged_pattern *)op;
-      const typespec *ttp = tp->Typespec();
+      const typespec *ttp = nullptr;
+      if (const ref_obj *ro = tp->Typespec()) {
+        ttp = ro->Actual_group<typespec>();
+      }
       UHDM_OBJECT_TYPE ttpt = ttp->UhdmType();
       switch (ttpt) {
         case UHDM_OBJECT_TYPE::uhdmint_typespec: {
@@ -657,7 +668,10 @@ void ExprEval::recursiveFlattening(Serializer &s, VectorOfany *flattened,
               bool substituted = false;
               if (op1->UhdmType() == UHDM_OBJECT_TYPE::uhdmtagged_pattern) {
                 tagged_pattern *tp1 = (tagged_pattern *)op1;
-                const typespec *ttp1 = tp1->Typespec();
+                const typespec *ttp1 = nullptr;
+                if (const ref_obj *ro = tp1->Typespec()) {
+                  ttp1 = ro->Actual_group<typespec>();
+                }
                 UHDM_OBJECT_TYPE ttpt1 = ttp1->UhdmType();
                 if (ttpt1 == UHDM_OBJECT_TYPE::uhdmstring_typespec) {
                   if (ttp1->VpiName() == "default") {
@@ -674,7 +688,8 @@ void ExprEval::recursiveFlattening(Serializer &s, VectorOfany *flattened,
                       for (auto mem : *molds->Members()) {
                         if (mem) sops->push_back((any *)patt);
                       }
-                    } else if (moldtype == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
+                    } else if (moldtype ==
+                               UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
                       logic_typespec *molds = (logic_typespec *)mold;
                       VectorOfrange *ranges = molds->Ranges();
                       if (!ranges->empty()) {
@@ -740,20 +755,26 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
     }
     if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
       array_typespec *atps = (array_typespec *)tps;
-      tps = atps->Elem_typespec();
+      if (const ref_obj *ro = atps->Elem_typespec()) {
+        tps = ro->Actual_group<typespec>();
+      }
     }
     if (tps == nullptr) {
       return result;
     }
     if (tps->UhdmType() != UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-      tps = op->Typespec();
+      if (const ref_obj *ro = op->Typespec()) {
+        tps = ro->Actual_group<typespec>();
+      }
     }
     if (tps == nullptr) {
       return result;
     }
     if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
       array_typespec *atps = (array_typespec *)tps;
-      tps = atps->Elem_typespec();
+      if (const ref_obj *ro = atps->Elem_typespec()) {
+        tps = ro->Actual_group<typespec>();
+      }
     }
     if (tps->UhdmType() != UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
       return result;
@@ -765,8 +786,10 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
     std::vector<std::string_view> fieldNames;
     std::vector<const typespec *> fieldTypes;
     for (typespec_member *memb : *stps->Members()) {
-      fieldNames.emplace_back(memb->VpiName());
-      fieldTypes.emplace_back(memb->Typespec());
+      if (const ref_obj *ro = memb->Typespec()) {
+        fieldNames.emplace_back(memb->VpiName());
+        fieldTypes.emplace_back(ro->Actual_group<typespec>());
+      }
     }
     VectorOfany *orig = op->Operands();
     if (orig->size() == 1) {
@@ -789,7 +812,10 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
     for (auto oper : *orig) {
       if (oper->UhdmType() == UHDM_OBJECT_TYPE::uhdmtagged_pattern) {
         tagged_pattern *tp = (tagged_pattern *)oper;
-        const typespec *ttp = tp->Typespec();
+        const typespec *ttp = nullptr;
+        if (const ref_obj *ro = tp->Typespec()) {
+          ttp = ro->Actual_group<typespec>();
+        }
         const std::string_view tname = ttp->VpiName();
         bool found = false;
         if (tname == "default") {
@@ -1242,7 +1268,10 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
     case UHDM_OBJECT_TYPE::uhdmarray_typespec: {
       array_typespec *lts = (array_typespec *)ts;
       ranges = lts->Ranges();
-      bits = size(lts->Elem_typespec(), invalidValue, inst, pexpr, full);
+      if (const ref_obj *ro = lts->Elem_typespec()) {
+        bits =
+            size(ro->Actual_group<typespec>(), invalidValue, inst, pexpr, full);
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmshort_real_typespec: {
@@ -1337,66 +1366,80 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmstruct_var: {
-      const typespec *tp = ((struct_var *)ts)->Typespec();
-      bits += size(tp, invalidValue, inst, pexpr, full);
+      if (const ref_obj *ro = ((const struct_var *)ts)->Typespec()) {
+        bits +=
+            size(ro->Actual_group<typespec>(), invalidValue, inst, pexpr, full);
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmarray_var: {
       const array_var *var = (array_var *)ts;
       variables *regv = var->Variables()->at(0);
-      bits += size(regv->Typespec(), invalidValue, inst, pexpr, full);
+      if (const ref_obj *ro = regv->Typespec()) {
+        bits +=
+            size(ro->Actual_group<typespec>(), invalidValue, inst, pexpr, full);
+      }
       ranges = var->Ranges();
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmstruct_net: {
-      const typespec *tp = ((struct_net *)ts)->Typespec();
-      bits += size(tp, invalidValue, inst, pexpr, full);
+      if (const ref_obj *ro = ((const struct_net *)ts)->Typespec()) {
+        bits +=
+            size(ro->Actual_group<typespec>(), invalidValue, inst, pexpr, full);
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmstruct_typespec: {
-      struct_typespec *sts = (struct_typespec *)ts;
+      const struct_typespec *sts = (const struct_typespec *)ts;
       if (VectorOftypespec_member *members = sts->Members()) {
         for (typespec_member *member : *members) {
-          bits += size(member->Typespec(), invalidValue, inst, pexpr, full);
+          if (const ref_obj *ro = member->Typespec()) {
+            bits += size(ro->Actual_group<typespec>(), invalidValue, inst,
+                         pexpr, full);
+          }
         }
       }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmenum_var: {
-      const typespec *tp = ((enum_var *)ts)->Typespec();
-      bits = size(tp, invalidValue, inst, pexpr, full);
+      if (const ref_obj *ro = ((const enum_var *)ts)->Typespec()) {
+        bits =
+            size(ro->Actual_group<typespec>(), invalidValue, inst, pexpr, full);
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmenum_typespec: {
-      const enum_typespec *sts = (const enum_typespec *)ts;
-      if (sts)
-        bits = size(sts->Base_typespec(), invalidValue, inst, pexpr, full);
+      if (const ref_obj *ro = ((const enum_typespec *)ts)->Base_typespec()) {
+        bits =
+            size(ro->Actual_group<typespec>(), invalidValue, inst, pexpr, full);
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmunion_typespec: {
-      union_typespec *sts = (union_typespec *)ts;
+      const union_typespec *sts = (const union_typespec *)ts;
       if (VectorOftypespec_member *members = sts->Members()) {
-        for (typespec_member *member : *members) {
-          uint64_t max =
-              size(member->Typespec(), invalidValue, inst, pexpr, full);
-          if (max > bits) bits = max;
+        for (const typespec_member *member : *members) {
+          if (const ref_obj *ro = member->Typespec()) {
+            uint64_t max = size(ro->Actual_group<typespec>(), invalidValue,
+                                inst, pexpr, full);
+            if (max > bits) bits = max;
+          }
         }
       }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmconstant: {
-      constant *c = (constant *)ts;
+      const constant *c = (const constant *)ts;
       bits = c->VpiSize();
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmenum_const: {
-      enum_const *c = (enum_const *)ts;
+      const enum_const *c = (const enum_const *)ts;
       bits = c->VpiSize();
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmref_obj: {
-      ref_obj *ref = (ref_obj *)ts;
-      if (const any *act = ref->Actual_group()) {
+      if (const any *act = ((const ref_obj *)ts)->Actual_group()) {
         bits = size(act, invalidValue, inst, pexpr, full);
       } else {
         invalidValue = true;
@@ -1404,7 +1447,7 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmoperation: {
-      operation *tsop = (operation *)ts;
+      const operation *tsop = (const operation *)ts;
       if (tsop->VpiOpType() == vpiConcatOp) {
         if (auto ops = tsop->Operands()) {
           for (auto op : *ops) {
@@ -1416,20 +1459,25 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
     }
     case UHDM_OBJECT_TYPE::uhdmpacked_array_typespec: {
       packed_array_typespec *tmp = (packed_array_typespec *)ts;
-      const typespec *tps = (typespec *)tmp->Elem_typespec();
-      bits += size(tps, invalidValue, inst, pexpr, full);
+      if (const ref_obj *ro = tmp->Elem_typespec()) {
+        bits +=
+            size(ro->Actual_group<typespec>(), invalidValue, inst, pexpr, full);
+      }
       ranges = tmp->Ranges();
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmtypespec_member: {
-      typespec_member *tmp = (typespec_member *)ts;
-      bits += size(tmp->Typespec(), invalidValue, inst, pexpr, full);
+      if (const ref_obj *ro = ((const typespec_member *)ts)->Typespec()) {
+        bits +=
+            size(ro->Actual_group<typespec>(), invalidValue, inst, pexpr, full);
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmio_decl: {
-      io_decl *decl = (io_decl *)ts;
-      const typespec *tps = decl->Typespec();
-      bits += size(tps, invalidValue, inst, pexpr, full);
+      if (const ref_obj *ro = ((const io_decl *)ts)->Typespec()) {
+        bits +=
+            size(ro->Actual_group<typespec>(), invalidValue, inst, pexpr, full);
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmbit_select: {
@@ -1437,7 +1485,7 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmpart_select: {
-      const part_select *sel = (part_select *)ts;
+      const part_select *sel = (const part_select *)ts;
       const expr *lexpr = sel->Left_range();
       const expr *rexpr = sel->Right_range();
       int64_t lv =
@@ -1492,17 +1540,17 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
   return bits;
 }
 
-uint64_t ExprEval::size(
-		const vpiHandle typespec,
-		bool &invalidValue,
-                const vpiHandle inst,
-		const vpiHandle pexpr,
-		bool full,
-                bool muteError) {
-  const UHDM::any* vpiHandle_typespec = (UHDM::any*)((uhdm_handle*)typespec)->object;
-  const UHDM::any* vpiHandle_inst = !inst ? nullptr : (UHDM::any*)((uhdm_handle*)inst)->object;
-  const UHDM::any* vpiHandle_pexpr = !pexpr ? nullptr : (UHDM::any*)((uhdm_handle*)pexpr)->object;
-  return size(vpiHandle_typespec,invalidValue,vpiHandle_inst,vpiHandle_pexpr,full,muteError);
+uint64_t ExprEval::size(const vpiHandle typespec, bool &invalidValue,
+                        const vpiHandle inst, const vpiHandle pexpr, bool full,
+                        bool muteError) {
+  const UHDM::any *vpiHandle_typespec =
+      (UHDM::any *)((uhdm_handle *)typespec)->object;
+  const UHDM::any *vpiHandle_inst =
+      !inst ? nullptr : (UHDM::any *)((uhdm_handle *)inst)->object;
+  const UHDM::any *vpiHandle_pexpr =
+      !pexpr ? nullptr : (UHDM::any *)((uhdm_handle *)pexpr)->object;
+  return size(vpiHandle_typespec, invalidValue, vpiHandle_inst, vpiHandle_pexpr,
+              full, muteError);
 }
 static bool getStringVal(std::string &result, expr *val) {
   if (const constant *hs0 = any_cast<const constant *>(val)) {
@@ -1649,71 +1697,82 @@ uint64_t ExprEval::getWordSize(const expr* exp, const any *inst,
   if (exp == nullptr) {
     return wordSize;
   }
-  if (typespec *cts = (typespec *)exp->Typespec()) {
-    if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
-      array_typespec *atps = (array_typespec *)cts;
-      cts = atps->Elem_typespec();
-    }
-    if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmlong_int_typespec) {
-      wordSize = 64;
-    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmshort_int_typespec) {
-      wordSize = 16;
-    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmbyte_typespec) {
-      wordSize = 8;
-    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
-      int_typespec *icts = (int_typespec *)cts;
-      std::string_view value = icts->VpiValue();
-      if (exp->VpiSize() > 32)
-        wordSize = 32;
-      else
-        wordSize = 1;
-      if (value.find("UINT:") == 0) {
-        value.remove_prefix(std::string_view("UINT:").length());
-        if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
-          wordSize = 32;
+  if (const ref_obj *ctsro = exp->Typespec()) {
+    if (const typespec *cts = ctsro->Actual_group<typespec>()) {
+      if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmpacked_array_typespec) {
+        packed_array_typespec *atps = (packed_array_typespec *)cts;
+        if (const ref_obj *etsro = atps->Elem_typespec()) {
+          cts = etsro->Actual_group<typespec>();
         }
-      } else if (value.find("INT:") == 0) {
-        value.remove_prefix(std::string_view("INT:").length());
-        if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
-          wordSize = 32;
+      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
+        array_typespec *atps = (array_typespec *)cts;
+        if (const ref_obj *etsro = atps->Elem_typespec()) {
+          cts = etsro->Actual_group<typespec>();
         }
       }
-    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdminteger_typespec) {
-      integer_typespec *icts = (integer_typespec *)cts;
-      std::string_view value = icts->VpiValue();
-      if (exp->VpiSize() > 32)
-        wordSize = 32;
-      else
+      if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmlong_int_typespec) {
+        wordSize = 64;
+      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmshort_int_typespec) {
+        wordSize = 16;
+      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmbyte_typespec) {
+        wordSize = 8;
+      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
+        int_typespec *icts = (int_typespec *)cts;
+        std::string_view value = icts->VpiValue();
+        if (exp->VpiSize() > 32)
+          wordSize = 32;
+        else
+          wordSize = 1;
+        if (value.find("UINT:") == 0) {
+          value.remove_prefix(std::string_view("UINT:").length());
+          if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
+            wordSize = 32;
+          }
+        } else if (value.find("INT:") == 0) {
+          value.remove_prefix(std::string_view("INT:").length());
+          if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
+            wordSize = 32;
+          }
+        }
+      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdminteger_typespec) {
+        integer_typespec *icts = (integer_typespec *)cts;
+        std::string_view value = icts->VpiValue();
+        if (exp->VpiSize() > 32)
+          wordSize = 32;
+        else
+          wordSize = 1;
+        if (value.find("UINT:") == 0) {
+          value.remove_prefix(std::string_view("UINT:").length());
+          if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
+            wordSize = 32;
+          }
+        } else if (value.find("INT:") == 0) {
+          value.remove_prefix(std::string_view("INT:").length());
+          if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
+            wordSize = 32;
+          }
+        }
+      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
+        logic_typespec *icts = (logic_typespec *)cts;
+        if (const ref_obj *ro = icts->Elem_typespec()) {
+          wordSize = size(ro->Actual_group(), invalidValue, inst, pexpr, false,
+                          muteError);
+        }
+      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_typespec) {
+        bit_typespec *icts = (bit_typespec *)cts;
         wordSize = 1;
-      if (value.find("UINT:") == 0) {
-        value.remove_prefix(std::string_view("UINT:").length());
-        if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
-          wordSize = 32;
-        }
-      } else if (value.find("INT:") == 0) {
-        value.remove_prefix(std::string_view("INT:").length());
-        if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
-          wordSize = 32;
-        }
-      }
-    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
-      logic_typespec *icts = (logic_typespec *)cts;
-      const logic_typespec *elem = icts->Logic_typespec();
-      wordSize = size(elem, invalidValue, inst, pexpr, false, muteError);
-    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_typespec) {
-      bit_typespec *icts = (bit_typespec *)cts;
-      wordSize = 1;
-      if (VectorOfrange *ranges = icts->Ranges()) {
-        if (icts->Ranges()->size() > 1) {
-          range *r = ranges->at(ranges->size() - 1);
-          bool invalid = false;
-          uint16_t lr = static_cast<uint16_t>(
-              get_value(invalid, reduceExpr(r->Left_expr(), invalidValue, inst,
-                                            pexpr, muteError)));
-          uint16_t rr = static_cast<uint16_t>(
-              get_value(invalid, reduceExpr(r->Right_expr(), invalidValue, inst,
-                                            pexpr, muteError)));
-          wordSize = (lr > rr) ? (lr - rr + 1) : (rr - lr + 1);
+        if (VectorOfrange *ranges = icts->Ranges()) {
+          if (icts->Ranges()->size() > 1) {
+            range *r = ranges->at(ranges->size() - 1);
+            bool invalid = false;
+            uint64_t lr = static_cast<uint16_t>(
+                get_value(invalid, reduceExpr(r->Left_expr(), invalidValue,
+                                              inst, pexpr, muteError)));
+            uint64_t rr = static_cast<uint16_t>(
+                get_value(invalid, reduceExpr(r->Right_expr(), invalidValue,
+                                              inst, pexpr, muteError)));
+            wordSize = (lr > rr) ? (lr - rr + 1) : (rr - lr + 1);
+          }
         }
       }
     }
@@ -1737,42 +1796,32 @@ expr *ExprEval::reduceBitSelect(expr *op, uint32_t index_val,
     constant *c = s.MakeConstant();
     uint16_t lr = 0;
     uint16_t rr = 0;
-    if (const typespec *tps = exp->Typespec()) {
-      if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
-        logic_typespec *lts = (logic_typespec *)tps;
-        if (VectorOfrange *ranges = lts->Ranges()) {
-          range *r = ranges->at(ranges->size() - 1);
-          bool invalid = false;
-          lr = static_cast<uint16_t>(
-              get_value(invalid, reduceExpr(r->Left_expr(), invalidValue, inst,
-                                            pexpr, muteError)));
-          rr = static_cast<uint16_t>(
-              get_value(invalid, reduceExpr(r->Right_expr(), invalidValue, inst,
-                                            pexpr, muteError)));
-        }
-      } else if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
-        int_typespec *lts = (int_typespec *)tps;
-        if (VectorOfrange *ranges = lts->Ranges()) {
-          range *r = ranges->at(ranges->size() - 1);
-          bool invalid = false;
-          lr = static_cast<uint16_t>(
-              get_value(invalid, reduceExpr(r->Left_expr(), invalidValue, inst,
-                                            pexpr, muteError)));
-          rr = static_cast<uint16_t>(
-              get_value(invalid, reduceExpr(r->Right_expr(), invalidValue, inst,
-                                            pexpr, muteError)));
-        }
-      } else if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_typespec) {
-        bit_typespec *lts = (bit_typespec *)tps;
-        if (VectorOfrange *ranges = lts->Ranges()) {
-          range *r = ranges->at(ranges->size() - 1);
-          bool invalid = false;
-          lr = static_cast<uint16_t>(
-              get_value(invalid, reduceExpr(r->Left_expr(), invalidValue, inst,
-                                            pexpr, muteError)));
-          rr = static_cast<uint16_t>(
-              get_value(invalid, reduceExpr(r->Right_expr(), invalidValue, inst,
-                                            pexpr, muteError)));
+    if (const ref_obj *ro = exp->Typespec()) {
+      if (const typespec *tps = ro->Actual_group<typespec>()) {
+        if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
+          logic_typespec *lts = (logic_typespec *)tps;
+          if (VectorOfrange *ranges = lts->Ranges()) {
+            range *r = ranges->at(0);
+            bool invalid = false;
+            lr = static_cast<uint16_t>(get_value(invalid, r->Left_expr()));
+            rr = static_cast<uint16_t>(get_value(invalid, r->Right_expr()));
+          }
+        } else if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
+          int_typespec *lts = (int_typespec *)tps;
+          if (VectorOfrange *ranges = lts->Ranges()) {
+            range *r = ranges->at(0);
+            bool invalid = false;
+            lr = static_cast<uint16_t>(get_value(invalid, r->Left_expr()));
+            rr = static_cast<uint16_t>(get_value(invalid, r->Right_expr()));
+          }
+        } else if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_typespec) {
+          bit_typespec *lts = (bit_typespec *)tps;
+          if (VectorOfrange *ranges = lts->Ranges()) {
+            range *r = ranges->at(0);
+            bool invalid = false;
+            lr = static_cast<uint16_t>(get_value(invalid, r->Left_expr()));
+            rr = static_cast<uint16_t>(get_value(invalid, r->Right_expr()));
+          }
         }
       }
     }
@@ -2134,11 +2183,16 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
       object = clone_tree(cons, &elaboratorContext);
       cons = any_cast<constant *>(object);
       if (cons->Typespec() == nullptr) {
-        cons->Typespec((typespec *)path->Typespec());
+        ref_obj *ro =
+            (ref_obj *)clone_tree(path->Typespec(), &elaboratorContext);
+        ro->VpiParent(cons);
+        cons->Typespec(ro);
       }
-    } else if (operation *oper = any_cast<operation *>(object)) {
+    } else if (operation *oper = any_cast<operation>(object)) {
       if (returnTypespec) {
-        object = (typespec *)oper->Typespec();
+        if (ref_obj *ro = oper->Typespec()) {
+          object = ro->Actual_group<typespec>();
+        }
       }
     }
 
@@ -2176,57 +2230,74 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
   if (variables *var = any_cast<variables *>(object)) {
     UHDM_OBJECT_TYPE ttps = var->UhdmType();
     if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_var) {
-      const typespec *stp = ((struct_var *)var)->Typespec();
-      if (stp->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-        struct_typespec *stpt = (struct_typespec *)stp;
-        for (typespec_member *member : *stpt->Members()) {
-          if (member->VpiName() == elemName) {
-            if (returnTypespec)
-              return (expr *)member->Typespec();
-            else
-              return (expr *)member->Default_value();
+      if (const ref_obj *svro = var->Typespec()) {
+        if (const struct_typespec *stpt =
+                svro->Actual_group<struct_typespec>()) {
+          for (typespec_member *member : *stpt->Members()) {
+            if (member->VpiName() == elemName) {
+              if (returnTypespec) {
+                if (ref_obj *mro = member->Typespec()) {
+                  return mro->Actual_group();
+                }
+              } else {
+                return member->Default_value();
+              }
+            }
           }
         }
       }
     } else if (ttps == UHDM_OBJECT_TYPE::uhdmclass_var) {
-      const typespec *stpt = ((class_var *)var)->Typespec();
-      if (stpt->UhdmType() == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
-        class_typespec *ctps = (class_typespec *)stpt;
-        const class_defn *defn = ctps->Class_defn();
-        while (defn) {
-          if (defn->Variables()) {
-            for (variables *member : *defn->Variables()) {
-              if (member->VpiName() == elemName) {
-                if (returnTypespec)
-                  return (typespec *)member->Typespec();
-                else
-                  return member;
+      if (ref_obj *ro = var->Typespec()) {
+        if (class_typespec *ctps = ro->Actual_group<class_typespec>()) {
+          const class_defn *defn = ctps->Class_defn();
+          while (defn) {
+            if (defn->Variables()) {
+              for (variables *member : *defn->Variables()) {
+                if (member->VpiName() == elemName) {
+                  if (returnTypespec) {
+                    if (ref_obj *mro = member->Typespec()) {
+                      return mro->Actual_group();
+                    }
+                  } else {
+                    return member;
+                  }
+                }
               }
             }
-          }
-          const class_defn *base_defn = nullptr;
-          if (const extends *ext = defn->Extends()) {
-            if (const class_typespec *tp = ext->Class_typespec()) {
-              base_defn = tp->Class_defn();
+            const class_defn *base_defn = nullptr;
+            if (const extends *ext = defn->Extends()) {
+              if (const ref_obj *ro = ext->Class_typespec()) {
+                if (const class_typespec *tp =
+                        ro->Actual_group<class_typespec>()) {
+                  base_defn = tp->Class_defn();
+                }
+              }
             }
+            defn = base_defn;
           }
-          defn = base_defn;
         }
       }
     } else if (ttps == UHDM_OBJECT_TYPE::uhdmarray_var) {
-      if (returnTypespec) return (typespec *)var->Typespec();
+      if (returnTypespec) {
+        if (ref_obj *ro = var->Typespec()) {
+          return ro->Actual_group();
+        }
+      }
     }
   } else if (typespec *tps = any_cast<typespec *>(object)) {
     UHDM_OBJECT_TYPE ttps = tps->UhdmType();
     if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-      struct_typespec *stpt = (struct_typespec *)(tps);
+      struct_typespec *stpt = (struct_typespec *)tps;
       for (typespec_member *member : *stpt->Members()) {
         if (member->VpiName() == elemName) {
-          expr *res = nullptr;
-          if (returnTypespec)
-            res = (expr *)member->Typespec();
-          else
-            res = (expr *)member->Default_value();
+          any *res = nullptr;
+          if (returnTypespec) {
+            if (ref_obj *mro = member->Typespec()) {
+              res = mro->Actual_group();
+            }
+          } else {
+            res = member->Default_value();
+          }
           if (level == select_path.size() - 1) {
             return res;
           } else {
@@ -2241,113 +2312,132 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     if (const any *exp = decl->Expr()) {
       UHDM_OBJECT_TYPE ttps = exp->UhdmType();
       if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_var) {
-        const typespec *stp = ((struct_var *)exp)->Typespec();
-        if (stp->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-          struct_typespec *stpt = (struct_typespec *)stp;
-
-          for (typespec_member *member : *stpt->Members()) {
-            if (member->VpiName() == elemName) {
-              if (returnTypespec)
-                return (expr *)member->Typespec();
-              else
-                return (expr *)member->Default_value();
+        if (const ref_obj *ro = ((struct_var *)exp)->Typespec()) {
+          if (const struct_typespec *stpt =
+                  ro->Actual_group<struct_typespec>()) {
+            for (typespec_member *member : *stpt->Members()) {
+              if (member->VpiName() == elemName) {
+                if (returnTypespec) {
+                  if (ref_obj *mro = member->Typespec()) {
+                    return mro->Actual_group();
+                  }
+                } else {
+                  return member->Default_value();
+                }
+              }
             }
           }
         }
       }
     }
     if (returnTypespec) {
-      if (const typespec *tps = decl->Typespec()) {
-        UHDM_OBJECT_TYPE ttps = tps->UhdmType();
-        if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-          struct_typespec *stpt = (struct_typespec *)tps;
-          for (typespec_member *member : *stpt->Members()) {
-            if (member->VpiName() == elemName) {
-              return (expr *)member->Typespec();
+      if (const ref_obj *ro = decl->Typespec()) {
+        if (const typespec *tps = ro->Actual_group<typespec>()) {
+          UHDM_OBJECT_TYPE ttps = tps->UhdmType();
+          if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
+            struct_typespec *stpt = (struct_typespec *)tps;
+            for (typespec_member *member : *stpt->Members()) {
+              if (member->VpiName() == elemName)
+                if (ref_obj *mro = member->Typespec()) {
+                  return mro->Actual_group();
+                }
             }
-          }
-        } else if (ttps == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
-          class_typespec *stpt = (class_typespec *)tps;
-          const class_defn *defn = stpt->Class_defn();
-          while (defn) {
-            if (defn->Variables()) {
-              for (variables *member : *defn->Variables()) {
-                if (member->VpiName() == elemName) {
-                  return (typespec *)member->Typespec();
+          } else if (ttps == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
+            class_typespec *stpt = (class_typespec *)tps;
+            const class_defn *defn = stpt->Class_defn();
+            while (defn) {
+              if (defn->Variables()) {
+                for (variables *member : *defn->Variables()) {
+                  if (member->VpiName() == elemName) {
+                    if (ref_obj *mro = member->Typespec()) {
+                      return mro->Actual_group();
+                    }
+                  }
                 }
               }
-            }
-            const class_defn *base_defn = nullptr;
-            if (const extends *ext = defn->Extends()) {
-              if (const class_typespec *tp = ext->Class_typespec()) {
-                base_defn = tp->Class_defn();
+              const class_defn *base_defn = nullptr;
+              if (const extends *ext = defn->Extends()) {
+                if (const ref_obj *ro = ext->Class_typespec()) {
+                  if (const class_typespec *tp =
+                          ro->Actual_group<class_typespec>()) {
+                    base_defn = tp->Class_defn();
+                  }
+                }
               }
+              defn = base_defn;
             }
-            defn = base_defn;
           }
         }
       }
     }
-  } else if (nets *nt = any_cast<nets *>(object)) {
+  } else if (const nets *nt = any_cast<const nets *>(object)) {
     UHDM_OBJECT_TYPE ttps = nt->UhdmType();
     if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_net) {
-      struct_typespec *stpt = (struct_typespec *)((struct_net *)nt)->Typespec();
-      for (typespec_member *member : *stpt->Members()) {
-        if (member->VpiName() == elemName) {
-          if (returnTypespec)
-            return (expr *)member->Typespec();
-          else
-            return (expr *)member->Default_value();
+      if (const ref_obj *ro = ((struct_net *)nt)->Typespec()) {
+        if (const struct_typespec *stpt = ro->Actual_group<struct_typespec>()) {
+          for (typespec_member *member : *stpt->Members()) {
+            if (member->VpiName() == elemName) {
+              if (returnTypespec) {
+                if (ref_obj *mro = member->Typespec()) {
+                  return mro->Actual_group();
+                }
+              } else {
+                return member->Default_value();
+              }
+            }
+          }
         }
       }
     }
   } else if (constant *cons = any_cast<constant *>(object)) {
-    if (const typespec *ts = cons->Typespec()) {
-      UHDM_OBJECT_TYPE ttps = ts->UhdmType();
-      if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-        struct_typespec *stpt = (struct_typespec *)ts;
-        uint64_t from = 0;
-        uint64_t width = 0;
-        for (typespec_member *member : *stpt->Members()) {
-          if (member->VpiName() == elemName) {
-            width = size(member, invalidValue, inst, pexpr, true);
-            if (cons->VpiSize() <= 64) {
-              uint64_t iv = get_value(invalidValue, cons);
-              uint64_t mask = 0;
+    if (ref_obj *ro = cons->Typespec()) {
+      if (typespec *ts = ro->Actual_group<typespec>()) {
+        UHDM_OBJECT_TYPE ttps = ts->UhdmType();
+        if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
+          struct_typespec *stpt = (struct_typespec *)ts;
+          uint64_t from = 0;
+          uint64_t width = 0;
+          for (typespec_member *member : *stpt->Members()) {
+            if (member->VpiName() == elemName) {
+              width = size(member, invalidValue, inst, pexpr, true);
+              if (cons->VpiSize() <= 64) {
+                uint64_t iv = get_value(invalidValue, cons);
+                uint64_t mask = 0;
 
-              for (uint64_t i = from; i < uint64_t(from + width); i++) {
-                mask |= ((uint64_t)1 << i);
+                for (uint64_t i = from; i < uint64_t(from + width); i++) {
+                  mask |= ((uint64_t)1 << i);
+                }
+                uint64_t res = iv & mask;
+                res = res >> (from);
+                cons->VpiValue("UINT:" + std::to_string(res));
+                cons->VpiSize(static_cast<int32_t>(width));
+                cons->VpiConstType(vpiUIntConst);
+                return cons;
+              } else {
+                std::string_view val = cons->VpiValue();
+                int32_t ctype = cons->VpiConstType();
+                if (ctype == vpiHexConst) {
+                  std::string_view vval =
+                      val.substr(strlen("HEX:"), std::string::npos);
+                  std::string bin = NumUtils::hexToBin(vval);
+                  std::string res = bin.substr(from, width);
+                  cons->VpiValue("BIN:" + res);
+                  cons->VpiSize(static_cast<int32_t>(width));
+                  cons->VpiConstType(vpiBinaryConst);
+                  return cons;
+                } else if (ctype == vpiBinaryConst) {
+                  std::string_view bin =
+                      val.substr(strlen("BIN:"), std::string::npos);
+                  std::string_view res = bin.substr(from, width);
+                  cons->VpiValue("BIN:" + std::string(res));
+                  cons->VpiSize(static_cast<int32_t>(width));
+                  cons->VpiConstType(vpiBinaryConst);
+                  return cons;
+                }
               }
-              uint64_t res = iv & mask;
-              res = res >> (from);
-              cons->VpiValue("UINT:" + std::to_string(res));
-              cons->VpiSize(static_cast<int32_t>(width));
-              cons->VpiConstType(vpiUIntConst);
-              return cons;
             } else {
-              std::string_view val = cons->VpiValue();
-              int32_t ctype = cons->VpiConstType();
-              if (ctype == vpiHexConst) {
-                std::string_view vval =
-                    val.substr(strlen("HEX:"), std::string::npos);
-                std::string bin = NumUtils::hexToBin(vval);
-                std::string res = bin.substr(from, width);
-                cons->VpiValue("BIN:" + res);
-                cons->VpiSize(static_cast<int32_t>(width));
-                cons->VpiConstType(vpiBinaryConst);
-                return cons;
-              } else if (ctype == vpiBinaryConst) {
-                std::string_view bin =
-                    val.substr(strlen("BIN:"), std::string::npos);
-                std::string_view res = bin.substr(from, width);
-                cons->VpiValue("BIN:" + std::string(res));
-                cons->VpiSize(static_cast<int32_t>(width));
-                cons->VpiConstType(vpiBinaryConst);
-                return cons;
-              }
+              from += size(member, invalidValue, inst, pexpr, true);
             }
-          } else {
-            from += size(member, invalidValue, inst, pexpr, true);
           }
         }
       }
@@ -2376,19 +2466,17 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
           sInd++;
         }
       }
-    } else if (typespec *tps = any_cast<typespec *>(object)) {
-      if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
-        logic_typespec *ltps = (logic_typespec *)tps;
-        VectorOfrange *ranges = ltps->Ranges();
-        if (ranges && (ranges->size() >= 2)) {
-          logic_typespec *tmp = s.MakeLogic_typespec();
-          VectorOfrange *tmpR = s.MakeRangeVec();
-          for (uint32_t i = 1; i < ranges->size(); i++) {
-            tmpR->push_back(ranges->at(i));
-          }
-          tmp->Ranges(tmpR);
-          return tmp;
+    } else if (const logic_typespec *ltps =
+                   any_cast<const logic_typespec *>(object)) {
+      VectorOfrange *ranges = ltps->Ranges();
+      if (ranges && (ranges->size() >= 2)) {
+        logic_typespec *tmp = s.MakeLogic_typespec();
+        VectorOfrange *tmpR = s.MakeRangeVec();
+        for (uint32_t i = 1; i < ranges->size(); i++) {
+          tmpR->push_back(ranges->at(i));
         }
+        tmp->Ranges(tmpR);
+        return tmp;
       }
     } else if (constant *c = any_cast<constant *>(object)) {
       return reduceBitSelect(c, selectIndex, invalidValue, inst, pexpr,
@@ -2432,15 +2520,22 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         if (baseP) {
           const typespec *tps = nullptr;
           if (parameter *p = any_cast<parameter *>(baseP)) {
-            tps = p->Typespec();
+            if (const ref_obj *ro = p->Typespec()) {
+              tps = ro->Actual_group<typespec>();
+            }
           } else if (operation *op = any_cast<operation *>(baseP)) {
-            tps = op->Typespec();
+            if (const ref_obj *ro = op->Typespec()) {
+              tps = ro->Actual_group<typespec>();
+            }
           }
 
           if (tps) {
-            if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmpacked_array_typespec) {
+            if (tps->UhdmType() ==
+                UHDM_OBJECT_TYPE::uhdmpacked_array_typespec) {
               packed_array_typespec *tmp = (packed_array_typespec *)tps;
-              tps = (typespec *)tmp->Elem_typespec();
+              if (const ref_obj *ro = tmp->Elem_typespec()) {
+                tps = ro->Actual_group<typespec>();
+              }
             }
             if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
               struct_typespec *sts = (struct_typespec *)tps;
@@ -2462,7 +2557,8 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         const any *tmpInstance = inst;
         while ((bIndex == -1) && tmpInstance) {
           VectorOfparam_assign *param_assigns = nullptr;
-          if (tmpInstance->UhdmType() == UHDM_OBJECT_TYPE::uhdmgen_scope_array) {
+          if (tmpInstance->UhdmType() ==
+              UHDM_OBJECT_TYPE::uhdmgen_scope_array) {
           } else if (tmpInstance->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
             param_assigns = ((design *)tmpInstance)->Param_assigns();
           } else if (const scope *spe = any_cast<const scope *>(tmpInstance)) {
@@ -2475,22 +2571,29 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
                 if (param_name == select_path[0]) {
                   if (const parameter *p =
                           any_cast<const parameter *>(param->Lhs())) {
-                    if (const typespec *tps = p->Typespec()) {
-                      if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmpacked_array_typespec) {
-                        packed_array_typespec *tmp =
-                            (packed_array_typespec *)tps;
-                        tps = (typespec *)tmp->Elem_typespec();
-                      }
-                      if (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-                        struct_typespec *sts = (struct_typespec *)tps;
-                        if (VectorOftypespec_member *members = sts->Members()) {
-                          uint32_t i = 0;
-                          for (typespec_member *member : *members) {
-                            if (member->VpiName() == elemName) {
-                              bIndex = i;
-                              break;
+                    if (const ref_obj *ro = p->Typespec()) {
+                      if (const typespec *tps = ro->Actual_group<typespec>()) {
+                        if (tps->UhdmType() ==
+                            UHDM_OBJECT_TYPE::uhdmpacked_array_typespec) {
+                          if (const ref_obj *ero =
+                                  ((packed_array_typespec *)tps)
+                                      ->Elem_typespec()) {
+                            tps = ero->Actual_group<typespec>();
+                          }
+                        }
+                        if (tps && (tps->UhdmType() ==
+                                    UHDM_OBJECT_TYPE::uhdmstruct_typespec)) {
+                          struct_typespec *sts = (struct_typespec *)tps;
+                          if (VectorOftypespec_member *members =
+                                  sts->Members()) {
+                            uint32_t i = 0;
+                            for (typespec_member *member : *members) {
+                              if (member->VpiName() == elemName) {
+                                bIndex = i;
+                                break;
+                              }
+                              i++;
                             }
-                            i++;
                           }
                         }
                       }
@@ -2507,26 +2610,28 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         UHDM_OBJECT_TYPE operandType = operand->UhdmType();
         if (operandType == UHDM_OBJECT_TYPE::uhdmtagged_pattern) {
           tagged_pattern *tpatt = (tagged_pattern *)operand;
-          const typespec *tps = tpatt->Typespec();
-          if (tps->VpiName() == "default") {
-            defaultPattern = (any *)tpatt->Pattern();
-          }
-          if (!elemName.empty() && (tps->VpiName() == elemName)) {
-            const any *patt = tpatt->Pattern();
-            UHDM_OBJECT_TYPE pattType = patt->UhdmType();
-            if (pattType == UHDM_OBJECT_TYPE::uhdmconstant) {
-              any *ex = reduceExpr((expr *)patt, invalidValue, inst, pexpr,
-                                   muteError);
-              if (level < select_path.size()) {
-                ex = hierarchicalSelector(select_path, level + 1, ex,
-                                          invalidValue, inst, pexpr,
-                                          returnTypespec);
+          if (const ref_obj *ro = tpatt->Typespec()) {
+            const typespec *tps = ro->Actual_group<typespec>();
+            if (tps->VpiName() == "default") {
+              defaultPattern = (any *)tpatt->Pattern();
+            }
+            if (!elemName.empty() && (tps->VpiName() == elemName)) {
+              const any *patt = tpatt->Pattern();
+              UHDM_OBJECT_TYPE pattType = patt->UhdmType();
+              if (pattType == UHDM_OBJECT_TYPE::uhdmconstant) {
+                any *ex = reduceExpr((expr *)patt, invalidValue, inst, pexpr,
+                                     muteError);
+                if (level < select_path.size()) {
+                  ex = hierarchicalSelector(select_path, level + 1, ex,
+                                            invalidValue, inst, pexpr,
+                                            returnTypespec);
+                }
+                return ex;
+              } else if (pattType == UHDM_OBJECT_TYPE::uhdmoperation) {
+                return hierarchicalSelector(select_path, level + 1,
+                                            (expr *)patt, invalidValue, inst,
+                                            pexpr, returnTypespec);
               }
-              return ex;
-            } else if (pattType == UHDM_OBJECT_TYPE::uhdmoperation) {
-              return hierarchicalSelector(select_path, level + 1, (expr *)patt,
-                                          invalidValue, inst, pexpr,
-                                          returnTypespec);
             }
           }
         } else if (operandType == UHDM_OBJECT_TYPE::uhdmconstant) {
@@ -2966,9 +3071,9 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 if (operand->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
                   constant *c = (constant *)operand;
                   size = c->VpiSize();
-                  if (const typespec *tps = c->Typespec()) {
-                    size = ExprEval::size(tps, invalidValue, inst, pexpr, true,
-                                          muteError);
+                  if (const ref_obj *ro = c->Typespec()) {
+                    size = ExprEval::size(ro->Actual_group(), invalidValue,
+                                          inst, pexpr, true, muteError);
                   }
                   if (size == 1) {
                     val = !val;
@@ -3188,7 +3293,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   if (const gen_scope_array *in =
                           any_cast<const gen_scope_array *>(inst)) {
                     fullPath = in->VpiFullName();
-                  } else if (inst && inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
+                  } else if (inst &&
+                             inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
                     fullPath = inst->VpiName();
                   } else if (const scope *spe = any_cast<const scope *>(inst)) {
                     fullPath = spe->VpiFullName();
@@ -3287,7 +3393,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 if (const gen_scope_array *in =
                         any_cast<const gen_scope_array *>(inst)) {
                   fullPath = in->VpiFullName();
-                } else if (inst && inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
+                } else if (inst &&
+                           inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
                   fullPath = inst->VpiName();
                 } else if (const scope *spe = any_cast<const scope *>(inst)) {
                   fullPath = spe->VpiFullName();
@@ -3409,7 +3516,10 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               if (width) {
                 int_typespec *ts = s.MakeInt_typespec();
                 ts->VpiValue("UINT:" + std::to_string(width));
-                c->Typespec(ts);
+                ref_obj *ro = s.MakeRef_obj();
+                ro->Actual_group(ts);
+                ro->VpiParent(c);
+                c->Typespec(ro);
               }
               result = c;
             }
@@ -3428,7 +3538,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 operation *o = (operation *)oper;
                 operType = o->VpiOpType();
               }
-              if ((optype != UHDM_OBJECT_TYPE::uhdmconstant) && (operType != vpiConcatOp) &&
+              if ((optype != UHDM_OBJECT_TYPE::uhdmconstant) &&
+                  (operType != vpiConcatOp) &&
                   (operType != vpiMultiAssignmentPatternOp) &&
                   (operType != vpiAssignmentPatternOp)) {
                 if (expr *tmp = reduceExpr(oper, invalidValue, inst, pexpr,
@@ -3586,7 +3697,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   if (const gen_scope_array *in =
                           any_cast<const gen_scope_array *>(inst)) {
                     fullPath = in->VpiFullName();
-                  } else if (inst && inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
+                  } else if (inst &&
+                             inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
                     fullPath = inst->VpiName();
                   } else if (const scope *spe = any_cast<const scope *>(inst)) {
                     fullPath = spe->VpiFullName();
@@ -3610,7 +3722,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 reduceExpr(operands[0], invalidValue, inst, pexpr, muteError);
             uint64_t val0 = get_value(invalidValue, oper);
             if (invalidValue) break;
-            if (const typespec *tps = op->Typespec()) {
+            const typespec *tps = nullptr;
+            if (const ref_obj *ro = op->Typespec()) {
+              tps = ro->Actual_group<typespec>();
+            }
+            if (tps) {
               UHDM_OBJECT_TYPE ttps = tps->UhdmType();
               if (ttps == UHDM_OBJECT_TYPE::uhdmint_typespec) {
                 constant *c = s.MakeConstant();
@@ -3712,8 +3828,10 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           if (any_cast<array_var *>(object)) {
             // Size the object, not its typespec
           } else if (expr *exp = any_cast<expr *>(object)) {
-            tps = exp->Typespec();
-          } else if (typespec *tp = any_cast<typespec *>(object)) {
+            if (ref_obj *ro = exp->Typespec()) {
+              tps = ro->Actual_group<typespec>();
+            }
+          } else if (typespec *tp = any_cast<typespec>(object)) {
             tps = tp;
           }
           if (tps) {
@@ -3748,24 +3866,19 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 var = passign->Rhs();
               }
             }
-            if (var) {
-              UHDM_OBJECT_TYPE vtype = var->UhdmType();
-              if (vtype == UHDM_OBJECT_TYPE::uhdmport) {
-                port *p = (port *)var;
-                if (const typespec *tps = p->Typespec()) {
-                  UHDM_OBJECT_TYPE ttps = tps->UhdmType();
-                  if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-                    struct_typespec *tpss = (struct_typespec *)tps;
-                    for (typespec_member *memb : *tpss->Members()) {
-                      if (memb->VpiName() == suffix) {
-                        const typespec *tps = memb->Typespec();
-                        if (tps) {
-                          bits += size(tps, invalidValue, inst, pexpr,
-                                       (name != "$size"));
-                          found = true;
-                        }
-                        break;
+            if (const port *p = any_cast<port>(var)) {
+              if (const ref_obj *tpv = p->Typespec()) {
+                if (const struct_typespec *tpss =
+                        tpv->Actual_group<struct_typespec>()) {
+                  for (typespec_member *memb : *tpss->Members()) {
+                    if (memb->VpiName() == suffix) {
+                      if (const ref_obj *rom = memb->Typespec()) {
+                        bits +=
+                            size(rom->Actual_group<typespec>(), invalidValue,
+                                 inst, pexpr, (name != "$size"));
+                        found = true;
                       }
+                      break;
                     }
                   }
                 }
@@ -3805,12 +3918,16 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         }
       }
     } else if (name == "$signed" || name == "$unsigned") {
+      const typespec *optps = nullptr;
+      if (const ref_obj *ro = scall->Typespec()) {
+        optps = ro->Actual_group<typespec>();
+      }
       if (scall->Tf_call_args()) {
-        const typespec *optps = scall->Typespec();
         for (auto arg : *scall->Tf_call_args()) {
           bool invalidTmpValue = false;
           expr *val = reduceExpr(arg, invalidTmpValue, inst, pexpr, muteError);
-          if (val && (val->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) && !invalidTmpValue) {
+          if (val && (val->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) &&
+              !invalidTmpValue) {
             constant *c = (constant *)val;
             if (c->VpiConstType() == vpiIntConst ||
                 c->VpiConstType() == vpiDecConst) {
@@ -3848,7 +3965,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   uint32_t bits =
                       ExprEval::size(optps, invalidValue, inst, pexpr, false);
                   bool is_signed = false;
-                  if (optps->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
+                  if (optps->UhdmType() ==
+                      UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
                     logic_typespec *ltps = (logic_typespec *)optps;
                     is_signed = ltps->VpiSigned();
                   }
@@ -3962,12 +4080,22 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             VectorOfany *ops = op->Operands();
             if (ops && (index_val < ops->size())) {
               result = ops->at(index_val);
-              if (const typespec *optps = op->Typespec()) {
-                if (optps->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
-                  array_typespec *atps = (array_typespec *)optps;
-                  const typespec *elemtps = atps->Elem_typespec();
-                  if (result->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
-                    ((operation *)result)->Typespec((typespec *)elemtps);
+              if (const operation *rop = any_cast<const operation *>(result)) {
+                if (const ref_obj *opro = op->Typespec()) {
+                  if (const array_typespec *atps =
+                          opro->Actual_group<array_typespec>()) {
+                    if (const ref_obj *elro = atps->Elem_typespec()) {
+                      if (const typespec *elemtps =
+                              elro->Actual_group<typespec>()) {
+                        ElaboratorContext elaboratorContext(&s, false,
+                                                            muteError);
+                        ref_obj *celro =
+                            (ref_obj *)clone_tree(elro, &elaboratorContext);
+                        celro->Actual_group(const_cast<typespec *>(elemtps));
+                        celro->VpiParent((any *)rop);
+                        const_cast<operation *>(rop)->Typespec(celro);
+                      }
+                    }
                   }
                 }
               }
@@ -3976,10 +4104,13 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               for (auto op : *ops) {
                 if (op->UhdmType() == UHDM_OBJECT_TYPE::uhdmtagged_pattern) {
                   tagged_pattern *tp = (tagged_pattern *)op;
-                  const typespec *tps = tp->Typespec();
-                  if (tps->VpiName() == "default") {
-                    defaultTaggedPattern = true;
-                    break;
+                  if (const ref_obj *ro = tp->Typespec()) {
+                    if (const typespec *tps = ro->Actual_group<typespec>()) {
+                      if (tps->VpiName() == "default") {
+                        defaultTaggedPattern = true;
+                        break;
+                      }
+                    }
                   }
                 }
               }
@@ -4244,8 +4375,9 @@ bool ExprEval::setValueInInstance(
       param->VpiName(lhsname);
       pa->Lhs(param);
       param_assigns->push_back(pa);
-      if (rhsexp && ((rhsexp->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) ||
-                     (rhsexp->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_expr))) {
+      if (rhsexp &&
+          ((rhsexp->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) ||
+           (rhsexp->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_expr))) {
         opRhs = true;
       }
     }
@@ -4315,7 +4447,8 @@ bool ExprEval::setValueInInstance(
             accumul = accumul + si;
           }
         }
-      } else if (lhsexp->UhdmType() == UHDM_OBJECT_TYPE::uhdmindexed_part_select) {
+      } else if (lhsexp->UhdmType() ==
+                 UHDM_OBJECT_TYPE::uhdmindexed_part_select) {
         for (VectorOfparam_assign::iterator itr = param_assigns->begin();
              itr != param_assigns->end(); itr++) {
           if ((*itr)->Lhs()->VpiName() == lhsname) {
@@ -4329,11 +4462,14 @@ bool ExprEval::setValueInInstance(
         if (any *object = getObject(name, inst, scope_exp, muteError)) {
           std::string lhsbinary;
           const typespec *tps = nullptr;
-          if (expr *elhs = any_cast<expr *>(object)) {
-            tps = elhs->Typespec();
+          if (const expr *elhs = any_cast<const expr *>(object)) {
+            if (const ref_obj *ro = elhs->Typespec()) {
+              tps = ro->Actual_group<typespec>();
+            }
           }
           uint64_t si = size(tps, invalidValue, inst, lhsexp, true, muteError);
-          if (prevRhs && prevRhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+          if (prevRhs &&
+              prevRhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
             const constant *prev = (constant *)prevRhs;
             lhsbinary = toBinary(prev);
             std::reverse(lhsbinary.begin(), lhsbinary.end());
@@ -4384,11 +4520,14 @@ bool ExprEval::setValueInInstance(
         if (any *object = getObject(name, inst, scope_exp, muteError)) {
           std::string lhsbinary;
           const typespec *tps = nullptr;
-          if (expr *elhs = any_cast<expr *>(object)) {
-            tps = elhs->Typespec();
+          if (const expr *elhs = any_cast<const expr *>(object)) {
+            if (const ref_obj *ro = elhs->Typespec()) {
+              tps = ro->Actual_group<typespec>();
+            }
           }
           uint64_t si = size(tps, invalidValue, inst, lhsexp, true, muteError);
-          if (prevRhs && prevRhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+          if (prevRhs &&
+              prevRhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
             const constant *prev = (constant *)prevRhs;
             lhsbinary = toBinary(prev);
             std::reverse(lhsbinary.begin(), lhsbinary.end());
@@ -4453,11 +4592,14 @@ bool ExprEval::setValueInInstance(
           }
           std::string lhsbinary;
           const typespec *tps = nullptr;
-          if (expr *elhs = any_cast<expr *>(object)) {
-            tps = elhs->Typespec();
+          if (const expr *elhs = any_cast<const expr *>(object)) {
+            if (const ref_obj *ro = elhs->Typespec()) {
+              tps = ro->Actual_group<typespec>();
+            }
           }
           uint64_t si = size(tps, invalidValue, inst, lhsexp, true, muteError);
-          if (prevRhs && prevRhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+          if (prevRhs &&
+              prevRhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
             const constant *prev = (constant *)prevRhs;
             if (prev->VpiConstType() == vpiBinaryConst) {
               std::string_view val = prev->VpiValue();
@@ -4491,7 +4633,11 @@ bool ExprEval::setValueInInstance(
           c->VpiDecompile(lhsbinary);
           c->VpiSize(static_cast<int32_t>(lhsbinary.size()));
           c->VpiConstType(vpiBinaryConst);
-          c->Typespec((typespec *)tps);
+
+          ref_obj *ro = s.MakeRef_obj();
+          ro->Actual_group(const_cast<typespec *>(tps));
+          ro->VpiParent(c);
+          c->Typespec(ro);
         } else {
           std::map<std::string, const typespec *>::iterator itr =
               local_vars.find(std::string(lhs));
@@ -4567,8 +4713,7 @@ bool ExprEval::setValueInInstance(
         if (!tmpInvalidValue) {
           std::string bval;
           if (valUI) {
-            for (uint32_t i = 0; i < size; i++)
-              bval += "1";
+            for (uint32_t i = 0; i < size; i++) bval += "1";
           } else {
             bval = NumUtils::toBinary(size, valUI);
           }
@@ -4661,7 +4806,11 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       begin *st = (begin *)stmt;
       if (st->Variables()) {
         for (auto var : *st->Variables()) {
-          local_vars.emplace(var->VpiName(), var->Typespec());
+          if (const ref_obj *ro = var->Typespec()) {
+            if (const typespec *ts = ro->Actual_group<typespec>()) {
+              local_vars.emplace(var->VpiName(), ts);
+            }
+          }
         }
       }
       if (st->Stmts()) {
@@ -4679,7 +4828,11 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       named_begin *st = (named_begin *)stmt;
       if (st->Variables()) {
         for (auto var : *st->Variables()) {
-          local_vars.emplace(var->VpiName(), var->Typespec());
+          if (const ref_obj *ro = var->Typespec()) {
+            if (const typespec *ts = ro->Actual_group<typespec>()) {
+              local_vars.emplace(var->VpiName(), ts);
+            }
+          }
         }
       }
       if (st->Stmts()) {
@@ -4738,8 +4891,11 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       if (const any *stmt = st->VpiForInitStmt()) {
         if (stmt->UhdmType() == UHDM_OBJECT_TYPE::uhdmassign_stmt) {
           assign_stmt *assign = (assign_stmt *)stmt;
-          local_vars.emplace(assign->Lhs()->VpiName(),
-                             assign->Lhs()->Typespec());
+          if (const ref_obj *ro = assign->Lhs()->Typespec()) {
+            if (const typespec *ts = ro->Actual_group<typespec>()) {
+              local_vars.emplace(assign->Lhs()->VpiName(), ts);
+            }
+          }
         }
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
                  return_flag, scopes.back(), st->VpiForInitStmt(), local_vars,
@@ -4749,14 +4905,18 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
         for (auto s : *st->VpiForInitStmts()) {
           if (s->UhdmType() == UHDM_OBJECT_TYPE::uhdmassign_stmt) {
             assign_stmt *assign = (assign_stmt *)s;
-            local_vars.emplace(assign->Lhs()->VpiName(),
-                               assign->Lhs()->Typespec());
+            if (const ref_obj *ro = assign->Lhs()->Typespec()) {
+              if (const typespec *ts = ro->Actual_group<typespec>()) {
+                local_vars.emplace(assign->Lhs()->VpiName(), ts);
+              }
+            }
           }
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
                    return_flag, scopes.back(), s, local_vars, muteError);
         }
       }
-      while (1) {
+      size_t iterationCount = 0;
+      while (++iterationCount < 1000) {
         expr *cond = (expr *)st->VpiCondition();
         if (cond) {
           int64_t val = get_value(invalidValue,
@@ -4815,7 +4975,8 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
     case UHDM_OBJECT_TYPE::uhdmwhile_stmt: {
       while_stmt *st = (while_stmt *)stmt;
       if (const expr *cond = st->VpiCondition()) {
-        while (1) {
+        size_t iterationCount = 0;
+        while (++iterationCount < 1000) {
           int64_t val = get_value(invalidValue,
                                   reduceExpr(cond, invalidValue, scopes.back(),
                                              nullptr, muteError));
@@ -4845,7 +5006,8 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
     case UHDM_OBJECT_TYPE::uhdmdo_while: {
       do_while *st = (do_while *)stmt;
       if (const expr *cond = st->VpiCondition()) {
-        while (1) {
+        size_t iterationCount = 0;
+        while (++iterationCount < 1000) {
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
                    return_flag, scopes.back(), st->VpiStmt(), local_vars,
                    muteError);
@@ -4931,7 +5093,9 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
       modinst->Param_assigns()->push_back((param_assign *)pp);
       const typespec *tps = nullptr;
       if (const expr *lhs = any_cast<const expr *>(p->Lhs())) {
-        tps = lhs->Typespec();
+        if (const ref_obj *ro = lhs->Typespec()) {
+          tps = ro->Actual_group<typespec>();
+        }
       }
       vars.emplace(std::string(p->Lhs()->VpiName()), tps);
     }
@@ -4942,13 +5106,21 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
     for (auto io : *func->Io_decls()) {
       if (args && (index < args->size())) {
         const std::string_view ioname = io->VpiName();
-        const typespec *tps = io->Typespec();
-        if (tps != nullptr) vars.emplace(ioname, tps);
-        else vars.emplace(ioname, s.MakeLogic_typespec());
+        typespec *tps = nullptr;
+        if (ref_obj *ro = io->Typespec()) {
+          tps = ro->Actual_group<typespec>();
+        }
+        if (tps == nullptr) tps = s.MakeLogic_typespec();
+        vars.emplace(ioname, tps);
         expr *ioexp = (expr *)args->at(index);
         if (expr *exparg =
                 reduceExpr(ioexp, invalidValue, modinst, pexpr, muteError)) {
-          exparg->Typespec((typespec *)io->Typespec());
+          if (tps != nullptr) {
+            ref_obj *cro = s.MakeRef_obj();
+            cro->VpiParent(exparg);
+            cro->Actual_group(tps);
+            exparg->Typespec(cro);
+          }
           std::map<std::string, const typespec *> local_vars;
           invalidValue =
               setValueInInstance(ioname, io, exparg, invalidValue, s, modinst,
@@ -4960,17 +5132,31 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
   }
   if (func->Variables()) {
     for (auto var : *func->Variables()) {
-      vars.emplace(var->VpiName(), var->Typespec());
+      if (const ref_obj *ro = var->Typespec()) {
+        if (const typespec *tps = ro->Actual_group<typespec>()) {
+          vars.emplace(var->VpiName(), tps);
+        }
+      }
     }
   }
-  typespec* funcReturnTypespec = func->Return() ? func->Return()->Typespec() : nullptr;
+  typespec *funcReturnTypespec = nullptr; 
+  if (variables *r = func->Return()) {
+    if (ref_obj *ro = r->Typespec()) {
+      if (typespec *tps = ro->Actual_group<typespec>()) {
+        funcReturnTypespec = tps;
+      }
+    }
+  }
   if (funcReturnTypespec == nullptr) {
     funcReturnTypespec = s.MakeLogic_typespec();
   }
   modinst->Variables(s.MakeVariablesVec());
-  logic_var* var = s.MakeLogic_var();
+  logic_var *var = s.MakeLogic_var();
   var->VpiName(name);
-  var->Typespec(funcReturnTypespec);
+  ref_obj *frtro = s.MakeRef_obj();
+  frtro->VpiParent(var);
+  frtro->Actual_group(funcReturnTypespec);
+  var->Typespec(frtro);
   modinst->Variables()->push_back(var);
   vars.emplace(name, funcReturnTypespec);
   scopes.push_back(modinst);
@@ -5041,7 +5227,8 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
     }
     for (auto p : *modinst->Param_assigns()) {
       if (p->Lhs()->VpiName() == name) {
-        if (p->Rhs() && (p->Rhs()->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant)) {
+        if (p->Rhs() &&
+            (p->Rhs()->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant)) {
           constant *c = (constant *)p->Rhs();
           std::string_view val = c->VpiValue();
           if ((val.find("X") != std::string::npos) ||
@@ -5051,11 +5238,16 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
           }
         }
         const typespec *tps = nullptr;
-        if (func->Return()) tps = func->Return()->Typespec();
+        if (const variables *r = func->Return()) {
+          if (const ref_obj *ro = r->Typespec()) {
+            tps = ro->Actual_group<typespec>();
+          }
+        }
         if (tps && (tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec)) {
           logic_typespec *ltps = (logic_typespec *)tps;
           uint64_t si = size(tps, invalidValue, inst, pexpr, true, true);
-          if (p->Rhs() && (p->Rhs()->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant)) {
+          if (p->Rhs() &&
+              (p->Rhs()->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant)) {
             constant *c = (constant *)p->Rhs();
             ElaboratorContext elaboratorContext(&s, false, muteError);
             c = (constant *)clone_tree(c, &elaboratorContext);

@@ -740,13 +740,17 @@ cont_assign* cont_assign::DeepClone(BaseClass* parent,
   if (auto obj = Rhs()) {
     expr* rhs = obj->DeepClone(clone, context);
     clone->Rhs(rhs);
-    if (ref_obj* ref = any_cast<ref_obj*>(lhs)) {
-      if (struct_var* stv = ref->Actual_group<struct_var>()) {
-        ExprEval eval(elaboratorContext->m_elaborator.muteErrors());
-        if (expr* res = eval.flattenPatternAssignments(*context->m_serializer,
-                                                       stv->Typespec(), rhs)) {
-          if (res->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
-            ((operation*)rhs)->Operands(((operation*)res)->Operands());
+    if (ref_obj* ref1 = any_cast<ref_obj*>(lhs)) {
+      if (struct_var* stv = ref1->Actual_group<struct_var>()) {
+        if (ref_obj* ref2 = stv->Typespec()) {
+          if (typespec* ts = ref2->Actual_group<typespec>()) {
+            ExprEval eval(elaboratorContext->m_elaborator.muteErrors());
+            if (expr* res = eval.flattenPatternAssignments(
+                    *context->m_serializer, ts, rhs)) {
+              if (res->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
+                ((operation*)rhs)->Operands(((operation*)res)->Operands());
+              }
+            }
           }
         }
       }
@@ -797,10 +801,12 @@ any* bindClassTypespec(class_typespec* ctps, any* current,
         if (tf->VpiName() == name) {
           if (ref_obj* ro = any_cast<ref_obj*>(current)) {
             ro->Actual_group(tf);
-          } else if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_func_call) {
+          } else if (current->UhdmType() ==
+                     UHDM_OBJECT_TYPE::uhdmmethod_func_call) {
             if (tf->UhdmType() == UHDM_OBJECT_TYPE::uhdmfunction)
               ((method_func_call*)current)->Function((function*)tf);
-          } else if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_task_call) {
+          } else if (current->UhdmType() ==
+                     UHDM_OBJECT_TYPE::uhdmmethod_task_call) {
             if (tf->UhdmType() == UHDM_OBJECT_TYPE::uhdmtask)
               ((method_task_call*)current)->Task((task*)tf);
           }
@@ -811,11 +817,12 @@ any* bindClassTypespec(class_typespec* ctps, any* current,
       }
     }
     if (found) break;
-
     const class_defn* base_defn = nullptr;
     if (const extends* ext = defn->Extends()) {
-      if (const class_typespec* tp = ext->Class_typespec()) {
-        base_defn = tp->Class_defn();
+      if (const ref_obj* ro = ext->Class_typespec()) {
+        if (const class_typespec* tp = ro->Actual_group<class_typespec>()) {
+          base_defn = tp->Class_defn();
+        }
       }
     }
     defn = base_defn;
@@ -857,10 +864,13 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
             if (tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdmclass_defn) {
               class_defn* def = (class_defn*)tmp;
               if (const extends* ext = def->Extends()) {
-                if (const class_typespec* ctps = ext->Class_typespec()) {
-                  ref->Actual_group((any*)ctps->Class_defn());
-                  found = true;
-                  break;
+                if (const ref_obj* ro = ext->Class_typespec()) {
+                  if (const class_typespec* ctps =
+                          ro->Actual_group<class_typespec>()) {
+                    ref->Actual_group((any*)ctps->Class_defn());
+                    found = true;
+                    break;
+                  }
                 }
               }
               break;
@@ -933,7 +943,8 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                       }
                     }
                   }
-                } else if (obj->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_task_call) {
+                } else if (obj->UhdmType() ==
+                           UHDM_OBJECT_TYPE::uhdmmethod_task_call) {
                   method_task_call* call = (method_task_call*)current;
                   if (scope->Task_funcs()) {
                     for (auto tf : *scope->Task_funcs()) {
@@ -1058,25 +1069,43 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 }
                 break;
               }
-              case UHDM_OBJECT_TYPE::uhdmarray_var: 
+              case UHDM_OBJECT_TYPE::uhdmarray_var:
               case UHDM_OBJECT_TYPE::uhdmpacked_array_var: {
                 const typespec* tps = nullptr;
                 if (actual_type == UHDM_OBJECT_TYPE::uhdmpacked_array_var) {
                   packed_array_var* avar = (packed_array_var*)actual;
-                  VectorOfany* vars = avar->Elements();
-                  if (vars && vars->size()) {
-                    actual = vars->at(0);
-                    actual_type = actual->UhdmType();
+                  if (VectorOfany* vars = avar->Elements()) {
+                    if (!vars->empty()) {
+                      actual = vars->front();
+                      actual_type = actual->UhdmType();
+                    }
                   }
-                  tps = avar->Typespec();
+                  if (const ref_obj* ro = avar->Typespec()) {
+                    tps = ro->Actual_group<typespec>();
+                    if (const packed_array_typespec* ptps =
+                            ro->Actual_group<packed_array_typespec>()) {
+                      if (const ref_obj* ero = ptps->Elem_typespec()) {
+                        tps = ero->Actual_group<typespec>();
+                      }
+                    }
+                  }
                 } else {
                   array_var* avar = (array_var*)actual;
-                  VectorOfvariables* vars = avar->Variables();
-                  if (vars && vars->size()) {
-                    actual = vars->at(0);
-                    actual_type = actual->UhdmType();
+                  if (VectorOfvariables* vars = avar->Variables()) {
+                    if (!vars->empty()) {
+                      actual = vars->front();
+                      actual_type = actual->UhdmType();
+                    }
                   }
-                  tps = avar->Typespec();
+                  if (const ref_obj* ro = avar->Typespec()) {
+                    tps = ro->Actual_group<typespec>();
+                    if (const array_typespec* atps =
+                            ro->Actual_group<array_typespec>()) {
+                      if (const ref_obj* ero = atps->Elem_typespec()) {
+                        tps = ero->Actual_group<typespec>();
+                      }
+                    }
+                  }
                 }
                 if (name == "size" || name == "exists" || name == "find" ||
                     name == "max" || name == "min") {
@@ -1093,26 +1122,15 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 if (found == false) {
                   if (tps) {
                     UHDM_OBJECT_TYPE ttype = tps->UhdmType();
-                    if (ttype == UHDM_OBJECT_TYPE::uhdmpacked_array_typespec) {
-                      packed_array_typespec* ptps = (packed_array_typespec*)tps;
-                      tps = (typespec*)ptps->Elem_typespec();
-                      if (tps)
-                        ttype = tps->UhdmType();
-                    } else if (ttype == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
-                      array_typespec* ptps = (array_typespec*)tps;
-                      tps = (typespec*)ptps->Elem_typespec();
-                      if (tps)
-                        ttype = tps->UhdmType();
-                    }
-                    if (ttype == UHDM_OBJECT_TYPE::uhdmstring_typespec) {
+                    if (ttype == uhdmstring_typespec) {
                       found = true;
-                    } else if (ttype == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
+                    } else if (ttype == uhdmclass_typespec) {
                       class_typespec* ctps = (class_typespec*)tps;
                       any* tmp = bindClassTypespec(ctps, current, name, found);
                       if (found) {
                         previous = tmp;
                       }
-                    } else if (ttype == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
+                    } else if (ttype == uhdmstruct_typespec) {
                       struct_typespec* stpt = (struct_typespec*)tps;
                       for (typespec_member* member : *stpt->Members()) {
                         if (member->VpiName() == name) {
@@ -1128,12 +1146,12 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                         // Builtin introspection
                         found = true;
                       }
-                    } else if (ttype == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
+                    } else if (ttype == uhdmenum_typespec) {
                       if (name == "name") {
                         // Builtin introspection
                         found = true;
                       }
-                    } else if (ttype == UHDM_OBJECT_TYPE::uhdmunion_typespec) {
+                    } else if (ttype == uhdmunion_typespec) {
                       union_typespec* stpt = (union_typespec*)tps;
                       for (typespec_member* member : *stpt->Members()) {
                         if (member->VpiName() == name) {
@@ -1324,29 +1342,33 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 break;
               }
               case UHDM_OBJECT_TYPE::uhdmclass_var: {
-                if (const typespec* tps = ((class_var*)actual)->Typespec()) {
-                  UHDM_OBJECT_TYPE ttype = tps->UhdmType();
-                  if (ttype == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
-                    class_typespec* ctps = (class_typespec*)tps;
-                    any* tmp = bindClassTypespec(ctps, current, name, found);
-                    if (found) {
-                      previous = tmp;
-                    }
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-                    struct_typespec* stpt = (struct_typespec*)tps;
-                    for (typespec_member* member : *stpt->Members()) {
-                      if (member->VpiName() == name) {
-                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                          cro->Actual_group(member);
-                        }
-                        previous = member;
-                        found = true;
-                        break;
+                const typespec* tps = nullptr;
+                if (const ref_obj* ro = ((class_var*)actual)->Typespec()) {
+                  tps = ro->Actual_group<typespec>();
+                }
+                if (tps == nullptr) break;
+                UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+                if (ttype == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
+                  class_typespec* ctps = (class_typespec*)tps;
+                  any* tmp = bindClassTypespec(ctps, current, name, found);
+                  if (found) {
+                    previous = tmp;
+                  }
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
+                  struct_typespec* stpt = (struct_typespec*)tps;
+                  for (typespec_member* member : *stpt->Members()) {
+                    if (member->VpiName() == name) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(member);
                       }
+                      previous = member;
+                      found = true;
+                      break;
                     }
                   }
                 }
-                if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_func_call) {
+                if (current->UhdmType() ==
+                    UHDM_OBJECT_TYPE::uhdmmethod_func_call) {
                   found = true;
                 }
                 break;
@@ -1355,9 +1377,14 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
               case UHDM_OBJECT_TYPE::uhdmstruct_var: {
                 struct_typespec* stpt = nullptr;
                 if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_net) {
-                  stpt = (struct_typespec*)((struct_net*)actual)->Typespec();
-                } else if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_var) {
-                  stpt = (struct_typespec*)((struct_var*)actual)->Typespec();
+                  if (ref_obj* ro = ((struct_net*)actual)->Typespec()) {
+                    stpt = ro->Actual_group<struct_typespec>();
+                  }
+                } else if (actual->UhdmType() ==
+                           UHDM_OBJECT_TYPE::uhdmstruct_var) {
+                  if (ref_obj* ro = ((struct_var*)actual)->Typespec()) {
+                    stpt = ro->Actual_group<struct_typespec>();
+                  }
                 }
                 if (stpt && stpt->Members()) {
                   for (typespec_member* member : *stpt->Members()) {
@@ -1374,8 +1401,10 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 break;
               }
               case UHDM_OBJECT_TYPE::uhdmunion_var: {
-                union_typespec* stpt =
-                    (union_typespec*)((union_var*)actual)->Typespec();
+                union_typespec* stpt = nullptr;
+                if (ref_obj* ro = ((union_var*)actual)->Typespec()) {
+                  stpt = ro->Actual_group<union_typespec>();
+                }
                 if (stpt) {
                   for (typespec_member* member : *stpt->Members()) {
                     if (member->VpiName() == name) {
@@ -1442,10 +1471,11 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                           if (any* exp = decl->Expr()) {
                             actual_decl = exp;
                           }
-                          if (actual_decl->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj) {
-                            ref_obj* ref = (ref_obj*)actual_decl;
-                            if (const any* act = ref->Actual_group()) {
-                              actual_decl = (any*)act;
+                          if (actual_decl->UhdmType() ==
+                              UHDM_OBJECT_TYPE::uhdmref_obj) {
+                            if (any* act =
+                                    ((ref_obj*)actual_decl)->Actual_group()) {
+                              actual_decl = act;
                             }
                           }
                           if (ref_obj* cro = any_cast<ref_obj*>(current)) {
@@ -1507,16 +1537,20 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 break;
               }
               case UHDM_OBJECT_TYPE::uhdmarray_var: {
-                if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_func_call)
+                if (current->UhdmType() ==
+                    UHDM_OBJECT_TYPE::uhdmmethod_func_call)
                   found = true;
-                else if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_select)
+                else if (current->UhdmType() ==
+                         UHDM_OBJECT_TYPE::uhdmbit_select)
                   found = true;
                 break;
               }
               case UHDM_OBJECT_TYPE::uhdmstring_var: {
-                if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_func_call)
+                if (current->UhdmType() ==
+                    UHDM_OBJECT_TYPE::uhdmmethod_func_call)
                   found = true;
-                else if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_select)
+                else if (current->UhdmType() ==
+                         UHDM_OBJECT_TYPE::uhdmbit_select)
                   found = true;
                 break;
               }
@@ -1530,48 +1564,47 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
               }
               case UHDM_OBJECT_TYPE::uhdmio_decl: {
                 io_decl* decl = (io_decl*)actual;
-                if (const typespec* tps = decl->Typespec()) {
-                  UHDM_OBJECT_TYPE ttype = tps->UhdmType();
-                  if (ttype == UHDM_OBJECT_TYPE::uhdmstring_typespec) {
+                typespec* tps = nullptr;
+                if (ref_obj* ro = decl->Typespec()) {
+                  tps = ro->Actual_group<typespec>();
+                }
+                if (tps == nullptr) break;
+                UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+                if (ttype == UHDM_OBJECT_TYPE::uhdmstring_typespec) {
+                  found = true;
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
+                  class_typespec* ctps = (class_typespec*)tps;
+                  any* tmp = bindClassTypespec(ctps, current, name, found);
+                  if (found) {
+                    previous = tmp;
+                  }
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
+                  struct_typespec* stpt = (struct_typespec*)tps;
+                  for (typespec_member* member : *stpt->Members()) {
+                    if (member->VpiName() == name) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(member);
+                      }
+                      previous = member;
+                      found = true;
+                      break;
+                    }
+                  }
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
+                  if (name == "name") {
+                    // Builtin introspection
                     found = true;
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
-                    class_typespec* ctps = (class_typespec*)tps;
-                    any* tmp = bindClassTypespec(ctps, current, name, found);
-                    if (found) {
-                      previous = tmp;
-                    }
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-                    struct_typespec* stpt = (struct_typespec*)tps;
-                    for (typespec_member* member : *stpt->Members()) {
-                      if (member->VpiName() == name) {
-                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                          cro->Actual_group(member);
-                        }
-                        previous = member;
-                        found = true;
-                        break;
+                  }
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmunion_typespec) {
+                  union_typespec* stpt = (union_typespec*)tps;
+                  for (typespec_member* member : *stpt->Members()) {
+                    if (member->VpiName() == name) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(member);
                       }
-                    }
-                    if (name == "name") {
-                      // Builtin introspection
+                      previous = member;
                       found = true;
-                    }
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
-                    if (name == "name") {
-                      // Builtin introspection
-                      found = true;
-                    }
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmunion_typespec) {
-                    union_typespec* stpt = (union_typespec*)tps;
-                    for (typespec_member* member : *stpt->Members()) {
-                      if (member->VpiName() == name) {
-                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                          cro->Actual_group(member);
-                        }
-                        previous = member;
-                        found = true;
-                        break;
-                      }
+                      break;
                     }
                     if (name == "name") {
                       // Builtin introspection
@@ -1580,79 +1613,96 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                   }
                 }
                 if (decl->Ranges()) {
-                  if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_func_call)
+                  if (current->UhdmType() ==
+                      UHDM_OBJECT_TYPE::uhdmmethod_func_call)
                     found = true;
-                  else if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_select)
+                  else if (current->UhdmType() ==
+                           UHDM_OBJECT_TYPE::uhdmbit_select)
                     found = true;
                 }
                 // TODO: class method support
-                if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_func_call) found = true;
+                if (current->UhdmType() ==
+                    UHDM_OBJECT_TYPE::uhdmmethod_func_call)
+                  found = true;
                 break;
               }
               case UHDM_OBJECT_TYPE::uhdmparameter: {
                 parameter* param = (parameter*)actual;
-                if (const typespec* tps = param->Typespec()) {
-                  UHDM_OBJECT_TYPE ttype = tps->UhdmType();
-                  if (ttype == UHDM_OBJECT_TYPE::uhdmpacked_array_typespec) {
-                    packed_array_typespec* ptps = (packed_array_typespec*)tps;
-                    tps = (typespec*)ptps->Elem_typespec();
-                    ttype = tps->UhdmType();
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
-                    array_typespec* ptps = (array_typespec*)tps;
-                    tps = (typespec*)ptps->Elem_typespec();
-                    ttype = tps->UhdmType();
+                const typespec* tps = nullptr;
+                if (const ref_obj* ro = param->Typespec()) {
+                  tps = ro->Actual_group<typespec>();
+                }
+                if (tps == nullptr) break;
+                UHDM_OBJECT_TYPE ttype = tps->UhdmType();
+                if (ttype == UHDM_OBJECT_TYPE::uhdmpacked_array_typespec) {
+                  packed_array_typespec* ptps = (packed_array_typespec*)tps;
+                  if (const ref_obj* ero = ptps->Elem_typespec()) {
+                    if (const typespec* ets = ero->Actual_group<typespec>()) {
+                      tps = ets;
+                      ttype = ets->UhdmType();
+                    }
                   }
-                  if (ttype == UHDM_OBJECT_TYPE::uhdmstring_typespec) {
-                    found = true;
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
-                    class_typespec* ctps = (class_typespec*)tps;
-                    any* tmp = bindClassTypespec(ctps, current, name, found);
-                    if (found) {
-                      previous = tmp;
-                    }
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
-                    struct_typespec* stpt = (struct_typespec*)tps;
-                    for (typespec_member* member : *stpt->Members()) {
-                      if (member->VpiName() == name) {
-                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                          cro->Actual_group(member);
-                        }
-                        previous = member;
-                        found = true;
-                        break;
-                      }
-                    }
-                    if (name == "name") {
-                      // Builtin introspection
-                      found = true;
-                    }
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
-                    if (name == "name") {
-                      // Builtin introspection
-                      found = true;
-                    }
-                  } else if (ttype == UHDM_OBJECT_TYPE::uhdmunion_typespec) {
-                    union_typespec* stpt = (union_typespec*)tps;
-                    for (typespec_member* member : *stpt->Members()) {
-                      if (member->VpiName() == name) {
-                        if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                          cro->Actual_group(member);
-                        }
-                        previous = member;
-                        found = true;
-                        break;
-                      }
-                    }
-                    if (name == "name") {
-                      // Builtin introspection
-                      found = true;
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
+                  const array_typespec* ptps = (array_typespec*)tps;
+                  if (const ref_obj* ero = ptps->Elem_typespec()) {
+                    if (const typespec* ets = ero->Actual_group<typespec>()) {
+                      tps = ets;
+                      ttype = ets->UhdmType();
                     }
                   }
                 }
-                if (param->Ranges()) {
-                  if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_func_call)
+                if (ttype == UHDM_OBJECT_TYPE::uhdmstring_typespec) {
+                  found = true;
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
+                  class_typespec* ctps = (class_typespec*)tps;
+                  any* tmp = bindClassTypespec(ctps, current, name, found);
+                  if (found) {
+                    previous = tmp;
+                  }
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
+                  struct_typespec* stpt = (struct_typespec*)tps;
+                  for (typespec_member* member : *stpt->Members()) {
+                    if (member->VpiName() == name) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(member);
+                      }
+                      previous = member;
+                      found = true;
+                      break;
+                    }
+                  }
+                  if (name == "name") {
+                    // Builtin introspection
                     found = true;
-                  else if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_select)
+                  }
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
+                  if (name == "name") {
+                    // Builtin introspection
+                    found = true;
+                  }
+                } else if (ttype == UHDM_OBJECT_TYPE::uhdmunion_typespec) {
+                  union_typespec* stpt = (union_typespec*)tps;
+                  for (typespec_member* member : *stpt->Members()) {
+                    if (member->VpiName() == name) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(member);
+                      }
+                      previous = member;
+                      found = true;
+                      break;
+                    }
+                  }
+                  if (name == "name") {
+                    // Builtin introspection
+                    found = true;
+                  }
+                }
+                if (param->Ranges()) {
+                  if (current->UhdmType() ==
+                      UHDM_OBJECT_TYPE::uhdmmethod_func_call)
+                    found = true;
+                  else if (current->UhdmType() ==
+                           UHDM_OBJECT_TYPE::uhdmbit_select)
                     found = true;
                 }
                 break;
@@ -1662,20 +1712,18 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 if (op->VpiOpType() != vpiAssignmentPatternOp) {
                   break;
                 }
-                const typespec* tps = op->Typespec();
-                if (!tps) {
-                  break;
+                const struct_typespec* stps = nullptr;
+                if (const ref_obj* ro = op->Typespec()) {
+                  stps = ro->Actual_group<struct_typespec>();
                 }
-                const struct_typespec* stps =
-                    any_cast<const struct_typespec*>(tps);
-                if (!stps) {
-                  break;
-                }
+                if (stps == nullptr) break;
                 std::vector<std::string_view> fieldNames;
                 std::vector<const typespec*> fieldTypes;
                 for (typespec_member* memb : *stps->Members()) {
-                  fieldNames.emplace_back(memb->VpiName());
-                  fieldTypes.emplace_back(memb->Typespec());
+                  if (const ref_obj* ro = memb->Typespec()) {
+                    fieldNames.emplace_back(memb->VpiName());
+                    fieldTypes.emplace_back(ro->Actual_group<typespec>());
+                  }
                 }
                 std::vector<any*> tmp(fieldNames.size());
                 VectorOfany* orig = op->Operands();
@@ -1683,9 +1731,13 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 any* res = nullptr;
                 int32_t index = 0;
                 for (auto oper : *orig) {
-                  if (oper->UhdmType() == UHDM_OBJECT_TYPE::uhdmtagged_pattern) {
+                  if (oper->UhdmType() ==
+                      UHDM_OBJECT_TYPE::uhdmtagged_pattern) {
                     tagged_pattern* tp = (tagged_pattern*)oper;
-                    const typespec* ttp = tp->Typespec();
+                    const typespec* ttp = nullptr;
+                    if (const ref_obj* ro = tp->Typespec()) {
+                      ttp = ro->Actual_group<typespec>();
+                    }
                     const std::string_view tname = ttp->VpiName();
                     bool oper_found = false;
                     if (tname == "default") {
@@ -1734,7 +1786,9 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
               }
               default:
                 // TODO: class method support
-                if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_func_call) found = true;
+                if (current->UhdmType() ==
+                    UHDM_OBJECT_TYPE::uhdmmethod_func_call)
+                  found = true;
                 break;
             }
             if (!found) {
@@ -1757,29 +1811,38 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                   ErrorType::UHDM_UNRESOLVED_HIER_PATH, errMsg, this, nullptr);
             }
           }
-        } else if (previous->UhdmType() == UHDM_OBJECT_TYPE::uhdmtypespec_member) {
+        } else if (previous->UhdmType() ==
+                   UHDM_OBJECT_TYPE::uhdmtypespec_member) {
           typespec_member* member = (typespec_member*)previous;
-          if (const typespec* tps = member->Typespec()) {
+          const typespec* tps = nullptr;
+          if (const ref_obj* ro = member->Typespec()) {
+            tps = ro->Actual_group<typespec>();
+          }
+          if (tps) {
             UHDM_OBJECT_TYPE ttype = tps->UhdmType();
             if (ttype == UHDM_OBJECT_TYPE::uhdmpacked_array_typespec) {
               packed_array_typespec* ptps = (packed_array_typespec*)tps;
-              tps = (typespec*)ptps->Elem_typespec();
-              ttype = tps->UhdmType();
+              if (const ref_obj* ro = ptps->Elem_typespec()) {
+                tps = ro->Actual_group<typespec>();
+                ttype = tps->UhdmType();
+              }
             } else if (ttype == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
               array_typespec* ptps = (array_typespec*)tps;
-              tps = (typespec*)ptps->Elem_typespec();
-              ttype = tps->UhdmType();
+              if (const ref_obj* ro = ptps->Elem_typespec()) {
+                tps = ro->Actual_group<typespec>();
+                ttype = tps->UhdmType();
+              }
             }
             if (ttype == UHDM_OBJECT_TYPE::uhdmstruct_typespec) {
               struct_typespec* stpt = (struct_typespec*)tps;
               for (typespec_member* tsmember : *stpt->Members()) {
                 if (tsmember->VpiName() == name) {
-                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                  if (ref_obj* cro = any_cast<ref_obj>(current)) {
                     cro->Actual_group(tsmember);
-                    previous = tsmember;
-                    found = true;
-                    break;
                   }
+                  previous = tsmember;
+                  found = true;
+                  break;
                 }
               }
             } else if (ttype == UHDM_OBJECT_TYPE::uhdmunion_typespec) {
@@ -1788,10 +1851,10 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 if (tsmember->VpiName() == name) {
                   if (ref_obj* cro = any_cast<ref_obj*>(current)) {
                     cro->Actual_group(tsmember);
-                    previous = tsmember;
-                    found = true;
-                    break;
                   }
+                  previous = tsmember;
+                  found = true;
+                  break;
                 }
               }
             } else if (ttype == UHDM_OBJECT_TYPE::uhdmstring_typespec) {
@@ -1810,11 +1873,16 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
             switch (actual_type) {
               case UHDM_OBJECT_TYPE::uhdmstruct_net:
               case UHDM_OBJECT_TYPE::uhdmstruct_var: {
-                struct_typespec* stpt = nullptr;
+                const struct_typespec* stpt = nullptr;
                 if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_net) {
-                  stpt = (struct_typespec*)((struct_net*)actual)->Typespec();
-                } else if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_var) {
-                  stpt = (struct_typespec*)((struct_var*)actual)->Typespec();
+                  if (const ref_obj* ro = ((struct_net*)actual)->Typespec()) {
+                    stpt = ro->Actual_group<struct_typespec>();
+                  }
+                } else if (actual->UhdmType() ==
+                           UHDM_OBJECT_TYPE::uhdmstruct_var) {
+                  if (const ref_obj* ro = ((struct_var*)actual)->Typespec()) {
+                    stpt = ro->Actual_group<struct_typespec>();
+                  }
                 }
                 if (stpt) {
                   for (typespec_member* member : *stpt->Members()) {
@@ -1836,11 +1904,15 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
           }
         } else if (previous->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_var ||
                    previous->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_net) {
-          struct_typespec* stpt = nullptr;
+          const struct_typespec* stpt = nullptr;
           if (previous->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_net) {
-            stpt = (struct_typespec*)((struct_net*)previous)->Typespec();
+            if (const ref_obj* ro = ((struct_net*)previous)->Typespec()) {
+              stpt = ro->Actual_group<struct_typespec>();
+            }
           } else if (previous->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_var) {
-            stpt = (struct_typespec*)((struct_var*)previous)->Typespec();
+            if (const ref_obj* ro = ((struct_var*)previous)->Typespec()) {
+              stpt = ro->Actual_group<struct_typespec>();
+            }
           }
           if (stpt) {
             for (typespec_member* member : *stpt->Members()) {
@@ -1905,7 +1977,8 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 }
               }
             }
-          } else if (obj->UhdmType() == UHDM_OBJECT_TYPE::uhdmmethod_task_call) {
+          } else if (obj->UhdmType() ==
+                     UHDM_OBJECT_TYPE::uhdmmethod_task_call) {
             method_task_call* call = (method_task_call*)current;
             if (scope->Task_funcs()) {
               for (auto tf : *scope->Task_funcs()) {
@@ -1943,12 +2016,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
       clone_vec->push_back(obj->DeepClone(clone, context));
     }
   }
-  if (elaboratorContext->m_elaborator.uniquifyTypespec()) {
-    if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
-  } else {
-    if (auto obj = Typespec()) clone->Typespec((typespec*)obj);
-  }
-
+  if (auto obj = Typespec()) clone->Typespec(obj->DeepClone(clone, context));
   return clone;
 }
 }  // namespace UHDM

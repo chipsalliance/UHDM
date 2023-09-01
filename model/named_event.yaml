@@ -48,7 +48,7 @@
   - obj_ref: event_typespec
     name: event typespec
     vpi: vpiTypespec
-    type: event_typespec
+    type: ref_obj
     card: 1
   - obj_ref: threads
     name: threads

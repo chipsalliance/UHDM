@@ -19,7 +19,7 @@
   - class_ref: base_typespec
     name: base typespec
     vpi: vpiBaseTypespec
-    type: typespec
+    type: ref_obj
     card: 1
   - obj_ref: enum_consts
     name: enum consts

@@ -24,7 +24,7 @@
   - obj_ref: bit_typespec
     name: bit typespec
     vpi: vpiElemTypespec
-    type: bit_typespec
+    type: ref_obj
     card: 1
   - obj_ref: ranges
     name: ranges
@@ -44,7 +44,7 @@
   - class_ref: typespec
     name: typespec
     vpi: vpiIndexTypespec
-    type: typespec
+    type: ref_obj
     card: 1
   - property: sign
     name: sign

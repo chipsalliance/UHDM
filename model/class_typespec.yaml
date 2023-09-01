@@ -27,10 +27,10 @@
     vpi: vpiAutomatic
     type: bool
     card: 1
-  - obj_ref: class_typespec
-    name: class typespec
+  - obj_ref: extends
+    name: extends
     vpi: vpiExtends
-    type: class_typespec
+    type: ref_obj
     card: 1    
   - class_ref: variables
     name: variables
