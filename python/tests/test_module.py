@@ -19,5 +19,47 @@ class  test_module(unittest.TestCase):
 
         self.assertEqual(set(result),set(["module2","module1"]))
 
+
+    def test_ExprEval_size(self):
+        s  = uhdm.Serializer()
+
+        result = []
+        exprEval = uhdm.ExprEval()
+
+        data = uhdm.buildTestTypedef(s)
+        typedefit = uhdm.vpi_iterate(uhdm.vpiTypedef,data[0])
+        while(True):
+            vpiObj = uhdm.vpi_scan(typedefit)
+            if vpiObj is None:
+                break
+            value, invalidValue = exprEval.size(
+                    vpiObj,
+                    inst=None,
+                    pexpr=None,
+                    full=False,
+                    muteError=False
+                             )
+
+            self.assertEqual(value,32)
+            self.assertEqual(invalidValue,False)
+
+    def test_visit_designs(self):
+        ref = '''design: 
+|uhdmallModules:
+\_module_inst: (module1)
+  |vpiName:module1
+|uhdmallModules:
+\_module_inst: (module2)
+  |vpiName:module2
+'''
+        s  = uhdm.Serializer()
+
+        data = uhdm.buildTestDesign(s)
+        o = uhdm.ostringstream()
+        uhdm.visit_designs(data,o)
+
+        self.assertEqual(o.str(),ref)
+
+
 if __name__ == '__main__':
     unittest.main()
