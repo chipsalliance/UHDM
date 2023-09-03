@@ -257,11 +257,49 @@ void SynthSubset::leaveSys_task_call(const sys_task_call* object,
   }
 }
 
+void removeFromVector(VectorOfany* vec, const any* object) {
+  VectorOfany::iterator itr = vec->begin();
+  for (auto s : *vec) {
+    if (s == object) {
+      vec->erase(itr);
+      break;
+    }
+    itr++;
+  }
+}
+
+
 void SynthSubset::leaveSys_func_call(const sys_func_call* object,
                                      vpiHandle handle) {
   const std::string_view name = object->VpiName();
   if (nonSynthSysCalls_.find(name) != nonSynthSysCalls_.end()) {
     reportError(object);
+  }
+  // Filter out $error stmt from initial block
+  if (name == "$error") {
+    bool inInitialBlock = false;
+    const any* parent = object->VpiParent();
+    while (parent) {
+      if (parent->UhdmType() == uhdminitial) {
+        inInitialBlock = true;
+        break;
+      }
+      parent = parent->VpiParent();
+    }
+    if (inInitialBlock) {
+      parent = object->VpiParent();
+      if (parent->UhdmType() == uhdmbegin) {
+        begin* st = (begin*) parent;
+        if (st->Stmts()) {
+          removeFromVector(st->Stmts(), object);
+        }
+      } else if (parent->UhdmType() == uhdmnamed_begin) {
+        named_begin* st = (named_begin*) parent;
+        if (st->Stmts()) {
+          removeFromVector(st->Stmts(), object);
+        }
+      }
+    }
   }
 }
 
