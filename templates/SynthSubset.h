@@ -31,6 +31,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
+#include <utility>
 
 namespace UHDM {
 class Serializer;
@@ -39,6 +41,7 @@ class SynthSubset final : public VpiListener {
   SynthSubset(Serializer* serializer,
               std::set<const any*>& nonSynthesizableObjects, bool reportErrors, bool allowFormal);
   ~SynthSubset() override = default;
+  void filterNonSynthesizable();
   void report(std::ostream& out);
 
  private:
@@ -65,6 +68,7 @@ class SynthSubset final : public VpiListener {
   std::set<std::string, std::less<>> nonSynthSysCalls_;
   bool reportErrors_;
   bool allowFormal_;
+  std::vector<std::pair<VectorOfany*, const any*>> m_scheduledFilteredObjects;
 };
 
 }  // namespace UHDM
