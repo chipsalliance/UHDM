@@ -268,6 +268,12 @@ void removeFromVector(VectorOfany* vec, const any* object) {
   }
 }
 
+void SynthSubset::filterNonSynthesizable() {
+  for (auto p : m_scheduledFilteredObjects) {
+    removeFromVector(p.first, p.second);
+  }
+}
+
 
 void SynthSubset::leaveSys_func_call(const sys_func_call* object,
                                      vpiHandle handle) {
@@ -275,8 +281,8 @@ void SynthSubset::leaveSys_func_call(const sys_func_call* object,
   if (nonSynthSysCalls_.find(name) != nonSynthSysCalls_.end()) {
     reportError(object);
   }
-  // Filter out $error stmt from initial block
-  if (name == "$error") {
+  // Filter out sys func calls stmt from initial block
+  if (name == "$error" || name == "$finish" || name == "$display") {
     bool inInitialBlock = false;
     const any* parent = object->VpiParent();
     while (parent) {
@@ -291,12 +297,12 @@ void SynthSubset::leaveSys_func_call(const sys_func_call* object,
       if (parent->UhdmType() == uhdmbegin) {
         begin* st = (begin*) parent;
         if (st->Stmts()) {
-          removeFromVector(st->Stmts(), object);
+          m_scheduledFilteredObjects.emplace_back(st->Stmts(), object);
         }
       } else if (parent->UhdmType() == uhdmnamed_begin) {
         named_begin* st = (named_begin*) parent;
         if (st->Stmts()) {
-          removeFromVector(st->Stmts(), object);
+          m_scheduledFilteredObjects.emplace_back(st->Stmts(), object);
         }
       }
     }
