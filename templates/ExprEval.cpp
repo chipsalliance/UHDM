@@ -4896,7 +4896,7 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
         const std::string_view ioname = io->VpiName();
         const typespec *tps = io->Typespec();
         if (tps != nullptr) vars.emplace(ioname, tps);
-
+        else vars.emplace(ioname, s.MakeLogic_typespec());
         expr *ioexp = (expr *)args->at(index);
         if (expr *exparg =
                 reduceExpr(ioexp, invalidValue, modinst, pexpr, muteError)) {
@@ -4915,7 +4915,11 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
       vars.emplace(var->VpiName(), var->Typespec());
     }
   }
-  vars.emplace(name, func->Return() ? func->Return()->Typespec() : nullptr);
+  typespec* funcReturnTypespec = func->Return() ? func->Return()->Typespec() : nullptr;
+  if (funcReturnTypespec == nullptr) {
+    funcReturnTypespec = s.MakeLogic_typespec();
+  }
+  vars.emplace(name, funcReturnTypespec);
   scopes.push_back(modinst);
   if (const any *the_stmt = func->Stmt()) {
     UHDM_OBJECT_TYPE stt = the_stmt->UhdmType();
