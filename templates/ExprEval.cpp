@@ -245,7 +245,7 @@ static std::vector<std::string_view> tokenizeMulti(
 }
 
 any *ExprEval::getValue(std::string_view name, const any *inst,
-                        const any *pexpr, bool muteError) {
+                        const any *pexpr, bool muteError, const any* checkLoop) {
   any *result = nullptr;
   if ((inst == nullptr) && (pexpr == nullptr)) {
     return nullptr;
@@ -348,6 +348,9 @@ any *ExprEval::getValue(std::string_view name, const any *inst,
                (resultType == UHDM_OBJECT_TYPE::uhdmbit_select) ||
                (resultType == UHDM_OBJECT_TYPE::uhdmsys_func_call)) {
       bool invalidValue = false;
+      if (checkLoop && (result == checkLoop)) {
+        return nullptr;
+      }
       if (any *rval =
               reduceExpr(result, invalidValue, inst, pexpr, muteError)) {
         result = rval;
@@ -1555,67 +1558,68 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
   bool invalidValueD = false;
   bool invalidValueS = true;
   uint64_t val = 0;
-  if (arg0isString && arg1isString) {
-    invalidValueS = false;
+
+  int64_t v0 = get_uvalue(invalidValueI, reduc0);
+  int64_t v1 = get_uvalue(invalidValueI, reduc1);
+  if ((invalidValue == false) && (invalidValueI == false)) {
     switch (optype) {
       case vpiEqOp:
-        val = (s0 == s1);
+        val = (v0 == v1);
         break;
       case vpiNeqOp:
-        val = (s0 != s1);
+        val = (v0 != v1);
+        break;
+      case vpiGtOp:
+        val = (v0 > v1);
+        break;
+      case vpiGeOp:
+        val = (v0 >= v1);
+        break;
+      case vpiLtOp:
+        val = (v0 < v1);
+        break;
+      case vpiLeOp:
+        val = (v0 <= v1);
         break;
       default:
         break;
     }
   } else {
-    int64_t v0 = get_uvalue(invalidValueI, reduc0);
-    int64_t v1 = get_uvalue(invalidValueI, reduc1);
-    if ((invalidValue == false) && (invalidValueI == false)) {
+    invalidValueD = false;
+    long double ld0 = get_double(invalidValueD, reduc0);
+    long double ld1 = get_double(invalidValueD, reduc1);
+    if ((invalidValue == false) && (invalidValueD == false)) {
       switch (optype) {
         case vpiEqOp:
-          val = (v0 == v1);
+          val = (ld0 == ld1);
           break;
         case vpiNeqOp:
-          val = (v0 != v1);
+          val = (ld0 != ld1);
           break;
         case vpiGtOp:
-          val = (v0 > v1);
+          val = (ld0 > ld1);
           break;
         case vpiGeOp:
-          val = (v0 >= v1);
+          val = (ld0 >= ld1);
           break;
         case vpiLtOp:
-          val = (v0 < v1);
+          val = (ld0 < ld1);
           break;
         case vpiLeOp:
-          val = (v0 <= v1);
+          val = (ld0 <= ld1);
           break;
         default:
           break;
       }
     } else {
-      invalidValueD = false;
-      long double ld0 = get_double(invalidValueD, reduc0);
-      long double ld1 = get_double(invalidValueD, reduc1);
-      if ((invalidValue == false) && (invalidValueD == false)) {
+      if (arg0isString && arg1isString) {
+        invalidValueS = false;
         switch (optype) {
           case vpiEqOp:
-            val = (ld0 == ld1);
+            val = (s0 == s1);
             break;
           case vpiNeqOp:
-            val = (ld0 != ld1);
-            break;
-          case vpiGtOp:
-            val = (ld0 > ld1);
-            break;
-          case vpiGeOp:
-            val = (ld0 >= ld1);
-            break;
-          case vpiLtOp:
-            val = (ld0 < ld1);
-            break;
-          case vpiLeOp:
-            val = (ld0 <= ld1);
+            val = (s0 != s1);
             break;
           default:
             break;
@@ -1623,6 +1627,7 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
       }
     }
   }
+
   if (invalidValueI && invalidValueD && invalidValueS) {
     invalidValue = true;
   } else {
@@ -1636,6 +1641,89 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
   return result;
 }
 
+uint64_t ExprEval::getWordSize(const expr* exp, const any *inst,
+                                const any *pexpr) {
+  uint64_t wordSize = 1;
+  bool invalidValue = false;
+  bool muteError = true;
+  if (exp == nullptr) {
+    return wordSize;
+  }
+  if (typespec *cts = (typespec *)exp->Typespec()) {
+    if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
+      array_typespec *atps = (array_typespec *)cts;
+      cts = atps->Elem_typespec();
+    }
+    if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmlong_int_typespec) {
+      wordSize = 64;
+    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmshort_int_typespec) {
+      wordSize = 16;
+    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmbyte_typespec) {
+      wordSize = 8;
+    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
+      int_typespec *icts = (int_typespec *)cts;
+      std::string_view value = icts->VpiValue();
+      if (exp->VpiSize() > 32)
+        wordSize = 32;
+      else
+        wordSize = 1;
+      if (value.find("UINT:") == 0) {
+        value.remove_prefix(std::string_view("UINT:").length());
+        if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
+          wordSize = 32;
+        }
+      } else if (value.find("INT:") == 0) {
+        value.remove_prefix(std::string_view("INT:").length());
+        if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
+          wordSize = 32;
+        }
+      }
+    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdminteger_typespec) {
+      integer_typespec *icts = (integer_typespec *)cts;
+      std::string_view value = icts->VpiValue();
+      if (exp->VpiSize() > 32)
+        wordSize = 32;
+      else
+        wordSize = 1;
+      if (value.find("UINT:") == 0) {
+        value.remove_prefix(std::string_view("UINT:").length());
+        if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
+          wordSize = 32;
+        }
+      } else if (value.find("INT:") == 0) {
+        value.remove_prefix(std::string_view("INT:").length());
+        if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
+          wordSize = 32;
+        }
+      }
+    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
+      logic_typespec *icts = (logic_typespec *)cts;
+      const logic_typespec *elem = icts->Logic_typespec();
+      wordSize = size(elem, invalidValue, inst, pexpr, false, muteError);
+    } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_typespec) {
+      bit_typespec *icts = (bit_typespec *)cts;
+      wordSize = 1;
+      if (VectorOfrange *ranges = icts->Ranges()) {
+        if (icts->Ranges()->size() > 1) {
+          range *r = ranges->at(ranges->size() - 1);
+          bool invalid = false;
+          uint16_t lr = static_cast<uint16_t>(
+              get_value(invalid, reduceExpr(r->Left_expr(), invalidValue, inst,
+                                            pexpr, muteError)));
+          uint16_t rr = static_cast<uint16_t>(
+              get_value(invalid, reduceExpr(r->Right_expr(), invalidValue, inst,
+                                            pexpr, muteError)));
+          wordSize = (lr > rr) ? (lr - rr + 1) : (rr - lr + 1);
+        }
+      }
+    }
+  }
+  if (wordSize == 0) {
+    wordSize = 1;
+  }
+  return wordSize;
+}
+
 expr *ExprEval::reduceBitSelect(expr *op, uint32_t index_val,
                                 bool &invalidValue, const any *inst,
                                 const any *pexpr, bool muteError) {
@@ -1645,61 +1733,7 @@ expr *ExprEval::reduceBitSelect(expr *op, uint32_t index_val,
   if (exp && (exp->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant)) {
     constant *cexp = (constant *)exp;
     std::string binary = toBinary(cexp);
-    uint64_t wordSize = 1;
-    if (typespec *cts = (typespec *)cexp->Typespec()) {
-      if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec) {
-        int_typespec *icts = (int_typespec *)cts;
-        std::string_view value = icts->VpiValue();
-        if (value.find("UINT:") == 0) {
-          value.remove_prefix(std::string_view("UINT:").length());
-          if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
-            wordSize = 1;
-          }
-        } else if (value.find("INT:") == 0) {
-          value.remove_prefix(std::string_view("INT:").length());
-          if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
-            wordSize = 1;
-          }
-        }
-      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdminteger_typespec) {
-        integer_typespec *icts = (integer_typespec *)cts;
-        std::string_view value = icts->VpiValue();
-        if (value.find("UINT:") == 0) {
-          value.remove_prefix(std::string_view("UINT:").length());
-          if (NumUtils::parseUint64(value, &wordSize) == nullptr) {
-            wordSize = 1;
-          }
-        } else if (value.find("INT:") == 0) {
-          value.remove_prefix(std::string_view("INT:").length());
-          if (NumUtils::parseIntLenient(value, &wordSize) == nullptr) {
-            wordSize = 1;
-          }
-        }
-      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
-        logic_typespec *icts = (logic_typespec *)cts;
-        const logic_typespec *elem = icts->Logic_typespec();
-        wordSize = size(elem, invalidValue, inst, pexpr, false, muteError);
-      } else if (cts->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_typespec) {
-        bit_typespec *icts = (bit_typespec *)cts;
-        wordSize = 1;
-        if (VectorOfrange *ranges = icts->Ranges()) {
-          if (icts->Ranges()->size() > 1) {
-            range *r = ranges->at(ranges->size() - 1);
-            bool invalid = false;
-            uint16_t lr = static_cast<uint16_t>(
-                get_value(invalid, reduceExpr(r->Left_expr(), invalidValue,
-                                              inst, pexpr, muteError)));
-            uint16_t rr = static_cast<uint16_t>(
-                get_value(invalid, reduceExpr(r->Right_expr(), invalidValue,
-                                              inst, pexpr, muteError)));
-            wordSize = (lr > rr) ? (lr - rr + 1) : (rr - lr + 1);
-          }
-        }
-      }
-    }
-    if (wordSize == 0) {
-      wordSize = 1;
-    }
+    uint64_t wordSize = getWordSize(cexp, inst, pexpr);
     constant *c = s.MakeConstant();
     uint16_t lr = 0;
     uint16_t rr = 0;
@@ -2536,7 +2570,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           ref_obj *ref = (ref_obj *)oper;
           const std::string_view name = ref->VpiName();
           if (name == "default" && ref->VpiStructMember()) continue;
-          if (getValue(name, inst, pexpr, muteError) == nullptr) {
+          if (getValue(name, inst, pexpr, muteError, result) == nullptr) {
             constantOperands = false;
             break;
           }
@@ -4158,15 +4192,27 @@ bool ExprEval::setValueInInstance(
   bool invalidValueI = false;
   bool invalidValueUI = false;
   bool invalidValueD = false;
+  bool invalidValueB = false;
   bool opRhs = false;
   std::string_view lhsname = lhs;
   if (lhsname.empty()) lhsname = lhsexp->VpiName();
   rhsexp = reduceExpr(rhsexp, invalidValue, inst, nullptr, muteError);
   int64_t valI = get_value(invalidValueI, rhsexp);
   uint64_t valUI = get_uvalue(invalidValueUI, rhsexp);
+  if (rhsexp && (rhsexp->UhdmType() == uhdmconstant)) {
+    constant* t = (constant*) rhsexp;
+    if (t->VpiConstType() != vpiBinaryConst) {
+      invalidValueB = true;
+    }
+  }
   long double valD = 0;
   if (invalidValueI) {
     valD = get_double(invalidValueD, rhsexp);
+  }
+  uint64_t wordSize = 1;
+  const std::string_view name = lhsexp->VpiName();
+  if (any *object = getObject(name, inst, scope_exp, muteError)) {
+     wordSize = getWordSize(any_cast<const expr*>(object), inst, scope_exp);
   }
   VectorOfparam_assign *param_assigns = nullptr;
   if (inst && inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmgen_scope_array) {
@@ -4428,10 +4474,12 @@ bool ExprEval::setValueInInstance(
             }
           }
 
-          uint64_t size_rhs = ((constant *)rhsexp)->VpiSize();
+          int64_t size_rhs = ((constant *)rhsexp)->VpiSize();
+          if ((wordSize != 1) && (((int64_t) wordSize) < size_rhs))
+            size_rhs = wordSize;
           std::string tobinary = NumUtils::toBinary(size_rhs, valUI);
           std::reverse(tobinary.begin(), tobinary.end());
-          for (uint32_t i = 0; i < size_rhs; i++) {
+          for (int32_t i = 0; i < size_rhs; i++) {
             if ((((index * size_rhs) + i) < si) &&
                 (((index * size_rhs) + i) < lhsbinary.size())) {
               lhsbinary[(index * size_rhs) + i] = tobinary[i];
@@ -4537,7 +4585,7 @@ bool ExprEval::setValueInInstance(
       param_assigns->push_back(pa);
     }
   }
-  if (invalidValueI && invalidValueD && (!opRhs)) invalidValue = true;
+  if (invalidValueI && invalidValueD && invalidValueB && (!opRhs)) invalidValue = true;
   return invalidValue;
 }
 
@@ -4919,6 +4967,11 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
   if (funcReturnTypespec == nullptr) {
     funcReturnTypespec = s.MakeLogic_typespec();
   }
+  modinst->Variables(s.MakeVariablesVec());
+  logic_var* var = s.MakeLogic_var();
+  var->VpiName(name);
+  var->Typespec(funcReturnTypespec);
+  modinst->Variables()->push_back(var);
   vars.emplace(name, funcReturnTypespec);
   scopes.push_back(modinst);
   if (const any *the_stmt = func->Stmt()) {
