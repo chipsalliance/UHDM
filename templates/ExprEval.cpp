@@ -3931,7 +3931,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       if (object == nullptr) {
         object = getValue(name, inst, pexpr, muteError);
       }
-      if (object) {
+      if (object && (object != result)) {
         if (expr *tmp = reduceExpr((expr *)object, invalidValue, inst, pexpr,
                                    muteError)) {
           object = tmp;
