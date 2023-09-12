@@ -81,12 +81,15 @@ class ExprEval {
   expr* reduceExpr(const any* object, bool& invalidValue, const any* inst,
                    const any* pexpr, bool muteErrors = false);
 
+  uint64_t getWordSize(const expr *exp, const any *inst,
+                                const any *pexpr);
+
   uint64_t getValue(const UHDM::expr* expr);
 
   std::string toBinary(const UHDM::constant* c);
 
   any* getValue(std::string_view name, const any* inst, const any* pexpr,
-                bool muteError = false);
+                bool muteError = false, const any* checkLoop = nullptr);
 
   any* getObject(std::string_view name, const any* inst, const any* pexpr,
                  bool muteError = false);
