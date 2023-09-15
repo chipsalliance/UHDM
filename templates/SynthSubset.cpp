@@ -98,7 +98,6 @@ void SynthSubset::report(std::ostream& out) {
 }
 
 void SynthSubset::reportError(const any* object) {
-  if (isInUhdmAllIterator()) return;
   const any* tmp = object;
   while (tmp && tmp->VpiFile().empty()) {
     tmp = tmp->VpiParent();
