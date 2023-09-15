@@ -46,7 +46,10 @@ std::vector<vpiHandle> buildTestTypedef(UHDM::Serializer* s){
   members->push_back(member1);
 
   bit_typespec* btps = s->MakeBit_typespec();
-  member1->Typespec(btps);
+
+  ref_typespec* btps_rt = s->MakeRef_typespec();
+  btps_rt->Actual_typespec(btps);
+  member1->Typespec(btps_rt);
 
   VectorOfrange* ranges = s->MakeRangeVec();
   btps->VpiParent(member1);
@@ -76,7 +79,10 @@ std::vector<vpiHandle> buildTestTypedef(UHDM::Serializer* s){
   members->push_back(member2);
 
   btps = s->MakeBit_typespec();
-  member2->Typespec(btps);
+
+  btps_rt = s->MakeRef_typespec();
+  btps_rt->Actual_typespec(btps);
+  member2->Typespec(btps_rt);
 
   ranges = s->MakeRangeVec();
   btps->VpiParent(member2);

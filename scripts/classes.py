@@ -180,6 +180,15 @@ def _get_DeepClone_implementation(model, models):
                     content.append(f'  if (!clone->{method}()) clone->{method}(elaboratorContext->m_elaborator.bindAny(VpiName()));')
                     content.append(f'  if (!clone->{method}()) clone->{method}((any*) {method}());')
 
+                elif (classname in ['ref_typespec']) and (method == 'Actual_typespec'):
+                    includes.add('ElaboratorListener')
+                    includes.add('typespec')
+                    content.append( '  if (elaboratorContext->m_elaborator.uniquifyTypespec()) {')
+                    content.append(f'    if (auto obj = {method}()) clone->{method}(obj->DeepClone(clone, context));')
+                    content.append( '  } else {')
+                    content.append(f'    if (auto obj = {method}()) clone->{method}((typespec*) obj);')
+                    content.append( '  }')
+
                 elif (classname == 'udp') and (method == 'Udp_defn'):
                     includes.add('ElaboratorListener')
                     content.append(f'  if (!clone->{method}()) clone->{method}((udp_defn*) elaboratorContext->m_elaborator.bindAny(VpiDefName()));')
@@ -235,14 +244,6 @@ def _get_DeepClone_implementation(model, models):
                     includes.add('module_inst')
                     content.append(f'  if (auto obj = {method}()) clone->{method}((interface_inst*) obj);')
 
-                elif method == 'Typespec':
-                    includes.add('typespec')
-                    content.append( '  if (elaboratorContext->m_elaborator.uniquifyTypespec()) {')
-                    content.append(f'    if (auto obj = {method}()) clone->{method}(obj->DeepClone(clone, context));')
-                    content.append( '  } else {')
-                    content.append(f'    if (auto obj = {method}()) clone->{method}((typespec*) obj);')
-                    content.append( '  }')
-
                 else:
                     content.append(f'  if (auto obj = {method}()) clone->{method}(obj->DeepClone(clone, context));')
 
@@ -250,16 +251,11 @@ def _get_DeepClone_implementation(model, models):
                 pass # No cloning
 
             elif method == 'Typespecs':
+                # Don't deep clone
                 content.append(f'  if (auto vec = {method}()) {{')
                 content.append(f'    auto clone_vec = context->m_serializer->Make{Cast}Vec();')
                 content.append(f'    clone->{method}(clone_vec);')
-                content.append( '    for (auto obj : *vec) {')
-                content.append( '      if (elaboratorContext->m_elaborator.uniquifyTypespec()) {')
-                content.append( '        clone_vec->push_back(obj->DeepClone(clone, context));')
-                content.append( '      } else {')
-                content.append( '        clone_vec->push_back(obj);')
-                content.append( '      }')
-                content.append( '    }')
+                content.append( '    clone_vec->insert(clone_vec->cend(), vec->cbegin(), vec->cend());')
                 content.append( '  }')
 
             elif (classname == 'class_defn') and (method == 'Deriveds'):
@@ -279,6 +275,7 @@ def _get_DeepClone_implementation(model, models):
                 content.append( '      clone_vec->push_back(obj->DeepClone(clone, context));')
                 content.append( '    }')
                 content.append( '  }')
+
     if modeltype != 'class_def':
         content.append(f'  elaboratorContext->m_elaborator.leave{Classname}(clone, nullptr);')
 

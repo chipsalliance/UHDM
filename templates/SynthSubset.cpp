@@ -36,7 +36,8 @@ SynthSubset::SynthSubset(Serializer* serializer,
                          bool reportErrors, bool allowFormal)
     : serializer_(serializer),
       nonSynthesizableObjects_(nonSynthesizableObjects),
-      reportErrors_(reportErrors), allowFormal_(allowFormal) {
+      reportErrors_(reportErrors),
+      allowFormal_(allowFormal) {
   constexpr std::string_view kDollar("$");
   for (auto s :
        {// "display",
@@ -106,8 +107,8 @@ void SynthSubset::reportError(const any* object) {
   if (reportErrors_ && !reportedParent(object)) {
     if (!object->VpiFile().empty()) {
       const std::string errMsg(object->VpiName());
-      serializer_->GetErrorHandler()(ErrorType::UHDM_NON_SYNTHESIZABLE,
-                                     errMsg, object, nullptr);
+      serializer_->GetErrorHandler()(ErrorType::UHDM_NON_SYNTHESIZABLE, errMsg,
+                                     object, nullptr);
     }
   }
   mark(object);
@@ -195,8 +196,7 @@ void SynthSubset::leaveAny(const any* object, vpiHandle handle) {
     case UHDM_OBJECT_TYPE::uhdmrestrict:
     case UHDM_OBJECT_TYPE::uhdmimmediate_assume:
     case UHDM_OBJECT_TYPE::uhdmimmediate_cover:
-      if (!allowFormal_)
-        reportError(object);
+      if (!allowFormal_) reportError(object);
       break;  
     default:
       break;
@@ -317,11 +317,13 @@ void SynthSubset::leaveClass_typespec(const class_typespec* object,
 }
 
 void SynthSubset::leaveClass_var(const class_var* object, vpiHandle handle) {
-  if (const class_typespec* spec = (class_typespec*)object->Typespec()) {
-    if (const class_defn* def = spec->Class_defn()) {
-      if (reportedParent(def)) {
-        mark(object);
-        return;
+  if (const ref_typespec* rt = object->Typespec()) {
+    if (const class_typespec* spec = rt->Actual_typespec<class_typespec>()) {
+      if (const class_defn* def = spec->Class_defn()) {
+        if (reportedParent(def)) {
+          mark(object);
+          return;
+        }
       }
     }
   }

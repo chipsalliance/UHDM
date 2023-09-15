@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "ref_obj" formal description
- 
+# Universal Hardware Data Model (UHDM) "ref_typespec" formal description
+
 - obj_def: ref_typespec
   - extends: simple_expr
   - property: name
@@ -30,7 +30,7 @@
     name: definition name
     vpi: vpiDefName
     type: string
-    card: 1  
+    card: 1
   - class_ref: actual_typespec
     name: actual typespec
     vpi: vpiActual

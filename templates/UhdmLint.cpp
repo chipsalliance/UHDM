@@ -189,14 +189,16 @@ void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
 }
 
 void UhdmLint::leaveLogic_net(const logic_net* object, vpiHandle handle) {
-  if (const logic_typespec* tps = object->Typespec<logic_typespec>()) {
-    if (const VectorOfrange* ranges = tps->Ranges()) {
-      range* r0 = ranges->at(0);
-      if (const constant* c = r0->Right_expr<constant>()) {
-        if (c->VpiValue() == "STRING:unsized") {
-          const std::string errMsg(object->VpiName());
-          serializer_->GetErrorHandler()(
-              ErrorType::UHDM_ILLEGAL_PACKED_DIMENSION, errMsg, c, 0);
+  if (const ref_typespec* rt = object->Typespec()) {
+    if (const logic_typespec* tps = rt->Actual_typespec<logic_typespec>()) {
+      if (const VectorOfrange* ranges = tps->Ranges()) {
+        range* r0 = ranges->at(0);
+        if (const constant* c = r0->Right_expr<constant>()) {
+          if (c->VpiValue() == "STRING:unsized") {
+            const std::string errMsg(object->VpiName());
+            serializer_->GetErrorHandler()(
+                ErrorType::UHDM_ILLEGAL_PACKED_DIMENSION, errMsg, c, 0);
+          }
         }
       }
     }
@@ -205,7 +207,10 @@ void UhdmLint::leaveLogic_net(const logic_net* object, vpiHandle handle) {
 
 void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
                                   vpiHandle handle) {
-  const typespec* baseType = object->Base_typespec();
+  const typespec* baseType = nullptr;
+  if (const ref_typespec* rt = object->Base_typespec()) {
+    baseType = rt->Actual_typespec<typespec>();
+  }
   if (!baseType) return;
   static std::regex r("^[0-9]*'");
   ExprEval eval;

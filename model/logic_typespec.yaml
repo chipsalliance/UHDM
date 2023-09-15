@@ -21,10 +21,10 @@
     vpi: vpiVector
     type: bool
     card: 1
-  - obj_ref: logic_typespec
-    name: logic typespec
+  - obj_ref: elem_typespec
+    name: elem typespec
     vpi: vpiElemTypespec
-    type: logic_typespec
+    type: ref_typespec
     card: 1
   - obj_ref: ranges
     name: ranges
@@ -41,10 +41,10 @@
     vpi: vpiRightRange
     type: expr
     card: 1
-  - class_ref: typespec
-    name: typespec
+  - class_ref: index_typespec
+    name: index typespec
     vpi: vpiIndexTypespec
-    type: typespec
+    type: ref_typespec
     card: 1
   - property: sign
     name: sign
