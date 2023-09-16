@@ -31,21 +31,20 @@ def _get_schema(type, vpi, card):
 
 
 def generate(models):
-    root_schema_index = 4
-    root_schema = []
     model_schemas = [
       'struct Any {',
-      '  uhdmId @0 :UInt64;',
-      '  vpiParent @1 :ObjIndexType;',
-      '  vpiFile @2 :UInt64;',
-      '  vpiLineNo @3 :UInt32;',
-      '  vpiEndLineNo @4 :UInt32;',
-      '  vpiColumnNo @5 :UInt16;',
-      '  vpiEndColumnNo @6 :UInt16;',
+      '  uhdmId @0 : UInt64;',
+      '  vpiParent @1 : ObjIndexType;',
+      '  vpiFile @2 : UInt64;',
+      '  vpiLineNo @3 : UInt32;',
+      '  vpiEndLineNo @4 : UInt32;',
+      '  vpiColumnNo @5 : UInt16;',
+      '  vpiEndColumnNo @6 : UInt16;',
       '}',
       ''
     ]
 
+    classnames = set()
     for model in models.values():
         modeltype = model['type']
         if modeltype == 'group_def':
@@ -58,8 +57,7 @@ def generate(models):
         Basename = basename[:1].upper() + basename[1:].replace('_', '')
 
         if modeltype != 'class_def':
-            root_schema.append(f'  factory{Classname} @{root_schema_index} :List({Classname});')
-            root_schema_index += 1
+            classnames.add(Classname)
 
         field_index = 1
         model_schemas.append(f'struct {Classname} {{')
@@ -74,7 +72,7 @@ def generate(models):
 
                     field_name, field_type = _get_schema(type, vpi, card)
                     if field_name and field_type:
-                        model_schemas.append(f'  {field_name} @{field_index}: {field_type};')
+                        model_schemas.append(f'  {field_name} @{field_index} : {field_type};')
                         field_index += 1
 
             elif key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
@@ -91,11 +89,17 @@ def generate(models):
 
                 field_name, field_type = _get_schema(obj_key, name, card)
                 if field_name and field_type:
-                    model_schemas.append(f'  {field_name} @{field_index}: {field_type};')
+                    model_schemas.append(f'  {field_name} @{field_index} : {field_type};')
                     field_index += 1
 
         model_schemas.append('}')
         model_schemas.append('')
+
+    root_schema = []
+    root_schema_index = 4
+    for Classname in sorted(classnames):
+        root_schema.append(f'  factory{Classname} @{root_schema_index} : List({Classname});')
+        root_schema_index += 1
 
     with open(config.get_template_filepath('UHDM.capnp'), 'rt') as strm:
         file_content = strm.read()
