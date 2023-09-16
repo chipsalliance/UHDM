@@ -106,6 +106,7 @@ operation.yaml
 actual_group.yaml
 ref_obj.yaml
 ref_module.yaml
+ref_typespec.yaml
 part_select.yaml
 indexed_part_select.yaml
 var_select.yaml
