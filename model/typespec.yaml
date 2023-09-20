@@ -23,7 +23,7 @@
   - class_ref: typedef_alias
     name: typedef alias
     vpi: vpiTypedefAlias
-    type: typespec
+    type: ref_typespec
     card: 1
   - class_ref: instance
     name: instance

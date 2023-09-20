@@ -56,7 +56,9 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
         }
       }
       if (const UHDM::extends* ext = defn->Extends()) {
-        propagateParamAssign(pass, ext->Class_typespec());
+        if (const ref_typespec* rt = ext->Class_typespec()) {
+          propagateParamAssign(pass, rt->Actual_typespec<class_typespec>());
+        }
       }
       if (const auto vars = defn->Variables()) {
         for (auto var : *vars) {
@@ -67,7 +69,9 @@ static void propagateParamAssign(param_assign* pass, const any* target) {
     }
     case UHDM_OBJECT_TYPE::uhdmclass_var: {
       class_var* var = (class_var*)target;
-      propagateParamAssign(pass, var->Typespec());
+      if (const ref_typespec* rt = var->Typespec()) {
+        propagateParamAssign(pass, rt->Actual_typespec());
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmclass_typespec: {
@@ -107,10 +111,11 @@ void ElaboratorListener::enterVariables(const variables* object,
       return;  // Only do class var propagation while in elaboration
     const class_var* cv = (class_var*)object;
     class_var* const rw_cv = (class_var*)cv;
-    if (typespec* ctps = (typespec*)cv->Typespec()) {
-      ctps = ctps->DeepClone(rw_cv, context_);
+    if (const ref_typespec* tps = cv->Typespec()) {
+      ref_typespec* ctps = tps->DeepClone(rw_cv, context_);
       rw_cv->Typespec(ctps);
-      if (class_typespec* cctps = any_cast<class_typespec*>(ctps)) {
+      if (const class_typespec* cctps =
+              ctps->Actual_typespec<class_typespec>()) {
         if (VectorOfparam_assign* params = cctps->Param_assigns()) {
           for (param_assign* pass : *params) {
             propagateParamAssign(pass, cctps->Class_defn());
@@ -176,10 +181,14 @@ void ElaboratorListener::enterModule_inst(const module_inst* object,
         }
         if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
           enum_var* evar = (enum_var*)var;
-          enum_typespec* etps = evar->Typespec<enum_typespec>();
-          for (auto c : *etps->Enum_consts()) {
-            if (!c->VpiName().empty()) {
-              netMap.emplace(c->VpiName(), c);
+          if (const ref_typespec* rt = evar->Typespec()) {
+            if (const enum_typespec* etps =
+                    rt->Actual_typespec<enum_typespec>()) {
+              for (auto c : *etps->Enum_consts()) {
+                if (!c->VpiName().empty()) {
+                  netMap.emplace(c->VpiName(), c);
+                }
+              }
             }
           }
         }
@@ -457,10 +466,14 @@ void ElaboratorListener::enterPackage(const package* object, vpiHandle handle) {
       }
       if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
         enum_var* evar = (enum_var*)var;
-        enum_typespec* etps = (enum_typespec*)evar->Typespec();
-        for (auto c : *etps->Enum_consts()) {
-          if (!c->VpiName().empty()) {
-            netMap.emplace(c->VpiName(), c);
+        if (const ref_typespec* rt = evar->Typespec()) {
+          if (const enum_typespec* etps =
+                  rt->Actual_typespec<enum_typespec>()) {
+            for (auto c : *etps->Enum_consts()) {
+              if (!c->VpiName().empty()) {
+                netMap.emplace(c->VpiName(), c);
+              }
+            }
           }
         }
       }
@@ -536,10 +549,13 @@ void ElaboratorListener::enterClass_defn(const class_defn* object,
         }
         if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
           enum_var* evar = (enum_var*)var;
-          enum_typespec* etps = (enum_typespec*)evar->Typespec();
-          for (auto c : *etps->Enum_consts()) {
-            if (!c->VpiName().empty()) {
-              varMap.emplace(c->VpiName(), c);
+          if (const ref_typespec* rt = evar->Typespec()) {
+            if (const enum_typespec* etps = rt->Actual_typespec<enum_typespec>()) {
+              for (auto c : *etps->Enum_consts()) {
+                if (!c->VpiName().empty()) {
+                  varMap.emplace(c->VpiName(), c);
+                }
+              }
             }
           }
         }
@@ -577,8 +593,11 @@ void ElaboratorListener::enterClass_defn(const class_defn* object,
 
     const class_defn* base_defn = nullptr;
     if (const extends* ext = defn->Extends()) {
-      if (const class_typespec* ctps = ext->Class_typespec()) {
-        base_defn = ctps->Class_defn();
+      if (const ref_typespec* rt = ext->Class_typespec()) {
+        if (const class_typespec* ctps =
+                rt->Actual_typespec<class_typespec>()) {
+          base_defn = ctps->Class_defn();
+        }
       }
     }
     defn = base_defn;
@@ -680,10 +699,14 @@ void ElaboratorListener::enterInterface_inst(const interface_inst* object,
         }
         if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
           enum_var* evar = (enum_var*)var;
-          enum_typespec* etps = (enum_typespec*)evar->Typespec();
-          for (auto c : *etps->Enum_consts()) {
-            if (!c->VpiName().empty()) {
-              netMap.emplace(c->VpiName(), c);
+          if (const ref_typespec* rt = evar->Typespec()) {
+            if (const enum_typespec* etps =
+                    rt->Actual_typespec<enum_typespec>()) {
+              for (auto c : *etps->Enum_consts()) {
+                if (!c->VpiName().empty()) {
+                  netMap.emplace(c->VpiName(), c);
+                }
+              }
             }
           }
         }
@@ -954,23 +977,27 @@ any* ElaboratorListener::bindTaskFunc(std::string_view name,
     }
   }
   if (prefix) {
-    const typespec* tps = prefix->Typespec();
-    if (tps && tps->UhdmType() == UHDM_OBJECT_TYPE::uhdmclass_typespec) {
-      const class_defn* defn = ((const class_typespec*)tps)->Class_defn();
-      while (defn) {
-        if (defn->Task_funcs()) {
-          for (task_func* tf : *defn->Task_funcs()) {
-            if (tf->VpiName() == name) return tf;
+    if (const ref_typespec* rt = prefix->Typespec()) {
+      if (const class_typespec* tps = rt->Actual_typespec<class_typespec>()) {
+        const class_defn* defn = tps->Class_defn();
+        while (defn) {
+          if (defn->Task_funcs()) {
+            for (task_func* tf : *defn->Task_funcs()) {
+              if (tf->VpiName() == name) return tf;
+            }
           }
-        }
 
-        const class_defn* base_defn = nullptr;
-        if (const extends* ext = defn->Extends()) {
-          if (const class_typespec* ctps = ext->Class_typespec()) {
-            base_defn = ctps->Class_defn();
+          const class_defn* base_defn = nullptr;
+          if (const extends* ext = defn->Extends()) {
+            if (const ref_typespec* ctps_rt = ext->Class_typespec()) {
+              if (const class_typespec* ctps =
+                      ctps_rt->Actual_typespec<class_typespec>()) {
+                base_defn = ctps->Class_defn();
+              }
+            }
           }
+          defn = base_defn;
         }
-        defn = base_defn;
       }
     }
   }
@@ -1057,8 +1084,11 @@ void ElaboratorListener::enterTask_func(const task_func* object,
 
         const class_defn* base_defn = nullptr;
         if (const extends* ext = defn->Extends()) {
-          if (const class_typespec* ctps = ext->Class_typespec()) {
-            base_defn = ctps->Class_defn();
+          if (const ref_typespec* rt = ext->Class_typespec()) {
+            if (const class_typespec* ctps =
+                    rt->Actual_typespec<class_typespec>()) {
+              base_defn = ctps->Class_defn();
+            }
           }
         }
         defn = base_defn;
@@ -1337,10 +1367,13 @@ void ElaboratorListener::enterGen_scope(const gen_scope* object,
       }
       if (var->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var) {
         enum_var* evar = (enum_var*)var;
-        enum_typespec* etps = (enum_typespec*)evar->Typespec();
-        for (auto c : *etps->Enum_consts()) {
-          if (!c->VpiName().empty()) {
-            netMap.emplace(c->VpiName(), c);
+        if (const ref_typespec* rt = evar->Typespec()) {
+          if (const enum_typespec* etps = rt->Typespec<enum_typespec>()) {
+            for (auto c : *etps->Enum_consts()) {
+              if (!c->VpiName().empty()) {
+                netMap.emplace(c->VpiName(), c);
+              }
+            }
           }
         }
       }

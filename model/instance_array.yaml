@@ -63,7 +63,7 @@
   - class_ref: elem_typespec
     name: elem typespec
     vpi: vpiElemTypespec
-    type: typespec
+    type: ref_typespec
     card: 1
   - obj_ref: ports
     vpi: vpiPort

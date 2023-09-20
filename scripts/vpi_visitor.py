@@ -23,7 +23,7 @@ def _get_implementation(classname, vpi, card):
             # Prevent stepping inside tasks while processing calls (task_call, method_task_call) to them
             shallow_visit = 'true'
 
-        if classname in ['ref_obj']:
+        if classname in ['ref_obj', 'ref_typespec']:
             # Ref_obj are always printed shallow
             shallow_visit = 'true'
 

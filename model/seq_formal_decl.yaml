@@ -38,6 +38,6 @@
   - class_ref: typespec
     name: typespec
     vpi: vpiTypespec
-    type: typespec
+    type: ref_typespec
     card: 1
     

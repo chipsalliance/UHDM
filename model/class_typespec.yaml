@@ -27,11 +27,11 @@
     vpi: vpiAutomatic
     type: bool
     card: 1
-  - obj_ref: class_typespec
-    name: class typespec
+  - obj_ref: extends
+    name: extends
     vpi: vpiExtends
-    type: class_typespec
-    card: 1    
+    type: ref_typespec
+    card: 1
   - class_ref: variables
     name: variables
     vpi: vpiVariables
@@ -55,7 +55,7 @@
   - obj_ref: param_assigns
     vpi: vpiParamAssign
     type: param_assign
-    card: any     
+    card: any
   - obj_ref: virtual_interface_vars
     name: virtual interface vars
     vpi: vpiVirtualInterfaceVar
@@ -70,12 +70,12 @@
     name: named event arrays
     vpi: vpiNamedEventArray
     type: named_event_array
-    card: any    
+    card: any
   - class_ref: scopes
     name: scopes
     vpi: vpiInternalScope
     type: scope
-    card: any    
+    card: any
   - obj_ref: class_defn
     name: class defn
     vpi: vpiClassDefn

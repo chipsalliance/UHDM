@@ -27,8 +27,8 @@
 #ifndef UHDM_EXPREVAL_H
 #define UHDM_EXPREVAL_H
 
-#include <uhdm/expr.h>
-#include <uhdm/typespec.h>
+#include <uhdm/containers.h>
+#include <uhdm/uhdm_forward_decl.h>
 
 #include <functional>
 #include <map>

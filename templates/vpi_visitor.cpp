@@ -539,11 +539,6 @@ void VpiVisitor::visit_object(vpiHandle obj_h, int32_t indent,
   }
   m_out << "\n";
 
-  // Force shallow visit for all vpiParent except for vpiRefObj
-  if (strcmp(relation, "vpiParent") == 0) {
-    shallowVisit = (objectType != vpiRefObj);
-  }
-
   if (!alreadyVisited && shallowVisit) {
     m_weaklyReferenced1.emplace(object);
   }

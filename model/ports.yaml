@@ -73,7 +73,7 @@
   - class_ref: typespec
     name: typespec
     vpi: vpiTypedef
-    type: typespec
+    type: ref_typespec
     card: 1
   - class_ref: instance
     name: instance

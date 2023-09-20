@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Universal Hardware Data Model (UHDM) "ref_obj" formal description
- 
+
 - obj_def: ref_obj
   - extends: simple_expr
   - property: name
@@ -30,12 +30,12 @@
     name: definition name
     vpi: vpiDefName
     type: string
-    card: 1  
+    card: 1
   - property: generic
     name: generic
     vpi: vpiGeneric
     type: bool
-    card: 1 
+    card: 1
   - group_ref: actual_group
     name: actual group
     vpi: vpiActual
@@ -46,4 +46,4 @@
     name: is struct member
     vpi: vpiStructMember
     type: bool
-    card: 1    
+    card: 1
