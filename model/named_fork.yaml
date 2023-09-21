@@ -26,3 +26,8 @@
     vpi: vpiStmt
     type: stmt
     card: any
+  - property: endlabel
+    name: endlabel
+    vpi: vpiEndLabel
+    type: string
+    card: 1

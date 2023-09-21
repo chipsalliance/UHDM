@@ -51,3 +51,8 @@
     vpi: vpiClassTypespec
     type: class_typespec
     card: any
+  - property: endlabel
+    name: endlabel
+    vpi: vpiEndLabel
+    type: string
+    card: 1

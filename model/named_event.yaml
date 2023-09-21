@@ -55,3 +55,8 @@
     vpi: vpiWaitingProcesses
     type: thread_obj
     card: any
+  - property: endlabel
+    name: endlabel
+    vpi: vpiEndLabel
+    type: string
+    card: 1

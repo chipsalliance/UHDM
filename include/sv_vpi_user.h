@@ -90,6 +90,8 @@ extern "C" {
 #define vpiEventTypespec                      698
 #define vpiModuleTypespec                     768 /* !!! NOT Standard !!! */
 #define vpiRefTypespec                        769 /* !!! NOT Standard !!! */
+#define vpiLabel                              770
+#define vpiEndLabel                           771
 
 #define vpiClockingBlock                      650
 #define vpiClockingIODecl                     651

@@ -147,3 +147,8 @@
     vpi: vpiGenStmt
     type: gen_stmt
     card: any
+  - property: endlabel
+    name: endlabel
+    vpi: vpiEndLabel
+    type: string
+    card: 1

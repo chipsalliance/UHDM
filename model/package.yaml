@@ -26,3 +26,8 @@
     vpi: vpiUnit
     type: bool
     card: 1
+  - property: endlabel
+    name: endlabel
+    vpi: vpiEndLabel
+    type: string
+    card: 1

@@ -102,4 +102,9 @@
   - class_ref: gen_stmts
     vpi: vpiGenStmt
     type: gen_stmt
-    card: any  
+    card: any
+  - property: endlabel
+    name: endlabel
+    vpi: vpiEndLabel
+    type: string
+    card: 1
