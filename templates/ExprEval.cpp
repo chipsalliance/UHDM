@@ -2390,9 +2390,16 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     UHDM_OBJECT_TYPE ttps = nt->UhdmType();
     if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_net) {
       if (const ref_typespec *rt = ((struct_net *)nt)->Typespec()) {
-        if (const struct_typespec *stpt =
+        VectorOftypespec_member *members = nullptr;
+        if (const struct_typespec *sts =
                 rt->Actual_typespec<struct_typespec>()) {
-          for (typespec_member *member : *stpt->Members()) {
+          members = sts->Members();
+        } else if (const union_typespec *uts =
+                       rt->Actual_typespec<union_typespec>()) {
+          members = uts->Members();
+        }
+        if (members) {
+          for (typespec_member *member : *members) {
             if (member->VpiName() == elemName) {
               if (returnTypespec) {
                 if (ref_typespec *mrt = member->Typespec()) {
