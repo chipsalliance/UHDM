@@ -52,8 +52,10 @@ static const any* returnWithValue(const any* stmt) {
     }
     case UHDM_OBJECT_TYPE::uhdmbegin: {
       begin* st = (begin*)stmt;
-      for (auto s : *st->Stmts()) {
-        if (const any* r = returnWithValue(s)) return r;
+      if (st->Stmts()) {
+        for (auto s : *st->Stmts()) {
+          if (const any* r = returnWithValue(s)) return r;
+        }
       }
       break;
     }
@@ -114,12 +116,14 @@ void UhdmLint::checkMultiContAssign(
     const expr* lhs_exp = cassign->Lhs();
     if (const operation* op = cassign->Rhs<operation>()) {
       bool triStatedOp = false;
-      for (auto operand : *op->Operands()) {
-        if (operand->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
-          constant* c = (constant*)operand;
-          if (c->VpiValue().find('z') != std::string_view::npos) {
-            triStatedOp = true;
-            break;
+      if (op->Operands()) {
+        for (auto operand : *op->Operands()) {
+          if (operand->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+            constant* c = (constant*)operand;
+            if (c->VpiValue().find('z') != std::string_view::npos) {
+              triStatedOp = true;
+              break;
+            }
           }
         }
       }
@@ -141,12 +145,14 @@ void UhdmLint::checkMultiContAssign(
           }
           if (const operation* op = as->Rhs<operation>()) {
             bool triStatedOp = false;
-            for (auto operand : *op->Operands()) {
-              if (operand->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
-                constant* c = (constant*)operand;
-                if (c->VpiValue().find('z') != std::string_view::npos) {
-                  triStatedOp = true;
-                  break;
+            if (op->Operands()) {
+              for (auto operand : *op->Operands()) {
+                if (operand->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+                  constant* c = (constant*)operand;
+                  if (c->VpiValue().find('z') != std::string_view::npos) {
+                    triStatedOp = true;
+                    break;
+                  }
                 }
               }
             }
@@ -163,7 +169,7 @@ void UhdmLint::checkMultiContAssign(
 
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
   if (isInUhdmAllIterator()) return;
-  if (!design_->VpiElaborated()) return; // -uhdmelab
+  if (!design_->VpiElaborated()) return;  // -uhdmelab
   if (const ref_obj* lhs = object->Lhs<ref_obj>()) {
     if (const logic_net* n = lhs->Actual_group<logic_net>()) {
       if (n->VpiNetType() == vpiWire) {
@@ -223,17 +229,19 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
                 object->VpiParent(), true);
   if (invalidValue) return;
 
-  for (auto c : *object->Enum_consts()) {
-    const std::string_view val = c->VpiDecompile();
-    if (c->VpiSize() == -1) continue;
-    if (!std::regex_match(std::string(val), r)) continue;
-    invalidValue = false;
-    const uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
-                                      object->VpiParent(), true);
-    if (!invalidValue && (baseSize != c_size)) {
-      const std::string errMsg(c->VpiName());
-      serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_CONST_SIZE_MISMATCH,
-                                     errMsg, c, baseType);
+  if (object->Enum_consts()) {
+    for (auto c : *object->Enum_consts()) {
+      const std::string_view val = c->VpiDecompile();
+      if (c->VpiSize() == -1) continue;
+      if (!std::regex_match(std::string(val), r)) continue;
+      invalidValue = false;
+      const uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
+                                        object->VpiParent(), true);
+      if (!invalidValue && (baseSize != c_size)) {
+        const std::string errMsg(c->VpiName());
+        serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_CONST_SIZE_MISMATCH,
+                                       errMsg, c, baseType);
+      }
     }
   }
 }
