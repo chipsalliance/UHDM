@@ -282,46 +282,68 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
   }
 }
 
-void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
-  if (isInUhdmAllIterator()) return;
+void UhdmAdjuster::updateParentWithReducedExpression(const any* object, const any* parent) {
   bool invalidValue = false;
   ExprEval eval(true);
-  const any* parent = object->VpiParent();
-  if (parent == nullptr) return;
-  if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmcont_assign) {
-    cont_assign* assign = (cont_assign*)parent;
-    if (assign->Lhs() == object) return;
-    expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
-    if (invalidValue) return;
-    if (tmp) {
-      assign->Rhs(tmp);
-    }
-  } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
+  eval.reduceExceptions({vpiAssignmentPatternOp, vpiMultiAssignmentPatternOp,
+                         vpiConcatOp, vpiMultiConcatOp, vpiBitNegOp});
+  expr* tmp =
+      eval.reduceExpr(object, invalidValue, currentInstance_, parent, true);
+  if (invalidValue) return;
+  if (tmp && tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+    tmp->VpiFile(object->VpiFile());
+    tmp->VpiLineNo(object->VpiLineNo());
+    tmp->VpiColumnNo(object->VpiColumnNo());
+    tmp->VpiEndLineNo(object->VpiEndLineNo());
+    tmp->VpiEndColumnNo(object->VpiEndColumnNo());
+  }
+  if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
     operation* poper = (operation*)parent;
     VectorOfany* operands = poper->Operands();
     if (operands) {
-      eval.reduceExceptions({vpiAssignmentPatternOp,
-                             vpiMultiAssignmentPatternOp, vpiConcatOp,
-                             vpiMultiConcatOp, vpiBitNegOp});
-      expr* tmp = eval.reduceExpr(object, invalidValue, nullptr, nullptr, true);
-      if (invalidValue) return;
-      if (tmp && tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
-        tmp->VpiFile(poper->VpiFile());
-        tmp->VpiLineNo(poper->VpiLineNo());
-        tmp->VpiColumnNo(poper->VpiColumnNo());
-        tmp->VpiEndLineNo(poper->VpiEndLineNo());
-        tmp->VpiEndColumnNo(poper->VpiEndColumnNo());
-        uint64_t index = 0;
-        for (any* oper : *operands) {
-          if (oper == object) {
-            operands->at(index) = tmp;
-            break;
-          }
-          index++;
+      uint64_t index = 0;
+      for (any* oper : *operands) {
+        if (oper == object) {
+          operands->at(index) = tmp;
+          break;
         }
+        index++;
       }
     }
+  } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmcont_assign) {
+    cont_assign* assign = (cont_assign*)parent;
+    if (assign->Lhs() == object) return;
+    if (tmp) {
+      assign->Rhs(tmp);
+    }
+  } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmindexed_part_select) {
+    indexed_part_select* pselect = (indexed_part_select*) parent;
+    if (pselect->Base_expr() == object) {
+      pselect->Base_expr(tmp);
+    }
+    if (pselect->Width_expr() == object) {
+      pselect->Width_expr(tmp);
+    }
   }
+}
+
+void UhdmAdjuster::leaveSys_func_call(const sys_func_call* object,
+                                      vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  const any* parent = object->VpiParent();
+  if (parent == nullptr) return;
+  std::string_view name = object->VpiName();
+  if ((name == "$bits") || (name == "$size") || (name == "$high") ||
+      (name == "$low") || (name == "$left") || (name == "$right")) {
+    updateParentWithReducedExpression(object, parent);
+  }
+}
+
+void UhdmAdjuster::leaveOperation(const operation* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  const any* parent = object->VpiParent();
+  if (parent == nullptr) return;
+  updateParentWithReducedExpression(object, parent);
 }
 
 }  // namespace UHDM
