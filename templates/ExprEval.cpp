@@ -59,17 +59,17 @@ class DetectRefObj : public VpiListener {
   void leaveRef_obj(const ref_obj *object, vpiHandle handle) final {
     hasRef_obj = true;
   }
-  void leaveBit_select(const bit_select *object, vpiHandle handle) {
+  void leaveBit_select(const bit_select *object, vpiHandle handle) final {
     hasRef_obj = true;
   }
   void leaveIndexed_part_select(const indexed_part_select *object,
-                                vpiHandle handle) {
+                                vpiHandle handle) final {
     hasRef_obj = true;
   }
-  void leavePart_select(const part_select *object, vpiHandle handle) {
+  void leavePart_select(const part_select *object, vpiHandle handle) final {
     hasRef_obj = true;
   }
-  void leaveVar_select(const var_select *object, vpiHandle handle) {
+  void leaveVar_select(const var_select *object, vpiHandle handle) final {
     hasRef_obj = true;
   }
   void leaveHier_path(const hier_path *object, vpiHandle handle) final {
@@ -1569,6 +1569,7 @@ static bool getStringVal(std::string &result, expr *val) {
     if (s_vpi_value *sval = String2VpiValue(hs0->VpiValue())) {
       if (sval->format == vpiStringVal || sval->format == vpiBinStrVal) {
         result = sval->value.str;
+        delete sval->value.str;
         delete sval;
         return true;
       }
