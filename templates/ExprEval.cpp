@@ -1255,6 +1255,11 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
   uint64_t bits = 0;
   VectorOfrange *ranges = nullptr;
   UHDM_OBJECT_TYPE ttps = ts->UhdmType();
+  if (ttps == uhdmref_typespec) {
+    ref_typespec* rtps = (ref_typespec*) ts;
+    ts = rtps->Actual_typespec();
+    ttps = ts->UhdmType();
+  }
   switch (ttps) {
     case UHDM_OBJECT_TYPE::uhdmhier_path: {
       ts = decodeHierPath((hier_path *)ts, invalidValue, inst, nullptr, true);
@@ -1344,12 +1349,26 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
     case UHDM_OBJECT_TYPE::uhdmlogic_net: {
       bits = 1;
       logic_net *lts = (logic_net *)ts;
+      if (const ref_typespec *rt = lts->Typespec()) {
+        bool tmpInvalidValue = false;
+        uint64_t tmpS = size(rt->Actual_typespec(), tmpInvalidValue, inst, pexpr, full);
+        if (tmpInvalidValue == false) {
+          bits = tmpS;
+        }
+      }
       ranges = lts->Ranges();
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmlogic_var: {
       bits = 1;
       logic_var *lts = (logic_var *)ts;
+      if (const ref_typespec *rt = lts->Typespec()) {
+        bool tmpInvalidValue = false;
+        uint64_t tmpS = size(rt->Actual_typespec(), tmpInvalidValue, inst, pexpr, full);
+        if (tmpInvalidValue == false) {
+          bits = tmpS;
+        }
+      }
       ranges = lts->Ranges();
       break;
     }
@@ -4802,7 +4821,7 @@ bool ExprEval::setValueInInstance(
       }
       if ((c->VpiSize() == -1) && (c->VpiConstType() == vpiBinaryConst)) {
         bool tmpInvalidValue = false;
-        uint64_t size = ExprEval::size(lhsexp, tmpInvalidValue, nullptr,
+        uint64_t size = ExprEval::size(lhsexp, tmpInvalidValue, inst,
                                        scope_exp, true, true);
         if (tmpInvalidValue) {
           std::map<std::string, const typespec *>::iterator itr =
@@ -4810,7 +4829,7 @@ bool ExprEval::setValueInInstance(
           if (itr != local_vars.end()) {
             if (const typespec *tps = itr->second) {
               tmpInvalidValue = false;
-              size = ExprEval::size(tps, tmpInvalidValue, nullptr, scope_exp,
+              size = ExprEval::size(tps, tmpInvalidValue, inst, scope_exp,
                                     true, true);
             }
           }
