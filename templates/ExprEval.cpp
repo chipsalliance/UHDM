@@ -1569,9 +1569,14 @@ static bool getStringVal(std::string &result, expr *val) {
     if (s_vpi_value *sval = String2VpiValue(hs0->VpiValue())) {
       if (sval->format == vpiStringVal || sval->format == vpiBinStrVal) {
         result = sval->value.str;
-        delete [] sval->value.str;
+        if (sval->value.str)
+          delete [] sval->value.str;
         delete sval;
         return true;
+      } else {
+        if (sval->value.str)
+          delete [] sval->value.str;
+        delete sval;
       }
     }
   }
