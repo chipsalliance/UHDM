@@ -3952,6 +3952,71 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           } else if (typespec *tp = any_cast<typespec *>(object)) {
             tps = tp;
           }
+
+          if ((name == "$high") || (name == "$low") || (name == "$left") ||
+              (name == "$right")) {
+            VectorOfrange *ranges = nullptr;
+            if (tps) {
+              switch (tps->UhdmType()) {
+                case uhdmbit_typespec: {
+                  bit_typespec *bts = (bit_typespec *)tps;
+                  ranges = bts->Ranges();
+                  break;
+                }
+                case uhdmint_typespec: {
+                  int_typespec *bts = (int_typespec *)tps;
+                  ranges = bts->Ranges();
+                  break;
+                }
+                case uhdmlogic_typespec: {
+                  logic_typespec *bts = (logic_typespec *)tps;
+                  ranges = bts->Ranges();
+                  break;
+                }
+                case uhdmarray_typespec: {
+                  array_typespec *bts = (array_typespec *)tps;
+                  ranges = bts->Ranges();
+                  break;
+                }
+                case uhdmpacked_array_typespec: {
+                  packed_array_typespec *bts = (packed_array_typespec *)tps;
+                  ranges = bts->Ranges();
+                  break;
+                }
+                default:
+                  break;
+              }
+            }
+            if (ranges) {
+              range *r = ranges->at(0);
+              expr *lr = r->Left_expr();
+              expr *rr = r->Right_expr();
+              bool invalidValue = false;
+              lr = reduceExpr(lr, invalidValue, inst, pexpr, muteError);
+              UHDM::ExprEval eval;
+              int64_t lrv = eval.get_value(invalidValue, lr);
+              rr = reduceExpr(rr, invalidValue, inst, pexpr, muteError);
+              int64_t rrv = eval.get_value(invalidValue, rr);
+              if (name == "left") {
+                return lr;
+              } else if (name == "right") {
+                return rr;
+              } else if (name == "high") {
+                if (lrv > rrv) {
+                  return lr;
+                } else {
+                  return rr;
+                }
+              } else if (name == "low") {
+                if (lrv > rrv) {
+                  return rr;
+                } else {
+                  return lr;
+                }
+              }
+            }
+          }
+
           if (tps) {
             bits += size(tps, invalidValue, inst, pexpr, (name != "$size"));
             found = true;

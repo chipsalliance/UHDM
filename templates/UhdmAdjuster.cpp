@@ -324,6 +324,19 @@ void UhdmAdjuster::updateParentWithReducedExpression(const any* object, const an
     if (pselect->Width_expr() == object) {
       pselect->Width_expr(tmp);
     }
+  } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmpart_select) {
+    part_select* pselect = (part_select*) parent;
+    if (pselect->Left_range() == object) {
+      pselect->Left_range(tmp);
+    }
+    if (pselect->Right_range() == object) {
+      pselect->Right_range(tmp);
+    }
+  } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_select) {
+    bit_select* pselect = (bit_select*) parent;
+    if (pselect->VpiIndex() == object) {
+      pselect->VpiIndex(tmp);
+    }
   }
 }
 
