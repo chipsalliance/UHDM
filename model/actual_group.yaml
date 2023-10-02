@@ -37,5 +37,8 @@
   - obj_ref: typespec_member
   - class_ref: task_func
   - class_ref: scope
+  - obj_ref: property_decl
+  - obj_ref: sequence_decl
+
 
 
