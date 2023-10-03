@@ -19,3 +19,4 @@
   - obj_ref: sequence_inst
   - obj_ref: distribution
   - class_ref: expr
+  - obj_ref: clocked_seq
