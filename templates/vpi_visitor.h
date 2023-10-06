@@ -52,6 +52,7 @@ void visit_designs(const std::vector<vpiHandle>& designs, std::ostream& out);
 #ifndef SWIG
 // For debug use in GDB
 std::string decompile(const UHDM::any* handle);
+std::string decompile(vpiHandle handle);
 
 class VpiVisitor final {
  private:
