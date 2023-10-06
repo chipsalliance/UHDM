@@ -616,7 +616,7 @@ std::string decompile(const UHDM::any* handle) {
   return out.str();
 }
 
-std::string decompile(vpiHandle handle) {
+std::string decompileVPI(vpiHandle handle) {
   if (handle == nullptr) {
     std::cout << "NULL HANDLE\n";
     return "NULL HANDLE";
