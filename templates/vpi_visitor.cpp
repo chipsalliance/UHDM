@@ -615,6 +615,21 @@ std::string decompile(const UHDM::any* handle) {
   std::cout << out.str() << "\n";
   return out.str();
 }
+
+std::string decompile(vpiHandle handle) {
+  if (handle == nullptr) {
+    std::cout << "NULL HANDLE\n";
+    return "NULL HANDLE";
+  }
+  UHDM::VisitedContainer visited;
+  vpi_show_ids(true);
+  std::stringstream out;
+  VpiVisitor visitor(out);
+  visitor.visit_object(handle, 0, "decompile", false);
+  std::cout << out.str() << "\n";
+  return out.str();
+}
+
 } // namespace UHDM
 
 void vpi_show_ids(bool show) {
