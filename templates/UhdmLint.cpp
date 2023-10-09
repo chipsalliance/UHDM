@@ -203,7 +203,7 @@ void UhdmLint::leaveLogic_net(const logic_net* object, vpiHandle handle) {
           if (c->VpiValue() == "STRING:unsized") {
             const std::string errMsg(object->VpiName());
             serializer_->GetErrorHandler()(
-                ErrorType::UHDM_ILLEGAL_PACKED_DIMENSION, errMsg, c, 0);
+                ErrorType::UHDM_ILLEGAL_PACKED_DIMENSION, errMsg, c, nullptr);
           }
         }
       }
@@ -241,6 +241,23 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
         const std::string errMsg(c->VpiName());
         serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_CONST_SIZE_MISMATCH,
                                        errMsg, c, baseType);
+      }
+    }
+  }
+}
+
+void UhdmLint::leaveProperty_spec(const property_spec* prop_s,
+                                  vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  if (const any* exp = prop_s->VpiPropertyExpr()) {
+    if (exp->UhdmType() == uhdmref_obj) {
+      const ref_obj* ref = any_cast<const ref_obj*>(exp);
+      if (ref->Actual_group()) {
+        if (ref->Actual_group()->UhdmType() == uhdmlogic_net) {
+          const std::string errMsg(ref->VpiName());
+          serializer_->GetErrorHandler()(ErrorType::UHDM_UNRESOLVED_PROPERTY,
+                                         errMsg, ref, nullptr);
+        }
       }
     }
   }
