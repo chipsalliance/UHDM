@@ -52,6 +52,9 @@ class UhdmLint final : public VpiListener {
   void leaveEnum_typespec(const enum_typespec* object,
                           vpiHandle handle) override;
 
+  void leaveProperty_spec(const property_spec* object,
+                          vpiHandle handle) override;
+
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 
   Serializer* serializer_ = nullptr;
