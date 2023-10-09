@@ -163,6 +163,9 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_UNSUPPORTED_TYPESPEC:
             errmsg = "Unsupported typespec";
             break;
+          case UHDM::UHDM_UNRESOLVED_PROPERTY:
+            errmsg = "Unresolved property";
+            break;
         }
 
         if (object1) {
