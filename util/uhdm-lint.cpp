@@ -166,6 +166,9 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_UNRESOLVED_PROPERTY:
             errmsg = "Unresolved property";
             break;
+          case UHDM::UHDM_NON_TEMPORAL_SEQUENCE_USE:
+            errmsg = "Sequence used in non-temporal context";
+            break;
         }
 
         if (object1) {
