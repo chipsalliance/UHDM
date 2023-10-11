@@ -246,6 +246,24 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
   }
 }
 
+class DetectSequenceInst : public VpiListener {
+ public:
+  explicit DetectSequenceInst() {}
+  ~DetectSequenceInst() override = default;
+  void leaveRef_obj(const ref_obj* object, vpiHandle handle) final {
+    if (decl && (seq_parent == nullptr))
+      seq_parent = object;
+  }
+  void leaveSequence_decl(const sequence_decl *object, vpiHandle handle) final {
+    decl = object;   
+  }
+  const sequence_decl* seqDeclDetected() const { return decl; }
+  const ref_obj* parentRef() { return seq_parent; }
+ private:
+  const ref_obj* seq_parent = nullptr;
+  const sequence_decl* decl = nullptr;
+};
+
 void UhdmLint::leaveProperty_spec(const property_spec* prop_s,
                                   vpiHandle handle) {
   if (isInUhdmAllIterator()) return;
@@ -257,6 +275,20 @@ void UhdmLint::leaveProperty_spec(const property_spec* prop_s,
           const std::string errMsg(ref->VpiName());
           serializer_->GetErrorHandler()(ErrorType::UHDM_UNRESOLVED_PROPERTY,
                                          errMsg, ref, nullptr);
+        }
+      }
+    }
+    {
+      if (prop_s->VpiClockingEvent()) {
+        DetectSequenceInst seqDetector;
+        vpiHandle h = NewVpiHandle(exp);
+        seqDetector.listenAny(h);
+        vpi_free_object(h);
+        if (const sequence_decl* decl = seqDetector.seqDeclDetected()) {
+          const std::string errMsg(decl->VpiName());
+          serializer_->GetErrorHandler()(
+              ErrorType::UHDM_NON_TEMPORAL_SEQUENCE_USE, errMsg,
+              seqDetector.parentRef(), nullptr);
         }
       }
     }
