@@ -250,18 +250,37 @@ class DetectSequenceInst : public VpiListener {
  public:
   explicit DetectSequenceInst() {}
   ~DetectSequenceInst() override = default;
-  void leaveRef_obj(const ref_obj* object, vpiHandle handle) final {
-    if (decl && (seq_parent == nullptr))
-      seq_parent = object;
+
+   void enterOperation(const operation* object, vpiHandle handle) final {
+    int opType = object->VpiOpType();
+    if (opType == vpiNonOverlapImplyOp || opType == vpiOverlapImplyOp) {
+      rhsImplication = object->Operands()->at(1);
+    }
   }
+
+  void leaveRef_obj(const ref_obj* object, vpiHandle handle) final {
+    if (decl && (seq_parent == nullptr)) {
+      const any* parent = object;
+      while (parent) {
+        if (parent == rhsImplication) {
+          seq_parent = object;
+          return;
+        }
+        parent = parent->VpiParent();
+      }
+      decl = nullptr;
+    }
+  }
+
   void leaveSequence_decl(const sequence_decl *object, vpiHandle handle) final {
-    decl = object;   
+        decl = object; 
   }
   const sequence_decl* seqDeclDetected() const { return decl; }
   const ref_obj* parentRef() { return seq_parent; }
  private:
   const ref_obj* seq_parent = nullptr;
   const sequence_decl* decl = nullptr;
+  const any* rhsImplication = nullptr;
 };
 
 void UhdmLint::leaveProperty_spec(const property_spec* prop_s,
