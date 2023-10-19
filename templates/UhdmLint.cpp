@@ -314,4 +314,27 @@ void UhdmLint::leaveProperty_spec(const property_spec* prop_s,
   }
 }
 
+void UhdmLint::leaveSys_func_call(const sys_func_call* object,
+                                  vpiHandle handle) {
+  ExprEval eval;
+  eval.setDesign(design_);
+  if (object->VpiName() == "$past") {
+    if (auto arg = object->Tf_call_args()) {
+      if (arg->size() == 2) {
+        any* ex = arg->at(1);
+        bool invalidValue = false;
+        const int64_t val = eval.get_value(
+            invalidValue,
+            eval.reduceExpr(ex, invalidValue, nullptr, object->VpiParent()));
+        if (val <= 0 && (invalidValue == false)) {
+          const std::string errMsg = std::to_string(val);
+          serializer_->GetErrorHandler()(
+              ErrorType::UHDM_NON_POSITIVE_VALUE, errMsg,
+              ex, nullptr);
+        }
+      }
+    }
+  }
+}
+
 }  // namespace UHDM
