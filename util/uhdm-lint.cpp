@@ -169,6 +169,9 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_NON_TEMPORAL_SEQUENCE_USE:
             errmsg = "Sequence used in non-temporal context";
             break;
+          case UHDM::UHDM_NON_POSITIVE_VALUE:
+            errmsg = "Non positive (<1) value";
+            break;
         }
 
         if (object1) {
