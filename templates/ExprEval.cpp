@@ -2282,7 +2282,14 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
             if (member->VpiName() == elemName) {
               if (returnTypespec) {
                 if (ref_typespec *mrt = member->Typespec()) {
-                  return mrt->Actual_typespec();
+                  any *res = mrt->Actual_typespec();
+                  if (level == select_path.size() - 1) {
+                    return res;
+                  } else {
+                    return hierarchicalSelector(select_path, level + 1, res,
+                                                invalidValue, inst, pexpr,
+                                                returnTypespec, muteError);
+                  }
                 }
               } else {
                 return member->Default_value();
@@ -2325,7 +2332,14 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     } else if (ttps == UHDM_OBJECT_TYPE::uhdmarray_var) {
       if (returnTypespec) {
         if (ref_typespec *rt = var->Typespec()) {
-          return rt->Actual_typespec();
+          any *res = rt->Actual_typespec();
+          if (level == select_path.size() - 1) {
+            return res;
+          } else {
+            return hierarchicalSelector(select_path, level + 1, res,
+                                        invalidValue, inst, pexpr,
+                                        returnTypespec, muteError);
+          }
         }
       }
     }
@@ -2335,7 +2349,14 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         any *res = nullptr;
         if (returnTypespec) {
           if (ref_typespec *mrt = member->Typespec()) {
-            res = mrt->Actual_typespec();
+            any *res = mrt->Actual_typespec();
+            if (level == select_path.size() - 1) {
+              return res;
+            } else {
+              return hierarchicalSelector(select_path, level + 1, res,
+                                          invalidValue, inst, pexpr,
+                                          returnTypespec, muteError);
+            }
           }
         } else {
           res = member->Default_value();
@@ -2359,7 +2380,14 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
               if (member->VpiName() == elemName) {
                 if (returnTypespec) {
                   if (ref_typespec *mrt = member->Typespec()) {
-                    return mrt->Actual_typespec();
+                    any *res = mrt->Actual_typespec();
+                    if (level == select_path.size() - 1) {
+                      return res;
+                    } else {
+                      return hierarchicalSelector(select_path, level + 1, res,
+                                                  invalidValue, inst, pexpr,
+                                                  returnTypespec, muteError);
+                    }
                   }
                 } else {
                   return member->Default_value();
@@ -2379,7 +2407,14 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
             for (typespec_member *member : *stpt->Members()) {
               if (member->VpiName() == elemName) {
                 if (ref_typespec *mrt = member->Typespec()) {
-                  return mrt->Actual_typespec();
+                  any *res = mrt->Actual_typespec();
+                  if (level == select_path.size() - 1) {
+                    return res;
+                  } else {
+                    return hierarchicalSelector(select_path, level + 1, res,
+                                                invalidValue, inst, pexpr,
+                                                returnTypespec, muteError);
+                  }
                 }
               }
             }
@@ -2428,7 +2463,14 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
             if (member->VpiName() == elemName) {
               if (returnTypespec) {
                 if (ref_typespec *mrt = member->Typespec()) {
-                  return mrt->Actual_typespec();
+                  any *res = mrt->Actual_typespec();
+                  if (level == select_path.size() - 1) {
+                    return res;
+                  } else {
+                    return hierarchicalSelector(select_path, level + 1, res,
+                                                invalidValue, inst, pexpr,
+                                                returnTypespec, muteError);
+                  }
                 }
               } else {
                 return member->Default_value();
