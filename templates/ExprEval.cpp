@@ -2271,7 +2271,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     return (expr *)object;
   }
   std::string elemName = select_path[level];
-
+  bool lastElem = (level == select_path.size() - 1);
   if (variables *var = any_cast<variables *>(object)) {
     UHDM_OBJECT_TYPE ttps = var->UhdmType();
     if (ttps == UHDM_OBJECT_TYPE::uhdmstruct_var) {
@@ -2283,7 +2283,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
               if (returnTypespec) {
                 if (ref_typespec *mrt = member->Typespec()) {
                   any *res = mrt->Actual_typespec();
-                  if (level == select_path.size() - 1) {
+                  if (lastElem) {
                     return res;
                   } else {
                     return hierarchicalSelector(select_path, level + 1, res,
@@ -2333,7 +2333,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
       if (returnTypespec) {
         if (ref_typespec *rt = var->Typespec()) {
           any *res = rt->Actual_typespec();
-          if (level == select_path.size() - 1) {
+          if (lastElem) {
             return res;
           } else {
             return hierarchicalSelector(select_path, level + 1, res,
@@ -2350,7 +2350,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         if (returnTypespec) {
           if (ref_typespec *mrt = member->Typespec()) {
             any *res = mrt->Actual_typespec();
-            if (level == select_path.size() - 1) {
+            if (lastElem) {
               return res;
             } else {
               return hierarchicalSelector(select_path, level + 1, res,
@@ -2361,7 +2361,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         } else {
           res = member->Default_value();
         }
-        if (level == select_path.size() - 1) {
+        if (lastElem) {
           return res;
         } else {
           return hierarchicalSelector(select_path, level + 1, res, invalidValue,
@@ -2381,7 +2381,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
                 if (returnTypespec) {
                   if (ref_typespec *mrt = member->Typespec()) {
                     any *res = mrt->Actual_typespec();
-                    if (level == select_path.size() - 1) {
+                    if (lastElem) {
                       return res;
                     } else {
                       return hierarchicalSelector(select_path, level + 1, res,
@@ -2408,7 +2408,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
               if (member->VpiName() == elemName) {
                 if (ref_typespec *mrt = member->Typespec()) {
                   any *res = mrt->Actual_typespec();
-                  if (level == select_path.size() - 1) {
+                  if (lastElem) {
                     return res;
                   } else {
                     return hierarchicalSelector(select_path, level + 1, res,
@@ -2464,7 +2464,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
               if (returnTypespec) {
                 if (ref_typespec *mrt = member->Typespec()) {
                   any *res = mrt->Actual_typespec();
-                  if (level == select_path.size() - 1) {
+                  if (lastElem) {
                     return res;
                   } else {
                     return hierarchicalSelector(select_path, level + 1, res,
@@ -2568,6 +2568,9 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         }
         tmp->Ranges(tmpR);
         return tmp;
+      } else {
+        // Must be unpacked struct
+        return object;
       }
     } else if (constant *c = any_cast<constant *>(object)) {
       if (expr *tmp = reduceBitSelect(c, selectIndex, invalidValue, inst, pexpr,
