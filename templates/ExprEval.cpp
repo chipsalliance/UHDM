@@ -2568,10 +2568,12 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         }
         tmp->Ranges(tmpR);
         return tmp;
-      } else {
-        // Must be unpacked struct
-        return object;
-      }
+      } 
+    } else if (const array_typespec *ltps =
+                   any_cast<const array_typespec *>(object)) {
+      if (const ref_typespec *rt = ltps->Elem_typespec()) {
+        return (typespec *)rt->Actual_typespec();
+      } 
     } else if (constant *c = any_cast<constant *>(object)) {
       if (expr *tmp = reduceBitSelect(c, selectIndex, invalidValue, inst, pexpr,
                                       muteError)) {
