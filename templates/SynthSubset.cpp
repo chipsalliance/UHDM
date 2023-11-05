@@ -373,11 +373,16 @@ void SynthSubset::leaveFor_stmt(const for_stmt* object, vpiHandle handle) {
         any* lhs = operands->at(0);
         any* rhs = operands->at(1);
         ((for_stmt*)object)->VpiCondition((expr*)lhs);
-
+        VectorOfany* stlist = nullptr;
         if (const any* stmt = object->VpiStmt()) {
           if (stmt->UhdmType() == uhdmbegin) {
             begin* st = (begin*) stmt;
-            VectorOfany* stlist = st->Stmts();
+            stlist = st->Stmts();
+          } else if (stmt->UhdmType() == uhdmnamed_begin) {
+            named_begin* st = (named_begin*) stmt;
+            stlist = st->Stmts();
+          } 
+          if (stlist) {
             if_stmt* ifstmt = serializer_->MakeIf_stmt();
             stlist->insert(stlist->begin(), ifstmt);
             ifstmt->VpiCondition((expr*)rhs);
