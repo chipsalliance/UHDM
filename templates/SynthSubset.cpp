@@ -352,4 +352,48 @@ bool SynthSubset::reportedParent(const any* object) {
   return false;
 }
 
+void SynthSubset::leaveFor_stmt(const for_stmt* object, vpiHandle handle) {
+  if (const expr* cond = object->VpiCondition()) {
+    // Rewrite rule for Yosys (Cannot handle non-constant expression in for loop condition besides loop var)
+    // Transforms:
+    //  for (int i=0; i<32 && found==0; i++) begin
+    //  end
+    // Into:
+    //  for (int i=0; i<32; i++) begin
+    //    if (found==0) break;
+    //  end
+    //
+
+    if (cond->UhdmType() == uhdmoperation) {
+      operation* topOp = (operation*) cond;
+      if (topOp->VpiOpType() == vpiLogAndOp) {
+        VectorOfany* operands = topOp->Operands();
+        // Assumes lhs is comprator over loop var
+        // rhs is any expression
+        any* lhs = operands->at(0);
+        any* rhs = operands->at(1);
+        ((for_stmt*)object)->VpiCondition((expr*)lhs);
+        VectorOfany* stlist = nullptr;
+        if (const any* stmt = object->VpiStmt()) {
+          if (stmt->UhdmType() == uhdmbegin) {
+            begin* st = (begin*) stmt;
+            stlist = st->Stmts();
+          } else if (stmt->UhdmType() == uhdmnamed_begin) {
+            named_begin* st = (named_begin*) stmt;
+            stlist = st->Stmts();
+          } 
+          if (stlist) {
+            if_stmt* ifstmt = serializer_->MakeIf_stmt();
+            stlist->insert(stlist->begin(), ifstmt);
+            ifstmt->VpiCondition((expr*)rhs);
+            break_stmt* brk = serializer_->MakeBreak_stmt();
+            ifstmt->VpiStmt(brk);
+          }
+        }
+      }
+    }
+  }
+}
+
+
 }  // namespace UHDM

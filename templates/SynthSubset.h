@@ -59,6 +59,9 @@ class SynthSubset final : public VpiListener {
 
   void leaveClass_var(const class_var* object, vpiHandle handle) override;
 
+  // Apply some rewrite rule for Yosys limitations
+  void leaveFor_stmt(const for_stmt* object, vpiHandle handle) override;
+
   void reportError(const any* object);
   void mark(const any* object);
   bool reportedParent(const any* object);
