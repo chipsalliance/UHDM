@@ -172,6 +172,12 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_NON_POSITIVE_VALUE:
             errmsg = "Non positive (<1) value";
             break;
+          case UHDM::UHDM_SIGNED_UNSIGNED_PORT_CONN:
+            errmsg = "Signed vs Unsigned port connection";
+            break;
+          case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
+            errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
+            break;
         }
 
         if (object1) {
@@ -197,7 +203,7 @@ int32_t main(int32_t argc, char **argv) {
 
   std::set<const UHDM::any*> nonSynthesizableObjects;
   UHDM::SynthSubset* annotate = new UHDM::SynthSubset(
-      serializer.get(), nonSynthesizableObjects, true, true);
+      serializer.get(), nonSynthesizableObjects, design, true, true);
   annotate->listenDesigns(designs);
   delete annotate;
 

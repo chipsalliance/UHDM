@@ -57,6 +57,8 @@ class UhdmLint final : public VpiListener {
 
   void leaveSys_func_call(const sys_func_call* object, vpiHandle handle) override;
 
+  void leavePort(const port* object, vpiHandle handle) override;
+
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 
   Serializer* serializer_ = nullptr;

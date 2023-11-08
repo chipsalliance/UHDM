@@ -33,9 +33,11 @@ namespace UHDM {
 
 SynthSubset::SynthSubset(Serializer* serializer,
                          std::set<const any*>& nonSynthesizableObjects,
+                         design* des,
                          bool reportErrors, bool allowFormal)
     : serializer_(serializer),
       nonSynthesizableObjects_(nonSynthesizableObjects),
+      design_(des),
       reportErrors_(reportErrors),
       allowFormal_(allowFormal) {
   constexpr std::string_view kDollar("$");
@@ -395,5 +397,70 @@ void SynthSubset::leaveFor_stmt(const for_stmt* object, vpiHandle handle) {
   }
 }
 
+void SynthSubset::leavePort(const port* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  bool signedLowConn = false;
+  if (const any* lc = object->Low_conn()) {
+    if (const ref_obj* ref = any_cast<const ref_obj*>(lc)) {
+      if (const any* actual = ref->Actual_group()) {
+        if (actual->UhdmType() == uhdmlogic_var) {
+          logic_var* var = (logic_var*)actual;
+          if (var->VpiSigned()) {
+            signedLowConn = true;
+          }
+        }
+        if (actual->UhdmType() == uhdmlogic_net) {
+          logic_net* var = (logic_net*)actual;
+          if (var->VpiSigned()) {
+            signedLowConn = true;
+          }
+        }
+      }
+    }
+  }
+  if (signedLowConn) return;
+
+  std::string highConnSignal;
+  const any* reportObject = object;
+  if (const any* hc = object->High_conn()) {
+    if (const ref_obj* ref = any_cast<const ref_obj*> (hc)) {
+      reportObject = ref;
+      if (const any* actual = ref->Actual_group()) {
+        if (actual->UhdmType() == uhdmlogic_var) {
+          logic_var* var = (logic_var*)actual;
+          if (var->VpiSigned()) {
+            highConnSignal = actual->VpiName();
+            var->VpiSigned(false);
+            if (const ref_typespec* tps = var->Typespec()) {
+              if (const logic_typespec* ltps =
+                      any_cast<const logic_typespec*>(tps->Actual_typespec())) {
+                ((logic_typespec*)ltps)->VpiSigned(false);
+              }
+            }
+          }
+        }
+        if (actual->UhdmType() == uhdmlogic_net) {
+          logic_net* var = (logic_net*)actual;
+          if (var->VpiSigned()) {
+            highConnSignal = actual->VpiName();
+            var->VpiSigned(false);
+            if (const ref_typespec* tps = var->Typespec()) {
+              if (const logic_typespec* ltps =
+                      any_cast<const logic_typespec*>(tps->Actual_typespec())) {
+                ((logic_typespec*)ltps)->VpiSigned(false);
+              }
+            }
+          }
+        }
+      }
+    } 
+  }
+  if (!highConnSignal.empty()) {
+    const std::string errMsg(highConnSignal);
+    serializer_->GetErrorHandler()(ErrorType::UHDM_FORCING_UNSIGNED_TYPE, errMsg,
+                                     reportObject, nullptr);
+  }
+  
+}
 
 }  // namespace UHDM

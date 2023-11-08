@@ -337,4 +337,57 @@ void UhdmLint::leaveSys_func_call(const sys_func_call* object,
   }
 }
 
+
+void UhdmLint::leavePort(const port* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  bool signedHighConn = false;
+  bool signedLowConn = false;
+  bool highConn = false;
+  const any* reportObject = object;
+  if (const any* hc = object->High_conn()) {
+    if (const ref_obj* ref = any_cast<const ref_obj*> (hc)) {
+      reportObject = ref;
+      if (const any* actual = ref->Actual_group()) {
+        if (actual->UhdmType() == uhdmlogic_var) {
+          logic_var* var = (logic_var*)actual;
+          highConn = true;
+          if (var->VpiSigned()) {
+             signedHighConn = true;
+          }
+        } if (actual->UhdmType() == uhdmlogic_net) {
+          logic_net* var = (logic_net*)actual;
+          highConn = true;
+          if (var->VpiSigned()) {
+             signedHighConn = true;
+          }
+        }
+      }
+    } 
+  }
+  if (const any* lc = object->Low_conn()) {
+    if (const ref_obj* ref = any_cast<const ref_obj*>(lc)) {
+      if (const any* actual = ref->Actual_group()) {
+        if (actual->UhdmType() == uhdmlogic_var) {
+          logic_var* var = (logic_var*)actual;
+          if (var->VpiSigned()) {
+            signedLowConn = true;
+          }
+        }
+        if (actual->UhdmType() == uhdmlogic_net) {
+          logic_net* var = (logic_net*)actual;
+          if (var->VpiSigned()) {
+            signedLowConn = true;
+          }
+        }
+      }
+    }
+  }
+  if (highConn && (signedLowConn != signedHighConn)) {
+    std::string_view errMsg = object->VpiName();
+    serializer_->GetErrorHandler()(
+              ErrorType::UHDM_SIGNED_UNSIGNED_PORT_CONN, std::string(errMsg),
+              reportObject, nullptr);
+  }
+}
+
 }  // namespace UHDM
