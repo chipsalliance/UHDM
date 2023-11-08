@@ -39,7 +39,7 @@ class Serializer;
 class SynthSubset final : public VpiListener {
  public:
   SynthSubset(Serializer* serializer,
-              std::set<const any*>& nonSynthesizableObjects, bool reportErrors, bool allowFormal);
+              std::set<const any*>& nonSynthesizableObjects, design* des, bool reportErrors, bool allowFormal);
   ~SynthSubset() override = default;
   void filterNonSynthesizable();
   void report(std::ostream& out);
@@ -62,6 +62,9 @@ class SynthSubset final : public VpiListener {
   // Apply some rewrite rule for Yosys limitations
   void leaveFor_stmt(const for_stmt* object, vpiHandle handle) override;
 
+  // Signed/Unsigned port transform to allow Yosys to Synthesize
+  void leavePort(const port* object, vpiHandle handle) override;
+
   void reportError(const any* object);
   void mark(const any* object);
   bool reportedParent(const any* object);
@@ -69,6 +72,7 @@ class SynthSubset final : public VpiListener {
   Serializer* serializer_ = nullptr;
   std::set<const any*>& nonSynthesizableObjects_;
   std::set<std::string, std::less<>> nonSynthSysCalls_;
+  design* design_;
   bool reportErrors_;
   bool allowFormal_;
   std::vector<std::pair<VectorOfany*, const any*>> m_scheduledFilteredObjects;
