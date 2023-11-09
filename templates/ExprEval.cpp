@@ -5134,8 +5134,8 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
     case UHDM_OBJECT_TYPE::uhdmfor_stmt: {
       for_stmt *st = (for_stmt *)stmt;
       if (const any *stmt = st->VpiForInitStmt()) {
-        if (stmt->UhdmType() == UHDM_OBJECT_TYPE::uhdmassign_stmt) {
-          assign_stmt *assign = (assign_stmt *)stmt;
+        if (stmt->UhdmType() == UHDM_OBJECT_TYPE::uhdmassignment) {
+          assignment *assign = (assignment *)stmt;
           if (const ref_typespec *rt = assign->Lhs()->Typespec()) {
             local_vars.emplace(assign->Lhs()->VpiName(), rt->Actual_typespec());
           }
@@ -5146,8 +5146,8 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       }
       if (st->VpiForInitStmts()) {
         for (auto s : *st->VpiForInitStmts()) {
-          if (s->UhdmType() == UHDM_OBJECT_TYPE::uhdmassign_stmt) {
-            assign_stmt *assign = (assign_stmt *)s;
+          if (s->UhdmType() == UHDM_OBJECT_TYPE::uhdmassignment) {
+            assignment *assign = (assignment *)s;
             if (const ref_typespec *rt = assign->Lhs()->Typespec()) {
               local_vars.emplace(assign->Lhs()->VpiName(),
                                  rt->Actual_typespec());

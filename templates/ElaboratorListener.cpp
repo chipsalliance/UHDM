@@ -1128,8 +1128,8 @@ void ElaboratorListener::enterFor_stmt(const for_stmt* object,
   }
   if (object->VpiForInitStmts()) {
     for (any* stmt : *object->VpiForInitStmts()) {
-      if (stmt->UhdmType() == UHDM_OBJECT_TYPE::uhdmassign_stmt) {
-        assign_stmt* astmt = (assign_stmt*)stmt;
+      if (stmt->UhdmType() == UHDM_OBJECT_TYPE::uhdmassignment) {
+        assignment* astmt = (assignment*)stmt;
         const any* lhs = astmt->Lhs();
         if (lhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_var) {
           if (!lhs->VpiName().empty()) {
