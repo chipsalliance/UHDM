@@ -214,7 +214,7 @@ std::string ExprEval::toBinary(const constant *c) {
   return result;
 }
 
-static std::vector<std::string_view> tokenizeMulti(
+std::vector<std::string_view> ExprEval::tokenizeMulti(
     std::string_view str, std::string_view multichar_separator) {
   std::vector<std::string_view> result;
   if (str.empty()) return result;

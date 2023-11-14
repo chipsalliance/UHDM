@@ -100,6 +100,7 @@ void UhdmAdjuster::leaveCase_stmt(const case_stmt* object, vpiHandle handle) {
   if (isInUhdmAllIterator()) return;
   // Make all expressions match the largest expression size per LRM
   int32_t maxsize = 0;
+  updateParentWithReducedExpression(object->VpiCondition(), object);
   bool is_overall_unsigned = false;
   {
     // Find maxsize and is any expression is unsigned
@@ -191,6 +192,16 @@ void UhdmAdjuster::enterModule_inst(const module_inst* object,
 }
 
 void UhdmAdjuster::leaveModule_inst(const module_inst* object,
+                                    vpiHandle handle) {
+  currentInstance_ = nullptr;
+}
+
+void UhdmAdjuster::enterPackage(const package* object,
+                                    vpiHandle handle) {
+  currentInstance_ = object;
+}
+
+void UhdmAdjuster::leavePackage(const package* object,
                                     vpiHandle handle) {
   currentInstance_ = nullptr;
 }
@@ -290,7 +301,8 @@ void UhdmAdjuster::updateParentWithReducedExpression(const any* object, const an
   expr* tmp =
       eval.reduceExpr(object, invalidValue, currentInstance_, parent, true);
   if (invalidValue) return;
-  if (tmp && tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+  if (tmp == nullptr) return;
+  if (tmp->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
     tmp->VpiFile(object->VpiFile());
     tmp->VpiLineNo(object->VpiLineNo());
     tmp->VpiColumnNo(object->VpiColumnNo());
@@ -336,6 +348,65 @@ void UhdmAdjuster::updateParentWithReducedExpression(const any* object, const an
     bit_select* pselect = (bit_select*) parent;
     if (pselect->VpiIndex() == object) {
       pselect->VpiIndex(tmp);
+    }
+  } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmreturn_stmt) {
+    return_stmt* stmt = (return_stmt*)parent;
+    stmt->VpiCondition(tmp);
+  } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmcase_stmt) {
+    case_stmt* stmt = (case_stmt*)parent;
+    stmt->VpiCondition(tmp);
+  } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmcase_item) {
+    case_item* poper = (case_item*)parent;
+    VectorOfany* operands = poper->VpiExprs();
+    if (operands) {
+      uint64_t index = 0;
+      for (any* oper : *operands) {
+        if (oper == object) {
+          operands->at(index) = tmp;
+          break;
+        }
+        index++;
+      }
+    }
+  }
+}
+
+void UhdmAdjuster::leaveFunc_call(const func_call* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  const std::string_view name = object->VpiName();
+  if (name.find("::") != std::string::npos) {
+    ExprEval eval;
+    std::vector<std::string_view> res = eval.tokenizeMulti(name, "::");
+    const std::string_view packName = res[0];
+    const std::string_view funcName = res[1];
+    if (design_->TopPackages()) {
+      for (package* pack : *design_->TopPackages()) {
+        if (pack->VpiName() == packName) {
+          if (pack->Task_funcs()) {
+            for (task_func* tf : *pack->Task_funcs()) {
+              if (tf->VpiName() == funcName) {
+                if (tf->UhdmType() == uhdmfunction)
+                  ((func_call*)object)->Function((function*)tf);
+              }
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
+}
+
+void UhdmAdjuster::leaveReturn_stmt(const return_stmt* object, vpiHandle) {
+  if (isInUhdmAllIterator()) return;
+  updateParentWithReducedExpression(object->VpiCondition(), object);
+}
+
+void UhdmAdjuster::leaveCase_item(const case_item* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  if (object->VpiExprs()) {
+    for (auto ex : *object->VpiExprs()) {
+      updateParentWithReducedExpression(ex, object);
     }
   }
 }

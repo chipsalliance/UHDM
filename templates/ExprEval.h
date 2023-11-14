@@ -156,6 +156,9 @@ class ExprEval {
   }
 
   UHDM::task_func* getTaskFunc(std::string_view name, const any* inst);
+
+  std::vector<std::string_view> tokenizeMulti(
+    std::string_view str, std::string_view multichar_separator);
 #endif
  private:
   GetObjectFunctor getObjectFunctor = nullptr;

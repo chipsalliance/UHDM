@@ -1,7 +1,7 @@
 # -*- mode:cmake -*-
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-project(UHDM VERSION 1.79)
+project(UHDM VERSION 1.80)
 
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
