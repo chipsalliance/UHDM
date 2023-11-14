@@ -40,11 +40,16 @@ class UhdmAdjuster final : public VpiListener {
   void leaveCase_stmt(const case_stmt* object, vpiHandle handle) final;
   void leaveOperation(const operation* object, vpiHandle handle) final;
   void leaveSys_func_call(const sys_func_call* object, vpiHandle handle) final;
+  void leaveFunc_call(const func_call* object, vpiHandle handle) final;
   void leaveConstant(const constant* object, vpiHandle handle) final;
   void enterModule_inst(const module_inst* object, vpiHandle handle) final;
   void leaveModule_inst(const module_inst* object, vpiHandle handle) final;
+  void enterPackage(const package* object, vpiHandle handle) final;
+  void leavePackage(const package* object, vpiHandle handle) final;
+  void leaveCase_item(const case_item* object, vpiHandle handle) final;
   void enterGen_scope(const gen_scope* object, vpiHandle handle) final;
   void leaveGen_scope(const gen_scope* object, vpiHandle handle) final;
+  void leaveReturn_stmt(const return_stmt* object, vpiHandle) final;
   const any* resize(const any* object, int32_t maxsize, bool is_unsigned);
   void updateParentWithReducedExpression(const any* object, const any* parent);
   Serializer* serializer_ = nullptr;
