@@ -4296,7 +4296,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             any *elem = elems->at(index_val);
             if (elem->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_var ||
                 elem->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_var ||
-                elem->UhdmType() == UHDM_OBJECT_TYPE::uhdmunion_var) {
+                elem->UhdmType() == UHDM_OBJECT_TYPE::uhdmunion_var ||
+                elem->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_var) {
             } else {
               result = elems->at(index_val);
             }
