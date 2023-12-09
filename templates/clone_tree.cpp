@@ -735,10 +735,28 @@ cont_assign* cont_assign::DeepClone(BaseClass* parent,
   expr* lhs = nullptr;
   if (auto obj = Lhs()) {
     lhs = obj->DeepClone(clone, context);
+    if (lhs->UhdmType() == uhdmhier_path) {
+      hier_path* path = (hier_path*) lhs;
+      any* last = path->Path_elems()->back();
+      if (ref_obj* ro = any_cast<ref_obj*>(last)) {
+        if (net* n = any_cast<net*>(ro->Actual_group())) {
+          lhs = n;
+        } 
+      }
+    }
     clone->Lhs(lhs);
   }
   if (auto obj = Rhs()) {
     expr* rhs = obj->DeepClone(clone, context);
+    if (rhs->UhdmType() == uhdmhier_path) {
+      hier_path* path = (hier_path*) rhs;
+      any* last = path->Path_elems()->back();
+      if (ref_obj* ro = any_cast<ref_obj*>(last)) {
+        if (ro->Actual_group()->UhdmType() == uhdmconstant) {
+          rhs = (expr*) ro->Actual_group();
+        } 
+      }
+    }
     clone->Rhs(rhs);
     if (ref_obj* ro = any_cast<ref_obj*>(lhs)) {
       if (struct_var* stv = ro->Actual_group<struct_var>()) {
@@ -1345,6 +1363,18 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                         cro->Actual_group(tsf);
                       }
                       previous = tsf;
+                      found = true;
+                    }
+                  }
+                }
+                if (!found && mod->Param_assigns()) {
+                  for (auto pa : *mod->Param_assigns()) {
+                    if (pa->Lhs()->VpiName() == name ||
+                        pa->Lhs()->VpiName() == nameIndexed) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(pa->Rhs());
+                      }
+                      previous = pa;
                       found = true;
                     }
                   }
