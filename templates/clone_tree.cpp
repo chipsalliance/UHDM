@@ -752,8 +752,8 @@ cont_assign* cont_assign::DeepClone(BaseClass* parent,
       hier_path* path = (hier_path*) rhs;
       any* last = path->Path_elems()->back();
       if (ref_obj* ro = any_cast<ref_obj*>(last)) {
-        if (ro->Actual_group()->UhdmType() == uhdmconstant) {
-          rhs = (expr*) ro->Actual_group();
+        if (constant* c = any_cast<constant*>(ro->Actual_group())) {
+          rhs = c;
         } 
       }
     }
