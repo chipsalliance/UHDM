@@ -62,6 +62,9 @@ class SynthSubset final : public VpiListener {
   // Apply some rewrite rule for Yosys limitations
   void leaveFor_stmt(const for_stmt* object, vpiHandle handle) override;
 
+  // Apply some rewrite rule for Synlig limitations
+  void leaveRef_typespec(const ref_typespec* object, vpiHandle handle) override;
+
   // Signed/Unsigned port transform to allow Yosys to Synthesize
   void leavePort(const port* object, vpiHandle handle) override;
 

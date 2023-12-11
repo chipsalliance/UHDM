@@ -354,6 +354,22 @@ bool SynthSubset::reportedParent(const any* object) {
   return false;
 }
 
+// Apply some rewrite rule for Synlig limitations, namely Synlig handles aliased typespec incorrectly.
+void SynthSubset::leaveRef_typespec(const ref_typespec* object, vpiHandle handle) {
+  if (const typespec* actual = object->Actual_typespec()) {
+    if (const ref_typespec* ref_alias = actual->Typedef_alias()) {
+      // Make the typespec point to the aliased typespec if they are of the same type:
+      //   typedef lc_tx_e lc_tx_t;
+      // When extra dimensions are added using a packed_array_typespec like in:
+      //  typedef lc_tx_e [1:0] lc_tx_t;
+      //  We will need to uniquify and create a new typespec instance
+      if (ref_alias->Actual_typespec()->UhdmType() == actual->UhdmType()) {
+        ((ref_typespec*)object)->Actual_typespec((typespec*) ref_alias->Actual_typespec());
+      }
+    }
+  }
+}
+
 void SynthSubset::leaveFor_stmt(const for_stmt* object, vpiHandle handle) {
   if (const expr* cond = object->VpiCondition()) {
     // Rewrite rule for Yosys (Cannot handle non-constant expression in for loop condition besides loop var)

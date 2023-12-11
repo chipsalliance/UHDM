@@ -740,7 +740,9 @@ cont_assign* cont_assign::DeepClone(BaseClass* parent,
       any* last = path->Path_elems()->back();
       if (ref_obj* ro = any_cast<ref_obj*>(last)) {
         if (net* n = any_cast<net*>(ro->Actual_group())) {
-          lhs = n;
+          // The net parent has to be the same as a current scope
+          if (n->VpiParent() == parent)
+            lhs = n;
         } 
       }
     }
@@ -753,7 +755,9 @@ cont_assign* cont_assign::DeepClone(BaseClass* parent,
       any* last = path->Path_elems()->back();
       if (ref_obj* ro = any_cast<ref_obj*>(last)) {
         if (constant* c = any_cast<constant*>(ro->Actual_group())) {
-          rhs = c;
+          // The constant parrent's parent has to be the same as a current scope
+          if (c->VpiParent()->VpiParent() == parent)
+            rhs = c;
         } 
       }
     }
