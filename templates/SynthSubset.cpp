@@ -28,7 +28,6 @@
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_visitor.h>
-#include <uhdm/ElaboratorListener.h>
 
 namespace UHDM {
 
@@ -355,13 +354,11 @@ bool SynthSubset::reportedParent(const any* object) {
   return false;
 }
 
-// Apply some rewrite rule for Synlig limitations
+// Apply some rewrite rule for Synlig limitations, namely Synlig handles aliased typespec incorrectly.
 void SynthSubset::leaveRef_typespec(const ref_typespec* object,
                                     vpiHandle handle) {
-  if (isInUhdmAllIterator()) return;
   if (const typespec* actual = object->Actual_typespec()) {
     if (const ref_typespec* ref_alias = actual->Typedef_alias()) {
-      // Synlig handles aliased typespec incorrectly.
       // Make the typespec point to the aliased typespec if they are of the same
       // type:
       //   typedef lc_tx_e lc_tx_t;
@@ -372,21 +369,6 @@ void SynthSubset::leaveRef_typespec(const ref_typespec* object,
           !ref_alias->Actual_typespec()->VpiName().empty()) {
         ((ref_typespec*)object)
             ->Actual_typespec((typespec*)ref_alias->Actual_typespec());
-      }
-    }
-    // Inline array_var typespec to enable memory inference in Synlig for the
-    // case:
-    //   typedef logic [3:0] nibble;
-    //   nibble mem[15:0];
-    if ((actual->UhdmType() == uhdmlogic_typespec) &&
-        !actual->VpiName().empty()) {
-      logic_typespec* ltps = (logic_typespec*)actual;
-      if (ltps->Ranges() && (!ltps->Ranges()->empty())) {
-        ElaboratorContext elaboratorContext(serializer_);
-        logic_typespec* clone =
-            (logic_typespec*)clone_tree(actual, &elaboratorContext);
-        clone->VpiName("");
-        ((ref_typespec*)object)->Actual_typespec(clone);
       }
     }
   }
