@@ -358,7 +358,7 @@ bool SynthSubset::reportedParent(const any* object) {
 // Apply some rewrite rule for Synlig limitations
 void SynthSubset::leaveRef_typespec(const ref_typespec* object,
                                     vpiHandle handle) {
-  //if (isInUhdmAllIterator()) return;
+  if (isInUhdmAllIterator()) return;
   if (const typespec* actual = object->Actual_typespec()) {
     if (const ref_typespec* ref_alias = actual->Typedef_alias()) {
       // Synlig handles aliased typespec incorrectly.
@@ -378,13 +378,8 @@ void SynthSubset::leaveRef_typespec(const ref_typespec* object,
     // case:
     //   typedef logic [3:0] nibble;
     //   nibble mem[15:0];
-
-    if (object->VpiParent() &&
-        (object->VpiParent()->UhdmType() ==
-         uhdmpacked_array_var)) {
-      // Do not transform packed_array_var
-    } else if ((actual->UhdmType() == uhdmlogic_typespec) &&
-               !actual->VpiName().empty()) {
+    if ((actual->UhdmType() == uhdmlogic_typespec) &&
+        !actual->VpiName().empty()) {
       logic_typespec* ltps = (logic_typespec*)actual;
       if (ltps->Ranges() && (!ltps->Ranges()->empty())) {
         ElaboratorContext elaboratorContext(serializer_);
