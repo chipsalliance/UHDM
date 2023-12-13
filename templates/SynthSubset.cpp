@@ -483,128 +483,132 @@ void SynthSubset::leavePort(const port* object, vpiHandle handle) {
   }
 }
 
-// Transform 3 vars sensitiy list into 2 vars sensitivity list because of a
+// Transform 3 vars sensitivity list into 2 vars sensitivity list because of a
 // Yosys limitation
 void SynthSubset::leaveAlways(const always* object, vpiHandle handle) {
+  // Transform: always @ (posedge clk or posedge rst or posedge start)
+  //              if (rst | start) ...
+  // Into:
+  //            wire \synlig_tmp = rst | start;
+  //            always @ (posedge clk or posedge \synlig_tmp )
+  //               if (\synlig_tmp ) ...
   if (const UHDM::any* stmt = object->Stmt()) {
-    if (stmt->UhdmType() == uhdmevent_control) {
-      event_control* ec = (event_control*)stmt;
-      if (const any* cond = ec->VpiCondition()) {
-        if (cond->UhdmType() == uhdmoperation) {
-          operation* op = (operation*)cond;
-          VectorOfany* operands = op->Operands();
-          VectorOfany* operands_op0 = nullptr;
-          VectorOfany* operands_op1 = nullptr;
-          any* opLast = nullptr;
-          int totalOperands = 0;
-          if (operands->size() > 1) {
-            if (operands->at(0)->UhdmType() == uhdmoperation) {
-              operation* op = (operation*)operands->at(0);
-              operands_op0 = op->Operands();
-              totalOperands += operands_op0->size();
-            }
-            if (operands->at(1)->UhdmType() == uhdmoperation) {
-              operation* op = (operation*)operands->at(1);
-              opLast = op;
-              operands_op1 = op->Operands();
-              totalOperands += operands_op1->size();
-            }
+    if (const event_control* ec = any_cast<event_control*>(stmt)) {
+      if (const operation* cond_op = any_cast<operation*>(ec->VpiCondition())) {
+        VectorOfany* operands_top = cond_op->Operands();
+        VectorOfany* operands_op0 = nullptr;
+        VectorOfany* operands_op1 = nullptr;
+        any* opLast = nullptr;
+        int totalOperands = 0;
+        if (operands_top->size() > 1) {
+          if (operands_top->at(0)->UhdmType() == uhdmoperation) {
+            operation* op = (operation*)operands_top->at(0);
+            operands_op0 = op->Operands();
+            totalOperands += operands_op0->size();
           }
-          if (totalOperands == 3) {
-            any* opMiddle = operands_op0->at(1);
-            if (opMiddle->UhdmType() == uhdmoperation &&
-                opLast->UhdmType() == uhdmoperation) {
-              operation* opM = (operation*)opMiddle;
-              operation* opL = (operation*)opLast;
-              if (opM->VpiOpType() == opL->VpiOpType()) {
-                // Transform: always @ (posedge clk or posedge rst or posedge
-                // start)
-                //              if (rst | start) ...
-                // Into:
-                //            wire \synlig_tmp = rst | start;
-                //            always @ (posedge clk or posedge \synlig_tmp )
-                //               if (\synlig_tmp ) ...
+          if (operands_top->at(1)->UhdmType() == uhdmoperation) {
+            operation* op = (operation*)operands_top->at(1);
+            opLast = op;
+            operands_op1 = op->Operands();
+            totalOperands += operands_op1->size();
+          }
+        }
+        if (totalOperands != 3) {
+          return;
+        }
+        any* opMiddle = operands_op0->at(1);
+        if (opMiddle->UhdmType() == uhdmoperation &&
+            opLast->UhdmType() == uhdmoperation) {
+          operation* opM = (operation*)opMiddle;
+          operation* opL = (operation*)opLast;
+          any* midVar = opM->Operands()->at(0);
+          std::string_view var2Name = midVar->VpiName();
+          std::string_view var3Name = opL->Operands()->at(0)->VpiName();
+          if (opM->VpiOpType() == opL->VpiOpType()) {
+            VectorOfany* stmts = nullptr;
+            if (const UHDM::scope* st = any_cast<scope*>(ec->Stmt())) {
+              if (st->UhdmType() == uhdmbegin) {
+                stmts = any_cast<begin*>(st)->Stmts();
+              } else if (st->UhdmType() == uhdmnamed_begin) {
+                stmts = any_cast<named_begin*>(st)->Stmts();
+              }
+            } else if (const UHDM::any* st = any_cast<any*>(ec->Stmt())) {
+              stmts = serializer_->MakeAnyVec();
+              stmts->push_back((any*)st);
+            }
+            if (!stmts) return;
+            for (auto stmt : *stmts) {
+              expr* cond = nullptr;
+              if (stmt->UhdmType() == uhdmif_else) {
+                cond = any_cast<if_else*>(stmt)->VpiCondition();
+              } else if (stmt->UhdmType() == uhdmif_stmt) {
+                cond = any_cast<if_stmt*>(stmt)->VpiCondition();
+              } else if (stmt->UhdmType() == uhdmcase_stmt) {
+                cond = any_cast<case_stmt*>(stmt)->VpiCondition();
+              }
+              if (cond->UhdmType() == uhdmoperation) {
+                operation* op = (operation*)cond;
+                // Check that the sensitivity vars are used as a or-ed
+                // condition
+                if (op->VpiOpType() == vpiBitOrOp) {
+                  VectorOfany* operands = op->Operands();
+                  if (operands->at(0)->VpiName() == var2Name &&
+                      operands->at(1)->VpiName() == var3Name) {
+                    // All conditions are met, perform the transformation
 
-                any* midVar = opM->Operands()->at(0);
-                operands_op0->pop_back();
+                    // Remove: "posedge rst" from that part of the tree
+                    operands_op0->pop_back();
 
-                // rst | start
-                operation* orOp = serializer_->MakeOperation();
-                orOp->VpiOpType(vpiBitOrOp);
-                orOp->Operands(serializer_->MakeAnyVec());
-                std::string_view var2Name = midVar->VpiName();
-                orOp->Operands()->push_back(midVar);
-                std::string_view var3Name = opL->Operands()->at(0)->VpiName();
-                orOp->Operands()->push_back(opL->Operands()->at(0));
+                    // Create expression: rst | start
+                    operation* orOp = serializer_->MakeOperation();
+                    orOp->VpiOpType(vpiBitOrOp);
+                    orOp->Operands(serializer_->MakeAnyVec());
+                    orOp->Operands()->push_back(midVar);
+                    orOp->Operands()->push_back(opL->Operands()->at(0));
 
-                // posedge clk
-                operands->at(0) = operands_op0->at(0);
+                    // Move up the tree: posedge clk
+                    operands_top->at(0) = operands_op0->at(0);
 
-                // wire \synlig_tmp = rst | start;
-                cont_assign* ass = serializer_->MakeCont_assign();
-                logic_net* lhs = serializer_->MakeLogic_net();
-                std::string tmpName = std::string("synlig_tmp_") + std::string(var2Name) + "_or_" + std::string(var3Name);
-                lhs->VpiName(tmpName);
-                ass->Lhs(lhs);
-                ref_obj* ref = serializer_->MakeRef_obj();
-                ref->VpiName(tmpName);
-                ref->Actual_group(lhs);
-                ass->Rhs(orOp);
-                const any* instance = object->VpiParent();
-                if (instance->UhdmType() == uhdmmodule_inst) {
-                  module_inst* mod = (module_inst*)instance;
-                  if (mod->Cont_assigns() == nullptr) {
-                    mod->Cont_assigns(serializer_->MakeCont_assignVec());
-                  }
-                  bool found = false;
-                  for (cont_assign* ca : *mod->Cont_assigns()) {
-                    if (ca->Lhs()->VpiName() == tmpName) {
-                      found = true;
-                      break;
-                    }
-                  }
-                  if (!found)
-                    mod->Cont_assigns()->push_back(ass);
-                }
-
-                // posedge \synlig_tmp
-                opL->Operands()->at(0) = ref;
-
-                // if (\synlig_tmp ) ...
-                if (UHDM::scope* st = any_cast<scope*>(ec->Stmt())) {
-                  VectorOfany* stmts = nullptr;
-                  if (st->UhdmType() == uhdmbegin) {
-                    stmts = any_cast<begin*>(st)->Stmts();
-                  } else if (st->UhdmType() == uhdmnamed_begin) {
-                    stmts = any_cast<named_begin*>(st)->Stmts();
-                  }
-                  if (stmts) {
-                    for (auto stmt : *stmts) {
-                      expr* cond = nullptr;
-                      if (stmt->UhdmType() == uhdmif_else) {
-                        cond = any_cast<if_else*>(stmt)->VpiCondition();
-                      } else if (stmt->UhdmType() == uhdmif_stmt) {
-                        cond = any_cast<if_stmt*>(stmt)->VpiCondition();
-                      } else if (stmt->UhdmType() == uhdmcase_stmt) {
-                        cond = any_cast<case_stmt*>(stmt)->VpiCondition();
+                    // Create: wire \synlig_tmp = rst | start;
+                    cont_assign* ass = serializer_->MakeCont_assign();
+                    logic_net* lhs = serializer_->MakeLogic_net();
+                    std::string tmpName = std::string("synlig_tmp_") +
+                                          std::string(var2Name) + "_or_" +
+                                          std::string(var3Name);
+                    lhs->VpiName(tmpName);
+                    ass->Lhs(lhs);
+                    ref_obj* ref = serializer_->MakeRef_obj();
+                    ref->VpiName(tmpName);
+                    ref->Actual_group(lhs);
+                    ass->Rhs(orOp);
+                    const any* instance = object->VpiParent();
+                    if (instance->UhdmType() == uhdmmodule_inst) {
+                      module_inst* mod = (module_inst*)instance;
+                      if (mod->Cont_assigns() == nullptr) {
+                        mod->Cont_assigns(serializer_->MakeCont_assignVec());
                       }
-                      if (cond->UhdmType() == uhdmoperation) {
-                        operation* op = (operation*)cond;
-                        if (op->VpiOpType() == vpiBitOrOp) {
-                          VectorOfany* operands = op->Operands();
-                          if (operands->at(0)->VpiName() == var2Name &&
-                              operands->at(1)->VpiName() == var3Name) {
-                            if (stmt->UhdmType() == uhdmif_else) {
-                              any_cast<if_else*>(stmt)->VpiCondition(ref);
-                            } else if (stmt->UhdmType() == uhdmif_stmt) {
-                              any_cast<if_stmt*>(stmt)->VpiCondition(ref);
-                            } else if (stmt->UhdmType() == uhdmcase_stmt) {
-                              any_cast<case_stmt*>(stmt)->VpiCondition(ref);
-                            }
-                          }
+                      bool found = false;
+                      for (cont_assign* ca : *mod->Cont_assigns()) {
+                        if (ca->Lhs()->VpiName() == tmpName) {
+                          found = true;
+                          break;
                         }
                       }
+                      if (!found) mod->Cont_assigns()->push_back(ass);
                     }
+
+                    // Redirect condition to: if (\synlig_tmp ) ...
+                    if (stmt->UhdmType() == uhdmif_else) {
+                      any_cast<if_else*>(stmt)->VpiCondition(ref);
+                    } else if (stmt->UhdmType() == uhdmif_stmt) {
+                      any_cast<if_stmt*>(stmt)->VpiCondition(ref);
+                    } else if (stmt->UhdmType() == uhdmcase_stmt) {
+                      any_cast<case_stmt*>(stmt)->VpiCondition(ref);
+                    }
+
+                    // Redirect 2nd sensitivity list signal to: posedge
+                    // \synlig_tmp
+                    opL->Operands()->at(0) = ref;
                   }
                 }
               }
