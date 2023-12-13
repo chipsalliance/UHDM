@@ -62,6 +62,9 @@ class SynthSubset final : public VpiListener {
   // Apply some rewrite rule for Yosys limitations
   void leaveFor_stmt(const for_stmt* object, vpiHandle handle) override;
 
+  // Apply some rewrite rule for Yosys limitations
+  void leaveAlways(const always* object, vpiHandle handle) override;
+
   // Apply some rewrite rule for Synlig limitations
   void leaveRef_typespec(const ref_typespec* object, vpiHandle handle) override;
 
