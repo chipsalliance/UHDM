@@ -25,6 +25,8 @@
  */
 #include <string.h>
 #include <uhdm/SynthSubset.h>
+#include <uhdm/ExprEval.h>
+#include <uhdm/ElaboratorListener.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_visitor.h>
@@ -377,21 +379,22 @@ void SynthSubset::leaveRef_typespec(const ref_typespec* object,
 
 void SynthSubset::leaveFor_stmt(const for_stmt* object, vpiHandle handle) {
   if (const expr* cond = object->VpiCondition()) {
-    // Rewrite rule for Yosys (Cannot handle non-constant expression in for loop condition besides loop var)
-    // Transforms:
-    //  for (int i=0; i<32 && found==0; i++) begin
-    //  end
-    // Into:
-    //  for (int i=0; i<32; i++) begin
-    //    if (found==0) break;
-    //  end
-    //
-
     if (cond->UhdmType() == uhdmoperation) {
-      operation* topOp = (operation*) cond;
+      operation* topOp = (operation*)cond;
+      VectorOfany* operands = topOp->Operands();
+      const any* parent = object->VpiParent();
       if (topOp->VpiOpType() == vpiLogAndOp) {
-        VectorOfany* operands = topOp->Operands();
-        // Assumes lhs is comprator over loop var
+        // Rewrite rule for Yosys (Cannot handle non-constant expression in for
+        // loop condition besides loop var)
+        // Transforms:
+        //  for (int i=0; i<32 && found==0; i++) begin
+        //  end
+        // Into:
+        //  for (int i=0; i<32; i++) begin
+        //    if (found==0) break;
+        //  end
+        //
+        // Assumes lhs is comparator over loop var
         // rhs is any expression
         any* lhs = operands->at(0);
         any* rhs = operands->at(1);
@@ -399,18 +402,122 @@ void SynthSubset::leaveFor_stmt(const for_stmt* object, vpiHandle handle) {
         VectorOfany* stlist = nullptr;
         if (const any* stmt = object->VpiStmt()) {
           if (stmt->UhdmType() == uhdmbegin) {
-            begin* st = (begin*) stmt;
+            begin* st = (begin*)stmt;
             stlist = st->Stmts();
           } else if (stmt->UhdmType() == uhdmnamed_begin) {
-            named_begin* st = (named_begin*) stmt;
+            named_begin* st = (named_begin*)stmt;
             stlist = st->Stmts();
-          } 
+          }
           if (stlist) {
             if_stmt* ifstmt = serializer_->MakeIf_stmt();
             stlist->insert(stlist->begin(), ifstmt);
             ifstmt->VpiCondition((expr*)rhs);
             break_stmt* brk = serializer_->MakeBreak_stmt();
             ifstmt->VpiStmt(brk);
+          }
+        }
+      } else {
+        if (isInUhdmAllIterator()) return;
+        // Rewrite rule for Yosys (Cannot handle non-constant expression as a
+        // bound for loop var) Transforms:
+        //   logic [1:0] bound;
+        //   for(j=0;j<bound;j=j+1) Q = 1'b1;
+        // Into:
+        //   case (i)
+        //     0 :
+        //       for(j=0;j<0;j=j+1) Q = 1'b1;
+        //     1 :
+        //       for(j=0;j<1;j=j+1) Q = 1'b1;
+        //   endcase
+        bool needsTransform = false;
+        logic_net* var = nullptr;
+        for (any* op : *operands) {
+          if (op->UhdmType() == uhdmref_obj) {
+            ref_obj* ref = (ref_obj*)op;
+            any* actual = ref->Actual_group();
+            if (actual) {
+              if (actual->UhdmType() == uhdmlogic_net) {
+                needsTransform = true;
+                var = (logic_net*)actual;
+                break;
+              }
+            }
+          }
+        }
+        if (needsTransform) {
+          // Check that we are in an always stmt
+          needsTransform = false;
+          const any* tmp = parent;
+          while (tmp) {
+            if (tmp->UhdmType() == uhdmalways) {
+              needsTransform = true;
+              break;
+            }
+            tmp = tmp->VpiParent();
+          }
+        }
+        if (needsTransform) {
+          ExprEval eval;
+          bool invalidValue = false;
+          uint32_t size = eval.size(var, invalidValue, parent->VpiParent(),
+                                    parent, true, true);
+          case_stmt* case_st = serializer_->MakeCase_stmt();
+          case_st->VpiParent((any*)parent);
+          VectorOfany* stmts = nullptr;
+          if (parent->UhdmType() == uhdmbegin) {
+            stmts = any_cast<begin*>(parent)->Stmts();
+          } else if (parent->UhdmType() == uhdmnamed_begin) {
+            stmts = any_cast<named_begin*>(parent)->Stmts();
+          }
+          if (stmts) {
+            // Substitute the for loop with a case stmt
+            for (VectorOfany::iterator itr = stmts->begin();
+                 itr != stmts->end(); itr++) {
+              if ((*itr) == object) {
+                stmts->insert(itr, case_st);
+                break;
+              }
+            }
+            for (VectorOfany::iterator itr = stmts->begin();
+                 itr != stmts->end(); itr++) {
+              if ((*itr) == object) {
+                stmts->erase(itr);
+                break;
+              }
+            }
+          }
+          // Construct the case stmt
+          ref_obj* ref = serializer_->MakeRef_obj();
+          ref->VpiName(var->VpiName());
+          ref->Actual_group(var);
+          ref->VpiParent(case_st);
+          case_st->VpiCondition(ref);
+          VectorOfcase_item* items = serializer_->MakeCase_itemVec();
+          case_st->Case_items(items);
+          for (uint32_t i = 0; i < size; i++) {
+            case_item* item = serializer_->MakeCase_item();
+            item->VpiParent(case_st);
+            constant* c = serializer_->MakeConstant();
+            c->VpiConstType(vpiUIntConst);
+            c->VpiValue("UINT:" + std::to_string(i));
+            c->VpiDecompile(std::to_string(i));
+            c->VpiParent(item);
+            VectorOfany* exprs = serializer_->MakeAnyVec();
+            exprs->push_back(c);
+            item->VpiExprs(exprs);
+            items->push_back(item);
+            ElaboratorContext elaboratorContext(serializer_);
+            for_stmt* clone = (for_stmt*)clone_tree(object, &elaboratorContext);
+            clone->VpiParent(item);
+            operation* cond_op = any_cast<operation*>(clone->VpiCondition());
+            VectorOfany* operands = cond_op->Operands();
+            for (uint32_t ot = 0; ot < operands->size(); ot++) {
+              if (operands->at(ot)->VpiName() == var->VpiName()) {
+                operands->at(ot) = c;
+                break;
+              }
+            }
+            item->Stmt(clone);
           }
         }
       }
@@ -444,7 +551,7 @@ void SynthSubset::leavePort(const port* object, vpiHandle handle) {
   std::string highConnSignal;
   const any* reportObject = object;
   if (const any* hc = object->High_conn()) {
-    if (const ref_obj* ref = any_cast<const ref_obj*> (hc)) {
+    if (const ref_obj* ref = any_cast<const ref_obj*>(hc)) {
       reportObject = ref;
       if (const any* actual = ref->Actual_group()) {
         if (actual->UhdmType() == uhdmlogic_var) {
@@ -474,12 +581,12 @@ void SynthSubset::leavePort(const port* object, vpiHandle handle) {
           }
         }
       }
-    } 
+    }
   }
   if (!highConnSignal.empty()) {
     const std::string errMsg(highConnSignal);
-    serializer_->GetErrorHandler()(ErrorType::UHDM_FORCING_UNSIGNED_TYPE, errMsg,
-                                     reportObject, nullptr);
+    serializer_->GetErrorHandler()(ErrorType::UHDM_FORCING_UNSIGNED_TYPE,
+                                   errMsg, reportObject, nullptr);
   }
 }
 
