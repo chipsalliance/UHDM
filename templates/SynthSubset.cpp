@@ -431,7 +431,8 @@ void SynthSubset::leaveFor_stmt(const for_stmt* object, vpiHandle handle) {
         //   endcase
         bool needsTransform = false;
         logic_net* var = nullptr;
-        for (any* op : *operands) {
+        if (operands->size() == 2) {
+          any* op = operands->at(1);
           if (op->UhdmType() == uhdmref_obj) {
             ref_obj* ref = (ref_obj*)op;
             any* actual = ref->Actual_group();
@@ -439,7 +440,6 @@ void SynthSubset::leaveFor_stmt(const for_stmt* object, vpiHandle handle) {
               if (actual->UhdmType() == uhdmlogic_net) {
                 needsTransform = true;
                 var = (logic_net*)actual;
-                break;
               }
             }
           }
