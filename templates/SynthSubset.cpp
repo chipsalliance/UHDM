@@ -462,6 +462,7 @@ void SynthSubset::leaveFor_stmt(const for_stmt* object, vpiHandle handle) {
           uint32_t size = eval.size(var, invalidValue, parent->VpiParent(),
                                     parent, true, true);
           case_stmt* case_st = serializer_->MakeCase_stmt();
+          case_st->VpiCaseType(vpiCaseExact);
           case_st->VpiParent((any*)parent);
           VectorOfany* stmts = nullptr;
           if (parent->UhdmType() == uhdmbegin) {
