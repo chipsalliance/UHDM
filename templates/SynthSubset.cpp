@@ -734,6 +734,7 @@ void SynthSubset::leaveArray_var(const array_var* object, vpiHandle handle) {
   if (vars->empty()) return;
   variables* var = vars->at(0);
   const ref_typespec* ref_tps = var->Typespec();
+  if (!ref_tps) return;
   const typespec* tps = ref_tps->Actual_typespec();
   if (tps->UhdmType() == uhdmlogic_typespec) {
     logic_typespec* ltps = (logic_typespec*)tps;
