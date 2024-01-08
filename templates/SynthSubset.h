@@ -71,6 +71,12 @@ class SynthSubset final : public VpiListener {
   // Signed/Unsigned port transform to allow Yosys to Synthesize
   void leavePort(const port* object, vpiHandle handle) override;
 
+  // Typespec substitution to allow Yosys to perform RAM  Inference
+  void leaveArray_var(const array_var* object, vpiHandle handle) override;
+
+  // Remove Typespec information on allModules to allow Yosys to perform RAM Inference
+  void leaveLogic_net(const logic_net* object, vpiHandle handle) override;
+
   void reportError(const any* object);
   void mark(const any* object);
   bool reportedParent(const any* object);
