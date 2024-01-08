@@ -728,4 +728,35 @@ void SynthSubset::leaveAlways(const always* object, vpiHandle handle) {
   }
 }
 
+void SynthSubset::leaveArray_var(const array_var* object, vpiHandle handle) {
+  VectorOfvariables* vars = object->Variables();
+  if (!vars) return;
+  if (vars->empty()) return;
+  variables* var = vars->at(0);
+  const ref_typespec* ref_tps = var->Typespec();
+  const typespec* tps = ref_tps->Actual_typespec();
+  if (tps->UhdmType() == uhdmlogic_typespec) {
+    logic_typespec* ltps = (logic_typespec*)tps;
+    if ((tps->VpiName().empty())) {
+      if (ltps->Ranges() && ltps->Ranges()->size() == 1) {
+        ((array_var*)object)->Typespec((ref_typespec*)ref_tps);
+      }
+    } else {
+      if (ltps->Ranges() && ltps->Ranges()->size() == 1) {
+        ElaboratorContext elaboratorContext(serializer_);
+        logic_typespec* clone =
+            (logic_typespec*)clone_tree(ltps, &elaboratorContext);
+        clone->VpiName("");
+        ((ref_typespec*)ref_tps)->Actual_typespec(clone);
+        ((array_var*)object)->Typespec((ref_typespec*)ref_tps);
+      }
+    }
+  }
+}
+
+void SynthSubset::leaveLogic_net(const logic_net* object, vpiHandle handle) {
+  if (!isInUhdmAllIterator()) return;
+  ((logic_net*) object)->Typespec(nullptr);
+}
+
 }  // namespace UHDM
