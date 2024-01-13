@@ -1698,10 +1698,10 @@ expr *ExprEval::reduceCompOp(operation *op, bool &invalidValue, const any *inst,
     invalidValue = true;
   } else {
     constant *c = s.MakeConstant();
-    c->VpiValue("UINT:" + std::to_string(val));
+    c->VpiValue("BIN:" + std::to_string(val));
     c->VpiDecompile(std::to_string(val));
-    c->VpiSize(64);
-    c->VpiConstType(vpiUIntConst);
+    c->VpiSize(1);
+    c->VpiConstType(vpiBinaryConst);
     result = c;
   }
   return result;
