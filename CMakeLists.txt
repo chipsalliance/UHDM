@@ -128,6 +128,7 @@ set(model-GENERATED_UHDM ${GENDIR}/src/UHDM.capnp)
 set_source_files_properties(${model-GENERATED_UHDM} PROPERTIES GENERATED TRUE)
 
 file(GLOB py_SRC ${PROJECT_SOURCE_DIR}/scripts/*.py)
+if(NOT EXISTS ${model-GENERATED_UHDM})
 add_custom_command(
   OUTPUT ${model-GENERATED_UHDM}
   COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/generate.py --source-dirpath=${UHDM_SOURCE_DIR} -output-dirpath=${GENDIR}
@@ -138,6 +139,7 @@ add_custom_command(
           ${yaml_SRC}
           ${templates_SRC}
           ${include_SRC})
+endif()
 
 set(model-GENERATED_SRC ${GENDIR}/src/UHDM.capnp.h
                         ${GENDIR}/src/UHDM.capnp.c++)

@@ -23,8 +23,13 @@ swig_add_library(py_uhdm
   ${PROJECT_NAME}.i swig_test.cpp
 )
 target_link_libraries(py_uhdm
-  PRIVATE uhdm ${Python3_LIBRARIES}
+  PRIVATE uhdm
 )
+IF(APPLE)
+    set_property(TARGET py_uhdm APPEND_STRING PROPERTY
+        LINK_FLAGS "-undefined dynamic_lookup")
+ENDIF()
+
 set_target_properties(py_uhdm PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
 )
@@ -38,11 +43,11 @@ execute_process(
 
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/uhdm.py
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/${Python_site_packages}
+  DESTINATION ${Python_site_packages}
 )
 install(
-  TARGETS ${SWIG_MODULE_py_udhm_REAL_NAME}
-  LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}
+  TARGETS py_uhdm
+  LIBRARY DESTINATION ${Python_site_packages}
 )
 
 add_test(
