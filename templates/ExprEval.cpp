@@ -2568,12 +2568,12 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         }
         tmp->Ranges(tmpR);
         return tmp;
-      } 
+      }
     } else if (const array_typespec *ltps =
                    any_cast<const array_typespec *>(object)) {
       if (const ref_typespec *rt = ltps->Elem_typespec()) {
         return (typespec *)rt->Actual_typespec();
-      } 
+      }
     } else if (const packed_array_typespec *ltps =
                    any_cast<const packed_array_typespec *>(object)) {
       if (const ref_typespec *rt = ltps->Elem_typespec()) {
@@ -4049,17 +4049,17 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               int64_t lrv = eval.get_value(invalidValue, lr);
               rr = reduceExpr(rr, invalidValue, inst, pexpr, muteError);
               int64_t rrv = eval.get_value(invalidValue, rr);
-              if (name == "left") {
+              if (name == "$left") {
                 return lr;
-              } else if (name == "right") {
+              } else if (name == "$right") {
                 return rr;
-              } else if (name == "high") {
+              } else if (name == "$high") {
                 if (lrv > rrv) {
                   return lr;
                 } else {
                   return rr;
                 }
-              } else if (name == "low") {
+              } else if (name == "$low") {
                 if (lrv > rrv) {
                   return rr;
                 } else {
