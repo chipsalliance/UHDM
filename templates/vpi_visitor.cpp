@@ -30,6 +30,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 static bool showIDs = false;
 static constexpr int32_t kLevelIndent = 2;
