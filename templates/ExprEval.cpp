@@ -1375,6 +1375,9 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
     case UHDM_OBJECT_TYPE::uhdmbit_var: {
       bits = 1;
       bit_var *lts = (bit_var *)ts;
+      if (const ref_typespec *rt = lts->Typespec()) {
+        bits = size(rt->Actual_typespec(), invalidValue, inst, pexpr, full);
+      }
       ranges = lts->Ranges();
       break;
     }
@@ -1453,7 +1456,12 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
     }
     case UHDM_OBJECT_TYPE::uhdmref_obj: {
       ref_obj *ref = (ref_obj *)ts;
-      if (const any *act = ref->Actual_group()) {
+      const any* act = ref->Actual_group();
+      if (act == nullptr) {
+        std::string_view name = ref->VpiName();
+        act = getObject(name, inst, pexpr, muteError);
+      }
+      if (act) {
         bits = size(act, invalidValue, inst, pexpr, full);
       } else {
         invalidValue = true;
