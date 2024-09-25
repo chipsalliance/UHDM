@@ -591,9 +591,14 @@ void SynthSubset::leavePort(const port* object, vpiHandle handle) {
   }
 }
 
+void SynthSubset::leaveAlways(const always* object, vpiHandle handle) {
+  sensitivityListRewrite(object, handle);
+  blockingToNonBlockingRewrite(object, handle);
+}
+
 // Transform 3 vars sensitivity list into 2 vars sensitivity list because of a
 // Yosys limitation
-void SynthSubset::leaveAlways(const always* object, vpiHandle handle) {
+void SynthSubset::sensitivityListRewrite(const always* object, vpiHandle handle) {
   // Transform: always @ (posedge clk or posedge rst or posedge start)
   //              if (rst | start) ...
   // Into:
@@ -721,6 +726,141 @@ void SynthSubset::leaveAlways(const always* object, vpiHandle handle) {
                 }
               }
             }
+          }
+        }
+      }
+    }
+  }
+}
+
+void collectAssignmentStmt(const any* stmt, std::vector<const assignment*>& blocking_assigns, std::vector<const assignment*>& nonblocking_assigns) {
+  if (stmt == nullptr)
+    return;
+  UHDM_OBJECT_TYPE stmt_type = stmt->UhdmType();
+  switch (stmt_type) {
+    case uhdmbegin: {
+      VectorOfany* stmts = any_cast<begin*>(stmt)->Stmts();
+      if (stmts)
+        for (auto stmt : *stmts) {
+          collectAssignmentStmt(stmt, blocking_assigns, nonblocking_assigns);
+        }
+      break;
+    }
+    case uhdmnamed_begin: {
+      VectorOfany* stmts = any_cast<named_begin*>(stmt)->Stmts();
+      if (stmts)
+        for (auto stmt : *stmts) {
+          collectAssignmentStmt(stmt, blocking_assigns, nonblocking_assigns);
+        }
+      break;
+    }
+    case uhdmif_else: {
+      const any* the_stmt = any_cast<if_else*>(stmt)->VpiStmt();
+      collectAssignmentStmt(the_stmt, blocking_assigns, nonblocking_assigns);
+      const any* else_stmt = any_cast<if_else*>(stmt)->VpiElseStmt();
+      collectAssignmentStmt(else_stmt, blocking_assigns, nonblocking_assigns);
+      break;
+    }
+    case uhdmif_stmt: {
+      const any* the_stmt = any_cast<if_stmt*>(stmt)->VpiStmt();
+      collectAssignmentStmt(the_stmt, blocking_assigns, nonblocking_assigns);
+      break;
+    }
+    case uhdmcase_stmt: {
+      //VectorOfcase_item* items = any_cast<case_stmt*>(stmt)->Case_items();
+      // TODO
+      break;
+    }
+    case uhdmassignment: {
+      const assignment* as = any_cast<assignment*>(stmt);
+      if (as->VpiBlocking()) {
+        blocking_assigns.push_back(as);
+      } else { 
+        nonblocking_assigns.push_back(as);
+      }
+    }
+    default:
+      break;
+  }
+}
+
+// Transforms the following to enable RAM inference:
+//    if (we)
+//      RAM[addr] = di;
+//    read = RAM[addr];
+// Into:
+//    if (we)
+//      RAM[addr] <= di;
+//    read <= RAM[addr];
+void SynthSubset::blockingToNonBlockingRewrite(const always* object,
+                                               vpiHandle handle) {
+  if (const UHDM::any* stmt = object->Stmt()) {
+    if (const event_control* ec = any_cast<event_control*>(stmt)) {
+      // Collect all the blocking and non blocking assignments
+      std::vector<const assignment*> blocking_assigns;
+      std::vector<const assignment*> nonblocking_assigns;
+      collectAssignmentStmt(ec->Stmt(), blocking_assigns, nonblocking_assigns);
+      // Identify a potential RAM in the LHSs
+      std::string ram_name;
+      // 1) It has to be a LHS of a blocking assignment to be a candidate
+      for (const assignment* stmt : blocking_assigns) {
+        const expr* lhs = stmt->Lhs();
+        // LHS assigns to a bit select 
+        // RAM[addr] = ...
+        if (lhs->UhdmType() == uhdmbit_select) {
+          // The actual has to be an array_net with 2 dimensions (packed and unpacked):
+          const bit_select* bs = any_cast<bit_select*>(lhs);
+          const any* actual = bs->Actual_group();
+          if (actual && (actual->UhdmType() == uhdmarray_net)) {
+            const array_net* arr_net = any_cast<array_net*>(actual);
+            if (arr_net->Ranges()) { // Unpacked dimension
+              if (VectorOfnet* nets = arr_net->Nets()) {
+                if (nets->size()) {
+                  net* n = nets->at(0);
+                  ref_typespec* reft = n->Typespec();
+                  typespec* tps = reft->Actual_typespec();
+                  bool has_packed_dimm = false; // Packed dimension
+                  if (tps->UhdmType() == uhdmlogic_typespec) {
+                    logic_typespec* ltps = any_cast<logic_typespec*>(tps);
+                    if (ltps->Ranges()) {
+                      has_packed_dimm = true;
+                    }
+                  }
+                  if (has_packed_dimm) {
+                    ram_name = lhs->VpiName();
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      // 2) It cannot be a LHS of a non blocking assignment
+      for (const assignment* stmt : nonblocking_assigns) {
+        const expr* lhs = stmt->Lhs();
+        if (lhs->VpiName() == ram_name) {
+          // Invalidate the candidate
+          ram_name = "";
+        }
+      }
+      // Finally check that it is referenced in RHS of blocking assignments
+      bool used = false;
+      if (!ram_name.empty()) {
+        for (const assignment* stmt : blocking_assigns) {
+          const any* rhs = stmt->Rhs();
+          if (rhs && rhs->VpiName() == ram_name) {
+            used = true;
+            break;
+          }
+        }
+      }
+      // Match all the criteria: Convert all blocking assignments writing or reading the ram to non blocking
+      if (used) { 
+        for (const assignment* stmt : blocking_assigns) {
+          const expr* lhs = stmt->Lhs();
+          const any* rhs = stmt->Rhs();
+          if ((lhs && lhs->VpiName() == ram_name) || (rhs && rhs->VpiName() == ram_name)) {
+            ((assignment*)stmt)->VpiBlocking(false);
           }
         }
       }
