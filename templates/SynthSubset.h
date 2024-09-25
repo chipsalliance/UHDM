@@ -81,6 +81,9 @@ class SynthSubset final : public VpiListener {
   void mark(const any* object);
   bool reportedParent(const any* object);
 
+  void sensitivityListRewrite(const always* object, vpiHandle handle);
+  void blockingToNonBlockingRewrite(const always* object, vpiHandle handle);
+
   Serializer* serializer_ = nullptr;
   std::set<const any*>& nonSynthesizableObjects_;
   std::set<std::string, std::less<>> nonSynthSysCalls_;
