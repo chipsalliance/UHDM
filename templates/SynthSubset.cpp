@@ -843,19 +843,23 @@ void SynthSubset::blockingToNonBlockingRewrite(const always* object,
           ram_name = "";
         }
       }
-      // Finally check that it is referenced in RHS of blocking assignments
-      bool used = false;
+      // 3) Check that it is referenced in RHS of blocking assignments exactly once, and assigned exactly once
+      int countAssignments = 0;
+      int countUsages = 0;
       if (!ram_name.empty()) {
         for (const assignment* stmt : blocking_assigns) {
+          const expr* lhs = stmt->Lhs();
           const any* rhs = stmt->Rhs();
+          if (lhs && lhs->VpiName() == ram_name) {
+            countAssignments++;
+          }
           if (rhs && rhs->VpiName() == ram_name) {
-            used = true;
-            break;
+            countUsages++;
           }
         }
       }
-      // Match all the criteria: Convert all blocking assignments writing or reading the ram to non blocking
-      if (used) { 
+      if ((countUsages == 1) && (countAssignments == 1)) { 
+        // Match all the criteria: Convert all blocking assignments writing or reading the ram to non blocking
         for (const assignment* stmt : blocking_assigns) {
           const expr* lhs = stmt->Lhs();
           const any* rhs = stmt->Rhs();
