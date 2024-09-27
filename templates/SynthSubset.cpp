@@ -261,52 +261,147 @@ void SynthSubset::leaveSys_task_call(const sys_task_call* object,
   }
 }
 
-void removeFromVector(VectorOfany* vec, const any* object) {
+sys_func_call* SynthSubset::makeStubDisplayStmt(const any* object) {
+  sys_func_call* display = serializer_->MakeSys_func_call();
+  display->VpiName("$display");
+  VectorOfany* arguments = serializer_->MakeAnyVec();
+  constant *c = serializer_->MakeConstant();
+  c->VpiConstType(vpiStringVal);
+  std::string text = "Stub for non-synthesizable stmt";
+  c->VpiValue("STRING:" + text);
+  c->VpiDecompile(text);
+  c->VpiSize(text.size());
+  arguments->push_back(c);
+  display->Tf_call_args(arguments);
+  return display;
+}
+
+bool objectIsInitialBlock(const any* object) {
+  bool inInitialBlock = false;
+  const any* parent = object->VpiParent();
+  while (parent) {
+    if (parent->UhdmType() == uhdminitial) {
+      inInitialBlock = true;
+      break;
+    }
+    parent = parent->VpiParent();
+  }
+  return inInitialBlock;
+}
+
+void SynthSubset::removeFromVector(VectorOfany* vec, const any* object) {
   VectorOfany::iterator itr = vec->begin();
   for (auto s : *vec) {
     if (s == object) {
       vec->erase(itr);
+      if (vec->empty()) {
+        const std::string_view name = object->VpiName();
+        if (name == "$error" || name == "$finish" || name == "$display") {
+          bool inInitialBLock = objectIsInitialBlock(object);
+          if (!inInitialBLock)
+            vec->push_back(makeStubDisplayStmt(object));
+        } else {
+          vec->push_back(makeStubDisplayStmt(object));
+        }
+      }
       break;
     }
     itr++;
   }
 }
 
-void SynthSubset::filterNonSynthesizable() {
-  for (auto p : m_scheduledFilteredObjects) {
-    removeFromVector(p.first, p.second);
-  }
+void SynthSubset::removeFromStmt(any* parent, const any* object) {
+  if (parent->UhdmType() == uhdmfor_stmt) {
+    for_stmt* st = (for_stmt*) parent;
+    st->VpiStmt(makeStubDisplayStmt(object));
+  } else if (parent->UhdmType() == uhdmif_stmt) {
+    if_stmt* st = (if_stmt*) parent;
+    st->VpiStmt(makeStubDisplayStmt(object));
+  } else if (parent->UhdmType() == uhdmif_else) {
+    if_else* st = (if_else*) parent;
+    if (st->VpiStmt() && (st->VpiStmt() == object))
+      st->VpiStmt(makeStubDisplayStmt(object));
+    else if (st->VpiElseStmt() && (st->VpiElseStmt() == object))
+      st->VpiElseStmt(makeStubDisplayStmt(object)); 
+  } else if (parent->UhdmType() == uhdminitial) {
+    initial* st = (initial*) parent;
+    const std::string_view name = object->VpiName();
+    if (name == "$error" || name == "$finish" || name == "$display") {
+      st->Stmt(nullptr);  
+    } else {
+      st->Stmt(makeStubDisplayStmt(object));
+    }
+  } 
 }
 
+void SynthSubset::filterNonSynthesizable() {
+  for (auto p : m_scheduledFilteredObjectsInVector) {
+    removeFromVector(p.first, p.second);
+  }
+  for (auto p : m_scheduledFilteredObjectsInStmt) {
+    removeFromStmt(p.first, p.second);
+  }
+}
 
 void SynthSubset::leaveSys_func_call(const sys_func_call* object,
                                      vpiHandle handle) {
   const std::string_view name = object->VpiName();
   if (nonSynthSysCalls_.find(name) != nonSynthSysCalls_.end()) {
     reportError(object);
+    const any* parent = object->VpiParent();
+    if (parent->UhdmType() == uhdmbegin) {
+      begin* st = (begin*) parent;
+      if (st->Stmts()) {
+        m_scheduledFilteredObjectsInVector.emplace_back(st->Stmts(), object);
+      }
+    } else if (parent->UhdmType() == uhdmnamed_begin) {
+      named_begin* st = (named_begin*) parent;
+      if (st->Stmts()) {
+        m_scheduledFilteredObjectsInVector.emplace_back(st->Stmts(), object);
+      }
+    } else if (parent->UhdmType() == uhdmfor_stmt) {
+      for_stmt* st = (for_stmt*) parent;
+      if (st->VpiStmt()) {
+        m_scheduledFilteredObjectsInStmt.emplace_back(st, object);
+      }
+    } else if (parent->UhdmType() == uhdmif_stmt) {
+      if_stmt* st = (if_stmt*) parent;
+      if (st->VpiStmt()) {
+        m_scheduledFilteredObjectsInStmt.emplace_back(st, object);
+      }
+    } else if (parent->UhdmType() == uhdmif_else) {
+      if_else* st = (if_else*) parent;
+      if (st->VpiStmt() && (st->VpiStmt() == object)) {
+        m_scheduledFilteredObjectsInStmt.emplace_back(st, object);
+      } else if (st->VpiElseStmt() && (st->VpiElseStmt() == object)) {
+        m_scheduledFilteredObjectsInStmt.emplace_back(st, object);
+      }
+    } else if (parent->UhdmType() == uhdminitial) {
+      initial* st = (initial*) parent;
+      if (st->Stmt()) {
+        m_scheduledFilteredObjectsInStmt.emplace_back(st, object);
+      }
+    } 
   }
   // Filter out sys func calls stmt from initial block
   if (name == "$error" || name == "$finish" || name == "$display") {
-    bool inInitialBlock = false;
-    const any* parent = object->VpiParent();
-    while (parent) {
-      if (parent->UhdmType() == uhdminitial) {
-        inInitialBlock = true;
-        break;
-      }
-      parent = parent->VpiParent();
-    }
+    bool inInitialBlock = objectIsInitialBlock(object);
     if (inInitialBlock) {
-      parent = object->VpiParent();
+      const any* parent = object->VpiParent();
       if (parent->UhdmType() == uhdmbegin) {
         begin* st = (begin*) parent;
         if (st->Stmts()) {
-          m_scheduledFilteredObjects.emplace_back(st->Stmts(), object);
+          m_scheduledFilteredObjectsInVector.emplace_back(st->Stmts(), object);
         }
       } else if (parent->UhdmType() == uhdmnamed_begin) {
         named_begin* st = (named_begin*) parent;
         if (st->Stmts()) {
-          m_scheduledFilteredObjects.emplace_back(st->Stmts(), object);
+          m_scheduledFilteredObjectsInVector.emplace_back(st->Stmts(), object);
+        }
+      } else if (parent->UhdmType() == uhdminitial) {
+        initial* st = (initial*) parent;
+        if (st->Stmt()) {
+          m_scheduledFilteredObjectsInStmt.emplace_back(st, object);
         }
       }
     }

@@ -84,13 +84,18 @@ class SynthSubset final : public VpiListener {
   void sensitivityListRewrite(const always* object, vpiHandle handle);
   void blockingToNonBlockingRewrite(const always* object, vpiHandle handle);
 
+  void removeFromVector(VectorOfany* vec, const any* object);
+  void removeFromStmt(any* parent, const any* object);
+  sys_func_call* makeStubDisplayStmt(const any* object);
+
   Serializer* serializer_ = nullptr;
   std::set<const any*>& nonSynthesizableObjects_;
   std::set<std::string, std::less<>> nonSynthSysCalls_;
   design* design_;
   bool reportErrors_;
   bool allowFormal_;
-  std::vector<std::pair<VectorOfany*, const any*>> m_scheduledFilteredObjects;
+  std::vector<std::pair<VectorOfany*, const any*>> m_scheduledFilteredObjectsInVector;
+  std::vector<std::pair<any*, const any*>> m_scheduledFilteredObjectsInStmt;
 };
 
 }  // namespace UHDM
