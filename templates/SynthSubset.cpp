@@ -326,8 +326,10 @@ void SynthSubset::removeFromStmt(any* parent, const any* object) {
   } else if (parent->UhdmType() == uhdminitial) {
     initial* st = (initial*) parent;
     const std::string_view name = object->VpiName();
-    if (name == "$error" || name == "$finish" || name == "$display") {
-      st->Stmt(nullptr);  
+    if (name == "$error" || name == "$finish") {
+      st->Stmt(makeStubDisplayStmt(object));
+    } else if (name == "$display") {
+      // No better alternative than to keep the statement
     } else {
       st->Stmt(makeStubDisplayStmt(object));
     }
