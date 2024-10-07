@@ -77,13 +77,6 @@ const any* UhdmAdjuster::resize(const any* object, int32_t maxsize,
     const any* parent = result->VpiParent();
     if (parent && (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst)) {
       module_inst* mod = (module_inst*)parent;
-      if (mod->Cont_assigns()) {
-        for (cont_assign* cass : *mod->Cont_assigns()) {
-          if (cass->Lhs()->VpiName() == result->VpiName()) {
-            return resize(cass->Rhs(), maxsize, is_overall_unsigned);
-          }
-        }
-      }
       if (mod->Param_assigns()) {
         for (param_assign* cass : *mod->Param_assigns()) {
           if (cass->Lhs()->VpiName() == result->VpiName()) {
