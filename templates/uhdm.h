@@ -25,9 +25,7 @@
 #ifndef UHDM_UHDM_H
 #define UHDM_UHDM_H
 
-#include <string>
-#include <vector>
-#include <set>
+// IWYU pragma: begin_exports
 
 #include <uhdm/sv_vpi_user.h>
 #include <uhdm/vhpi_user.h>
@@ -40,5 +38,7 @@
 <INCLUDE_FILES>
 
 #include <uhdm/Serializer.h>
+
+// IWYU pragma: end_exports
 
 #endif  // UHDM_UHDM_H
