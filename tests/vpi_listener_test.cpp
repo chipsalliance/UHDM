@@ -22,7 +22,7 @@ using testing::HasSubstr;
 class MyVpiListener : public VpiListener {
  protected:
   void enterModule_inst(const module_inst* object, vpiHandle handle) override {
-    CollectLine("Module", object);
+    if (visited_.insert(object).second) CollectLine("Module", object);
     stack_.push(object);
   }
 
@@ -32,7 +32,7 @@ class MyVpiListener : public VpiListener {
   }
 
   void enterProgram(const program* object, vpiHandle handle) override {
-    CollectLine("Program", object);
+    if (visited_.insert(object).second) CollectLine("Program", object);
     stack_.push(object);
   }
 
@@ -62,6 +62,7 @@ class MyVpiListener : public VpiListener {
  private:
   std::vector<std::string> collected_;
   std::stack<const BaseClass*> stack_;
+  std::set<const BaseClass*> visited_;
 };
 
 static std::vector<vpiHandle> buildModuleProg(Serializer* s) {
@@ -103,6 +104,10 @@ static std::vector<vpiHandle> buildModuleProg(Serializer* s) {
   v2->push_back(m3);
   m1->Modules(v2);
 
+  VectorOfmodule_inst* v4 = s->MakeModule_instVec();
+  v4->push_back(m4);
+  m3->Modules(v4);
+
   // Package
   package* p1 = s->MakePackage();
   p1->VpiName("P1");
@@ -133,6 +138,7 @@ TEST(VpiListenerTest, ProgramModule) {
       "Program: /PR1 parent: -",
       "Module: u1/M2 parent: -",
       "Module: u2/M3 parent: -",
+      "Module: u3/M4 parent: u2",
   };
   EXPECT_EQ(listener->collected(), expected);
 }

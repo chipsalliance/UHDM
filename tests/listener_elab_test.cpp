@@ -269,9 +269,7 @@ class MyElaboratorListener : public VpiListener {
             // method below will be trigerred to capture the same data as the
             // walking above in (1)
             if (vpiHandle defModule = NewVpiHandle(defMod)) {
-              MyElaboratorListener* listener = new MyElaboratorListener();
-              listener->listenModule_inst(defModule);
-              delete listener;
+              listenModule_inst(defModule);
               vpi_free_object(defModule);
             }
 

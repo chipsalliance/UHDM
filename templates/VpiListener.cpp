@@ -26,6 +26,13 @@
 #include <uhdm/uhdm.h>
 
 namespace UHDM {
+void VpiListener::listenBaseClass_(vpiHandle handle) {
+  if (vpiHandle itr = vpi_handle(vpiParent, handle)) {
+    listenAny(itr);
+    vpi_free_object(itr);
+  }
+}
+
 <VPI_PRIVATE_LISTEN_IMPLEMENTATIONS>
 <VPI_PUBLIC_LISTEN_IMPLEMENTATIONS>
 
@@ -43,11 +50,13 @@ void VpiListener::listenAny(vpiHandle handle) {
   const bool revisiting = visited.find(object) != visited.end();
   if (!revisiting) enterAny(object, handle);
 
+  callstack.emplace_back(object);
   UHDM_OBJECT_TYPE type = ((const uhdm_handle*)handle)->type;
   switch (type) {
 <VPI_LISTENANY_IMPLEMENTATION>
     default : break;
   }
+  callstack.pop_back();
 
   if (!revisiting) leaveAny(object, handle);
 }
