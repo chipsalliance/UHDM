@@ -16,25 +16,21 @@ using testing::ElementsAre;
 class MyUhdmListener : public UhdmListener {
  protected:
   void enterModule_inst(const module_inst* object) override {
-    if (visited.find(object) != visited.end()) return;
-    CollectLine("Module", object);
+    if (visited_.insert(object).second) CollectLine("Module", object);
     stack_.push(object);
   }
 
   void leaveModule_inst(const module_inst* object) override {
-    if (visited.find(object) != visited.end()) return;
     ASSERT_EQ(stack_.top(), object);
     stack_.pop();
   }
 
   void enterProgram(const program* object) override {
-    if (visited.find(object) != visited.end()) return;
-    CollectLine("Program", object);
+    if (visited_.insert(object).second) CollectLine("Program", object);
     stack_.push(object);
   }
 
   void leaveProgram(const program* object) override {
-    if (visited.find(object) != visited.end()) return;
     ASSERT_EQ(stack_.top(), object);
     stack_.pop();
   }
@@ -61,6 +57,7 @@ class MyUhdmListener : public UhdmListener {
  private:
   std::vector<std::string> collected_;
   std::stack<const BaseClass*> stack_;
+  any_set_t visited_;
 };
 
 static design* buildModuleProg(Serializer* s) {
@@ -102,6 +99,10 @@ static design* buildModuleProg(Serializer* s) {
   v2->push_back(m3);
   m1->Modules(v2);
 
+  VectorOfmodule_inst* v4 = s->MakeModule_instVec();
+  v4->push_back(m4);
+  m3->Modules(v4);
+
   // Package
   package* p1 = s->MakePackage();
   p1->VpiName("P1");
@@ -132,10 +133,8 @@ TEST(UhdmListenerTest, ProgramModule) {
       "Program: /PR1 parent: -",
       "Module: u1/M2 parent: -",
       "Module: u2/M3 parent: -",
+      "Module: u3/M4 parent: u2",
   };
   EXPECT_EQ(listener->collected(), expected);
-
-  // m4 is never visited since though it's parented (back edge),
-  // it isn't connected to the graph with a forward edge.
-  EXPECT_FALSE(listener->didVisitAll(serializer));
+  EXPECT_TRUE(listener->didVisitAll(serializer));
 }

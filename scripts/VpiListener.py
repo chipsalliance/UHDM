@@ -57,14 +57,13 @@ def generate(models):
     classname = model['name']
     Classname_ = classname[:1].upper() + classname[1:]
 
-    baseclass = model.get('extends')
+    baseclass = model.get('extends') or 'BaseClass'
+    Baseclass_ = baseclass[:1].upper() + baseclass[1:]
 
     if model.get('subclasses') or modeltype == 'obj_def':
       private_declarations.append(f'  void listen{Classname_}_(vpiHandle handle);')
       private_implementations.append(f'void VpiListener::listen{Classname_}_(vpiHandle handle) {{')
-      if baseclass:
-        Baseclass_ = baseclass[:1].upper() + baseclass[1:]
-        private_implementations.append(f'  listen{Baseclass_}_(handle);')
+      private_implementations.append(f'  listen{Baseclass_}_(handle);')
 
       for key, value in model.allitems():
         if key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
@@ -85,13 +84,11 @@ def generate(models):
 
       public_implementations.append(f'void VpiListener::listen{Classname_}(vpiHandle handle) {{')
       public_implementations.append(f'  const {classname}* object = (const {classname}*) ((const uhdm_handle*)handle)->object;')
-      public_implementations.append(f'  callstack.push_back(object);')
       public_implementations.append(f'  enter{Classname_}(object, handle);')
       public_implementations.append( '  if (visited.insert(object).second) {')
       public_implementations.append(f'    listen{Classname_}_(handle);')
       public_implementations.append( '  }')
       public_implementations.append(f'  leave{Classname_}(object, handle);')
-      public_implementations.append(f'  callstack.pop_back();')
       public_implementations.append(f'}}')
       public_implementations.append( '')
 
