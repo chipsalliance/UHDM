@@ -875,6 +875,7 @@ void collectAssignmentStmt(const any* stmt, std::vector<const assignment*>& bloc
       } else { 
         nonblocking_assigns.push_back(as);
       }
+      break;
     }
     default:
       break;
