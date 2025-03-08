@@ -1272,7 +1272,9 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
     case UHDM_OBJECT_TYPE::uhdmarray_typespec: {
       array_typespec *lts = (array_typespec *)ts;
       ranges = lts->Ranges();
-      if (const ref_typespec *rt = lts->Elem_typespec()) {
+      if (!full) {
+        bits = 1;
+      } else if (const ref_typespec *rt = lts->Elem_typespec()) {
         bits = size(rt->Actual_typespec(), invalidValue, inst, pexpr, full);
       }
       break;
