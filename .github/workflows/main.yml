@@ -7,7 +7,7 @@ on:
 jobs:
   linux-gcc:
     name: ubuntu-gcc
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
@@ -25,7 +25,7 @@ jobs:
         sudo apt install -y g++-9 build-essential pkg-config cmake
 
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.8
 
@@ -33,14 +33,14 @@ jobs:
       run: pip3 install orderedmultidict
 
     - name: Git pull
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
       if: ${{ matrix.vendored_dependencies }}
 
     - name: Git pull
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       if: ${{ !matrix.vendored_dependencies }}
 
     # Fetch tags for CMakeLists version check
@@ -106,16 +106,15 @@ jobs:
 
     steps:
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.8
-        architecture: x64
 
     - name: Setup Python Packages
       run: pip3 install orderedmultidict
 
     - name: Git pull
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
@@ -151,7 +150,7 @@ jobs:
 
     steps:
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.8
         architecture: x64
@@ -170,7 +169,7 @@ jobs:
         MSYS2_PATH_TYPE: inherit
 
     - name: Git pull
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
@@ -216,7 +215,7 @@ jobs:
 
     steps:
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.8
         architecture: x64
@@ -229,7 +228,7 @@ jobs:
     - run: git config --global core.autocrlf input
       shell: bash
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
@@ -266,13 +265,13 @@ jobs:
 
   release-tagging:
     name: Version Tagging
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     if: ${{github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')}}
     permissions:
       contents: write
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
        fetch-depth: 0
        token: ${{ secrets.GITHUB_TOKEN }}
