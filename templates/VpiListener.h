@@ -56,13 +56,10 @@ public:
   bool isInUhdmAllIterator() const { return uhdmAllIterator; }
   bool inCallstackOfType(UHDM_OBJECT_TYPE type);
   design* currentDesign() { return currentDesign_; }
-
 protected:
   bool uhdmAllIterator = false;
   design* currentDesign_ = nullptr;
-
 private:
-  void listenBaseClass_(vpiHandle handle);
 <VPI_PRIVATE_LISTEN_DECLARATIONS>
 };
 }  // namespace UHDM

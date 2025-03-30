@@ -69,12 +69,10 @@ void UhdmListener::listenAny(const any* const object) {
   const bool revisiting = visited.find(object) != visited.end();
   if (!revisiting) enterAny(object);
 
-  callstack.emplace_back(object);
   switch (object->UhdmType()) {
 <UHDM_LISTENANY_IMPLEMENTATION>
   default: break;
   }
-  callstack.pop_back();
 
   if (!revisiting) leaveAny(object);
 }
