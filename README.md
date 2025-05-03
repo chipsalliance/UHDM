@@ -130,7 +130,8 @@
  * When uhdm is compiled as a shared library and the UHDM_WITH_PYTHON is set, it also builds a swig wrapper for python (`-DUHDM_WITH_PYTHON=ON` using `cmake` command, or `make release-shared UHDM_WITH_PYTHON=ON`, also make sure your python executable is built with shared libraries enabled: env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install -verbose 3.9.11). The python wrapper implements almost all the VPI getter API from systemVerilog. See chapter *38. VPI routine definitions* of Ieee1800-2017 for details.
  * Find here a short example that assumes an existing database. It will print all module names existing in the first design :
 ```python
-import uhdm
+from uhdm import uhdm
+from uhdm import util
 
 #build uhdm Serializer object
 s = uhdm.Serializer()
@@ -149,6 +150,10 @@ while(True):
    #print the string pointed by vpiName attribut of vpiObj_module
    print(uhdm.vpi_get_str(uhdm.vpiName,vpiObj_module))
 
+#Or use a generator wrapper
+for vpiObj_module in util.vpi_iterate_gen(uhdm.uhdmallModules,data[0]):
+   #print the string pointed by vpiName attribut of vpiObj_module
+   print(uhdm.vpi_get_str(uhdm.vpiName,vpiObj_module))
 ```
 
 

@@ -1,6 +1,6 @@
 import unittest
-import uhdm
-
+from uhdm import uhdm
+from uhdm import util
 
 class  test_module(unittest.TestCase):
 
@@ -19,6 +19,17 @@ class  test_module(unittest.TestCase):
 
         self.assertEqual(set(result),set(["module2","module1"]))
 
+    def test_generator(self):
+        result = []
+
+        s = uhdm.Serializer()
+
+        data = uhdm.buildTestDesign(s)
+
+        for vpiObj in vpi_iterate_gen(uhdm.uhdmallModules,data[0]):
+            result.append(uhdm.vpi_get_str(uhdm.vpiName,vpiObj))
+
+        self.assertEqual(set(result),set(["module2","module1"]))
 
     def test_ExprEval_size(self):
         s  = uhdm.Serializer()

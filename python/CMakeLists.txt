@@ -19,6 +19,7 @@ set_source_files_properties(${PROJECT_NAME}.i
 swig_add_library(py_uhdm
   TYPE MODULE
   LANGUAGE python
+  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/uhdm
   SOURCES
   ${PROJECT_NAME}.i swig_test.cpp
 )
@@ -31,28 +32,38 @@ IF(APPLE)
 ENDIF()
 
 set_target_properties(py_uhdm PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
+  LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/uhdm
 )
 
-# this figures out where to install the Python modules
-execute_process(
-  COMMAND ${Python3_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
-  OUTPUT_VARIABLE Python_site_packages
-  OUTPUT_STRIP_TRAILING_WHITESPACE
+file(
+    COPY
+    ${CMAKE_CURRENT_SOURCE_DIR}/setup.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/uhdm
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/uhdm.py
-  DESTINATION ${Python_site_packages}
-)
-install(
-  TARGETS py_uhdm
-  LIBRARY DESTINATION ${Python_site_packages}
+add_custom_target(PyPackageBuild ALL
+    COMMAND ${Python3_EXECUTABLE} -m build --sdist
+    COMMAND ${Python3_EXECUTABLE} -m pip install .
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Building python sdist package"
+    DEPENDS py_uhdm
 )
 
 add_test(
   NAME python-tests-import
   COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" "${Python3_EXECUTABLE}" -c "import uhdm"
+)
+
+add_test(
+  NAME python-tests-import-uhdm
+  COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" "${Python3_EXECUTABLE}" -c "from uhdm import uhdm"
+)
+
+add_test(
+  NAME python-tests-import-util
+  COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" "${Python3_EXECUTABLE}" -c "from uhdm import util"
 )
 
 add_test(
