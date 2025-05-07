@@ -138,10 +138,6 @@ int32_t main(int32_t argc, char **argv) {
 
   if (dumpstats) {
     serializer.PrintStats(std::cout, uhdmFile);
-
-    if (!goldenFile.empty()) {
-      serializer.PrintStats(std::cout, goldenFile);
-    }
   }
 
   std::cout << uhdmFile << ": Restored design Pre-Elab: " << std::endl;

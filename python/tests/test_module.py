@@ -66,10 +66,9 @@ class  test_module(unittest.TestCase):
         s  = uhdm.Serializer()
 
         data = uhdm.buildTestDesign(s)
-        o = uhdm.ostringstream()
-        uhdm.visit_designs(data,o)
+        o = uhdm.visit_designs(data)
 
-        self.assertEqual(o.str(),ref)
+        self.assertEqual(o,ref)
 
 
 if __name__ == '__main__':
