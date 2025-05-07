@@ -31,6 +31,8 @@ It is not parsed or interpreted by swig
 %include "vpi_visitor.h"
 %include "swig_test.h"
 
+%include "uhdm_vpi_user.h"
+%include "uhdm-version.h"
 
 namespace std {
   %template(vpiHandleVector) vector<vpiHandle>;

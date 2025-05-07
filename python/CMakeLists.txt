@@ -41,11 +41,9 @@ file(
 )
 
 file(
-    COPY ${CMAKE_CURRENT_SOURCE_DIR}/uhdm/__init__.py
+    COPY ${CMAKE_CURRENT_SOURCE_DIR}/uhdm/util.py ${CMAKE_CURRENT_SOURCE_DIR}/uhdm/__init__.py
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/uhdm
 )
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/uhdm/util.py.in ${CMAKE_CURRENT_BINARY_DIR}/uhdm/util.py)
 
 add_custom_target(PyPackageBuild ALL
     COMMAND ${Python3_EXECUTABLE} -m build --sdist
