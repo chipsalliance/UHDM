@@ -30,7 +30,7 @@ jobs:
         python-version: 3.8
 
     - name: Setup Python Packages
-      run: pip3 install orderedmultidict
+      run: pip3 install orderedmultidict build
 
     - name: Git pull
       uses: actions/checkout@v4
@@ -111,7 +111,7 @@ jobs:
         python-version: 3.8
 
     - name: Setup Python Packages
-      run: pip3 install orderedmultidict
+      run: pip3 install orderedmultidict build
 
     - name: Git pull
       uses: actions/checkout@v4
@@ -157,7 +157,7 @@ jobs:
 
     - name: Setup Python Packages
       shell: cmd
-      run: pip3 install orderedmultidict
+      run: pip3 install orderedmultidict build
 
     - name: Setup Msys2
       uses: msys2/setup-msys2@v2
@@ -223,7 +223,7 @@ jobs:
     - name: Install Core Dependencies
       run: |
         choco install -y make
-        pip3 install orderedmultidict
+        pip3 install orderedmultidict build
 
     - run: git config --global core.autocrlf input
       shell: bash
