@@ -26,7 +26,7 @@ class  test_module(unittest.TestCase):
 
         data = uhdm.buildTestDesign(s)
 
-        for vpiObj in vpi_iterate_gen(uhdm.uhdmallModules,data[0]):
+        for vpiObj in util.vpi_iterate_gen(uhdm.uhdmallModules,data[0]):
             result.append(uhdm.vpi_get_str(uhdm.vpiName,vpiObj))
 
         self.assertEqual(set(result),set(["module2","module1"]))
