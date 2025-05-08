@@ -13,13 +13,17 @@ It is not parsed or interpreted by swig
 #include "sv_vpi_user.h"
 
 #include "uhdm_types.h"
+#include "vpi_uhdm.h"
 #include "RTTI.h"
 #include "Serializer.h"
-#include "VpiListener.h"
-#include "ElaboratorListener.h"
 #include "ExprEval.h"
 #include "vpi_visitor.h"
 #include "swig_test.h"
+
+#include "BaseClass.h"
+#include "VpiListener.h"
+#include "ElaboratorListener.h"
+
 %}
 %include "std_iostream.i"
 %include "std_sstream.i"
@@ -35,13 +39,20 @@ It is not parsed or interpreted by swig
 %include "sv_vpi_user.h"
 
 %include "uhdm_types.h"
-%include "VpiListener.h"
-%include "ElaboratorListener.h"
+%include "vpi_uhdm.h"
 %include "ExprEval.h"
 %include "swig_test.h"
 
 %include "uhdm_vpi_user.h"
 %include "uhdm-version.h"
+
+// We ignore RTTI because it's largely incompatible with base SWIG
+%ignore RTTI;
+class UHDM::RTTI {};
+#define UHDM_IMPLEMENT_RTTI(a,b) ;
+#define UHDM_IMPLEMENT_RTTI_2_BASES(a,b,c) ;
+#define UHDM_IMPLEMENT_RTTI_CAST_FUNCTIONS(a,b) ;
+#define UHDM_IMPLEMENT_RTTI_VIRTUAL_CAST_FUNCTIONS(a,b) ;
 
 // PrintStats requires a C++ output stream, here we convert to a Pythonic string
 %ignore UHDM::Serializer::PrintStats;
@@ -63,6 +74,18 @@ It is not parsed or interpreted by swig
     UHDM::visit_designs(designs, oss);
     return oss.str();
   }
+%}
+
+%include "BaseClass.h"
+%include "VpiListener.h"
+%include "ElaboratorListener.h"
+
+// SWIG doesn't seem to expose some methods to the child classes
+%inline %{
+    UHDM::BaseClass* UhdmBaseClassFromVpiHandle(vpiHandle hdesign) {
+        if (!hdesign) return (UHDM::BaseClass*)Py_None;
+        return (UHDM::BaseClass*)((uhdm_handle*)hdesign)->object;
+    }
 %}
 
 namespace std {

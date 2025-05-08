@@ -42,7 +42,9 @@
 namespace UHDM {
 class BaseClass;
 class Serializer;
+#ifndef SWIG
 static inline constexpr std::string_view kEmpty("");
+#endif
 
 #ifdef STANDARD_VPI
 typedef std::set<vpiHandle> VisitedContainer;
@@ -296,7 +298,6 @@ class FactoryT final {
 
 typedef FactoryT<std::vector<BaseClass*>> VectorOfBaseClassFactory;
 typedef FactoryT<std::vector<BaseClass*>> VectorOfanyFactory;
-
 }  // namespace UHDM
 
 UHDM_IMPLEMENT_RTTI_CAST_FUNCTIONS(clonecontext_cast, UHDM::CloneContext)
