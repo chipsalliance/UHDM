@@ -37,7 +37,7 @@ def vpi_is_type(types, handle):
     This function retrieves the type of the VPI object referenced by `handle`
     and compares it to the specified type `t`.
     """
-	obj_type = uhdm.vpi_get(uhdm.vpiType, handle)
-	if isinstance(types, (list, tuple)):
-		return obj_type in types
-	return obj_type == types
+    obj_type = uhdm.vpi_get(uhdm.vpiType, handle)
+    if isinstance(types, (list, tuple)):
+        return obj_type in types
+    return obj_type == types
