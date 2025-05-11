@@ -41,3 +41,4 @@ def vpi_is_type(types, handle):
     if isinstance(types, (list, tuple)):
         return obj_type in types
     return obj_type == types
+
