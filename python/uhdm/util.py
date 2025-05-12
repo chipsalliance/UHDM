@@ -1,5 +1,5 @@
-
 from uhdm import uhdm
+
 
 def vpi_iterate_gen(t, data):
     """
@@ -16,4 +16,29 @@ def vpi_iterate_gen(t, data):
     """
     vpi_iterator = uhdm.vpi_iterate(t, data)
     yield from iter(lambda: uhdm.vpi_scan(vpi_iterator), None)
+
+
+def vpi_get_str_val(t, handle):
+    """
+    Retrieve a string property from a VPI object, returning an empty string if not found.
+
+    This function calls `uhdm.vpi_get_str` with the specified property type `t` and object handle `handle`.
+    If the property is not present or the call returns None, an empty string is returned instead.
+    """
+    s = uhdm.vpi_get_str(t, handle)
+    if s is None:
+        s = ""
+    return s
+
+def vpi_is_type(types, handle):
+    """
+    Check if a VPI object's type matches the specified type.
+
+    This function retrieves the type of the VPI object referenced by `handle`
+    and compares it to the specified type `t`.
+    """
+    obj_type = uhdm.vpi_get(uhdm.vpiType, handle)
+    if isinstance(types, (list, tuple)):
+        return obj_type in types
+    return obj_type == types
 
