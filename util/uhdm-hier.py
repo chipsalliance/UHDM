@@ -13,7 +13,7 @@ def main(uhdm_file, line):
 
     if not data:
         print(f"{uhdm_file}: empty design!", file=sys.stderr)
-        sys.exit(1)
+        return 1
 
     result = ""
     for design in data:
@@ -54,6 +54,7 @@ def main(uhdm_file, line):
                 return res
 
             result += inst_visit(obj_h, "")
+    return 0
 
 
 if __name__ == "__main__":
@@ -76,5 +77,6 @@ if __name__ == "__main__":
         print(f"{uhdm_file}: File does not exist!", file=sys.stderr)
         sys.exit(1)
 
-    main(uhdm_file, line)
+    rc = main(uhdm_file, line)
+    sys.exit(rc)
 
