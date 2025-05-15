@@ -49,11 +49,11 @@ void visit_designs(const std::vector<vpiHandle>& designs, VpiVisitor* visitor);
 #endif
 void visit_designs(const std::vector<vpiHandle>& designs, std::ostream& out);
 
-#ifndef SWIG
 // For debug use in GDB
 std::string decompile(const UHDM::any* handle);
 std::string decompileVPI(vpiHandle handle);
 
+#ifndef SWIG
 class VpiVisitor final {
  private:
   std::ostream& stream_indent(int32_t indent) const;

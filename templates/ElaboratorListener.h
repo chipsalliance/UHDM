@@ -171,9 +171,7 @@ class ElaboratorListener final : public VpiListener {
 };
 
 class ElaboratorContext final : public CloneContext {
-#ifndef SWIG
   UHDM_IMPLEMENT_RTTI(ElaboratorContext, CloneContext)
-#endif
 
  public:
   explicit ElaboratorContext(Serializer* serializer, bool debug = false,
