@@ -19,7 +19,11 @@ def _get_listeners(classname, vpi, type, card):
       return listeners
 
     listeners.append(f'  if (vpiHandle itr = vpi_handle({vpi}, handle)) {{')
+    if vpi == 'vpiHighConn':
+      listeners.append(f'    ignoreLastInstance(true);')
     listeners.append(f'    listenAny(itr);')
+    if vpi == 'vpiHighConn':
+      listeners.append(f'    ignoreLastInstance(false);')
     listeners.append( '    vpi_free_object(itr);')
     listeners.append( '  }')
 
