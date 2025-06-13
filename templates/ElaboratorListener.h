@@ -54,7 +54,7 @@ class ElaboratorListener final : public VpiListener {
   bool isFunctionCall(std::string_view name, const expr* prefix) const;
   bool muteErrors() { return muteErrors_; }
   bool isTaskCall(std::string_view name, const expr* prefix) const;
-  void ignoreLastInstance(bool ignore) { ignoreLastInstance_ = ignore; }
+  void ignoreLastInstance(bool ignore) override { ignoreLastInstance_ = ignore; }
 
   // Bind to a net in the current instance
   any* bindNet(std::string_view name) const;

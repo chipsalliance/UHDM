@@ -55,6 +55,7 @@ public:
 <VPI_ENTER_LEAVE_DECLARATIONS>
   bool isInUhdmAllIterator() const { return uhdmAllIterator; }
   bool inCallstackOfType(UHDM_OBJECT_TYPE type);
+  virtual void ignoreLastInstance(bool ignore) {}
   design* currentDesign() { return currentDesign_; }
 protected:
   bool uhdmAllIterator = false;
