@@ -1593,11 +1593,9 @@ static bool getStringVal(std::string &result, expr *val) {
 }
 
 void resize(expr *resizedExp, int32_t size) {
-  bool invalidValue = false;
   ExprEval eval;
   constant *c = (constant *)resizedExp;
-  int64_t val = eval.get_value(invalidValue, c);
-  if (val == 1) {
+  if (c->VpiDecompile() == "'1") {
     uint64_t mask = NumUtils::getMask(size);
     c->VpiValue("UINT:" + std::to_string(mask));
     c->VpiDecompile(std::to_string(mask));
