@@ -234,19 +234,23 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
         }
         if (size != object->VpiSize()) {
           constant* newc = (constant*)clone_tree(object, &elaboratorContext);
-          newc->VpiSize(size);
-          int64_t val = eval.get_value(invalidValue, object);
-          if (val == 1) {
+          std::string_view val = object->VpiDecompile();
+          if (val == "'1") {
+            newc->VpiSize(size);
             uint64_t mask = NumUtils::getMask(size);
             newc->VpiValue("UINT:" + std::to_string(mask));
             newc->VpiDecompile(std::to_string(mask));
             newc->VpiConstType(vpiUIntConst);
+          } else if ((val == "'0") || (val[0] == '\'' && val[1] == 'b')) {
+            newc->VpiSize(size);
           }
           op->Operands()->at(indexSelf) = newc;
         }
       } else if (parent->UhdmType() == UHDM_OBJECT_TYPE::uhdmcont_assign) {
         cont_assign* assign = (cont_assign*)parent;
         const any* lhs = assign->Lhs();
+        if (assign->Rhs() != object)
+          return;
         if (lhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmhier_path) {
           hier_path* path = (hier_path*)lhs;
           any* last = path->Path_elems()->back();
@@ -268,16 +272,26 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
               }
             }
           }
+        } else if (lhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj) {
+          ref_obj* ref = (ref_obj*)lhs;
+          const any* actual = ref->Actual_group();
+          uint64_t tmp = eval.size(actual, invalidValue, currentInstance_, assign,
+                                   true, true);
+          if (!invalidValue) {
+            size = static_cast<int32_t>(tmp);
+          }
         }
         if (size != object->VpiSize()) {
           constant* newc = (constant*)clone_tree(object, &elaboratorContext);
-          newc->VpiSize(size);
-          int64_t val = eval.get_value(invalidValue, object);
-          if (val == 1) {
+          std::string_view val = object->VpiDecompile();
+          if (val == "'1") {
+            newc->VpiSize(size);
             uint64_t mask = NumUtils::getMask(size);
             newc->VpiValue("UINT:" + std::to_string(mask));
             newc->VpiDecompile(std::to_string(mask));
             newc->VpiConstType(vpiUIntConst);
+          } else if ((val == "'0") || (val[0] == '\'' && val[1] == 'b')) {
+            newc->VpiSize(size);
           }
           assign->Rhs(newc);
         }
