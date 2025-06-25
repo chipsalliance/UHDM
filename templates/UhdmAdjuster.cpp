@@ -243,6 +243,20 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
             newc->VpiConstType(vpiUIntConst);
           } else if ((val == "'0") || (val[0] == '\'' && val[1] == 'b')) {
             newc->VpiSize(size);
+          } else if ((val == "'X") || (val == "'x")) {
+            newc->VpiSize(size);
+            std::string val(size, 'x');
+            newc->VpiDecompile(val);
+            val = "BIN:" + val;
+            newc->VpiValue(val);
+          } else if ((val == "'Z") || (val == "'z")) {
+            newc->VpiSize(size);
+            std::string val(size, 'z');
+            newc->VpiDecompile(val);
+            val = "BIN:" + val;
+            newc->VpiValue(val);
+          } else if (size <= 64) {
+            newc->VpiSize(64);
           }
           op->Operands()->at(indexSelf) = newc;
         }
@@ -292,6 +306,20 @@ void UhdmAdjuster::leaveConstant(const constant* object, vpiHandle handle) {
             newc->VpiConstType(vpiUIntConst);
           } else if ((val == "'0") || (val[0] == '\'' && val[1] == 'b')) {
             newc->VpiSize(size);
+          } else if ((val == "'X") || (val == "'x")) {
+            newc->VpiSize(size);
+            std::string val(size, 'x');
+            newc->VpiDecompile(val);
+            val = "BIN:" + val;
+            newc->VpiValue(val);
+          } else if ((val == "'Z") || (val == "'z")) {
+            newc->VpiSize(size);
+            std::string val(size, 'z');
+            newc->VpiDecompile(val);
+            val = "BIN:" + val;
+            newc->VpiValue(val);
+          } else if (size <= 64) {
+            newc->VpiSize(64);
           }
           assign->Rhs(newc);
         }
