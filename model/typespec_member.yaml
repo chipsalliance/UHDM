@@ -35,6 +35,12 @@
     vpi: vpiExpr
     type: expr
     card: 1
+  # Non standard, this field allows to have a value payload
+  - class_ref: actual_value
+    name: actual value
+    vpi: vpiExpr
+    type: expr
+    card: 1
   - property: ref_file
     name: ref location file
     vpi: vpiRefFile
