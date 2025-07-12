@@ -14,6 +14,8 @@
 
 # Universal Hardware Data Model (UHDM) "typespec_member" formal description
  
+# Non standard field: actual_value, this extra field allows to have a value payload
+
 - obj_def: typespec_member
   - property: name
     name: name
@@ -32,6 +34,11 @@
     card: 1
   - class_ref: default_value
     name: default value
+    vpi: vpiExpr
+    type: expr
+    card: 1
+  - class_ref: actual_value
+    name: actual value
     vpi: vpiExpr
     type: expr
     card: 1
