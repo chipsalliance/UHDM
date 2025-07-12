@@ -27,7 +27,6 @@
 #include <uhdm/ExprEval.h>
 #include <uhdm/NumUtils.h>
 #include <uhdm/clone_tree.h>
-#include <uhdm/vpi_visitor.h>
 #include <uhdm/uhdm.h>
 
 #include <algorithm>
@@ -2468,8 +2467,8 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
     }
     if (returnType == ReturnType::VALUE) {
       VectorOfparam_assign *param_assigns = nullptr;
-      if (inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmgen_scope_array) {
-      } else if (inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
+      if (inst && inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmgen_scope_array) {
+      } else if (inst && inst->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
         param_assigns = ((design *)inst)->Param_assigns();
       } else if (const scope *spe = any_cast<const scope *>(inst)) {
         param_assigns = spe->Param_assigns();
