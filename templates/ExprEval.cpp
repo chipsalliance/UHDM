@@ -2249,9 +2249,18 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
       }
     }
 
-    return (expr *)hierarchicalSelector(the_path, 0, object, invalidValue, inst,
+    expr* result = (expr *)hierarchicalSelector(the_path, 0, object, invalidValue, inst,
                                         pexpr, returnType, muteError);
+    if (result == nullptr) {
+      invalidValue = true;
+      result = (expr *)hierarchicalSelector(the_path, 0, object, invalidValue, inst,
+                                        pexpr, returnType, muteError);
+    } else if (result->UhdmType() == uhdmhier_path) {
+      invalidValue = true;
+    }
+    return result;
   }
+  invalidValue = true;
   return nullptr;
 }
 
@@ -2303,7 +2312,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
               } else if (returnType == ReturnType::MEMBER) {
                 return member;
               } else {
-                return member->Default_value();
+                return member->Actual_value() ? member->Actual_value() : member->Default_value();
               }
             }
           }
@@ -2370,7 +2379,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
             }
           }
         } else {
-          res = member->Default_value();
+          res = member->Actual_value() ? member->Actual_value() : member->Default_value();
         }
         if (lastElem) {
           return res;
@@ -2401,7 +2410,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
                     }
                   }
                 } else {
-                  return member->Default_value();
+                  return member->Actual_value() ? member->Actual_value() : member->Default_value();
                 }
               }
             }
@@ -2470,7 +2479,6 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
           if (param && param->Lhs()) {
             const std::string_view param_name = param->Lhs()->VpiName();
             if (param_name == elemName) {
-              UHDM::decompile(param->Rhs());
               const std::string_view param_value_name = param->Rhs()->VpiName();
               any *objectrhs = getObject(param_value_name, inst, pexpr, muteError);
               if (objectrhs == nullptr) {
@@ -2511,7 +2519,7 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
                   }
                 }
               } else {
-                return member->Default_value();
+                return member->Actual_value() ? member->Actual_value() : member->Default_value();
               }
             }
           }
@@ -4661,6 +4669,18 @@ bool ExprEval::setValueInInstance(
     }
   }
   if (invalidValueI && invalidValueD) {
+    if (lhsexp->UhdmType() == UHDM_OBJECT_TYPE::uhdmhier_path) {
+      hier_path *path = (hier_path *)lhsexp;
+      expr *object = (expr *)decodeHierPath(path, invalidValue, inst, lhsexp,
+                                            ReturnType::MEMBER);
+      if (object) {
+        if (object->UhdmType() == UHDM_OBJECT_TYPE::uhdmtypespec_member) {
+          typespec_member *tmp = (typespec_member *)object;
+          tmp->Actual_value(rhsexp);
+          return false;
+        }
+      }
+    }
     if (param_assigns) {
       for (VectorOfparam_assign::iterator itr = param_assigns->begin();
            itr != param_assigns->end(); itr++) {
@@ -4962,11 +4982,12 @@ bool ExprEval::setValueInInstance(
         }
       } else if (lhsexp->UhdmType() == UHDM_OBJECT_TYPE::uhdmhier_path) {
         hier_path *path = (hier_path *)lhsexp;
-        expr* object = (expr *)decodeHierPath(path, invalidValue, inst, lhsexp, ReturnType::MEMBER);
+        expr *object = (expr *)decodeHierPath(path, invalidValue, inst, lhsexp,
+                                              ReturnType::MEMBER);
         if (object) {
           if (object->UhdmType() == UHDM_OBJECT_TYPE::uhdmtypespec_member) {
-            typespec_member* tmp = (typespec_member*) object;
-            tmp->Default_value(rhsexp);
+            typespec_member *tmp = (typespec_member *)object;
+            tmp->Actual_value(rhsexp);
             return false;
           }
         }
@@ -5007,16 +5028,16 @@ bool ExprEval::setValueInInstance(
       }
       if ((c->VpiSize() == -1) && (c->VpiConstType() == vpiBinaryConst)) {
         bool tmpInvalidValue = false;
-        uint64_t size = ExprEval::size(lhsexp, tmpInvalidValue, inst,
-                                       scope_exp, true, true);
+        uint64_t size = ExprEval::size(lhsexp, tmpInvalidValue, inst, scope_exp,
+                                       true, true);
         if (tmpInvalidValue) {
           std::map<std::string, const typespec *>::iterator itr =
               local_vars.find(std::string(lhs));
           if (itr != local_vars.end()) {
             if (const typespec *tps = itr->second) {
               tmpInvalidValue = false;
-              size = ExprEval::size(tps, tmpInvalidValue, inst, scope_exp,
-                                    true, true);
+              size = ExprEval::size(tps, tmpInvalidValue, inst, scope_exp, true,
+                                    true);
             }
           }
         }
@@ -5419,10 +5440,8 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
         typespec *tps = io->Typespec()->Actual_typespec();
         vars.emplace(ioname, tps);
         expr *ioexp = (expr *)args->at(index);
-        std::cout << decompile(ioexp) << std::endl;
         if (expr *exparg =
                 reduceExpr(ioexp, invalidValue, modinst, pexpr, muteError)) {
-           std::cout << decompile(exparg) << std::endl;
           if (exparg->Typespec() == nullptr) {
             ref_typespec *crt = s.MakeRef_typespec();
             crt->VpiParent(exparg);
