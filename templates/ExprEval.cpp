@@ -847,6 +847,8 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
         }
       } else if (oper->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
         return result;
+      } else if (oper->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+        return result;
       } else {
         if (index < (int32_t)tmp.size()) {
           tmp[index] = oper;
