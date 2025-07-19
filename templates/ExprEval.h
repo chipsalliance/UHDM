@@ -119,14 +119,19 @@ class ExprEval {
                            const VectorOfany* ordered,
                            std::vector<const typespec*> fieldTypes);
 
+   enum ReturnType {
+    VALUE,
+    TYPESPEC,
+    MEMBER
+  };
   any* decodeHierPath(hier_path* path, bool& invalidValue, const any* inst,
-                      const any* pexpr, bool returnTypespec,
+                      const any* pexpr, ReturnType returnType,
                       bool muteError = false);
 
   any* hierarchicalSelector(std::vector<std::string>& select_path,
                             uint32_t level, UHDM::any* object,
                             bool& invalidValue, const any* inst,
-                            const UHDM::any* pexpr, bool returnTypespec,
+                            const UHDM::any* pexpr, ReturnType returnType,
                             bool muteError = false);
 
   typedef std::vector<const instance*> Scopes;
