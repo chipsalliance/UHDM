@@ -916,6 +916,9 @@ expr *ExprEval::flattenPatternAssignments(Serializer &s, const typespec *tps,
     }
     operation *opres = (operation *)clone_tree((any *)op, &elaboratorContext);
     opres->VpiParent(const_cast<any *>(op->VpiParent()));
+    ref_typespec* rtps = s.MakeRef_typespec();
+    opres->Typespec(rtps);
+    rtps->Actual_typespec((typespec*) tps);
     opres->Operands(ordered);
     if (flatten) {
       opres->VpiFlattened(true);
