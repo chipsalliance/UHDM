@@ -119,7 +119,7 @@ class ExprEval {
                            const VectorOfany* ordered,
                            std::vector<const typespec*> fieldTypes);
 
-   enum ReturnType {
+   enum class ReturnType {
     VALUE,
     TYPESPEC,
     MEMBER
