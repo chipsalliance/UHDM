@@ -2530,6 +2530,26 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
         }
       }
     }
+  } else if (port *tport = any_cast<port *>(object)) {
+    any* low_conn = tport->Low_conn();
+    if (low_conn) {
+      if (low_conn->UhdmType() == uhdmref_obj) {
+        ref_obj* ref = (ref_obj*) low_conn;
+        any* actual = ref->Actual_group();
+        if (actual) {
+          if (actual->UhdmType() == uhdmmodport) {
+            modport* mport = (modport*) actual;
+            if (mport->Io_decls()) {
+              for (io_decl* decl : *mport->Io_decls()) {
+                if (elemName == decl->VpiName()) {
+                  return decl;
+                }
+              }
+            }
+          }
+        }
+      }
+    }  
   } else if (constant *cons = any_cast<constant *>(object)) {
     if (ref_typespec *rt = cons->Typespec()) {
       if (const typespec *ts = rt->Actual_typespec()) {
