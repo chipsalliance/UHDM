@@ -2542,7 +2542,14 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
             if (mport->Io_decls()) {
               for (io_decl* decl : *mport->Io_decls()) {
                 if (elemName == decl->VpiName()) {
-                  return decl;
+                  if (returnType == ReturnType::MEMBER) {
+                    return decl;
+                  } else if (returnType == ReturnType::TYPESPEC) {
+                    if (decl->Typespec())
+                      return decl->Typespec()->Actual_typespec();
+                  } else {
+                    return decl->Expr();
+                  }
                 }
               }
             }
@@ -5471,7 +5478,8 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
             crt->VpiParent(exparg);
             exparg->Typespec(crt);
           }
-          exparg->Typespec()->Actual_typespec(tps);
+          if (exparg->Typespec())
+            exparg->Typespec()->Actual_typespec(tps);
           std::map<std::string, const typespec *> local_vars;
           invalidValue =
               setValueInInstance(ioname, io, exparg, invalidValue, s, modinst,
