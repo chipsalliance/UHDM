@@ -17,3 +17,5 @@
 - group_def: expr_ref_obj_group
   - class_ref: expr
   - obj_ref: ref_obj
+  - obj_ref: io_decl
+
