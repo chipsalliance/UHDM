@@ -28,6 +28,7 @@
 #include <uhdm/NumUtils.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
+#include <uhdm/vpi_visitor.h>
 
 #include <algorithm>
 #include <bitset>
@@ -288,6 +289,7 @@ any *ExprEval::getValue(std::string_view name, const any *inst,
 
   while (the_instance) {
     VectorOfparam_assign *param_assigns = nullptr;
+    VectorOfany *parameters = nullptr;
     VectorOftypespec *typespecs = nullptr;
     if (the_instance->UhdmType() == UHDM_OBJECT_TYPE::uhdmgen_scope_array) {
     } else if (the_instance->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
@@ -296,12 +298,23 @@ any *ExprEval::getValue(std::string_view name, const any *inst,
     } else if (const scope *spe = any_cast<const scope *>(the_instance)) {
       param_assigns = spe->Param_assigns();
       typespecs = spe->Typespecs();
+      parameters = spe->Parameters();
     }
     if (param_assigns) {
       for (auto p : *param_assigns) {
         if (p->Lhs() && (p->Lhs()->VpiName() == the_name)) {
           result = (any *)p->Rhs();
           break;
+        }
+      }
+    }
+    if ((result == nullptr) && parameters) {
+      for (auto p : *parameters) {
+        if (p->VpiName() == the_name) {
+          if (p->UhdmType() == uhdmparameter) {
+            result = (any*) p;
+            break;
+          }
         }
       }
     }
@@ -1928,6 +1941,9 @@ int64_t ExprEval::get_value(bool &invalidValue, const expr *expr, bool strict) {
       type = vpiUIntConst;
       sv = v->VpiValue();
     }
+  } else if (const parameter *p = any_cast<const parameter *>(expr)) {
+    // default type
+    sv = p->VpiValue();
   } else {
     invalidValue = true;
   }
