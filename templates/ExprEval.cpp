@@ -1612,8 +1612,8 @@ static bool getStringVal(std::string &result, expr *val) {
 
 void resize(expr *resizedExp, int32_t size) {
   ExprEval eval;
-  constant *c = (constant *)resizedExp;
-  if (c->VpiDecompile() == "'1") {
+  constant* c = any_cast<constant*>(resizedExp);
+  if (c && c->VpiDecompile() == "'1") {
     uint64_t mask = NumUtils::getMask(size);
     c->VpiValue("UINT:" + std::to_string(mask));
     c->VpiDecompile(std::to_string(mask));
@@ -4043,6 +4043,8 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               }
               constant *c = s.MakeConstant();
               uint64_t mask = ((uint64_t)(1ULL << cast_to)) - 1ULL;
+              resize(oper, cast_to);
+              val0 = get_value(invalidValue, oper);
               uint64_t res = val0 & mask;
               c->VpiValue("UINT:" + std::to_string(res));
               c->VpiSize(static_cast<int32_t>(cast_to));
