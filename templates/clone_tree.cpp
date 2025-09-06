@@ -1039,6 +1039,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                           }
                           previous = gs;
                           found = true;
+                          break;
                         }
                       }
                     }
@@ -1056,6 +1057,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                       if (ref_obj* cro = any_cast<ref_obj*>(current)) {
                         cro->Actual_group(decl);
                       }
+                      break;
                     }
                   }
                 }
@@ -1292,9 +1294,11 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                   for (clocking_io_decl* decl : *block->Clocking_io_decls()) {
                     if (decl->VpiName() == name) {
                       found = true;
+                      previous = decl;
                       if (ref_obj* cro = any_cast<ref_obj*>(current)) {
                         cro->Actual_group(decl);
                       }
+                      break;
                     }
                   }
                 }
@@ -1355,6 +1359,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                         }
                         previous = gs;
                         found = true;
+                        break;
                       }
                     }
                   }
@@ -1368,6 +1373,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                       }
                       previous = tsf;
                       found = true;
+                      break;
                     }
                   }
                 }
@@ -1380,6 +1386,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                       }
                       previous = pa;
                       found = true;
+                      break;
                     }
                   }
                 }
@@ -1582,6 +1589,7 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                         }
                         previous = gs;
                         found = true;
+                        break;
                       }
                     }
                   }
@@ -2064,7 +2072,43 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
               }
             }
           } else {
-            if (scope->Modules()) {
+            if (!found && scope->Nets()) {
+              for (nets* n : *scope->Nets()) {
+                if (n->VpiName() == name) {
+                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                    cro->Actual_group(n);
+                  }
+                  previous = n;
+                  found = true;
+                  break;
+                }
+              }
+            }
+            if (!found && scope->Array_nets()) {
+              for (auto m : *scope->Array_nets()) {
+                if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                  found = true;
+                  previous = m;
+                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                    cro->Actual_group(m);
+                  }
+                  break;
+                }
+              }
+            }
+            if (!found && scope->Variables()) {
+              for (auto m : *scope->Variables()) {
+                if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                  found = true;
+                  previous = m;
+                  if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                    cro->Actual_group(m);
+                  }
+                  break;
+                }
+              }
+            }
+            if (!found && scope->Modules()) {
               for (auto m : *scope->Modules()) {
                 if (m->VpiName() == name || m->VpiName() == nameIndexed) {
                   found = true;
