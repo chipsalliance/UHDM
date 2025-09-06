@@ -1496,9 +1496,11 @@ void ElaboratorListener::leaveMethod_func_call(const method_func_call* object,
 }
 
 void ElaboratorListener::leaveRef_obj(const ref_obj* object, vpiHandle handle) {
+  // if (!((ref_obj*)object)->Actual_group()) {
   if (any* res = bindAny(object->VpiName())) {
     ((ref_obj*)object)->Actual_group(res);
   }
+  //}
 }
 
 void ElaboratorListener::leaveBit_select(const bit_select* object,
