@@ -20,7 +20,3 @@
   type: int32_t
   vpi: vpiFuncType
   card: 1
-- obj_ref: function
-  type: function
-  vpi: vpiFunction
-  card: 1

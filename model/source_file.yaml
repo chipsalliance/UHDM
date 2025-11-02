@@ -31,3 +31,7 @@
   vpi: vpiPreprocMacroInstance
   type: preproc_macro_instance
   card: any
+- obj_ref: comment
+  vpi: vpiComment
+  type: comment
+  card: any

@@ -349,6 +349,12 @@ extern "C" {
 #define vpiDPIC                            2
 #define vpiDPICIdentifier                     668
 
+#define vpiComment                            797 /* !!! NOT Standard !!! */
+#define vpiCommentType                        669
+#define vpiLineComment                        1
+#define vpiBlockComment                       2
+#define vpiDocumentComment                    3
+
 /******************************** Operators *******************************/
 #define vpiImplyOp                        50 /* -> implication operator */
 #define vpiNonOverlapImplyOp              51 /* |=> nonoverlapped implication */

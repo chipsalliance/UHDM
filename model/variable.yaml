@@ -28,10 +28,6 @@
   vpi: vpiFullName
   type: string
   card: 1
-- property: signed
-  vpi: vpiSigned
-  type: bool
-  card: 1
 - property: automatic
   vpi: vpiAutomatic
   type: bool
@@ -116,7 +112,3 @@
   vpi: vpiIndex
   type: expr
   card: any
-- group_ref: actual
-  vpi: vpiActual
-  type: actual_group
-  card: 1

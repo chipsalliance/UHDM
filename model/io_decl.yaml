@@ -27,10 +27,6 @@
   vpi: vpiScalar
   type: bool
   card: 1
-- property: signed
-  vpi: vpiSigned
-  type: bool
-  card: 1
 - property: size
   vpi: vpiSize
   type: int32_t
@@ -43,19 +39,11 @@
   vpi: vpiExpr
   type: ref_obj_interf_net_var_group
   card: 1
-- class_ref: left_expr
-  vpi: vpiLeftRange
-  type: expr
-  card: 1
-- class_ref: right_expr
-  vpi: vpiRightRange
-  type: expr
-  card: 1
 - obj_ref: range
   vpi: vpiRange
   type: range
   card: any
 - class_ref: typespec
-  vpi: vpiTypedef
+  vpi: vpiTypespec
   type: ref_typespec
   card: 1

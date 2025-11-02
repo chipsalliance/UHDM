@@ -16,14 +16,6 @@
 
 - obj_def: function
 - extends: task_func
-- property: signed
-  vpi: vpiSigned
-  type: bool
-  card: 1
-- property: size
-  vpi: vpiSize
-  type: int32_t
-  card: 1
 - property: func_type
   vpi: vpiFuncType
   type: int32_t

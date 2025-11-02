@@ -40,6 +40,7 @@
 
 namespace uhdm {
 class BaseClass;
+class Comment;
 class Serializer;
 class UhdmComparer;
 
@@ -48,6 +49,7 @@ static inline constexpr std::string_view kEmpty("");
 #endif
 
 using AnySet = std::set<const BaseClass*>;
+using CommentCollection = std::vector<Comment*>;
 
 class ClientData {
  public:
@@ -217,6 +219,7 @@ class BaseClass : public RTTI {
  protected:
   Serializer* m_serializer = nullptr;
   ClientData* m_clientData = nullptr;
+  CommentCollection* m_comments = nullptr;
 
   uint32_t m_uhdmId = 0;
   BaseClass* m_parent = nullptr;

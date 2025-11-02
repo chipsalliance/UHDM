@@ -16,10 +16,6 @@
 
 - obj_def: bit_typespec
 - extends: typespec
-- property: vector
-  vpi: vpiVector
-  type: bool
-  card: 1
 - obj_ref: elem_typespec
   vpi: vpiElemTypespec
   type: ref_typespec
@@ -28,14 +24,6 @@
   vpi: vpiRange
   type: range
   card: any
-- class_ref: left_expr
-  vpi: vpiLeftRange
-  type: expr
-  card: 1
-- class_ref: right_expr
-  vpi: vpiRightRange
-  type: expr
-  card: 1
 - class_ref: index_typespec
   vpi: vpiIndexTypespec
   type: ref_typespec

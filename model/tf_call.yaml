@@ -24,6 +24,10 @@
   vpi: vpiScope
   type: scope
   card: 1
+- obj_ref: task_func
+  type: task_func
+  vpi: vpiTaskFunc
+  card: 1
 - group_ref: argument
   vpi: vpiArgument
   type: tf_call_args

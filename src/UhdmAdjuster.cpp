@@ -377,7 +377,7 @@ void UhdmAdjuster::leaveFuncCall(const FuncCall* object, vpiHandle handle) {
             for (TaskFunc* tf : *pack->getTaskFuncs()) {
               if (tf->getName() == funcName) {
                 if (tf->getUhdmType() == UhdmType::Function)
-                  ((FuncCall*)object)->setFunction((Function*)tf);
+                  ((FuncCall*)object)->setTaskFunc(tf);
               }
             }
           }

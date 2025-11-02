@@ -1,5 +1,6 @@
 attribute.yaml
 identifier.yaml
+comment.yaml
 let_decl.yaml
 assertion.yaml
 stmt.yaml

@@ -589,25 +589,7 @@ void ElaboratorListener::bindScheduledTaskFunc() {
   for (auto& call_prefix : m_scheduledTfCallBinding) {
     TFCall* call = call_prefix.first;
     const Variable* prefix = call_prefix.second;
-    if (call->getUhdmType() == UhdmType::FuncCall) {
-      if (Function* f =
-              any_cast<Function*>(bindTaskFunc(call->getName(), prefix))) {
-        ((FuncCall*)call)->setFunction(f);
-      }
-    } else if (call->getUhdmType() == UhdmType::TaskCall) {
-      if (Task* f = any_cast<Task*>(bindTaskFunc(call->getName(), prefix))) {
-        ((TaskCall*)call)->setTask(f);
-      }
-    } else if (call->getUhdmType() == UhdmType::MethodFuncCall) {
-      if (Function* f =
-              any_cast<Function*>(bindTaskFunc(call->getName(), prefix))) {
-        ((MethodFuncCall*)call)->setFunction(f);
-      }
-    } else if (call->getUhdmType() == UhdmType::MethodTaskCall) {
-      if (Task* f = any_cast<Task*>(bindTaskFunc(call->getName(), prefix))) {
-        ((MethodTaskCall*)call)->setTask(f);
-      }
-    }
+    call->setTaskFunc(bindTaskFunc(call->getName(), prefix));
   }
   m_scheduledTfCallBinding.clear();
 }
@@ -911,8 +893,8 @@ Any* ElaboratorListener::bindParam(std::string_view name) const {
 }
 
 // Bind to a function or task in the current scope
-Any* ElaboratorListener::bindTaskFunc(std::string_view name,
-                                      const Variable* prefix) const {
+TaskFunc* ElaboratorListener::bindTaskFunc(std::string_view name,
+                                           const Variable* prefix) const {
   if (name.empty()) return nullptr;
   for (InstStack::const_reverse_iterator i = m_instStack.rbegin();
        i != m_instStack.rend(); ++i) {
@@ -926,7 +908,7 @@ Any* ElaboratorListener::bindTaskFunc(std::string_view name,
       if (const RefObj* r = any_cast<RefObj>(p)) {
         p = r->getActual();
       }
-      return const_cast<Any*>(p);
+      return const_cast<TaskFunc*>(any_cast<TaskFunc>(p));
     }
   }
   if (prefix) {

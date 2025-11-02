@@ -612,12 +612,14 @@ void SynthSubset::leavePort(const Port* object, vpiHandle handle) {
   if (const Any* lc = object->getLowConn()) {
     if (const RefObj* ref = any_cast<RefObj>(lc)) {
       if (const Variable* const actual = ref->getActual<Variable>()) {
-        if (getTypespec<LogicTypespec>(actual) != nullptr) {
-          if (actual->getSigned()) signedLowConn = true;
+        if (const LogicTypespec* const typespec =
+                getTypespec<LogicTypespec>(actual)) {
+          if (typespec->getSigned()) signedLowConn = true;
         }
       } else if (const Net* const actual = ref->getActual<Net>()) {
-        if (getTypespec<LogicTypespec>(actual) != nullptr) {
-          if (actual->getSigned()) signedLowConn = true;
+        if (const LogicTypespec* const typespec =
+                getTypespec<LogicTypespec>(actual)) {
+          if (typespec->getSigned()) signedLowConn = true;
         }
       }
     }
@@ -630,22 +632,19 @@ void SynthSubset::leavePort(const Port* object, vpiHandle handle) {
     if (const RefObj* ref = any_cast<RefObj>(hc)) {
       reportObject = ref;
       if (const Variable* actual = ref->getActual<Variable>()) {
-        if (actual->getSigned()) {
-          highConnSignal = actual->getName();
-          const_cast<Variable*>(actual)->setSigned(false);
-          if (const RefTypespec* tps = actual->getTypespec()) {
-            if (const LogicTypespec* ltps = tps->getActual<LogicTypespec>()) {
-              ((LogicTypespec*)ltps)->setSigned(false);
-            }
-          }
-        }
-      } else if (const Net* const actual = ref->getActual<Net>()) {
-        if (const LogicTypespec* const lt = getTypespec<LogicTypespec>(actual)) {
-          if (actual->getSigned()) {
+        if (const LogicTypespec* const lt =
+                getTypespec<LogicTypespec>(actual)) {
+          if (lt->getSigned()) {
             highConnSignal = actual->getName();
-            const_cast<Net*>(actual)->setSigned(false);
             const_cast<LogicTypespec*>(lt)->setSigned(false);
           }
+        }
+      }
+    } else if (const Net* const actual = ref->getActual<Net>()) {
+      if (const LogicTypespec* const lt = getTypespec<LogicTypespec>(actual)) {
+        if (lt->getSigned()) {
+          highConnSignal = actual->getName();
+          const_cast<LogicTypespec*>(lt)->setSigned(false);
         }
       }
     }

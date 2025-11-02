@@ -66,8 +66,8 @@ class ElaboratorListener final : public VpiListener {
   Any* bindParam(std::string_view name) const;
 
   // Bind to a function or task in the current scope
-  Any* bindTaskFunc(std::string_view name,
-                    const Variable* prefix = nullptr) const;
+  TaskFunc* bindTaskFunc(std::string_view name,
+                         const Variable* prefix = nullptr) const;
 
   void scheduleTaskFuncBinding(TFCall* clone, const Variable* prefix) {
     m_scheduledTfCallBinding.emplace_back(clone, prefix);

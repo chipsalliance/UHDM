@@ -47,7 +47,7 @@ static std::vector<vpiHandle> build_tfCallDesign(Serializer* s) {
   FuncCall* my_func_call = s->make<FuncCall>();
   Function* my_func = s->make<Function>();
   my_func->setName("a_func");
-  my_func_call->setFunction(my_func);
+  my_func_call->setTaskFunc(my_func);
   my_func->setParent(begin_block);
   AnyCollection* arguments2 = s->makeCollection<Any>();
   Constant* cA2 = s->make<Constant>();

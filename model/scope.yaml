@@ -60,7 +60,7 @@
   type: scope
   card: any
 - class_ref: typespecs
-  vpi: vpiTypedef
+  vpi: vpiTypespec
   type: typespec
   card: any
 - group_ref: instance_item

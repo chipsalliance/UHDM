@@ -48,8 +48,6 @@ inline auto getActual(T* object) ->
     return rm->template getActual<R>();
   } else if (auto* const rt = any_cast<RefTypespec>(object)) {
     return rt->template getActual<R>();
-  } else if (auto* const v = any_cast<Variable>(object)) {
-    return v->template getActual<R>();
   }
 
   return nullptr;
@@ -62,13 +60,11 @@ inline bool setActual(uhdm::Any* object, T* actual) {
   if (RefObj* const ro = any_cast<RefObj>(object)) {
     return ro->setActual(actual);
   } else if (ClockingBlock* const cb = any_cast<ClockingBlock>(object)) {
-    return cb->setActual(actual);
+    return cb->setActual(any_cast<ClockingBlock>(actual));
   } else if (RefModule* const rm = any_cast<RefModule>(object)) {
     return rm->setActual(actual);
   } else if (RefTypespec* const rt = any_cast<RefTypespec>(object)) {
-    return rt->setActual(actual);
-  } else if (Variable* const v = any_cast<Variable>(object)) {
-    return v->setActual(actual);
+    return rt->setActual(any_cast<Typespec>(actual));
   }
 
   return false;
@@ -81,6 +77,10 @@ inline auto getTypespec(T* object) ->
 
   if (auto* const e = any_cast<Expr>(object)) {
     if (auto* const rt = e->getTypespec()) {
+      return rt->template getActual<R>();
+    }
+  } else if (auto* const iod = any_cast<IODecl>(object)) {
+    if (auto* const rt = iod->getTypespec()) {
       return rt->template getActual<R>();
     }
   } else if (auto* const ne = any_cast<NamedEvent>(object)) {
@@ -125,6 +125,11 @@ inline bool setTypespec(Any* object, Typespec* typespec) {
     if ((rt = e->getTypespec()) == nullptr) {
       rt = serializer->make<RefTypespec>();
       e->setTypespec(rt);
+    }
+  } else if (IODecl* const iod = any_cast<IODecl>(object)) {
+    if ((rt = iod->getTypespec()) == nullptr) {
+      rt = serializer->make<RefTypespec>();
+      iod->setTypespec(rt);
     }
   } else if (NamedEvent* const ne = any_cast<NamedEvent>(object)) {
     if ((rt = ne->getTypespec()) == nullptr) {
@@ -205,7 +210,7 @@ inline bool setIndexTypespec(ArrayTypespec* typespec, Typespec* actual) {
 template <typename R, typename T = Any>
 inline auto getParent(T* any) ->
     typename std::conditional<std::is_const<T>::value, const R*, R*>::type {
-  auto* p = any;
+  auto* p = any_cast<Any>(any);
   while (p != nullptr) {
     if (auto* const pp = any_cast<R>(p)) {
       return pp;
@@ -213,6 +218,48 @@ inline auto getParent(T* any) ->
     p = p->getParent();
   }
   return nullptr;
+}
+
+inline bool getSigned(const Typespec* typespec) {
+  switch (typespec->getUhdmType()) {
+    case UhdmType::BitTypespec:
+      return static_cast<const BitTypespec*>(typespec)->getSigned();
+    case UhdmType::ByteTypespec:
+      return static_cast<const ByteTypespec*>(typespec)->getSigned();
+    case UhdmType::IntegerTypespec:
+      return static_cast<const IntegerTypespec*>(typespec)->getSigned();
+    case UhdmType::IntTypespec:
+      return static_cast<const IntTypespec*>(typespec)->getSigned();
+    case UhdmType::LogicTypespec:
+      return static_cast<const LogicTypespec*>(typespec)->getSigned();
+    case UhdmType::LongIntTypespec:
+      return static_cast<const LongIntTypespec*>(typespec)->getSigned();
+    case UhdmType::ShortIntTypespec:
+      return static_cast<const ShortIntTypespec*>(typespec)->getSigned();
+    default:
+      return false;
+  }
+}
+
+inline bool setSigned(Typespec* typespec, bool value) {
+  switch (typespec->getUhdmType()) {
+    case UhdmType::BitTypespec:
+      return static_cast<const BitTypespec*>(typespec)->getSigned();
+    case UhdmType::ByteTypespec:
+      return static_cast<ByteTypespec*>(typespec)->setSigned(value);
+    case UhdmType::IntegerTypespec:
+      return static_cast<IntegerTypespec*>(typespec)->setSigned(value);
+    case UhdmType::IntTypespec:
+      return static_cast<IntTypespec*>(typespec)->setSigned(value);
+    case UhdmType::LogicTypespec:
+      return static_cast<const LogicTypespec*>(typespec)->getSigned();
+    case UhdmType::LongIntTypespec:
+      return static_cast<LongIntTypespec*>(typespec)->setSigned(value);
+    case UhdmType::ShortIntTypespec:
+      return static_cast<ShortIntTypespec*>(typespec)->setSigned(value);
+    default:
+      return false;
+  }
 }
 }  // namespace uhdm
 

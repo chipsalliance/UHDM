@@ -54,6 +54,7 @@ _collector_class_types = {
         ( 'task_func', 'TaskFuncs' ),
         ( 'typespec', 'Typespecs' ),
         ( 'udp_defn', 'AllUdps' ),
+        ( 'variable', 'Variables' ),
     ]),
     'ClassDefn': set([
         ( 'class_defn', 'DerivedClasses' ),

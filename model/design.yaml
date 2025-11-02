@@ -56,7 +56,7 @@
   vpi: vpiAllModules
   card: any
 - class_ref: typespecs
-  vpi: vpiTypedef
+  vpi: vpiTypespec
   type: typespec
   card: any
 - obj_ref: let_decl
@@ -74,6 +74,10 @@
 - obj_ref: param_assign
   vpi: vpiParamAssign
   type: param_assign
+  card: any
+- obj_ref: variable
+  vpi: vpiVariable
+  type: variable
   card: any
 - class_ref: top_modules
   type: module

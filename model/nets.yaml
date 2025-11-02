@@ -60,10 +60,6 @@
   vpi: vpiExplicitScalared
   type: bool
   card: 1
-- property: signed
-  vpi: vpiSigned
-  type: bool
-  card: 1
 - property: strength0
   vpi: vpiStrength0
   type: int32_t

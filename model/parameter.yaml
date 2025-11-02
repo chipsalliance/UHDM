@@ -20,10 +20,6 @@
   vpi: vpiConstType
   type: int32_t
   card: 1
-- property: signed
-  vpi: vpiSigned
-  type: bool
-  card: 1
 - class_ref: expr
   vpi: vpiExpr
   type: expr
@@ -32,14 +28,6 @@
   vpi: vpiRange
   type: range
   card: any
-- class_ref: left_expr
-  vpi: vpiLeftRange
-  type: expr
-  card: 1
-- class_ref: right_expr
-  vpi: vpiRightRange
-  type: expr
-  card: 1
 - property: local_param
   vpi: vpiLocalParam
   type: bool

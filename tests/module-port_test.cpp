@@ -81,12 +81,12 @@ static std::vector<vpiHandle> buildModulePortDesign(Serializer* s) {
   // Function
   Function* f1 = s->make<Function>();
   f1->setName("MyFunc1");
-  f1->setSize(100);
+  f1->setFuncType(vpiIntFunc);
   f1->setParent(m1);
 
   Function* f2 = s->make<Function>();
   f2->setName("MyFunc2");
-  f2->setSize(200);
+  f2->setFuncType(vpiTimeFunc);
   f2->setParent(m1);
 
   TaskFuncCollection* v4 = p1->getTaskFuncs(true);
@@ -100,7 +100,7 @@ static std::vector<vpiHandle> buildModulePortDesign(Serializer* s) {
 
   Function* f3 = s->make<Function>();
   f3->setName("MyFunc3");
-  f3->setSize(300);
+  f3->setFuncType(vpiRealFunc);
   f3->setParent(m1);
 
   MyPayLoad* pl = new MyPayLoad(10);

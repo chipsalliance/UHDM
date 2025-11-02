@@ -781,10 +781,10 @@ Any* bindClassTypespec(ClassTypespec* ctps, Any* current, std::string_view name,
             ro->setActual(tf);
           } else if (current->getUhdmType() == UhdmType::MethodFuncCall) {
             if (tf->getUhdmType() == UhdmType::Function)
-              ((MethodFuncCall*)current)->setFunction((Function*)tf);
+              ((MethodFuncCall*)current)->setTaskFunc(tf);
           } else if (current->getUhdmType() == UhdmType::MethodTaskCall) {
             if (tf->getUhdmType() == UhdmType::Task)
-              ((MethodTaskCall*)current)->setTask((Task*)tf);
+              ((MethodTaskCall*)current)->setTaskFunc(tf);
           }
           previous = tf;
           found = true;
@@ -912,8 +912,8 @@ HierPath* HierPath::deepClone(BaseClass* parent, CloneContext* context) const {
                   if (scope->getTaskFuncs()) {
                     for (auto tf : *scope->getTaskFuncs()) {
                       if (tf->getName() == name) {
-                        call->setFunction(any_cast<Function>(tf));
-                        previous = (Any*)call->getFunction();
+                        call->setTaskFunc(tf);
+                        previous = call->getTaskFunc();
                         found = true;
                         break;
                       }
@@ -924,9 +924,9 @@ HierPath* HierPath::deepClone(BaseClass* parent, CloneContext* context) const {
                   if (scope->getTaskFuncs()) {
                     for (auto tf : *scope->getTaskFuncs()) {
                       if (tf->getName() == name) {
-                        call->setTask(any_cast<Task>(tf));
+                        call->setTaskFunc(tf);
                         found = true;
-                        previous = (Any*)call->getTask();
+                        previous = call->getTaskFunc();
                         break;
                       }
                     }
@@ -1843,8 +1843,8 @@ HierPath* HierPath::deepClone(BaseClass* parent, CloneContext* context) const {
             if (scope->getTaskFuncs()) {
               for (auto tf : *scope->getTaskFuncs()) {
                 if (tf->getName() == name) {
-                  call->setFunction(any_cast<Function>(tf));
-                  previous = (Any*)call->getFunction();
+                  call->setTaskFunc(tf);
+                  previous = call->getTaskFunc();
                   found = true;
                   break;
                 }
@@ -1855,9 +1855,9 @@ HierPath* HierPath::deepClone(BaseClass* parent, CloneContext* context) const {
             if (scope->getTaskFuncs()) {
               for (auto tf : *scope->getTaskFuncs()) {
                 if (tf->getName() == name) {
-                  call->setTask(any_cast<Task>(tf));
+                  call->setTaskFunc(tf);
                   found = true;
-                  previous = (Any*)call->getTask();
+                  previous = call->getTaskFunc();
                   break;
                 }
               }

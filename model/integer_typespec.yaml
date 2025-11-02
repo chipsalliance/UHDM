@@ -16,6 +16,7 @@
 
 - obj_def: integer_typespec
 - extends: typespec
+ # Non Standard, allows to model casts to integer values
 - property: value
   vpi: vpiValue
   type: value
