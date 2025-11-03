@@ -24,7 +24,7 @@
   vpi: vpiScope
   type: scope
   card: 1
-- obj_ref: task_func
+- class_ref: task_func
   type: task_func
   vpi: vpiTaskFunc
   card: 1
