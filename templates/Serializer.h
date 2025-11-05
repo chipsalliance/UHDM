@@ -104,13 +104,24 @@ class Factory final {
   }
 
   bool erase(const Any* any) {
-    for (objects_t::const_iterator itr = m_objects.begin();
-         itr != m_objects.end(); ++itr) {
-      if ((*itr) == any) {
-        delete any;
-        m_objects.erase(itr);
-        return true;
-      }
+    objects_t::iterator it = std::find(m_objects.begin(), m_objects.end(), any);
+    if (it != m_objects.end()) {
+      delete any;
+      m_objects.erase(it);
+      return true;
+    }
+    return false;
+  }
+
+  template <typename T>
+  bool erase(const std::vector<T*>* collection) {
+    collections_t::iterator it =
+        std::find(m_collections.begin(), m_collections.end(),
+                  static_cast<const std::vector<Any*>*>(collection));
+    if (it != m_collections.end()) {
+      delete collection;
+      m_collections.erase(it);
+      return true;
     }
     return false;
   }
@@ -239,6 +250,10 @@ class Serializer final {
   vpiHandle makeUhdmHandle(UhdmType type, const void* object);
 
   bool erase(const BaseClass* p);
+  template<typename T>
+  bool erase(const std::vector<T*>* collection) {
+    return m_factories[T::kUhdmType]->template erase<T>(collection);
+  }
 
 #ifndef SWIG
   void pushScope(Any* s);

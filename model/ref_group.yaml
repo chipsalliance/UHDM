@@ -1,4 +1,4 @@
-# Copyright 2019 Alain Dargelas
+# Copyright 2019-2020 Alain Dargelas
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Universal Hardware Data Model (UHDM) "foreach_stmt" formal description
+# Universal Hardware Data Model (UHDM) "ref_group" formal description
 
-- obj_def: foreach_stmt
-- extends: scope
-- group_ref: variable
-  vpi: vpiVariable
-  type: ref_group
-  card: 1
-- group_ref: loop_vars
-  vpi: vpiLoopVars
-  type: variables_operation_group
-  card: any
-- group_ref: stmt
-  vpi: vpiStmt
-  type: stmt
-  card: 1
+- group_def: ref_group
+- class_ref: ref_obj
+- obj_ref: hier_path
