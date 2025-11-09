@@ -355,39 +355,9 @@ def _get_deepClone_implementation(model, models):
     includes = set()
     content = []
     content.append(f'void {ClassName}::deepCopy({ClassName}* clone, BaseClass* parent, CloneContext* context) const {{')
-    content.append( '  [[maybe_unused]] ElaboratorContext* const elaboratorContext = clonecontext_cast<ElaboratorContext>(context);')
-    if modeltype != 'class_def':
-        content.append(f'  elaboratorContext->m_elaborator.enter{ClassName}(clone, nullptr);')
-
-    if classname in ['bit_select']:
-        includes.add('ExprEval')
-        content.append(f'  ExprEval eval;')
-        content.append(f'  bool invalidValue = false;')
-        content.append( '  if (Any* val = eval.reduceExpr(getIndex(), invalidValue, parent, parent, true)) {')
-        content.append( '    if (!invalidValue) {')
-        content.append(f'      std::string indexName = eval.prettyPrint(val);')
-        content.append( '      if (Any *const indexVal = elaboratorContext->m_elaborator.bindAny(indexName)) {')
-        content.append(f'        val = eval.reduceExpr(indexVal, invalidValue, parent, parent, true);')
-        content.append(f'        if (!invalidValue) indexName = eval.prettyPrint(val);')
-        content.append( '      }')
-        content.append( '      const std::string_view name = getName();')
-        content.append( '      std::string fullIndexName(name);')
-        content.append( '      fullIndexName.append("[").append(indexName).append("]");')
-        content.append(f'      clone->setActual(elaboratorContext->m_elaborator.bindAny(fullIndexName));')
-        content.append(f'      if (!clone->getActual()) clone->setActual(elaboratorContext->m_elaborator.bindAny(name));')
-        content.append(f'      if (!clone->getActual()) clone->setActual((Any*) getActual());')
-        content.append( '    }')
-        content.append( '  }')
 
     content.append(f'  basetype_t::deepCopy(clone, parent, context);')
     vpi_name = config.make_vpi_name(classname)
-
-    if 'Select' in vpi_name:
-        includes.add('net')
-        content.append('  if (Any *const n = elaboratorContext->m_elaborator.bindNet(getName())) {')
-        content.append('    if (Net *const nn = n->Cast<Net>())')
-        content.append('      clone->setFullName(nn->getFullName());')
-        content.append('  }')
 
     for key, value in model.allitems():
         if key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
@@ -401,24 +371,17 @@ def _get_deepClone_implementation(model, models):
 
             # Unary relations
             if card == '1':
-                if (ClassName in ['RefObj', 'RefVar']) and (varName == 'actual'):
-                    includes.add('ElaboratorListener')
-                    content.append(f'  if (!clone->m_{varName}) clone->m_{varName} = elaboratorContext->m_elaborator.bindAny(getName());')
-                    content.append(f'  if (!clone->m_{varName}) clone->m_{varName} = (Any*) m_{varName};')
+                if (ClassName in ['RefObj', 'BitSelect', 'IndexedPartSelect', 'PartSelect', 'VarSelect']) and (varName == 'actual'):
+                    content.append('  if (clone->m_actual == nullptr) clone->m_actual = m_actual;')
 
                 elif (ClassName in ['RefTypespec']) and (varName == 'actual'):
-                    includes.add('ElaboratorListener')
-                    includes.add('typespec')
-                    content.append( '  if (elaboratorContext->m_elaborator.uniquifyTypespec()) {')
-                    content.append(f'    if (auto obj = m_{varName}) clone->m_{varName} = obj->deepClone(clone, context);')
-                    content.append( '  } else {')
-                    content.append(f'    if (auto obj = m_{varName}) clone->m_{varName} = (Typespec*) obj;')
-                    content.append( '  }')
+                    content.append('  if (clone->m_actual == nullptr) clone->m_actual = m_actual;')
 
                 elif (ClassName == 'Udp') and (varName == 'udpDefn'):
-                    includes.add('ElaboratorListener')
-                    content.append(f'  if (!clone->m_{varName}) clone->m_{varName} = (UdpDefn*) elaboratorContext->m_elaborator.bindAny(getDefName());')
-                    content.append(f'  if (!clone->m_{varName}) clone->m_{varName} = (UdpDefn*) m_{varName};')
+                    content.append('  if (clone->m_udpDefn == nullptr) clone->m_udpDefn = m_udpDefn;')
+
+                elif (ClassName == 'ClassTypespec') and (varName == 'classDefn'):
+                    content.append('  if (clone->m_classDefn == nullptr) clone->m_classDefn = m_classDefn;')
 
                 elif name in ['Task', 'Function']:
                     prefix = 'nullptr'
@@ -427,48 +390,33 @@ def _get_deepClone_implementation(model, models):
                         includes.add('ref_obj')
                         includes.add('class_var')
                         includes.add(name.lower())
-                        content.append( '  const ClassVar* prefix = nullptr;')
-                        content.append(f'  if (const RefObj *const ref = clone->getPrefix<RefObj>()) {{')
-                        content.append( '    prefix = ref->getActual<ClassVar>();')
-                        content.append( '  }')
+                        content.append('  const ClassVar* prefix = nullptr;')
+                        content.append('  if (const RefObj *const ref = clone->getPrefix<RefObj>()) {')
+                        content.append('    prefix = ref->getActual<ClassVar>();')
+                        content.append('  }')
                         prefix = 'prefix'
-                    content.append(f'  elaboratorContext->m_elaborator.scheduleTaskFuncBinding(clone, {prefix});')
 
                 elif (ClassName == 'Disable') and (varName == 'vpiExpr'):
-                    includes.add('expr')
-                    content.append(f'  clone->m_{varName} = m_{varName};')
-
-                elif (ClassName == 'ports') and (varName == 'highConn'):
-                    content.append(f'  if (m_{varName} != nullptr) {{')
-                    content.append( '    elaboratorContext->m_elaborator.ignoreLastInstance(true); ')
-                    content.append(f'    clone->m_{varName} = m_{varName}->deepClone(clone, context);')
-                    content.append( '    elaboratorContext->m_elaborator.ignoreLastInstance(false);')
-                    content.append( '  }')
+                    content.append('  clone->m_vpiExpr = m_vpiExpr;')
 
                 elif (ClassName == 'IntTypespec') and (varName == 'castToExpr'):
-                    includes.add('variable')
-                    content.append(f'  clone->m_{varName} = m_{varName};')
+                    content.append('  clone->m_castToExpr = m_castToExpr;')
 
                 elif (ClassName == 'Function') and (varName == 'return'):
-                    includes.add('variable')
-                    content.append(f'  clone->m_{varName} = m_{varName};')
+                    content.append('  clone->m_return = m_return;')
 
                 elif (ClassName == 'ClassTypespec') and (varName == 'Class_defn'):
-                    includes.add('class_defn')
-                    content.append(f'  clone->m_{varName} = m_{varName};')
+                    content.append('  clone->m_Class_defn = m_Class_defn;')
 
                 elif varName == 'instance':
                     includes.add('instance')
                     content.append(f'  clone->m_{varName} = m_{varName};')
-                    content.append( '  if (Instance *const inst = parent->Cast<Instance>())')
-                    content.append( '    clone->setInstance(inst);')
+                    content.append( '  if (parent != nullptr) {')
+                    content.append( '    if (Instance *const inst = parent->Cast<Instance>())')
+                    content.append( '      clone->setInstance(inst);')
+                    content.append( '  }')
 
-                elif varName == 'module':
-                    includes.add('module')
-                    content.append(f'  clone->m_{varName} = m_{varName};')
-
-                elif varName == 'interface':
-                    includes.add('interface')
+                elif varName in ['module', 'interface']:
                     content.append(f'  clone->m_{varName} = m_{varName};')
 
                 else:
@@ -503,47 +451,18 @@ def _get_deepClone_implementation(model, models):
                 content.append( '    }')
                 content.append( '  }')
 
-    if modeltype != 'class_def':
-        content.append(f'  elaboratorContext->m_elaborator.leave{ClassName}(clone, nullptr);')
-
     content.append('}')
     content.append('')
 
-    if ClassName.endswith('Call') or ClassName in [ 'Function', 'Task', 'Constant', 'TaggedPattern', 'GenScopeArray', 'HierPath', 'ContAssign' ]:
-        return content, includes  # Use hardcoded implementations of deepClone
-
     if modeltype == 'obj_def':
+        ReturnType = 'TFCall' if ClassName.endswith('Call') else ClassName
         # deepClone() not implemented for class_def; just declare to narrow the covariant return type.
-        content.append(f'{ClassName}* {ClassName}::deepClone(BaseClass* parent, CloneContext* context) const {{')
-
-        if ClassName in ['Begin', 'NamedBegin', 'Fork', 'NamedFork']:
-            content.append( '  ElaboratorContext* const elaboratorContext = clonecontext_cast<ElaboratorContext>(context);')
-            content.append(f'  elaboratorContext->m_elaborator.enter{ClassName}(this, nullptr);')
-
-        if 'Net' in vpi_name:
-            includes.add('ElaboratorListener')
-            content.append( '  ElaboratorContext* const elaboratorContext = clonecontext_cast<ElaboratorContext>(context);')
-            content.append(f'  {ClassName}* clone = any_cast<{ClassName}>(elaboratorContext->m_elaborator.bindNet(getName()));')
-            content.append(f'  if (clone != nullptr) return clone;')
-            content.append(f'  clone = context->m_serializer->make<{ClassName}>();')
-
-        elif 'Parameter' in vpi_name:
-            includes.add('ElaboratorListener')
-            content.append( '  ElaboratorContext* const elaboratorContext = clonecontext_cast<ElaboratorContext>(context);')
-            content.append(f'  {ClassName}* clone = any_cast<{ClassName}>(elaboratorContext->m_elaborator.bindParam(getName()));')
-            content.append(f'  if (clone == nullptr) clone = context->m_serializer->make<{ClassName}>();')
-
-        else:
-            content.append(f'  {ClassName}* const clone = context->m_serializer->make<{ClassName}>();')
-
+        content.append(f'{ReturnType}* {ClassName}::deepClone(BaseClass* parent, CloneContext* context) const {{')
+        content.append(f'  {ClassName}* const clone = context->m_serializer->make<{ClassName}>();')
         content.append('  const uint32_t id = clone->getUhdmId();')
         content.append('  *clone = *this;')
         content.append('  clone->setUhdmId(id);')
         content.append('  deepCopy(clone, parent, context);')
-
-        if ClassName in ['Begin', 'NamedBegin', 'Fork', 'NamedFork']:
-            content.append(f'  elaboratorContext->m_elaborator.leave{ClassName}(this, nullptr);')
-
         content.append('  return clone;')
         content.append('}')
         content.append('')
@@ -889,11 +808,15 @@ def _get_setParent_implementation(model):
         f'bool {ClassName}::setParent(BaseClass* data, bool force /* = false */) {{',
     ]
 
-    if classname in ['param_assign']:
+    if ClassName in ['Parameter']:
+      includes.append('param_assign')
+      content.append('  if ((data != nullptr) && (data->Cast<Scope>() == nullptr) && (data->Cast<Design>() == nullptr) && (data->Cast<ParamAssign>() == nullptr)) {')
+
+    elif ClassName in ['ParamAssign']:
       includes.append('class_typespec')
       content.append('  if ((data != nullptr) && (data->Cast<Scope>() == nullptr) && (data->Cast<Design>() == nullptr) && (data->Cast<ClassTypespec>() == nullptr)) {')
 
-    elif classname in ['io_decl']:
+    elif ClassName in ['IODecl']:
       includes.append('modport')
       includes.append('task_func_decl')
       content.append('  if ((data != nullptr) && (data->Cast<Scope>() == nullptr) && (data->Cast<Design>() == nullptr) && (data->Cast<Modport>() == nullptr) && (data->Cast<TaskFuncDecl>() == nullptr)) {')

@@ -31,8 +31,48 @@
 #include <type_traits>
 
 namespace uhdm {
+// Remove whitespace at the beginning of the string.
+[[nodiscard]] constexpr std::string_view ltrim(std::string_view str) {
+  while (!str.empty() && std::isspace(str.front())) str.remove_prefix(1);
+  return str;
+}
+
+// Remove whitespace at the end of the string.
+[[nodiscard]] constexpr std::string_view rtrim(std::string_view str) {
+  while (!str.empty() && std::isspace(str.back())) str.remove_suffix(1);
+  return str;
+}
+
+// Removing spaces on both ends.
+[[nodiscard]] constexpr std::string_view trim(std::string_view str) {
+  return ltrim(rtrim(str));
+}
+
+// Erase left of the input string until given character is reached.
+[[nodiscard]] constexpr std::string_view ltrim_until(std::string_view str,
+                                                     char c) {
+  auto pos = str.find(c);
+  if (pos != std::string_view::npos) str = str.substr(pos + 1);
+  return str;
+}
+
+// Erase right of the input string until given character is reached.
+[[nodiscard]] constexpr std::string_view rtrim_until(std::string_view str,
+                                                     char c) {
+  auto pos = str.rfind(c);
+  if (pos != std::string_view::npos) str = str.substr(0, pos);
+  return str;
+}
+
+// Erase from left and right of the input string until the given character is
+// reached.
+[[nodiscard]] constexpr std::string_view trim_until(std::string_view str,
+                                                    char c) {
+  return ltrim_until(rtrim_until(str, c), c);
+}
+
 template <typename R = Any, typename T = Any>
-inline auto getActual(T* object) ->
+constexpr auto getActual(T* object) ->
     typename std::conditional<std::is_const<T>::value, const R*, R*>::type {
   if (object == nullptr) return nullptr;
 
@@ -54,7 +94,7 @@ inline auto getActual(T* object) ->
 }
 
 template <typename T>
-inline bool setActual(uhdm::Any* object, T* actual) {
+bool setActual(uhdm::Any* object, T* actual) {
   if (object == nullptr) return false;
 
   if (RefObj* const ro = any_cast<RefObj>(object)) {
@@ -71,7 +111,7 @@ inline bool setActual(uhdm::Any* object, T* actual) {
 }
 
 template <typename R = Typespec, typename T = Any>
-inline auto getTypespec(T* object) ->
+constexpr auto getTypespec(T* object) ->
     typename std::conditional<std::is_const<T>::value, const R*, R*>::type {
   if (object == nullptr) return nullptr;
 
@@ -116,63 +156,10 @@ inline auto getTypespec(T* object) ->
   return nullptr;
 }
 
-inline bool setTypespec(Any* object, Typespec* typespec) {
-  if (object == nullptr) return false;
-
-  Serializer* const serializer = object->getSerializer();
-  RefTypespec* rt = nullptr;
-  if (Expr* const e = any_cast<Expr>(object)) {
-    if ((rt = e->getTypespec()) == nullptr) {
-      rt = serializer->make<RefTypespec>();
-      e->setTypespec(rt);
-    }
-  } else if (IODecl* const iod = any_cast<IODecl>(object)) {
-    if ((rt = iod->getTypespec()) == nullptr) {
-      rt = serializer->make<RefTypespec>();
-      iod->setTypespec(rt);
-    }
-  } else if (NamedEvent* const ne = any_cast<NamedEvent>(object)) {
-    if ((rt = ne->getTypespec()) == nullptr) {
-      rt = serializer->make<RefTypespec>();
-      ne->setTypespec(rt);
-    }
-  } else if (Ports* const p = any_cast<Ports>(object)) {
-    if ((rt = p->getTypespec()) == nullptr) {
-      rt = serializer->make<RefTypespec>();
-      p->setTypespec(rt);
-    }
-  } else if (PropFormalDecl* const pfd = any_cast<PropFormalDecl>(object)) {
-    if ((rt = pfd->getTypespec()) == nullptr) {
-      rt = serializer->make<RefTypespec>();
-      pfd->setTypespec(rt);
-    }
-  } else if (SeqFormalDecl* const sfd = any_cast<SeqFormalDecl>(object)) {
-    if ((rt = sfd->getTypespec()) == nullptr) {
-      rt = serializer->make<RefTypespec>();
-      sfd->setTypespec(rt);
-    }
-  } else if (TaggedPattern* const tp = any_cast<TaggedPattern>(object)) {
-    if ((rt = tp->getTypespec()) == nullptr) {
-      rt = serializer->make<RefTypespec>();
-      tp->setTypespec(rt);
-    }
-  } else if (TypespecMember* const tm = any_cast<TypespecMember>(object)) {
-    if ((rt = tm->getTypespec()) == nullptr) {
-      rt = serializer->make<RefTypespec>();
-      tm->setTypespec(rt);
-    }
-  } else if (TypeParameter* const tp = any_cast<TypeParameter>(object)) {
-    if ((rt = tp->getTypespec()) == nullptr) {
-      rt = serializer->make<RefTypespec>();
-      tp->setTypespec(rt);
-    }
-  }
-
-  return (rt != nullptr) && rt->setActual(typespec);
-}
+bool setTypespec(Any* object, Typespec* typespec);
 
 template <typename R = Typespec, typename T = ArrayTypespec>
-inline auto getElemTypespec(T* typespec) ->
+constexpr auto getElemTypespec(T* typespec) ->
     typename std::conditional<std::is_const<T>::value, const R*, R*>::type {
   if (auto* const at = any_cast<ArrayTypespec>(typespec)) {
     return getActual<R>(at->getElemTypespec());
@@ -180,17 +167,10 @@ inline auto getElemTypespec(T* typespec) ->
   return nullptr;
 }
 
-inline bool setElemTypespec(ArrayTypespec* typespec, Typespec* actual) {
-  RefTypespec* rt = nullptr;
-  if ((rt = typespec->getElemTypespec()) == nullptr) {
-    rt = typespec->getSerializer()->make<RefTypespec>();
-    typespec->setElemTypespec(rt);
-  }
-  return (rt != nullptr) && rt->setActual(actual);
-}
+bool setElemTypespec(ArrayTypespec* typespec, Typespec* actual);
 
 template <typename R = Typespec, typename T = ArrayTypespec>
-inline auto getIndexTypespec(T* typespec) ->
+constexpr auto getIndexTypespec(T* typespec) ->
     typename std::conditional<std::is_const<T>::value, const R*, R*>::type {
   if (auto* const at = any_cast<ArrayTypespec>(typespec)) {
     return getActual<R>(at->getIndexTypespec());
@@ -198,17 +178,10 @@ inline auto getIndexTypespec(T* typespec) ->
   return nullptr;
 }
 
-inline bool setIndexTypespec(ArrayTypespec* typespec, Typespec* actual) {
-  RefTypespec* rt = nullptr;
-  if ((rt = typespec->getIndexTypespec()) == nullptr) {
-    rt = typespec->getSerializer()->make<RefTypespec>();
-    typespec->setIndexTypespec(rt);
-  }
-  return (rt != nullptr) && rt->setActual(actual);
-}
+bool setIndexTypespec(ArrayTypespec* typespec, Typespec* actual);
 
 template <typename R, typename T = Any>
-inline auto getParent(T* any) ->
+constexpr auto getParent(T* any) ->
     typename std::conditional<std::is_const<T>::value, const R*, R*>::type {
   auto* p = any_cast<Any>(any);
   while (p != nullptr) {
@@ -220,45 +193,21 @@ inline auto getParent(T* any) ->
   return nullptr;
 }
 
-inline bool getSigned(const Typespec* typespec) {
-  switch (typespec->getUhdmType()) {
-    case UhdmType::BitTypespec:
-      return static_cast<const BitTypespec*>(typespec)->getSigned();
-    case UhdmType::ByteTypespec:
-      return static_cast<const ByteTypespec*>(typespec)->getSigned();
-    case UhdmType::IntegerTypespec:
-      return static_cast<const IntegerTypespec*>(typespec)->getSigned();
-    case UhdmType::IntTypespec:
-      return static_cast<const IntTypespec*>(typespec)->getSigned();
-    case UhdmType::LogicTypespec:
-      return static_cast<const LogicTypespec*>(typespec)->getSigned();
-    case UhdmType::LongIntTypespec:
-      return static_cast<const LongIntTypespec*>(typespec)->getSigned();
-    case UhdmType::ShortIntTypespec:
-      return static_cast<const ShortIntTypespec*>(typespec)->getSigned();
-    default:
-      return false;
-  }
-}
+bool getSigned(const Typespec* typespec);
+bool setSigned(Typespec* typespec, bool value);
 
-inline bool setSigned(Typespec* typespec, bool value) {
-  switch (typespec->getUhdmType()) {
-    case UhdmType::BitTypespec:
-      return static_cast<const BitTypespec*>(typespec)->getSigned();
-    case UhdmType::ByteTypespec:
-      return static_cast<ByteTypespec*>(typespec)->setSigned(value);
-    case UhdmType::IntegerTypespec:
-      return static_cast<IntegerTypespec*>(typespec)->setSigned(value);
-    case UhdmType::IntTypespec:
-      return static_cast<IntTypespec*>(typespec)->setSigned(value);
-    case UhdmType::LogicTypespec:
-      return static_cast<const LogicTypespec*>(typespec)->getSigned();
-    case UhdmType::LongIntTypespec:
-      return static_cast<LongIntTypespec*>(typespec)->setSigned(value);
-    case UhdmType::ShortIntTypespec:
-      return static_cast<ShortIntTypespec*>(typespec)->setSigned(value);
-    default:
-      return false;
+void prettyPrint(std::ostream& out, const Any* object, size_t indent = 0);
+std::string prettyPrint(const Any* object, size_t indent = 0);
+
+template <typename T>
+void prettyPrint(std::ostream& out, const std::vector<T*>* collection,
+                 std::string_view separator = ", ", size_t indent = 0) {
+  if (collection == nullptr) return;
+
+  if (indent > 0) out << std::string(indent, ' ');
+  for (const T* any : *collection) {
+    prettyPrint(out, any, indent);
+    if (any != collection->back()) out << separator;
   }
 }
 }  // namespace uhdm

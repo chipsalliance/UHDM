@@ -16,6 +16,10 @@
 
 - obj_def: byte_typespec
 - extends: typespec
+- obj_ref: range
+  vpi: vpiRange
+  type: range
+  card: any
 - property: signed
   vpi: vpiSigned
   type: bool

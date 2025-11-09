@@ -34,10 +34,8 @@
 #endif
 
 #include <uhdm/ElaboratorListener.h>
-#include <uhdm/VpiListener.h>
 #include <uhdm/uhdm-version.h>
 #include <uhdm/uhdm.h>
-#include <uhdm/vpi_visitor.h>
 
 using namespace uhdm;
 

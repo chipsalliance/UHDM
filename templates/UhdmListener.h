@@ -51,7 +51,7 @@ protected:
 
 public:
   // Use implicit constructor to initialize all members
-  // VpiListener()
+  // UhdmListener()
   virtual ~UhdmListener() = default;
 
 public:

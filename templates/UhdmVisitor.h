@@ -37,7 +37,7 @@ class Serializer;
 class UhdmVisitor {
 public:
   // Use implicit constructor to initialize all members
-  // VpiListener()
+  // UhdmVisitor()
   virtual ~UhdmVisitor() = default;
 
 public:

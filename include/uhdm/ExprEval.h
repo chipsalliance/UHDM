@@ -101,9 +101,6 @@ class ExprEval {
   Expr* flattenPatternAssignments(Serializer& s, const Typespec* tps,
                                   Expr* assignExpr);
 
-  void prettyPrint(Serializer& s, const Any* tree, uint32_t indent,
-                   std::ostream& out);
-
   std::string prettyPrint(const Any* handle);
 
   Expr* reduceCompOp(Operation* op, bool& invalidValue, const Any* inst,

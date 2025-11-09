@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "test_util.h"
 #include "uhdm/ElaboratorListener.h"
-#include "uhdm/ExprEval.h"
+#include "uhdm/Utils.h"
 #include "uhdm/VpiListener.h"
 #include "uhdm/uhdm.h"
 #include "uhdm/vpi_visitor.h"
@@ -100,7 +100,7 @@ TEST(exprVal, prettyPrint_MinusOp) {
   EXPECT_FALSE(elaborated);
 
   ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, true);
+      new ElaboratorContext(&serializer, false);
   elaboratorContext->m_elaborator.listenDesigns(designs);
   delete elaboratorContext;
 
@@ -113,7 +113,6 @@ TEST(exprVal, prettyPrint_MinusOp) {
   vpiHandle dh = designs.at(0);
   Design* d = UhdmDesignFromVpiHandle(dh);
 
-  ExprEval eval;
   for (auto m : *d->getTopModules()) {
     for (auto p : *m->getPorts()) {
       const RefTypespec* rt = p->getTypespec();
@@ -121,11 +120,11 @@ TEST(exprVal, prettyPrint_MinusOp) {
       RangeCollection* ranges = typespec->getRanges();
       for (auto range : *ranges) {
         Expr* left = (Expr*)range->getLeftExpr();
-        std::string left_str = eval.prettyPrint((Any*)left);
+        std::string left_str = prettyPrint(left);
         EXPECT_EQ(left_str, "SIZE - 1");
 
         Expr* right = (Expr*)range->getRightExpr();
-        std::string right_str = eval.prettyPrint((Any*)right);
+        std::string right_str = prettyPrint(right);
         EXPECT_EQ(right_str, "0");
       }
     }
@@ -204,7 +203,7 @@ TEST(exprVal, prettyPrint_ConditionOp) {
   EXPECT_FALSE(elaborated);
 
   ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, true);
+      new ElaboratorContext(&serializer, false);
   elaboratorContext->m_elaborator.listenDesigns(designs);
   delete elaboratorContext;
 
@@ -217,11 +216,10 @@ TEST(exprVal, prettyPrint_ConditionOp) {
   vpiHandle dh = designs.at(0);
   Design* d = UhdmDesignFromVpiHandle(dh);
 
-  ExprEval eval;
   for (auto m : *d->getTopModules()) {
     for (auto pa : *m->getParamAssigns()) {
       const Any* rhs = pa->getRhs();
-      std::string result = eval.prettyPrint((Any*)rhs);
+      std::string result = prettyPrint(rhs);
       EXPECT_EQ(result, "b ? 1 : 3");
     }
   }
@@ -297,7 +295,7 @@ TEST(exprVal, prettyPrint_functionCall) {
   EXPECT_FALSE(elaborated);
 
   ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, true);
+      new ElaboratorContext(&serializer, false);
   elaboratorContext->m_elaborator.listenDesigns(designs);
   delete elaboratorContext;
 
@@ -310,13 +308,11 @@ TEST(exprVal, prettyPrint_functionCall) {
   vpiHandle dh = designs.at(0);
   Design* d = UhdmDesignFromVpiHandle(dh);
 
-  ExprEval eval;
   for (auto m : *d->getTopModules()) {
     for (auto pa : *m->getParamAssigns()) {
       const Any* rhs = pa->getRhs();
-      std::string result = eval.prettyPrint((Any*)rhs);
-      std::string expected_result = "$sformatf(\"%d\",b)";
-      std::cout << expected_result << std::endl;
+      std::string result = prettyPrint(rhs);
+      std::string expected_result = "$sformatf(\"%d\", b)";
 
       EXPECT_EQ(expected_result, result);
     }
@@ -408,7 +404,7 @@ TEST(exprVal, prettyPrint_select) {
   EXPECT_FALSE(elaborated);
 
   ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, true);
+      new ElaboratorContext(&serializer, false);
   elaboratorContext->m_elaborator.listenDesigns(designs);
   delete elaboratorContext;
 
@@ -421,13 +417,11 @@ TEST(exprVal, prettyPrint_select) {
   vpiHandle dh = designs.at(0);
   Design* d = UhdmDesignFromVpiHandle(dh);
 
-  ExprEval eval;
   for (auto m : *d->getTopModules()) {
     for (auto pa : *m->getParamAssigns()) {
       const Any* rhs = pa->getRhs();
-      std::string result = eval.prettyPrint((Any*)rhs);
+      std::string result = prettyPrint(rhs);
       std::string expected_result = "b[3][2][1:0]";
-      std::cout << expected_result << std::endl;
 
       EXPECT_EQ(expected_result, result);
     }
@@ -495,7 +489,7 @@ std::vector<vpiHandle> build_designs_AssignmentPatternOp(Serializer* s) {
   return designs;
 }
 
-TEST(exprVal, prettyPrint_array) {
+TEST(exprVal, prettyPrint_AssignmentPatternOp) {
   Serializer serializer;
   const std::vector<vpiHandle>& designs =
       build_designs_AssignmentPatternOp(&serializer);
@@ -510,7 +504,7 @@ TEST(exprVal, prettyPrint_array) {
   EXPECT_FALSE(elaborated);
 
   ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, true);
+      new ElaboratorContext(&serializer, false);
   elaboratorContext->m_elaborator.listenDesigns(designs);
   delete elaboratorContext;
 
@@ -523,15 +517,64 @@ TEST(exprVal, prettyPrint_array) {
   vpiHandle dh = designs.at(0);
   Design* d = UhdmDesignFromVpiHandle(dh);
 
-  ExprEval eval;
   for (auto m : *d->getTopModules()) {
     for (auto pa : *m->getParamAssigns()) {
       const Any* rhs = pa->getRhs();
-      std::string result = eval.prettyPrint((Any*)rhs);
-      std::string expected_result = "'{1,2,3}";
-      std::cout << expected_result << std::endl;
+      std::string result = prettyPrint(rhs);
+      std::string expected_result = "'{1, 2, 3}";
 
       EXPECT_EQ(expected_result, result);
     }
   }
+}
+
+TEST(exprVal, prettyPrint_ArrayTypespec) {
+  Serializer serializer;
+  ArrayTypespec* const at = serializer.make<ArrayTypespec>();
+  LogicTypespec* const lt = serializer.make<LogicTypespec>();
+  setElemTypespec(at, lt);
+
+  if (Range* const r = serializer.make<Range>()) {
+    if (Constant* const le = serializer.make<Constant>()) {
+      le->setDecompile("10");
+      r->setLeftExpr(le);
+    }
+    if (Constant* const re = serializer.make<Constant>()) {
+      re->setDecompile("20");
+      r->setRightExpr(re);
+    }
+    at->getRanges(true)->emplace_back(r);
+  }
+
+  std::string actual1 = prettyPrint(at);
+  std::string expected1 = "logic [10:20]";
+  EXPECT_EQ(actual1, expected1);
+
+  if (Range* const r = serializer.make<Range>()) {
+    if (Constant* const le = serializer.make<Constant>()) {
+      le->setDecompile("50");
+      r->setLeftExpr(le);
+    }
+    if (Constant* const re = serializer.make<Constant>()) {
+      re->setDecompile("60");
+      r->setRightExpr(re);
+    }
+    at->getRanges(true)->emplace_back(r);
+  }
+
+  std::string actual2 = prettyPrint(at);
+  std::string expected2 = "logic [10:20][50:60]";
+  EXPECT_EQ(actual2, expected2);
+
+  ArrayTypespec* const at2 = serializer.make<ArrayTypespec>();
+  setElemTypespec(at2, at);
+
+  if (IntTypespec* const it = serializer.make<IntTypespec>()) {
+    it->setSigned(true);
+    setIndexTypespec(at2, it);
+  }
+
+  std::string actual3 = prettyPrint(at2);
+  std::string expected3 = "logic [10:20][50:60] [int]";
+  EXPECT_EQ(actual3, expected3);
 }

@@ -25,55 +25,45 @@
 #include <uhdm/ElaboratorListener.h>
 #include <uhdm/ExprEval.h>
 #include <uhdm/NumUtils.h>
+#include <uhdm/UhdmVisitor.h>
 #include <uhdm/Utils.h>
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
-#include <algorithm>
-#include <bitset>
 #include <cmath>
 #include <cstring>
 #include <iostream>
-#include <locale>
-#include <regex>
 #include <sstream>
-#include <string_view>
 
 namespace uhdm {
-[[nodiscard]] static std::string_view ltrim(std::string_view str, char c) {
-  auto pos = str.find(c);
-  if (pos != std::string_view::npos) str = str.substr(pos + 1);
-  return str;
-}
-
-[[nodiscard]] std::string_view rtrim(std::string_view str, char c) {
-  auto pos = str.rfind(c);
-  if (pos != std::string_view::npos) str = str.substr(0, pos);
-  return str;
-}
-
-class DetectRefObj : public VpiListener {
+class DetectRefObj final : public UhdmVisitor {
  public:
   explicit DetectRefObj() {}
   ~DetectRefObj() override = default;
-  void leaveRefObj(const RefObj *object, vpiHandle handle) final {
+
+  void visitRefObj(const RefObj *object) final {
     hasRefObj = true;
+    requestAbort();
   }
-  void leaveBitSelect(const BitSelect *object, vpiHandle handle) final {
+  void visitBitSelect(const BitSelect *object) final {
     hasRefObj = true;
+    requestAbort();
   }
-  void leaveIndexedPartSelect(const IndexedPartSelect *object,
-                              vpiHandle handle) final {
+  void visitIndexedPartSelect(const IndexedPartSelect *object) final {
     hasRefObj = true;
+    requestAbort();
   }
-  void leavePartSelect(const PartSelect *object, vpiHandle handle) final {
+  void visitPartSelect(const PartSelect *object) final {
     hasRefObj = true;
+    requestAbort();
   }
-  void leaveVarSelect(const VarSelect *object, vpiHandle handle) final {
+  void visitVarSelect(const VarSelect *object) final {
     hasRefObj = true;
+    requestAbort();
   }
-  void leaveHierPath(const HierPath *object, vpiHandle handle) final {
+  void visitHierPath(const HierPath *object) final {
     hasRefObj = true;
+    requestAbort();
   }
   bool refObjDetected() const { return hasRefObj; }
 
@@ -86,9 +76,7 @@ bool ExprEval::isFullySpecified(const Typespec *tps) {
     return true;
   }
   DetectRefObj detector;
-  vpiHandle h_rhs = NewVpiHandle(tps);
-  detector.listenAny(h_rhs);
-  vpi_free_object(h_rhs);
+  detector.visit(tps);
   if (detector.refObjDetected()) {
     return false;
   }
@@ -917,327 +905,6 @@ Expr *ExprEval::flattenPatternAssignments(Serializer &s, const Typespec *tps,
   return result;
 }
 
-void ExprEval::prettyPrint(Serializer &s, const Any *object, uint32_t indent,
-                           std::ostream &out) {
-  if (object == nullptr) return;
-  UhdmType type = object->getUhdmType();
-  for (uint32_t i = 0; i < indent; i++) {
-    out << " ";
-  }
-  switch (type) {
-    case UhdmType::Constant: {
-      Constant *c = (Constant *)object;
-      out << c->getDecompile();
-      break;
-    }
-    case UhdmType::Parameter: {
-      Parameter *p = (Parameter *)object;
-      std::string_view val = p->getValue();
-      val = ltrim(val, ':');
-      out << val;
-      break;
-    }
-    case UhdmType::SysFuncCall: {
-      SysFuncCall *sysFuncCall = (SysFuncCall *)object;
-      out << sysFuncCall->getName() << "(";
-      if (sysFuncCall->getArguments()) {
-        for (uint32_t i = 0; i < sysFuncCall->getArguments()->size(); i++) {
-          prettyPrint(s, sysFuncCall->getArguments()->at(i), 0, out);
-          if (i < sysFuncCall->getArguments()->size() - 1) {
-            out << ",";
-          }
-        }
-      }
-      out << ")";
-      break;
-    }
-    case UhdmType::EnumConst: {
-      EnumConst *c = (EnumConst *)object;
-      std::string_view val = c->getValue();
-      val = ltrim(val, ':');
-      out << val;
-      break;
-    }
-    case UhdmType::Operation: {
-      Operation *oper = (Operation *)object;
-      int32_t opType = oper->getOpType();
-      switch (opType) {
-        case vpiMinusOp:
-        case vpiPlusOp:
-        case vpiNotOp:
-        case vpiBitNegOp:
-        case vpiUnaryAndOp:
-        case vpiUnaryNandOp:
-        case vpiUnaryOrOp:
-        case vpiUnaryNorOp:
-        case vpiUnaryXorOp:
-        case vpiUnaryXNorOp:
-        case vpiPreIncOp:
-        case vpiPreDecOp: {
-          static std::unordered_map<int32_t, std::string_view> opToken = {
-              {vpiMinusOp, "-"},    {vpiPlusOp, "+"},
-              {vpiNotOp, "!"},      {vpiBitNegOp, "~"},
-              {vpiUnaryAndOp, "&"}, {vpiUnaryNandOp, "~&"},
-              {vpiUnaryOrOp, "|"},  {vpiUnaryNorOp, "~|"},
-              {vpiUnaryXorOp, "^"}, {vpiUnaryXNorOp, "~^"},
-              {vpiPreIncOp, "++"},  {vpiPreDecOp, "--"},
-          };
-          std::stringstream out_op0;
-          prettyPrint(s, oper->getOperands()->at(0), 0, out_op0);
-          out << opToken[opType] << out_op0.str();
-          break;
-        }
-        case vpiSubOp:
-        case vpiDivOp:
-        case vpiModOp:
-        case vpiEqOp:
-        case vpiNeqOp:
-        case vpiCaseEqOp:
-        case vpiCaseNeqOp:
-        case vpiGtOp:
-        case vpiGeOp:
-        case vpiLtOp:
-        case vpiLeOp:
-        case vpiLShiftOp:
-        case vpiRShiftOp:
-        case vpiAddOp:
-        case vpiMultOp:
-        case vpiLogAndOp:
-        case vpiLogOrOp:
-        case vpiBitAndOp:
-        case vpiBitOrOp:
-        case vpiBitXorOp:
-        case vpiBitXNorOp:
-        case vpiArithLShiftOp:
-        case vpiArithRShiftOp:
-        case vpiPowerOp:
-        case vpiImplyOp:
-        case vpiNonOverlapImplyOp:
-        case vpiOverlapImplyOp: {
-          static std::unordered_map<int32_t, std::string_view> opToken = {
-              {vpiMinusOp, "-"},
-              {vpiPlusOp, "+"},
-              {vpiNotOp, "!"},
-              {vpiBitNegOp, "~"},
-              {vpiUnaryAndOp, "&"},
-              {vpiUnaryNandOp, "~&"},
-              {vpiUnaryOrOp, "|"},
-              {vpiUnaryNorOp, "~|"},
-              {vpiUnaryXorOp, "^"},
-              {vpiUnaryXNorOp, "~^"},
-              {vpiSubOp, "-"},
-              {vpiDivOp, "/"},
-              {vpiModOp, "%"},
-              {vpiEqOp, "=="},
-              {vpiNeqOp, "!="},
-              {vpiCaseEqOp, "==="},
-              {vpiCaseNeqOp, "!=="},
-              {vpiGtOp, ">"},
-              {vpiGeOp, ">="},
-              {vpiLtOp, "<"},
-              {vpiLeOp, "<="},
-              {vpiLShiftOp, "<<"},
-              {vpiRShiftOp, ">>"},
-              {vpiAddOp, "+"},
-              {vpiMultOp, "*"},
-              {vpiLogAndOp, "&&"},
-              {vpiLogOrOp, "||"},
-              {vpiBitAndOp, "&"},
-              {vpiBitOrOp, "|"},
-              {vpiBitXorOp, "^"},
-              {vpiBitXNorOp, "^~"},
-              {vpiArithLShiftOp, "<<<"},
-              {vpiArithRShiftOp, ">>>"},
-              {vpiPowerOp, "**"},
-              {vpiImplyOp, "->"},
-              {vpiNonOverlapImplyOp, "|=>"},
-              {vpiOverlapImplyOp, "|->"},
-          };
-          std::stringstream out_op0;
-          prettyPrint(s, oper->getOperands()->at(0), 0, out_op0);
-          std::stringstream out_op1;
-          prettyPrint(s, oper->getOperands()->at(1), 0, out_op1);
-          out << out_op0.str() << " " << opToken[opType] << " "
-              << out_op1.str();
-          break;
-        }
-        case vpiConditionOp: {
-          std::stringstream out_op0;
-          prettyPrint(s, oper->getOperands()->at(0), 0, out_op0);
-          std::stringstream out_op1;
-          prettyPrint(s, oper->getOperands()->at(1), 0, out_op1);
-          std::stringstream out_op2;
-          prettyPrint(s, oper->getOperands()->at(2), 0, out_op2);
-          out << out_op0.str() << " ? " << out_op1.str() << " : "
-              << out_op2.str();
-          break;
-        }
-        case vpiConcatOp:
-        case vpiAssignmentPatternOp: {
-          switch (opType) {
-            case vpiConcatOp: {
-              out << "{";
-              break;
-            }
-            case vpiAssignmentPatternOp: {
-              out << "'{";
-              break;
-            }
-            default: {
-              break;
-            }
-          };
-          for (uint32_t i = 0; i < oper->getOperands()->size(); i++) {
-            prettyPrint(s, oper->getOperands()->at(i), 0, out);
-            if (i < oper->getOperands()->size() - 1) {
-              out << ",";
-            }
-          }
-          out << "}";
-          break;
-        }
-        case vpiMultiConcatOp: {
-          std::stringstream mult;
-          prettyPrint(s, oper->getOperands()->at(0), 0, mult);
-          std::stringstream op;
-          prettyPrint(s, oper->getOperands()->at(1), 0, op);
-          out << "{" << mult.str() << "{" << op.str() << "}}";
-          break;
-        }
-        case vpiEventOrOp: {
-          std::stringstream op[2];
-          prettyPrint(s, oper->getOperands()->at(0), 0, op[0]);
-          prettyPrint(s, oper->getOperands()->at(1), 0, op[1]);
-          out << op[0].str() << " or " << op[1].str();
-          break;
-        }
-        case vpiInsideOp: {
-          prettyPrint(s, oper->getOperands()->at(0), 0, out);
-          out << " inside {";
-          for (uint32_t i = 1; i < oper->getOperands()->size(); i++) {
-            prettyPrint(s, oper->getOperands()->at(i), 0, out);
-            if (i < oper->getOperands()->size() - 1) {
-              out << ",";
-            }
-          }
-          out << "}";
-          break;
-        }
-        case vpiNullOp: {
-          break;
-        }
-          /*
-            { vpiListOp, "," },
-            { vpiMinTypMaxOp, ":" },
-          */
-        case vpiPosedgeOp: {
-          std::stringstream op;
-          prettyPrint(s, oper->getOperands()->at(0), 0, op);
-          out << "posedge " << op.str();
-          break;
-        }
-        case vpiNegedgeOp: {
-          std::stringstream op;
-          prettyPrint(s, oper->getOperands()->at(0), 0, op);
-          out << "negedge " << op.str();
-          break;
-        }
-        case vpiPostIncOp: {
-          std::stringstream op;
-          prettyPrint(s, oper->getOperands()->at(0), 0, op);
-          out << op.str() << "++";
-          break;
-        }
-        case vpiPostDecOp: {
-          std::stringstream op;
-          prettyPrint(s, oper->getOperands()->at(0), 0, op);
-          out << op.str() << "--";
-          break;
-        }
-
-          /*
-            { vpiAcceptOnOp, "accept_on" },
-            { vpiRejectOnOp, "reject_on" },
-            { vpiSyncAcceptOnOp, "sync_accept_on" },
-            { vpiSyncRejectOnOp, "sync_reject_on" },
-            { vpiOverlapFollowedByOp, "overlapped followed_by" },
-            { vpiNonOverlapFollowedByOp, "nonoverlapped followed_by" },
-            { vpiNexttimeOp, "nexttime" },
-            { vpiAlwaysOp, "always" },
-            { vpiEventuallyOp, "eventually" },
-            { vpiUntilOp, "until" },
-            { vpiUntilWithOp, "until_with" },
-            { vpiUnaryCycleDelayOp, "##" },
-            { vpiCycleDelayOp, "##" },
-            { vpiIntersectOp, "intersection" },
-            { vpiFirstMatchOp, "first_match" },
-            { vpiThroughoutOp, "throughout" },
-            { vpiWithinOp, "within" },
-            { vpiRepeatOp, "[=]" },
-            { vpiConsecutiveRepeatOp, "[*]" },
-            { vpiGotoRepeatOp, "[->]" },
-            { vpiMatchOp, "match" },
-            { vpiCastOp, "type'" },
-            { vpiIffOp, "iff" },
-            { vpiWildEqOp, "==?" },
-            { vpiWildNeqOp, "!=?" },
-            { vpiStreamLROp, "{>>}" },
-            { vpiStreamRLOp, "{<<}" },
-            { vpiMatchedOp, ".matched" },
-            { vpiTriggeredOp, ".triggered" },
-            { vpiMultiAssignmentPatternOp, "{n{}}" },
-            { vpiIfOp, "if" },
-            { vpiIfElseOp, "if–else" },
-            { vpiCompAndOp, "and" },
-            { vpiCompOrOp, "or" },
-            { vpiImpliesOp, "implies" },
-            { vpiTypeOp, "type" },
-            { vpiAssignmentOp, "=" },
-          */
-
-        default:
-          break;
-      }
-      break;
-    }
-    case UhdmType::PartSelect: {
-      PartSelect *ps = (PartSelect *)object;
-      prettyPrint(s, ps->getLeftExpr(), 0, out);
-      out << ":";
-      prettyPrint(s, ps->getRightExpr(), 0, out);
-      break;
-    }
-    case UhdmType::IndexedPartSelect: {
-      IndexedPartSelect *ps = (IndexedPartSelect *)object;
-      prettyPrint(s, ps->getBaseExpr(), 0, out);
-      if (ps->getIndexedPartSelectType() == vpiPosIndexed)
-        out << "+";
-      else
-        out << "-";
-      out << ":";
-      prettyPrint(s, ps->getWidthExpr(), 0, out);
-      break;
-    }
-    case UhdmType::RefObj: {
-      out << object->getName();
-      break;
-    }
-    case UhdmType::VarSelect: {
-      VarSelect *vs = (VarSelect *)object;
-      out << vs->getName();
-      for (uint32_t i = 0; i < vs->getIndexes()->size(); i++) {
-        out << "[";
-        prettyPrint(s, vs->getIndexes()->at(i), 0, out);
-        out << "]";
-      }
-      break;
-    }
-    default: {
-      break;
-    }
-  }
-}
-
 uint64_t ExprEval::size(const Any *ts, bool &invalidValue, const Any *inst,
                         const Any *pexpr, bool full, bool muteError) {
   if (ts == nullptr) return 0;
@@ -1885,9 +1552,9 @@ int64_t ExprEval::get_value(bool &invalidValue, const Expr *Expr, bool strict) {
         if (Expr->getSize() > 64) {
           invalidValue = true;
         } else {
-          sv = ltrim(sv, '\'');
-          sv = ltrim(sv, 's');
-          sv = ltrim(sv, 'b');
+          sv = ltrim_until(sv, '\'');
+          sv = ltrim_until(sv, 's');
+          sv = ltrim_until(sv, 'b');
           sv.remove_prefix(std::string_view("BIN:").length());
           bool invalid = NumUtils::parseBinary(sv, &result) == nullptr;
           if (strict) invalidValue = invalid;
@@ -1903,9 +1570,9 @@ int64_t ExprEval::get_value(bool &invalidValue, const Expr *Expr, bool strict) {
         if (Expr->getSize() > 64) {
           invalidValue = true;
         } else {
-          sv = ltrim(sv, '\'');
-          sv = ltrim(sv, 's');
-          sv = ltrim(sv, 'h');
+          sv = ltrim_until(sv, '\'');
+          sv = ltrim_until(sv, 's');
+          sv = ltrim_until(sv, 'h');
           sv.remove_prefix(std::string_view("HEX:").length());
           invalidValue = NumUtils::parseHex(sv, &result) == nullptr;
         }
@@ -1915,9 +1582,9 @@ int64_t ExprEval::get_value(bool &invalidValue, const Expr *Expr, bool strict) {
         if (Expr->getSize() > 64) {
           invalidValue = true;
         } else {
-          sv = ltrim(sv, '\'');
-          sv = ltrim(sv, 's');
-          sv = ltrim(sv, 'o');
+          sv = ltrim_until(sv, '\'');
+          sv = ltrim_until(sv, 's');
+          sv = ltrim_until(sv, 'o');
           sv.remove_prefix(std::string_view("OCT:").length());
           invalidValue = NumUtils::parseOctal(sv, &result) == nullptr;
         }
@@ -1996,9 +1663,9 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const Expr *expr,
         if (expr->getSize() > 64) {
           invalidValue = true;
         } else {
-          sv = ltrim(sv, '\'');
-          sv = ltrim(sv, 's');
-          sv = ltrim(sv, 'b');
+          sv = ltrim_until(sv, '\'');
+          sv = ltrim_until(sv, 's');
+          sv = ltrim_until(sv, 'b');
           sv.remove_prefix(std::string_view("BIN:").length());
           bool invalid = NumUtils::parseBinary(sv, &result) == nullptr;
           if (strict) invalidValue = invalid;
@@ -2014,9 +1681,9 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const Expr *expr,
         if (expr->getSize() > 64) {
           invalidValue = true;
         } else {
-          sv = ltrim(sv, '\'');
-          sv = ltrim(sv, 's');
-          sv = ltrim(sv, 'h');
+          sv = ltrim_until(sv, '\'');
+          sv = ltrim_until(sv, 's');
+          sv = ltrim_until(sv, 'h');
           sv.remove_prefix(std::string_view("HEX:").length());
           invalidValue = NumUtils::parseHex(sv, &result) == nullptr;
         }
@@ -2026,9 +1693,9 @@ uint64_t ExprEval::get_uvalue(bool &invalidValue, const Expr *expr,
         if (expr->getSize() > 64) {
           invalidValue = true;
         } else {
-          sv = ltrim(sv, '\'');
-          sv = ltrim(sv, 's');
-          sv = ltrim(sv, 'o');
+          sv = ltrim_until(sv, '\'');
+          sv = ltrim_until(sv, 's');
+          sv = ltrim_until(sv, 'o');
           sv.remove_prefix(std::string_view("OCT:").length());
           invalidValue = NumUtils::parseOctal(sv, &result) == nullptr;
         }
@@ -2191,7 +1858,7 @@ Any *ExprEval::decodeHierPath(HierPath *path, bool &invalidValue,
     std::vector<std::string> the_path;
     for (auto elem : *path->getPathElems()) {
       std::string_view elemName = elem->getName();
-      elemName = rtrim(elemName, '[');
+      elemName = rtrim_until(elemName, '[');
       the_path.emplace_back(elemName);
       if (elem->getUhdmType() == UhdmType::BitSelect) {
         BitSelect *select = (BitSelect *)elem;
@@ -2479,8 +2146,8 @@ Any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
 
   int32_t selectIndex = -1;
   if (elemName.find('[') != std::string::npos) {
-    std::string_view indexName = ltrim(elemName, '[');
-    indexName = rtrim(indexName, ']');
+    std::string_view indexName = ltrim_until(elemName, '[');
+    indexName = rtrim_until(indexName, ']');
     if (NumUtils::parseInt32(indexName, &selectIndex) == nullptr) {
       selectIndex = -1;
     }
@@ -5374,28 +5041,23 @@ Expr *ExprEval::evalFunc(Function *func, std::vector<Any *> *args,
   return nullptr;
 }
 
-std::string vPrint(Any *handle) {
-  if (handle == nullptr) {
-    // std::cout << "NULL HANDLE\n";
-    return "NULL HANDLE";
-  }
-  ExprEval eval;
-  Serializer *s = handle->getSerializer();
-  std::stringstream out;
-  eval.prettyPrint(*s, handle, 0, out);
-  std::cout << out.str() << "\n";
-  return out.str();
-}
-
 std::string ExprEval::prettyPrint(const Any *handle) {
   if (handle == nullptr) {
     // std::cout << "NULL HANDLE\n";
     return "NULL HANDLE";
   }
-  ExprEval eval;
-  Serializer *s = handle->getSerializer();
+  return uhdm::prettyPrint(handle, 0);
+}
+
+std::string vPrint(Any *handle) {
+  if (handle == nullptr) {
+    // std::cout << "NULL HANDLE\n";
+    return "NULL HANDLE";
+  }
   std::stringstream out;
-  eval.prettyPrint(*s, handle, 0, out);
-  return out.str();
+  uhdm::prettyPrint(out, handle, 0);
+  const std::string s = out.str();
+  std::cout << s << "\n";
+  return s;
 }
 }  // namespace uhdm

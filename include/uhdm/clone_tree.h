@@ -26,12 +26,18 @@
 #define UHDM_CLONE_TREE_H
 
 #include <uhdm/sv_vpi_user.h>
+#include <uhdm/BaseClass.h>
 
 namespace uhdm {
 class BaseClass;
 class CloneContext;
 
 BaseClass* clone_tree(const BaseClass* root, CloneContext* context);
+
+template<typename T>
+T *clone_tree(const T *root, CloneContext *context) {
+  return root ? root->deepClone(nullptr, context) : nullptr;
+}
 
 };  // namespace uhdm
 

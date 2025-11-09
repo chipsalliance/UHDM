@@ -132,12 +132,6 @@ void ElaboratorListener::leaveDesign(const Design* object, vpiHandle handle) {
   const_cast<Design*>(object)->setElaborated(true);
 }
 
-static std::string_view ltrim_until(std::string_view str, char c) {
-  auto it = str.find(c);
-  if (it != std::string_view::npos) str.remove_prefix(it + 1);
-  return str;
-}
-
 void ElaboratorListener::enterModule(const Module* object, vpiHandle handle) {
   bool topLevelModule = object->getTopModule();
   const std::string_view instName = object->getName();
