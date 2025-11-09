@@ -39,7 +39,7 @@ class Serializer;
 class SynthSubset final : public VpiListener {
  public:
   SynthSubset(Serializer* serializer,
-              std::set<const Any*>& nonSynthesizableObjects, Design* des,
+              AnySet& nonSynthesizableObjects, Design* des,
               bool reportErrors, bool allowFormal);
   ~SynthSubset() override = default;
   void filterNonSynthesizable();
@@ -87,7 +87,7 @@ class SynthSubset final : public VpiListener {
   SysFuncCall* makeStubDisplayStmt(const Any* object);
 
   Serializer* m_serializer = nullptr;
-  std::set<const Any*>& m_nonSynthesizableObjects;
+  AnySet& m_nonSynthesizableObjects;
   std::set<std::string, std::less<>> m_nonSynthSysCalls;
   Design* m_design = nullptr;
   bool m_reportErrors = false;

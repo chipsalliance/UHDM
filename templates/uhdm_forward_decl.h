@@ -27,8 +27,6 @@
 #ifndef UHDM_FORWARD_DECL_H
 #define UHDM_FORWARD_DECL_H
 
-#include <vector>
-
 namespace uhdm {
 <UHDM_CLASSES_FORWARD_DECL>
 

@@ -26,11 +26,19 @@
 #ifndef UHDM_CONTAINERS_H
 #define UHDM_CONTAINERS_H
 
-#include <vector>
 #include <uhdm/uhdm_forward_decl.h>
 #include <uhdm/SymbolId.h>
 
+// System headers
+#include <set>
+#include <vector>
+
 namespace uhdm {
+  struct AnyLessComparer final {
+    bool operator()(const Any* lhs, const Any* rhs) const;
+  };
+  using AnySet = std::set<const BaseClass*, AnyLessComparer>;
+
 <CONTAINERS>
 } // namespace uhdm
 

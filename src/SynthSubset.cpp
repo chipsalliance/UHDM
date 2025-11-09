@@ -38,7 +38,7 @@
 namespace uhdm {
 
 SynthSubset::SynthSubset(Serializer* serializer,
-                         std::set<const Any*>& nonSynthesizableObjects,
+                         AnySet& nonSynthesizableObjects,
                          Design* des, bool reportErrors, bool allowFormal)
     : m_serializer(serializer),
       m_nonSynthesizableObjects(nonSynthesizableObjects),

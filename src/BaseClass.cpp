@@ -27,6 +27,11 @@
 #include <uhdm/UhdmComparer.h>
 
 namespace uhdm {
+bool AnyLessComparer::operator()(const uhdm::Any* lhs,
+                                 const uhdm::Any* rhs) const {
+  return lhs->getUhdmId() < rhs->getUhdmId();
+}
+
 std::string_view BaseClass::getFile() const {
   return m_fileId ? m_serializer->getSymbol(m_fileId) : kEmpty;
 }

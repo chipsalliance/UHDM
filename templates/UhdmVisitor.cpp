@@ -32,7 +32,7 @@ namespace uhdm {
 bool UhdmVisitor::didVisitAll(const Serializer& serializer) const {
   const Serializer::IdMap idMap = serializer.getAllObjects();
 
-  any_set_t allObjects;
+  AnySet allObjects;
   std::transform(
       idMap.cbegin(), idMap.cend(),
       std::inserter(allObjects, allObjects.begin()),
@@ -40,7 +40,7 @@ bool UhdmVisitor::didVisitAll(const Serializer& serializer) const {
         return entry.first;
       });
 
-  any_set_t diffObjects;
+  AnySet diffObjects;
   std::set_difference(allObjects.begin(), allObjects.end(), m_visited.begin(),
                       m_visited.end(),
                       std::inserter(diffObjects, diffObjects.begin()));

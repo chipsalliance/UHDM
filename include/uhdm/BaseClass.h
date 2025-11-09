@@ -29,6 +29,7 @@
 
 #include <uhdm/RTTI.h>
 #include <uhdm/SymbolFactory.h>
+#include <uhdm/containers.h>
 #include <uhdm/uhdm_types.h>
 
 #include <algorithm>
@@ -47,9 +48,6 @@ class UhdmComparer;
 #ifndef SWIG
 static inline constexpr std::string_view kEmpty("");
 #endif
-
-using AnySet = std::set<const BaseClass*>;
-using CommentCollection = std::vector<Comment*>;
 
 class ClientData {
  public:

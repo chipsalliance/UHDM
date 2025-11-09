@@ -27,31 +27,22 @@
 #ifndef UHDM_UHDMVISITOR_H
 #define UHDM_UHDMVISITOR_H
 
-#include <uhdm/BaseClass.h>
 #include <uhdm/containers.h>
 #include <uhdm/sv_vpi_user.h>
 #include <uhdm/uhdm_types.h>
-
-#include <algorithm>
-#include <set>
-#include <vector>
-
 
 namespace uhdm {
 class Serializer;
 
 class UhdmVisitor {
-protected:
-  using any_set_t = std::set<const Any *>;
-
 public:
   // Use implicit constructor to initialize all members
   // VpiListener()
   virtual ~UhdmVisitor() = default;
 
 public:
-  any_set_t &getVisited() { return m_visited; }
-  const any_set_t &getVisited() const { return m_visited; }
+  AnySet &getVisited() { return m_visited; }
+  const AnySet &getVisited() const { return m_visited; }
 
   void requestAbort() { m_abortRequested = true; }
 
@@ -72,7 +63,7 @@ private:
   // clang-format on
 
 protected:
-  any_set_t m_visited;
+  AnySet m_visited;
   bool m_abortRequested = false;
 };
 }  // namespace uhdm

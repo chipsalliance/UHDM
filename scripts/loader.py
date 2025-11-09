@@ -24,7 +24,7 @@ def _load_one_model(filepath):
             if not line: # empty line, ignore!
                 continue
 
-            m = re.match('^[-]?\s*(?P<key>\w+)\s*:\s*(?P<value>.+)$', line)
+            m = re.match(r'^[-]?\s*(?P<key>\w+)\s*:\s*(?P<value>.+)$', line)
             if not m:
               print(f'Failed to parse {filepath}:{lineNo}')
               continue  # TODO(HS): Should this be an error?

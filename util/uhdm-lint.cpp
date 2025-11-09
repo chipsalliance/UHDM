@@ -205,7 +205,7 @@ int32_t main(int32_t argc, char** argv) {
   linter->listenDesigns(designs);
   delete linter;
 
-  std::set<const uhdm::Any*> nonSynthesizableObjects;
+  uhdm::AnySet nonSynthesizableObjects;
   uhdm::SynthSubset* annotate = new uhdm::SynthSubset(
       serializer.get(), nonSynthesizableObjects, design, true, true);
   annotate->listenDesigns(designs);

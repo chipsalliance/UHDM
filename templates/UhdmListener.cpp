@@ -26,6 +26,7 @@
 #include <uhdm/uhdm.h>
 
 // System headers
+#include <algorithm>
 #include <map>
 
 namespace uhdm {
@@ -38,10 +39,22 @@ ScopedVpiHandle::~ScopedVpiHandle() {
   }
 }
 
+bool UhdmListener::isOnCallstack(const Any* what) const {
+  return std::find(m_callstack.crbegin(), m_callstack.crend(), what) !=
+         m_callstack.rend();
+}
+
+bool UhdmListener::isOnCallstack(const std::set<UhdmType>& types) const {
+  return std::find_if(m_callstack.crbegin(), m_callstack.crend(),
+                      [&types](const Any* const which) {
+                        return types.find(which->getUhdmType()) != types.end();
+                      }) != m_callstack.rend();
+}
+
 bool UhdmListener::didVisitAll(const Serializer& serializer) const {
   const Serializer::IdMap idMap = serializer.getAllObjects();
 
-  any_set_t allObjects;
+  AnySet allObjects;
   std::transform(
       idMap.cbegin(), idMap.cend(),
       std::inserter(allObjects, allObjects.begin()),
@@ -49,10 +62,10 @@ bool UhdmListener::didVisitAll(const Serializer& serializer) const {
         return entry.first;
       });
 
-  any_set_t diffObjects;
-  std::set_difference(allObjects.begin(), allObjects.end(), m_visited.begin(),
-                      m_visited.end(),
-                      std::inserter(diffObjects, diffObjects.begin()));
+  AnySet diffObjects;
+  std::set_difference(
+      allObjects.begin(), allObjects.end(), m_visited.begin(), m_visited.end(),
+      std::inserter(diffObjects, diffObjects.begin()), AnyLessComparer());
 
   return diffObjects.empty();
 }
