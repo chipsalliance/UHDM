@@ -76,7 +76,7 @@ jobs:
 
         cmake --build out/build -j `nproc`
         cmake --install out/build
-        cmake --build out/build --target UHDMUnitTests -j `nproc`
+        cmake --build out/build --target UhdmUnitTests -j `nproc`
         cmake --build out/build --target test_inst -j `nproc`
 
         find out/build/bin -name test_inst* -exec {} \;
@@ -110,7 +110,7 @@ jobs:
         if %errorlevel% neq 0 exit /b %errorlevel%
         cmake --install out/build
         if %errorlevel% neq 0 exit /b %errorlevel%
-        cmake --build out/build --target UHDMUnitTests -j %NUMBER_OF_PROCESSORS%
+        cmake --build out/build --target UhdmUnitTests -j %NUMBER_OF_PROCESSORS%
         if %errorlevel% neq 0 exit /b %errorlevel%
         cmake --build out/build --target test_inst -j %NUMBER_OF_PROCESSORS%
         if %errorlevel% neq 0 exit /b %errorlevel%

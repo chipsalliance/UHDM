@@ -241,6 +241,16 @@ class Serializer final {
     return makeCollection<T>(m_factories[T::kUhdmType]);
   }
 
+  template <typename T>
+  T* clone(const T *source) {
+    Factory *const factory = m_factories[T::kUhdmType];
+    T* const target = factory->template make<T>();
+    *target = *source;
+    target->setSerializer(this);
+    target->setUhdmId(++m_objId);
+    return target;
+  }
+
   SymbolId makeSymbol(std::string_view symbol);
   std::string_view getSymbol(SymbolId id) const;
   SymbolId getSymbolId(std::string_view symbol) const;

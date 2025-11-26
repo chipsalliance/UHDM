@@ -43,6 +43,20 @@ def _get_listeners(classname, vpi, type, card):
   return listeners
 
 
+def _get_trace_listeners(models):
+    methods = []
+    for model in models.values():
+        if model['type'] not in ['class_def', 'group_def']:
+            classname = model['name']
+            ClassName = config.make_class_name(classname)
+
+            methods.append(f'    void enter{ClassName}(const {ClassName}* object, vpiHandle handle) final {{ TRACE_ENTER; }}')
+            methods.append(f'    void leave{ClassName}(const {ClassName}* object, vpiHandle handle) final {{ TRACE_LEAVE; }}')
+            methods.append('')
+
+    return methods
+
+
 def generate(models):
   private_declarations = []
   private_implementations = []
@@ -106,22 +120,25 @@ def generate(models):
 
     public_declarations.append(f'  void listen{classname}(vpiHandle handle);')
 
+  trace_listeners = _get_trace_listeners(models)
+
   # VpiListener.h
   with open(config.get_template_filepath('VpiListener.h'), 'rt') as strm:
     file_content = strm.read()
 
-  file_content = file_content.replace('<VPI_PUBLIC_LISTEN_DECLARATIONS>', '\n'.join(public_declarations))
-  file_content = file_content.replace('<VPI_PRIVATE_LISTEN_DECLARATIONS>', '\n'.join(private_declarations))
-  file_content = file_content.replace('<VPI_ENTER_LEAVE_DECLARATIONS>', '\n'.join(enter_leave_declarations))
+  file_content = file_content.replace('//<VPI_PUBLIC_LISTEN_DECLARATIONS>', '\n'.join(public_declarations))
+  file_content = file_content.replace('//<VPI_PRIVATE_LISTEN_DECLARATIONS>', '\n'.join(private_declarations))
+  file_content = file_content.replace('//<VPI_ENTER_LEAVE_DECLARATIONS>', '\n'.join(enter_leave_declarations))
+  file_content = file_content.replace('//<VPI_LISTENER_TRACER_METHODS>', '\n'.join(trace_listeners))
   file_utils.set_content_if_changed(config.get_output_header_filepath('VpiListener.h'), file_content)
 
   # VpiListener.cpp
   with open(config.get_template_filepath('VpiListener.cpp'), 'rt') as strm:
     file_content = strm.read()
 
-  file_content = file_content.replace('<VPI_PRIVATE_LISTEN_IMPLEMENTATIONS>', '\n'.join(private_implementations))
-  file_content = file_content.replace('<VPI_PUBLIC_LISTEN_IMPLEMENTATIONS>', '\n'.join(public_implementations))
-  file_content = file_content.replace('<VPI_LISTENANY_IMPLEMENTATION>', '\n'.join(any_implementation))
+  file_content = file_content.replace('//<VPI_PRIVATE_LISTEN_IMPLEMENTATIONS>', '\n'.join(private_implementations))
+  file_content = file_content.replace('//<VPI_PUBLIC_LISTEN_IMPLEMENTATIONS>', '\n'.join(public_implementations))
+  file_content = file_content.replace('//<VPI_LISTENANY_IMPLEMENTATION>', '\n'.join(any_implementation))
   file_utils.set_content_if_changed(config.get_output_source_filepath('VpiListener.cpp'), file_content)
 
   return True

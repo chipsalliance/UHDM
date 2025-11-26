@@ -24,7 +24,6 @@
  */
 
 #include <uhdm/<CLASSNAME_HEADER>.h>
-#include <uhdm/ElaboratorListener.h>
 #include <uhdm/Serializer.h>
 <INCLUDES>
 

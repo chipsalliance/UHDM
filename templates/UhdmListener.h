@@ -27,24 +27,32 @@
 #ifndef UHDM_UHDMLISTENER_H
 #define UHDM_UHDMLISTENER_H
 
+#include <uhdm/BaseClass.h>
 #include <uhdm/containers.h>
 #include <uhdm/sv_vpi_user.h>
 #include <uhdm/uhdm_types.h>
 
+#include <ostream>
+#include <string>
+
+#define TRACE_CONTEXT                   \
+  "[" << ((const Any*)object)->getStartLine() <<      \
+  "," << ((const Any*)object)->getStartColumn() <<    \
+  ":" << ((const Any*)object)->getEndLine() <<        \
+  "," << ((const Any*)object)->getEndColumn() <<      \
+  "]"
+
+#define TRACE_ENTER strm                \
+  << std::string(++indent * 2, ' ')     \
+  << __func__ << ": " << TRACE_CONTEXT  \
+  << std::endl
+#define TRACE_LEAVE strm                \
+  << std::string(2 * indent--, ' ')     \
+  << __func__ << ": " << TRACE_CONTEXT  \
+  << std::endl
+
 namespace uhdm {
 class Serializer;
-
-class ScopedVpiHandle final {
- public:
-  ScopedVpiHandle(const Any *any);
-  ~ScopedVpiHandle();
-
-  operator vpiHandle() const { return handle; }
-
- private:
-  const vpiHandle handle = nullptr;
-};
-
 class UhdmListener {
 protected:
   using any_stack_t = std::vector<const Any *>;
@@ -68,21 +76,33 @@ public:
   bool didVisitAll(const Serializer &serializer) const;
 
   void listenAny(const Any* object, uint32_t vpiRelation = 0);
-<UHDM_PUBLIC_LISTEN_DECLARATIONS>
+//<UHDM_PUBLIC_LISTEN_DECLARATIONS>
 
   virtual void enterAny(const Any* object, uint32_t vpiRelation) {}
   virtual void leaveAny(const Any* object, uint32_t vpiRelation) {}
 
-<UHDM_ENTER_LEAVE_DECLARATIONS>
-<UHDM_ENTER_LEAVE_COLLECTION_DECLARATIONS>
+//<UHDM_ENTER_LEAVE_DECLARATIONS>
+//<UHDM_ENTER_LEAVE_COLLECTION_DECLARATIONS>
 private:
   void listenAny_(const Any* object);
-<UHDM_PRIVATE_LISTEN_DECLARATIONS>
+//<UHDM_PRIVATE_LISTEN_DECLARATIONS>
 
 protected:
   AnySet m_visited;
   any_stack_t m_callstack;
   bool m_abortRequested = false;
+};
+
+class UhdmListenerTracer : public UhdmListener {
+  public:
+    UhdmListenerTracer(std::ostream &strm) : strm(strm) {}
+    ~UhdmListenerTracer() final = default;
+
+//<UHDM_LISTENER_OBJECT_TRACER_METHODS>
+//<UHDM_LISTENER_COLLECTION_TRACER_METHODS>
+  protected:
+   std::ostream &strm;
+   int32_t indent = -1;
 };
 }  // namespace uhdm
 

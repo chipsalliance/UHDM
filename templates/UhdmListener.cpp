@@ -30,15 +30,6 @@
 #include <map>
 
 namespace uhdm {
-ScopedVpiHandle::ScopedVpiHandle(const Any* any)
-    : handle(NewVpiHandle(any)) {}
-
-ScopedVpiHandle::~ScopedVpiHandle() {
-  if (handle != nullptr) {
-    vpi_release_handle(handle);
-  }
-}
-
 bool UhdmListener::isOnCallstack(const Any* what) const {
   return std::find(m_callstack.crbegin(), m_callstack.crend(), what) !=
          m_callstack.rend();
@@ -79,13 +70,13 @@ void UhdmListener::listenAny_(const Any* object) {
   // }
 }
 
-<UHDM_PRIVATE_LISTEN_IMPLEMENTATIONS>
-<UHDM_PUBLIC_LISTEN_IMPLEMENTATIONS>
+//<UHDM_PRIVATE_LISTEN_IMPLEMENTATIONS>
+//<UHDM_PUBLIC_LISTEN_IMPLEMENTATIONS>
 void UhdmListener::listenAny(const Any* object, uint32_t vpiRelation) {
   if (m_abortRequested) return;
   enterAny(object, vpiRelation);
   switch (object->getUhdmType()) {
-<UHDM_LISTENANY_IMPLEMENTATION>
+//<UHDM_LISTENANY_IMPLEMENTATION>
     default: break;
   }
   leaveAny(object, vpiRelation);

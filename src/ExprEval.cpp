@@ -22,12 +22,12 @@
  * Created on July 3, 2021, 8:03 PM
  */
 
-#include <uhdm/ElaboratorListener.h>
+#include <uhdm/Elaborator.h>
 #include <uhdm/ExprEval.h>
 #include <uhdm/NumUtils.h>
+#include <uhdm/Serializer.h>
 #include <uhdm/UhdmVisitor.h>
 #include <uhdm/Utils.h>
-#include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
 #include <cmath>
@@ -837,13 +837,10 @@ Expr *ExprEval::flattenPatternAssignments(Serializer &s, const Typespec *tps,
       index++;
     }
     index = 0;
-    ElaboratorContext elaboratorContext(&s, false, m_muteError);
+    Elaborator elaborator(&s, false, m_muteError);
     for (auto opi : tmp) {
       if (defaultOp && (opi == nullptr)) {
-        opi = clone_tree((Any *)defaultOp, &elaboratorContext);
-        if (opi != nullptr) {
-          opi->setParent(const_cast<Any *>(defaultOp->getParent()));
-        }
+        opi = elaborator.clone<>(defaultOp, defaultOp->getParent());
       }
       if (opi == nullptr) {
         if (!m_muteError) {
@@ -889,8 +886,7 @@ Expr *ExprEval::flattenPatternAssignments(Serializer &s, const Typespec *tps,
       ordered->emplace_back(opi);
       index++;
     }
-    Operation *opres = (Operation *)clone_tree((Any *)op, &elaboratorContext);
-    opres->setParent(const_cast<Any *>(op->getParent()));
+    Operation *opres = elaborator.clone<>(op, op->getParent());
     opres->setOperands(ordered);
     if (flatten) {
       opres->setFlattened(true);
@@ -1838,13 +1834,11 @@ Any *ExprEval::decodeHierPath(HierPath *path, bool &invalidValue,
     } else if (RefObj *ref = any_cast<RefObj>(object)) {
       object = reduceExpr(ref, invalidValue, inst, pexpr, muteError);
     } else if (Constant *cons = any_cast<Constant>(object)) {
-      ElaboratorContext elaboratorContext(&s);
-      object = clone_tree(cons, &elaboratorContext);
+      Elaborator elaborator(&s);
+      object = elaborator.clone<>(cons, nullptr);
       cons = any_cast<Constant>(object);
       if (cons->getTypespec() == nullptr) {
-        RefTypespec *rt =
-            (RefTypespec *)clone_tree(path->getTypespec(), &elaboratorContext);
-        rt->setParent(cons);
+        RefTypespec *rt = elaborator.clone<>(path->getTypespec(), cons);
         cons->setTypespec(rt);
       }
     } else if (Operation *oper = any_cast<Operation>(object)) {
@@ -3900,12 +3894,10 @@ Expr *ExprEval::reduceExpr(const Any *result, bool &invalidValue,
                           oprt->getActual<ArrayTypespec>()) {
                     if (const RefTypespec *ert = atps->getElemTypespec()) {
                       if (const Typespec *ertts = ert->getActual()) {
-                        ElaboratorContext elaboratorContext(&s, false,
-                                                            muteError);
+                        Elaborator elaborator(&s, false, muteError);
                         RefTypespec *celrt =
-                            (RefTypespec *)clone_tree(ert, &elaboratorContext);
+                            elaborator.clone<>(ert, const_cast<Any *>(result));
                         celrt->setActual(const_cast<Typespec *>(ertts));
-                        celrt->setParent((Any *)result);
                         ((Operation *)result)->setTypespec(celrt);
                       }
                     }
@@ -4868,9 +4860,9 @@ Expr *ExprEval::evalFunc(Function *func, std::vector<Any *> *args,
   if (ParamAssigns) {
     modinst->setParamAssigns(s.makeCollection<ParamAssign>());
     for (auto p : *ParamAssigns) {
-      ElaboratorContext elaboratorContext(&s, false, muteError);
-      Any *pp = clone_tree(p, &elaboratorContext);
-      modinst->getParamAssigns()->emplace_back((ParamAssign *)pp);
+      Elaborator elaborator(&s, false, muteError);
+      ParamAssign *pp = elaborator.clone<>(p, nullptr);
+      modinst->getParamAssigns()->emplace_back(pp);
       const Typespec *tps = nullptr;
       if (const Expr *lhs = any_cast<const Expr *>(p->getLhs())) {
         if (const RefTypespec *rt = lhs->getTypespec()) {
@@ -5005,8 +4997,8 @@ Expr *ExprEval::evalFunc(Function *func, std::vector<Any *> *args,
           if (p->getRhs() &&
               (p->getRhs()->getUhdmType() == UhdmType::Constant)) {
             Constant *c = (Constant *)p->getRhs();
-            ElaboratorContext elaboratorContext(&s, false, muteError);
-            c = (Constant *)clone_tree(c, &elaboratorContext);
+            Elaborator elaborator(&s, false, muteError);
+            c = elaborator.clone<>(c, nullptr);
             if (c->getConstType() == vpiBinaryConst) {
               std::string_view val = c->getValue();
               val.remove_prefix(std::string_view("BIN:").length());

@@ -347,129 +347,6 @@ def _get_data_member(name, type, vpi, card):
     return content
 
 
-def _get_deepClone_implementation(model, models):
-    classname = model.get('name')
-    ClassName = config.make_class_name(classname)
-    modeltype = model.get('type')
-
-    includes = set()
-    content = []
-    content.append(f'void {ClassName}::deepCopy({ClassName}* clone, BaseClass* parent, CloneContext* context) const {{')
-
-    content.append(f'  basetype_t::deepCopy(clone, parent, context);')
-    vpi_name = config.make_vpi_name(classname)
-
-    for key, value in model.allitems():
-        if key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
-            name = value.get('name')
-            type = value.get('type')
-            card = value.get('card')
-
-            TypeName = config.make_class_name('any' if key == 'group_ref' else type)
-            FuncName = config.make_func_name(name, card)
-            varName = config.make_var_name(name, card)
-
-            # Unary relations
-            if card == '1':
-                if (ClassName in ['RefObj', 'BitSelect', 'IndexedPartSelect', 'PartSelect', 'VarSelect']) and (varName == 'actual'):
-                    content.append('  if (clone->m_actual == nullptr) clone->m_actual = m_actual;')
-
-                elif (ClassName in ['RefTypespec']) and (varName == 'actual'):
-                    content.append('  if (clone->m_actual == nullptr) clone->m_actual = m_actual;')
-
-                elif (ClassName == 'Udp') and (varName == 'udpDefn'):
-                    content.append('  if (clone->m_udpDefn == nullptr) clone->m_udpDefn = m_udpDefn;')
-
-                elif (ClassName == 'ClassTypespec') and (varName == 'classDefn'):
-                    content.append('  if (clone->m_classDefn == nullptr) clone->m_classDefn = m_classDefn;')
-
-                elif name in ['Task', 'Function']:
-                    prefix = 'nullptr'
-                    includes.add(name.lower())
-                    if ClassName.startswith('Method'):
-                        includes.add('ref_obj')
-                        includes.add('class_var')
-                        includes.add(name.lower())
-                        content.append('  const ClassVar* prefix = nullptr;')
-                        content.append('  if (const RefObj *const ref = clone->getPrefix<RefObj>()) {')
-                        content.append('    prefix = ref->getActual<ClassVar>();')
-                        content.append('  }')
-                        prefix = 'prefix'
-
-                elif (ClassName == 'Disable') and (varName == 'vpiExpr'):
-                    content.append('  clone->m_vpiExpr = m_vpiExpr;')
-
-                elif (ClassName == 'IntTypespec') and (varName == 'castToExpr'):
-                    content.append('  clone->m_castToExpr = m_castToExpr;')
-
-                elif (ClassName == 'Function') and (varName == 'return'):
-                    content.append('  clone->m_return = m_return;')
-
-                elif (ClassName == 'ClassTypespec') and (varName == 'Class_defn'):
-                    content.append('  clone->m_Class_defn = m_Class_defn;')
-
-                elif varName == 'instance':
-                    includes.add('instance')
-                    content.append(f'  clone->m_{varName} = m_{varName};')
-                    content.append( '  if (parent != nullptr) {')
-                    content.append( '    if (Instance *const inst = parent->Cast<Instance>())')
-                    content.append( '      clone->setInstance(inst);')
-                    content.append( '  }')
-
-                elif varName in ['module', 'interface']:
-                    content.append(f'  clone->m_{varName} = m_{varName};')
-
-                else:
-                    content.append(f'  if (m_{varName} != nullptr) clone->m_{varName} = m_{varName}->deepClone(clone, context);')
-
-            elif (ClassName == 'Module') and (varName == 'refModules'):
-                pass # No cloning
-
-            elif varName == 'typespecs':
-                # Don't deep clone
-                content.append(f'  if (m_{varName} != nullptr) {{')
-                content.append(f'    auto clone_vec = context->m_serializer->makeCollection<{TypeName}>();')
-                content.append(f'    clone->set{FuncName}(clone_vec);')
-                content.append(f'    clone_vec->insert(clone_vec->cend(), m_{varName}->cbegin(), m_{varName}->cend());')
-                content.append( '  }')
-
-            elif (ClassName == 'ClassDefn') and (varName == 'derivedClasses'):
-                # Don't deep clone
-                content.append(f'  if (m_{varName} != nullptr) {{')
-                content.append(f'    auto clone_vec = context->m_serializer->makeCollection<{TypeName}>();')
-                content.append(f'    clone->set{FuncName}(clone_vec);')
-                content.append(f'    clone_vec->insert(clone_vec->cend(), m_{varName}->cbegin(), m_{varName}->cend());')
-                content.append( '  }')
-
-            else:
-                # N-ary relations
-                content.append(f'  if (auto vec = m_{varName}) {{')
-                content.append(f'    auto clone_vec = context->m_serializer->makeCollection<{TypeName}>();')
-                content.append(f'    clone->set{FuncName}(clone_vec);')
-                content.append(f'    for (auto obj : *vec) {{')
-                content.append( '      clone_vec->emplace_back(obj->deepClone(clone, context));')
-                content.append( '    }')
-                content.append( '  }')
-
-    content.append('}')
-    content.append('')
-
-    if modeltype == 'obj_def':
-        ReturnType = 'TFCall' if ClassName.endswith('Call') else ClassName
-        # deepClone() not implemented for class_def; just declare to narrow the covariant return type.
-        content.append(f'{ReturnType}* {ClassName}::deepClone(BaseClass* parent, CloneContext* context) const {{')
-        content.append(f'  {ClassName}* const clone = context->m_serializer->make<{ClassName}>();')
-        content.append('  const uint32_t id = clone->getUhdmId();')
-        content.append('  *clone = *this;')
-        content.append('  clone->setUhdmId(id);')
-        content.append('  deepCopy(clone, parent, context);')
-        content.append('  return clone;')
-        content.append('}')
-        content.append('')
-
-    return content, includes
-
-
 def _get_getByVpiName_implementation(model):
     classname = model['name']
     ClassName = config.make_class_name(classname)
@@ -945,13 +822,6 @@ def _generate_one_class(model, models, templates):
         public_declarations.append(f'  uint32_t getVpiType() const {"final" if leaf else "override"} {{ return {vpiclasstype}; }}')
 
     override = 'override' if model['subclasses'] else 'final'
-    if modeltype == 'class_def':
-        # deepClone() not implemented for class_def; just declare to narrow the covariant return type.
-        public_declarations.append(f'  {ClassName}* deepClone(BaseClass* parent, CloneContext* context) const override = 0;')
-    else:
-        return_type = 'TFCall' if ClassName.endswith('Call') else ClassName
-        public_declarations.append(f'  {return_type}* deepClone(BaseClass* parent, CloneContext* context) const {override};')
-
     public_declarations.append(f'  const BaseClass* getByVpiName(std::string_view name) const {override};')
     public_declarations.append(f'  get_by_vpi_type_return_t getByVpiType(int32_t type) const {override};')
     public_declarations.append(f'  vpi_property_value_t getVpiPropertyValue(int32_t property) const {override};')
@@ -970,10 +840,6 @@ def _generate_one_class(model, models, templates):
 
     implementations.extend(_get_getByVpiType_implementation(model, models))
     implementations.extend(_get_getVpiPropertyValue_implementation(model, models))
-
-    func_body, func_includes = _get_deepClone_implementation(model, models)
-    implementations.extend(func_body)
-    includes.update(func_includes)
 
     func_body, func_includes = _get_compare_implementation(model)
     implementations.extend(func_body)

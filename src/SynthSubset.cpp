@@ -23,12 +23,11 @@
  *
  * Created on Feb 16, 2022, 9:03 PM
  */
-#include <uhdm/ElaboratorListener.h>
+#include <uhdm/Elaborator.h>
 #include <uhdm/ExprEval.h>
 #include <uhdm/Serializer.h>
 #include <uhdm/SynthSubset.h>
 #include <uhdm/Utils.h>
-#include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 #include <uhdm/vpi_visitor.h>
 
@@ -587,9 +586,8 @@ void SynthSubset::leaveForStmt(const ForStmt* object, vpiHandle handle) {
             exprs->push_back(c);
             item->setExprs(exprs);
             items->push_back(item);
-            ElaboratorContext elaboratorContext(m_serializer);
-            ForStmt* clone = (ForStmt*)clone_tree(object, &elaboratorContext);
-            clone->setParent(item);
+            Elaborator elaborator(m_serializer);
+            ForStmt* clone = elaborator.clone<>(object, item);
             Operation* cond_op = any_cast<Operation>(clone->getCondition());
             AnyCollection* operands = cond_op->getOperands();
             for (uint32_t ot = 0; ot < operands->size(); ot++) {

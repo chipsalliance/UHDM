@@ -148,17 +148,10 @@ class BaseClass : public RTTI {
   using vpi_property_value_t = std::variant<int64_t, const char*>;
   virtual vpi_property_value_t getVpiPropertyValue(int32_t property) const;
 
-  // Create a deep copy of this object.
-  virtual BaseClass* deepClone(BaseClass* parent,
-                               CloneContext* context) const = 0;
-
   virtual int32_t compare(const BaseClass* other,
                           UhdmComparer* comparer) const;
 
  protected:
-  void deepCopy(BaseClass* clone, BaseClass* parent,
-                CloneContext* context) const;
-
   std::string computeFullName() const;
 
   void setSerializer(Serializer* serializer) { m_serializer = serializer; }

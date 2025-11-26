@@ -9,7 +9,6 @@
 
 // uhdm
 #include "uhdm/VpiListener.h"
-#include "uhdm/VpiListenerTracer.h"
 
 // We include this last to make sure that the headers above don't accidentally
 // depend on any class defined here

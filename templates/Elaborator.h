@@ -18,44 +18,41 @@
  */
 
 /*
- * File:   ElaboratorListener.h
- * Author: alaindargelas
+ * File:   Elaborator.h
+ * Author: hs
  *
- * Created on May 6, 2020, 10:03 PM
+ * Created on November 24, 2025, 10:03 PM
  */
 
-#ifndef UHDM_ELABORATORLISTENER_H
-#define UHDM_ELABORATORLISTENER_H
+#ifndef UHDM_ELABORATOR_H
+#define UHDM_ELABORATOR_H
 
-#include <uhdm/BaseClass.h>
+#include <uhdm/Cloner.h>
 #include <uhdm/VpiListener.h>
+#include <uhdm/containers.h>
 
 #include <map>
-#include <unordered_set>
 #include <vector>
 
 namespace uhdm {
-
-class ElaboratorContext;
-class ElaboratorListener;
 class Serializer;
 
-class ElaboratorListener final : public VpiListener {
-  friend class Function;
-  friend class Task;
-  friend class GenScopeArray;
-
+class Elaborator final : public VpiListener, public Cloner {
  public:
-  void setContext(ElaboratorContext* context) { m_context = context; }
+  explicit Elaborator(Serializer* serializer, bool debug = false,
+                      bool muteErrors = false);
+
   void uniquifyTypespec(bool uniquify) { m_uniquifyTypespec = uniquify; }
-  bool uniquifyTypespec() { return m_uniquifyTypespec; }
+  bool uniquifyTypespec() const { return m_uniquifyTypespec; }
   void bindOnly(bool bindOnly) { m_clone = !bindOnly; }
-  bool bindOnly() { return !m_clone; }
+  bool bindOnly() const { return !m_clone; }
   bool isFunctionCall(std::string_view name, const Expr* prefix) const;
-  bool muteErrors() { return m_muteErrors; }
+  bool muteErrors() const { return m_muteErrors; }
   bool isTaskCall(std::string_view name, const Expr* prefix) const;
   void ignoreLastInstance(bool ignore) { m_ignoreLastInstance = ignore; }
+  using Cloner::clone;
 
+ private:
   // Bind to a net in the current instance
   Any* bindNet(std::string_view name) const;
 
@@ -69,17 +66,13 @@ class ElaboratorListener final : public VpiListener {
   TaskFunc* bindTaskFunc(std::string_view name,
                          const Variable* prefix = nullptr) const;
 
-  void scheduleTaskFuncBinding(TFCall* clone, const Variable* prefix) {
-    m_scheduledTfCallBinding.emplace_back(clone, prefix);
-  }
   void bindScheduledTaskFunc();
 
-  using ComponentMap = std::map<std::string, const BaseClass*, std::less<>>;
+  void enterAny(const Any* object, vpiHandle handle) final;
 
   void leaveDesign(const Design* object, vpiHandle handle) final;
 
   void enterModule(const Module* object, vpiHandle handle) final;
-  void elabModule(const Module* object, vpiHandle handle);
   void leaveModule(const Module* object, vpiHandle handle) final;
 
   void enterInterface(const Interface* object, vpiHandle handle) final;
@@ -89,7 +82,6 @@ class ElaboratorListener final : public VpiListener {
   void leavePackage(const Package* object, vpiHandle handle) final;
 
   void enterClassDefn(const ClassDefn* object, vpiHandle handle) final;
-  void elabClassDefn(const ClassDefn* object, vpiHandle handle);
   void leaveClassDefn(const ClassDefn* object, vpiHandle handle) final;
 
   void enterGenScope(const GenScope* object, vpiHandle handle) final;
@@ -125,55 +117,86 @@ class ElaboratorListener final : public VpiListener {
   void leaveMethodFuncCall(const MethodFuncCall* object,
                            vpiHandle handle) final;
 
-  void enterVariable(const Variable* object, vpiHandle handle) final;
-
   void pushVar(Any* var);
   void popVar(Any* var);
 
+  Any* bindClassTypespec(ClassTypespec* ctps, Any* current,
+                         std::string_view name, bool& found);
+
+  Any* cloneAny(const Any* source, Any* parent) final;
+
+  Constant* clone(const Constant* source, Any* parent) final;
+  ContAssign* clone(const ContAssign* source, Any* parent) final;
+  Function* clone(const Function* source, Any* parent) final;
+  GenScopeArray* clone(const GenScopeArray* source, Any* parent) final;
+  HierPath* clone(const HierPath* source, Any* parent) final;
+  SysFuncCall* clone(const SysFuncCall* source, Any* parent) final;
+  SysTaskCall* clone(const SysTaskCall* source, Any* parent) final;
+  TaggedPattern* clone(const TaggedPattern* source, Any* parent) final;
+  Task* clone(const Task* source, Any* parent) final;
+  TFCall* clone(const FuncCall* source, Any* parent) final;
+  TFCall* clone(const MethodFuncCall* source, Any* parent) final;
+  TFCall* clone(const MethodTaskCall* source, Any* parent) final;
+  TFCall* clone(const TaskCall* source, Any* parent) final;
+
+  Typespec* clone(const ArrayTypespec* source, Any* parent) final;
+  Typespec* clone(const BitTypespec* source, Any* parent) final;
+  Typespec* clone(const ByteTypespec* source, Any* parent) final;
+  Typespec* clone(const ChandleTypespec* source, Any* parent) final;
+  Typespec* clone(const ClassTypespec* source, Any* parent) final;
+  Typespec* clone(const EnumTypespec* source, Any* parent) final;
+  Typespec* clone(const EventTypespec* source, Any* parent) final;
+  Typespec* clone(const ImportTypespec* source, Any* parent) final;
+  Typespec* clone(const IntTypespec* source, Any* parent) final;
+  Typespec* clone(const IntegerTypespec* source, Any* parent) final;
+  Typespec* clone(const InterfaceTypespec* source, Any* parent) final;
+  Typespec* clone(const LogicTypespec* source, Any* parent) final;
+  Typespec* clone(const LongIntTypespec* source, Any* parent) final;
+  Typespec* clone(const ModuleTypespec* source, Any* parent) final;
+  Typespec* clone(const PropertyTypespec* source, Any* parent) final;
+  Typespec* clone(const RealTypespec* source, Any* parent) final;
+  Typespec* clone(const SequenceTypespec* source, Any* parent) final;
+  Typespec* clone(const ShortIntTypespec* source, Any* parent) final;
+  Typespec* clone(const ShortRealTypespec* source, Any* parent) final;
+  Typespec* clone(const StringTypespec* source, Any* parent) final;
+  Typespec* clone(const StructTypespec* source, Any* parent) final;
+  Typespec* clone(const TimeTypespec* source, Any* parent) final;
+  Typespec* clone(const TypeParameter* source, Any* parent) final;
+  Typespec* clone(const UnionTypespec* source, Any* parent) final;
+  Typespec* clone(const UnsupportedTypespec* source, Any* parent) final;
+  Typespec* clone(const VoidTypespec* source, Any* parent) final;
+
+  // clang-format off
+  using Cloner::copy;
+//<COPY_DECLARATIONS>
+  // clang-format on
+
  private:
-  explicit ElaboratorListener(Serializer* serializer, bool debug = false,
-                              bool muteErrors = false)
-      : m_serializer(serializer), m_debug(debug), m_muteErrors(muteErrors) {}
+  void enterVariable(const Variable* object, vpiHandle handle);
 
   void enterTaskFunc(const TaskFunc* object, vpiHandle handle);
   void leaveTaskFunc(const TaskFunc* object, vpiHandle handle);
 
+  using ComponentMap = std::map<std::string, const BaseClass*, std::less<>>;
   // Instance context stack
   using InstStack =
       std::vector<std::tuple<const BaseClass*, ComponentMap, ComponentMap,
                              ComponentMap, ComponentMap>>;
-  InstStack m_instStack;
+  using ScheduledTfCallBinding =
+      std::vector<std::pair<TFCall*, const Variable*>>;
 
-  // Flat list of components (modules, udps, interfaces)
-  ComponentMap m_flatComponentMap;
-
-  Serializer* m_serializer = nullptr;
-  ElaboratorContext* m_context = nullptr;
-  bool m_inHierarchy = false;
   bool m_debug = false;
   bool m_muteErrors = false;
+  InstStack m_instStack;
+  // Flat list of components (modules, udps, interfaces)
+  ComponentMap m_flatComponentMap;
+  ScheduledTfCallBinding m_scheduledTfCallBinding;
+  bool m_inHierarchy = false;
   bool m_uniquifyTypespec = true;
   bool m_clone = true;
   bool m_ignoreLastInstance = false;
-  std::vector<std::pair<TFCall*, const Variable*>> m_scheduledTfCallBinding;
-
-  friend class ElaboratorContext;
+  bool m_isInUhdmAllIterator = false;
 };
+};  // namespace uhdm
 
-class ElaboratorContext final : public CloneContext {
-  UHDM_IMPLEMENT_RTTI(ElaboratorContext, CloneContext)
-
- public:
-  explicit ElaboratorContext(Serializer* serializer, bool debug = false,
-                             bool muteErrors = false)
-      : CloneContext(serializer), m_elaborator(serializer, debug, muteErrors) {
-    m_elaborator.setContext(this);
-  }
-  ~ElaboratorContext() final = default;
-
-  ElaboratorListener m_elaborator;
-};
-
-}  // namespace uhdm
-
-#endif  // UHDM_ELABORATORLISTENER_H
+#endif  // UHDM_ELABORATOR_H

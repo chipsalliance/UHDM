@@ -23,13 +23,12 @@
  *
  * Created on Jan 3, 2022, 9:03 PM
  */
-#include <uhdm/ElaboratorListener.h>
+#include <uhdm/Elaborator.h>
 #include <uhdm/ExprEval.h>
 #include <uhdm/NumUtils.h>
 #include <uhdm/Serializer.h>
 #include <uhdm/UhdmAdjuster.h>
 #include <uhdm/Utils.h>
-#include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
 #include <cstring>
@@ -47,8 +46,8 @@ const Any* UhdmAdjuster::resize(const Any* object, int32_t maxsize,
   if (type == UhdmType::Constant) {
     Constant* c = (Constant*)result;
     if (c->getSize() < maxsize) {
-      ElaboratorContext elaboratorContext(m_serializer);
-      c = (Constant*)clone_tree(c, &elaboratorContext);
+      Elaborator elaborator(m_serializer);
+      c = elaborator.clone<>(c, nullptr);
       int32_t constType = c->getConstType();
       bool is_signed = false;
       if (const RefTypespec* rt = c->getTypespec()) {
@@ -215,7 +214,7 @@ void UhdmAdjuster::leaveConstant(const Constant* object, vpiHandle handle) {
     int32_t size = object->getSize();
     bool invalidValue = false;
     ExprEval eval;
-    ElaboratorContext elaboratorContext(m_serializer);
+    Elaborator elaborator(m_serializer);
     if (parent) {
       if (parent->getUhdmType() == UhdmType::Operation) {
         Operation* op = (Operation*)parent;
@@ -234,7 +233,7 @@ void UhdmAdjuster::leaveConstant(const Constant* object, vpiHandle handle) {
           i++;
         }
         if (size != object->getSize()) {
-          Constant* newc = (Constant*)clone_tree(object, &elaboratorContext);
+          Constant* newc = elaborator.clone<>(object, nullptr);
           newc->setSize(size);
           int64_t val = eval.get_value(invalidValue, object);
           if (val == 1) {
@@ -271,7 +270,7 @@ void UhdmAdjuster::leaveConstant(const Constant* object, vpiHandle handle) {
           }
         }
         if (size != object->getSize()) {
-          Constant* newc = (Constant*)clone_tree(object, &elaboratorContext);
+          Constant* newc = elaborator.clone<>(object, nullptr);
           newc->setSize(size);
           int64_t val = eval.get_value(invalidValue, object);
           if (val == 1) {

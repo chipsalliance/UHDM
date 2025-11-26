@@ -50,8 +50,6 @@ public:
   <VIRTUAL> UhdmType getUhdmType() const <OVERRIDE_OR_FINAL> { return UhdmType::<CLASSNAME>; }
 
 protected:
-  void deepCopy(<CLASSNAME>* clone, BaseClass* parent, CloneContext* context) const;
-
 <PRIVATE_METHODS>
 
 protected:

@@ -26,7 +26,6 @@
 #include <uhdm/ExprEval.h>
 #include <uhdm/UhdmLint.h>
 #include <uhdm/Utils.h>
-#include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
 #include <cstring>

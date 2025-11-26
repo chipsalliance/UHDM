@@ -1,7 +1,7 @@
 # -*- mode:cmake -*-
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-project(UHDM VERSION 1.84)
+project(UHDM VERSION 1.86)
 
 # Detect build type, fallback to release and throw a warning if use didn't
 # specify any
@@ -121,24 +121,22 @@ endif()
 # All the files the generator depends on.
 file(GLOB yaml_SRC ${PROJECT_SOURCE_DIR}/model/*.yaml)
 file(GLOB templates_SRC ${PROJECT_SOURCE_DIR}/templates/*.h
-     ${PROJECT_SOURCE_DIR}/templates/*.cpp)
-file(GLOB include_SRC ${PROJECT_SOURCE_DIR}/include/*.h)
+                        ${PROJECT_SOURCE_DIR}/templates/*.cpp)
 
 set(model-GENERATED_UHDM ${GENDIR}/src/UHDM.capnp)
 set_source_files_properties(${model-GENERATED_UHDM} PROPERTIES GENERATED TRUE)
 
 file(GLOB py_SRC ${PROJECT_SOURCE_DIR}/scripts/*.py)
 if(NOT EXISTS ${model-GENERATED_UHDM} OR NOT UHDM_USE_HOST_CAPNP)
-add_custom_command(
-  OUTPUT ${model-GENERATED_UHDM}
-  COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/generate.py --source-dirpath=${UHDM_SOURCE_DIR} -output-dirpath=${GENDIR}
-  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  DEPENDS ${PROJECT_SOURCE_DIR}/model/models.lst
-          ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
-          ${py_SRC}
-          ${yaml_SRC}
-          ${templates_SRC}
-          ${include_SRC})
+  add_custom_command(
+    OUTPUT ${model-GENERATED_UHDM} ${uhdm-GENERATED_SRC}
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/generate.py --source-dirpath=${UHDM_SOURCE_DIR} -output-dirpath=${GENDIR}
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    DEPENDS ${PROJECT_SOURCE_DIR}/model/models.lst
+            ${PROJECT_SOURCE_DIR}/templates/UHDM.capnp
+            ${py_SRC}
+            ${yaml_SRC}
+            ${templates_SRC})
 endif()
 
 set(model-GENERATED_SRC ${GENDIR}/src/UHDM.capnp.h
@@ -153,21 +151,9 @@ add_custom_command(
   DEPENDS ${model-GENERATED_UHDM})
 add_custom_target(GenerateCode DEPENDS ${model-GENERATED_SRC})
 
-set(uhdm_SRC
-    ${PROJECT_SOURCE_DIR}/src/BaseClass.cpp
-    ${PROJECT_SOURCE_DIR}/src/clone_tree.cpp
-    ${PROJECT_SOURCE_DIR}/src/ExprEval.cpp
-    ${PROJECT_SOURCE_DIR}/src/NumUtils.cpp
-    ${PROJECT_SOURCE_DIR}/src/SymbolFactory.cpp
-    ${PROJECT_SOURCE_DIR}/src/SymbolId.cpp
-    ${PROJECT_SOURCE_DIR}/src/SynthSubset.cpp
-    ${PROJECT_SOURCE_DIR}/src/UhdmAdjuster.cpp
-    ${PROJECT_SOURCE_DIR}/src/UhdmLint.cpp
-    ${PROJECT_SOURCE_DIR}/src/Utils.cpp
-)
-
 set(uhdm-GENERATED_SRC
-    ${GENDIR}/src/ElaboratorListener.cpp
+    ${GENDIR}/src/Cloner.cpp
+    ${GENDIR}/src/Elaborator.cpp
     ${GENDIR}/src/Serializer.cpp
     ${GENDIR}/src/Serializer_restore.cpp
     ${GENDIR}/src/Serializer_save.cpp
@@ -194,6 +180,20 @@ foreach(src_file ${uhdm-GENERATED_SRC})
   set_source_files_properties(${src_file} PROPERTIES GENERATED TRUE)
 endforeach(src_file ${uhdm-GENERATED_SRC})
 
+set(uhdm_SRC
+    ${PROJECT_SOURCE_DIR}/src/BaseClass.cpp
+    ${PROJECT_SOURCE_DIR}/src/ExprEval.cpp
+    ${PROJECT_SOURCE_DIR}/src/NumUtils.cpp
+    ${PROJECT_SOURCE_DIR}/src/SymbolFactory.cpp
+    ${PROJECT_SOURCE_DIR}/src/SymbolId.cpp
+    ${PROJECT_SOURCE_DIR}/src/SynthSubset.cpp
+    ${PROJECT_SOURCE_DIR}/src/UhdmAdjuster.cpp
+    ${PROJECT_SOURCE_DIR}/src/UhdmLint.cpp
+    ${PROJECT_SOURCE_DIR}/src/Utils.cpp
+    ${uhdm-GENERATED_SRC}
+    ${model-GENERATED_SRC}
+)
+
 # Set version from cmake project and extract latest hash if available.
 set(UHDM_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set(UHDM_VERSION_MINOR ${PROJECT_VERSION_MINOR})
@@ -212,7 +212,7 @@ set(UHDM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 message("Building UHDM version v${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR} [${UHDM_VERSION_COMMIT_SHA}]")
 configure_file(${PROJECT_SOURCE_DIR}/templates/uhdm-version.h.in ${GENDIR}/uhdm/uhdm-version.h)
 
-add_library(uhdm ${uhdm_SRC} ${uhdm-GENERATED_SRC})
+add_library(uhdm ${uhdm_SRC})
 set_target_properties(uhdm PROPERTIES
   PUBLIC_HEADER ${GENDIR}/uhdm/uhdm.h
   SOVERSION "${UHDM_VERSION_MAJOR}.${UHDM_VERSION_MINOR}"
@@ -282,8 +282,8 @@ if (UHDM_BUILD_TESTS)
   enable_testing()
   include(GoogleTest)
   # All unit-tests are registered with this custom target as dependency, so
-  # just `make UHDMUnitTests` will build them all.
-  add_custom_target(UHDMUnitTests)
+  # just `make UhdmUnitTests` will build them all.
+  add_custom_target(UhdmUnitTests)
 
   function(register_tests)
     foreach(test_cc_file IN LISTS ARGN)
@@ -298,14 +298,15 @@ if (UHDM_BUILD_TESTS)
         NAME ${test_prefix}/${test_bin} COMMAND ${test_bin}
         WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
       gtest_discover_tests(${test_bin} TEST_PREFIX "${test_prefix}/")
-      # Now, add this binary to our UHDMUnitTests target that it builds this
-      add_dependencies(UHDMUnitTests ${test_bin})
+      # Now, add this binary to our UhdmUnitTests target that it builds this
+      add_dependencies(UhdmUnitTests ${test_bin})
     endforeach()
   endfunction()
   register_tests(
     # These are already gtest-ified, albeit some would need some finer
     # grained testing.
     tests/classes_test.cpp
+    tests/cloner_test.cpp
     tests/error-handler_test.cpp
     tests/expr_prettyPrint_test.cpp
     tests/expr_reduce_test.cpp

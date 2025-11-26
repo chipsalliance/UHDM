@@ -33,7 +33,6 @@
 #include <unistd.h>
 #endif
 
-#include <uhdm/ElaboratorListener.h>
 #include <uhdm/uhdm-version.h>
 #include <uhdm/uhdm.h>
 

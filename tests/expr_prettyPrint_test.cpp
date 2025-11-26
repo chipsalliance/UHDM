@@ -5,7 +5,7 @@
 
 #include "gtest/gtest.h"
 #include "test_util.h"
-#include "uhdm/ElaboratorListener.h"
+#include "uhdm/Elaborator.h"
 #include "uhdm/Utils.h"
 #include "uhdm/VpiListener.h"
 #include "uhdm/uhdm.h"
@@ -99,10 +99,8 @@ TEST(exprVal, prettyPrint_MinusOp) {
   }
   EXPECT_FALSE(elaborated);
 
-  ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, false);
-  elaboratorContext->m_elaborator.listenDesigns(designs);
-  delete elaboratorContext;
+  Elaborator elaborator(&serializer);
+  elaborator.listenDesigns(designs);
 
   elaborated = false;
   for (auto Design : designs) {
@@ -202,10 +200,8 @@ TEST(exprVal, prettyPrint_ConditionOp) {
   }
   EXPECT_FALSE(elaborated);
 
-  ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, false);
-  elaboratorContext->m_elaborator.listenDesigns(designs);
-  delete elaboratorContext;
+  Elaborator elaborator(&serializer);
+  elaborator.listenDesigns(designs);
 
   elaborated = false;
   for (auto Design : designs) {
@@ -294,10 +290,8 @@ TEST(exprVal, prettyPrint_functionCall) {
   }
   EXPECT_FALSE(elaborated);
 
-  ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, false);
-  elaboratorContext->m_elaborator.listenDesigns(designs);
-  delete elaboratorContext;
+  Elaborator elaborator(&serializer);
+  elaborator.listenDesigns(designs);
 
   elaborated = false;
   for (auto Design : designs) {
@@ -403,10 +397,8 @@ TEST(exprVal, prettyPrint_select) {
   }
   EXPECT_FALSE(elaborated);
 
-  ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, false);
-  elaboratorContext->m_elaborator.listenDesigns(designs);
-  delete elaboratorContext;
+  Elaborator elaborator(&serializer);
+  elaborator.listenDesigns(designs);
 
   elaborated = false;
   for (auto Design : designs) {
@@ -503,10 +495,8 @@ TEST(exprVal, prettyPrint_AssignmentPatternOp) {
   }
   EXPECT_FALSE(elaborated);
 
-  ElaboratorContext* elaboratorContext =
-      new ElaboratorContext(&serializer, false);
-  elaboratorContext->m_elaborator.listenDesigns(designs);
-  delete elaboratorContext;
+  Elaborator elaborator(&serializer);
+  elaborator.listenDesigns(designs);
 
   elaborated = false;
   for (auto Design : designs) {

@@ -113,16 +113,6 @@ BaseClass::vpi_property_value_t BaseClass::getVpiPropertyValue(
   return vpi_property_value_t();
 }
 
-BaseClass* BaseClass::deepClone(BaseClass* parent,
-                                CloneContext* context) const {
-  return nullptr;
-}
-
-void BaseClass::deepCopy(BaseClass* clone, BaseClass* parent,
-                         CloneContext* context) const {
-  clone->setParent(parent);
-}
-
 std::string BaseClass::computeFullName() const {
   if ((getUhdmType() == UhdmType::Module) && (getParent() != nullptr) &&
       (getParent()->getUhdmType() == UhdmType::Module)) {

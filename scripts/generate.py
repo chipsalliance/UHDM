@@ -10,19 +10,18 @@ import capnp
 import class_hierarchy
 import classes
 import containers_h
-import ElaboratorListener_cpp
+import Cloner
+import Elaborator
 import serializer
 import uhdm_forward_decl_h
 import uhdm_h
 import uhdm_types_h
 import UhdmComparer
 import UhdmListener
-import UhdmListenerTracer_h
 import UhdmVisitor
 import vpi_user_cpp
 import vpi_visitor
 import VpiListener
-import VpiListenerTracer_h
 
 
 def _worker(params):
@@ -42,8 +41,11 @@ def _worker(params):
     elif key == 'containers_h':
         return containers_h.generate(*args)
 
-    elif key == 'ElaboratorListener_cpp':
-        return ElaboratorListener_cpp.generate(*args)
+    elif key == 'Cloner':
+        return Cloner.generate(*args)
+
+    elif key == 'Elaborator':
+        return Elaborator.generate(*args)
 
     elif key == 'serializer':
         return serializer.generate(*args)
@@ -63,9 +65,6 @@ def _worker(params):
     elif key == 'UhdmListener':
       return UhdmListener.generate(*args)
 
-    elif key == 'UhdmListenerTracer_h':
-      return UhdmListenerTracer_h.generate(*args)
-
     elif key == 'UhdmVisitor':
       return UhdmVisitor.generate(*args)
 
@@ -77,9 +76,6 @@ def _worker(params):
 
     elif key == 'VpiListener':
         return VpiListener.generate(*args)
-
-    elif key == 'VpiListenerTracer_h':
-        return VpiListenerTracer_h.generate(*args)
 
     config.log('ERROR: Unknown key "{key}"')
     return False
@@ -120,19 +116,18 @@ def _main():
         ('class_hierarchy', [models]),
         ('classes', [models]),
         ('containers_h', [models]),
-        ('ElaboratorListener_cpp', [models]),
+        ('Cloner', [models]),
+        ('Elaborator', [models]),
         ('serializer', [models]),
         ('uhdm_forward_decl_h', [models]),
         ('uhdm_h', [models]),
         ('uhdm_types_h', [models]),
         ('UhdmComparer', [models]),
         ('UhdmListener', [models]),
-        ('UhdmListenerTracer_h', [models]),
         ('UhdmVisitor', [models]),
         ('vpi_user_cpp', [models]),
         ('vpi_visitor', [models]),
         ('VpiListener', [models]),
-        ('VpiListenerTracer_h', [models]),
     ]
 
     if args.parallel:

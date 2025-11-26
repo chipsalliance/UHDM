@@ -35,11 +35,11 @@ debug-shared:
 
 
 test: build
-	cmake --build build --target UnitTests --config Release -j $(CPU_CORES)
+	cmake --build build --target UhdmUnitTests --config Release -j $(CPU_CORES)
 	cd build && ctest -C Release --output-on-failure
 
 test-shared: build-shared
-	cmake --build build --target UnitTests --config Release -j $(CPU_CORES)
+	cmake --build build --target UhdmUnitTests --config Release -j $(CPU_CORES)
 	cd build && ctest -C Release --output-on-failure
 
 
