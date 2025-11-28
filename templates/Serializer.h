@@ -89,9 +89,9 @@ class Factory final {
   using collections_t = std::vector<objects_t*>;
 
  public:
-  template <typename T>
-  T* make() {
-    T* const any = new T;
+  template <typename T, typename... Args>
+  T* make(Args&&... args) {
+    T* const any = new T(args...);
     m_objects.emplace_back(any);
     return any;
   }
@@ -209,8 +209,7 @@ class Serializer final {
  private:
   template <typename T>
   T* make(Factory* const factory) {
-    T *const obj = factory->template make<T>();
-    obj->setSerializer(this);
+    T *const obj = factory->template make<T>(this);
     obj->setUhdmId(++m_objId);
     return obj;
   }
@@ -244,9 +243,7 @@ class Serializer final {
   template <typename T>
   T* clone(const T *source) {
     Factory *const factory = m_factories[T::kUhdmType];
-    T* const target = factory->template make<T>();
-    *target = *source;
-    target->setSerializer(this);
+    T* const target = factory->template make<T>(this, *source);
     target->setUhdmId(++m_objId);
     return target;
   }

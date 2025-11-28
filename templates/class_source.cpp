@@ -25,10 +25,14 @@
 
 #include <uhdm/<CLASSNAME_HEADER>.h>
 #include <uhdm/Serializer.h>
-<INCLUDES>
+//<INCLUDES>
 
 #include <algorithm>
 
 namespace uhdm {
-<METHODS>
+<CLASSNAME>::<CLASSNAME>(Serializer* serializer, const <CLASSNAME>& rhs)
+    : <EXTENDS>(serializer, rhs)
+//<COPY_CONSTRUCTOR_IMPLEMENTATION> {}
+
+//<METHODS>
 }  // namespace uhdm

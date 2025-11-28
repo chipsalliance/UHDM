@@ -21,7 +21,7 @@ def _generate_module_listeners(models, classname):
 
         if card == '1':
           suffix = 'Obj' if type == 'identifier' else ''
-          listeners.append(f'if (auto {varName} = defMod->get{FuncName}{suffix}()) inst->set{FuncName}{suffix}(clone({varName}, inst));')
+          listeners.append(f'if (auto {varName} = defMod->get{FuncName}{suffix}()) inst->set{FuncName}{suffix}(clone({varName}, inst), true);')
 
           if type == 'string' and vpi not in ['vpiFullName']:
             listeners.append(f'  target->set{FuncName}(source->get{FuncName}());')
@@ -49,11 +49,11 @@ def _generate_module_listeners(models, classname):
 
         elif FuncName in ['ContAssigns', 'Primitives', 'PrimitiveArrays', 'Ports']:
           # We want to deep clone existing instance cont assign to perform binding
-          listeners.append(f'if (auto {varName} = inst->get{FuncName}()) inst->set{FuncName}(clone({varName}, inst));')
+          listeners.append(f'if (auto {varName} = inst->get{FuncName}()) inst->set{FuncName}(clone({varName}, inst), true);')
 
         elif FuncName in ['GenScopeArrays']:
           # We want to deep clone existing instance cont assign to perform binding
-          listeners.append(f'if (auto {varName} = inst->get{FuncName}()) inst->set{FuncName}(clone({varName}, inst));')
+          listeners.append(f'if (auto {varName} = inst->get{FuncName}()) inst->set{FuncName}(clone({varName}, inst), true);')
           # We also want to clone the module cont assign
           listeners.append(f'if (auto {varName} = defMod->get{FuncName}()) {{')
           listeners.append(f'  auto clone_vec = inst->get{FuncName}(true);')
@@ -77,7 +77,7 @@ def _generate_module_listeners(models, classname):
 
         elif FuncName not in ['Nets', 'Parameters', 'ParamAssigns', 'InterfaceArrays', 'ModuleArrays']:
           # We don't want to override the elaborated instance ports by the module def ports, same for nets, params and param_assigns
-          listeners.append(f'if (auto {varName} = defMod->get{FuncName}()) inst->set{FuncName}(clone({varName}, inst));')
+          listeners.append(f'if (auto {varName} = defMod->get{FuncName}()) inst->set{FuncName}(clone({varName}, inst), true);')
 
     classname = models[classname]['extends']
 
@@ -113,17 +113,21 @@ def _generate_class_listeners(models):
 
           if card == '1':
             suffix = 'Obj' if type == 'identifier' else ''
-            listeners.append(f'if (auto {varName} = cl->get{FuncName}{suffix}()) cl->set{FuncName}{suffix}(clone({varName}, cl));')
+            listeners.append(f'if (auto {varName} = cl->get{FuncName}{suffix}()) cl->set{FuncName}{suffix}(clone({varName}, cl), true);')
 
             if type == 'string' and vpi not in ['vpiFullName']:
-              listeners.append(f'  target->set{FuncName}(source->get{FuncName}());')
+              listeners.append(f'  target->set{FuncName}(source->get{FuncName}(), true);')
 
           elif FuncName == 'DerivedClasses':
             # Don't deep clone
-            listeners.append(f'if (auto {varName} = cl->get{FuncName}()) cl->set{FuncName}(cloneT({varName}));')
+            listeners.append(f'if (auto {varName} = cl->get{FuncName}()) cl->set{FuncName}(cloneT({varName}), true);')
+
+          elif FuncName in ['InternalScopes', 'InstanceItems']:
+            # Don't clone
+            pass
 
           else:
-            listeners.append(f'if (auto {varName} = cl->get{FuncName}()) cl->set{FuncName}(clone({varName}, cl));')
+            listeners.append(f'if (auto {varName} = cl->get{FuncName}()) cl->set{FuncName}(clone({varName}, cl), true);')
 
       classname = models[classname]['extends']
 
@@ -207,9 +211,9 @@ def _generate_copy_implementations(models):
         implementations.append( '      const std::string_view name(source->getName());')
         implementations.append( '      std::string fullIndexName(name);')
         implementations.append( '      fullIndexName.append("[").append(indexName).append("]");')
-        implementations.append(f'      target->setActual(bindAny(fullIndexName));')
-        implementations.append(f'      if (!target->getActual()) target->setActual(bindAny(name));')
-        implementations.append(f'      if (!target->getActual()) target->setActual((Any*) source->getActual());')
+        implementations.append(f'      target->setActual(bindAny(fullIndexName), true);')
+        implementations.append(f'      if (!target->getActual()) target->setActual(bindAny(name), true);')
+        implementations.append(f'      if (!target->getActual()) target->setActual((Any*) source->getActual(), true);')
         implementations.append( '    }')
         implementations.append( '  }')
 
@@ -240,19 +244,19 @@ def _generate_copy_implementations(models):
                     implementations.append(f'  target->set{FuncName}(source->get{FuncName}());')
 
             elif (Classname in ['RefObj']) and (FuncName == 'Actual'):
-                implementations.append(f'  if (!target->get{FuncName}()) target->set{FuncName}(bindAny(source->getName()));')
-                implementations.append(f'  if (!target->get{FuncName}()) target->set{FuncName}((Any*) source->get{FuncName}());')
+                implementations.append(f'  if (!target->get{FuncName}()) target->set{FuncName}(bindAny(source->getName()), true);')
+                implementations.append(f'  if (!target->get{FuncName}()) target->set{FuncName}((Any*) source->get{FuncName}(), true);')
 
             elif (Classname in ['RefTypespec']) and (FuncName == 'Actual'):
                 implementations.append( '  if (uniquifyTypespec()) {')
-                implementations.append(f'    if (auto {varName} = source->get{FuncName}()) target->set{FuncName}(clone({varName}, target));')
+                implementations.append(f'    if (auto {varName} = source->get{FuncName}()) target->set{FuncName}(clone({varName}, target), true);')
                 implementations.append( '  } else {')
-                implementations.append(f'    if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((Typespec*) {varName});')
+                implementations.append(f'    if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((Typespec*) {varName}, true);')
                 implementations.append( '  }')
 
             elif (Classname == 'Udp') and (FuncName == 'UdpDefn'):
-                implementations.append(f'  if (!target->get{FuncName}()) target->set{FuncName}((UdpDefn*) bindAny(source->getDefName()));')
-                implementations.append(f'  if (!target->get{FuncName}()) target->set{FuncName}((UdpDefn*) source->get{FuncName}());')
+                implementations.append(f'  if (!target->get{FuncName}()) target->set{FuncName}((UdpDefn*) bindAny(source->getDefName()), true);')
+                implementations.append(f'  if (!target->get{FuncName}()) target->set{FuncName}((UdpDefn*) source->get{FuncName}(), true);')
 
             elif FuncName in ['Task', 'Function']:
                 prefix = 'nullptr'
@@ -264,42 +268,42 @@ def _generate_copy_implementations(models):
                 implementations.append(f'  scheduleTaskFuncBinding(target, {prefix});')
 
             elif (Classname == 'Disable') and (FuncName == 'Expr'):
-                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((Expr*) {varName});')
+                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((Expr*) {varName}, true);')
 
             elif (Classname == 'Ports') and (FuncName == 'HighConn'):
                 implementations.append(f'  if (auto {varName} = source->get{FuncName}()) {{')
                 implementations.append( '    ignoreLastInstance(true); ')
-                implementations.append(f'    target->set{FuncName}(clone({varName}, target));')
+                implementations.append(f'    target->set{FuncName}(clone({varName}, target), true);')
                 implementations.append( '    ignoreLastInstance(false);')
                 implementations.append( '  }')
 
             elif (Classname == 'IntTypespec') and (FuncName == 'CastToExpr'):
-                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((Variable*) {varName});')
+                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((Variable*) {varName}, true);')
 
             elif (Classname == 'ClassTypespec') and (FuncName == 'ClassDefn'):
-                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((ClassDefn*) {varName});')
+                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((ClassDefn*) {varName}, true);')
 
             elif FuncName == 'Instance':
-                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((Instance*) {varName});')
-                implementations.append( '  if (Instance* inst = target->getParent<Instance>()) target->setInstance(inst);')
+                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}((Instance*) {varName}, true);')
+                implementations.append( '  if (Instance* inst = target->getParent<Instance>()) target->setInstance(inst, true);')
 
             elif FuncName in ['Module', 'Interface']:
-                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}(({FuncName}*) {varName});')
+                implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}(({FuncName}*) {varName}, true);')
 
             else:
                 suffix = 'Obj' if type == 'identifier' else ''
-                implementations.append(f'  if (auto {varName} = source->get{FuncName}{suffix}()) target->set{FuncName}{suffix}(clone({varName}, target));')
+                implementations.append(f'  if (auto {varName} = source->get{FuncName}{suffix}()) target->set{FuncName}{suffix}(clone({varName}, target), true);')
 
         elif (Classname == 'Module') and (FuncName == 'RefModules'):
             pass # No cloning
 
         elif (FuncName == 'Typespecs'):
             # Don't deep clone
-            implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}(cloneT({varName}));')
+            implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}(cloneT({varName}), true);')
 
         else:
             # N-ary relations
-            implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}(clone({varName}, target));')
+            implementations.append(f'  if (auto {varName} = source->get{FuncName}()) target->set{FuncName}(clone({varName}, target), true);')
 
     if modeltype != 'class_def':
         implementations.append(f'  leave{Classname}(target, nullptr);')

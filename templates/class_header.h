@@ -32,7 +32,7 @@
 #include <uhdm/containers.h>
 #include <uhdm/<EXTENDS_HEADER>.h>
 
-<GROUP_HEADER_DEPENDENCY>
+//<GROUP_HEADER_DEPENDENCY>
 
 namespace uhdm {
 class <CLASSNAME><FINAL_CLASS> : public <EXTENDS> {
@@ -41,19 +41,21 @@ class <CLASSNAME><FINAL_CLASS> : public <EXTENDS> {
 public:
   static constexpr UhdmType kUhdmType = UhdmType::<CLASSNAME>;
 
-  // Implicit constructor used to initialize all members,
-  // comment: <CLASSNAME>();
-  <VIRTUAL>~<CLASSNAME>()<FINAL_DESTRUCTOR> = default;
+  explicit <CLASSNAME>(Serializer *serializer) : basetype_t(serializer) {}
+  <CLASSNAME>(Serializer *serializer, const <CLASSNAME>& rhs);
+  ~<CLASSNAME>() <OVERRIDE_OR_FINAL> = default;
+  <CLASSNAME>(const <CLASSNAME>& rhs) = delete;
+  <CLASSNAME>& operator=(const <CLASSNAME>& rhs) = delete;
 
-<PUBLIC_METHODS>
+//<PUBLIC_METHODS>
 
   <VIRTUAL> UhdmType getUhdmType() const <OVERRIDE_OR_FINAL> { return UhdmType::<CLASSNAME>; }
 
 protected:
-<PRIVATE_METHODS>
+//<PRIVATE_METHODS>
 
 protected:
-<MEMBERS>
+//<DATA_MEMBERS>
 };
 }  // namespace uhdm
 

@@ -54,20 +54,6 @@ class ClientData {
   virtual ~ClientData() = default;
 };
 
-class CloneContext : public RTTI {
-  UHDM_IMPLEMENT_RTTI(CloneContext, RTTI)
-
- public:
-  CloneContext(Serializer* serializer) : m_serializer(serializer) {}
-  virtual ~CloneContext() = default;
-
-  Serializer* const m_serializer = nullptr;
-
- private:
-  CloneContext(const CloneContext& rhs) = delete;
-  CloneContext& operator=(const CloneContext& rhs) = delete;
-};
-
 class BaseClass : public RTTI {
   UHDM_IMPLEMENT_RTTI(BaseClass, RTTI)
   friend Serializer;
@@ -75,10 +61,11 @@ class BaseClass : public RTTI {
  public:
   static constexpr UhdmType kUhdmType = UhdmType::BaseClass;
 
-  // Use implicit constructor to initialize all members
-  // BaseClass()
-
+  explicit BaseClass(Serializer* serializer) : m_serializer(serializer) {}
+  BaseClass(Serializer* serializer, const BaseClass& rhs);
   virtual ~BaseClass() = default;
+  BaseClass(const BaseClass& rhs) = delete;
+  BaseClass& operator=(const BaseClass& rhs) = delete;
 
   Serializer* getSerializer() const { return m_serializer; }
 
@@ -154,8 +141,6 @@ class BaseClass : public RTTI {
  protected:
   std::string computeFullName() const;
 
-  void setSerializer(Serializer* serializer) { m_serializer = serializer; }
-
   virtual void swap(const BaseClass* what, BaseClass* with);
   virtual void swap(const std::map<const BaseClass*, BaseClass*>& replacements);
 
@@ -208,7 +193,7 @@ class BaseClass : public RTTI {
   virtual void onChildRemoved(BaseClass* child) {}
 
  protected:
-  Serializer* m_serializer = nullptr;
+  Serializer* const m_serializer = nullptr;
   ClientData* m_clientData = nullptr;
   CommentCollection* m_comments = nullptr;
 
@@ -225,7 +210,6 @@ class BaseClass : public RTTI {
 using Any = BaseClass;
 }  // namespace uhdm
 
-UHDM_IMPLEMENT_RTTI_CAST_FUNCTIONS(clonecontext_cast, uhdm::CloneContext)
 UHDM_IMPLEMENT_RTTI_CAST_FUNCTIONS(any_cast, uhdm::BaseClass)
 
 #endif  // UHDM_BASECLASS_H

@@ -115,13 +115,10 @@ inline std::vector<T *> *Cloner::cloneT(const std::vector<T *> *source,
   if ((source == nullptr) || source->empty()) return nullptr;
   std::vector<T *> *const target = m_serializer->template makeCollection<T>();
   target->reserve(source->size());
-  if (source == target) {
-    for (T *obj : *source) cloneAny(static_cast<const Any *>(obj), parent);
-  } else {
-    for (T *obj : *source) {
-      target->emplace_back(
-          static_cast<T *>(cloneAny(static_cast<const Any *>(obj), parent)));
-    }
+  const std::vector<T *> collection(*source);
+  for (T *obj : collection) {
+    target->emplace_back(
+        static_cast<T *>(cloneAny(static_cast<const Any *>(obj), parent)));
   }
   return target;
 }

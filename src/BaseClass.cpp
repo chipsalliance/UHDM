@@ -32,6 +32,14 @@ bool AnyLessComparer::operator()(const uhdm::Any* lhs,
   return lhs->getUhdmId() < rhs->getUhdmId();
 }
 
+BaseClass::BaseClass(Serializer* serializer, const BaseClass& rhs)
+    : m_serializer(serializer)
+    , m_clientData(rhs.m_clientData)
+    , m_startLine(rhs.m_startLine)
+    , m_endLine(rhs.m_endLine)
+    , m_startColumn(rhs.m_startColumn)
+    , m_endColumn(rhs.m_endColumn) {}
+
 std::string_view BaseClass::getFile() const {
   return m_fileId ? m_serializer->getSymbol(m_fileId) : kEmpty;
 }

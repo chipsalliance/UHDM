@@ -34,6 +34,7 @@
 #include <uhdm/sv_vpi_user.h>
 
 #include <map>
+#include <ostream>
 #include <set>
 #include <string_view>
 #include <vector>
@@ -77,6 +78,8 @@ class UhdmComparer : public RTTI {
   const Any* getFailedLhs() const { return m_failedLhs; }
   const Any* getFailedRhs() const { return m_failedRhs; }
   uint32_t getFailedRelation() const { return m_relation; }
+
+  void print(std::ostream& strm);
 
  private:
   template <typename T>

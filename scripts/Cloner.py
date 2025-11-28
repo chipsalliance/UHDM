@@ -21,14 +21,14 @@ def _generate_copy_implementation(model):
       FuncName = config.make_func_name(name, card)
       varName = config.make_var_name(name, card)
       if varName == 'return':
-          varName = 'rtn'
+        varName = 'rtn'
 
       if key == 'property' and type == 'string':
         if vpi not in ['vpiFullName']:
           content.append(f'  target->set{FuncName}(source->get{FuncName}());')
-      elif key != 'property':
+      elif key != 'property' and vpi not in ['vpiInstance', 'vpiUse']:
           suffix = 'Obj' if type == 'identifier' else ''
-          content.append(f'  if (auto {varName} = source->get{FuncName}{suffix}()) target->set{FuncName}{suffix}(clone({varName}, target));')
+          content.append(f'  if (auto {varName} = source->get{FuncName}{suffix}()) target->set{FuncName}{suffix}(clone({varName}, target), true);')
 
   content.append('}')
   content.append('')

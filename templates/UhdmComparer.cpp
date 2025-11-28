@@ -28,6 +28,8 @@
 #include <uhdm/uhdm_types.h>
 
 namespace uhdm {
+extern std::string decompile(const Any *any);
+
 bool UhdmComparer::setFailed(const Any *lhs, const Any *rhs, uint32_t relation,
                              bool force /* = false */) {
   if (((m_failedLhs == nullptr) && (m_failedRhs == nullptr)) || force) {
@@ -205,5 +207,33 @@ int32_t UhdmComparer::compare(const Any *lhs, const Any *rhs,
 
   m_callstack.erase({lhs, rhs});
   return r;
+}
+
+void UhdmComparer::print(std::ostream &strm) {
+  if (const uhdm::Any *p = m_failedLhs) {
+    size_t count = 0;
+    while ((p != nullptr) && (count < 4)) {
+      std::cout << "LHS: " << count << ", " << p->getFile() << std::endl;
+      decompile(p);
+      p = p->getParent();
+      ++count;
+    }
+  } else {
+    std::cout << "LHS: <null>" << std::endl;
+  }
+
+  std::cout << std::string(80, '=') << std::endl;
+
+  if (const uhdm::Any *p = m_failedRhs) {
+    size_t count = 0;
+    while ((p != nullptr) && (count < 4)) {
+      std::cout << "RHS: " << count << ", " << p->getFile() << std::endl;
+      decompile(p);
+      p = p->getParent();
+      ++count;
+    }
+  } else {
+    std::cout << "RHS: <null>" << std::endl;
+  }
 }
 }  // namespace uhdm

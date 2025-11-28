@@ -227,7 +227,7 @@ def _get_declarations(name, type, vpi, card, real_type=''):
             content.append(f'  const {Type}* get{FuncName}{suffix}() const{final} {{ return m_{varName}; }}')
             content.append(f'  template <typename T> T* get{FuncName}{suffix}() {{ return any_cast<T>(m_{varName}); }}')
             content.append(f'  template <typename T> const T* get{FuncName}{suffix}() const {{ return any_cast<T>(m_{varName}); }}')
-            content.append(f'  bool set{FuncName}{suffix}({Type}* data) {{\n    {check}m_{varName} = data;\n    return true;\n  }}')
+            content.append(f'  bool set{FuncName}{suffix}({Type}* data, bool force = false) {{\n    if ((m_{varName} == nullptr) || (data == nullptr) || force) {{\n      {check}m_{varName} = data;\n      return true;\n    }}\n    return false;\n  }}')
 
             # if type == 'ref_typespec':
             #     content.append(f'  template <typename T> T* get{FuncName}Actual() {{ return (m_{varName} != nullptr) ? m_{varName}->template getActual<T>() : nullptr; }}')
@@ -239,7 +239,7 @@ def _get_declarations(name, type, vpi, card, real_type=''):
         content.append(f'  {TypeName}Collection* get{FuncName}() const {{ return m_{varName}; }}')
         content.append(f'  template<typename T> {TypeName}Collection* get{FuncName}(T) = delete;')
         content.append(f'  {TypeName}Collection* get{FuncName}(bool createIfNull);')
-        content.append(f'  bool set{FuncName}({TypeName}Collection* data) {{\n    {check}if ((m_{varName} == nullptr) || (data == nullptr)) {{\n      m_{varName} = data;\n      return true;\n    }}\n    return false;\n  }}')
+        content.append(f'  bool set{FuncName}({TypeName}Collection* data, bool force = false) {{\n    {check}if ((m_{varName} == nullptr) || (data == nullptr) || force) {{\n      m_{varName} = data;\n      return true;\n    }}\n    return false;\n  }}')
 
     return '\n'.join(content)
 
@@ -761,6 +761,7 @@ def _generate_one_class(model, models, templates):
     implementations = []
     forward_declares = set()
     includes = set()
+    copy_constructor_implementation = []
     leaf = (modeltype == 'obj_def') and (len(model['subclasses']) == 0)
 
     classname = model['name']
@@ -792,13 +793,20 @@ def _generate_one_class(model, models, templates):
                 public_declarations.append(_get_declarations(name, type, vpi, card))
                 implementations.extend(_get_implementations(classname, name, type, vpi, card))
 
+            if type in ['int16_t', 'uint16_t', 'int32_t', 'uint32_t', 'int64_t', 'uint64_t', 'bool'] and vpi not in ['vpiInstance', 'vpiUse']:
+              varName = config.make_var_name(name, card)
+              copy_constructor_implementation.append(f'    , m_{varName}(rhs.m_{varName})')
+            elif type in ['string']:
+              varName = config.make_var_name(name, card)
+              copy_constructor_implementation.append(f'    , m_{varName}(m_serializer->makeSymbol(rhs.m_serializer->getSymbol(rhs.m_{varName})))')
+
         elif (key == 'extends') and value:
             header_file_content = header_file_content.replace('<EXTENDS_HEADER>', value)
             value = config.make_class_name(value)
             header_file_content = header_file_content.replace('<EXTENDS>', value)
             source_file_content = source_file_content.replace('<EXTENDS>', value)
 
-        elif key in ['class', 'obj_ref', 'class_ref', 'group_ref']:
+        elif key in ['obj_ref', 'class_ref', 'group_ref']:
             name = value.get('name')
             vpi = value.get('vpi')
             type = value.get('type')
@@ -816,6 +824,10 @@ def _generate_one_class(model, models, templates):
             data_members.extend(_get_data_member(name, type, name, card))
             public_declarations.append(_get_declarations(name, type, vpi, card, real_type))
             implementations.extend(_get_implementations(classname, name, type, vpi, card))
+
+            if card == '1' and vpi not in ['vpiInstance', 'vpiUse']:
+              varName = config.make_var_name(name, card)
+              copy_constructor_implementation.append(f'    , m_{varName}(rhs.m_{varName})')
 
     if not type_specified and (modeltype == 'obj_def'):
         vpiclasstype = config.make_vpi_name(classname)
@@ -863,7 +875,6 @@ def _generate_one_class(model, models, templates):
     is_class_def = modeltype == 'class_def'
     header_file_content = header_file_content.replace('<VIRTUAL>', 'virtual ')
     header_file_content = header_file_content.replace('<FINAL_CLASS>', ' final' if leaf and not is_class_def else '')
-    header_file_content = header_file_content.replace('<FINAL_DESTRUCTOR>', ' final' if leaf and not is_class_def else '')
     header_file_content = header_file_content.replace('<OVERRIDE_OR_FINAL>', 'final' if leaf and not is_class_def else 'override')
 
     header_file_content = header_file_content.replace('<EXTENDS>', BaseName)
@@ -871,15 +882,17 @@ def _generate_one_class(model, models, templates):
     header_file_content = header_file_content.replace('<CLASSNAME>', ClassName)
     header_file_content = header_file_content.replace('<CLASSNAME_HEADER>', classname)
     header_file_content = header_file_content.replace('<UPPER_CLASSNAME>', classname.upper())
-    header_file_content = header_file_content.replace('<PUBLIC_METHODS>', '\n\n'.join(public_declarations))
-    header_file_content = header_file_content.replace('<PRIVATE_METHODS>', '\n\n'.join(private_declarations))
-    header_file_content = header_file_content.replace('<MEMBERS>', '\n'.join(data_members))
-    header_file_content = header_file_content.replace('<GROUP_HEADER_DEPENDENCY>', '\n'.join(f'#include <uhdm/{include}.h>' for include in sorted(group_headers)))
+    header_file_content = header_file_content.replace('//<PUBLIC_METHODS>', '\n\n'.join(public_declarations))
+    header_file_content = header_file_content.replace('//<PRIVATE_METHODS>', '\n\n'.join(private_declarations))
+    header_file_content = header_file_content.replace('//<DATA_MEMBERS>', '\n'.join(data_members))
+    header_file_content = header_file_content.replace('//<GROUP_HEADER_DEPENDENCY>', '\n'.join(f'#include <uhdm/{include}.h>' for include in sorted(group_headers)))
 
+    source_file_content = source_file_content.replace('<EXTENDS>', BaseName)
     source_file_content = source_file_content.replace('<CLASSNAME>', ClassName)
     source_file_content = source_file_content.replace('<CLASSNAME_HEADER>', classname)
-    source_file_content = source_file_content.replace('<INCLUDES>', '\n'.join(f'#include <uhdm/{include}.h>' for include in sorted(includes)))
-    source_file_content = source_file_content.replace('<METHODS>', '\n'.join(implementations))
+    source_file_content = source_file_content.replace('//<COPY_CONSTRUCTOR_IMPLEMENTATION>', '\n'.join(copy_constructor_implementation))
+    source_file_content = source_file_content.replace('//<INCLUDES>', '\n'.join(f'#include <uhdm/{include}.h>' for include in sorted(includes)))
+    source_file_content = source_file_content.replace('//<METHODS>', '\n'.join(implementations))
 
     file_utils.set_content_if_changed(config.get_output_header_filepath(f'{classname}.h'), header_file_content)
     file_utils.set_content_if_changed(config.get_output_source_filepath(f'{classname}.cpp'), source_file_content)

@@ -100,32 +100,8 @@ int32_t main(int32_t argc, char **argv) {
 
   for (size_t i = 0, n = designsA.size(); i < n; ++i) {
     uhdm::UhdmComparer comparer;
-    if (comparer.compare(designsA[i], designsB[i]) != 0) {
-      if (const uhdm::Any *p = comparer.getFailedLhs()) {
-        size_t count = 0;
-        while ((p != nullptr) && (count < 4)) {
-          std::cout << "LHS: " << count << ", " << p->getFile() << std::endl;
-          uhdm::decompile(p);
-          p = p->getParent();
-          ++count;
-        }
-      } else {
-        std::cout << "LHS: <null>" << std::endl;
-      }
-
-      std::cout << std::string(80, '=') << std::endl;
-
-      if (const uhdm::Any *p = comparer.getFailedRhs()) {
-        size_t count = 0;
-        while ((p != nullptr) && (count < 4)) {
-          std::cout << "RHS: " << count << ", " << p->getFile() << std::endl;
-          uhdm::decompile(p);
-          p = p->getParent();
-          ++count;
-        }
-      } else {
-        std::cout << "RHS: <null>" << std::endl;
-      }
+    if (int32_t r = comparer.compare(designsA[i], designsB[i]); r != 0) {
+      comparer.print(std::cout);
       return -1;
     }
   }
