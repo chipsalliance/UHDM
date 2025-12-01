@@ -103,7 +103,7 @@ static void propagateParamAssign(ParamAssign* pass, const Any* target) {
 void Elaborator::enterVariable(const Variable* object, vpiHandle handle) {
   if (!m_inHierarchy)
     return;  // Only do class var propagation while in elaboration
-  if (const ClassTypespec* const ct = getTypespec<ClassTypespec>(object)) {
+  if (getTypespec<ClassTypespec>(object) != nullptr) {
     if (const RefTypespec* tps = object->getTypespec()) {
       Variable* const var = const_cast<Variable*>(object);
       RefTypespec* ctps = clone(tps, var);
@@ -1402,56 +1402,56 @@ TFCall* Elaborator::clone(const MethodFuncCall* source, Any* parent) {
     target->setParent(parent, true);
     if (auto obj = source->getPrefix())
       target->setPrefix(clone(obj, target), true);
-    const Any* parent = target->getParent();
+    // const Any* parent = target->getParent();
     const Variable* var = getActual<Variable>(target->getPrefix());
     if (getTypespec<ClassTypespec>(var) != nullptr)
       m_scheduledTfCallBinding.emplace_back(target, var);
     Any* pushedVar = nullptr;
-    if (auto vec = source->getArguments()) {
-      auto clone_vec = target->getArguments(true);
-      for (auto obj : *vec) {
-        Any* arg = clone(obj, target);
-        // CB callbacks_to_append[$];
-        // unique_callbacks_to_append = callbacks_to_append.unique( cb_ )
-        // with ( cb_.get_inst_id );
-        if (parent->getUhdmType() == UhdmType::HierPath) {
-          HierPath* phier = (HierPath*)parent;
-          Any* last = phier->getPathElems()->back();
-          if (RefObj* last_ref = any_cast<RefObj>(last)) {
-            if (const Any* actual = last_ref->getActual()) {
-              if (RefObj* refarg = any_cast<RefObj>(arg)) {
-                bool override = false;
-                if (const Any* act = refarg->getActual()) {
-                  if (act->getName() == obj->getName()) {
-                    override = true;
-                  }
-                } else {
-                  override = true;
-                }
-                // if (override) {
-                //   if (actual->getUhdmType() == UhdmType::array_var) {
-                //     array_var* arr = (array_var*)actual;
-                //     if (arr->getVariables() && !arr->getVariables()->empty())
-                //     {
-                //       Variable* var = arr->getVariables()->front();
-                //       if (Variable* varclone = clone(var, obj->getParent()))
-                //       {
-                //         varclone->setName(obj->getName());
-                //         actual = varclone;
-                //         pushVar(varclone);
-                //         pushedVar = varclone;
-                //       }
-                //     }
-                //   }
-                //   refarg->setActual((Any*)actual);
-                // }
-              }
-            }
-          }
-        }
-        clone_vec->emplace_back(arg);
-      }
-    }
+    // if (auto vec = source->getArguments()) {
+    //   auto clone_vec = target->getArguments(true);
+    //   for (auto obj : *vec) {
+    //     Any* arg = clone(obj, target);
+    //     // CB callbacks_to_append[$];
+    //     // unique_callbacks_to_append = callbacks_to_append.unique( cb_ )
+    //     // with ( cb_.get_inst_id );
+    //     if (parent->getUhdmType() == UhdmType::HierPath) {
+    //       HierPath* phier = (HierPath*)parent;
+    //       Any* last = phier->getPathElems()->back();
+    //       if (RefObj* last_ref = any_cast<RefObj>(last)) {
+    //         if (const Any* actual = last_ref->getActual()) {
+    //           if (RefObj* refarg = any_cast<RefObj>(arg)) {
+    //             bool override = false;
+    //             if (const Any* act = refarg->getActual()) {
+    //               if (act->getName() == obj->getName()) {
+    //                 override = true;
+    //               }
+    //             } else {
+    //               override = true;
+    //             }
+    //             if (override) {
+    //               if (actual->getUhdmType() == UhdmType::array_var) {
+    //                 array_var* arr = (array_var*)actual;
+    //                 if (arr->getVariables() && !arr->getVariables()->empty())
+    //                 {
+    //                   Variable* var = arr->getVariables()->front();
+    //                   if (Variable* varclone = clone(var, obj->getParent()))
+    //                   {
+    //                     varclone->setName(obj->getName());
+    //                     actual = varclone;
+    //                     pushVar(varclone);
+    //                     pushedVar = varclone;
+    //                   }
+    //                 }
+    //               }
+    //               refarg->setActual((Any*)actual);
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //     clone_vec->emplace_back(arg);
+    //   }
+    // }
     if (auto obj = source->getWith()) target->setWith(clone(obj, target), true);
     if (pushedVar) popVar(pushedVar);
     if (auto obj = source->getScope())
