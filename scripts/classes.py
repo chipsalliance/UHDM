@@ -693,6 +693,10 @@ def _get_setParent_implementation(model):
       includes.append('class_typespec')
       content.append('  if ((data != nullptr) && (data->Cast<Scope>() == nullptr) && (data->Cast<Design>() == nullptr) && (data->Cast<ClassTypespec>() == nullptr)) {')
 
+    elif ClassName in ['Net']:
+      includes.append('io_decl')
+      content.append('  if ((data != nullptr) && (data->Cast<Scope>() == nullptr) && (data->Cast<Design>() == nullptr) && (data->Cast<IODecl>() == nullptr)) {')
+
     elif ClassName in ['IODecl']:
       includes.append('modport')
       includes.append('task_func_decl')

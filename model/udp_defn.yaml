@@ -15,6 +15,7 @@
 # Universal Hardware Data Model (UHDM) "udp_defn" formal description
 
 - obj_def: udp_defn
+- extends: scope
 - property: def_name
   vpi: vpiDefName
   type: string
@@ -31,10 +32,6 @@
   vpi: vpiPrimType
   type: int32_t
   card: 1
-- obj_ref: attribute
-  vpi: vpiAttribute
-  type: attribute
-  card: any
 - obj_ref: io_decl
   vpi: vpiIODecl
   type: io_decl
