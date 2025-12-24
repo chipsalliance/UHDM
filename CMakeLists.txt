@@ -445,6 +445,9 @@ if(UHDM_WITH_PYTHON)
   add_subdirectory(python)
 endif()
 
-# Pybind11
+# Pybind11 PoC
 add_subdirectory(python/poc_pybind11)
+
+# Pybind11 Real Implementation
+add_subdirectory(python/pybind11)
 
