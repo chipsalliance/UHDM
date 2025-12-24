@@ -444,3 +444,7 @@ install(
 if(UHDM_WITH_PYTHON)
   add_subdirectory(python)
 endif()
+
+# Pybind11
+add_subdirectory(python/poc_pybind11)
+
