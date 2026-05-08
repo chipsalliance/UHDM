@@ -2241,11 +2241,13 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
       ElaboratorContext elaboratorContext(&s);
       object = clone_tree(cons, &elaboratorContext);
       cons = any_cast<constant *>(object);
-      if (cons->Typespec() == nullptr) {
+      if (cons->Typespec() == nullptr && path->Typespec() != nullptr) {
         ref_typespec *rt =
             (ref_typespec *)clone_tree(path->Typespec(), &elaboratorContext);
-        rt->VpiParent(cons);
-        cons->Typespec(rt);
+        if (rt != nullptr) {
+          rt->VpiParent(cons);
+          cons->Typespec(rt);
+        }
       }
     } else if (operation *oper = any_cast<operation *>(object)) {
       if (returnType == ReturnType::TYPESPEC) {
