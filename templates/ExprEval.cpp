@@ -4080,6 +4080,171 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
   } else if (objtype == UHDM_OBJECT_TYPE::uhdmsys_func_call) {
     sys_func_call *scall = (sys_func_call *)result;
     const std::string_view name = scall->VpiName();
+    // Per SV LRM §20.7, `$size(arr [, dim])` returns the size of the
+    // numbered dimension (1 = outermost).  The old handler routed
+    // `$size` through the generic `size()` function which (a) added
+    // the dim-index argument's bit-width to the running total, (b)
+    // applied the LAST range only (`ranges->back()`) instead of the
+    // requested one, and (c) had no `array_net` case at all — so
+    // `$size(z)` / `$size(z, N)` on an unpacked array net returned
+    // wrong values.  Handle `$size` independently before the generic
+    // path.
+    if (name == "$size") {
+      // Collect all dimensions (outer → inner: unpacked first, packed
+      // last) of the first call argument.  `strip_outer` counts
+      // bit_select / var_select indices we still need to strip from
+      // the front of the dim list.
+      struct DimEntry { int64_t left, right; };
+      std::vector<DimEntry> alldims;
+      int strip_outer = 0;
+      bool dim_ok = true;
+
+      std::function<void(const any *)> walk_ts;
+      std::function<void(const any *)> walk_obj;
+
+      walk_ts = [&](const any *ts) {
+        if (!ts) return;
+        UHDM_OBJECT_TYPE tt = ts->UhdmType();
+        if (tt == uhdmref_typespec) {
+          ts = ((ref_typespec *)ts)->Actual_typespec();
+          if (!ts) return;
+          tt = ts->UhdmType();
+        }
+        VectorOfrange *rs = nullptr;
+        const any *elem_ts = nullptr;
+        if (tt == uhdmlogic_typespec) {
+          auto *t = (logic_typespec *)ts;
+          rs = t->Ranges();
+          if (t->Elem_typespec()) elem_ts = t->Elem_typespec()->Actual_typespec();
+        } else if (tt == uhdmbit_typespec) {
+          rs = ((bit_typespec *)ts)->Ranges();
+        } else if (tt == uhdmint_typespec) {
+          rs = ((int_typespec *)ts)->Ranges();
+        } else if (tt == uhdmpacked_array_typespec) {
+          auto *t = (packed_array_typespec *)ts;
+          rs = t->Ranges();
+          if (t->Elem_typespec()) elem_ts = t->Elem_typespec()->Actual_typespec();
+        } else if (tt == uhdmarray_typespec) {
+          auto *t = (array_typespec *)ts;
+          rs = t->Ranges();
+          if (t->Elem_typespec()) elem_ts = t->Elem_typespec()->Actual_typespec();
+        }
+        if (rs) {
+          for (range *r : *rs) {
+            bool inv = false;
+            int64_t lv = getValue(reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError));
+            int64_t rv = getValue(reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError));
+            if (inv) { dim_ok = false; return; }
+            alldims.push_back({lv, rv});
+          }
+        }
+        if (elem_ts) walk_ts(elem_ts);
+      };
+
+      walk_obj = [&](const any *obj) {
+        if (!obj) { dim_ok = false; return; }
+        UHDM_OBJECT_TYPE ot = obj->UhdmType();
+        if (ot == uhdmarray_net) {
+          auto *an = (array_net *)obj;
+          if (an->Ranges()) {
+            for (range *r : *an->Ranges()) {
+              bool inv = false;
+              int64_t lv = getValue(reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError));
+              int64_t rv = getValue(reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError));
+              if (inv) { dim_ok = false; return; }
+              alldims.push_back({lv, rv});
+            }
+          }
+          if (an->Nets() && !an->Nets()->empty()) {
+            auto *n = (*an->Nets())[0];
+            if (n->Typespec()) walk_ts(n->Typespec()->Actual_typespec());
+          }
+        } else if (auto *lvar = any_cast<logic_var *>(obj)) {
+          if (lvar->Typespec()) walk_ts(lvar->Typespec()->Actual_typespec());
+        } else if (auto *lnet = any_cast<logic_net *>(obj)) {
+          if (lnet->Typespec()) walk_ts(lnet->Typespec()->Actual_typespec());
+        } else if (auto *var = any_cast<array_var *>(obj)) {
+          if (var->Ranges()) {
+            for (range *r : *var->Ranges()) {
+              bool inv = false;
+              int64_t lv = getValue(reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError));
+              int64_t rv = getValue(reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError));
+              if (inv) { dim_ok = false; return; }
+              alldims.push_back({lv, rv});
+            }
+          }
+          if (var->Variables() && !var->Variables()->empty()) {
+            variables *v = (*var->Variables())[0];
+            if (v->Typespec()) walk_ts(v->Typespec()->Actual_typespec());
+          }
+        }
+      };
+
+      if (scall->Tf_call_args() && !scall->Tf_call_args()->empty()) {
+        any *arg0 = scall->Tf_call_args()->at(0);
+        UHDM_OBJECT_TYPE at = arg0->UhdmType();
+        // bit_select / var_select strip outer dims by Exprs().size().
+        if (at == uhdmbit_select) {
+          ++strip_outer;
+          auto *bs = (bit_select *)arg0;
+          std::string_view bname = bs->VpiName();
+          any *obj = getObject(bname, inst, pexpr, muteError);
+          walk_obj(obj);
+        } else if (at == uhdmvar_select) {
+          auto *vs = (var_select *)arg0;
+          if (vs->Exprs()) strip_outer = (int)vs->Exprs()->size();
+          std::string_view bname = vs->VpiName();
+          any *obj = getObject(bname, inst, pexpr, muteError);
+          walk_obj(obj);
+        } else if (at == uhdmref_obj) {
+          auto *ref = (ref_obj *)arg0;
+          std::string_view objname = ref->VpiName();
+          any *obj = getObject(objname, inst, pexpr, muteError);
+          if (obj == nullptr) {
+            // Fall back to typespec on the ref itself.
+            if (ref->Typespec()) walk_ts(ref->Typespec()->Actual_typespec());
+          } else {
+            walk_obj(obj);
+          }
+        } else {
+          dim_ok = false;
+        }
+      } else {
+        dim_ok = false;
+      }
+
+      // Determine the dim index from the optional 2nd arg.
+      int64_t dim_index = 1;
+      if (dim_ok && scall->Tf_call_args()->size() >= 2) {
+        bool inv = false;
+        dim_index = getValue(
+            reduceExpr(scall->Tf_call_args()->at(1), inv, inst, pexpr, muteError));
+        if (inv) dim_ok = false;
+      }
+
+      if (dim_ok) {
+        // Apply outer-dim stripping from bit/var-selects.
+        while (strip_outer > 0 && !alldims.empty()) {
+          alldims.erase(alldims.begin());
+          --strip_outer;
+        }
+        if (dim_index >= 1 && dim_index <= (int64_t)alldims.size()) {
+          const DimEntry &d = alldims[dim_index - 1];
+          uint64_t dsize = (d.left > d.right)
+                               ? (uint64_t)(d.left - d.right) + 1
+                               : (uint64_t)(d.right - d.left) + 1;
+          constant *c = s.MakeConstant();
+          c->VpiValue("UINT:" + std::to_string(dsize));
+          c->VpiDecompile(std::to_string(dsize));
+          c->VpiSize(64);
+          c->VpiConstType(vpiUIntConst);
+          return c;
+        }
+      }
+      // Fall through to generic handler below if our walker couldn't
+      // resolve the dim — preserves behavior for cases we don't cover
+      // (struct fields, function-call args, etc).
+    }
     if ((name == "$bits") || (name == "$size") || (name == "$high") ||
         (name == "$low") || (name == "$left") || (name == "$right")) {
       uint64_t bits = 0;
