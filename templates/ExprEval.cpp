@@ -4043,14 +4043,63 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   cast_to = 32;
                 }
               }
+              // SV LRM §6.24.1: a size cast `N'(expr)` preserves the
+              // OPERAND's signedness.  We only treat the operand as
+              // signed when an EXPLICIT signed marker is present (a
+              // signed typespec on the folded constant) — `vpiIntConst`
+              // alone is unreliable because Surelog stores arithmetic
+              // results (e.g. `PartEnd - 4` from an unsigned PartEnd)
+              // as `vpiIntConst` regardless of operand signedness.
+              // `$signed(...)` attaches the signed typespec below so
+              // that `8'(4'(signed'(-8'd1)))` correctly sign-extends.
+              bool oper_signed = false;
+              if (constant *oc = any_cast<constant *>(oper)) {
+                if (const ref_typespec *ort = oc->Typespec()) {
+                  if (const typespec *ots = ort->Actual_typespec()) {
+                    UHDM_OBJECT_TYPE ott = ots->UhdmType();
+                    if (ott == UHDM_OBJECT_TYPE::uhdmlogic_typespec)
+                      oper_signed = ((const logic_typespec*)ots)->VpiSigned();
+                    else if (ott == UHDM_OBJECT_TYPE::uhdmbit_typespec)
+                      oper_signed = ((const bit_typespec*)ots)->VpiSigned();
+                    else if (ott == UHDM_OBJECT_TYPE::uhdmint_typespec)
+                      oper_signed = ((const int_typespec*)ots)->VpiSigned();
+                    else if (ott == UHDM_OBJECT_TYPE::uhdminteger_typespec)
+                      oper_signed = ((const integer_typespec*)ots)->VpiSigned();
+                    else if (ott == UHDM_OBJECT_TYPE::uhdmbyte_typespec)
+                      oper_signed = ((const byte_typespec*)ots)->VpiSigned();
+                    else if (ott == UHDM_OBJECT_TYPE::uhdmshort_int_typespec)
+                      oper_signed = ((const short_int_typespec*)ots)->VpiSigned();
+                    else if (ott == UHDM_OBJECT_TYPE::uhdmlong_int_typespec)
+                      oper_signed = ((const long_int_typespec*)ots)->VpiSigned();
+                  }
+                }
+              }
               constant *c = s.MakeConstant();
               uint64_t mask = ((uint64_t)(1ULL << cast_to)) - 1ULL;
               resize(oper, cast_to);
               val0 = get_value(invalidValue, oper);
               uint64_t res = val0 & mask;
-              c->VpiValue("UINT:" + std::to_string(res));
+              if (oper_signed) {
+                int64_t sres = (int64_t)res;
+                if (cast_to < 64) {
+                  uint64_t sign = 1ULL << (cast_to - 1);
+                  if (res & sign) sres = (int64_t)(res | ~mask);
+                }
+                c->VpiValue("INT:" + std::to_string(sres));
+                c->VpiConstType(vpiIntConst);
+                // Propagate the signed marker so a chained outer cast
+                // (`8'(4'(...))`) still sees its operand as signed.
+                logic_typespec *lt = s.MakeLogic_typespec();
+                lt->VpiSigned(true);
+                ref_typespec *rt = s.MakeRef_typespec();
+                rt->VpiParent(c);
+                rt->Actual_typespec(lt);
+                c->Typespec(rt);
+              } else {
+                c->VpiValue("UINT:" + std::to_string(res));
+                c->VpiConstType(vpiUIntConst);
+              }
               c->VpiSize(static_cast<int32_t>(cast_to));
-              c->VpiConstType(vpiUIntConst);
               result = c;
             } else if (ttps == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
               // TODO: Should check the value is in range of the enum and
@@ -4444,6 +4493,18 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               int64_t value = get_value(invalidValue, val);
               int64_t size = c->VpiSize();
               if (name == "$signed") {
+                // Attach a signed typespec hint so downstream code (in
+                // particular the size-cast handler) can distinguish a
+                // genuinely-signed value from an incidental vpiIntConst
+                // produced by arithmetic over unsigned operands.
+                if (!c->Typespec()) {
+                  logic_typespec *lt = s.MakeLogic_typespec();
+                  lt->VpiSigned(true);
+                  ref_typespec *rt = s.MakeRef_typespec();
+                  rt->VpiParent(c);
+                  rt->Actual_typespec(lt);
+                  c->Typespec(rt);
+                }
                 return c;
               } else {
                 uint64_t res = value;
@@ -4503,6 +4564,13 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 c->VpiDecompile(std::to_string(res));
                 c->VpiSize(static_cast<int32_t>(size));
                 c->VpiConstType(vpiIntConst);
+                // Attach signed typespec hint (see comment above).
+                logic_typespec *lt = s.MakeLogic_typespec();
+                lt->VpiSigned(true);
+                ref_typespec *rt = s.MakeRef_typespec();
+                rt->VpiParent(c);
+                rt->Actual_typespec(lt);
+                c->Typespec(rt);
                 result = c;
               } else {
                 result = c;
