@@ -1612,8 +1612,8 @@ static bool getStringVal(std::string &result, expr *val) {
 
 void resize(expr *resizedExp, int32_t size) {
   ExprEval eval;
-  constant* c = any_cast<constant*>(resizedExp);
-  if (c && c->VpiDecompile() == "'1") {
+  constant *c = (constant *)resizedExp;
+  if (c->VpiDecompile() == "'1") {
     uint64_t mask = NumUtils::getMask(size);
     c->VpiValue("UINT:" + std::to_string(mask));
     c->VpiDecompile(std::to_string(mask));
@@ -2241,13 +2241,11 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
       ElaboratorContext elaboratorContext(&s);
       object = clone_tree(cons, &elaboratorContext);
       cons = any_cast<constant *>(object);
-      if (cons->Typespec() == nullptr && path->Typespec() != nullptr) {
+      if (cons->Typespec() == nullptr) {
         ref_typespec *rt =
             (ref_typespec *)clone_tree(path->Typespec(), &elaboratorContext);
-        if (rt != nullptr) {
-          rt->VpiParent(cons);
-          cons->Typespec(rt);
-        }
+        rt->VpiParent(cons);
+        cons->Typespec(rt);
       }
     } else if (operation *oper = any_cast<operation *>(object)) {
       if (returnType == ReturnType::TYPESPEC) {
@@ -4043,63 +4041,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   cast_to = 32;
                 }
               }
-              // SV LRM §6.24.1: a size cast `N'(expr)` preserves the
-              // OPERAND's signedness.  We only treat the operand as
-              // signed when an EXPLICIT signed marker is present (a
-              // signed typespec on the folded constant) — `vpiIntConst`
-              // alone is unreliable because Surelog stores arithmetic
-              // results (e.g. `PartEnd - 4` from an unsigned PartEnd)
-              // as `vpiIntConst` regardless of operand signedness.
-              // `$signed(...)` attaches the signed typespec below so
-              // that `8'(4'(signed'(-8'd1)))` correctly sign-extends.
-              bool oper_signed = false;
-              if (constant *oc = any_cast<constant *>(oper)) {
-                if (const ref_typespec *ort = oc->Typespec()) {
-                  if (const typespec *ots = ort->Actual_typespec()) {
-                    UHDM_OBJECT_TYPE ott = ots->UhdmType();
-                    if (ott == UHDM_OBJECT_TYPE::uhdmlogic_typespec)
-                      oper_signed = ((const logic_typespec*)ots)->VpiSigned();
-                    else if (ott == UHDM_OBJECT_TYPE::uhdmbit_typespec)
-                      oper_signed = ((const bit_typespec*)ots)->VpiSigned();
-                    else if (ott == UHDM_OBJECT_TYPE::uhdmint_typespec)
-                      oper_signed = ((const int_typespec*)ots)->VpiSigned();
-                    else if (ott == UHDM_OBJECT_TYPE::uhdminteger_typespec)
-                      oper_signed = ((const integer_typespec*)ots)->VpiSigned();
-                    else if (ott == UHDM_OBJECT_TYPE::uhdmbyte_typespec)
-                      oper_signed = ((const byte_typespec*)ots)->VpiSigned();
-                    else if (ott == UHDM_OBJECT_TYPE::uhdmshort_int_typespec)
-                      oper_signed = ((const short_int_typespec*)ots)->VpiSigned();
-                    else if (ott == UHDM_OBJECT_TYPE::uhdmlong_int_typespec)
-                      oper_signed = ((const long_int_typespec*)ots)->VpiSigned();
-                  }
-                }
-              }
               constant *c = s.MakeConstant();
               uint64_t mask = ((uint64_t)(1ULL << cast_to)) - 1ULL;
-              resize(oper, cast_to);
-              val0 = get_value(invalidValue, oper);
               uint64_t res = val0 & mask;
-              if (oper_signed) {
-                int64_t sres = (int64_t)res;
-                if (cast_to < 64) {
-                  uint64_t sign = 1ULL << (cast_to - 1);
-                  if (res & sign) sres = (int64_t)(res | ~mask);
-                }
-                c->VpiValue("INT:" + std::to_string(sres));
-                c->VpiConstType(vpiIntConst);
-                // Propagate the signed marker so a chained outer cast
-                // (`8'(4'(...))`) still sees its operand as signed.
-                logic_typespec *lt = s.MakeLogic_typespec();
-                lt->VpiSigned(true);
-                ref_typespec *rt = s.MakeRef_typespec();
-                rt->VpiParent(c);
-                rt->Actual_typespec(lt);
-                c->Typespec(rt);
-              } else {
-                c->VpiValue("UINT:" + std::to_string(res));
-                c->VpiConstType(vpiUIntConst);
-              }
+              c->VpiValue("UINT:" + std::to_string(res));
               c->VpiSize(static_cast<int32_t>(cast_to));
+              c->VpiConstType(vpiUIntConst);
               result = c;
             } else if (ttps == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
               // TODO: Should check the value is in range of the enum and
@@ -4129,171 +4076,6 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
   } else if (objtype == UHDM_OBJECT_TYPE::uhdmsys_func_call) {
     sys_func_call *scall = (sys_func_call *)result;
     const std::string_view name = scall->VpiName();
-    // Per SV LRM §20.7, `$size(arr [, dim])` returns the size of the
-    // numbered dimension (1 = outermost).  The old handler routed
-    // `$size` through the generic `size()` function which (a) added
-    // the dim-index argument's bit-width to the running total, (b)
-    // applied the LAST range only (`ranges->back()`) instead of the
-    // requested one, and (c) had no `array_net` case at all — so
-    // `$size(z)` / `$size(z, N)` on an unpacked array net returned
-    // wrong values.  Handle `$size` independently before the generic
-    // path.
-    if (name == "$size") {
-      // Collect all dimensions (outer → inner: unpacked first, packed
-      // last) of the first call argument.  `strip_outer` counts
-      // bit_select / var_select indices we still need to strip from
-      // the front of the dim list.
-      struct DimEntry { int64_t left, right; };
-      std::vector<DimEntry> alldims;
-      int strip_outer = 0;
-      bool dim_ok = true;
-
-      std::function<void(const any *)> walk_ts;
-      std::function<void(const any *)> walk_obj;
-
-      walk_ts = [&](const any *ts) {
-        if (!ts) return;
-        UHDM_OBJECT_TYPE tt = ts->UhdmType();
-        if (tt == uhdmref_typespec) {
-          ts = ((ref_typespec *)ts)->Actual_typespec();
-          if (!ts) return;
-          tt = ts->UhdmType();
-        }
-        VectorOfrange *rs = nullptr;
-        const any *elem_ts = nullptr;
-        if (tt == uhdmlogic_typespec) {
-          auto *t = (logic_typespec *)ts;
-          rs = t->Ranges();
-          if (t->Elem_typespec()) elem_ts = t->Elem_typespec()->Actual_typespec();
-        } else if (tt == uhdmbit_typespec) {
-          rs = ((bit_typespec *)ts)->Ranges();
-        } else if (tt == uhdmint_typespec) {
-          rs = ((int_typespec *)ts)->Ranges();
-        } else if (tt == uhdmpacked_array_typespec) {
-          auto *t = (packed_array_typespec *)ts;
-          rs = t->Ranges();
-          if (t->Elem_typespec()) elem_ts = t->Elem_typespec()->Actual_typespec();
-        } else if (tt == uhdmarray_typespec) {
-          auto *t = (array_typespec *)ts;
-          rs = t->Ranges();
-          if (t->Elem_typespec()) elem_ts = t->Elem_typespec()->Actual_typespec();
-        }
-        if (rs) {
-          for (range *r : *rs) {
-            bool inv = false;
-            int64_t lv = getValue(reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError));
-            int64_t rv = getValue(reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError));
-            if (inv) { dim_ok = false; return; }
-            alldims.push_back({lv, rv});
-          }
-        }
-        if (elem_ts) walk_ts(elem_ts);
-      };
-
-      walk_obj = [&](const any *obj) {
-        if (!obj) { dim_ok = false; return; }
-        UHDM_OBJECT_TYPE ot = obj->UhdmType();
-        if (ot == uhdmarray_net) {
-          auto *an = (array_net *)obj;
-          if (an->Ranges()) {
-            for (range *r : *an->Ranges()) {
-              bool inv = false;
-              int64_t lv = getValue(reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError));
-              int64_t rv = getValue(reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError));
-              if (inv) { dim_ok = false; return; }
-              alldims.push_back({lv, rv});
-            }
-          }
-          if (an->Nets() && !an->Nets()->empty()) {
-            auto *n = (*an->Nets())[0];
-            if (n->Typespec()) walk_ts(n->Typespec()->Actual_typespec());
-          }
-        } else if (auto *lvar = any_cast<logic_var *>(obj)) {
-          if (lvar->Typespec()) walk_ts(lvar->Typespec()->Actual_typespec());
-        } else if (auto *lnet = any_cast<logic_net *>(obj)) {
-          if (lnet->Typespec()) walk_ts(lnet->Typespec()->Actual_typespec());
-        } else if (auto *var = any_cast<array_var *>(obj)) {
-          if (var->Ranges()) {
-            for (range *r : *var->Ranges()) {
-              bool inv = false;
-              int64_t lv = getValue(reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError));
-              int64_t rv = getValue(reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError));
-              if (inv) { dim_ok = false; return; }
-              alldims.push_back({lv, rv});
-            }
-          }
-          if (var->Variables() && !var->Variables()->empty()) {
-            variables *v = (*var->Variables())[0];
-            if (v->Typespec()) walk_ts(v->Typespec()->Actual_typespec());
-          }
-        }
-      };
-
-      if (scall->Tf_call_args() && !scall->Tf_call_args()->empty()) {
-        any *arg0 = scall->Tf_call_args()->at(0);
-        UHDM_OBJECT_TYPE at = arg0->UhdmType();
-        // bit_select / var_select strip outer dims by Exprs().size().
-        if (at == uhdmbit_select) {
-          ++strip_outer;
-          auto *bs = (bit_select *)arg0;
-          std::string_view bname = bs->VpiName();
-          any *obj = getObject(bname, inst, pexpr, muteError);
-          walk_obj(obj);
-        } else if (at == uhdmvar_select) {
-          auto *vs = (var_select *)arg0;
-          if (vs->Exprs()) strip_outer = (int)vs->Exprs()->size();
-          std::string_view bname = vs->VpiName();
-          any *obj = getObject(bname, inst, pexpr, muteError);
-          walk_obj(obj);
-        } else if (at == uhdmref_obj) {
-          auto *ref = (ref_obj *)arg0;
-          std::string_view objname = ref->VpiName();
-          any *obj = getObject(objname, inst, pexpr, muteError);
-          if (obj == nullptr) {
-            // Fall back to typespec on the ref itself.
-            if (ref->Typespec()) walk_ts(ref->Typespec()->Actual_typespec());
-          } else {
-            walk_obj(obj);
-          }
-        } else {
-          dim_ok = false;
-        }
-      } else {
-        dim_ok = false;
-      }
-
-      // Determine the dim index from the optional 2nd arg.
-      int64_t dim_index = 1;
-      if (dim_ok && scall->Tf_call_args()->size() >= 2) {
-        bool inv = false;
-        dim_index = getValue(
-            reduceExpr(scall->Tf_call_args()->at(1), inv, inst, pexpr, muteError));
-        if (inv) dim_ok = false;
-      }
-
-      if (dim_ok) {
-        // Apply outer-dim stripping from bit/var-selects.
-        while (strip_outer > 0 && !alldims.empty()) {
-          alldims.erase(alldims.begin());
-          --strip_outer;
-        }
-        if (dim_index >= 1 && dim_index <= (int64_t)alldims.size()) {
-          const DimEntry &d = alldims[dim_index - 1];
-          uint64_t dsize = (d.left > d.right)
-                               ? (uint64_t)(d.left - d.right) + 1
-                               : (uint64_t)(d.right - d.left) + 1;
-          constant *c = s.MakeConstant();
-          c->VpiValue("UINT:" + std::to_string(dsize));
-          c->VpiDecompile(std::to_string(dsize));
-          c->VpiSize(64);
-          c->VpiConstType(vpiUIntConst);
-          return c;
-        }
-      }
-      // Fall through to generic handler below if our walker couldn't
-      // resolve the dim — preserves behavior for cases we don't cover
-      // (struct fields, function-call args, etc).
-    }
     if ((name == "$bits") || (name == "$size") || (name == "$high") ||
         (name == "$low") || (name == "$left") || (name == "$right")) {
       uint64_t bits = 0;
@@ -4493,18 +4275,6 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               int64_t value = get_value(invalidValue, val);
               int64_t size = c->VpiSize();
               if (name == "$signed") {
-                // Attach a signed typespec hint so downstream code (in
-                // particular the size-cast handler) can distinguish a
-                // genuinely-signed value from an incidental vpiIntConst
-                // produced by arithmetic over unsigned operands.
-                if (!c->Typespec()) {
-                  logic_typespec *lt = s.MakeLogic_typespec();
-                  lt->VpiSigned(true);
-                  ref_typespec *rt = s.MakeRef_typespec();
-                  rt->VpiParent(c);
-                  rt->Actual_typespec(lt);
-                  c->Typespec(rt);
-                }
                 return c;
               } else {
                 uint64_t res = value;
@@ -4564,13 +4334,6 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 c->VpiDecompile(std::to_string(res));
                 c->VpiSize(static_cast<int32_t>(size));
                 c->VpiConstType(vpiIntConst);
-                // Attach signed typespec hint (see comment above).
-                logic_typespec *lt = s.MakeLogic_typespec();
-                lt->VpiSigned(true);
-                ref_typespec *rt = s.MakeRef_typespec();
-                rt->VpiParent(c);
-                rt->Actual_typespec(lt);
-                c->Typespec(rt);
                 result = c;
               } else {
                 result = c;
@@ -4605,25 +4368,6 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     const std::string_view name = ref->VpiName();
     if (any *tmp = getValue(name, inst, pexpr, muteError)) {
       result = tmp;
-    } else if (const any *actual = ref->Actual_group()) {
-      // Fallback: use the elaborated Actual pointer to resolve the value
-      // This handles parameters/localparams in generate scopes that
-      // can't be found by name lookup alone
-      if (const parameter *param = any_cast<const parameter *>(actual)) {
-        std::string_view val = param->VpiValue();
-        if (!val.empty()) {
-          bool tmpInvalid = false;
-          get_value(tmpInvalid, (const expr *)param);
-          if (!tmpInvalid) {
-            constant *c = s.MakeConstant();
-            c->VpiValue(std::string(val));
-            c->VpiDecompile(param->VpiDecompile());
-            c->VpiSize(param->VpiSize());
-            c->VpiConstType(param->VpiConstType());
-            result = c;
-          }
-        }
-      }
     }
     return (expr *)result;
   } else if (objtype == UHDM_OBJECT_TYPE::uhdmhier_path) {
@@ -5370,71 +5114,6 @@ bool ExprEval::setValueInInstance(
   return invalidValue;
 }
 
-void ExprEval::evalBlock_(std::string_view funcName, Scopes &scopes,
-                          bool &invalidValue, bool &continue_flag,
-                          bool &break_flag, bool &return_flag,
-                          VectorOfvariables *variables, VectorOfany *stmts,
-                          std::map<std::string, const typespec *> &local_vars,
-                          bool muteError) {
-  // Variables declared in this block must shadow any same-named
-  // outer variable.  `param_assigns` (where setValueInInstance stores
-  // values) is keyed by name only — without explicit save/restore the
-  // inner block's write would overwrite the outer scope's binding.
-  VectorOfparam_assign *param_assigns = nullptr;
-  if (const scope *spe = any_cast<const scope *>(scopes.back()))
-    param_assigns = spe->Param_assigns();
-
-  std::vector<param_assign *> saved_outer;
-  std::vector<std::pair<std::string, const typespec *>> saved_local;
-  if (variables && param_assigns) {
-    for (auto var : *variables) {
-      std::string_view vn = var->VpiName();
-      // Save and remove any outer param_assign with the same name.
-      for (auto itr = param_assigns->begin(); itr != param_assigns->end();
-           ++itr) {
-        if ((*itr)->Lhs() && (*itr)->Lhs()->VpiName() == vn) {
-          saved_outer.push_back(*itr);
-          param_assigns->erase(itr);
-          break;
-        }
-      }
-      // Save and remove any outer local_vars entry.
-      auto lv_it = local_vars.find(std::string(vn));
-      if (lv_it != local_vars.end()) {
-        saved_local.emplace_back(lv_it->first, lv_it->second);
-        local_vars.erase(lv_it);
-      }
-      if (const ref_typespec *rt = var->Typespec())
-        local_vars.emplace(vn, rt->Actual_typespec());
-    }
-  }
-
-  if (stmts) {
-    for (auto bst : *stmts) {
-      evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-               return_flag, scopes.back(), bst, local_vars, muteError);
-      if (continue_flag || break_flag || return_flag) break;
-    }
-  }
-
-  // Restore outer-scope param_assigns and local_vars.
-  if (variables && param_assigns) {
-    for (auto var : *variables) {
-      std::string_view vn = var->VpiName();
-      for (auto itr = param_assigns->begin(); itr != param_assigns->end();
-           ++itr) {
-        if ((*itr)->Lhs() && (*itr)->Lhs()->VpiName() == vn) {
-          param_assigns->erase(itr);
-          break;
-        }
-      }
-      local_vars.erase(std::string(vn));
-    }
-    for (auto pa : saved_outer) param_assigns->push_back(pa);
-    for (auto &kv : saved_local) local_vars.emplace(kv.first, kv.second);
-  }
-}
-
 void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
                         bool &invalidValue, bool &continue_flag,
                         bool &break_flag, bool &return_flag, const any *inst,
@@ -5505,16 +5184,42 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
     }
     case UHDM_OBJECT_TYPE::uhdmbegin: {
       begin *st = (begin *)stmt;
-      evalBlock_(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 return_flag, st->Variables(), st->Stmts(), local_vars,
-                 muteError);
+      if (st->Variables()) {
+        for (auto var : *st->Variables()) {
+          if (const ref_typespec *rt = var->Typespec()) {
+            local_vars.emplace(var->VpiName(), rt->Actual_typespec());
+          }
+        }
+      }
+      if (st->Stmts()) {
+        for (auto bst : *st->Stmts()) {
+          evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                   return_flag, scopes.back(), bst, local_vars, muteError);
+          if (continue_flag || break_flag || return_flag) {
+            return;
+          }
+        }
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmnamed_begin: {
       named_begin *st = (named_begin *)stmt;
-      evalBlock_(funcName, scopes, invalidValue, continue_flag, break_flag,
-                 return_flag, st->Variables(), st->Stmts(), local_vars,
-                 muteError);
+      if (st->Variables()) {
+        for (auto var : *st->Variables()) {
+          if (const ref_typespec *rt = var->Typespec()) {
+            local_vars.emplace(var->VpiName(), rt->Actual_typespec());
+          }
+        }
+      }
+      if (st->Stmts()) {
+        for (auto bst : *st->Stmts()) {
+          evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+                   return_flag, scopes.back(), bst, local_vars, muteError);
+          if (continue_flag || break_flag || return_flag) {
+            return;
+          }
+        }
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmassignment: {
