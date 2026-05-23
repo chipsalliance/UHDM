@@ -5370,6 +5370,71 @@ bool ExprEval::setValueInInstance(
   return invalidValue;
 }
 
+void ExprEval::evalBlock_(std::string_view funcName, Scopes &scopes,
+                          bool &invalidValue, bool &continue_flag,
+                          bool &break_flag, bool &return_flag,
+                          VectorOfvariables *variables, VectorOfany *stmts,
+                          std::map<std::string, const typespec *> &local_vars,
+                          bool muteError) {
+  // Variables declared in this block must shadow any same-named
+  // outer variable.  `param_assigns` (where setValueInInstance stores
+  // values) is keyed by name only — without explicit save/restore the
+  // inner block's write would overwrite the outer scope's binding.
+  VectorOfparam_assign *param_assigns = nullptr;
+  if (const scope *spe = any_cast<const scope *>(scopes.back()))
+    param_assigns = spe->Param_assigns();
+
+  std::vector<param_assign *> saved_outer;
+  std::vector<std::pair<std::string, const typespec *>> saved_local;
+  if (variables && param_assigns) {
+    for (auto var : *variables) {
+      std::string_view vn = var->VpiName();
+      // Save and remove any outer param_assign with the same name.
+      for (auto itr = param_assigns->begin(); itr != param_assigns->end();
+           ++itr) {
+        if ((*itr)->Lhs() && (*itr)->Lhs()->VpiName() == vn) {
+          saved_outer.push_back(*itr);
+          param_assigns->erase(itr);
+          break;
+        }
+      }
+      // Save and remove any outer local_vars entry.
+      auto lv_it = local_vars.find(std::string(vn));
+      if (lv_it != local_vars.end()) {
+        saved_local.emplace_back(lv_it->first, lv_it->second);
+        local_vars.erase(lv_it);
+      }
+      if (const ref_typespec *rt = var->Typespec())
+        local_vars.emplace(vn, rt->Actual_typespec());
+    }
+  }
+
+  if (stmts) {
+    for (auto bst : *stmts) {
+      evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
+               return_flag, scopes.back(), bst, local_vars, muteError);
+      if (continue_flag || break_flag || return_flag) break;
+    }
+  }
+
+  // Restore outer-scope param_assigns and local_vars.
+  if (variables && param_assigns) {
+    for (auto var : *variables) {
+      std::string_view vn = var->VpiName();
+      for (auto itr = param_assigns->begin(); itr != param_assigns->end();
+           ++itr) {
+        if ((*itr)->Lhs() && (*itr)->Lhs()->VpiName() == vn) {
+          param_assigns->erase(itr);
+          break;
+        }
+      }
+      local_vars.erase(std::string(vn));
+    }
+    for (auto pa : saved_outer) param_assigns->push_back(pa);
+    for (auto &kv : saved_local) local_vars.emplace(kv.first, kv.second);
+  }
+}
+
 void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
                         bool &invalidValue, bool &continue_flag,
                         bool &break_flag, bool &return_flag, const any *inst,
@@ -5440,42 +5505,16 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
     }
     case UHDM_OBJECT_TYPE::uhdmbegin: {
       begin *st = (begin *)stmt;
-      if (st->Variables()) {
-        for (auto var : *st->Variables()) {
-          if (const ref_typespec *rt = var->Typespec()) {
-            local_vars.emplace(var->VpiName(), rt->Actual_typespec());
-          }
-        }
-      }
-      if (st->Stmts()) {
-        for (auto bst : *st->Stmts()) {
-          evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scopes.back(), bst, local_vars, muteError);
-          if (continue_flag || break_flag || return_flag) {
-            return;
-          }
-        }
-      }
+      evalBlock_(funcName, scopes, invalidValue, continue_flag, break_flag,
+                 return_flag, st->Variables(), st->Stmts(), local_vars,
+                 muteError);
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmnamed_begin: {
       named_begin *st = (named_begin *)stmt;
-      if (st->Variables()) {
-        for (auto var : *st->Variables()) {
-          if (const ref_typespec *rt = var->Typespec()) {
-            local_vars.emplace(var->VpiName(), rt->Actual_typespec());
-          }
-        }
-      }
-      if (st->Stmts()) {
-        for (auto bst : *st->Stmts()) {
-          evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
-                   return_flag, scopes.back(), bst, local_vars, muteError);
-          if (continue_flag || break_flag || return_flag) {
-            return;
-          }
-        }
-      }
+      evalBlock_(funcName, scopes, invalidValue, continue_flag, break_flag,
+                 return_flag, st->Variables(), st->Stmts(), local_vars,
+                 muteError);
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmassignment: {

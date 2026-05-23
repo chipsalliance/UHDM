@@ -146,6 +146,20 @@ class ExprEval {
                 std::map<std::string, const typespec*>& local_vars,
                 bool muteError = false);
 
+  // Helper for begin/named_begin scope handling.  Variables declared in
+  // the inner block must SHADOW any same-named outer variable for the
+  // duration of the block: existing `param_assigns` entries are saved
+  // and removed on entry, fresh ones are created by the body, then the
+  // inner entries are wiped and the saved outer ones restored on exit.
+  // Without this, `func[8:6] = y` in `const_func_shadow.v` reads the
+  // innermost `y` value instead of the enclosing scope's `y`.
+  void evalBlock_(std::string_view funcName, Scopes& scopes,
+                  bool& invalidValue, bool& continue_flag, bool& break_flag,
+                  bool& return_flag,
+                  VectorOfvariables* variables, VectorOfany* stmts,
+                  std::map<std::string, const typespec*>& local_vars,
+                  bool muteError);
+
   bool setValueInInstance(std::string_view lhs, any* lhsexp, expr* rhsexp,
                           bool& invalidValue, Serializer& s, const any* inst,
                           const any* scope_exp,
