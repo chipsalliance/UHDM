@@ -5791,6 +5791,52 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
           }
           if (exparg->Typespec())
             exparg->Typespec()->Actual_typespec(tps);
+          // Truncate the constant argument to the formal parameter's
+          // declared width so the in-function value reflects the
+          // truncated (1-bit / 5-bit / etc.) view of the argument.
+          // Without this, `function f; input reg signed inp; ...
+          // f = inp;` reads `inp` as the full-width argument constant
+          // (e.g. 64-bit `1`) instead of the 1-bit signed value
+          // (`1` → -1), and a subsequent assignment to a wider return
+          // type fails to sign-extend correctly
+          // (yosys/tests/verilog/func_typename_ret.sv gold module).
+          if (exparg->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant &&
+              tps && tps->UhdmType() ==
+                     UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
+            bool sz_invalid = false;
+            uint64_t formal_w = size(tps, sz_invalid, modinst, pexpr,
+                                     true, true);
+            constant *cexp = (constant *)exparg;
+            if (!sz_invalid && formal_w > 0 &&
+                cexp->VpiConstType() != vpiBinaryConst &&
+                static_cast<uint64_t>(cexp->VpiSize()) > formal_w) {
+              bool gv_invalid = false;
+              int64_t v = get_value(gv_invalid, cexp);
+              if (!gv_invalid) {
+                uint64_t mask = NumUtils::getMask(formal_w);
+                int64_t truncated = v & mask;
+                logic_typespec *ltps2 = (logic_typespec *)tps;
+                if (ltps2->VpiSigned() && formal_w < 64) {
+                  int64_t msb = (truncated >> (formal_w - 1)) & 1;
+                  if (msb) {
+                    // Sign-extend so subsequent assignment to a wider
+                    // LHS uses the negative value.
+                    truncated |= ~mask;
+                  }
+                }
+                if (ltps2->VpiSigned()) {
+                  cexp->VpiValue("INT:" + std::to_string(truncated));
+                  cexp->VpiConstType(vpiIntConst);
+                } else {
+                  cexp->VpiValue("UINT:" +
+                                 std::to_string(static_cast<uint64_t>(truncated)));
+                  cexp->VpiConstType(vpiUIntConst);
+                }
+                cexp->VpiDecompile(std::to_string(truncated));
+                cexp->VpiSize(static_cast<int32_t>(formal_w));
+              }
+            }
+          }
           std::map<std::string, const typespec *> local_vars;
           invalidValue =
               setValueInInstance(ioname, io, exparg, invalidValue, s, modinst,
