@@ -4031,7 +4031,19 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               std::string_view val = itps->VpiValue();
               uint64_t cast_to = 0;
               if (val.empty()) {
+                // A size cast `N'(expr)` whose width N is a constant
+                // EXPRESSION (e.g. `$clog2(X)'(...)`) leaves VpiValue empty
+                // and stores the width expression in the typespec's Expr().
+                // Evaluate it instead of defaulting to the 32-bit `integer`
+                // width (which would skip the intended truncation).
                 cast_to = 32;
+                if (const expr *we = itps->Expr()) {
+                  bool wiv = false;
+                  uint64_t w = get_value(
+                      wiv,
+                      reduceExpr((any *)we, wiv, inst, pexpr, muteError));
+                  if (!wiv && w > 0) cast_to = w;
+                }
               } else if (val.find("UINT:") == 0) {
                 val.remove_prefix(std::string_view("UINT:").length());
                 if (NumUtils::parseUint64(val, &cast_to) == nullptr) {
