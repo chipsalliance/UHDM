@@ -1354,6 +1354,20 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
       bits = 1;
       logic_typespec *lts = (logic_typespec *)ts;
       ranges = lts->Ranges();
+      // A packed array whose element is a typedef — `typedef logic[31:0] word;
+      // word [1:0]` — carries the element type in Elem_typespec.  The element
+      // width must multiply the outer range(s) below; without this the element
+      // is treated as 1 bit and e.g. a `word[1:0]` function return is sized 2
+      // instead of 2*32=64 (truncating the return value).  Mirrors the
+      // array_typespec / packed_array_typespec cases.
+      if (full) {
+        if (const ref_typespec *rt = lts->Elem_typespec()) {
+          bool tmpInvalidValue = false;
+          uint64_t tmpS =
+              size(rt->Actual_typespec(), tmpInvalidValue, inst, pexpr, full);
+          if (!tmpInvalidValue) bits = tmpS;
+        }
+      }
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmstring_typespec: {
