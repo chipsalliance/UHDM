@@ -35,8 +35,14 @@ set_target_properties(py_uhdm PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/uhdm
 )
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in
+    ${CMAKE_CURRENT_BINARY_DIR}/setup.py
+    @ONLY
+)
+
 file(
-    COPY ${CMAKE_CURRENT_SOURCE_DIR}/setup.py ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
+    COPY ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -45,11 +51,17 @@ file(
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/uhdm
 )
 
-add_custom_target(PyPackageBuild ALL
-    COMMAND ${Python3_EXECUTABLE} -m build --sdist
-    COMMAND ${Python3_EXECUTABLE} -m pip install .
+add_custom_target(PyPackageBuild
+    COMMAND ${Python3_EXECUTABLE} -m pip install -e .
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Building python sdist package"
+    COMMENT "Building python package (editable)"
+    DEPENDS py_uhdm
+)
+
+add_custom_target(PyPackageDist
+    COMMAND ${Python3_EXECUTABLE} -m build --sdist
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Building python distribution package (sdist)"
     DEPENDS py_uhdm
 )
 
