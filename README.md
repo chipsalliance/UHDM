@@ -23,6 +23,8 @@
 
 # HowTo
 
+For detailed setup, dependencies, and build options (including Python bindings), please refer to [INSTALL.md](INSTALL.md).
+
 ```bash
  * git clone https://github.com/alainmarcel/UHDM.git
  * cd UHDM

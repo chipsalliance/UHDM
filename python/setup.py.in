@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(name='uhdm',
-      version='0.1',
+      version='@PROJECT_VERSION@',
       description='UHDM VPI SWIG wrapper and utilities',
       url='https://github.com/ChipsAlliance/UHDM',
       packages=find_packages(),
@@ -11,4 +11,3 @@ setup(name='uhdm',
       package_data={'uhdm': ['_py_uhdm.so']},
       include_package_data=True,
 )
-
