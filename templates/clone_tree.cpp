@@ -1568,6 +1568,25 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                     }
                   }
                 }
+                // Interface signals (nets/vars) resolve BEFORE modport io_decls:
+                // for `iface.member` (direct interface access, previous is the
+                // interface instance) the member is the actual signal, not a
+                // modport I/O declaration.  Matching a modport io_decl here would
+                // bind `req` to an io_decl, and a following `.field` element could
+                // no longer resolve (io_decl has no member scope) — it would fall
+                // back to the global bind and hit a same-named enclosing signal.
+                if (!found && interf->Nets()) {
+                  for (nets* n : *interf->Nets()) {
+                    if (n->VpiName() == name) {
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(n);
+                      }
+                      previous = n;
+                      found = true;
+                      break;
+                    }
+                  }
+                }
                 if (!found && interf->Modports()) {
                   for (modport* mport : *interf->Modports()) {
                     if (mport->VpiName() == name) {
@@ -1602,18 +1621,6 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                       }
                     }
                     if (found) break;
-                  }
-                }
-                if (!found && interf->Nets()) {
-                  for (nets* n : *interf->Nets()) {
-                    if (n->VpiName() == name) {
-                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
-                        cro->Actual_group(n);
-                      }
-                      previous = n;
-                      found = true;
-                      break;
-                    }
                   }
                 }
                 if (!found && interf->Ports()) {
