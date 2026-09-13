@@ -7299,11 +7299,25 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
           // the param_assign Rhs without re-reducing it, so no loop — and
           // the historical behaviour, incl. the typespec annotations evalFunc
           // leaves on the body, is kept for that common `f(value)` shape.)
+          // Only when the argument IS a nested function call: the leaked
+          // names are the nested callee's formals, which have no meaning in
+          // this scope.  A select / operation over this caller's own
+          // variables (`sbox4_8bit(state_in[0 +: 8])` with state_in bound in
+          // the caller) resolves through the scope chain as before.
           if (exparg->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant &&
-              exparg->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) {
+              ioexp->UhdmType() == UHDM_OBJECT_TYPE::uhdmfunc_call) {
+            const func_call *nested = (const func_call *)ioexp;
+            const function *nfunc = nullptr;
+            if (task_func *tf = getTaskFunc(nested->VpiName(), inst))
+              nfunc = any_cast<const function *>(tf);
             bool selfRef = false;
-            for (auto io2 : *func->Io_decls())
-              if (exprRefsName(exparg, io2->VpiName())) { selfRef = true; break; }
+            if (nfunc && nfunc->Io_decls()) {
+              for (auto io2 : *nfunc->Io_decls())
+                if (exprRefsName(exparg, io2->VpiName())) { selfRef = true; break; }
+            } else {
+              for (auto io2 : *func->Io_decls())
+                if (exprRefsName(exparg, io2->VpiName())) { selfRef = true; break; }
+            }
             if (selfRef) {
               invalidValue = true;
               return nullptr;
