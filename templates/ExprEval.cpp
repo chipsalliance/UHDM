@@ -5115,7 +5115,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 }
               }
               constant *c = s.MakeConstant();
-              uint64_t mask = ((uint64_t)(1ULL << cast_to)) - 1ULL;
+              // `1ULL << 64` is undefined (x86 yields 1, so the mask became
+              // 0): a 64-bit-or-wider size cast `64'(X)` folded to ZERO
+              // (OpenTitan hmac_core: `localparam bit [63:0] BlockSizeSHA256in64
+              // = 64'(BlockSizeSHA256)` and every constant derived from it).
+              uint64_t mask = (cast_to >= 64) ? ~0ULL
+                                              : ((uint64_t)(1ULL << cast_to)) - 1ULL;
               resize(oper, cast_to);
               val0 = get_value(invalidValue, oper);
               uint64_t res = val0 & mask;
