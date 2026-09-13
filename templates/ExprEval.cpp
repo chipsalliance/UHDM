@@ -3840,9 +3840,78 @@ any *ExprEval::hierarchicalSelector(std::vector<std::string> &select_path,
   return nullptr;
 }
 
+// Does `e` reference `name` (a ref_obj / select base / nested operand or call
+// argument)?  Used by evalFunc to refuse binding a formal to an argument
+// expression that still mentions a formal of the SAME name — the classic
+// `outer(inner(x))` with both formals called `g`: inner's non-constant result
+// `{g[0], g[1]}` bound to outer's `g` makes getValue("g") reduce to itself.
+static bool exprRefsName(const any *e, std::string_view name, int depth = 0) {
+  if (!e || depth > 64) return false;
+  switch (e->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmref_obj:
+      return ((const ref_obj *)e)->VpiName() == name;
+    case UHDM_OBJECT_TYPE::uhdmbit_select: {
+      const bit_select *b = (const bit_select *)e;
+      return b->VpiName() == name ||
+             exprRefsName(b->VpiIndex(), name, depth + 1);
+    }
+    case UHDM_OBJECT_TYPE::uhdmpart_select: {
+      const part_select *ps = (const part_select *)e;
+      return ps->VpiName() == name ||
+             exprRefsName(ps->Left_range(), name, depth + 1) ||
+             exprRefsName(ps->Right_range(), name, depth + 1);
+    }
+    case UHDM_OBJECT_TYPE::uhdmindexed_part_select: {
+      const indexed_part_select *ps = (const indexed_part_select *)e;
+      return ps->VpiName() == name ||
+             exprRefsName(ps->Base_expr(), name, depth + 1) ||
+             exprRefsName(ps->Width_expr(), name, depth + 1);
+    }
+    case UHDM_OBJECT_TYPE::uhdmvar_select: {
+      const var_select *vs = (const var_select *)e;
+      if (vs->VpiName() == name) return true;
+      if (vs->Exprs())
+        for (auto x : *vs->Exprs())
+          if (exprRefsName(x, name, depth + 1)) return true;
+      return false;
+    }
+    case UHDM_OBJECT_TYPE::uhdmoperation: {
+      const operation *op = (const operation *)e;
+      if (op->Operands())
+        for (auto x : *op->Operands())
+          if (exprRefsName(x, name, depth + 1)) return true;
+      return false;
+    }
+    case UHDM_OBJECT_TYPE::uhdmfunc_call:
+    case UHDM_OBJECT_TYPE::uhdmsys_func_call: {
+      const tf_call *c = (const tf_call *)e;
+      if (c->Tf_call_args())
+        for (auto x : *c->Tf_call_args())
+          if (exprRefsName(x, name, depth + 1)) return true;
+      return false;
+    }
+    default:
+      return false;
+  }
+}
+
 expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                            const any *inst, const any *pexpr, bool muteError) {
   if (!result) return nullptr;
+  // Recursion guard: a self-referential binding (getValue -> reduceExpr ->
+  // getValue on the same name) used to recurse until the stack was exhausted
+  // (SIGSEGV on OpenTitan aes_sbox_dom).  Legitimate reductions never nest
+  // this deep; give up with invalidValue instead of crashing.
+  static thread_local int32_t reduceDepth = 0;
+  struct DepthGuard {
+    int32_t &d;
+    explicit DepthGuard(int32_t &dd) : d(dd) { ++d; }
+    ~DepthGuard() { --d; }
+  } depthGuard(reduceDepth);
+  if (reduceDepth > 1024) {
+    invalidValue = true;
+    return nullptr;
+  }
   Serializer &s = *result->GetSerializer();
   UHDM_OBJECT_TYPE objtype = result->UhdmType();
   if (objtype == UHDM_OBJECT_TYPE::uhdmoperation) {
@@ -7221,6 +7290,25 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
         expr *ioexp = (expr *)args->at(index);
         if (expr *exparg =
                 reduceExpr(ioexp, invalidValue, modinst, pexpr, muteError)) {
+          // A NON-constant argument that still mentions one of this
+          // function's formals (`outer(inner(x))`, both formals `g`: inner
+          // reduces to `{g[0], g[1]}`) cannot be bound by name — the body's
+          // `g` would resolve to an expression containing `g`.  Not a
+          // compile-time value: stop here.
+          // (A BARE ref_obj to a same-named formal is fine: getValue returns
+          // the param_assign Rhs without re-reducing it, so no loop — and
+          // the historical behaviour, incl. the typespec annotations evalFunc
+          // leaves on the body, is kept for that common `f(value)` shape.)
+          if (exparg->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant &&
+              exparg->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) {
+            bool selfRef = false;
+            for (auto io2 : *func->Io_decls())
+              if (exprRefsName(exparg, io2->VpiName())) { selfRef = true; break; }
+            if (selfRef) {
+              invalidValue = true;
+              return nullptr;
+            }
+          }
           if (exparg->Typespec() == nullptr) {
             ref_typespec *crt = s.MakeRef_typespec();
             crt->VpiParent(exparg);
