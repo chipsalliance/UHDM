@@ -5091,6 +5091,37 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           case vpiCastOp: {
             expr *oper =
                 reduceExpr(operands[0], invalidValue, inst, pexpr, muteError);
+            // A size/type cast of a STRUCT assignment pattern — directly or
+            // through a parameter holding one (OpenTitan lc_ctrl:
+            // `localparam lc_hw_rev_t HwRev = '{silicon_creator_id: ...};
+            // prim_const #(.ConstVal(HwRevWidth'(HwRev)))`): the pattern does
+            // not reduce to a single value, get_value() failed and the cast
+            // was left unfolded, so every downstream `if (ConstVal[i])`
+            // generate picked the else branch and the hardware revision read
+            // as 0.  Fold the pattern against its typespec first.
+            {
+              const operation *pop = any_cast<const operation *>(oper);
+              if (pop && (pop->VpiOpType() == vpiAssignmentPatternOp ||
+                          pop->VpiOpType() == vpiMultiAssignmentPatternOp)) {
+                const typespec *pts = nullptr;
+                if (pop->Typespec()) pts = pop->Typespec()->Actual_typespec();
+                if (pts == nullptr) {
+                  if (const ref_obj *ro = any_cast<const ref_obj *>(operands[0])) {
+                    if (const parameter *pp =
+                            any_cast<const parameter *>(ro->Actual_group())) {
+                      if (pp->Typespec()) pts = pp->Typespec()->Actual_typespec();
+                    }
+                  }
+                }
+                if (pts != nullptr) {
+                  if (constant *fc = foldPatternToConstant(
+                          pop, pts, this, s, inst, pexpr, muteError)) {
+                    oper = fc;
+                    invalidValue = false;
+                  }
+                }
+              }
+            }
             uint64_t val0 = get_value(invalidValue, oper);
             if (invalidValue) break;
             const typespec *tps = nullptr;
@@ -5215,6 +5246,49 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               }
               c->VpiSize(static_cast<int32_t>(cast_to));
               result = c;
+            } else if (ttps == UHDM_OBJECT_TYPE::uhdmlogic_typespec) {
+              // `W'(expr)` with W a PARAMETER: Surelog types the cast with a
+              // logic_typespec spanning W bits (a literal `16'(expr)` gets
+              // an integer_typespec, handled above).  No branch matched, the
+              // cast stayed unfolded and a downstream `if (ConstVal[i])`
+              // generate saw 0 (OpenTitan lc_ctrl `HwRevWidth'(HwRev)`).
+              // Zero-extend / truncate the operand to the typespec width.
+              bool wiv = false;
+              uint64_t cast_to = size(tps, wiv, inst, pexpr, true, muteError);
+              if (wiv || cast_to == 0) break;
+              constant *oc = any_cast<constant *>(oper);
+              // A signed operand must SIGN-extend (LRM 6.24.1); leave those
+              // to the consumer rather than zero-extending here.
+              if (oc) {
+                if (oc->VpiValue().rfind("INT:-", 0) == 0) break;
+                if (const ref_typespec *ort = oc->Typespec())
+                  if (const logic_typespec *olt =
+                          any_cast<const logic_typespec *>(ort->Actual_typespec()))
+                    if (olt->VpiSigned()) break;
+              }
+              if (cast_to > 64 || (oc && oc->VpiSize() > 64)) {
+                if (!oc) break;
+                std::string b = toBinary(oc);
+                if (b.empty()) break;
+                if (b.size() > cast_to)
+                  b = b.substr(b.size() - cast_to);
+                else
+                  b.insert(0, cast_to - b.size(), '0');
+                constant *c = s.MakeConstant();
+                c->VpiValue("BIN:" + b);
+                c->VpiDecompile(b);
+                c->VpiSize(static_cast<int32_t>(cast_to));
+                c->VpiConstType(vpiBinaryConst);
+                result = c;
+              } else {
+                uint64_t mask = (cast_to >= 64) ? ~0ULL
+                                                : ((uint64_t)(1ULL << cast_to)) - 1ULL;
+                constant *c = s.MakeConstant();
+                c->VpiValue("UINT:" + std::to_string(val0 & mask));
+                c->VpiSize(static_cast<int32_t>(cast_to));
+                c->VpiConstType(vpiUIntConst);
+                result = c;
+              }
             } else if (ttps == UHDM_OBJECT_TYPE::uhdmenum_typespec) {
               // TODO: Should check the value is in range of the enum and
               // issue error if not
