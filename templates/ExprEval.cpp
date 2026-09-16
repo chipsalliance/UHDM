@@ -5786,7 +5786,19 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
     if (expr *tmp = evalFunc(actual_func, args, invalidValue, inst,
                              (any *)pexpr, muteError)) {
-      if (!invalidValue) result = tmp;
+      // A non-constant call reduces to the function's BODY expression, whose
+      // operands still name the function's FORMALS.  Those names mean nothing
+      // in the caller's scope, so replacing the call with that body loses the
+      // computation: a port actual `.key_i(swap_endianess_byte(key_in))`
+      // (OpenTitan ascon_core) left the child's input undriven.  Keep the
+      // call unless the result is formal-free.
+      bool leaks_formal = false;
+      if (!invalidValue && actual_func && actual_func->Io_decls() &&
+          tmp->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
+        for (auto io : *actual_func->Io_decls())
+          if (exprRefsName(tmp, io->VpiName())) { leaks_formal = true; break; }
+      if (!invalidValue && !leaks_formal) result = tmp;
+      else if (leaks_formal) invalidValue = true;
     }
   } else if (objtype == UHDM_OBJECT_TYPE::uhdmref_obj) {
     ref_obj *ref = (ref_obj *)result;
