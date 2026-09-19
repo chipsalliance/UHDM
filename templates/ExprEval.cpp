@@ -98,6 +98,80 @@ bool ExprEval::isFullySpecified(const typespec *tps) {
   return true;
 }
 
+// Bitwise AND / OR / XOR of constants WIDER than 64 bits.  get_value() refuses
+// anything above 64 bits, so an expression like
+// `320'h0007ffff_00000000 & {32{1'b1}}` evaluated as invalid and every
+// parameter derived from it silently fell back to the module's DEFAULT
+// (Caliptra's CALIPTRA_SLAVE_ADDR_WIDTH: the nested axi_addr instance then
+// elaborated the wrong generate arm and its address regs collapsed).
+// Returns nullptr when neither operand is wide or either carries x/z, leaving
+// the ordinary 64-bit path in charge.
+// Logical shift of a constant WIDER than 64 bits.  get_value() refuses those,
+// so `320'h0007ffff_00000000 >> 32` came back invalid and every expression
+// built on it (Caliptra's CALIPTRA_SLAVE_ADDR_WIDTH) fell back to a default.
+// Shifts the binary string and keeps operand 0's width; nullptr when the
+// operand is not a wide constant or carries x/z.
+static constant *wideShift(Serializer &s, ExprEval &eval, int32_t opType,
+                           const expr *e0, uint64_t amount) {
+  const constant *c0 = any_cast<const constant *>(e0);
+  if ((c0 == nullptr) || (c0->VpiSize() <= 64)) return nullptr;
+  std::string b0 = eval.toBinary(c0);
+  if (b0.empty()) return nullptr;
+  if (b0.find_first_not_of("01") != std::string::npos) return nullptr;
+  const size_t w = b0.size();
+  std::string res(w, '0');
+  if (amount < w) {
+    if ((opType == vpiRShiftOp) || (opType == vpiArithRShiftOp)) {
+      // logical right shift (the sign bit is not replicated: these constants
+      // are unsigned literals)
+      res.replace(amount, w - amount, b0.substr(0, w - amount));
+    } else {
+      res.replace(0, w - amount, b0.substr(amount, w - amount));
+    }
+  }
+  constant *c = s.MakeConstant();
+  c->VpiValue("BIN:" + res);
+  c->VpiDecompile(res);
+  c->VpiSize(static_cast<int32_t>(w));
+  c->VpiConstType(vpiBinaryConst);
+  return c;
+}
+
+static constant *wideBitop(Serializer &s, ExprEval &eval, int32_t opType,
+                           const expr *e0, const expr *e1) {
+  const constant *c0 = any_cast<const constant *>(e0);
+  const constant *c1 = any_cast<const constant *>(e1);
+  if ((c0 == nullptr) || (c1 == nullptr)) return nullptr;
+  if ((c0->VpiSize() <= 64) && (c1->VpiSize() <= 64)) return nullptr;
+  std::string b0 = eval.toBinary(c0);
+  std::string b1 = eval.toBinary(c1);
+  if (b0.empty() || b1.empty()) return nullptr;
+  const size_t w = std::max(b0.size(), b1.size());
+  b0.insert(b0.begin(), w - b0.size(), '0');
+  b1.insert(b1.begin(), w - b1.size(), '0');
+  std::string res(w, '0');
+  for (size_t i = 0; i < w; i++) {
+    const char a = b0[i], b = b1[i];
+    if (((a != '0') && (a != '1')) || ((b != '0') && (b != '1')))
+      return nullptr;  // x/z: leave it to the existing paths
+    const int32_t x = (a == '1'), y = (b == '1');
+    int32_t v = 0;
+    switch (opType) {
+      case vpiBitAndOp: v = x & y; break;
+      case vpiBitOrOp: v = x | y; break;
+      case vpiBitXorOp: v = x ^ y; break;
+      default: return nullptr;
+    }
+    res[i] = v ? '1' : '0';
+  }
+  constant *c = s.MakeConstant();
+  c->VpiValue("BIN:" + res);
+  c->VpiDecompile(res);
+  c->VpiSize(static_cast<int32_t>(w));
+  c->VpiConstType(vpiBinaryConst);
+  return c;
+}
+
 std::string ExprEval::toBinary(const constant *c) {
   std::string result;
   if (c == nullptr) return result;
@@ -3958,6 +4032,21 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 constant *c = (constant *)arg0;
                 if (c->VpiSize() == -1) invalidValue = true;
               }
+              // Operand 0 wider than 64 bits: shift its bit string instead of
+              // giving up (the shift amount itself is always small).
+              if (!invalidValue) {
+                bool amtInvalid = false;
+                expr *arg1w = reduceExpr(operands[1], amtInvalid, inst, pexpr,
+                                         muteError);
+                const uint64_t amt = get_uvalue(amtInvalid, arg1w);
+                if (!amtInvalid) {
+                  if (constant *wc =
+                          wideShift(s, *this, vpiRShiftOp, arg0, amt)) {
+                    result = wc;
+                    break;
+                  }
+                }
+              }
               int64_t val0 = get_value(invalidValue, arg0);
               int64_t val1 =
                   get_value(invalidValue, reduceExpr(operands[1], invalidValue,
@@ -4133,12 +4222,22 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           }
           case vpiBitOrOp: {
             if (operands.size() == 2) {
-              int64_t val0 =
-                  get_value(invalidValue, reduceExpr(operands[0], invalidValue,
-                                                     inst, pexpr, muteError));
-              int64_t val1 =
-                  get_value(invalidValue, reduceExpr(operands[1], invalidValue,
-                                                     inst, pexpr, muteError));
+              // Operands WIDER than 64 bits first: get_value() refuses those
+              // outright, so `320'h0007ffff_00000000 & {32{1'b1}}` (Caliptra's
+              // CALIPTRA_SLAVE_ADDR_WIDTH macro) came back invalid, the
+              // parameter fell back to the module DEFAULT, and every width and
+              // generate condition derived from it was wrong.
+              expr *wr0 = reduceExpr(operands[0], invalidValue, inst, pexpr,
+                                     muteError);
+              expr *wr1 = reduceExpr(operands[1], invalidValue, inst, pexpr,
+                                     muteError);
+              if (invalidValue) break;
+              if (constant *wc = wideBitop(s, *this, vpiBitOrOp, wr0, wr1)) {
+                result = wc;
+                break;
+              }
+              int64_t val0 = get_value(invalidValue, wr0);
+              int64_t val1 = get_value(invalidValue, wr1);
               if (invalidValue) break;
               uint64_t val = ((uint64_t)val0) | ((uint64_t)val1);
               constant *c = s.MakeConstant();
@@ -4152,14 +4251,56 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           }
           case vpiBitAndOp: {
             if (operands.size() == 2) {
-              int64_t val0 =
-                  get_value(invalidValue, reduceExpr(operands[0], invalidValue,
-                                                     inst, pexpr, muteError));
-              int64_t val1 =
-                  get_value(invalidValue, reduceExpr(operands[1], invalidValue,
-                                                     inst, pexpr, muteError));
+              // Operands WIDER than 64 bits first: get_value() refuses those
+              // outright, so `320'h0007ffff_00000000 & {32{1'b1}}` (Caliptra's
+              // CALIPTRA_SLAVE_ADDR_WIDTH macro) came back invalid, the
+              // parameter fell back to the module DEFAULT, and every width and
+              // generate condition derived from it was wrong.
+              expr *wr0 = reduceExpr(operands[0], invalidValue, inst, pexpr,
+                                     muteError);
+              expr *wr1 = reduceExpr(operands[1], invalidValue, inst, pexpr,
+                                     muteError);
+              if (invalidValue) break;
+              if (constant *wc = wideBitop(s, *this, vpiBitAndOp, wr0, wr1)) {
+                result = wc;
+                break;
+              }
+              int64_t val0 = get_value(invalidValue, wr0);
+              int64_t val1 = get_value(invalidValue, wr1);
               if (invalidValue) break;
               uint64_t val = ((uint64_t)val0) & ((uint64_t)val1);
+              constant *c = s.MakeConstant();
+              c->VpiValue("UINT:" + std::to_string(val));
+              c->VpiDecompile(std::to_string(val));
+              c->VpiSize(64);
+              c->VpiConstType(vpiUIntConst);
+              result = c;
+            }
+            break;
+          }
+          case vpiBitXorOp: {
+            if (operands.size() == 2) {
+              // Bitwise XOR had NO case here at all, so Caliptra's
+              // `CALIPTRA_SLAVE_ADDR_MASK = BASE ^ MASK` never folded and
+              // every slave's address width fell back to a default.
+              // Operands WIDER than 64 bits first: get_value() refuses those
+              // outright, so `320'h0007ffff_00000000 & {32{1'b1}}` (Caliptra's
+              // CALIPTRA_SLAVE_ADDR_WIDTH macro) came back invalid, the
+              // parameter fell back to the module DEFAULT, and every width and
+              // generate condition derived from it was wrong.
+              expr *wr0 = reduceExpr(operands[0], invalidValue, inst, pexpr,
+                                     muteError);
+              expr *wr1 = reduceExpr(operands[1], invalidValue, inst, pexpr,
+                                     muteError);
+              if (invalidValue) break;
+              if (constant *wc = wideBitop(s, *this, vpiBitXorOp, wr0, wr1)) {
+                result = wc;
+                break;
+              }
+              int64_t val0 = get_value(invalidValue, wr0);
+              int64_t val1 = get_value(invalidValue, wr1);
+              if (invalidValue) break;
+              uint64_t val = ((uint64_t)val0) ^ ((uint64_t)val1);
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(val));
               c->VpiDecompile(std::to_string(val));
@@ -5646,9 +5787,31 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       bool invalidValue = false;
       for (auto arg : *scall->Tf_call_args()) {
         uint64_t clog2 = 0;
-        uint64_t val =
-            get_uvalue(invalidValue,
-                       reduceExpr(arg, invalidValue, inst, pexpr, muteError));
+        expr *rarg = reduceExpr(arg, invalidValue, inst, pexpr, muteError);
+        // A WIDE (>64-bit) argument: get_uvalue() refuses it, so compute the
+        // ceiling log from the binary string instead of returning nothing —
+        // `$clog2(320'h... & '1)` otherwise left the parameter unresolved.
+        if (const constant *wc = any_cast<const constant *>(rarg)) {
+          if (wc->VpiSize() > 64) {
+            const std::string bits = toBinary(wc);
+            size_t first_one = bits.find('1');
+            if ((first_one != std::string::npos) &&
+                (bits.find_first_not_of("01") == std::string::npos)) {
+              const size_t msb = bits.size() - first_one;   // value < 2^msb
+              const bool exact_pow2 =
+                  (bits.find('1', first_one + 1) == std::string::npos);
+              constant *c = s.MakeConstant();
+              const uint64_t r = exact_pow2 ? (msb - 1) : msb;
+              c->VpiValue("UINT:" + std::to_string(r));
+              c->VpiDecompile(std::to_string(r));
+              c->VpiSize(64);
+              c->VpiConstType(vpiUIntConst);
+              result = c;
+              continue;
+            }
+          }
+        }
+        uint64_t val = get_uvalue(invalidValue, rarg);
         if (val) {
           val = val - 1;
           for (; val > 0; clog2 = clog2 + 1) {
