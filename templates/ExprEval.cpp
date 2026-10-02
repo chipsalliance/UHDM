@@ -2785,6 +2785,20 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
         the_path.push_back("[" + std::to_string(baseIndex) + "]");
       }
     }
+    // A trailing PART-SELECT on a struct member (`P.SIZE[3:0]`) carries the
+    // member NAME, so the walk above selects the member -- but `the_path` only
+    // speaks names and single indices, so the RANGE was dropped and the whole
+    // member came back.  `P.SIZE[3:0]` of `P.SIZE == 32'd16` then evaluated to
+    // 16 instead of 0, and a generate condition written over it
+    // (`if (|P.RAS_SIZE[Depth-1:0])`, openhwgroup/cvw RASPredictor) elaborated
+    // the wrong arm.  Apply the range to the member's value here, the same way
+    // the member select itself slices the struct constant below.
+    const part_select *trailing_ps = nullptr;
+    if (returnType == ReturnType::VALUE && path->Path_elems()->size() > 1) {
+      any *lastElem = path->Path_elems()->back();
+      if (lastElem->UhdmType() == UHDM_OBJECT_TYPE::uhdmpart_select)
+        trailing_ps = (part_select *)lastElem;
+    }
 
     expr* result = (expr *)hierarchicalSelector(the_path, 0, object, invalidValue, inst,
                                         pexpr, returnType, muteError);
@@ -2794,6 +2808,46 @@ any *ExprEval::decodeHierPath(hier_path *path, bool &invalidValue,
                                         pexpr, returnType, muteError);
     } else if (result->UhdmType() == uhdmhier_path) {
       invalidValue = true;
+    }
+    if (trailing_ps && result && !invalidValue &&
+        result->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+      constant *cres = (constant *)result;
+      // A hand-built UHDM (the unit tests construct objects programmatically)
+      // can have a part_select with no ranges at all, so both bounds are
+      // checked before they are touched.
+      bool iv = (trailing_ps->Left_range() == nullptr ||
+                 trailing_ps->Right_range() == nullptr);
+      int64_t msb = 0, lsb = 0;
+      if (!iv) {
+        msb = get_value(iv, reduceExpr((any *)trailing_ps->Left_range(), iv,
+                                       inst, pexpr, muteError));
+        if (!iv)
+          lsb = get_value(iv, reduceExpr((any *)trailing_ps->Right_range(), iv,
+                                         inst, pexpr, muteError));
+      }
+      if (!iv) {
+        if (msb < lsb) std::swap(msb, lsb);
+        std::string bin = toBinary(cres);          // MSB first
+        const int64_t w = (int64_t)bin.size();
+        // Every index is validated before it reaches substr(): an unevaluated
+        // or negative bound must leave the member value alone, never throw.
+        if (lsb >= 0 && msb >= lsb && msb < w) {
+          std::string sel = bin.substr((size_t)(w - 1 - msb),
+                                       (size_t)(msb - lsb + 1));
+          constant *c = s.MakeConstant();
+          c->VpiValue("BIN:" + sel);
+          c->VpiDecompile(sel);
+          c->VpiSize(static_cast<int32_t>(sel.size()));
+          c->VpiConstType(vpiBinaryConst);
+          c->VpiParent(path->VpiParent());
+          c->VpiFile(path->VpiFile());
+          c->VpiLineNo(path->VpiLineNo());
+          c->VpiColumnNo(path->VpiColumnNo());
+          c->VpiEndLineNo(path->VpiEndLineNo());
+          c->VpiEndColumnNo(path->VpiEndColumnNo());
+          result = c;
+        }
+      }
     }
     return result;
   }
