@@ -6932,6 +6932,41 @@ bool ExprEval::setValueInInstance(
               return false;
             }
           }
+          // An UNPACKED array variable (`reg [57:0] st [0:1];` local to the
+          // function being evaluated): one value per ELEMENT, kept in an
+          // array_expr exactly like the local_vars branch below creates for a
+          // declared-but-unbound local, and read back by reduceExpr's
+          // bit_select case.  The flat path below took the variable's
+          // typespec -- the ELEMENT's `[57:0]` -- for the whole array, wrote
+          // one bit at position `index` per element assignment and read the
+          // element back as that one bit, so `st[0] ^ st[1]` folded to 1
+          // (verilog-ethernet's lfsr_mask and every constant function that
+          // stages a table in a local array).
+          if (object->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var &&
+              param_assigns) {
+            param_assign *pa = nullptr;
+            for (param_assign *p : *param_assigns) {
+              if (p->Lhs() && p->Lhs()->VpiName() == lhsname && p->Rhs() &&
+                  p->Rhs()->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_expr) {
+                pa = p;
+                break;
+              }
+            }
+            if (pa == nullptr) {
+              pa = s.MakeParam_assign();
+              array_expr *array = s.MakeArray_expr();
+              array->Exprs(s.MakeExprVec());
+              pa->Rhs(array);
+              parameter *param = s.MakeParameter();
+              param->VpiName(lhsname);
+              pa->Lhs(param);
+              param_assigns->push_back(pa);
+            }
+            VectorOfexpr *values = ((array_expr *)pa->Rhs())->Exprs();
+            if (values->size() <= index) values->resize(index + 1);
+            (*values)[index] = rhsexp;
+            return false;
+          }
 
           for (VectorOfparam_assign::iterator itr = param_assigns->begin();
                itr != param_assigns->end(); itr++) {
