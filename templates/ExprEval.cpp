@@ -6741,6 +6741,37 @@ bool ExprEval::setValueInInstance(
     if (param_assigns) {
       const any *prevRhs = nullptr;
       constant *c = any_cast<constant *>(rhsexp);
+      // A COMPOUND assignment (`a += b`) computes its result by MUTATING `c`
+      // further down.  When the RHS reduced to a constant, `c` ALIASES that
+      // very object -- and reduceExpr hands back the constant stored as b's
+      // value in param_assigns, not a copy -- so writing a's new value into
+      // it silently changes b too:
+      //     int a,b; a=1; b=2; a+=b; return b;   // returned 3, not 2
+      // A constant function built on that then picked the wrong generate arm
+      // (chipsalliance/Surelog#4214).  `*=` and `/=` carry the same alias; it
+      // merely stays invisible for `a*=b` with a==1, which writes back exactly
+      // b's own value.  Copy before mutating, preserving size, const type and
+      // source location so nothing downstream sees a different constant.
+      if (c != nullptr && ((opType == vpiAddOp) || (opType == vpiSubOp) ||
+                           (opType == vpiMultOp) || (opType == vpiDivOp))) {
+        constant *copy = s.MakeConstant();
+        copy->VpiValue(c->VpiValue());
+        copy->VpiDecompile(c->VpiDecompile());
+        copy->VpiSize(c->VpiSize());
+        copy->VpiConstType(c->VpiConstType());
+        if (const ref_typespec *rt = c->Typespec()) {
+          ref_typespec *crt = s.MakeRef_typespec();
+          crt->Actual_typespec((typespec *)rt->Actual_typespec());
+          crt->VpiParent(copy);
+          copy->Typespec(crt);
+        }
+        copy->VpiFile(c->VpiFile());
+        copy->VpiLineNo(c->VpiLineNo());
+        copy->VpiColumnNo(c->VpiColumnNo());
+        copy->VpiEndLineNo(c->VpiEndLineNo());
+        copy->VpiEndColumnNo(c->VpiEndColumnNo());
+        c = copy;
+      }
       if (c == nullptr) {
         c = s.MakeConstant();
         c->VpiValue("INT:" + std::to_string(valI));
