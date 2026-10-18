@@ -38,9 +38,20 @@ std::string NumUtils::hexToBin(std::string_view s) {
   std::string out;
   out.reserve(s.length() * 4);
   for (auto i : s) {
+    // An x / z / ? digit stands for four such bits (IEEE 1800-2017 5.7.1);
+    // they used to be folded as garbage digit values, and a lowercase
+    // hex digit as well.
+    if (i == 'x' || i == 'X' || i == 'z' || i == 'Z' || i == '?') {
+      char w = (i == 'X') ? 'x' : (i == 'Z') ? 'z' : i;
+      out.append(4, w);
+      continue;
+    }
+    if (i == '_') continue;
     uint8_t n;
     if ((i <= '9') && (i >= '0'))
       n = i - '0';
+    else if ((i >= 'a') && (i <= 'f'))
+      n = 10 + i - 'a';
     else
       n = 10 + i - 'A';
     for (int8_t j = 3; j >= 0; --j) out.push_back((n & (1 << j)) ? '1' : '0');
