@@ -7518,14 +7518,14 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       expr *cond = (expr *)st->VpiCondition();
       int64_t val = get_value(
           invalidValue,
-          reduceExpr(cond, invalidValue, scopes.back(), stmt, muteError));
+          reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
       for (case_item *item : *st->Case_items()) {
         if (VectorOfany *exprs = item->VpiExprs()) {
           bool done = false;
           for (any *exp : *exprs) {
             int64_t vexp = get_value(
                 invalidValue, reduceExpr(exp, invalidValue, scopes.back(),
-                                         stmt, muteError));
+                                         nullptr, muteError));
             if (val == vexp) {
               evalStmt(funcName, scopes, invalidValue, continue_flag,
                        break_flag, return_flag, scopes.back(), item->Stmt(),
@@ -7544,7 +7544,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       expr *cond = (expr *)st->VpiCondition();
       int64_t val = get_value(
           invalidValue,
-          reduceExpr(cond, invalidValue, scopes.back(), stmt, muteError));
+          reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
       if (val > 0) {
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
                  return_flag, scopes.back(), st->VpiStmt(), local_vars,
@@ -7561,7 +7561,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       expr *cond = (expr *)st->VpiCondition();
       int64_t val = get_value(
           invalidValue,
-          reduceExpr(cond, invalidValue, scopes.back(), stmt, muteError));
+          reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
       if (val > 0) {
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
                  return_flag, scopes.back(), st->VpiStmt(), local_vars,
@@ -7601,7 +7601,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       expr *lhsexp = st->Lhs();
       const expr *rhs = st->Rhs();
       expr *rhsexp =
-          reduceExpr(rhs, invalidValue, scopes.back(), stmt, muteError);
+          reduceExpr(rhs, invalidValue, scopes.back(), nullptr, muteError);
       invalidValue = setValueInInstance(lhs, lhsexp, rhsexp, invalidValue, s,
                                         inst, stmt, local_vars, 0, muteError);
       break;
@@ -7610,10 +7610,10 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       repeat *st = (repeat *)stmt;
       const expr *cond = st->VpiCondition();
       expr *rcond =
-          reduceExpr((expr *)cond, invalidValue, scopes.back(), stmt);
+          reduceExpr((expr *)cond, invalidValue, scopes.back(), nullptr);
       int64_t val = get_value(
           invalidValue,
-          reduceExpr(rcond, invalidValue, scopes.back(), stmt, muteError));
+          reduceExpr(rcond, invalidValue, scopes.back(), nullptr, muteError));
       if (invalidValue == false) {
         for (int32_t i = 0; i < val; i++) {
           evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
@@ -7654,7 +7654,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
         if (cond) {
           int64_t val = get_value(invalidValue,
                                   reduceExpr(cond, invalidValue, scopes.back(),
-                                             stmt, muteError));
+                                             nullptr, muteError));
           if (val == 0) {
             break;
           }
@@ -7695,7 +7695,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       return_stmt *st = (return_stmt *)stmt;
       if (const expr *cond = st->VpiCondition()) {
         expr *rhsexp =
-            reduceExpr(cond, invalidValue, scopes.back(), stmt, muteError);
+            reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError);
         ref_obj *lhsexp = s.MakeRef_obj();
         lhsexp->VpiName(funcName);
         invalidValue =
@@ -7711,7 +7711,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
         while (1) {
           int64_t val = get_value(invalidValue,
                                   reduceExpr(cond, invalidValue, scopes.back(),
-                                             stmt, muteError));
+                                             nullptr, muteError));
           if (invalidValue) break;
           if (val == 0) {
             break;
@@ -7756,7 +7756,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
           }
           int64_t val = get_value(invalidValue,
                                   reduceExpr(cond, invalidValue, scopes.back(),
-                                             stmt, muteError));
+                                             nullptr, muteError));
           if (invalidValue) break;
           if (val == 0) {
             break;
@@ -7776,7 +7776,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
     case UHDM_OBJECT_TYPE::uhdmoperation: {
       operation *op = (operation *)stmt;
       // ++, -- ops
-      reduceExpr(op, invalidValue, scopes.back(), stmt, muteError);
+      reduceExpr(op, invalidValue, scopes.back(), nullptr, muteError);
       break;
     }
     default: {
