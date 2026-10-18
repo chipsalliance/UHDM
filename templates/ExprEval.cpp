@@ -1577,6 +1577,11 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
       if (const ref_typespec *rt =
               ((const enum_typespec *)ts)->Base_typespec()) {
         bits = size(rt->Actual_typespec(), invalidValue, inst, pexpr, full);
+      } else {
+        // IEEE 1800-2017 6.19: an enum declared without a base type is an
+        // `int` -- 32 bits.  `$bits(bp_fe_icache_op_e)` folded to 0 and
+        // black-parrot's icache packet width came out 40 instead of 72.
+        bits = 32;
       }
       break;
     }
@@ -4023,6 +4028,102 @@ static bool exprRefsName(const any *e, std::string_view name, int depth = 0) {
   }
 }
 
+
+// Element `index` of dimension `dim` of a packed table held as a CONCAT:
+// the operands are listed MSB-first as written (`{row4, row3, ..., row0}`
+// for a `[4:0]` dimension), or LSB-first when Surelog has already
+// reordered them (VpiReordered).  Taking `ops->at(index)` is right only in
+// the latter case; for the former, element k of a descending `[L:R]`
+// dimension sits at position L - k.  black-parrot's bsg_wormhole_router
+// read `routing_matrix_p[1][i]` (`bit [1:0][dirs][dirs]`, overridden with
+// the package constant StrictYX) from the [0] half with its rows reversed,
+// and every output channel was sized for the wrong set of inputs.
+static int64_t concatElementPosition(const var_select *sel, uint32_t dim,
+                                     const operation *op, uint64_t index,
+                                     ExprEval *ev, const any *inst,
+                                     const any *pexpr, bool muteError) {
+  VectorOfany *ops = op->Operands();
+  if (ops == nullptr) return -1;
+  const int64_t n = (int64_t)ops->size();
+  int64_t left = -1, right = -1;
+  bool have = false;
+  const typespec *ts = nullptr;
+  if (const parameter *par = any_cast<const parameter *>(sel->Actual_group()))
+    if (par->Typespec()) ts = par->Typespec()->Actual_typespec();
+  if (ts == nullptr)
+    if (const ref_typespec *rt = op->Typespec()) ts = rt->Actual_typespec();
+  VectorOfrange *ranges = nullptr;
+  if (ts) {
+    switch (ts->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmlogic_typespec:
+        ranges = ((const logic_typespec *)ts)->Ranges(); break;
+      case UHDM_OBJECT_TYPE::uhdmbit_typespec:
+        ranges = ((const bit_typespec *)ts)->Ranges(); break;
+      case UHDM_OBJECT_TYPE::uhdmint_typespec:
+        ranges = ((const int_typespec *)ts)->Ranges(); break;
+      case UHDM_OBJECT_TYPE::uhdmpacked_array_typespec:
+        ranges = ((const packed_array_typespec *)ts)->Ranges(); break;
+      case UHDM_OBJECT_TYPE::uhdmarray_typespec:
+        ranges = ((const array_typespec *)ts)->Ranges(); break;
+      default: break;
+    }
+  }
+  if (ranges && dim < ranges->size()) {
+    range *r = ranges->at(dim);
+    bool iv = false;
+    int64_t l = (int64_t)ev->get_value(iv, ev->reduceExpr(r->Left_expr(), iv, inst, pexpr, muteError));
+    int64_t rr = (int64_t)ev->get_value(iv, ev->reduceExpr(r->Right_expr(), iv, inst, pexpr, muteError));
+    if (!iv) { left = l; right = rr; have = true; }
+  }
+  int64_t pos;
+  if (have && (std::abs(left - right) + 1) == n) {
+    // position in the MSB-first (as-written) order
+    pos = (left >= right) ? (left - (int64_t)index) : ((int64_t)index - left);
+  } else {
+    pos = n - 1 - (int64_t)index;   // assume a descending [N-1:0] dimension
+  }
+  if (op->VpiReordered()) pos = n - 1 - pos;
+  if (pos < 0 || pos >= n) return -1;
+  return pos;
+}
+
+// A constant written with x / z / ? digits (`20'h0_8???`, an address MATCH
+// pattern) has no numeric value: folding it through get_value() turns the
+// wildcard digits into 0 (or drops them).  Return its binary image at its
+// declared size -- extended with the leftmost digit when that digit is
+// x / z / ? (IEEE 1800-2017 5.7.1), otherwise with 0 -- or false when the
+// constant has no such digit.
+static bool wildcardBinaryImage(const constant *c, std::string &out) {
+  if (c == nullptr) return false;
+  std::string_view sv = c->VpiValue();
+  std::string bits;
+  if (sv.find("BIN:") == 0) {
+    bits = std::string(sv.substr(4));
+  } else if (sv.find("HEX:") == 0) {
+    bits = NumUtils::hexToBin(sv.substr(4));
+  } else {
+    return false;
+  }
+  if (bits.find_first_of("xXzZ?") == std::string::npos) return false;
+  for (char &ch : bits) {
+    if (ch == 'X') ch = 'x';
+    else if (ch == 'Z') ch = 'z';
+  }
+  int32_t size = c->VpiSize();
+  if (size > 0) {
+    if ((int32_t)bits.size() < size) {
+      char pad = '0';
+      char msb = bits.empty() ? '0' : bits[0];
+      if (msb == 'x' || msb == 'z' || msb == '?') pad = msb;
+      bits.insert(0, size - bits.size(), pad);
+    } else if ((int32_t)bits.size() > size) {
+      bits.erase(0, bits.size() - size);
+    }
+  }
+  out = bits;
+  return true;
+}
+
 expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                            const any *inst, const any *pexpr, bool muteError) {
   if (!result) return nullptr;
@@ -5041,7 +5142,17 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     sv.remove_prefix(std::string_view("BIN:").length());
                     std::string value;
                     if (size > (int32_t)sv.size()) {
-                      value.append(size - sv.size(), '0');
+                      // IEEE 1800-2017 5.7.1: a literal whose leftmost digit
+                      // is x / z / ? is extended with that digit --
+                      // `{64'b????????????????}` means EVERY address, and
+                      // zero-extended it matched only the low 64 KiB
+                      // (black-parrot bp_sacc_vdp's register decode).
+                      char pad = '0';
+                      if (!sv.empty() && (sv[0] == 'x' || sv[0] == 'X' ||
+                                          sv[0] == 'z' || sv[0] == 'Z' ||
+                                          sv[0] == '?'))
+                        pad = sv[0];
+                      value.append(size - sv.size(), pad);
                     }
                     if (op->VpiReordered()) {
                       value.append(sv.rbegin(), sv.rend());
@@ -5069,7 +5180,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                     std::string tmp = NumUtils::hexToBin(sv);
                     std::string value;
                     if (size > (int32_t)tmp.size()) {
-                      value.append(size - tmp.size(), '0');
+                      char pad = '0';
+                      if (!tmp.empty() && (tmp[0] == 'x' || tmp[0] == 'z' ||
+                                           tmp[0] == '?'))
+                        pad = tmp[0];
+                      value.append(size - tmp.size(), pad);
                     } else if (size < (int32_t)tmp.size()) {
                       tmp.erase(0, (int32_t)tmp.size() - size);
                     }
@@ -5284,6 +5399,11 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             break;
           }
           case vpiCastOp: {
+            // A literal operand with x / z / ? digits has no numeric value;
+            // reduceExpr() would hand back a number with those digits as 0.
+            // Keep its binary image for the size-cast branch below.
+            std::string castWildcardImg;
+            wildcardBinaryImage(any_cast<const constant *>(operands[0]), castWildcardImg);
             expr *oper =
                 reduceExpr(operands[0], invalidValue, inst, pexpr, muteError);
             // A size/type cast of a STRUCT assignment pattern — directly or
@@ -5318,7 +5438,10 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               }
             }
             uint64_t val0 = get_value(invalidValue, oper);
-            if (invalidValue) break;
+            if (invalidValue) {
+              if (castWildcardImg.empty()) break;
+              invalidValue = false;   // the wildcard image is folded below
+            }
             const typespec *tps = nullptr;
             if (const ref_typespec *rt = op->Typespec()) {
               tps = rt->Actual_typespec();
@@ -5416,6 +5539,31 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               // = 64'(BlockSizeSHA256)` and every constant derived from it).
               uint64_t mask = (cast_to >= 64) ? ~0ULL
                                               : ((uint64_t)(1ULL << cast_to)) - 1ULL;
+              // A wildcard operand (`(dev_addr_width_gp)'('h0_8???)`, an
+              // address MATCH pattern) has no numeric value: the fold below
+              // produced UINT:8 and black-parrot's ucode-match register took
+              // the freeze register's address.  Resize its binary image per
+              // 5.7.1 instead.
+              {
+                std::string wimg = castWildcardImg;
+                if (!wimg.empty() ||
+                    wildcardBinaryImage(any_cast<const constant *>(oper), wimg)) {
+                  if ((int64_t)wimg.size() < (int64_t)cast_to) {
+                    char pad = '0';
+                    char msb = wimg.empty() ? '0' : wimg[0];
+                    if (msb == 'x' || msb == 'z' || msb == '?') pad = msb;
+                    wimg.insert(0, cast_to - wimg.size(), pad);
+                  } else if ((int64_t)wimg.size() > (int64_t)cast_to) {
+                    wimg.erase(0, wimg.size() - cast_to);
+                  }
+                  constant *wc = s.MakeConstant();
+                  wc->VpiValue("BIN:" + wimg);
+                  wc->VpiSize((int32_t)cast_to);
+                  wc->VpiConstType(vpiBinaryConst);
+                  result = wc;
+                  break;
+                }
+              }
               resize(oper, cast_to);
               val0 = get_value(invalidValue, oper);
               uint64_t res = val0 & mask;
@@ -6488,12 +6636,47 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       object = getValue(name, inst, pexpr, muteError);
     }
     bool selection = false;
+    uint32_t sel_dim = 0;
     for (auto index : *sel->Exprs()) {
       uint64_t index_val = get_value(
           invalidValue,
           reduceExpr((expr *)index, invalidValue, inst, pexpr, muteError));
+      const uint32_t this_dim = sel_dim++;
       if (object) {
         UHDM_OBJECT_TYPE otype = object->UhdmType();
+        if (otype == UHDM_OBJECT_TYPE::uhdmconstant && selection) {
+          // The previous dimensions selected a ROW that is a plain
+          // constant (`mat_p[1][i]` of a `bit [1:0][2:0][2:0]` table): a
+          // further index is a BIT of that row.  Left as the whole row,
+          // `mat_p[1][i][0] + mat_p[1][i][1] + mat_p[1][i][2]` summed the
+          // row three times instead of counting its ones.
+          constant *rc = (constant *)object;
+          std::string img;
+          std::string_view v = rc->VpiValue();
+          if (v.find("BIN:") == 0) img = std::string(v.substr(4));
+          else if (v.find("HEX:") == 0) img = NumUtils::hexToBin(v.substr(4));
+          else if (v.find("UINT:") == 0 || v.find("INT:") == 0 || v.find("DEC:") == 0) {
+            bool iv2 = false;
+            uint64_t uv = get_value(iv2, rc);
+            if (!iv2) img = NumUtils::toBinary(rc->VpiSize() > 0 ? rc->VpiSize() : 64, uv);
+          }
+          int32_t rsz = rc->VpiSize() > 0 ? rc->VpiSize() : (int32_t)img.size();
+          if (!img.empty() && rsz > 0) {
+            if ((int32_t)img.size() < rsz) img.insert(0, rsz - img.size(), '0');
+            else if ((int32_t)img.size() > rsz) img.erase(0, img.size() - rsz);
+            if (index_val < (uint64_t)rsz) {
+              char b = img[img.size() - 1 - index_val];
+              constant *bc = s.MakeConstant();
+              bc->VpiValue(std::string("BIN:") + b);
+              bc->VpiSize(1);
+              bc->VpiConstType(vpiBinaryConst);
+              object = bc;
+              continue;
+            }
+          }
+          invalidValue = true;
+          continue;
+        }
         if (otype == UHDM_OBJECT_TYPE::uhdmarray_expr) {
           // An UNPACKED array value expanded from a `default:` pattern is an
           // array_expr, not an assignment-pattern operation, so `P[i][j]` on
@@ -6520,8 +6703,10 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             }
           } else if (opType == vpiConcatOp) {
             VectorOfany *ops = op->Operands();
-            if (ops && (index_val < ops->size())) {
-              object = ops->at(index_val);
+            int64_t pos = concatElementPosition(sel, this_dim, op, index_val,
+                                                this, inst, pexpr, muteError);
+            if (ops && pos >= 0) {
+              object = ops->at(pos);
               selection = true;
             } else {
               invalidValue = true;
@@ -6543,8 +6728,10 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 }
               } else if (opType == vpiConcatOp) {
                 VectorOfany *ops = op->Operands();
-                if (ops && (index_val < ops->size())) {
-                  object = ops->at(index_val);
+                int64_t pos = concatElementPosition(sel, this_dim, op, index_val,
+                                                    this, inst, pexpr, muteError);
+                if (ops && pos >= 0) {
+                  object = ops->at(pos);
                   selection = true;
                 } else {
                   invalidValue = true;
