@@ -81,6 +81,13 @@ class ExprEval {
   expr* reduceExpr(const any* object, bool& invalidValue, const any* inst,
                    const any* pexpr, bool muteErrors = false);
 
+  /* Reduce a constant function's condition / return expression.  Reduces
+     with NO parent statement first (the cheap, historical lookup) and only
+     retries with the statement when that produced no constant -- see
+     reduceStmtExpr's comment in ExprEval.cpp. */
+  expr* reduceStmtExpr(const any* object, bool& invalidValue, const any* inst,
+                       const any* stmt, bool muteErrors = false);
+
   uint64_t getWordSize(const expr *exp, const any *inst,
                                 const any *pexpr);
 

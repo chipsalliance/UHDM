@@ -7501,6 +7501,102 @@ void ExprEval::evalBlock_(std::string_view funcName, Scopes &scopes,
   }
 }
 
+// Does `e` contain a HIERARCHICAL PATH (`cfg.size_x`) anywhere?  This is the
+// only shape that the parent-statement lookup in reduceStmtExpr can help --
+// decodeHierPath is what needs to walk UP from the statement to find a struct
+// formal -- so everything else must keep the cheap lookup and never pay for a
+// retry.  rggen's constant functions (rggen_or_reducer's `while` loop over
+// `list[list_index]`, rggen_mux) contain no hier_path at all and return a
+// whole packed array, so an unconditional retry fired on every iteration of
+// every call: that is what took #1163 from 4.7 s / 396 MB to a bad_alloc at
+// 30-40 GB and got it reverted in #1165.
+static bool exprHasHierPath(const any *e, int depth = 0) {
+  if (!e || depth > 16) return false;
+  switch (e->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmhier_path:
+      return true;
+    case UHDM_OBJECT_TYPE::uhdmbit_select:
+      return exprHasHierPath(((const bit_select *)e)->VpiIndex(), depth + 1);
+    case UHDM_OBJECT_TYPE::uhdmpart_select: {
+      const part_select *ps = (const part_select *)e;
+      return exprHasHierPath(ps->Left_range(), depth + 1) ||
+             exprHasHierPath(ps->Right_range(), depth + 1);
+    }
+    case UHDM_OBJECT_TYPE::uhdmindexed_part_select: {
+      const indexed_part_select *ps = (const indexed_part_select *)e;
+      return exprHasHierPath(ps->Base_expr(), depth + 1) ||
+             exprHasHierPath(ps->Width_expr(), depth + 1);
+    }
+    case UHDM_OBJECT_TYPE::uhdmvar_select: {
+      const var_select *vs = (const var_select *)e;
+      if (vs->Exprs())
+        for (auto x : *vs->Exprs())
+          if (exprHasHierPath(x, depth + 1)) return true;
+      return false;
+    }
+    case UHDM_OBJECT_TYPE::uhdmoperation: {
+      const operation *op = (const operation *)e;
+      if (op->Operands())
+        for (auto x : *op->Operands())
+          if (exprHasHierPath(x, depth + 1)) return true;
+      return false;
+    }
+    case UHDM_OBJECT_TYPE::uhdmfunc_call:
+    case UHDM_OBJECT_TYPE::uhdmsys_func_call: {
+      const tf_call *c = (const tf_call *)e;
+      if (c->Tf_call_args())
+        for (auto x : *c->Tf_call_args())
+          if (exprHasHierPath(x, depth + 1)) return true;
+      return false;
+    }
+    default:
+      return false;
+  }
+}
+
+
+expr *ExprEval::reduceStmtExpr(const any *object, bool &invalidValue,
+                               const any *inst, const any *stmt,
+                               bool muteErrors) {
+  // A constant function's condition and return expressions have always been
+  // reduced with NO parent statement, while the assignment cases pass the
+  // statement itself.  The parent expression is what decodeHierPath's
+  // getObject walks UP from -- through the begin blocks to the function,
+  // whose Io_decls hold the formal -- so a hierarchical path over a struct
+  // FORMAL (`return cfg.size_x`, `if (cfg.size_x >= 2)`) resolved in an
+  // assignment's RHS and nowhere else.  taichi-ishitani/tnoc's width helpers
+  // are written exactly that way, so `HEADER_FLITS == 1` saw no value and the
+  // packet serializer elaborated the wrong generate branch.
+  //
+  // Passing the statement UNCONDITIONALLY is what #1163 did, and it was
+  // reverted in #1165: the evaluator then re-walks the enclosing scopes on
+  // every reduction, which took Surelog's rggen test (constant functions with
+  // while loops in rggen_or_reducer / rggen_mux) from 4.7 s and 396 MB to a
+  // std::bad_alloc at 30-40 GB.  So keep the cheap lookup as the FIRST try
+  // and pay for the walk only when it yields no constant -- every expression
+  // that folds today takes the fast path and nothing re-walks per iteration.
+  if (!exprHasHierPath(object)) {
+    return reduceExpr(object, invalidValue, inst, nullptr, muteErrors);
+  }
+  bool firstInvalid = invalidValue;
+  expr *res = reduceExpr(object, firstInvalid, inst, nullptr, muteErrors);
+  if (!firstInvalid && res &&
+      res->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+    invalidValue = firstInvalid;
+    return res;
+  }
+  bool retryInvalid = invalidValue;
+  if (expr *retry = reduceExpr(object, retryInvalid, inst, stmt, muteErrors)) {
+    if (!retryInvalid &&
+        retry->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+      invalidValue = retryInvalid;
+      return retry;
+    }
+  }
+  invalidValue = firstInvalid;
+  return res;
+}
+
 void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
                         bool &invalidValue, bool &continue_flag,
                         bool &break_flag, bool &return_flag, const any *inst,
@@ -7544,7 +7640,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       expr *cond = (expr *)st->VpiCondition();
       int64_t val = get_value(
           invalidValue,
-          reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
+          reduceStmtExpr(cond, invalidValue, scopes.back(), stmt, muteError));
       if (val > 0) {
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
                  return_flag, scopes.back(), st->VpiStmt(), local_vars,
@@ -7561,7 +7657,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       expr *cond = (expr *)st->VpiCondition();
       int64_t val = get_value(
           invalidValue,
-          reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError));
+          reduceStmtExpr(cond, invalidValue, scopes.back(), stmt, muteError));
       if (val > 0) {
         evalStmt(funcName, scopes, invalidValue, continue_flag, break_flag,
                  return_flag, scopes.back(), st->VpiStmt(), local_vars,
@@ -7695,7 +7791,7 @@ void ExprEval::evalStmt(std::string_view funcName, Scopes &scopes,
       return_stmt *st = (return_stmt *)stmt;
       if (const expr *cond = st->VpiCondition()) {
         expr *rhsexp =
-            reduceExpr(cond, invalidValue, scopes.back(), nullptr, muteError);
+            reduceStmtExpr(cond, invalidValue, scopes.back(), stmt, muteError);
         ref_obj *lhsexp = s.MakeRef_obj();
         lhsexp->VpiName(funcName);
         invalidValue =
