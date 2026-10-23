@@ -5445,6 +5445,57 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             const typespec *tps = nullptr;
             if (const ref_typespec *rt = op->Typespec()) {
               tps = rt->Actual_typespec();
+              // A cast to a TYPE PARAMETER (`sid_t'(NumPorts - 1)` under
+              // `parameter type sid_t = logic`) is compiled once, on the
+              // definition, so the typespec attached here is the parameter's
+              // DEFAULT.  Reduced for an instance that binds the parameter to
+              // a 3-bit type, that default truncated the value to ONE bit --
+              // and a folded constant leaves a reader nothing to recover
+              // (CVA6 HPDcache: every store / prefetch request carried memory
+              // id 0 / 1 instead of NumPorts-1 / NumPorts).  The elaborated
+              // instance carries the binding on its own type_parameter of
+              // that name; the name is on the ref_typespec (stamped by the
+              // compiler) or is the default typespec's parent parameter.
+              std::string_view tpname = rt->VpiName();
+              if (tpname.empty() && tps != nullptr) {
+                if (const type_parameter *dtp =
+                        any_cast<const type_parameter *>(tps->VpiParent()))
+                  tpname = dtp->VpiName();
+              }
+              if (!tpname.empty()) {
+                const any *scopeInst = inst;
+                bool boundFound = false;
+                for (int depth = 0; scopeInst && depth < 16; depth++) {
+                  const typespec *bound = nullptr;
+                  if (const scope *sc = any_cast<const scope *>(scopeInst)) {
+                    if (sc->Parameters()) {
+                      for (any *p : *sc->Parameters()) {
+                        if (p->UhdmType() != UHDM_OBJECT_TYPE::uhdmtype_parameter)
+                          continue;
+                        if (p->VpiName() != tpname) continue;
+                        if (const ref_typespec *brt =
+                                ((type_parameter *)p)->Typespec())
+                          bound = brt->Actual_typespec();
+                        break;
+                      }
+                    }
+                  }
+                  if (bound != nullptr) {
+                    tps = bound;
+                    boundFound = true;
+                    break;
+                  }
+                  scopeInst = scopeInst->VpiParent();
+                }
+                // Surelog reduces against a PLACEHOLDER instance that carries
+                // only param_assigns; its typespec functor knows the real
+                // instance's type-parameter bindings.
+                if (!boundFound && getTypespecFunctor) {
+                  if (const typespec *bound = any_cast<const typespec *>(
+                          getTypespecFunctor(tpname, inst, pexpr)))
+                    tps = bound;
+                }
+              }
             }
             if (tps == nullptr) break;
             UHDM_OBJECT_TYPE ttps = tps->UhdmType();
