@@ -5651,6 +5651,35 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               uint64_t cast_to = size(tps, wiv, inst, pexpr, true, muteError);
               if (wiv || cast_to == 0) break;
               constant *oc = any_cast<constant *>(oper);
+              // A wildcard literal operand has no numeric value: the UINT
+              // fold below turned `dev_addr_width_gp'('h0_b00?)` -- the
+              // address MATCH pattern of black-parrot's clint registers,
+              // where the width is a bare PARAMETER name and so lands in
+              // this logic_typespec branch rather than the integer_typespec
+              // one above -- into UINT:2816, dropping the `?` nibble, and
+              // the decoder's `addr inside {pattern}` matched exactly one
+              // address.  Resize the binary image per 5.7.1 instead, exactly
+              // as the integer_typespec branch does.
+              {
+                std::string wimg = castWildcardImg;
+                if (!wimg.empty() || wildcardBinaryImage(oc, wimg)) {
+                  if ((int64_t)wimg.size() < (int64_t)cast_to) {
+                    char pad = '0';
+                    char msb = wimg.empty() ? '0' : wimg[0];
+                    if (msb == 'x' || msb == 'z' || msb == '?') pad = msb;
+                    wimg.insert(0, cast_to - wimg.size(), pad);
+                  } else if ((int64_t)wimg.size() > (int64_t)cast_to) {
+                    wimg.erase(0, wimg.size() - cast_to);
+                  }
+                  constant *wc = s.MakeConstant();
+                  wc->VpiValue("BIN:" + wimg);
+                  wc->VpiDecompile(wimg);
+                  wc->VpiSize((int32_t)cast_to);
+                  wc->VpiConstType(vpiBinaryConst);
+                  result = wc;
+                  break;
+                }
+              }
               // A signed operand must SIGN-extend (LRM 6.24.1); leave those
               // to the consumer rather than zero-extending here.
               if (oc) {
