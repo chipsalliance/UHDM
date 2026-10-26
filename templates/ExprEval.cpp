@@ -4984,9 +4984,18 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               // Hand the literal back unchanged and let the consumer
               // replicate it to the target width.
               bool the_val_is_fill = false;
-              if (the_val && the_val->UhdmType() == uhdmconstant)
+              // A SIZED constant arm keeps its own width: `(OPT_MPY > 0) ?
+              // 1'b1 : 1'b0` is one bit, and inside a concatenation
+              // (`{1'b1, (OPT_MPY > 0) ? 1'b1 : 1'b0, ...}`, ZipCPU's
+              // w_cpu_info) re-making it as a 64-bit integer shifted every
+              // operand to its left out of the result.
+              bool the_val_is_sized_const = false;
+              if (the_val && the_val->UhdmType() == uhdmconstant) {
                 the_val_is_fill = (((constant *)the_val)->VpiSize() == -1);
-              if (localInvalidValue == false && !the_val_is_fill) {
+                the_val_is_sized_const = (((constant *)the_val)->VpiSize() > 0);
+              }
+              if (localInvalidValue == false && !the_val_is_fill &&
+                  !the_val_is_sized_const) {
                 val = get_value(localInvalidValue, the_val);
                 if (localInvalidValue == false) {
                   constant *c = s.MakeConstant();
