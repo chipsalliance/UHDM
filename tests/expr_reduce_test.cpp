@@ -186,3 +186,45 @@ TEST(ExprReduceTest, OneBitOperatorResultWidth) {
     EXPECT_EQ(eval.get_value(invalidValue, r), 6);
   }
 }
+
+// A conditional operator whose selected arm is a SIZED constant keeps that
+// constant's width: `{1'b1, (0 > 0) ? 1'b1 : 1'b0, 1'b0}` is three bits,
+// 3'b100 -- not 1 + 64 + 1 bits (ZipCPU's w_cpu_info lost every operand left
+// of its ternaries that way).
+TEST(ExprReduceTest, ConditionalKeepsSizedArmWidth) {
+  Serializer s;
+  auto make_const = [&](const std::string& v, int size, int ctype) {
+    constant* c = s.MakeConstant();
+    c->VpiValue(v);
+    c->VpiSize(size);
+    c->VpiConstType(ctype);
+    return c;
+  };
+  auto make_op = [&](int type, std::vector<any*> ops) {
+    operation* op = s.MakeOperation();
+    op->VpiOpType(type);
+    VectorOfany* operands = s.MakeAnyVec();
+    for (any* o : ops) operands->push_back(o);
+    op->Operands(operands);
+    return op;
+  };
+  ExprEval eval;
+  bool invalidValue = false;
+  operation* cond = make_op(vpiConditionOp,
+                            {make_op(vpiGtOp, {make_const("UINT:0", 32, vpiUIntConst),
+                                               make_const("UINT:0", 64, vpiUIntConst)}),
+                             make_const("BIN:1", 1, vpiBinaryConst),
+                             make_const("BIN:0", 1, vpiBinaryConst)});
+  expr* r = eval.reduceExpr(cond, invalidValue, nullptr, nullptr);
+  ASSERT_NE(r, nullptr);
+  EXPECT_FALSE(invalidValue);
+  EXPECT_EQ(r->VpiSize(), 1);
+  expr* cat = eval.reduceExpr(
+      make_op(vpiConcatOp, {make_const("BIN:1", 1, vpiBinaryConst), cond,
+                            make_const("BIN:0", 1, vpiBinaryConst)}),
+      invalidValue, nullptr, nullptr);
+  ASSERT_NE(cat, nullptr);
+  EXPECT_FALSE(invalidValue);
+  EXPECT_EQ(cat->VpiSize(), 3);
+  EXPECT_EQ(eval.get_value(invalidValue, cat), 4);
+}
