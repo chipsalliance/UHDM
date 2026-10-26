@@ -128,3 +128,61 @@ TEST(FullElabTest, ElaborationRoundtrip) {
     }
   }
 }
+
+// A reduction, logical or `inside` operator yields ONE bit (LRM 11.6.1),
+// whatever the width of its operand.  reduceExpr sized every such fold as a
+// 64-bit integer; inside a concatenation that shifts every other operand --
+// Hazard3's `localparam MEPC_MASK = {{XLEN-2{1'b1}}, |EXTENSION_C, 1'b0}`
+// folded to 95 bits, and its `casez ({is_32bit, |EXTENSION_ZCMP,
+// instr[15:0]})` compared an 81-bit selector against 18-bit patterns.
+TEST(ExprReduceTest, OneBitOperatorResultWidth) {
+  Serializer s;
+  auto make_const = [&](const std::string& v, int size) {
+    constant* c = s.MakeConstant();
+    c->VpiValue(v);
+    c->VpiSize(size);
+    c->VpiConstType(vpiUIntConst);
+    return c;
+  };
+  auto make_op = [&](int type, std::vector<any*> ops) {
+    operation* op = s.MakeOperation();
+    op->VpiOpType(type);
+    VectorOfany* operands = s.MakeAnyVec();
+    for (any* o : ops) operands->push_back(o);
+    op->Operands(operands);
+    return op;
+  };
+  ExprEval eval;
+  for (int type : {vpiUnaryAndOp, vpiUnaryNandOp, vpiUnaryOrOp, vpiUnaryNorOp,
+                   vpiUnaryXorOp, vpiUnaryXNorOp, vpiNotOp}) {
+    bool invalidValue = false;
+    expr* r = eval.reduceExpr(make_op(type, {make_const("UINT:6", 32)}),
+                              invalidValue, nullptr, nullptr);
+    ASSERT_NE(r, nullptr) << type;
+    EXPECT_FALSE(invalidValue) << type;
+    EXPECT_EQ(r->VpiSize(), 1) << type;
+  }
+  for (int type : {vpiLogAndOp, vpiLogOrOp}) {
+    bool invalidValue = false;
+    expr* r = eval.reduceExpr(
+        make_op(type, {make_const("UINT:6", 32), make_const("UINT:1", 32)}),
+        invalidValue, nullptr, nullptr);
+    ASSERT_NE(r, nullptr) << type;
+    EXPECT_FALSE(invalidValue) << type;
+    EXPECT_EQ(r->VpiSize(), 1) << type;
+  }
+  // {1'b1, |32'd6, 1'b0} is three bits wide and equals 3'b110.
+  {
+    bool invalidValue = false;
+    expr* r = eval.reduceExpr(
+        make_op(vpiConcatOp,
+                {make_const("UINT:1", 1),
+                 make_op(vpiUnaryOrOp, {make_const("UINT:6", 32)}),
+                 make_const("UINT:0", 1)}),
+        invalidValue, nullptr, nullptr);
+    ASSERT_NE(r, nullptr);
+    EXPECT_FALSE(invalidValue);
+    EXPECT_EQ(r->VpiSize(), 3);
+    EXPECT_EQ(eval.get_value(invalidValue, r), 6);
+  }
+}

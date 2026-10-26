@@ -4478,7 +4478,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(val));
               c->VpiDecompile(std::to_string(val));
-              c->VpiSize(64);
+              c->VpiSize(1);
               c->VpiConstType(vpiUIntConst);
               result = c;
             }
@@ -4497,7 +4497,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(val));
               c->VpiDecompile(std::to_string(val));
-              c->VpiSize(64);
+              c->VpiSize(1);
               c->VpiConstType(vpiUIntConst);
               result = c;
             }
@@ -4658,7 +4658,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(val));
               c->VpiDecompile(std::to_string(val));
-              c->VpiSize(64);
+              c->VpiSize(1);
               c->VpiConstType(vpiUIntConst);
               result = c;
             }
@@ -4679,7 +4679,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   constant *c = s.MakeConstant();
                   c->VpiValue("UINT:1");
                   c->VpiDecompile(std::to_string(1));
-                  c->VpiSize(64);
+                  c->VpiSize(1);
                   c->VpiConstType(vpiUIntConst);
                   result = c;
                   break;
@@ -4701,7 +4701,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(res));
               c->VpiDecompile(std::to_string(res));
-              c->VpiSize(64);
+              c->VpiSize(1);
               c->VpiConstType(vpiUIntConst);
               result = c;
             }
@@ -4721,7 +4721,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(res));
               c->VpiDecompile(std::to_string(res));
-              c->VpiSize(64);
+              c->VpiSize(1);
               c->VpiConstType(vpiUIntConst);
               result = c;
             }
@@ -4740,7 +4740,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(res));
               c->VpiDecompile(std::to_string(res));
-              c->VpiSize(64);
+              c->VpiSize(1);
               c->VpiConstType(vpiUIntConst);
               result = c;
             }
@@ -4760,7 +4760,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(res));
               c->VpiDecompile(std::to_string(res));
-              c->VpiSize(64);
+              c->VpiSize(1);
               c->VpiConstType(vpiUIntConst);
               result = c;
             }
@@ -4779,7 +4779,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(res));
               c->VpiDecompile(std::to_string(res));
-              c->VpiSize(64);
+              c->VpiSize(1);
               c->VpiConstType(vpiUIntConst);
               result = c;
             }
@@ -4799,7 +4799,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
               constant *c = s.MakeConstant();
               c->VpiValue("UINT:" + std::to_string(res));
               c->VpiDecompile(std::to_string(res));
-              c->VpiSize(64);
+              c->VpiSize(1);
               c->VpiConstType(vpiUIntConst);
               result = c;
             }
