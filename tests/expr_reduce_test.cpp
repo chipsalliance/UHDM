@@ -228,3 +228,65 @@ TEST(ExprReduceTest, ConditionalKeepsSizedArmWidth) {
   EXPECT_EQ(cat->VpiSize(), 3);
   EXPECT_EQ(eval.get_value(invalidValue, cat), 4);
 }
+
+// A replication count ABOVE the old 1000 clamp must fold to the FULL width,
+// and an absurd count must FAIL the reduction rather than be truncated to a
+// plausible-looking one.
+//
+// The clamp (`if (n > 1000) n = 1000;`) silently produced a SHORTER constant
+// than the source asks for, and every consumer then zero-extends it to the
+// expected width: T-Head's OpenC910 masks 1024 PLIC interrupts with
+// `{{(INT_NUM-1){1'b1}}, 1'b0}`, so the mask folded to 1001 bits instead of
+// 1024 and the top 23 bits of each hart's interrupt-enable were forced to 0,
+// with no diagnostic anywhere.
+TEST(ExprReduceTest, ReplicationCountAboveOneThousand) {
+  Serializer s;
+  auto make_const = [&](const std::string& v, int size, int ctype) {
+    constant* c = s.MakeConstant();
+    c->VpiValue(v);
+    c->VpiSize(size);
+    c->VpiConstType(ctype);
+    return c;
+  };
+  auto make_op = [&](int type, std::vector<any*> ops) {
+    operation* op = s.MakeOperation();
+    op->VpiOpType(type);
+    VectorOfany* operands = s.MakeAnyVec();
+    for (any* o : ops) operands->push_back(o);
+    op->Operands(operands);
+    return op;
+  };
+  ExprEval eval;
+
+  // {1023{1'b1}} is 1023 bits, not 1000.
+  bool invalidValue = false;
+  expr* r = eval.reduceExpr(
+      make_op(vpiMultiConcatOp, {make_const("UINT:1023", 32, vpiUIntConst),
+                                 make_const("BIN:1", 1, vpiBinaryConst)}),
+      invalidValue, nullptr, nullptr);
+  ASSERT_NE(r, nullptr);
+  EXPECT_FALSE(invalidValue);
+  EXPECT_EQ(r->VpiSize(), 1023);
+
+  // The OpenC910 mask shape: {{1023{1'b1}}, 1'b0} is 1024 bits.
+  invalidValue = false;
+  expr* mask = eval.reduceExpr(
+      make_op(vpiConcatOp,
+              {make_op(vpiMultiConcatOp,
+                       {make_const("UINT:1023", 32, vpiUIntConst),
+                        make_const("BIN:1", 1, vpiBinaryConst)}),
+               make_const("BIN:0", 1, vpiBinaryConst)}),
+      invalidValue, nullptr, nullptr);
+  ASSERT_NE(mask, nullptr);
+  EXPECT_FALSE(invalidValue);
+  EXPECT_EQ(mask->VpiSize(), 1024);
+
+  // An absurd count is reported invalid, never silently truncated.
+  invalidValue = false;
+  eval.reduceExpr(
+      make_op(vpiMultiConcatOp,
+              {make_const("UINT:4294967295", 64, vpiUIntConst),
+               make_const("BIN:1", 1, vpiBinaryConst)}),
+      invalidValue, nullptr, nullptr);
+  EXPECT_TRUE(invalidValue);
+}
