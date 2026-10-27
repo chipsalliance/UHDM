@@ -5019,8 +5019,25 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                   get_value(invalidValue, reduceExpr(operands[0], invalidValue,
                                                      inst, pexpr, muteError));
               if (invalidValue) break;
-              if (n > 1000) n = 1000;  // Must be -1 or something silly
-              if (n < 0) n = 0;
+              // A replication count is an ordinary design parameter and can
+              // legitimately be large: T-Head's OpenC910 masks 1024 PLIC
+              // interrupts with `{{(INT_NUM-1){1'b1}}, 1'b0}`, so the count is
+              // 1023.  Clamping it produced a SHORTER constant than the source
+              // asks for, and every consumer then zero-extends that to the
+              // expected width -- wrong hardware, with no diagnostic at all
+              // (the OpenC910 mask came back 1001 bits instead of 1024, so the
+              // top 23 bits of each hart's interrupt-enable were forced to 0).
+              //
+              // Keep a sanity bound, because a count that failed to resolve can
+              // arrive as a huge or negative value and must not be turned into
+              // a multi-gigabyte string -- but FAIL the reduction instead of
+              // silently truncating it, so the caller falls back to its own
+              // evaluation rather than being handed a wrong answer.
+              static constexpr int64_t kMaxReplicationCount = 1 << 20;
+              if (n < 0 || n > kMaxReplicationCount) {
+                invalidValue = true;
+                break;
+              }
               expr *cv = (expr *)(operands[1]);
               if (cv->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant) {
                 cv = reduceExpr(cv, invalidValue, inst, pexpr, muteError);
