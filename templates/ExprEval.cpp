@@ -5806,7 +5806,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       // last) of the first call argument.  `strip_outer` counts
       // bit_select / var_select indices we still need to strip from
       // the front of the dim list.
-      struct DimEntry { int64_t left, right; };
+      struct DimEntry { int64_t left, right; expr *lexpr, *rexpr; };
       std::vector<DimEntry> alldims;
       int strip_outer = 0;
       bool dim_ok = true;
@@ -5844,10 +5844,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         if (rs) {
           for (range *r : *rs) {
             bool inv = false;
-            int64_t lv = getValue(reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError));
-            int64_t rv = getValue(reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError));
+            expr *le = reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError);
+            expr *re = reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError);
+            int64_t lv = getValue(le);
+            int64_t rv = getValue(re);
             if (inv) { dim_ok = false; return; }
-            alldims.push_back({lv, rv});
+            alldims.push_back({lv, rv, le, re});
           }
         }
         if (elem_ts) walk_ts(elem_ts);
@@ -5861,10 +5863,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           if (an->Ranges()) {
             for (range *r : *an->Ranges()) {
               bool inv = false;
-              int64_t lv = getValue(reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError));
-              int64_t rv = getValue(reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError));
+              expr *le = reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError);
+              expr *re = reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError);
+              int64_t lv = getValue(le);
+              int64_t rv = getValue(re);
               if (inv) { dim_ok = false; return; }
-              alldims.push_back({lv, rv});
+              alldims.push_back({lv, rv, le, re});
             }
           }
           if (an->Nets() && !an->Nets()->empty()) {
@@ -5879,10 +5883,12 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           if (var->Ranges()) {
             for (range *r : *var->Ranges()) {
               bool inv = false;
-              int64_t lv = getValue(reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError));
-              int64_t rv = getValue(reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError));
+              expr *le = reduceExpr(r->Left_expr(), inv, inst, pexpr, muteError);
+              expr *re = reduceExpr(r->Right_expr(), inv, inst, pexpr, muteError);
+              int64_t lv = getValue(le);
+              int64_t rv = getValue(re);
               if (inv) { dim_ok = false; return; }
-              alldims.push_back({lv, rv});
+              alldims.push_back({lv, rv, le, re});
             }
           }
           if (var->Variables() && !var->Variables()->empty()) {
@@ -5954,6 +5960,20 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             v = (d.left > d.right) ? d.left : d.right;
           } else {  // $low
             v = (d.left > d.right) ? d.right : d.left;
+          }
+          // A bound query answers with the range's OWN bound node when that
+          // is a constant, as the generic path always did: a fresh 64-bit
+          // constant in its place made the consumer (Surelog's adjustSize)
+          // re-size and clone it, which changed nine regression goldens by
+          // object counts alone.  Only `$size` has no node to hand back.
+          if (name != "$size") {
+            expr *node = nullptr;
+            if (name == "$left") node = d.lexpr;
+            else if (name == "$right") node = d.rexpr;
+            else if (name == "$high") node = (d.left > d.right) ? d.lexpr : d.rexpr;
+            else node = (d.left > d.right) ? d.rexpr : d.lexpr;  // $low
+            if (node && node->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant)
+              return node;
           }
           constant *c = s.MakeConstant();
           if (v < 0) {
