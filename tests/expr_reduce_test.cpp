@@ -423,3 +423,114 @@ TEST(ExprReduceTest, ReplicationCountAboveOneThousand) {
       invalidValue, nullptr, nullptr);
   EXPECT_TRUE(invalidValue);
 }
+
+// A struct-returning constant function whose body builds the result with an
+// ASSIGNMENT PATTERN over its formals -- PULP obi_pkg's
+//   function automatic obi_cfg_t obi_default_cfg(int unsigned AddrWidth, ...);
+//     obi_default_cfg = '{AddrWidth: AddrWidth, DataWidth: DataWidth, ...};
+//   localparam obi_cfg_t ObiDefaultConfig = obi_default_cfg(32, 32, 1, ...);
+// -- must evaluate to the BIN constant the pattern denotes, with the formals
+// bound.  It came back as the pattern itself, whose formal references are
+// meaningless outside the call, and every parameter taking the call carried
+// it: `ObiCfg.DataWidth` then measured 1 bit in every OBI module.
+TEST(ExprReduceTest, StructReturningFunctionPatternFolds) {
+  Serializer s;
+  auto make_const = [&](int64_t v) {
+    constant* c = s.MakeConstant();
+    c->VpiValue("UINT:" + std::to_string(v));
+    c->VpiDecompile(std::to_string(v));
+    c->VpiSize(64);
+    c->VpiConstType(vpiUIntConst);
+    return c;
+  };
+  // typedef struct packed { int unsigned AddrWidth, DataWidth, IdWidth; } cfg_t;
+  struct_typespec* cfg = s.MakeStruct_typespec();
+  cfg->VpiName("cfg_t");
+  cfg->VpiPacked(true);
+  VectorOftypespec_member* members = s.MakeTypespec_memberVec();
+  const char* names[3] = {"AddrWidth", "DataWidth", "IdWidth"};
+  for (const char* n : names) {
+    typespec_member* m = s.MakeTypespec_member();
+    m->VpiName(n);
+    int_typespec* it = s.MakeInt_typespec();
+    ref_typespec* rt = s.MakeRef_typespec();
+    rt->Actual_typespec(it);
+    rt->VpiParent(m);
+    m->Typespec(rt);
+    m->VpiParent(cfg);
+    members->push_back(m);
+  }
+  cfg->Members(members);
+  // function automatic cfg_t default_cfg(int unsigned AddrWidth, DataWidth, IdWidth);
+  function* fn = s.MakeFunction();
+  fn->VpiName("default_cfg");
+  VectorOfio_decl* ios = s.MakeIo_declVec();
+  for (const char* n : names) {
+    io_decl* io = s.MakeIo_decl();
+    io->VpiName(n);
+    io->VpiDirection(vpiInput);
+    int_typespec* it = s.MakeInt_typespec();
+    ref_typespec* rt = s.MakeRef_typespec();
+    rt->Actual_typespec(it);
+    rt->VpiParent(io);
+    io->Typespec(rt);
+    io->VpiParent(fn);
+    ios->push_back(io);
+  }
+  fn->Io_decls(ios);
+  struct_var* ret = s.MakeStruct_var();
+  ret->VpiName("default_cfg");
+  ref_typespec* rrt = s.MakeRef_typespec();
+  rrt->Actual_typespec(cfg);
+  rrt->VpiParent(ret);
+  ret->Typespec(rrt);
+  fn->Return(ret);
+  //   default_cfg = '{AddrWidth: AddrWidth, DataWidth: DataWidth, IdWidth: IdWidth};
+  operation* pat = s.MakeOperation();
+  pat->VpiOpType(vpiAssignmentPatternOp);
+  VectorOfany* ops = s.MakeAnyVec();
+  for (const char* n : names) {
+    tagged_pattern* tp = s.MakeTagged_pattern();
+    string_typespec* tag = s.MakeString_typespec();
+    tag->VpiName(n);
+    ref_typespec* trt = s.MakeRef_typespec();
+    trt->Actual_typespec(tag);
+    trt->VpiParent(tp);
+    tp->Typespec(trt);
+    ref_obj* formal = s.MakeRef_obj();
+    formal->VpiName(n);
+    formal->VpiParent(tp);
+    tp->Pattern(formal);
+    tp->VpiParent(pat);
+    ops->push_back(tp);
+  }
+  pat->Operands(ops);
+  assignment* asg = s.MakeAssignment();
+  ref_obj* lhs = s.MakeRef_obj();
+  lhs->VpiName("default_cfg");
+  asg->Lhs(lhs);
+  asg->Rhs(pat);
+  pat->VpiParent(asg);
+  asg->VpiParent(fn);
+  fn->Stmt(asg);
+  module_inst* top = s.MakeModule_inst();
+  top->VpiName("top");
+  // localparam cfg_t DefaultCfg = default_cfg(32, 32, 1);
+  std::vector<any*> args = {make_const(32), make_const(32), make_const(1)};
+  ExprEval eval;
+  bool invalidValue = false;
+  expr* r = eval.evalFunc(fn, &args, invalidValue, top, nullptr);
+  ASSERT_NE(r, nullptr);
+  EXPECT_FALSE(invalidValue);
+  ASSERT_EQ(r->UhdmType(), uhdmconstant);
+  constant* c = (constant*)r;
+  EXPECT_EQ(c->VpiSize(), 96);
+  std::string v(c->VpiValue());
+  ASSERT_EQ(v.substr(0, 4), "BIN:");
+  std::string bits = v.substr(4);
+  ASSERT_EQ(bits.size(), 96u);
+  // first member at the MSB: AddrWidth = 32, DataWidth = 32, IdWidth = 1
+  EXPECT_EQ(std::stoull(bits.substr(0, 32), nullptr, 2), 32u);
+  EXPECT_EQ(std::stoull(bits.substr(32, 32), nullptr, 2), 32u);
+  EXPECT_EQ(std::stoull(bits.substr(64, 32), nullptr, 2), 1u);
+}
