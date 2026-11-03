@@ -6809,6 +6809,20 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     uint32_t sel_dim = 0;
     // The table's DECLARED type, for element selects on its folded value.
     const typespec *decl_tts = nullptr;
+    // A select path with a RANGE tail (`pkg::RC[11][8 +: 4]`, `RC[2][63 -: 2]`,
+    // `RC[0][W-1:0]`) is not a chain of element indices: the pre-selection
+    // and flat-concat branches below must leave it to the paths that handled
+    // it before -- element-selecting at the first index and then treating the
+    // range node as an index bit-selected garbage out of the element
+    // (pkg_param_table_varselect_partsel: b_o 0x0a for 0xd6).
+    bool range_tail = false;
+    for (auto x : *sel->Exprs()) {
+      UHDM_OBJECT_TYPE xt = x->UhdmType();
+      if (xt == UHDM_OBJECT_TYPE::uhdmpart_select ||
+          xt == UHDM_OBJECT_TYPE::uhdmindexed_part_select ||
+          xt == UHDM_OBJECT_TYPE::uhdmrange)
+        range_tail = true;
+    }
     if (const parameter *par = any_cast<const parameter *>(sel->Actual_group()))
       if (par->Typespec()) decl_tts = par->Typespec()->Actual_typespec();
     // A PACKAGE-qualified table (`pkg::LUT[1][0]`) has no Actual_group on the
@@ -6832,7 +6846,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       const uint32_t this_dim = sel_dim++;
       if (object) {
         UHDM_OBJECT_TYPE otype = object->UhdmType();
-        if (otype == UHDM_OBJECT_TYPE::uhdmconstant && !selection) {
+        if (otype == UHDM_OBJECT_TYPE::uhdmconstant && !selection && !range_tail) {
           // The table's value is ALREADY a folded constant (a flat concat
           // `{8'd3, 8'd5, 8'd6, 8'd7}` for a `logic [1:0][1:0][7:0]` table,
           // core-v-mcu's ClosRLut): no branch below handled a constant
@@ -6942,7 +6956,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
                 if (!iv) dim_n = std::abs(l - r) + 1;
               }
             }
-            if (ops && dim_n > 0 && (int64_t)ops->size() != dim_n && this_dim == 0) {
+            if (ops && dim_n > 0 && (int64_t)ops->size() != dim_n && this_dim == 0 && !range_tail) {
               expr *folded = reduceExpr(op, invalidValue, inst, pexpr, muteError);
               constant *fc = folded ? any_cast<constant *>(folded) : nullptr;
               constant *ec = fc ? reducePackedElemSelect(fc, (int64_t)index_val, this, s,
