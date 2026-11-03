@@ -6807,6 +6807,24 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     }
     bool selection = false;
     uint32_t sel_dim = 0;
+    // The table's DECLARED type, for element selects on its folded value.
+    const typespec *decl_tts = nullptr;
+    if (const parameter *par = any_cast<const parameter *>(sel->Actual_group()))
+      if (par->Typespec()) decl_tts = par->Typespec()->Actual_typespec();
+    // A PACKAGE-qualified table (`pkg::LUT[1][0]`) has no Actual_group on the
+    // var_select; its declaration is reachable the way decodeHierPath and
+    // the bit_select path reach it.
+    if (decl_tts == nullptr) {
+      if (any *bobj = getObject(name, inst, pexpr, muteError)) {
+        if (param_assign *bpa = any_cast<param_assign *>(bobj)) bobj = (any *)bpa->Lhs();
+        if (const parameter *bp = any_cast<const parameter *>(bobj))
+          if (bp->Typespec()) decl_tts = bp->Typespec()->Actual_typespec();
+      }
+    }
+    if (decl_tts == nullptr && getTypespecFunctor) {
+      if (any *tsobj = getTypespecFunctor(name, inst, pexpr))
+        decl_tts = any_cast<const typespec *>(tsobj);
+    }
     for (auto index : *sel->Exprs()) {
       uint64_t index_val = get_value(
           invalidValue,
@@ -6814,6 +6832,22 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       const uint32_t this_dim = sel_dim++;
       if (object) {
         UHDM_OBJECT_TYPE otype = object->UhdmType();
+        if (otype == UHDM_OBJECT_TYPE::uhdmconstant && !selection) {
+          // The table's value is ALREADY a folded constant (a flat concat
+          // `{8'd3, 8'd5, 8'd6, 8'd7}` for a `logic [1:0][1:0][7:0]` table,
+          // core-v-mcu's ClosRLut): no branch below handled a constant
+          // BEFORE any selection, so `T[1][0]` resolved to nothing and every
+          // generate loop bounded by it ran ZERO times.  Slice the first
+          // dimension by the declared type; the element constant carries
+          // the remaining type for the next index.
+          if (constant *ec = reducePackedElemSelect((constant *)object, (int64_t)index_val,
+                                                    this, s, invalidValue, inst, pexpr,
+                                                    muteError, decl_tts)) {
+            object = ec;
+            selection = true;
+            continue;
+          }
+        }
         if (otype == UHDM_OBJECT_TYPE::uhdmconstant && selection) {
           // The previous dimensions selected a ROW that is a plain
           // constant (`mat_p[1][i]` of a `bit [1:0][2:0][2:0]` table): a
@@ -6821,6 +6855,16 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           // `mat_p[1][i][0] + mat_p[1][i][1] + mat_p[1][i][2]` summed the
           // row three times instead of counting its ones.
           constant *rc = (constant *)object;
+          // ...unless the row still has PACKED DIMENSIONS of its own (the
+          // element constant made by the flat-concat branch below carries
+          // the table type minus the dimensions already selected): then the
+          // index selects the next ELEMENT, not a bit.
+          if (constant *ec = reducePackedElemSelect(rc, (int64_t)index_val, this, s,
+                                                    invalidValue, inst, pexpr,
+                                                    muteError, nullptr)) {
+            object = ec;
+            continue;
+          }
           std::string img;
           std::string_view v = rc->VpiValue();
           if (v.find("BIN:") == 0) img = std::string(v.substr(4));
@@ -6873,6 +6917,46 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
             }
           } else if (opType == vpiConcatOp) {
             VectorOfany *ops = op->Operands();
+            // A table written as ONE FLAT concat (`logic [1:0][1:0][7:0] T =
+            // {8'd3, 8'd5, 8'd6, 8'd7}`, core-v-mcu's ClosRLut) has more
+            // operands than the outer dimension has elements: walking the
+            // operands per index picked operand `index` of the flat list
+            // (an element of the LAST dimension) and the next index then
+            // bit-selected it -- `T[1][0]` read bit 0 of 8'd6, and every
+            // generate loop bounded by ClosR/ClosM/ClosN ran ZERO times.
+            // Fold the concat and slice the element by the DECLARED range
+            // instead; the element constant carries the remaining type.
+            int64_t dim_n = -1;
+            const typespec *tts = decl_tts;
+            if (tts == nullptr)
+              if (const ref_typespec *rt = op->Typespec()) tts = rt->Actual_typespec();
+            if (tts) {
+              VectorOfrange *trg = nullptr;
+              if (const logic_typespec *lt = any_cast<const logic_typespec *>(tts)) trg = lt->Ranges();
+              else if (const bit_typespec *bt = any_cast<const bit_typespec *>(tts)) trg = bt->Ranges();
+              else if (const packed_array_typespec *pt = any_cast<const packed_array_typespec *>(tts)) trg = pt->Ranges();
+              if (trg && this_dim < trg->size()) {
+                bool iv = false;
+                int64_t l = get_value(iv, reduceExpr(trg->at(this_dim)->Left_expr(), iv, inst, pexpr, muteError));
+                int64_t r = get_value(iv, reduceExpr(trg->at(this_dim)->Right_expr(), iv, inst, pexpr, muteError));
+                if (!iv) dim_n = std::abs(l - r) + 1;
+              }
+            }
+            if (ops && dim_n > 0 && (int64_t)ops->size() != dim_n && this_dim == 0) {
+              expr *folded = reduceExpr(op, invalidValue, inst, pexpr, muteError);
+              constant *fc = folded ? any_cast<constant *>(folded) : nullptr;
+              constant *ec = fc ? reducePackedElemSelect(fc, (int64_t)index_val, this, s,
+                                                         invalidValue, inst, pexpr,
+                                                         muteError, tts)
+                                : nullptr;
+              if (ec) {
+                object = ec;
+                selection = true;
+              } else {
+                invalidValue = true;
+              }
+              continue;
+            }
             int64_t pos = concatElementPosition(sel, this_dim, op, index_val,
                                                 this, inst, pexpr, muteError);
             if (ops && pos >= 0) {
