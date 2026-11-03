@@ -2573,6 +2573,18 @@ static bool foldPatternBits(const any *val, const typespec *ts, ExprEval *ev,
   // Leaf: reduce to a constant and use its bits.
   bool liv = false;
   expr *re = ev->reduceExpr((any *)val, liv, inst, pexpr, muteError);
+  // A reference whose VALUE is itself a pattern -- a struct-typed formal
+  // bound to a pattern-valued package parameter (`obi_default_cfg(..., 
+  // ObiMinimalOptionalConfig)` with `OptionalCfg: OptionalCfg` in the
+  // body): fold that pattern against this member's type instead of
+  // refusing the non-constant.
+  if (!liv && re && re != val &&
+      re->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
+    int32_t rot = ((const operation *)re)->VpiOpType();
+    if (rot == vpiAssignmentPatternOp || rot == vpiConcatOp)
+      return foldPatternBits(re, ts, ev, s, inst, pexpr, muteError, bits,
+                             depth + 1);
+  }
   if (liv || !re || re->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
     return false;
   constant *rc = (constant *)re;
@@ -8495,6 +8507,23 @@ expr *ExprEval::evalFunc(function *func, std::vector<any *> *args,
             c->VpiSize(static_cast<int32_t>(si));
             return c;
           }
+        }
+        // A struct-returning function whose body builds the result with an
+        // ASSIGNMENT PATTERN over its formals (`obi_default_cfg(32, 32, 1,
+        // ...) = '{AddrWidth: AddrWidth, DataWidth: DataWidth, ...}`, PULP
+        // obi_pkg's ObiDefaultConfig): the pattern came back as the value
+        // verbatim, with refs to the formals that are bound only in THIS
+        // scope.  Every parameter that took the call then carried the
+        // pattern with `AddrWidth` / `DataWidth` unresolvable, and each
+        // `ObiCfg.DataWidth` downstream measured 1 bit.  Fold it here, while
+        // the formals are still in scope, into the BIN constant the pattern
+        // denotes.
+        if (p->Rhs() && tps &&
+            p->Rhs()->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation &&
+            ((operation *)p->Rhs())->VpiOpType() == vpiAssignmentPatternOp) {
+          if (constant *fc = foldPatternToConstant(p->Rhs(), tps, this, s,
+                                                   modinst, pexpr, muteError))
+            return fc;
         }
         return (expr *)p->Rhs();
       }
