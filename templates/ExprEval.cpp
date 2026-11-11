@@ -4182,6 +4182,42 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     explicit DepthGuard(int32_t &dd) : d(dd) { ++d; }
     ~DepthGuard() { --d; }
   } depthGuard(reduceDepth);
+  // The DECLARED range of a selected vector parameter (`localparam [5:15] p`,
+  // `[15:5] q`): the part-select folds below index the folded value's bits
+  // from the LSB, which is right only for `[N-1:0]`.  `lsbOf(i)` maps a
+  // declared index to that LSB-based bit position.  Only a single-range
+  // vector type is mapped; anything else keeps the `[N-1:0]` reading.
+  struct DeclRange {
+    int64_t right = 0;
+    bool ascending = false;
+    int64_t width = -1;  // -1: unknown (no declared range)
+    int64_t lsbOf(int64_t i) const { return ascending ? right - i : i - right; }
+  };
+  auto declaredRange = [&](std::string_view name) -> DeclRange {
+    DeclRange dr;
+    if (!getTypespecFunctor || name.empty()) return dr;
+    any *tsobj = getTypespecFunctor(name, inst, pexpr);
+    if (!tsobj) return dr;
+    VectorOfrange *rs = nullptr;
+    if (const logic_typespec *lt = any_cast<const logic_typespec *>(tsobj)) {
+      if (lt->Elem_typespec() == nullptr) rs = lt->Ranges();
+    } else if (const bit_typespec *bt = any_cast<const bit_typespec *>(tsobj)) {
+      rs = bt->Ranges();
+    } else if (const int_typespec *it = any_cast<const int_typespec *>(tsobj)) {
+      rs = it->Ranges();
+    }
+    if (!rs || rs->size() != 1) return dr;
+    bool iv = false;
+    int64_t l = get_value(iv, reduceExpr((any *)rs->at(0)->Left_expr(), iv,
+                                         inst, pexpr, true));
+    int64_t r = get_value(iv, reduceExpr((any *)rs->at(0)->Right_expr(), iv,
+                                         inst, pexpr, true));
+    if (iv) return dr;
+    dr.right = r;
+    dr.ascending = l < r;
+    dr.width = (l > r ? l - r : r - l) + 1;
+    return dr;
+  };
   if (reduceDepth > 1024) {
     invalidValue = true;
     return nullptr;
@@ -6766,14 +6802,17 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           invalidValue,
           reduceExpr(sel->Right_range(), invalidValue, inst, pexpr, muteError));
       std::reverse(binary.begin(), binary.end());
+      // Map both bounds through the DECLARED range (`p[13:9]` of a
+      // `[5:15]` vector is LSB bits 2..6, not 9..13).
+      DeclRange dr = declaredRange(name);
+      if (dr.width > (int64_t)binary.size()) binary.resize(dr.width, '0');
+      int64_t pl = dr.lsbOf(l), pr = dr.lsbOf(r);
+      int64_t lo = std::min(pl, pr), hi = std::max(pl, pr);
       std::string sub;
-      if (r > (int64_t)binary.size() || l > (int64_t)binary.size()) {
+      if (lo < 0 || hi >= (int64_t)binary.size()) {
         sub = "0";
       } else {
-        if (l > r)
-          sub = binary.substr(r, l - r + 1);
-        else
-          sub = binary.substr(l, r - l + 1);
+        sub = binary.substr(lo, hi - lo + 1);
       }
       std::reverse(sub.begin(), sub.end());
       constant *c = s.MakeConstant();
@@ -6806,21 +6845,33 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
           invalidValue,
           reduceExpr(sel->Width_expr(), invalidValue, inst, pexpr, muteError));
       std::reverse(binary.begin(), binary.end());
+      // The selected indices are [a, a + width - 1] -- `base +: w` starts at
+      // base, `base -: w` ENDS there (LRM 11.5.1) -- mapped through the
+      // DECLARED range: `p[13 -: 5]` of a `[5:15]` vector is LSB bits 2..6.
+      // The `-:` start used to be `base - w`, one bit low even on `[N-1:0]`
+      // (`r[7 -: 5]` folded bits 6..2), and a range not ending at 0 indexed
+      // past the value and folded to an EMPTY constant.
+      DeclRange dr = declaredRange(name);
+      if (dr.width > (int64_t)binary.size()) binary.resize(dr.width, '0');
+      int64_t a = (sel->VpiIndexedPartSelectType() == vpiPosIndexed)
+                      ? base
+                      : base - offset + 1;
+      int64_t pa = dr.lsbOf(a), pb = dr.lsbOf(a + offset - 1);
+      int64_t lo = std::min(pa, pb);
       std::string sub;
-      if (sel->VpiIndexedPartSelectType() == vpiPosIndexed) {
-        if ((uint32_t)(base + offset) <= binary.size())
-          sub = binary.substr(base, offset);
-      } else {
-        if ((uint32_t)base < binary.size())
-          sub = binary.substr(base - offset, offset);
-      }
+      if (offset > 0 && lo >= 0 && lo + offset <= (int64_t)binary.size())
+        sub = binary.substr(lo, offset);
       std::reverse(sub.begin(), sub.end());
-      constant *c = s.MakeConstant();
-      c->VpiValue("BIN:" + sub);
-      c->VpiDecompile(sub);
-      c->VpiSize(static_cast<int32_t>(sub.size()));
-      c->VpiConstType(vpiBinaryConst);
-      result = c;
+      // Out of range (or an unresolved bound): leave the select unfolded
+      // rather than fold it to an EMPTY constant, which reads as 0.
+      if (!sub.empty()) {
+        constant *c = s.MakeConstant();
+        c->VpiValue("BIN:" + sub);
+        c->VpiDecompile(sub);
+        c->VpiSize(static_cast<int32_t>(sub.size()));
+        c->VpiConstType(vpiBinaryConst);
+        result = c;
+      }
     }
   } else if (objtype == UHDM_OBJECT_TYPE::uhdmvar_select) {
     var_select *sel = (var_select *)result;
