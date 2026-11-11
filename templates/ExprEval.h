@@ -122,6 +122,14 @@ class ExprEval {
                         const any* inst, const any* pexpr,
                         bool muteError = false);
 
+  /* Bit `index` of the packed value of a STRUCT assignment pattern (operands
+     in member order, MSB member first -- or LSB first once
+     reorderAssignmentPattern has reversed them, VpiReordered), as a 1-bit
+     constant; nullptr when it cannot be folded. */
+  constant* reduceStructPatternBitSelect(const operation* op, uint64_t index,
+                                         const any* inst, const any* pexpr,
+                                         bool muteError = false);
+
   void recursiveFlattening(Serializer& s, VectorOfany* flattened,
                            const VectorOfany* ordered,
                            std::vector<const typespec*> fieldTypes);

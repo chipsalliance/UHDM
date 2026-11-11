@@ -1961,6 +1961,82 @@ uint64_t ExprEval::getWordSize(const expr *exp, const any *inst,
   return wordSize;
 }
 
+constant *ExprEval::reduceStructPatternBitSelect(const operation *op,
+                                                  uint64_t index,
+                                                  const any *inst,
+                                                  const any *pexpr,
+                                                  bool muteError) {
+  if (op == nullptr || op->VpiOpType() != vpiAssignmentPatternOp)
+    return nullptr;
+  const ref_typespec *rt = op->Typespec();
+  if (rt == nullptr) return nullptr;
+  const struct_typespec *st = rt->Actual_typespec<struct_typespec>();
+  if (st == nullptr) return nullptr;
+  const VectorOftypespec_member *members = st->Members();
+  const VectorOfany *ops = op->Operands();
+  if (members == nullptr || ops == nullptr || members->empty() ||
+      members->size() != ops->size())
+    return nullptr;
+  Serializer &s = *op->GetSerializer();
+  uint64_t offset = 0;
+  // Members are declared MSB first: walk them from the LSB end.
+  for (size_t m = members->size(); m-- > 0;) {
+    const typespec_member *mem = members->at(m);
+    const ref_typespec *mrt = mem->Typespec();
+    const typespec *mts = mrt ? mrt->Actual_typespec() : nullptr;
+    if (mts == nullptr) return nullptr;
+    bool invalid = false;
+    uint64_t width = size(mts, invalid, inst, pexpr, true, muteError);
+    if (invalid || width == 0) return nullptr;
+    if (index >= offset + width) {
+      offset += width;
+      continue;
+    }
+    const uint64_t k = index - offset;
+    // reorderAssignmentPattern REVERSES the operands (VpiReordered) when the
+    // pattern is bound to a descending-range vector parameter, so operand i
+    // is then the i-th member from the LSB end.
+    const any *operand =
+        ops->at(op->VpiReordered() ? members->size() - 1 - m : m);
+    if (operand->UhdmType() == UHDM_OBJECT_TYPE::uhdmtagged_pattern)
+      return nullptr;
+    if (operand->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
+      // A nested struct member written as its own pattern.
+      return reduceStructPatternBitSelect((const operation *)operand, k, inst,
+                                          pexpr, muteError);
+    }
+    expr *red = reduceExpr(operand, invalid, inst, pexpr, muteError);
+    if (invalid || red == nullptr ||
+        red->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
+      return nullptr;
+    const constant *c = (const constant *)red;
+    char bit = '0';
+    const int32_t ctype = c->VpiConstType();
+    if (ctype == vpiIntConst || ctype == vpiDecConst ||
+        ctype == vpiUIntConst) {
+      int64_t v = get_value(invalid, c);
+      if (invalid) return nullptr;
+      bit = (k < 64) ? (((v >> k) & 1) ? '1' : '0') : (v < 0 ? '1' : '0');
+    } else {
+      std::string bin = toBinary(c);
+      if (bin.empty()) return nullptr;
+      if (c->VpiSize() == -1) {
+        // Unbased unsized fill ('0 / '1 / 'x / 'z) covers the whole member.
+        bit = bin[0];
+      } else if (k < bin.size()) {
+        bit = bin[bin.size() - 1 - k];
+      }
+    }
+    constant *res = s.MakeConstant();
+    res->VpiValue(std::string("BIN:") + bit);
+    res->VpiDecompile(std::string("1'b") + bit);
+    res->VpiSize(1);
+    res->VpiConstType(vpiBinaryConst);
+    return res;
+  }
+  return nullptr;
+}
+
 expr *ExprEval::reduceBitSelect(expr *op, uint32_t index_val,
                                 bool &invalidValue, const any *inst,
                                 const any *pexpr, bool muteError) {
@@ -6674,7 +6750,25 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
         } else if (otype == UHDM_OBJECT_TYPE::uhdmoperation) {
           operation *op = (operation *)object;
           int32_t opType = op->VpiOpType();
-          if (opType == vpiAssignmentPatternOp) {
+          // A STRUCT (or union) pattern's operands are its MEMBERS, not its
+          // bits: `P[i]` over `parameter bit [31:0] P = mstatus_t'{...}`
+          // selects bit i of the packed value, which operand i is not
+          // (cv32e40x cs_registers' cv32e40x_csr `RESETVALUE[i]` took the
+          // 11th MEMBER, mpp, for bit 10).  Fold the bit from the member that
+          // holds it, or leave the select unreduced.
+          bool structPattern = false;
+          if (const ref_typespec *sprt = op->Typespec()) {
+            if (const typespec *spts = sprt->Actual_typespec()) {
+              structPattern =
+                  spts->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_typespec ||
+                  spts->UhdmType() == UHDM_OBJECT_TYPE::uhdmunion_typespec;
+            }
+          }
+          if (opType == vpiAssignmentPatternOp && structPattern) {
+            if (constant *b = reduceStructPatternBitSelect(op, index_val, inst,
+                                                           pexpr, muteError))
+              result = b;
+          } else if (opType == vpiAssignmentPatternOp) {
             VectorOfany *ops = op->Operands();
             if (ops && (index_val < ops->size())) {
               result = ops->at(index_val);
