@@ -4193,10 +4193,41 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
     int64_t width = -1;  // -1: unknown (no declared range)
     int64_t lsbOf(int64_t i) const { return ascending ? right - i : i - right; }
   };
-  auto declaredRange = [&](std::string_view name) -> DeclRange {
+  auto declaredRange = [&](std::string_view name, const any *from) -> DeclRange {
     DeclRange dr;
-    if (!getTypespecFunctor || name.empty()) return dr;
-    any *tsobj = getTypespecFunctor(name, inst, pexpr);
+    if (name.empty()) return dr;
+    // A FUNCTION LOCAL (or formal) is declared on the enclosing task_func,
+    // which the typespec functor (module / package scope) does not see:
+    // OpenTitan i3c_timing_pkg's tm_cycles_init keeps an 'n.1' fixed-point
+    // count in `logic [TmCycW-1:-1] cnt` and returns `cnt[TmCycW-1:0]`, the
+    // integer part -- folded here as the raw low bits (1 instead of 0).
+    // Walk the select's parents to the task_func first (`pexpr` is null
+    // while a function body is being evaluated; the select node itself
+    // still hangs off its statement).
+    any *tsobj = nullptr;
+    for (const any *p = from ? from : pexpr; p && !tsobj; p = p->VpiParent()) {
+      const task_func *tf = any_cast<const task_func *>(p);
+      if (!tf) continue;
+      if (tf->Variables()) {
+        for (variables *v : *tf->Variables()) {
+          if (v->VpiName() != name) continue;
+          if (const ref_typespec *rt = v->Typespec()) tsobj = (any *)rt->Actual_typespec();
+          break;
+        }
+      }
+      if (!tsobj && tf->Io_decls()) {
+        for (io_decl *io : *tf->Io_decls()) {
+          if (io->VpiName() != name) continue;
+          if (const ref_typespec *rt = io->Typespec()) tsobj = (any *)rt->Actual_typespec();
+          break;
+        }
+      }
+      break;
+    }
+    if (!tsobj) {
+      if (!getTypespecFunctor) return dr;
+      tsobj = getTypespecFunctor(name, inst, pexpr);
+    }
     if (!tsobj) return dr;
     VectorOfrange *rs = nullptr;
     if (const logic_typespec *lt = any_cast<const logic_typespec *>(tsobj)) {
@@ -6804,7 +6835,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       std::reverse(binary.begin(), binary.end());
       // Map both bounds through the DECLARED range (`p[13:9]` of a
       // `[5:15]` vector is LSB bits 2..6, not 9..13).
-      DeclRange dr = declaredRange(name);
+      DeclRange dr = declaredRange(name, sel);
       if (dr.width > (int64_t)binary.size()) binary.resize(dr.width, '0');
       int64_t pl = dr.lsbOf(l), pr = dr.lsbOf(r);
       int64_t lo = std::min(pl, pr), hi = std::max(pl, pr);
@@ -6851,7 +6882,7 @@ expr *ExprEval::reduceExpr(const any *result, bool &invalidValue,
       // The `-:` start used to be `base - w`, one bit low even on `[N-1:0]`
       // (`r[7 -: 5]` folded bits 6..2), and a range not ending at 0 indexed
       // past the value and folded to an EMPTY constant.
-      DeclRange dr = declaredRange(name);
+      DeclRange dr = declaredRange(name, sel);
       if (dr.width > (int64_t)binary.size()) binary.resize(dr.width, '0');
       int64_t a = (sel->VpiIndexedPartSelectType() == vpiPosIndexed)
                       ? base
