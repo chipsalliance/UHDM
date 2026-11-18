@@ -103,6 +103,14 @@ class Serializer final {
   ErrorHandler GetErrorHandler() { return m_errorHandler; }
 
   IdMap AllObjects() const;
+
+  // Calls `fn` on every live object of exactly `type`, in creation order.
+  // Unlike AllObjects(), this walks only that type's factory and allocates
+  // nothing -- AllObjects() builds a map over EVERY object of the design,
+  // which is gigabytes on a large elaborated design.  `fn` must not create
+  // or erase objects of `type` (that would invalidate the walk).
+  void ForEachObject(UHDM_OBJECT_TYPE type,
+                     const std::function<void(BaseClass*)>& fn) const;
 #endif
 
   const std::vector<vpiHandle> Restore(const std::filesystem::path& filepath);

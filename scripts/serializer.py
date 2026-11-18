@@ -14,6 +14,7 @@ def generate(models):
     factory_stats = []
     factory_get_object = []
     factory_erase_object = []
+    factory_foreach_object = []
 
     save_ids = []
     save_objects = []
@@ -43,6 +44,7 @@ def generate(models):
             factory_function_implementations.append(f'{classname}* Serializer::Make{Classname_}() {{ return Make<{classname}>(&{classname}Maker); }}')
             factory_get_object.append(f'    case UHDM_OBJECT_TYPE::uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.objects_[index];')
             factory_erase_object.append(f'    case UHDM_OBJECT_TYPE::uhdm{classname} /* = {type_map["uhdm" + classname]} */: return {classname}Maker.Erase(static_cast<const {classname}*>(p));')
+            factory_foreach_object.append(f'    case UHDM_OBJECT_TYPE::uhdm{classname} /* = {type_map["uhdm" + classname]} */: for (BaseClass* obj : {classname}Maker.objects_) fn(obj); return;')
 
             save_ids.append(f'  {classname}Maker.MapToIndex(idMap);')
             save_objects.append(f'  adapter.template operator()<{classname}, {Classname}>({classname}Maker, this, idMap, cap_root.initFactory{Classname}({classname}Maker.objects_.size()));')
@@ -176,6 +178,7 @@ def generate(models):
     file_content = file_content.replace('<FACTORY_PURGE>', '\n'.join(sorted(factory_purge)))
     file_content = file_content.replace('<FACTORY_STATS>', '\n'.join(sorted(factory_stats)))
     file_content = file_content.replace('<FACTORY_ERASE_OBJECT>', '\n'.join(sorted(factory_erase_object)))
+    file_content = file_content.replace('<FACTORY_FOREACH_OBJECT>', '\n'.join(sorted(factory_foreach_object)))
     file_utils.set_content_if_changed(config.get_output_source_filepath('Serializer.cpp'), file_content)
 
     # Serializer_save.cpp

@@ -523,6 +523,10 @@ void ElaboratorListener::leavePackage(const package* object, vpiHandle handle) {
         leaveTask_func(obj, nullptr);
         tf->VpiParent((package*)object);
         clone_vec->push_back(tf);
+        // Remember it (keyed by the original and by itself) so instances
+        // that import it can share it -- see sharePackageTaskFuncs().
+        packageTaskFuncClones_[obj] = tf;
+        packageTaskFuncClones_[tf] = tf;
       }
     }
   }
