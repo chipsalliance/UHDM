@@ -305,6 +305,7 @@ if (UHDM_BUILD_TESTS)
     tests/expr_reduce_test.cpp
     tests/full_elab_test.cpp
     tests/garbage_collect_test.cpp
+    tests/share_package_tf_test.cpp
     tests/group_membership_test.cpp
     tests/listener_elab_test.cpp
     tests/module-port_test.cpp

@@ -122,6 +122,15 @@ void Serializer::PrintStats(std::ostream& strm,
   strm << "=== UHDM Object Stats End ===" << std::endl;
 }
 
+void Serializer::ForEachObject(
+    UHDM_OBJECT_TYPE type,
+    const std::function<void(BaseClass*)>& fn) const {
+  switch (type) {
+<FACTORY_FOREACH_OBJECT>
+    default: return;
+  }
+}
+
 bool Serializer::Erase(const BaseClass* p) {
   if (p == nullptr) {
     return true;

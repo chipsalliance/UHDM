@@ -49,6 +49,18 @@ class ElaboratorListener final : public VpiListener {
   void setContext(ElaboratorContext* context) { context_ = context; }
   void uniquifyTypespec(bool uniquify) { uniquifyTypespec_ = uniquify; }
   bool uniquifyTypespec() { return uniquifyTypespec_; }
+  // Point every instance at its package's ONE elaborated copy of an imported
+  // package task/function instead of deep-cloning it into each instance.
+  // A package subroutine binds in package scope only, so the copies are
+  // identical; on OpenTitan top_earlgrey they were 570k clones of 278
+  // functions.  Off by default (keeps the historical model).
+  void sharePackageTaskFuncs(bool share) { sharePackageTaskFuncs_ = share; }
+  bool sharePackageTaskFuncs() const { return sharePackageTaskFuncs_; }
+  // The package-elaborated copy of a package task/function, if any.
+  task_func* packageTaskFuncClone(const task_func* tf) const {
+    auto it = packageTaskFuncClones_.find(tf);
+    return it == packageTaskFuncClones_.end() ? nullptr : it->second;
+  }
   void bindOnly(bool bindOnly) { clone_ = !bindOnly; }
   bool bindOnly() { return !clone_; }
   bool isFunctionCall(std::string_view name, const expr* prefix) const;
@@ -163,6 +175,8 @@ class ElaboratorListener final : public VpiListener {
   bool debug_ = false;
   bool muteErrors_ = false;
   bool uniquifyTypespec_ = true;
+  bool sharePackageTaskFuncs_ = false;
+  std::map<const task_func*, task_func*> packageTaskFuncClones_;
   bool clone_ = true;
   bool ignoreLastInstance_ = false;
   std::vector<std::pair<tf_call*, const class_var*>> scheduledTfCallBinding_;
