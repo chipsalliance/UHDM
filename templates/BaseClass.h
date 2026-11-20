@@ -267,7 +267,8 @@ class FactoryT final {
     return false;
   }
 
-  void EraseIfNotIn(const AnySet &container) {
+  template <typename Container>
+  void EraseIfNotIn(const Container &container) {
     objects_t keepers;
     for (typename objects_t::reference obj : objects_) {
       if (container.find(obj) == container.end()) {
@@ -279,7 +280,8 @@ class FactoryT final {
     keepers.swap(objects_);
   }
 
-  void MapToIndex(std::map<const BaseClass*, uint32_t>& table, uint32_t index = 1) const {
+  template <typename Table>
+  void MapToIndex(Table& table, uint32_t index = 1) const {
     for (typename objects_t::const_reference obj : objects_) {
       table.emplace(obj, index++);
     }

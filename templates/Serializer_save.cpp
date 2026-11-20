@@ -27,6 +27,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#if defined(__GLIBC__)
+#include <malloc.h>  // malloc_trim
+#endif
 
 #if defined(_MSC_VER)
   #include <io.h>
@@ -86,12 +89,26 @@ void Serializer::Save(const std::filesystem::path& filepath) {
 
 void Serializer::Save(const std::string& filepath) {
   if (m_enableGC) GarbageCollect();
+#if defined(__GLIBC__)
+  // Compilation and elaboration leave GBs of freed memory inside the heap
+  // (5 GB of a 9 GB heap on BlackParrot bp_unicore_tile).  The message
+  // below is allocated in large blocks that cannot reuse it, so hand the
+  // free pages back to the OS first: it cuts the resident peak of the
+  // save by the same amount.
+  malloc_trim(0);
+#endif
 
   uint32_t index = 0;
   const std::string file = filepath;
   const int32_t fileid = open(file.c_str(), O_CREAT | O_WRONLY | O_BINARY, S_IRWXU);
 
-  ::capnp::MallocMessageBuilder message;
+  // Grow the message in fixed 128 MB segments.  The default strategy makes
+  // each new segment as large as everything allocated so far, so a large
+  // design can hold up to twice the message size in memory at the end of
+  // the build.  128 MB segments keep the overshoot to one segment, and a
+  // multi-GB model stays far below the 512 segments a reader accepts.
+  ::capnp::MallocMessageBuilder message(
+      16u * 1024u * 1024u, ::capnp::AllocationStrategy::FIXED_SIZE);
   UhdmRoot::Builder cap_root = message.initRoot<UhdmRoot>();
   cap_root.setVersion(kVersion);
   cap_root.setObjectId(m_objId);

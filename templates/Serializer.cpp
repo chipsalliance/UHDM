@@ -47,10 +47,14 @@ void Serializer::GarbageCollect() {
     listener->listenDesign(d);
   }
 
-  const AnySet visited(listener->getVisited().begin(), listener->getVisited().end());
-  delete listener;
+  // Erase against the listener's own visited set.  Copying it into a
+  // second (ordered) set first held both at once: on a design with
+  // tens of millions of objects that is GBs of transient memory.
+  const auto& visited = listener->getVisited();
 
 <FACTORY_GC>
+
+  delete listener;
 }
 
 void DefaultErrorHandler(ErrorType errType, const std::string& errorMsg, const any* object1, const any* object2) {
@@ -76,6 +80,7 @@ vpiHandle Serializer::MakeUhdmHandle(UHDM_OBJECT_TYPE type, const void* object) 
 Serializer::IdMap Serializer::AllObjects() const {
   IdMap idMap;
 <CAPNP_ID>
+  idMap.sort();
   return idMap;
 }
 
