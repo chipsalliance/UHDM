@@ -34,6 +34,7 @@
 #include <filesystem>
 #include <functional>
 #include <iostream>
+#include <algorithm>
 #include <map>
 #include <string>
 #include <string_view>
@@ -84,7 +85,34 @@ class FactoryT;
 
 class Serializer final {
  public:
-  using IdMap = std::map<const BaseClass*, uint32_t>;
+#ifndef SWIG
+  // Object -> index table for Save(): a sorted vector, ~16 bytes per
+  // object where a std::map costs ~64 -- GBs on a design with tens of
+  // millions of objects.  Call sort() after the last emplace(); a pointer
+  // emplaced twice keeps its first index (stable sort + lower_bound).
+  class IdMap {
+   public:
+    using value_type = std::pair<const BaseClass*, uint32_t>;
+    using const_iterator = std::vector<value_type>::const_iterator;
+    void emplace(const BaseClass* p, uint32_t i) { m_entries.emplace_back(p, i); }
+    void sort() {
+      std::stable_sort(m_entries.begin(), m_entries.end(),
+                       [](const value_type& a, const value_type& b) { return a.first < b.first; });
+    }
+    const_iterator find(const BaseClass* p) const {
+      auto it = std::lower_bound(m_entries.cbegin(), m_entries.cend(), p,
+                                 [](const value_type& a, const BaseClass* k) { return a.first < k; });
+      return (it != m_entries.cend() && it->first == p) ? it : m_entries.cend();
+    }
+    const_iterator begin() const { return m_entries.cbegin(); }
+    const_iterator end() const { return m_entries.cend(); }
+    const_iterator cbegin() const { return m_entries.cbegin(); }
+    const_iterator cend() const { return m_entries.cend(); }
+    size_t size() const { return m_entries.size(); }
+   private:
+    std::vector<value_type> m_entries;
+  };
+#endif
   static constexpr uint32_t kBadIndex = static_cast<uint32_t>(-1);
   static const uint32_t kVersion;
 
@@ -106,7 +134,7 @@ class Serializer final {
 
   // Calls `fn` on every live object of exactly `type`, in creation order.
   // Unlike AllObjects(), this walks only that type's factory and allocates
-  // nothing -- AllObjects() builds a map over EVERY object of the design,
+  // nothing -- AllObjects() builds a table over EVERY object of the design,
   // which is gigabytes on a large elaborated design.  `fn` must not create
   // or erase objects of `type` (that would invalidate the walk).
   void ForEachObject(UHDM_OBJECT_TYPE type,
