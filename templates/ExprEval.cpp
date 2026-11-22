@@ -1542,11 +1542,25 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
     }
     case UHDM_OBJECT_TYPE::uhdmarray_var: {
       const array_var *var = (array_var *)ts;
-      variables *regv = var->Variables()->at(0);
-      if (const ref_typespec *rt = regv->Typespec()) {
-        bits += size(rt->Actual_typespec(), invalidValue, inst, pexpr, full);
+      const VectorOfvariables *vars = var->Variables();
+      if (vars && !vars->empty()) {
+        variables *regv = vars->at(0);
+        if (const ref_typespec *rt = regv->Typespec()) {
+          bits += size(rt->Actual_typespec(), invalidValue, inst, pexpr, full);
+        }
+        ranges = var->Ranges();
+      } else if (const ref_typespec *rt = var->Typespec()) {
+        // No element variables: an array variable declared through an
+        // UNPACKED-ARRAY TYPEDEF (`typedef logic [7:0] T[1:0]; T y;`) carries
+        // only its array_typespec, and Variables() is null.  It was
+        // dereferenced unconditionally and crashed $bits / $size of such a
+        // variable (ivtest sv_typedef_scope2, sv_typedef_nested_array,
+        // module_port_typedef_array1, sv_darray_function).  The typespec holds
+        // the element type and the ranges, so size it from there.
+        bits = size(rt->Actual_typespec(), invalidValue, inst, pexpr, full);
+      } else {
+        invalidValue = true;
       }
-      ranges = var->Ranges();
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmstruct_net: {
