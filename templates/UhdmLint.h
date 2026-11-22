@@ -59,6 +59,15 @@ class UhdmLint final : public VpiListener {
 
   void leavePort(const port* object, vpiHandle handle) override;
 
+  void leavePart_select(const part_select* object, vpiHandle handle) override;
+
+  void leaveRange(const range* object, vpiHandle handle) override;
+
+  void leaveParam_assign(const param_assign* object,
+                         vpiHandle handle) override;
+
+  void checkConstantExpr(const any* expr, bool netsOnly);
+
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 
   Serializer* serializer_ = nullptr;

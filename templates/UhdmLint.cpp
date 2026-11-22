@@ -390,4 +390,74 @@ void UhdmLint::leavePort(const port* object, vpiHandle handle) {
   }
 }
 
+// A constant expression (LRM 11.2.1) -- a declaration range, a part-select
+// bound, a parameter value -- may not read a net, and a parameter may not
+// read a variable either: `wire [N:0] a;` / `In[7:N]` with `input [2:0] N`,
+// `parameter P = some_integer;`.  Reported on the first offending
+// reference.  A net Surelog FABRICATED for a name it could not resolve (no
+// typespec of its own) is not a declared net and is left alone.
+static const any* nonConstantRef(const any* e, bool netsOnly) {
+  if (e == nullptr) return nullptr;
+  switch (e->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmref_obj: {
+      const any* actual = ((const ref_obj*)e)->Actual_group();
+      if (actual == nullptr) return nullptr;
+      switch (actual->UhdmType()) {
+        case UHDM_OBJECT_TYPE::uhdmlogic_net: {
+          // A `reg` is a VARIABLE (a logic_net of type vpiReg): a loop index
+          // in `a[i+1:i]` is technically illegal too, but common in older
+          // RTL and accepted by other tools -- like any other variable it is
+          // only reported in a parameter value.
+          const logic_net* n = (const logic_net*)actual;
+          if (n->Typespec() == nullptr) return nullptr;
+          if (n->VpiNetType() == vpiReg) return netsOnly ? nullptr : e;
+          return e;
+        }
+        case UHDM_OBJECT_TYPE::uhdmlogic_var:
+        case UHDM_OBJECT_TYPE::uhdmint_var:
+        case UHDM_OBJECT_TYPE::uhdminteger_var:
+        case UHDM_OBJECT_TYPE::uhdmbit_var:
+        case UHDM_OBJECT_TYPE::uhdmbyte_var:
+        case UHDM_OBJECT_TYPE::uhdmlong_int_var:
+        case UHDM_OBJECT_TYPE::uhdmshort_int_var:
+          return netsOnly ? nullptr : e;
+        default:
+          return nullptr;
+      }
+    }
+    case UHDM_OBJECT_TYPE::uhdmoperation: {
+      const operation* op = (const operation*)e;
+      if (op->Operands())
+        for (auto o : *op->Operands())
+          if (const any* r = nonConstantRef(o, netsOnly)) return r;
+      return nullptr;
+    }
+    default:
+      return nullptr;
+  }
+}
+
+void UhdmLint::checkConstantExpr(const any* expr, bool netsOnly) {
+  if (const any* r = nonConstantRef(expr, netsOnly)) {
+    const std::string errMsg(r->VpiName());
+    serializer_->GetErrorHandler()(ErrorType::UHDM_NON_CONSTANT_EXPRESSION,
+                                   errMsg, r, nullptr);
+  }
+}
+
+void UhdmLint::leavePart_select(const part_select* object, vpiHandle handle) {
+  checkConstantExpr(object->Left_range(), true);
+  checkConstantExpr(object->Right_range(), true);
+}
+
+void UhdmLint::leaveRange(const range* object, vpiHandle handle) {
+  checkConstantExpr(object->Left_expr(), true);
+  checkConstantExpr(object->Right_expr(), true);
+}
+
+void UhdmLint::leaveParam_assign(const param_assign* object,
+                                 vpiHandle handle) {
+  checkConstantExpr(object->Rhs(), false);
+}
+
 }  // namespace UHDM
