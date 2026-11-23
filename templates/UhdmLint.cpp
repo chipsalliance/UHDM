@@ -218,6 +218,61 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
     baseType = rt->Actual_typespec<typespec>();
   }
   if (!baseType) return;
+  // The base of an enum is an integer atom type, or an integer vector type
+  // with at most ONE packed dimension (LRM 6.19): not an unpacked array,
+  // queue, another enum, a struct, real or string, and no range on an atom.
+  {
+    bool invalidBase = false;
+    switch (baseType->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmint_typespec:
+      case UHDM_OBJECT_TYPE::uhdminteger_typespec:
+      case UHDM_OBJECT_TYPE::uhdmbyte_typespec:
+      case UHDM_OBJECT_TYPE::uhdmshort_int_typespec:
+      case UHDM_OBJECT_TYPE::uhdmlong_int_typespec:
+      case UHDM_OBJECT_TYPE::uhdmtime_typespec:
+        break;
+      case UHDM_OBJECT_TYPE::uhdmlogic_typespec: {
+        // Packed dimensions: its own ranges plus those of an element type
+        // (`typedef T2 [3:0] T` over a vector T2 is two dimensions).
+        size_t dims = 0;
+        for (const logic_typespec* lt = (const logic_typespec*)baseType; lt;) {
+          dims += lt->Ranges() ? lt->Ranges()->size() : 0;
+          const typespec* elem =
+              lt->Elem_typespec() ? lt->Elem_typespec()->Actual_typespec()
+                                  : nullptr;
+          lt = elem && elem->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec
+                   ? (const logic_typespec*)elem
+                   : nullptr;
+        }
+        if (dims > 1) invalidBase = true;
+        break;
+      }
+      case UHDM_OBJECT_TYPE::uhdmbit_typespec: {
+        const bit_typespec* bt = (const bit_typespec*)baseType;
+        if (bt->Ranges() && bt->Ranges()->size() > 1) invalidBase = true;
+        break;
+      }
+      case UHDM_OBJECT_TYPE::uhdmarray_typespec:
+      case UHDM_OBJECT_TYPE::uhdmenum_typespec:
+      case UHDM_OBJECT_TYPE::uhdmstruct_typespec:
+      case UHDM_OBJECT_TYPE::uhdmunion_typespec:
+      case UHDM_OBJECT_TYPE::uhdmreal_typespec:
+      case UHDM_OBJECT_TYPE::uhdmshort_real_typespec:
+      case UHDM_OBJECT_TYPE::uhdmstring_typespec:
+      case UHDM_OBJECT_TYPE::uhdmchandle_typespec:
+      case UHDM_OBJECT_TYPE::uhdmclass_typespec:
+        invalidBase = true;
+        break;
+      default:
+        break;
+    }
+    if (invalidBase) {
+      const std::string errMsg(baseType->VpiName());
+      serializer_->GetErrorHandler()(ErrorType::UHDM_INVALID_ENUM_BASE_TYPE,
+                                     errMsg, object, baseType);
+      return;
+    }
+  }
   static std::regex r("^[0-9]*'");
   ExprEval eval;
   eval.setDesign(design_);
