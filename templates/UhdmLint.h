@@ -47,6 +47,11 @@ class UhdmLint final : public VpiListener {
 
   void leaveAssignment(const assignment* object, vpiHandle handle) override;
 
+  void leaveCont_assign(const cont_assign* object, vpiHandle handle) override;
+
+  void checkUnpackedArrayAssign(const any* lhs, const any* rhs,
+                                const any* where);
+
   void leaveLogic_net(const logic_net* object, vpiHandle handle) override;
 
   void leaveEnum_typespec(const enum_typespec* object,
