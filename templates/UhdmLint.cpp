@@ -167,7 +167,132 @@ void UhdmLint::checkMultiContAssign(
   }
 }
 
+// The static unpacked array an expression names as a WHOLE, or nullptr:
+// Surelog binds a whole-array reference either to the array_net/array_var
+// or to its element net/variable, whose parent is the array.
+static const any* wholeUnpackedArray(const any* actual) {
+  if (actual == nullptr) return nullptr;
+  if (actual->UhdmType() != UHDM_OBJECT_TYPE::uhdmarray_net &&
+      actual->UhdmType() != UHDM_OBJECT_TYPE::uhdmarray_var) {
+    const any* p = actual->VpiParent();
+    if (p && (p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net ||
+              p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var))
+      actual = p;
+    else
+      return nullptr;
+  }
+  if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var) {
+    const array_var* av = (const array_var*)actual;
+    if (av->VpiArrayType() != vpiStaticArray && av->VpiArrayType() != 0)
+      return nullptr;  // dynamic / associative / queue: no fixed shape
+  }
+  return actual;
+}
+
+// Element count and element width of a 1-D static unpacked array, when both
+// are known constants.
+static bool unpackedShape(const any* arr, Serializer* s, design* d,
+                          uint64_t& count, uint64_t& width) {
+  const VectorOfrange* ranges = nullptr;
+  const any* elem = nullptr;
+  if (arr->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net) {
+    const array_net* an = (const array_net*)arr;
+    ranges = an->Ranges();
+    if (an->Nets() && !an->Nets()->empty()) elem = an->Nets()->at(0);
+  } else {
+    const array_var* av = (const array_var*)arr;
+    ranges = av->Ranges();
+    if (av->Variables() && !av->Variables()->empty())
+      elem = av->Variables()->at(0);
+  }
+  if (ranges == nullptr || ranges->size() != 1 || elem == nullptr) return false;
+  ExprEval eval;
+  eval.setDesign(d);
+  bool invalid = false;
+  const range* r = ranges->at(0);
+  if (!r->Left_expr() || !r->Right_expr()) return false;
+  if (r->Left_expr()->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant ||
+      r->Right_expr()->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
+    return false;
+  const int64_t l = eval.get_value(invalid, (const expr*)r->Left_expr());
+  const int64_t rr = eval.get_value(invalid, (const expr*)r->Right_expr());
+  if (invalid) return false;
+  count = (l > rr ? l - rr : rr - l) + 1;
+  width = eval.size(elem, invalid, nullptr, nullptr, true);
+  return !invalid && width > 0;
+}
+
+// Assigning a whole unpacked array (LRM 7.6): the right-hand side must be an
+// unpacked array of the same shape, or an assignment pattern / unpacked
+// array concatenation.  `assign x = y;` with y a vector, an element, an
+// expression or an array of another element width or count was accepted.
+void UhdmLint::checkUnpackedArrayAssign(const any* lhs, const any* rhs,
+                                        const any* where) {
+  // A WHOLE-array target only: bit_select / var_select derive from ref_obj
+  // and must not match (`mem[sp] <= d` is an element write).
+  if (lhs == nullptr || rhs == nullptr ||
+      lhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj)
+    return;
+  const ref_obj* lref = (const ref_obj*)lhs;
+  const any* larr = wholeUnpackedArray(lref->Actual_group());
+  if (larr == nullptr) return;
+  uint64_t lcount = 0, lwidth = 0;
+  if (!unpackedShape(larr, serializer_, design_, lcount, lwidth)) return;
+  bool bad = false;
+  switch (rhs->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmconstant:
+      bad = true;
+      break;
+    case UHDM_OBJECT_TYPE::uhdmoperation: {
+      const int op = ((const operation*)rhs)->VpiOpType();
+      // Patterns, concatenations, conditionals and casts may legally build
+      // an unpacked array; any other operator yields a single value.
+      if (op != vpiAssignmentPatternOp && op != vpiMultiAssignmentPatternOp &&
+          op != vpiConcatOp && op != vpiMultiConcatOp && op != vpiConditionOp &&
+          op != vpiCastOp)
+        bad = true;
+      break;
+    }
+    case UHDM_OBJECT_TYPE::uhdmref_obj: {
+      const any* actual = ((const ref_obj*)rhs)->Actual_group();
+      if (actual == nullptr) break;
+      const any* rarr = wholeUnpackedArray(actual);
+      if (rarr == nullptr) {
+        // A net or variable that is not an array: a scalar or a vector.
+        switch (actual->UhdmType()) {
+          case UHDM_OBJECT_TYPE::uhdmlogic_net:
+          case UHDM_OBJECT_TYPE::uhdmlogic_var:
+          case UHDM_OBJECT_TYPE::uhdmbit_var:
+          case UHDM_OBJECT_TYPE::uhdmint_var:
+          case UHDM_OBJECT_TYPE::uhdminteger_var:
+            bad = true;
+            break;
+          default:
+            break;
+        }
+        break;
+      }
+      uint64_t rcount = 0, rwidth = 0;
+      if (unpackedShape(rarr, serializer_, design_, rcount, rwidth))
+        bad = (rcount != lcount) || (rwidth != lwidth);
+      break;
+    }
+    default:
+      break;
+  }
+  if (bad) {
+    const std::string errMsg(lref->VpiName());
+    serializer_->GetErrorHandler()(
+        ErrorType::UHDM_ILLEGAL_UNPACKED_ARRAY_ASSIGN, errMsg, where, nullptr);
+  }
+}
+
+void UhdmLint::leaveCont_assign(const cont_assign* object, vpiHandle handle) {
+  checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
+}
+
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
+  checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
   if (isInUhdmAllIterator()) return;
   if (!design_->VpiElaborated()) return;  // -uhdmelab
   if (const ref_obj* lhs = object->Lhs<ref_obj>()) {
