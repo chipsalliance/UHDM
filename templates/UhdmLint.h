@@ -68,6 +68,14 @@ class UhdmLint final : public VpiListener {
 
   void leaveRange(const range* object, vpiHandle handle) override;
 
+  void leaveIndexed_part_select(const indexed_part_select* object,
+                                vpiHandle handle) override;
+
+  void leaveOperation(const operation* object, vpiHandle handle) override;
+
+  void checkNonPositive(const any* ex, const any* where, int64_t offset,
+                        bool allowZero);
+
   void leaveParam_assign(const param_assign* object,
                          vpiHandle handle) override;
 

@@ -640,4 +640,122 @@ void UhdmLint::leaveParam_assign(const param_assign* object,
   checkConstantExpr(object->Rhs(), false);
 }
 
+// `ex` itself when it is a constant; the value of a module parameter it names,
+// read from the enclosing ELABORATED instance's param_assign (an unelaborated
+// definition's defaults are not what any instance uses, so nothing is
+// returned there); nullptr otherwise.
+static const any* elaboratedParamValue(const any* ex, const any* where) {
+  if (ex == nullptr) return nullptr;
+  if (ex->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) return ex;
+  if (ex->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) return nullptr;
+  const any* actual = ((const ref_obj*)ex)->Actual_group();
+  if (actual == nullptr ||
+      actual->UhdmType() != UHDM_OBJECT_TYPE::uhdmparameter)
+    return nullptr;
+  const std::string_view name = ((const ref_obj*)ex)->VpiName();
+  for (const any* p = where ? where->VpiParent() : nullptr; p;
+       p = p->VpiParent()) {
+    if (p->UhdmType() != UHDM_OBJECT_TYPE::uhdmmodule_inst) continue;
+    const module_inst* mi = (const module_inst*)p;
+    const any* up = mi->VpiParent();
+    const bool elaborated =
+        mi->VpiTop() ||
+        (up && up->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst);
+    if (!elaborated) return nullptr;
+    if (const auto pas = mi->Param_assigns()) {
+      for (const param_assign* pa : *pas) {
+        if (pa->Lhs() && pa->Lhs()->VpiName() == name && pa->Rhs() &&
+            pa->Rhs()->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant)
+          return pa->Rhs();
+      }
+    }
+    return nullptr;
+  }
+  return nullptr;
+}
+
+// A size that must be positive (LRM 11.5.1 indexed part-select width,
+// 11.4.12.1 replication count, 6.24.1 size cast).  `ex + offset` is the size;
+// only a CONSTANT is checked: an unelaborated definition keeps `{(W-1){..}}`
+// unfolded, and its parameter defaults are not the values an instance uses --
+// the elaborated copy carries the folded value.
+void UhdmLint::checkNonPositive(const any* ex, const any* where, int64_t offset,
+                                bool allowZero) {
+  if (ex == nullptr) return;
+  ExprEval eval;
+  eval.setDesign(design_);
+  bool invalid = false;
+  const any* reduced = ex;
+  if (invalid || reduced == nullptr ||
+      reduced->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
+    return;
+  const constant* c = (const constant*)reduced;
+  // A fill literal ('0, '1, 'x, 'z) or an x/z value is not a size.
+  if (c->VpiSize() < 0) return;
+  std::string_view v = c->VpiValue();
+  if (v.find_first_of("xXzZ?") != std::string_view::npos) return;
+  const int64_t val = eval.get_value(invalid, (const expr*)reduced);
+  if (invalid) return;
+  const int64_t size = val + offset;
+  if (size < 0 || (size == 0 && !allowZero)) {
+    serializer_->GetErrorHandler()(ErrorType::UHDM_NON_POSITIVE_VALUE,
+                                   std::to_string(size), where, nullptr);
+  }
+}
+
+void UhdmLint::leaveIndexed_part_select(const indexed_part_select* object,
+                                        vpiHandle handle) {
+  checkNonPositive(elaboratedParamValue(object->Width_expr(), object), object,
+                   0, false);
+}
+
+void UhdmLint::leaveOperation(const operation* object, vpiHandle handle) {
+  const VectorOfany* ops = object->Operands();
+  if (ops == nullptr || ops->empty()) return;
+  switch (object->VpiOpType()) {
+    case vpiMultiConcatOp:
+      // A zero count is legal inside a larger concatenation; a negative one
+      // never is.
+      checkNonPositive(ops->at(0), object, 0, true);
+      break;
+    case vpiCastOp: {
+      // A SIZE cast `N'(x)` is compiled as a cast to an anonymous
+      // logic_typespec [N-1:0].
+      const ref_typespec* rt = object->Typespec();
+      if (rt == nullptr) break;
+      const typespec* ts = rt->Actual_typespec();
+      if (ts == nullptr ||
+          ts->UhdmType() != UHDM_OBJECT_TYPE::uhdmlogic_typespec ||
+          !ts->VpiName().empty())
+        break;
+      const VectorOfrange* ranges = ((const logic_typespec*)ts)->Ranges();
+      if (ranges == nullptr || ranges->size() != 1) break;
+      const range* r = ranges->at(0);
+      const any* l = r->Left_expr();
+      const any* rr = r->Right_expr();
+      if (l == nullptr || rr == nullptr ||
+          l->UhdmType() != UHDM_OBJECT_TYPE::uhdmoperation ||
+          rr->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
+        break;
+      const operation* sub = (const operation*)l;
+      if (sub->VpiOpType() != vpiSubOp || sub->Operands() == nullptr ||
+          sub->Operands()->size() != 2)
+        break;
+      const any* one = sub->Operands()->at(1);
+      if (one->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant ||
+          ((const constant*)one)->VpiValue() != "UINT:1" ||
+          ((const constant*)rr)->VpiValue() != "UINT:0")
+        break;
+      // The typespec is shared by every instance and its `N` names the
+      // DEFINITION's parameter.
+      const any* width = elaboratedParamValue(sub->Operands()->at(0), object);
+      if (width == nullptr) break;
+      checkNonPositive(width, object, 0, false);
+      break;
+    }
+    default:
+      break;
+  }
+}
+
 }  // namespace UHDM
