@@ -181,6 +181,9 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_UNDEFINED_TASK_FUNC:
             errmsg = "Undefined task or function";
             break;
+          case UHDM::UHDM_ENUM_ASSIGN_INCOMPATIBLE:
+            errmsg = "Value of another type assigned to an enum";
+            break;
           case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
             errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
             break;

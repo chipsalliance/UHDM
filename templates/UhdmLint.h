@@ -92,6 +92,15 @@ class UhdmLint final : public VpiListener {
 
   void leaveDesign(const design* object, vpiHandle handle) override;
 
+  void leaveReturn_stmt(const return_stmt* object, vpiHandle handle) override;
+
+  // LRM 6.19.3: a value assigned to an enum must be of that enum type.
+  void checkEnumAssign(const any* lhs, const any* rhs, const any* where,
+                       bool compound);
+  void checkEnumValue(const enum_typespec* target, const any* rhs,
+                      const any* where);
+  void checkEnumCallArgs(const tf_call* call, const task_func* tf);
+
   void leaveAny(const any* object, vpiHandle handle) override;
 
   void noteImplicitNetRef(const ref_obj* ref);
@@ -118,6 +127,7 @@ class UhdmLint final : public VpiListener {
   std::map<std::string, ImplicitNetUse> implicitNets_;
   std::vector<std::string> implicitNetOrder_;
   std::set<std::tuple<std::string, uint32_t, uint16_t>> reportedCalls_;
+  std::set<std::tuple<std::string, uint32_t, uint16_t>> reportedEnumAssigns_;
   // Every name the design DECLARES somewhere.  Surelog also fabricates a net
   // for a declared name it fails to bind (a block-local localparam, a $unit
   // parameter, a property formal); only a name declared nowhere is reported.

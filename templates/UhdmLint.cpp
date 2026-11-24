@@ -290,10 +290,16 @@ void UhdmLint::checkUnpackedArrayAssign(const any* lhs, const any* rhs,
 
 void UhdmLint::leaveCont_assign(const cont_assign* object, vpiHandle handle) {
   checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
+  checkEnumAssign(object->Lhs(), object->Rhs(), object, false);
 }
 
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
   checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
+  {
+    const int op = object->VpiOpType();
+    checkEnumAssign(object->Lhs(), object->Rhs(), object,
+                    op != 0 && op != vpiAssignmentOp);
+  }
   if (isInUhdmAllIterator()) return;
   if (!design_->VpiElaborated()) return;  // -uhdmelab
   if (const ref_obj* lhs = object->Lhs<ref_obj>()) {
@@ -862,6 +868,258 @@ void UhdmLint::leaveVar_select(const var_select* object, vpiHandle handle) {
   noteImplicitNetRef(object);
 }
 
+// ---------------------------------------------------------------------------
+// Enum assignment compatibility (LRM 6.19.3): an enum variable may only be
+// assigned an enum constant or a value of its own enum type; an integer, an
+// expression or another enum type needs an explicit cast.
+
+namespace {
+enum class ValKind { Unknown, Enum, Other };
+struct ValType {
+  ValKind kind = ValKind::Unknown;
+  const enum_typespec* ets = nullptr;
+};
+}  // namespace
+
+static const typespec* declTypespec(const any* o) {
+  if (o == nullptr) return nullptr;
+  const ref_typespec* rt = nullptr;
+  if (const expr* e = any_cast<const expr*>(o)) {
+    rt = e->Typespec();
+  } else if (const io_decl* d = any_cast<const io_decl*>(o)) {
+    rt = d->Typespec();
+  } else if (const typespec_member* m = any_cast<const typespec_member*>(o)) {
+    rt = m->Typespec();
+  }
+  return rt ? rt->Actual_typespec() : nullptr;
+}
+
+// `s.f`: the member the last path element resolves to.
+static const any* hierPathLeaf(const hier_path* hp) {
+  if (hp->Path_elems() == nullptr || hp->Path_elems()->empty()) return nullptr;
+  const any* last = hp->Path_elems()->back();
+  if (last->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) return nullptr;
+  const any* actual = ((const ref_obj*)last)->Actual_group();
+  if (actual && actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmtypespec_member)
+    return actual;
+  return nullptr;
+}
+
+static ValType typeOfTypespec(const typespec* ts) {
+  if (ts == nullptr) return {};
+  switch (ts->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmenum_typespec:
+      return {ValKind::Enum, (const enum_typespec*)ts};
+    case UHDM_OBJECT_TYPE::uhdmlogic_typespec:
+    case UHDM_OBJECT_TYPE::uhdmbit_typespec:
+    case UHDM_OBJECT_TYPE::uhdmint_typespec:
+    case UHDM_OBJECT_TYPE::uhdminteger_typespec:
+    case UHDM_OBJECT_TYPE::uhdmbyte_typespec:
+    case UHDM_OBJECT_TYPE::uhdmshort_int_typespec:
+    case UHDM_OBJECT_TYPE::uhdmlong_int_typespec:
+      return {ValKind::Other, nullptr};
+    default:
+      return {};
+  }
+}
+
+// The type of an element of the array `actual` is declared over.
+static ValType elementType(const any* actual) {
+  const typespec* ts = declTypespec(actual);
+  if (ts && ts->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_typespec) {
+    if (const ref_typespec* et = ((const array_typespec*)ts)->Elem_typespec())
+      if (et->Actual_typespec()) return typeOfTypespec(et->Actual_typespec());
+  }
+  // Surelog often leaves the array typespec bare and types the elements.
+  if (actual == nullptr) return {};
+  if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var) {
+    const array_var* av = (const array_var*)actual;
+    if (av->Variables() && !av->Variables()->empty())
+      return typeOfTypespec(declTypespec(av->Variables()->at(0)));
+  } else if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net) {
+    const array_net* an = (const array_net*)actual;
+    if (an->Nets() && !an->Nets()->empty())
+      return typeOfTypespec(declTypespec(an->Nets()->at(0)));
+  }
+  return {};
+}
+
+// The type of the object a write lands in (only shapes known exactly).
+static ValType targetType(const any* lhs) {
+  if (lhs == nullptr) return {};
+  switch (lhs->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmref_obj:
+      return typeOfTypespec(
+          declTypespec(((const ref_obj*)lhs)->Actual_group()));
+    case UHDM_OBJECT_TYPE::uhdmbit_select:
+      return elementType(((const bit_select*)lhs)->Actual_group());
+    case UHDM_OBJECT_TYPE::uhdmhier_path:
+      return typeOfTypespec(declTypespec(hierPathLeaf((const hier_path*)lhs)));
+    default:
+      return {};
+  }
+}
+
+// The type of a value.  Unknown whenever it cannot be told for sure.
+static ValType valueType(const any* rhs) {
+  if (rhs == nullptr) return {};
+  switch (rhs->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmconstant: {
+      const constant* c = (const constant*)rhs;
+      if (const ref_typespec* rt = c->Typespec()) {
+        if (rt->Actual_typespec()) return typeOfTypespec(rt->Actual_typespec());
+      }
+      // Surelog folds a NAMED constant (`pkg::IDLE`, a parameter) into a bare
+      // constant too.  Only a constant whose source span is exactly its own
+      // text was written as a literal.
+      const std::string_view text = c->VpiDecompile();
+      if (!text.empty() && c->VpiLineNo() == c->VpiEndLineNo() &&
+          c->VpiEndColumnNo() > c->VpiColumnNo() &&
+          c->VpiEndColumnNo() - c->VpiColumnNo() == text.size())
+        return {ValKind::Other, nullptr};
+      return {};
+    }
+    case UHDM_OBJECT_TYPE::uhdmref_obj: {
+      const any* actual = ((const ref_obj*)rhs)->Actual_group();
+      if (actual == nullptr) return {};
+      if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_const) {
+        const any* p = actual->VpiParent();
+        if (p && p->UhdmType() == UHDM_OBJECT_TYPE::uhdmenum_typespec)
+          return {ValKind::Enum, (const enum_typespec*)p};
+        return {};
+      }
+      return typeOfTypespec(declTypespec(actual));
+    }
+    case UHDM_OBJECT_TYPE::uhdmbit_select:
+      return elementType(((const bit_select*)rhs)->Actual_group());
+    case UHDM_OBJECT_TYPE::uhdmhier_path:
+      return typeOfTypespec(declTypespec(hierPathLeaf((const hier_path*)rhs)));
+    case UHDM_OBJECT_TYPE::uhdmfunc_call: {
+      const function* f = ((const func_call*)rhs)->Function();
+      if (f == nullptr || f->Return() == nullptr) return {};
+      return typeOfTypespec(declTypespec(f->Return()));
+    }
+    case UHDM_OBJECT_TYPE::uhdmoperation: {
+      const operation* op = (const operation*)rhs;
+      const int t = op->VpiOpType();
+      if (t == vpiCastOp) {
+        if (const ref_typespec* rt = op->Typespec())
+          return typeOfTypespec(rt->Actual_typespec());
+        return {};
+      }
+      // Arithmetic, bitwise, logical, relational, shift and concatenation
+      // operators all yield a plain integral value (LRM 6.19.4).
+      if ((t >= vpiMinusOp && t <= vpiBitXNorOp) || t == vpiConcatOp ||
+          t == vpiMultiConcatOp || t == vpiArithLShiftOp ||
+          t == vpiArithRShiftOp || t == vpiPowerOp)
+        return {ValKind::Other, nullptr};
+      return {};
+    }
+    default:
+      return {};
+  }
+}
+
+// Two enum typespecs are the same type when they are the same declaration.
+// Surelog clones a typespec per instance and per package import, and a
+// typedef alias gets its own name and location, so compare the member lists:
+// identical constants in the same order.  (Two distinct enums declared with
+// identical members then compare equal -- a missed error, never a false one.)
+static bool sameEnum(const enum_typespec* a, const enum_typespec* b) {
+  if (a == b) return true;
+  const auto* ca = a->Enum_consts();
+  const auto* cb = b->Enum_consts();
+  if (ca == nullptr || cb == nullptr || ca->size() != cb->size()) return false;
+  for (size_t i = 0; i < ca->size(); ++i) {
+    if (ca->at(i)->VpiName() != cb->at(i)->VpiName()) return false;
+  }
+  return true;
+}
+
+void UhdmLint::checkEnumValue(const enum_typespec* target, const any* rhs,
+                              const any* where) {
+  if (rhs == nullptr) return;
+  // `c ? A : B`: each arm on its own.
+  if (rhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation) {
+    const operation* op = (const operation*)rhs;
+    if (op->VpiOpType() == vpiConditionOp && op->Operands() &&
+        op->Operands()->size() == 3) {
+      checkEnumValue(target, op->Operands()->at(1), where);
+      checkEnumValue(target, op->Operands()->at(2), where);
+      return;
+    }
+  }
+  const ValType v = valueType(rhs);
+  if (v.kind == ValKind::Unknown) return;
+  if (v.kind == ValKind::Enum && sameEnum(target, v.ets)) return;
+  // A constant NAMED like a member of the target: Surelog can bind a
+  // generate-block enum constant to a same-named one of the parent.
+  if (v.kind == ValKind::Enum &&
+      rhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj &&
+      target->Enum_consts()) {
+    const std::string_view name = ((const ref_obj*)rhs)->VpiName();
+    for (const enum_const* c : *target->Enum_consts())
+      if (c->VpiName() == name) return;
+  }
+  if (inClass(where)) return;
+  if (!reportedEnumAssigns_
+           .emplace(std::string(rhs->VpiFile()), rhs->VpiLineNo(),
+                    rhs->VpiColumnNo())
+           .second)
+    return;
+  const std::string errMsg(target->VpiName().empty() ? "<anonymous>"
+                                                     : target->VpiName());
+  serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_ASSIGN_INCOMPATIBLE,
+                                 errMsg, rhs, nullptr);
+}
+
+void UhdmLint::checkEnumAssign(const any* lhs, const any* rhs, const any* where,
+                               bool compound) {
+  const ValType t = targetType(lhs);
+  if (t.kind != ValKind::Enum) return;
+  // `e += 1` is `e = e + 1`: an integral value (LRM 6.19.4).
+  if (compound) {
+    if (inClass(where)) return;
+    if (!reportedEnumAssigns_
+             .emplace(std::string(where->VpiFile()), where->VpiLineNo(),
+                      where->VpiColumnNo())
+             .second)
+      return;
+    serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_ASSIGN_INCOMPATIBLE,
+                                   std::string(t.ets->VpiName()), where,
+                                   nullptr);
+    return;
+  }
+  checkEnumValue(t.ets, rhs, where);
+}
+
+void UhdmLint::checkEnumCallArgs(const tf_call* call, const task_func* tf) {
+  if (tf == nullptr || call->Tf_call_args() == nullptr ||
+      tf->Io_decls() == nullptr)
+    return;
+  const auto& args = *call->Tf_call_args();
+  const auto& ios = *tf->Io_decls();
+  // Positional arguments only: a named or defaulted one does not line up.
+  if (args.size() > ios.size()) return;
+  for (size_t i = 0; i < args.size(); ++i) {
+    if (ios[i]->VpiDirection() != vpiInput) continue;
+    const ValType t = typeOfTypespec(declTypespec(ios[i]));
+    if (t.kind == ValKind::Enum) checkEnumValue(t.ets, args[i], call);
+  }
+}
+
+void UhdmLint::leaveReturn_stmt(const return_stmt* object, vpiHandle handle) {
+  const any* p = object->VpiParent();
+  while (p && p->UhdmType() != UHDM_OBJECT_TYPE::uhdmfunction)
+    p = p->VpiParent();
+  if (p == nullptr) return;
+  const function* f = (const function*)p;
+  if (f->Return() == nullptr) return;
+  const ValType t = typeOfTypespec(declTypespec(f->Return()));
+  if (t.kind == ValKind::Enum)
+    checkEnumValue(t.ets, object->VpiCondition(), object);
+}
+
 void UhdmLint::reportUndefinedTaskFunc(const tf_call* call, bool bound) {
   if (bound) return;
   const std::string_view name = call->VpiName();
@@ -891,10 +1149,12 @@ void UhdmLint::reportUndefinedTaskFunc(const tf_call* call, bool bound) {
 
 void UhdmLint::leaveFunc_call(const func_call* object, vpiHandle handle) {
   reportUndefinedTaskFunc(object, object->Function() != nullptr);
+  checkEnumCallArgs(object, object->Function());
 }
 
 void UhdmLint::leaveTask_call(const task_call* object, vpiHandle handle) {
   reportUndefinedTaskFunc(object, object->Task() != nullptr);
+  checkEnumCallArgs(object, object->Task());
 }
 
 void UhdmLint::leaveAny(const any* object, vpiHandle handle) {
