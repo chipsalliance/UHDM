@@ -184,6 +184,12 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_ENUM_ASSIGN_INCOMPATIBLE:
             errmsg = "Value of another type assigned to an enum";
             break;
+          case UHDM::UHDM_UNKNOWN_BITS_VALUE:
+            errmsg = "Value with unknown (x/z) bits used as a size or bound";
+            break;
+          case UHDM::UHDM_TF_ARG_COUNT:
+            errmsg = "Wrong number of arguments";
+            break;
           case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
             errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
             break;

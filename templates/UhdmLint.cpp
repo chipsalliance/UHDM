@@ -704,9 +704,15 @@ void UhdmLint::checkContAssignLhsSelects(const any* lhs) {
   }
 }
 
+static const any* elaboratedParamValue(const any* ex, const any* where);
+
 void UhdmLint::leaveRange(const range* object, vpiHandle handle) {
   checkConstantExpr(object->Left_expr(), true);
   checkConstantExpr(object->Right_expr(), true);
+  if (!checkUnknownBits(elaboratedParamValue(object->Left_expr(), object),
+                        object))
+    checkUnknownBits(elaboratedParamValue(object->Right_expr(), object),
+                     object);
 }
 
 void UhdmLint::leaveParam_assign(const param_assign* object,
@@ -764,10 +770,9 @@ void UhdmLint::checkNonPositive(const any* ex, const any* where, int64_t offset,
       reduced->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
     return;
   const constant* c = (const constant*)reduced;
-  // A fill literal ('0, '1, 'x, 'z) or an x/z value is not a size.
+  // A fill literal ('0, '1, 'x, 'z) is not a size; an x/z value is an error.
   if (c->VpiSize() < 0) return;
-  std::string_view v = c->VpiValue();
-  if (v.find_first_of("xXzZ?") != std::string_view::npos) return;
+  if (checkUnknownBits(c, where)) return;
   const int64_t val = eval.get_value(invalid, (const expr*)reduced);
   if (invalid) return;
   const int64_t size = val + offset;
@@ -775,6 +780,24 @@ void UhdmLint::checkNonPositive(const any* ex, const any* where, int64_t offset,
     serializer_->GetErrorHandler()(ErrorType::UHDM_NON_POSITIVE_VALUE,
                                    std::to_string(size), where, nullptr);
   }
+}
+
+// A size or a range bound must be a KNOWN value (LRM 6.9.1, 11.4.12.1,
+// 6.24.1): a parameter holding x or z bits has none.  Only a folded constant
+// (or the elaborated value of a parameter) is checked.
+bool UhdmLint::checkUnknownBits(const any* ex, const any* where) {
+  if (ex == nullptr || ex->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
+    return false;
+  const constant* c = (const constant*)ex;
+  if (c->VpiSize() < 0) return false;  // '0 / '1 / 'x / 'z fill literal
+  std::string_view v = c->VpiValue();
+  if (!(v.rfind("BIN:", 0) == 0 || v.rfind("HEX:", 0) == 0 ||
+        v.rfind("OCT:", 0) == 0))
+    return false;
+  if (v.find_first_of("xXzZ?", 4) == std::string_view::npos) return false;
+  serializer_->GetErrorHandler()(ErrorType::UHDM_UNKNOWN_BITS_VALUE,
+                                 std::string(v), where, nullptr);
+  return true;
 }
 
 void UhdmLint::leaveIndexed_part_select(const indexed_part_select* object,
@@ -791,7 +814,9 @@ void UhdmLint::leaveOperation(const operation* object, vpiHandle handle) {
     case vpiMultiConcatOp:
       // A zero count is legal inside a larger concatenation; a negative one
       // never is.
-      checkNonPositive(ops->at(0), object, 0, true);
+      // `{rep{x}}`: the count may name a parameter.
+      if (const any* count = elaboratedParamValue(ops->at(0), object))
+        checkNonPositive(count, object, 0, true);
       break;
     case vpiCastOp: {
       // A SIZE cast `N'(x)` is compiled as a cast to an anonymous
@@ -1213,14 +1238,44 @@ void UhdmLint::reportUndefinedTaskFunc(const tf_call* call, bool bound) {
   unboundCalls_.emplace_back(call, ownerDefName(call));
 }
 
+// LRM 13.5: a call passes at most one argument per formal, and every formal
+// without a default must get one.  Positional calls only are counted.
+void UhdmLint::checkTfArgCount(const tf_call* call, const task_func* tf) {
+  if (tf == nullptr || inClass(call)) return;
+  const size_t nargs = call->Tf_call_args() ? call->Tf_call_args()->size() : 0;
+  const size_t nformals = tf->Io_decls() ? tf->Io_decls()->size() : 0;
+  bool bad = nargs > nformals;
+  if (!bad) {
+    for (size_t i = nargs; i < nformals; ++i) {
+      if (tf->Io_decls()->at(i)->Expr() == nullptr) {
+        bad = true;
+        break;
+      }
+    }
+  }
+  if (!bad) return;
+  if (!reportedCalls_
+           .emplace(std::string(call->VpiFile()) + "#argc", call->VpiLineNo(),
+                    call->VpiColumnNo())
+           .second)
+    return;
+  const std::string errMsg = std::string(call->VpiName()) + " (expected " +
+                             std::to_string(nformals) + ", got " +
+                             std::to_string(nargs) + ")";
+  serializer_->GetErrorHandler()(ErrorType::UHDM_TF_ARG_COUNT, errMsg, call,
+                                 nullptr);
+}
+
 void UhdmLint::leaveFunc_call(const func_call* object, vpiHandle handle) {
   reportUndefinedTaskFunc(object, object->Function() != nullptr);
   checkEnumCallArgs(object, object->Function());
+  checkTfArgCount(object, object->Function());
 }
 
 void UhdmLint::leaveTask_call(const task_call* object, vpiHandle handle) {
   reportUndefinedTaskFunc(object, object->Task() != nullptr);
   checkEnumCallArgs(object, object->Task());
+  checkTfArgCount(object, object->Task());
 }
 
 void UhdmLint::leaveAny(const any* object, vpiHandle handle) {

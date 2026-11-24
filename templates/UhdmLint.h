@@ -112,6 +112,8 @@ class UhdmLint final : public VpiListener {
 
   void checkConstantExpr(const any* expr, bool netsOnly);
   void checkContAssignLhsSelects(const any* lhs);
+  bool checkUnknownBits(const any* ex, const any* where);
+  void checkTfArgCount(const tf_call* call, const task_func* tf);
 
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 
