@@ -29,6 +29,12 @@
 
 #include <uhdm/VpiListener.h>
 
+#include <map>
+#include <set>
+#include <string>
+#include <tuple>
+#include <vector>
+
 namespace UHDM {
 class Serializer;
 class UhdmLint final : public VpiListener {
@@ -76,6 +82,22 @@ class UhdmLint final : public VpiListener {
   void checkNonPositive(const any* ex, const any* where, int64_t offset,
                         bool allowZero);
 
+  void leaveRef_obj(const ref_obj* object, vpiHandle handle) override;
+
+  void leaveVar_select(const var_select* object, vpiHandle handle) override;
+
+  void leaveFunc_call(const func_call* object, vpiHandle handle) override;
+
+  void leaveTask_call(const task_call* object, vpiHandle handle) override;
+
+  void leaveDesign(const design* object, vpiHandle handle) override;
+
+  void leaveAny(const any* object, vpiHandle handle) override;
+
+  void noteImplicitNetRef(const ref_obj* ref);
+
+  void reportUndefinedTaskFunc(const tf_call* call, bool bound);
+
   void leaveParam_assign(const param_assign* object,
                          vpiHandle handle) override;
 
@@ -85,6 +107,25 @@ class UhdmLint final : public VpiListener {
 
   Serializer* serializer_ = nullptr;
   design* design_ = nullptr;
+  // Nets Surelog fabricated for an undeclared name, keyed by full name: the
+  // first reference, and whether ANY reference is in a context where LRM
+  // 6.10 infers an implicit net.
+  struct ImplicitNetUse {
+    const any* firstRef = nullptr;
+    std::string ownerDef;
+    bool legal = false;
+  };
+  std::map<std::string, ImplicitNetUse> implicitNets_;
+  std::vector<std::string> implicitNetOrder_;
+  std::set<std::tuple<std::string, uint32_t, uint16_t>> reportedCalls_;
+  // Every name the design DECLARES somewhere.  Surelog also fabricates a net
+  // for a declared name it fails to bind (a block-local localparam, a $unit
+  // parameter, a property formal); only a name declared nowhere is reported.
+  std::set<std::string, std::less<>> declaredNames_;
+  std::vector<std::pair<const tf_call*, std::string>> unboundCalls_;
+  // Definitions with at least one ELABORATED instance.  A module nothing
+  // instantiates is not elaborated, so its names are not resolved.
+  std::set<std::string, std::less<>> elaboratedDefs_;
 };
 
 }  // namespace UHDM

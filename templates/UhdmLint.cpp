@@ -34,6 +34,7 @@
 namespace UHDM {
 
 void UhdmLint::leaveBit_select(const bit_select* object, vpiHandle handle) {
+  noteImplicitNetRef(object);
   if (const ref_obj* index = object->VpiIndex<ref_obj>()) {
     if (const real_var* actual = index->Actual_group<real_var>()) {
       const std::string errMsg(actual->VpiName());
@@ -626,6 +627,7 @@ void UhdmLint::checkConstantExpr(const any* expr, bool netsOnly) {
 }
 
 void UhdmLint::leavePart_select(const part_select* object, vpiHandle handle) {
+  noteImplicitNetRef(object);
   checkConstantExpr(object->Left_range(), true);
   checkConstantExpr(object->Right_range(), true);
 }
@@ -705,6 +707,7 @@ void UhdmLint::checkNonPositive(const any* ex, const any* where, int64_t offset,
 
 void UhdmLint::leaveIndexed_part_select(const indexed_part_select* object,
                                         vpiHandle handle) {
+  noteImplicitNetRef(object);
   checkNonPositive(elaboratedParamValue(object->Width_expr(), object), object,
                    0, false);
 }
@@ -756,6 +759,202 @@ void UhdmLint::leaveOperation(const operation* object, vpiHandle handle) {
     default:
       break;
   }
+}
+
+// LRM 6.10: an implicit net is inferred only from the left-hand side of a
+// continuous assignment and from a port / terminal connection.  `ref` (or the
+// concatenation it is part of) sits in one of those places.
+static bool inImplicitNetContext(const any* ref) {
+  const any* cur = ref;
+  for (const any* p = ref->VpiParent(); p != nullptr;
+       cur = p, p = p->VpiParent()) {
+    switch (p->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmoperation: {
+        const int op = ((const operation*)p)->VpiOpType();
+        if (op == vpiConcatOp || op == vpiMultiConcatOp) continue;
+        return false;
+      }
+      case UHDM_OBJECT_TYPE::uhdmcont_assign:
+        return ((const cont_assign*)p)->Lhs() == cur;
+      case UHDM_OBJECT_TYPE::uhdmport:
+        return ((const port*)p)->High_conn() == cur;
+      case UHDM_OBJECT_TYPE::uhdmprim_term:
+      case UHDM_OBJECT_TYPE::uhdmgate:
+      case UHDM_OBJECT_TYPE::uhdmswitch_tran:
+      case UHDM_OBJECT_TYPE::uhdmudp:
+        return true;
+      default:
+        return false;
+    }
+  }
+  return false;
+}
+
+// Surelog binds a name it cannot resolve to a net it FABRICATES on the
+// module: a logic_net with no typespec of its own.  That is the LRM's
+// implicit net when some reference to the name may infer one; a name used
+// only elsewhere (an always block, an expression, a parameter value, a range)
+// is an undeclared identifier.
+// The definition name (`work@m` -> `m`) of the module `obj` is in, or "".
+static std::string ownerDefName(const any* obj) {
+  for (const any* p = obj; p != nullptr; p = p->VpiParent()) {
+    if (p->UhdmType() != UHDM_OBJECT_TYPE::uhdmmodule_inst) continue;
+    std::string_view def = ((const module_inst*)p)->VpiDefName();
+    if (const size_t at = def.find('@'); at != std::string_view::npos)
+      def.remove_prefix(at + 1);
+    return std::string(def);
+  }
+  return "";
+}
+
+void UhdmLint::noteImplicitNetRef(const ref_obj* ref) {
+  const any* actual = ref->Actual_group();
+  if (actual == nullptr ||
+      actual->UhdmType() != UHDM_OBJECT_TYPE::uhdmlogic_net)
+    return;
+  const logic_net* net = (const logic_net*)actual;
+  if (net->Typespec() != nullptr) return;
+  // In a module DEFINITION a port's net carries no typespec (it lives on the
+  // port), so a net named like one of the module's ports is declared.
+  const any* owner = net->VpiParent();
+  while (owner && owner->UhdmType() != UHDM_OBJECT_TYPE::uhdmmodule_inst)
+    owner = owner->VpiParent();
+  if (owner == nullptr) return;
+  if (const auto ports = ((const module_inst*)owner)->Ports()) {
+    for (const port* p : *ports)
+      if (p->VpiName() == net->VpiName()) return;
+  }
+  if (net->VpiName().find('.') != std::string_view::npos) return;
+  std::string key(net->VpiFullName());
+  if (key.empty()) key = std::string(net->VpiName());
+  auto [it, inserted] = implicitNets_.emplace(key, ImplicitNetUse{});
+  if (inserted) {
+    implicitNetOrder_.push_back(key);
+    it->second.firstRef = ref;
+    it->second.ownerDef = ownerDefName(net);
+  }
+  if (!it->second.legal && inImplicitNetContext(ref)) it->second.legal = true;
+}
+
+void UhdmLint::leaveRef_obj(const ref_obj* object, vpiHandle handle) {
+  noteImplicitNetRef(object);
+}
+
+void UhdmLint::leaveVar_select(const var_select* object, vpiHandle handle) {
+  noteImplicitNetRef(object);
+}
+
+void UhdmLint::reportUndefinedTaskFunc(const tf_call* call, bool bound) {
+  if (bound) return;
+  const std::string_view name = call->VpiName();
+  if (name.empty() || name[0] == '$') return;
+  // Built-ins of the `std` package (LRM 18.12, 18.13), visible everywhere.
+  static constexpr std::string_view kStdBuiltins[] = {
+      "randomize", "urandom",       "urandom_range",
+      "srandom",   "get_randstate", "set_randstate"};
+  for (std::string_view b : kStdBuiltins) {
+    if (name == b) return;
+  }
+  if (!reportedCalls_
+           .emplace(std::string(call->VpiFile()), call->VpiLineNo(),
+                    call->VpiColumnNo())
+           .second)
+    return;
+  // Reported from leaveDesign, once every declaration has been seen.
+  // `q.size` without parentheses: a built-in method of the prefix object.
+  if (const any* p = call->VpiParent();
+      p && p->UhdmType() == UHDM_OBJECT_TYPE::uhdmhier_path)
+    return;
+  unboundCalls_.emplace_back(call, ownerDefName(call));
+}
+
+void UhdmLint::leaveFunc_call(const func_call* object, vpiHandle handle) {
+  reportUndefinedTaskFunc(object, object->Function() != nullptr);
+}
+
+void UhdmLint::leaveTask_call(const task_call* object, vpiHandle handle) {
+  reportUndefinedTaskFunc(object, object->Task() != nullptr);
+}
+
+void UhdmLint::leaveAny(const any* object, vpiHandle handle) {
+  switch (object->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmmethod_func_call: {
+      // A `with (...)` clause names the iterator (`item` unless the call
+      // gives one as its argument) without declaring it.
+      const method_func_call* m = (const method_func_call*)object;
+      if (m->With() == nullptr) return;
+      declaredNames_.emplace("item");
+      if (const auto args = m->Tf_call_args()) {
+        for (const any* a : *args) {
+          if (!a->VpiName().empty()) declaredNames_.emplace(a->VpiName());
+        }
+      }
+      return;
+    }
+    // References and expressions name what they USE, not what they declare.
+    case UHDM_OBJECT_TYPE::uhdmref_obj:
+    case UHDM_OBJECT_TYPE::uhdmref_typespec:
+    case UHDM_OBJECT_TYPE::uhdmref_module:
+    case UHDM_OBJECT_TYPE::uhdmbit_select:
+    case UHDM_OBJECT_TYPE::uhdmpart_select:
+    case UHDM_OBJECT_TYPE::uhdmindexed_part_select:
+    case UHDM_OBJECT_TYPE::uhdmvar_select:
+    case UHDM_OBJECT_TYPE::uhdmhier_path:
+    case UHDM_OBJECT_TYPE::uhdmfunc_call:
+    case UHDM_OBJECT_TYPE::uhdmtask_call:
+    case UHDM_OBJECT_TYPE::uhdmmethod_task_call:
+    case UHDM_OBJECT_TYPE::uhdmsys_func_call:
+    case UHDM_OBJECT_TYPE::uhdmsys_task_call:
+    case UHDM_OBJECT_TYPE::uhdmoperation:
+    case UHDM_OBJECT_TYPE::uhdmconstant:
+      return;
+    case UHDM_OBJECT_TYPE::uhdmmodule_inst: {
+      // A module's own name is declared too (`$printtimescale(top)`).
+      const module_inst* mi = (const module_inst*)object;
+      const std::string def = ownerDefName(mi);
+      if (!def.empty()) {
+        declaredNames_.emplace(def);
+        const any* up = mi->VpiParent();
+        if (mi->VpiTop() ||
+            (up && up->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst))
+          elaboratedDefs_.emplace(def);
+      }
+      break;
+    }
+    case UHDM_OBJECT_TYPE::uhdmlogic_net:
+      // The fabricated net itself declares nothing.
+      if (((const logic_net*)object)->Typespec() == nullptr) return;
+      break;
+    default:
+      break;
+  }
+  const std::string_view name = object->VpiName();
+  if (!name.empty()) declaredNames_.emplace(name);
+}
+
+void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
+  for (const std::string& key : implicitNetOrder_) {
+    const ImplicitNetUse& use = implicitNets_[key];
+    if (use.legal) continue;
+    const std::string_view name = use.firstRef->VpiName();
+    if (declaredNames_.find(name) != declaredNames_.end()) continue;
+    if (elaboratedDefs_.find(use.ownerDef) == elaboratedDefs_.end()) continue;
+    serializer_->GetErrorHandler()(ErrorType::UHDM_UNDECLARED_IDENTIFIER,
+                                   std::string(use.firstRef->VpiName()),
+                                   use.firstRef, nullptr);
+  }
+  for (const auto& [call, ownerDef] : unboundCalls_) {
+    if (declaredNames_.find(call->VpiName()) != declaredNames_.end()) continue;
+    if (elaboratedDefs_.find(ownerDef) == elaboratedDefs_.end()) continue;
+    serializer_->GetErrorHandler()(ErrorType::UHDM_UNDEFINED_TASK_FUNC,
+                                   std::string(call->VpiName()), call, nullptr);
+  }
+  unboundCalls_.clear();
+  implicitNets_.clear();
+  implicitNetOrder_.clear();
+  reportedCalls_.clear();
+  declaredNames_.clear();
+  elaboratedDefs_.clear();
 }
 
 }  // namespace UHDM
