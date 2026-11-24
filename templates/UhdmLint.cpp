@@ -291,6 +291,7 @@ void UhdmLint::checkUnpackedArrayAssign(const any* lhs, const any* rhs,
 void UhdmLint::leaveCont_assign(const cont_assign* object, vpiHandle handle) {
   checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
   checkEnumAssign(object->Lhs(), object->Rhs(), object, false);
+  checkContAssignLhsSelects(object->Lhs());
 }
 
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
@@ -634,8 +635,58 @@ void UhdmLint::checkConstantExpr(const any* expr, bool netsOnly) {
 
 void UhdmLint::leavePart_select(const part_select* object, vpiHandle handle) {
   noteImplicitNetRef(object);
-  checkConstantExpr(object->Left_range(), true);
-  checkConstantExpr(object->Right_range(), true);
+  const any* l = object->Left_range();
+  const any* r = object->Right_range();
+  if (nonConstantRef(l, true) || nonConstantRef(r, true)) {
+    checkConstantExpr(l, true);
+    checkConstantExpr(r, true);
+    return;
+  }
+  // A variable is tolerated in BOTH bounds (`a[i+1:i]`, a constant width).
+  // With one bound constant and the other variable, the WIDTH itself varies
+  // (`a[15*m:0]`), which no reading of LRM 11.5.1 allows.
+  if (l == nullptr || r == nullptr) return;
+  const any* vl = nonConstantRef(l, false);
+  const any* vr = nonConstantRef(r, false);
+  if ((vl == nullptr) != (vr == nullptr)) checkConstantExpr(vl ? l : r, false);
+}
+
+// LRM 10.3.1: the target of a continuous assignment may select a bit, a part
+// or an element only with CONSTANT indices.  `assign arr[n] = x;` with a
+// variable `n` has no fixed driver.
+void UhdmLint::checkContAssignLhsSelects(const any* lhs) {
+  if (lhs == nullptr) return;
+  switch (lhs->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmoperation: {
+      const operation* op = (const operation*)lhs;
+      if (op->Operands())
+        for (const any* o : *op->Operands()) checkContAssignLhsSelects(o);
+      return;
+    }
+    case UHDM_OBJECT_TYPE::uhdmbit_select:
+      checkConstantExpr(((const bit_select*)lhs)->VpiIndex(), false);
+      return;
+    case UHDM_OBJECT_TYPE::uhdmvar_select: {
+      const var_select* vs = (const var_select*)lhs;
+      if (vs->Exprs())
+        for (const any* e : *vs->Exprs()) {
+          // A trailing part-select keeps its own (looser) check.
+          if (e->UhdmType() == UHDM_OBJECT_TYPE::uhdmpart_select) continue;
+          if (e->UhdmType() == UHDM_OBJECT_TYPE::uhdmindexed_part_select) {
+            checkConstantExpr(((const indexed_part_select*)e)->Base_expr(),
+                              false);
+            continue;
+          }
+          checkConstantExpr(e, false);
+        }
+      return;
+    }
+    case UHDM_OBJECT_TYPE::uhdmindexed_part_select:
+      checkConstantExpr(((const indexed_part_select*)lhs)->Base_expr(), false);
+      return;
+    default:
+      return;
+  }
 }
 
 void UhdmLint::leaveRange(const range* object, vpiHandle handle) {
