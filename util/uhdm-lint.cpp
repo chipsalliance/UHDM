@@ -193,6 +193,9 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_PATTERN_ELEMENT_COUNT:
             errmsg = "Wrong number of assignment pattern elements";
             break;
+          case UHDM::UHDM_ENUM_DUPLICATE_VALUE:
+            errmsg = "Duplicate enum value";
+            break;
           case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
             errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
             break;

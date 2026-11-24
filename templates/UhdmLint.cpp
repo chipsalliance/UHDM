@@ -28,6 +28,7 @@
 #include <uhdm/clone_tree.h>
 #include <uhdm/uhdm.h>
 
+#include <cerrno>
 #include <cstring>
 #include <regex>
 
@@ -344,13 +345,51 @@ void UhdmLint::leaveLogic_net(const logic_net* object, vpiHandle handle) {
   }
 }
 
+// The value of an enum constant (`UINT:3`, `INT:-1`, `HEX:F`, `BIN:10`),
+// false when it is not a plain number.
+static bool enumConstValue(std::string_view s, uint64_t& out) {
+  const size_t colon = s.find(':');
+  if (colon == std::string_view::npos) return false;
+  const std::string_view kind = s.substr(0, colon);
+  const std::string digits(s.substr(colon + 1));
+  if (digits.empty() || digits.find_first_of("xXzZ?") != std::string::npos)
+    return false;
+  int base = 0;
+  if (kind == "UINT" || kind == "DEC")
+    base = 10;
+  else if (kind == "INT")
+    base = 10;
+  else if (kind == "HEX")
+    base = 16;
+  else if (kind == "BIN")
+    base = 2;
+  else if (kind == "OCT")
+    base = 8;
+  else
+    return false;
+  if (digits.size() > (base == 2 ? 64u : 20u)) return false;
+  errno = 0;
+  char* end = nullptr;
+  if (kind == "INT") {
+    const long long v = std::strtoll(digits.c_str(), &end, 10);
+    out = (uint64_t)v;
+  } else {
+    out = std::strtoull(digits.c_str(), &end, base);
+  }
+  return errno == 0 && end && *end == '\0';
+}
+
 void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
                                   vpiHandle handle) {
   const typespec* baseType = nullptr;
   if (const ref_typespec* rt = object->Base_typespec()) {
     baseType = rt->Actual_typespec<typespec>();
   }
-  if (!baseType) return;
+  if (!baseType) {
+    // No explicit base: an `int` (LRM 6.19).
+    checkEnumDuplicateValues(object, 32);
+    return;
+  }
   // The base of an enum is an integer atom type, or an integer vector type
   // with at most ONE packed dimension (LRM 6.19): not an unpacked array,
   // queue, another enum, a struct, real or string, and no range on an atom.
@@ -431,6 +470,41 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
                                        errMsg, c, baseType);
       }
     }
+    checkEnumDuplicateValues(object, baseSize);
+  }
+}
+
+// LRM 6.19: the constants of one enum have UNIQUE values.  Compared within
+// the base width; a value that is not a plain number (x / z, or not folded)
+// is skipped.
+void UhdmLint::checkEnumDuplicateValues(const enum_typespec* object,
+                                        uint64_t baseSize) {
+  if (object->Enum_consts() == nullptr || baseSize == 0 || baseSize > 64)
+    return;
+  const uint64_t mask =
+      baseSize == 64 ? ~uint64_t(0) : ((uint64_t(1) << baseSize) - 1);
+  // Only values known without folding are compared: Surelog can mis-fold a
+  // constant EXPRESSION (`{RV_32I, RV_G | RV_C}` came out equal to
+  // `{RV_32I, RV_G}`, rp32), and folds `2'dx` to 0.  A value is trusted when
+  // its source text is a plain number literal (an implicit `+1` value
+  // decompiles to one), or names another constant of the same enum.
+  static const std::regex literal(
+      "^([0-9_]+)?('[sS]?[bBoOdDhH])?[0-9a-fA-F_]+$");
+  std::set<std::string_view> names;
+  for (const enum_const* c : *object->Enum_consts()) names.insert(c->VpiName());
+  std::map<uint64_t, const enum_const*> seen;
+  for (const enum_const* c : *object->Enum_consts()) {
+    const std::string text(c->VpiDecompile());
+    if (!std::regex_match(text, literal) && !names.count(text)) continue;
+    uint64_t v = 0;
+    if (!enumConstValue(c->VpiValue(), v)) continue;
+    v &= mask;
+    auto [it, fresh] = seen.emplace(v, c);
+    if (fresh) continue;
+    const std::string errMsg = std::string(c->VpiName()) + " and " +
+                               std::string(it->second->VpiName());
+    serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_DUPLICATE_VALUE, errMsg,
+                                   c, nullptr);
   }
 }
 
