@@ -811,6 +811,9 @@ void UhdmLint::leaveOperation(const operation* object, vpiHandle handle) {
   const VectorOfany* ops = object->Operands();
   if (ops == nullptr || ops->empty()) return;
   switch (object->VpiOpType()) {
+    case vpiAssignmentPatternOp:
+      checkPatternCount(object);
+      break;
     case vpiMultiConcatOp:
       // A zero count is legal inside a larger concatenation; a negative one
       // never is.
@@ -1360,6 +1363,147 @@ void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
   reportedCalls_.clear();
   declaredNames_.clear();
   elaboratedDefs_.clear();
+}
+
+// LRM 10.9.1: a POSITIONAL assignment pattern has exactly one element per
+// struct member, or per element of the outermost packed dimension.  Only a
+// target whose type is known exactly is checked: the variable a pattern
+// initialises, or the whole-variable left-hand side it is assigned to -- and
+// only a struct / logic / bit VARIABLE.  Surelog types a net, and an unpacked
+// or packed-of-struct array, by its ELEMENT (`logic [7:0] arr [4]` is a
+// logic_net of `logic [7:0]` in the definition view), which would count the
+// wrong dimension.
+static const typespec* varTypespec(const any* v) {
+  if (v == nullptr) return nullptr;
+  // The ELEMENT variable of an array carries the array's initialiser.
+  if (const any* p = v->VpiParent()) {
+    if (p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var ||
+        p->UhdmType() == UHDM_OBJECT_TYPE::uhdmpacked_array_var ||
+        p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net ||
+        p->UhdmType() == UHDM_OBJECT_TYPE::uhdmpacked_array_net)
+      return nullptr;
+  }
+  switch (v->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmstruct_var:
+    case UHDM_OBJECT_TYPE::uhdmlogic_var:
+    case UHDM_OBJECT_TYPE::uhdmbit_var:
+      return declTypespec(v);
+    case UHDM_OBJECT_TYPE::uhdmstruct_net: {
+      // A struct-typed net is typed exactly (its element would be a
+      // packed_array_net / array_net, guarded above).
+      const typespec* ts = declTypespec(v);
+      if (ts && ts->UhdmType() == UHDM_OBJECT_TYPE::uhdmstruct_typespec)
+        return ts;
+      return nullptr;
+    }
+    default:
+      return nullptr;
+  }
+}
+
+static const typespec* patternTarget(const operation* op) {
+  const any* p = op->VpiParent();
+  if (p == nullptr) return nullptr;
+  const any* lhs = nullptr;
+  switch (p->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmassignment:
+      if (((const assignment*)p)->Rhs() != op) return nullptr;
+      lhs = ((const assignment*)p)->Lhs();
+      break;
+    case UHDM_OBJECT_TYPE::uhdmcont_assign:
+      if (((const cont_assign*)p)->Rhs() != op) return nullptr;
+      lhs = ((const cont_assign*)p)->Lhs();
+      break;
+    default:
+      if (const variables* v = any_cast<const variables*>(p)) {
+        if (v->Expr() != op) return nullptr;
+        return varTypespec(v);
+      }
+      return nullptr;
+  }
+  if (lhs == nullptr) return nullptr;
+  // A net declaration's initialiser (`pair_t p = '{...};`) is a cont_assign
+  // whose left-hand side is the net itself.
+  if (lhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) {
+    // Surelog also emits that initialiser for an UNPACKED ARRAY of structs
+    // (`s_t a [2] = '{...};`), on a struct_net it creates for it: skip a
+    // name the enclosing module declares as an array.
+    const std::string_view name = lhs->VpiName();
+    for (const any* m = p->VpiParent(); m; m = m->VpiParent()) {
+      if (m->UhdmType() != UHDM_OBJECT_TYPE::uhdmmodule_inst) continue;
+      const module_inst* mi = (const module_inst*)m;
+      if (mi->Array_nets())
+        for (const array_net* an : *mi->Array_nets())
+          if (an->VpiName() == name) return nullptr;
+      if (mi->Variables())
+        for (const variables* v : *mi->Variables())
+          if (v->VpiName() == name &&
+              v->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var)
+            return nullptr;
+      break;
+    }
+    return varTypespec(lhs);
+  }
+  return varTypespec(((const ref_obj*)lhs)->Actual_group());
+}
+
+static bool constRangeSize(const range* r, uint64_t& size) {
+  if (r == nullptr) return false;
+  const any* l = r->Left_expr();
+  const any* rr = r->Right_expr();
+  if (l == nullptr || rr == nullptr ||
+      l->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant ||
+      rr->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
+    return false;
+  ExprEval eval;
+  bool invalid = false;
+  const int64_t lv = eval.get_value(invalid, (const expr*)l);
+  if (invalid) return false;
+  const int64_t rv = eval.get_value(invalid, (const expr*)rr);
+  if (invalid) return false;
+  size = (lv > rv ? lv - rv : rv - lv) + 1;
+  return true;
+}
+
+void UhdmLint::checkPatternCount(const operation* pattern) {
+  const VectorOfany* ops = pattern->Operands();
+  if (ops == nullptr || ops->empty() || inClass(pattern)) return;
+  // `'{a: x, default: y}` is not positional.
+  for (const any* o : *ops)
+    if (o->UhdmType() == UHDM_OBJECT_TYPE::uhdmtagged_pattern) return;
+  const typespec* ts = patternTarget(pattern);
+  if (ts == nullptr) return;
+  uint64_t expected = 0;
+  switch (ts->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmstruct_typespec: {
+      const auto* m = ((const struct_typespec*)ts)->Members();
+      if (m == nullptr || m->empty()) return;
+      expected = m->size();
+      break;
+    }
+    case UHDM_OBJECT_TYPE::uhdmlogic_typespec:
+    case UHDM_OBJECT_TYPE::uhdmbit_typespec: {
+      const VectorOfrange* rs =
+          ts->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec
+              ? ((const logic_typespec*)ts)->Ranges()
+              : ((const bit_typespec*)ts)->Ranges();
+      if (rs == nullptr || rs->empty()) return;
+      if (!constRangeSize(rs->at(0), expected)) return;
+      break;
+    }
+    default:
+      return;
+  }
+  if (expected == ops->size()) return;
+  if (!reportedCalls_
+           .emplace(std::string(pattern->VpiFile()) + "#pattern",
+                    pattern->VpiLineNo(), pattern->VpiColumnNo())
+           .second)
+    return;
+  const std::string errMsg = std::to_string(ops->size()) + " elements, " +
+                             std::to_string(expected) + " required";
+  serializer_->GetErrorHandler()(ErrorType::UHDM_PATTERN_ELEMENT_COUNT, errMsg,
+                                 pattern, nullptr);
 }
 
 }  // namespace UHDM
