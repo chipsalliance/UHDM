@@ -111,6 +111,7 @@ class UhdmLint final : public VpiListener {
                          vpiHandle handle) override;
 
   void checkConstantExpr(const any* expr, bool netsOnly);
+  void checkContAssignLhsSelects(const any* lhs);
 
   void checkMultiContAssign(const std::vector<UHDM::cont_assign*>* assigns);
 
