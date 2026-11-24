@@ -175,6 +175,12 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_SIGNED_UNSIGNED_PORT_CONN:
             errmsg = "Signed vs Unsigned port connection";
             break;
+          case UHDM::UHDM_UNDECLARED_IDENTIFIER:
+            errmsg = "Use of undeclared identifier";
+            break;
+          case UHDM::UHDM_UNDEFINED_TASK_FUNC:
+            errmsg = "Undefined task or function";
+            break;
           case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
             errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
             break;

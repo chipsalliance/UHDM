@@ -795,6 +795,23 @@ static bool inImplicitNetContext(const any* ref) {
 // implicit net when some reference to the name may infer one; a name used
 // only elsewhere (an always block, an expression, a parameter value, a range)
 // is an undeclared identifier.
+// Class bodies are not checked: Surelog leaves many members, `this` and
+// inherited methods unbound there.  Nor are sequence / property bodies,
+// whose local variables (LRM 16.10) it does not model.
+static bool inClass(const any* obj) {
+  for (const any* p = obj; p != nullptr; p = p->VpiParent()) {
+    switch (p->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmclass_defn:
+      case UHDM_OBJECT_TYPE::uhdmsequence_decl:
+      case UHDM_OBJECT_TYPE::uhdmproperty_decl:
+        return true;
+      default:
+        break;
+    }
+  }
+  return false;
+}
+
 // The definition name (`work@m` -> `m`) of the module `obj` is in, or "".
 static std::string ownerDefName(const any* obj) {
   for (const any* p = obj; p != nullptr; p = p->VpiParent()) {
@@ -814,6 +831,7 @@ void UhdmLint::noteImplicitNetRef(const ref_obj* ref) {
     return;
   const logic_net* net = (const logic_net*)actual;
   if (net->Typespec() != nullptr) return;
+  if (inClass(ref)) return;
   // In a module DEFINITION a port's net carries no typespec (it lives on the
   // port), so a net named like one of the module's ports is declared.
   const any* owner = net->VpiParent();
@@ -861,6 +879,9 @@ void UhdmLint::reportUndefinedTaskFunc(const tf_call* call, bool bound) {
            .second)
     return;
   // Reported from leaveDesign, once every declaration has been seen.
+  if (inClass(call)) return;
+  // `cls::type_id::create(...)`: a class scope, bound after the classes.
+  if (name.find("::") != std::string_view::npos) return;
   // `q.size` without parentheses: a built-in method of the prefix object.
   if (const any* p = call->VpiParent();
       p && p->UhdmType() == UHDM_OBJECT_TYPE::uhdmhier_path)
@@ -933,6 +954,9 @@ void UhdmLint::leaveAny(const any* object, vpiHandle handle) {
 }
 
 void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
+  // Built-in scope names (`std::randomize`, `this.x`, `super.f()`).
+  for (std::string_view builtin : {"std", "this", "super"})
+    declaredNames_.emplace(builtin);
   for (const std::string& key : implicitNetOrder_) {
     const ImplicitNetUse& use = implicitNets_[key];
     if (use.legal) continue;
