@@ -483,8 +483,19 @@ void UhdmLint::checkEnumDuplicateValues(const enum_typespec* object,
     return;
   const uint64_t mask =
       baseSize == 64 ? ~uint64_t(0) : ((uint64_t(1) << baseSize) - 1);
+  // Only values known without folding are compared: Surelog can mis-fold a
+  // constant EXPRESSION (`{RV_32I, RV_G | RV_C}` came out equal to
+  // `{RV_32I, RV_G}`, rp32), and folds `2'dx` to 0.  A value is trusted when
+  // its source text is a plain number literal (an implicit `+1` value
+  // decompiles to one), or names another constant of the same enum.
+  static const std::regex literal(
+      "^([0-9_]+)?('[sS]?[bBoOdDhH])?[0-9a-fA-F_]+$");
+  std::set<std::string_view> names;
+  for (const enum_const* c : *object->Enum_consts()) names.insert(c->VpiName());
   std::map<uint64_t, const enum_const*> seen;
   for (const enum_const* c : *object->Enum_consts()) {
+    const std::string text(c->VpiDecompile());
+    if (!std::regex_match(text, literal) && !names.count(text)) continue;
     uint64_t v = 0;
     if (!enumConstValue(c->VpiValue(), v)) continue;
     v &= mask;
