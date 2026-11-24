@@ -633,6 +633,8 @@ void UhdmLint::checkConstantExpr(const any* expr, bool netsOnly) {
   }
 }
 
+static bool inClass(const any* obj);
+
 void UhdmLint::leavePart_select(const part_select* object, vpiHandle handle) {
   noteImplicitNetRef(object);
   const any* l = object->Left_range();
@@ -644,8 +646,21 @@ void UhdmLint::leavePart_select(const part_select* object, vpiHandle handle) {
   }
   // A variable is tolerated in BOTH bounds (`a[i+1:i]`, a constant width).
   // With one bound constant and the other variable, the WIDTH itself varies
-  // (`a[15*m:0]`), which no reading of LRM 11.5.1 allows.
+  // (`a[15*m:0]`), which no reading of LRM 11.5.1 allows -- of a VECTOR.  A
+  // slice of an unpacked array may have variable bounds when the array is a
+  // queue or dynamic array (`q = q[0:n-1]`, UVM's m_uvm_queue_resize), so
+  // only a packed base is checked, and never in a class.
   if (l == nullptr || r == nullptr) return;
+  if (inClass(object)) return;
+  if (const any* base = object->Actual_group()) {
+    switch (base->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmarray_var:
+      case UHDM_OBJECT_TYPE::uhdmarray_net:
+        return;
+      default:
+        break;
+    }
+  }
   const any* vl = nonConstantRef(l, false);
   const any* vr = nonConstantRef(r, false);
   if ((vl == nullptr) != (vr == nullptr)) checkConstantExpr(vl ? l : r, false);
