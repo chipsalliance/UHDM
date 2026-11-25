@@ -150,15 +150,14 @@ void UhdmLint::checkScopeNameClashes(const module_inst* mi) {
   std::map<std::string, const gen_scope_array*, std::less<>> gens;
   for (const gen_scope_array* g : *mi->Gen_scope_arrays()) {
     std::string base(g->VpiName());
-    if (const size_t b = base.find('['); b != std::string::npos)
-      base.resize(b);
+    if (const size_t b = base.find('['); b != std::string::npos) base.resize(b);
     if (base.empty() || base.rfind("genblk", 0) == 0) continue;
     bool clash = false;
     if (auto it = gens.find(base); it != gens.end()) {
       const gen_scope_array* o = it->second;
-      clash = !(o->VpiFile() == g->VpiFile() &&
-                o->VpiLineNo() == g->VpiLineNo() &&
-                o->VpiColumnNo() == g->VpiColumnNo());
+      clash =
+          !(o->VpiFile() == g->VpiFile() && o->VpiLineNo() == g->VpiLineNo() &&
+            o->VpiColumnNo() == g->VpiColumnNo());
     } else {
       gens.emplace(base, g);
       clash = names.count(base) != 0;
