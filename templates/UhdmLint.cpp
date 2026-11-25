@@ -993,11 +993,10 @@ void UhdmLint::leaveOperation(const operation* object, vpiHandle handle) {
           break;
         }
       }
-      if (allEmpty &&
-          reportedCalls_
-              .emplace(std::string(object->VpiFile()) + "#concat",
-                       object->VpiLineNo(), object->VpiColumnNo())
-              .second)
+      if (allEmpty && reportedCalls_
+                          .emplace(std::string(object->VpiFile()) + "#concat",
+                                   object->VpiLineNo(), object->VpiColumnNo())
+                          .second)
         serializer_->GetErrorHandler()(ErrorType::UHDM_EMPTY_CONCATENATION,
                                        std::string(object->VpiDecompile()),
                                        object, nullptr);
