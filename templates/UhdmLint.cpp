@@ -107,6 +107,70 @@ void UhdmLint::leaveModule_inst(const module_inst* object, vpiHandle handle) {
   if (auto assigns = object->Cont_assigns()) {
     checkMultiContAssign(assigns);
   }
+  checkScopeNameClashes(object);
+}
+
+// LRM 3.13, 27.6: a generate block's name lives in the module's scope, so it
+// may not repeat the name of a net, variable, parameter, task, function,
+// instance or named block there -- nor of ANOTHER generate block.  The
+// iterations of one loop share a source location, and only the selected
+// branch of a conditional generate is elaborated, so `if (c) begin : g`
+// `end else begin : g` (legal, and common) never clashes here.  Checked on
+// ELABORATED instances only; `genblkN` names are compiler-made.
+void UhdmLint::checkScopeNameClashes(const module_inst* mi) {
+  if (mi->Gen_scope_arrays() == nullptr || isInUhdmAllIterator()) return;
+  const any* up = mi->VpiParent();
+  if (!(mi->VpiTop() ||
+        (up && up->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst)))
+    return;
+  std::set<std::string, std::less<>> names;
+  auto add = [&](const any* o) {
+    if (o && !o->VpiName().empty()) names.emplace(o->VpiName());
+  };
+  if (mi->Nets())
+    for (const any* o : *mi->Nets()) add(o);
+  if (mi->Array_nets())
+    for (const any* o : *mi->Array_nets()) add(o);
+  if (mi->Variables())
+    for (const any* o : *mi->Variables()) add(o);
+  if (mi->Parameters())
+    for (const any* o : *mi->Parameters()) add(o);
+  if (mi->Task_funcs())
+    for (const any* o : *mi->Task_funcs()) add(o);
+  if (mi->Modules())
+    for (const any* o : *mi->Modules()) add(o);
+  if (mi->Process())
+    for (const process_stmt* ps : *mi->Process())
+      if (const any* st = ps->Stmt())
+        if (st->UhdmType() == UHDM_OBJECT_TYPE::uhdmbegin ||
+            st->UhdmType() == UHDM_OBJECT_TYPE::uhdmnamed_begin ||
+            st->UhdmType() == UHDM_OBJECT_TYPE::uhdmfork_stmt ||
+            st->UhdmType() == UHDM_OBJECT_TYPE::uhdmnamed_fork)
+          add(st);
+  std::map<std::string, const gen_scope_array*, std::less<>> gens;
+  for (const gen_scope_array* g : *mi->Gen_scope_arrays()) {
+    std::string base(g->VpiName());
+    if (const size_t b = base.find('['); b != std::string::npos) base.resize(b);
+    if (base.empty() || base.rfind("genblk", 0) == 0) continue;
+    bool clash = false;
+    if (auto it = gens.find(base); it != gens.end()) {
+      const gen_scope_array* o = it->second;
+      clash =
+          !(o->VpiFile() == g->VpiFile() && o->VpiLineNo() == g->VpiLineNo() &&
+            o->VpiColumnNo() == g->VpiColumnNo());
+    } else {
+      gens.emplace(base, g);
+      clash = names.count(base) != 0;
+    }
+    if (!clash) continue;
+    if (!reportedCalls_
+             .emplace(std::string(g->VpiFile()) + "#scope", g->VpiLineNo(),
+                      g->VpiColumnNo())
+             .second)
+      continue;
+    serializer_->GetErrorHandler()(ErrorType::UHDM_SCOPE_NAME_CLASH, base, g,
+                                   nullptr);
+  }
 }
 
 void UhdmLint::checkMultiContAssign(
