@@ -524,7 +524,9 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
     for (auto c : *object->Enum_consts()) {
       const std::string_view val = c->VpiDecompile();
       if (c->VpiSize() == -1) continue;
-      if (!std::regex_match(std::string(val), r)) continue;
+      // A SIZED literal (`4'h2`): regex_match had to match the whole text,
+      // so it only ever accepted a bare `4'` and the check never ran.
+      if (!std::regex_search(std::string(val), r)) continue;
       invalidValue = false;
       const uint64_t c_size = eval.size(c, invalidValue, object->Instance(),
                                         object->VpiParent(), true);
