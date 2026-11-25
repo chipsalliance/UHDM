@@ -49,6 +49,11 @@ class UhdmLint final : public VpiListener {
   void leaveStruct_typespec(const struct_typespec* object,
                             vpiHandle handle) override;
 
+  void leaveUnion_typespec(const union_typespec* object,
+                           vpiHandle handle) override;
+
+  void checkAggregateTypespec(const typespec* object, bool packed);
+
   void leaveModule_inst(const module_inst* object, vpiHandle handle) override;
 
   void leaveAssignment(const assignment* object, vpiHandle handle) override;

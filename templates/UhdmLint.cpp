@@ -31,6 +31,7 @@
 #include <cerrno>
 #include <cstring>
 #include <regex>
+#include <set>
 
 namespace UHDM {
 
@@ -90,6 +91,93 @@ void UhdmLint::leaveFunction(const function* object, vpiHandle handle) {
   }
 }
 
+// The member list of a struct or union typespec, nullptr for anything else.
+static const VectorOftypespec_member* aggregateMembers(const typespec* ts) {
+  if (const struct_typespec* st = any_cast<const struct_typespec*>(ts))
+    return st->Members();
+  if (const union_typespec* ut = any_cast<const union_typespec*>(ts))
+    return ut->Members();
+  return nullptr;
+}
+
+static const typespec* memberTypespec(const typespec_member* member) {
+  if (const ref_typespec* rt = member->Typespec()) return rt->Actual_typespec();
+  return nullptr;
+}
+
+// Surelog may hold several copies of one declared type (a forward typedef
+// and its completion), so a type is matched by kind, name and position too.
+static bool sameTypeDecl(const typespec* a, const typespec* b) {
+  if (a == b) return true;
+  if (a == nullptr || b == nullptr) return false;
+  return a->UhdmType() == b->UhdmType() && !a->VpiName().empty() &&
+         a->VpiName() == b->VpiName() && a->VpiFile() == b->VpiFile() &&
+         a->VpiLineNo() == b->VpiLineNo() &&
+         a->VpiColumnNo() == b->VpiColumnNo();
+}
+
+// True if `ts` contains `target` as a member, directly or through nested
+// structs/unions and the element types of arrays.  Class handles are not
+// followed: a class may legally refer to itself.
+static bool containsAggregate(const typespec* ts, const typespec* target,
+                              std::set<const typespec*>& visited) {
+  if (ts == nullptr || !visited.insert(ts).second) return false;
+  const typespec* elem = nullptr;
+  if (const array_typespec* at = any_cast<const array_typespec*>(ts)) {
+    if (const ref_typespec* rt = at->Elem_typespec())
+      elem = rt->Actual_typespec();
+  } else if (const packed_array_typespec* pt =
+                 any_cast<const packed_array_typespec*>(ts)) {
+    if (const ref_typespec* rt = pt->Elem_typespec())
+      elem = rt->Actual_typespec();
+  }
+  if (elem != nullptr)
+    return sameTypeDecl(elem, target) ||
+           containsAggregate(elem, target, visited);
+  if (const VectorOftypespec_member* members = aggregateMembers(ts)) {
+    for (const typespec_member* member : *members) {
+      const typespec* mts = memberTypespec(member);
+      if (sameTypeDecl(mts, target) || containsAggregate(mts, target, visited))
+        return true;
+    }
+  }
+  return false;
+}
+
+// LRM 7.2.1: a packed structure or union holds only integral members; LRM
+// 6.18: a type cannot be defined in terms of itself (`typedef T; typedef
+// struct packed { T x; } T;`).
+void UhdmLint::checkAggregateTypespec(const typespec* object, bool packed) {
+  const VectorOftypespec_member* members = aggregateMembers(object);
+  if (members == nullptr) return;
+  for (const typespec_member* member : *members) {
+    const typespec* mts = memberTypespec(member);
+    if (mts == nullptr) continue;
+    if (packed) {
+      switch (mts->UhdmType()) {
+        case UHDM_OBJECT_TYPE::uhdmreal_typespec:
+        case UHDM_OBJECT_TYPE::uhdmshort_real_typespec:
+        case UHDM_OBJECT_TYPE::uhdmstring_typespec:
+        case UHDM_OBJECT_TYPE::uhdmchandle_typespec:
+        case UHDM_OBJECT_TYPE::uhdmevent_typespec:
+        case UHDM_OBJECT_TYPE::uhdmclass_typespec:
+          serializer_->GetErrorHandler()(
+              ErrorType::UHDM_PACKED_MEMBER_NOT_INTEGRAL,
+              std::string(member->VpiName()), member, nullptr);
+          break;
+        default:
+          break;
+      }
+    }
+    std::set<const typespec*> visited;
+    if (sameTypeDecl(mts, object) || containsAggregate(mts, object, visited)) {
+      serializer_->GetErrorHandler()(ErrorType::UHDM_RECURSIVE_TYPE,
+                                     std::string(object->VpiName()), member,
+                                     nullptr);
+    }
+  }
+}
+
 void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
                                     vpiHandle handle) {
   if (object->VpiPacked() && (object->Members() != nullptr)) {
@@ -101,6 +189,12 @@ void UhdmLint::leaveStruct_typespec(const struct_typespec* object,
       }
     }
   }
+  checkAggregateTypespec(object, object->VpiPacked());
+}
+
+void UhdmLint::leaveUnion_typespec(const union_typespec* object,
+                                   vpiHandle handle) {
+  checkAggregateTypespec(object, object->VpiPacked());
 }
 
 void UhdmLint::leaveModule_inst(const module_inst* object, vpiHandle handle) {

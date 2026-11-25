@@ -202,6 +202,12 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_EMPTY_CONCATENATION:
             errmsg = "Empty concatenation";
             break;
+          case UHDM::UHDM_PACKED_MEMBER_NOT_INTEGRAL:
+            errmsg = "Packed structure or union member is not integral";
+            break;
+          case UHDM::UHDM_RECURSIVE_TYPE:
+            errmsg = "Type recursively depends on its own definition";
+            break;
           case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
             errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
             break;
