@@ -509,7 +509,8 @@ void UhdmLint::leaveEnum_typespec(const enum_typespec* object,
       return;
     }
   }
-  static std::regex r("^[0-9]*'");
+  // At least one size digit: `'bx` is an UNSIZED based literal.
+  static std::regex r("^[0-9]+'");
   ExprEval eval;
   eval.setDesign(design_);
 
@@ -947,6 +948,33 @@ void UhdmLint::leaveIndexed_part_select(const indexed_part_select* object,
                    0, false);
 }
 
+// An element of a concatenation that contributes no bits: a replication
+// with a (folded) count of 0, or a replication of such an empty
+// concatenation.  Anything not KNOWN to be empty is not.
+static bool emptyConcatElement(const any* e, const any* where) {
+  if (e == nullptr || e->UhdmType() != UHDM_OBJECT_TYPE::uhdmoperation)
+    return false;
+  const operation* op = (const operation*)e;
+  const VectorOfany* ops = op->Operands();
+  if (ops == nullptr || ops->empty()) return false;
+  if (op->VpiOpType() == vpiMultiConcatOp) {
+    const any* count = elaboratedParamValue(ops->at(0), where);
+    if (count && count->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) {
+      std::string_view v = ((const constant*)count)->VpiValue();
+      if (v == "UINT:0" || v == "INT:0" || v == "DEC:0" || v == "BIN:0" ||
+          v == "HEX:0")
+        return true;
+    }
+    return ops->size() == 2 && emptyConcatElement(ops->at(1), where);
+  }
+  if (op->VpiOpType() == vpiConcatOp) {
+    for (const any* o : *ops)
+      if (!emptyConcatElement(o, where)) return false;
+    return true;
+  }
+  return false;
+}
+
 void UhdmLint::leaveOperation(const operation* object, vpiHandle handle) {
   const VectorOfany* ops = object->Operands();
   if (ops == nullptr || ops->empty()) return;
@@ -954,6 +982,27 @@ void UhdmLint::leaveOperation(const operation* object, vpiHandle handle) {
     case vpiAssignmentPatternOp:
       checkPatternCount(object);
       break;
+    case vpiConcatOp: {
+      // LRM 11.4.12.1: a zero replication count is legal only beside other
+      // operands -- a concatenation made of nothing but empty replications
+      // (`{{0{x}}}`, and the `{{0{s}}}` inside `{2{{0{s}}}}`) is an error.
+      bool allEmpty = true;
+      for (const any* o : *ops) {
+        if (!emptyConcatElement(o, object)) {
+          allEmpty = false;
+          break;
+        }
+      }
+      if (allEmpty &&
+          reportedCalls_
+              .emplace(std::string(object->VpiFile()) + "#concat",
+                       object->VpiLineNo(), object->VpiColumnNo())
+              .second)
+        serializer_->GetErrorHandler()(ErrorType::UHDM_EMPTY_CONCATENATION,
+                                       std::string(object->VpiDecompile()),
+                                       object, nullptr);
+      break;
+    }
     case vpiMultiConcatOp:
       // A zero count is legal inside a larger concatenation; a negative one
       // never is.
