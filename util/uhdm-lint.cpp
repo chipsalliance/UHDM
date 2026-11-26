@@ -223,6 +223,15 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_NOT_ASSIGNABLE:
             errmsg = "Expression is not assignable";
             break;
+          case UHDM::UHDM_INVALID_OPERAND_TYPE:
+            errmsg = "Operand type not allowed for this operator";
+            break;
+          case UHDM::UHDM_VOID_FUNCTION_VALUE:
+            errmsg = "Void function used as a value";
+            break;
+          case UHDM::UHDM_EVENT_AS_VALUE:
+            errmsg = "Event used as a value";
+            break;
           case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
             errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
             break;

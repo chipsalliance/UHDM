@@ -128,6 +128,8 @@ class UhdmLint final : public VpiListener {
   void checkContAssignLhsSelects(const any* lhs);
   bool checkUnknownBits(const any* ex, const any* where);
   void checkTfArgCount(const tf_call* call, const task_func* tf);
+  void checkOperandTypes(const operation* op);
+  void checkEventArgs(const tf_call* call, const task_func* tf);
   void checkPatternCount(const operation* pattern);
   void checkScopeNameClashes(const module_inst* mi);
   void checkEnumDuplicateValues(const enum_typespec* object,

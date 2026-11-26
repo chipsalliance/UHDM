@@ -784,8 +784,88 @@ void UhdmLint::leaveProperty_spec(const property_spec* prop_s,
   }
 }
 
+// The kind of an operand that only some operators accept (LRM 11.3.1):
+// real and string values, and a call to a void function.
+namespace {
+enum class OperandKind { Other, Real, String, Void };
+
+OperandKind typespecKind(const ref_typespec* rt) {
+  if (rt == nullptr) return OperandKind::Other;
+  const typespec* ts = rt->Actual_typespec();
+  if (ts == nullptr) return OperandKind::Other;
+  switch (ts->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmreal_typespec:
+      return OperandKind::Real;
+    case UHDM_OBJECT_TYPE::uhdmstring_typespec:
+      return OperandKind::String;
+    default:
+      return OperandKind::Other;
+  }
+}
+
+OperandKind operandKind(const any* o) {
+  if (o == nullptr) return OperandKind::Other;
+  switch (o->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmconstant: {
+      const constant* c = static_cast<const constant*>(o);
+      if (c->VpiConstType() == vpiRealConst) return OperandKind::Real;
+      return typespecKind(c->Typespec());
+    }
+    case UHDM_OBJECT_TYPE::uhdmref_obj: {
+      const ref_obj* ref = static_cast<const ref_obj*>(o);
+      const any* actual = ref->Actual_group();
+      // A parameter value in the definition view is left unbound: look the
+      // name up among the enclosing scope's parameters.
+      if (actual == nullptr) {
+        for (const any* p = ref->VpiParent(); p != nullptr && actual == nullptr;
+             p = p->VpiParent()) {
+          const scope* sc = any_cast<const scope*>(p);
+          if (sc == nullptr || sc->Parameters() == nullptr) continue;
+          for (const any* prm : *sc->Parameters()) {
+            if (prm->UhdmType() == UHDM_OBJECT_TYPE::uhdmparameter &&
+                prm->VpiName() == ref->VpiName()) {
+              actual = prm;
+              break;
+            }
+          }
+          break;  // only the innermost scope
+        }
+      }
+      if (actual == nullptr) return OperandKind::Other;
+      switch (actual->UhdmType()) {
+        case UHDM_OBJECT_TYPE::uhdmreal_var:
+          return OperandKind::Real;
+        case UHDM_OBJECT_TYPE::uhdmstring_var:
+          return OperandKind::String;
+        case UHDM_OBJECT_TYPE::uhdmparameter:
+          return typespecKind(
+              static_cast<const parameter*>(actual)->Typespec());
+        default:
+          return OperandKind::Other;
+      }
+    }
+    case UHDM_OBJECT_TYPE::uhdmfunc_call: {
+      const function* f = static_cast<const func_call*>(o)->Function();
+      if (f != nullptr && f->Return() == nullptr) return OperandKind::Void;
+      return OperandKind::Other;
+    }
+    default:
+      return OperandKind::Other;
+  }
+}
+}  // namespace
+
 void UhdmLint::leaveSys_func_call(const sys_func_call* object,
                                   vpiHandle handle) {
+  // LRM 11.7: $signed / $unsigned take an integral argument.
+  if ((object->VpiName() == "$signed" || object->VpiName() == "$unsigned") &&
+      object->Tf_call_args() != nullptr) {
+    for (const any* a : *object->Tf_call_args()) {
+      if (operandKind(a) == OperandKind::Real && reportOnce(a, "operand-type"))
+        serializer_->GetErrorHandler()(ErrorType::UHDM_INVALID_OPERAND_TYPE,
+                                       "real", a, nullptr);
+    }
+  }
   ExprEval eval;
   eval.setDesign(design_);
   if (object->VpiName() == "$past") {
@@ -1136,7 +1216,95 @@ static bool emptyConcatElement(const any* e, const any* where) {
   return false;
 }
 
+void UhdmLint::checkOperandTypes(const operation* op) {
+  const VectorOfany* ops = op->Operands();
+  if (ops == nullptr) return;
+  bool integralOnly = false;  // no real operand
+  bool wildcard = false;      // no string operand either
+  switch (op->VpiOpType()) {
+    case vpiBitNegOp:
+    case vpiUnaryAndOp:
+    case vpiUnaryNandOp:
+    case vpiUnaryOrOp:
+    case vpiUnaryNorOp:
+    case vpiUnaryXorOp:
+    case vpiUnaryXNorOp:
+    case vpiModOp:
+    case vpiLShiftOp:
+    case vpiRShiftOp:
+    case vpiArithLShiftOp:
+    case vpiArithRShiftOp:
+    case vpiBitAndOp:
+    case vpiBitOrOp:
+    case vpiBitXorOp:
+    case vpiBitXnorOp:
+    case vpiConcatOp:
+    case vpiMultiConcatOp:
+      integralOnly = true;
+      break;
+    case vpiWildEqOp:
+    case vpiWildNeqOp:
+      integralOnly = true;
+      wildcard = true;
+      break;
+    case vpiCastOp:
+    case vpiAssignmentPatternOp:
+    case vpiMultiAssignmentPatternOp:
+      return;
+    default:
+      break;
+  }
+  for (size_t i = 0; i < ops->size(); i++) {
+    // The count of `{n{...}}` is checked elsewhere.
+    if (op->VpiOpType() == vpiMultiConcatOp && i == 0) continue;
+    const any* o = ops->at(i);
+    const OperandKind k = operandKind(o);
+    ErrorType err = ErrorType::UHDM_INVALID_OPERAND_TYPE;
+    std::string what;
+    if (k == OperandKind::Void) {
+      err = ErrorType::UHDM_VOID_FUNCTION_VALUE;
+      what = std::string(static_cast<const func_call*>(o)->VpiName());
+    } else if (k == OperandKind::Real && integralOnly) {
+      what = "real";
+    } else if (k == OperandKind::String && wildcard) {
+      what = "string";
+    } else {
+      continue;
+    }
+    if (reportOnce(op, "operand-type"))
+      serializer_->GetErrorHandler()(err, what, op, nullptr);
+    return;
+  }
+}
+
+// LRM 15.5: an event is not a value; it cannot be passed to a formal that
+// is not itself an event.
+void UhdmLint::checkEventArgs(const tf_call* call, const task_func* tf) {
+  if (call->Tf_call_args() == nullptr) return;
+  const VectorOfio_decl* ios = tf ? tf->Io_decls() : nullptr;
+  size_t i = 0;
+  for (const any* a : *call->Tf_call_args()) {
+    const size_t idx = i++;
+    const ref_obj* r = any_cast<const ref_obj*>(a);
+    if (r == nullptr) continue;
+    const any* actual = r->Actual_group();
+    if (actual == nullptr ||
+        actual->UhdmType() != UHDM_OBJECT_TYPE::uhdmnamed_event)
+      continue;
+    if (ios != nullptr && idx < ios->size()) {
+      if (const ref_typespec* rt = ios->at(idx)->Typespec()) {
+        if (const typespec* ts = rt->Actual_typespec())
+          if (ts->UhdmType() == UHDM_OBJECT_TYPE::uhdmevent_typespec) continue;
+      }
+    }
+    if (reportOnce(a, "event-value"))
+      serializer_->GetErrorHandler()(ErrorType::UHDM_EVENT_AS_VALUE,
+                                     std::string(r->VpiName()), a, nullptr);
+  }
+}
+
 void UhdmLint::leaveOperation(const operation* object, vpiHandle handle) {
+  checkOperandTypes(object);
   const VectorOfany* ops = object->Operands();
   if (ops == nullptr || ops->empty()) return;
   switch (object->VpiOpType()) {
@@ -1799,11 +1967,13 @@ void UhdmLint::checkTfArgCount(const tf_call* call, const task_func* tf) {
 
 void UhdmLint::leaveFunc_call(const func_call* object, vpiHandle handle) {
   reportUndefinedTaskFunc(object, object->Function() != nullptr);
+  checkEventArgs(object, object->Function());
   checkEnumCallArgs(object, object->Function());
   checkTfArgCount(object, object->Function());
 }
 
 void UhdmLint::leaveTask_call(const task_call* object, vpiHandle handle) {
+  checkEventArgs(object, object->Task());
   // LRM 13.3: a task has no value, so it cannot be called inside an
   // expression (`y = P::t(10)`).
   if (const any* parent = object->VpiParent()) {
