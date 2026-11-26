@@ -66,6 +66,13 @@ class UhdmLint final : public VpiListener {
   void checkProcContTarget(const any* lhs, const any* where);
   void checkQueueBound(const VectorOfrange* ranges);
   void leaveArray_net(const array_net* object, vpiHandle handle) override;
+  void leaveForeach_stmt(const foreach_stmt* object, vpiHandle handle) override;
+  void leaveBit_var(const bit_var* object, vpiHandle handle) override;
+  void leaveLogic_var(const logic_var* object, vpiHandle handle) override;
+  void checkPatternToScalar(const any* var, const any* rhs);
+  void noteContDrivenVariable(const cont_assign* object);
+  void noteProcDrivenVariable(const assignment* object);
+  void reportContProcDrivenVariables();
   void leaveCont_assign(const cont_assign* object, vpiHandle handle) override;
 
   void checkClassAssign(const any* lhs, const any* rhs, const any* where);
@@ -166,6 +173,9 @@ class UhdmLint final : public VpiListener {
   // for a declared name it fails to bind (a block-local localparam, a $unit
   // parameter, a property formal); only a name declared nowhere is reported.
   std::set<std::string, std::less<>> declaredNames_;
+  std::map<const any*, const cont_assign*> contDrivenVars_;
+  std::vector<const any*> contDrivenOrder_;
+  std::map<const any*, const assignment*> procDrivenVars_;
   std::vector<std::pair<const tf_call*, std::string>> unboundCalls_;
   // Definitions with at least one ELABORATED instance.  A module nothing
   // instantiates is not elaborated, so its names are not resolved.
