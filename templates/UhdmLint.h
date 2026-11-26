@@ -58,8 +58,11 @@ class UhdmLint final : public VpiListener {
 
   void leaveAssignment(const assignment* object, vpiHandle handle) override;
 
+  void leaveArray_var(const array_var* object, vpiHandle handle) override;
   void leaveCont_assign(const cont_assign* object, vpiHandle handle) override;
 
+  void checkClassAssign(const any* lhs, const any* rhs, const any* where);
+  void checkArrayPatternCount(const any* arr, const any* rhs, const any* where);
   void checkUnpackedArrayAssign(const any* lhs, const any* rhs,
                                 const any* where);
 

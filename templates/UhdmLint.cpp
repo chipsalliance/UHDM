@@ -349,37 +349,220 @@ static const any* wholeUnpackedArray(const any* actual) {
   return actual;
 }
 
+// Any unpacked array (static, dynamic, associative or queue) an expression
+// names as a whole, or nullptr.
+static const any* anyUnpackedArray(const any* actual) {
+  if (actual == nullptr) return nullptr;
+  if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net ||
+      actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var)
+    return actual;
+  const any* p = actual->VpiParent();
+  if (p && (p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net ||
+            p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var))
+    return p;
+  return nullptr;
+}
+
+static const VectorOfrange* unpackedRanges(const any* arr) {
+  if (arr->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net)
+    return ((const array_net*)arr)->Ranges();
+  return ((const array_var*)arr)->Ranges();
+}
+
+static const any* unpackedElement(const any* arr) {
+  if (arr->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net) {
+    const array_net* an = (const array_net*)arr;
+    if (an->Nets() && !an->Nets()->empty()) return an->Nets()->at(0);
+    return nullptr;
+  }
+  const array_var* av = (const array_var*)arr;
+  if (av->Variables() && !av->Variables()->empty())
+    return av->Variables()->at(0);
+  return nullptr;
+}
+
+// The constant size of every unpacked dimension of a static array.
+static bool unpackedDims(const any* arr, design* d,
+                         std::vector<uint64_t>& dims) {
+  const VectorOfrange* ranges = unpackedRanges(arr);
+  if (ranges == nullptr || ranges->empty()) return false;
+  ExprEval eval;
+  eval.setDesign(d);
+  for (const range* r : *ranges) {
+    if (!r->Left_expr() || !r->Right_expr()) return false;
+    if (r->Left_expr()->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant ||
+        r->Right_expr()->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
+      return false;
+    bool invalid = false;
+    const int64_t l = eval.get_value(invalid, (const expr*)r->Left_expr());
+    const int64_t rr = eval.get_value(invalid, (const expr*)r->Right_expr());
+    if (invalid) return false;
+    dims.push_back((l > rr ? l - rr : rr - l) + 1);
+  }
+  return true;
+}
+
 // Element count and element width of a 1-D static unpacked array, when both
 // are known constants.
 static bool unpackedShape(const any* arr, Serializer* s, design* d,
                           uint64_t& count, uint64_t& width) {
-  const VectorOfrange* ranges = nullptr;
-  const any* elem = nullptr;
-  if (arr->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net) {
-    const array_net* an = (const array_net*)arr;
-    ranges = an->Ranges();
-    if (an->Nets() && !an->Nets()->empty()) elem = an->Nets()->at(0);
-  } else {
-    const array_var* av = (const array_var*)arr;
-    ranges = av->Ranges();
-    if (av->Variables() && !av->Variables()->empty())
-      elem = av->Variables()->at(0);
-  }
-  if (ranges == nullptr || ranges->size() != 1 || elem == nullptr) return false;
+  std::vector<uint64_t> dims;
+  const any* elem = unpackedElement(arr);
+  if (elem == nullptr || !unpackedDims(arr, d, dims) || dims.size() != 1)
+    return false;
   ExprEval eval;
   eval.setDesign(d);
   bool invalid = false;
-  const range* r = ranges->at(0);
-  if (!r->Left_expr() || !r->Right_expr()) return false;
-  if (r->Left_expr()->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant ||
-      r->Right_expr()->UhdmType() != UHDM_OBJECT_TYPE::uhdmconstant)
-    return false;
-  const int64_t l = eval.get_value(invalid, (const expr*)r->Left_expr());
-  const int64_t rr = eval.get_value(invalid, (const expr*)r->Right_expr());
-  if (invalid) return false;
-  count = (l > rr ? l - rr : rr - l) + 1;
+  count = dims[0];
   width = eval.size(elem, invalid, nullptr, nullptr, true);
   return !invalid && width > 0;
+}
+
+// What decides whether two unpacked-array element types are equivalent
+// (LRM 6.22.2): integral types match on width, 2/4-state and signedness; an
+// enum only matches itself; real, shortreal and string only themselves.
+// Kind::Unknown (structs, classes, ...) is never compared.
+struct ElemType {
+  enum class Kind { Unknown, Integral, Enum, Real, ShortReal, String };
+  Kind kind = Kind::Unknown;
+  int state = 0;  // 2, 4, or 0 when unknown
+  bool isSigned = false;
+  uint64_t width = 0;
+  const typespec* decl = nullptr;
+};
+
+static ElemType elemTypeOf(const any* arr, const any* elem, design* d) {
+  ElemType t;
+  if (elem == nullptr) return t;
+  const expr* e = any_cast<const expr*>(elem);
+  if (e == nullptr || e->Typespec() == nullptr) return t;
+  const typespec* ts = e->Typespec()->Actual_typespec();
+  if (ts == nullptr) return t;
+  bool tsSigned = false;
+  switch (ts->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmlogic_typespec:
+      t.kind = ElemType::Kind::Integral;
+      t.state = 4;
+      tsSigned = ((const logic_typespec*)ts)->VpiSigned();
+      break;
+    case UHDM_OBJECT_TYPE::uhdmbit_typespec:
+      t.kind = ElemType::Kind::Integral;
+      t.state = 2;
+      tsSigned = ((const bit_typespec*)ts)->VpiSigned();
+      break;
+    case UHDM_OBJECT_TYPE::uhdmint_typespec:
+      t.kind = ElemType::Kind::Integral;
+      t.state = 2;
+      tsSigned = ((const int_typespec*)ts)->VpiSigned();
+      t.width = 32;
+      break;
+    case UHDM_OBJECT_TYPE::uhdminteger_typespec:
+      t.kind = ElemType::Kind::Integral;
+      t.state = 4;
+      tsSigned = ((const integer_typespec*)ts)->VpiSigned();
+      t.width = 32;
+      break;
+    case UHDM_OBJECT_TYPE::uhdmshort_int_typespec:
+      t.kind = ElemType::Kind::Integral;
+      t.state = 2;
+      tsSigned = ((const short_int_typespec*)ts)->VpiSigned();
+      t.width = 16;
+      break;
+    case UHDM_OBJECT_TYPE::uhdmbyte_typespec:
+      t.kind = ElemType::Kind::Integral;
+      t.state = 2;
+      tsSigned = ((const byte_typespec*)ts)->VpiSigned();
+      t.width = 8;
+      break;
+    case UHDM_OBJECT_TYPE::uhdmlong_int_typespec:
+      t.kind = ElemType::Kind::Integral;
+      t.state = 2;
+      tsSigned = ((const long_int_typespec*)ts)->VpiSigned();
+      t.width = 64;
+      break;
+    case UHDM_OBJECT_TYPE::uhdmreal_typespec:
+      t.kind = ElemType::Kind::Real;
+      return t;
+    case UHDM_OBJECT_TYPE::uhdmshort_real_typespec:
+      t.kind = ElemType::Kind::ShortReal;
+      return t;
+    case UHDM_OBJECT_TYPE::uhdmstring_typespec:
+      t.kind = ElemType::Kind::String;
+      return t;
+    case UHDM_OBJECT_TYPE::uhdmenum_typespec:
+      t.kind = ElemType::Kind::Enum;
+      t.decl = ts;
+      return t;
+    default:
+      return t;
+  }
+  bool objSigned = false;
+  if (const variables* v = any_cast<const variables*>(elem))
+    objSigned = v->VpiSigned();
+  else if (const nets* n = any_cast<const nets*>(elem))
+    objSigned = n->VpiSigned();
+  if (const variables* v = any_cast<const variables*>(arr))
+    objSigned = objSigned || v->VpiSigned();
+  t.isSigned = tsSigned || objSigned;
+  if (t.width != 0) return t;
+  ExprEval eval;
+  eval.setDesign(d);
+  bool invalid = false;
+  t.width = eval.size(elem, invalid, nullptr, nullptr, true);
+  if (invalid) t.width = 0;
+  return t;
+}
+
+static bool elemTypesDiffer(const ElemType& a, const ElemType& b) {
+  if (a.kind == ElemType::Kind::Unknown || b.kind == ElemType::Kind::Unknown)
+    return false;
+  if (a.kind != b.kind) return true;
+  switch (a.kind) {
+    case ElemType::Kind::Enum:
+      return !sameTypeDecl(a.decl, b.decl);
+    case ElemType::Kind::Integral:
+      if (a.width && b.width && a.width != b.width) return true;
+      if (a.state && b.state && a.state != b.state) return true;
+      return a.isSigned != b.isSigned;
+    default:
+      return false;
+  }
+}
+
+// A select that yields ONE element of a 1-D unpacked array (`x[0]`).
+static bool isUnpackedElementSelect(const any* e) {
+  if (e == nullptr || e->UhdmType() != UHDM_OBJECT_TYPE::uhdmbit_select)
+    return false;
+  const any* arr = anyUnpackedArray(((const bit_select*)e)->Actual_group());
+  if (arr == nullptr) return false;
+  const VectorOfrange* ranges = unpackedRanges(arr);
+  return ranges != nullptr && ranges->size() == 1;
+}
+
+// A positional assignment pattern for a static unpacked array names one
+// item per element of the outer dimension (LRM 10.9.1): `ms_t ms[1:0] =
+// '{0, 0, 1, 1}` gives four items to two struct elements.
+void UhdmLint::checkArrayPatternCount(const any* arr, const any* rhs,
+                                      const any* where) {
+  if (arr == nullptr || rhs == nullptr ||
+      rhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmoperation)
+    return;
+  const operation* op = (const operation*)rhs;
+  if (op->VpiOpType() != vpiAssignmentPatternOp || op->Operands() == nullptr)
+    return;
+  for (const any* o : *op->Operands())
+    if (o->UhdmType() == UHDM_OBJECT_TYPE::uhdmtagged_pattern) return;
+  std::vector<uint64_t> dims;
+  if (!unpackedDims(arr, design_, dims)) return;
+  if (dims[0] != op->Operands()->size() && reportOnce(rhs, "array-pattern"))
+    serializer_->GetErrorHandler()(
+        ErrorType::UHDM_ILLEGAL_UNPACKED_ARRAY_ASSIGN,
+        std::string(arr->VpiName()), where, nullptr);
+}
+
+void UhdmLint::leaveArray_var(const array_var* object, vpiHandle handle) {
+  if (wholeUnpackedArray(object) != nullptr)
+    checkArrayPatternCount(object, object->Expr(), object->Expr());
 }
 
 // Assigning a whole unpacked array (LRM 7.6): the right-hand side must be an
@@ -388,63 +571,108 @@ static bool unpackedShape(const any* arr, Serializer* s, design* d,
 // expression or an array of another element width or count was accepted.
 void UhdmLint::checkUnpackedArrayAssign(const any* lhs, const any* rhs,
                                         const any* where) {
+  if (lhs == nullptr || rhs == nullptr) return;
+  // A slice of a 1-D unpacked array (`out[3:0] = in[j]`) takes an array,
+  // never a single element or value.
+  if (lhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmpart_select) {
+    const part_select* ps = (const part_select*)lhs;
+    const any* arr = anyUnpackedArray(ps->Actual_group());
+    if (arr == nullptr) return;
+    const VectorOfrange* ranges = unpackedRanges(arr);
+    if (ranges == nullptr || ranges->size() != 1) return;
+    if ((isUnpackedElementSelect(rhs) ||
+         rhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmconstant) &&
+        reportOnce(where, "array-assign"))
+      serializer_->GetErrorHandler()(
+          ErrorType::UHDM_ILLEGAL_UNPACKED_ARRAY_ASSIGN,
+          std::string(ps->VpiName()), where, nullptr);
+    return;
+  }
   // A WHOLE-array target only: bit_select / var_select derive from ref_obj
   // and must not match (`mem[sp] <= d` is an element write).
-  if (lhs == nullptr || rhs == nullptr ||
-      lhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj)
-    return;
+  if (lhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) return;
   const ref_obj* lref = (const ref_obj*)lhs;
+  const any* lany = anyUnpackedArray(lref->Actual_group());
+  if (lany == nullptr) return;
   const any* larr = wholeUnpackedArray(lref->Actual_group());
-  if (larr == nullptr) return;
-  uint64_t lcount = 0, lwidth = 0;
-  if (!unpackedShape(larr, serializer_, design_, lcount, lwidth)) return;
+  if (larr != nullptr) checkArrayPatternCount(larr, rhs, where);
   bool bad = false;
-  switch (rhs->UhdmType()) {
-    case UHDM_OBJECT_TYPE::uhdmconstant:
-      bad = true;
-      break;
-    case UHDM_OBJECT_TYPE::uhdmoperation: {
-      const int op = ((const operation*)rhs)->VpiOpType();
-      // Patterns, concatenations, conditionals and casts may legally build
-      // an unpacked array; any other operator yields a single value.
-      if (op != vpiAssignmentPatternOp && op != vpiMultiAssignmentPatternOp &&
-          op != vpiConcatOp && op != vpiMultiConcatOp && op != vpiConditionOp &&
-          op != vpiCastOp)
+  uint64_t lcount = 0, lwidth = 0;
+  if (larr != nullptr &&
+      unpackedShape(larr, serializer_, design_, lcount, lwidth)) {
+    switch (rhs->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmconstant:
         bad = true;
-      break;
-    }
-    case UHDM_OBJECT_TYPE::uhdmref_obj: {
-      const any* actual = ((const ref_obj*)rhs)->Actual_group();
-      if (actual == nullptr) break;
-      const any* rarr = wholeUnpackedArray(actual);
-      if (rarr == nullptr) {
-        // A net or variable that is not an array: a scalar or a vector.
-        switch (actual->UhdmType()) {
-          case UHDM_OBJECT_TYPE::uhdmlogic_net:
-          case UHDM_OBJECT_TYPE::uhdmlogic_var:
-          case UHDM_OBJECT_TYPE::uhdmbit_var:
-          case UHDM_OBJECT_TYPE::uhdmint_var:
-          case UHDM_OBJECT_TYPE::uhdminteger_var:
-            bad = true;
-            break;
-          default:
-            break;
-        }
+        break;
+      case UHDM_OBJECT_TYPE::uhdmoperation: {
+        const int op = ((const operation*)rhs)->VpiOpType();
+        // Patterns, concatenations, conditionals and casts may legally build
+        // an unpacked array; any other operator yields a single value.
+        if (op != vpiAssignmentPatternOp && op != vpiMultiAssignmentPatternOp &&
+            op != vpiConcatOp && op != vpiMultiConcatOp &&
+            op != vpiConditionOp && op != vpiCastOp)
+          bad = true;
         break;
       }
-      uint64_t rcount = 0, rwidth = 0;
-      if (unpackedShape(rarr, serializer_, design_, rcount, rwidth))
-        bad = (rcount != lcount) || (rwidth != lwidth);
-      break;
+      case UHDM_OBJECT_TYPE::uhdmref_obj: {
+        const any* actual = ((const ref_obj*)rhs)->Actual_group();
+        if (actual == nullptr) break;
+        const any* rarr = wholeUnpackedArray(actual);
+        if (rarr == nullptr) {
+          // A net or variable that is not an array: a scalar or a vector.
+          switch (actual->UhdmType()) {
+            case UHDM_OBJECT_TYPE::uhdmlogic_net:
+            case UHDM_OBJECT_TYPE::uhdmlogic_var:
+            case UHDM_OBJECT_TYPE::uhdmbit_var:
+            case UHDM_OBJECT_TYPE::uhdmint_var:
+            case UHDM_OBJECT_TYPE::uhdminteger_var:
+              bad = actual->VpiParent() == nullptr ||
+                    anyUnpackedArray(actual) == nullptr;
+              break;
+            default:
+              break;
+          }
+          break;
+        }
+        uint64_t rcount = 0, rwidth = 0;
+        if (unpackedShape(rarr, serializer_, design_, rcount, rwidth))
+          bad = (rcount != lcount) || (rwidth != lwidth);
+        break;
+      }
+      default:
+        break;
     }
-    default:
-      break;
   }
   if (bad) {
     const std::string errMsg(lref->VpiName());
     serializer_->GetErrorHandler()(
         ErrorType::UHDM_ILLEGAL_UNPACKED_ARRAY_ASSIGN, errMsg, where, nullptr);
+    return;
   }
+  // Array to array of any kind: the unpacked shapes of two static arrays
+  // must match dimension by dimension, and the element types must be
+  // equivalent (LRM 7.6); `x = y[0]` assigns one element to an array.
+  bool bad2 = isUnpackedElementSelect(rhs);
+  if (!bad2 && rhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj) {
+    const any* rany = anyUnpackedArray(((const ref_obj*)rhs)->Actual_group());
+    if (rany != nullptr && rany != lany) {
+      const any* rarr =
+          wholeUnpackedArray(((const ref_obj*)rhs)->Actual_group());
+      std::vector<uint64_t> ld, rd;
+      if (larr != nullptr && rarr != nullptr &&
+          unpackedDims(larr, design_, ld) && unpackedDims(rarr, design_, rd) &&
+          ld != rd)
+        bad2 = true;
+      if (!bad2)
+        bad2 =
+            elemTypesDiffer(elemTypeOf(lany, unpackedElement(lany), design_),
+                            elemTypeOf(rany, unpackedElement(rany), design_));
+    }
+  }
+  if (bad2 && reportOnce(where, "array-assign"))
+    serializer_->GetErrorHandler()(
+        ErrorType::UHDM_ILLEGAL_UNPACKED_ARRAY_ASSIGN,
+        std::string(lref->VpiName()), where, nullptr);
 }
 
 void UhdmLint::leaveCont_assign(const cont_assign* object, vpiHandle handle) {
@@ -492,6 +720,168 @@ void UhdmLint::leaveSwitch_tran(const switch_tran* object, vpiHandle handle) {
   }
 }
 
+static bool inClass(const any* obj);
+
+static const class_defn* classOfTypespec(const typespec* ts) {
+  if (const class_typespec* ct = any_cast<const class_typespec*>(ts))
+    return ct->Class_defn();
+  return nullptr;
+}
+
+static const class_defn* classOfVar(const any* v) {
+  const class_var* cv = any_cast<const class_var*>(v);
+  if (cv == nullptr || cv->Typespec() == nullptr) return nullptr;
+  return classOfTypespec(cv->Typespec()->Actual_typespec());
+}
+
+// Surelog may hold several copies of one class (specializations, the
+// definition and the elaborated view), so a class is matched by position.
+static bool sameClass(const class_defn* a, const class_defn* b) {
+  if (a == b) return true;
+  if (a == nullptr || b == nullptr) return false;
+  return a->VpiName() == b->VpiName() && a->VpiFile() == b->VpiFile() &&
+         a->VpiLineNo() == b->VpiLineNo() &&
+         a->VpiColumnNo() == b->VpiColumnNo();
+}
+
+// True if `c` is `base` or derives from it, or if the chain cannot be
+// followed to its end (an unresolved base is never reported).
+static bool derivesFrom(const class_defn* c, const class_defn* base) {
+  for (int depth = 0; c != nullptr && depth < 64; ++depth) {
+    if (sameClass(c, base)) return true;
+    const extends* e = c->Extends();
+    if (e == nullptr) return false;
+    if (e->Class_typespec() == nullptr) return true;
+    c = classOfTypespec(e->Class_typespec()->Actual_typespec());
+  }
+  return true;
+}
+
+// The class or type a `T::new` prefix names: the nearest enclosing scope
+// declaring it, then the design's classes.
+static std::string_view classLeafName(std::string_view n) {
+  if (size_t p = n.rfind('@'); p != std::string_view::npos)
+    n.remove_prefix(p + 1);
+  if (size_t p = n.rfind("::"); p != std::string_view::npos)
+    n.remove_prefix(p + 2);
+  return n;
+}
+
+static const any* lookupTypeName(const any* where, std::string_view name,
+                                 const design* d) {
+  for (const any* p = where; p != nullptr; p = p->VpiParent()) {
+    if (const instance* in = any_cast<const instance*>(p)) {
+      if (in->Class_defns())
+        for (const class_defn* cd : *in->Class_defns())
+          if (classLeafName(cd->VpiName()) == name) return cd;
+    }
+    if (const scope* sc = any_cast<const scope*>(p)) {
+      if (sc->Typespecs())
+        for (const typespec* ts : *sc->Typespecs())
+          if (ts->VpiName() == name) return ts;
+    }
+  }
+  if (d != nullptr && d->AllClasses())
+    for (const class_defn* cd : *d->AllClasses())
+      if (classLeafName(cd->VpiName()) == name) return cd;
+  return nullptr;
+}
+
+static bool isNonClassVariable(const any* v) {
+  // A variable of an unknown type (a class Surelog did not compile, such as
+  // a builtin under -nobuiltin) is a typeless logic_var: never a verdict.
+  const expr* e = any_cast<const expr*>(v);
+  if (e == nullptr || e->Typespec() == nullptr ||
+      e->Typespec()->Actual_typespec() == nullptr)
+    return false;
+  switch (v->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmint_var:
+    case UHDM_OBJECT_TYPE::uhdminteger_var:
+    case UHDM_OBJECT_TYPE::uhdmlogic_var:
+    case UHDM_OBJECT_TYPE::uhdmbit_var:
+    case UHDM_OBJECT_TYPE::uhdmbyte_var:
+    case UHDM_OBJECT_TYPE::uhdmshort_int_var:
+    case UHDM_OBJECT_TYPE::uhdmlong_int_var:
+    case UHDM_OBJECT_TYPE::uhdmreal_var:
+    case UHDM_OBJECT_TYPE::uhdmshort_real_var:
+    case UHDM_OBJECT_TYPE::uhdmstring_var:
+    case UHDM_OBJECT_TYPE::uhdmenum_var:
+    case UHDM_OBJECT_TYPE::uhdmstruct_var:
+      return true;
+    default:
+      return false;
+  }
+}
+
+// LRM 8.7 / 8.15 / 8.21: `new` constructs only into a class handle, never
+// for a virtual class or a non-class type; a class handle takes only a
+// handle of its own class or of a class derived from it.
+void UhdmLint::checkClassAssign(const any* lhs, const any* rhs,
+                                const any* where) {
+  if (lhs == nullptr || rhs == nullptr ||
+      lhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj)
+    return;
+  // Inside a class body Surelog binds type parameters to their defaults and
+  // a shadowed name to the outer declaration, so no verdict is safe there.
+  if (inClass(where)) return;
+  const ref_obj* lref = (const ref_obj*)lhs;
+  const any* lact = lref->Actual_group();
+  if (lact == nullptr) return;
+  const class_defn* lcls = classOfVar(lact);
+  const class_defn* rcls = nullptr;
+  auto reportNew = [&](const std::string& msg) {
+    if (reportOnce(where, "class-new"))
+      serializer_->GetErrorHandler()(ErrorType::UHDM_ILLEGAL_CLASS_NEW, msg,
+                                     where, nullptr);
+  };
+  if (const method_func_call* nw = any_cast<const method_func_call*>(rhs)) {
+    if (nw->VpiName() != "new") return;
+    if (const ref_obj* prefix = nw->Prefix<ref_obj>()) {
+      const any* named = lookupTypeName(nw, prefix->VpiName(), design_);
+      if (named == nullptr) return;
+      if (const class_defn* cd = any_cast<const class_defn*>(named)) {
+        rcls = cd;
+      } else if (const typespec* ts = any_cast<const typespec*>(named)) {
+        if (ts->UhdmType() != UHDM_OBJECT_TYPE::uhdmclass_typespec) {
+          reportNew("\"" + std::string(prefix->VpiName()) +
+                    "\" is not a class type");
+          return;
+        }
+        rcls = classOfTypespec(ts);
+      }
+      if (rcls != nullptr && rcls->VpiVirtual()) {
+        reportNew("virtual class \"" +
+                  std::string(classLeafName(rcls->VpiName())) +
+                  "\" cannot be constructed");
+        return;
+      }
+    } else {
+      // A dynamic array is sized with `new[n]`, which always carries the
+      // size; a bare `new` is a class constructor.
+      const bool arrayTarget =
+          lact->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var &&
+          (nw->Tf_call_args() == nullptr || nw->Tf_call_args()->empty());
+      if (isNonClassVariable(lact) || arrayTarget) {
+        reportNew("\"" + std::string(lref->VpiName()) +
+                  "\" is not a class handle");
+      } else if (lcls != nullptr && lcls->VpiVirtual()) {
+        reportNew("virtual class \"" +
+                  std::string(classLeafName(lcls->VpiName())) +
+                  "\" cannot be constructed");
+      }
+      return;
+    }
+  } else if (const ref_obj* rref = any_cast<const ref_obj*>(rhs)) {
+    if (rref->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) return;
+    rcls = classOfVar(rref->Actual_group());
+  }
+  if (lcls == nullptr || rcls == nullptr || derivesFrom(rcls, lcls)) return;
+  if (reportOnce(where, "class-compat"))
+    serializer_->GetErrorHandler()(ErrorType::UHDM_INCOMPATIBLE_CLASS_HANDLE,
+                                   std::string(lref->VpiName()), where,
+                                   nullptr);
+}
+
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
   checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
   {
@@ -500,6 +890,7 @@ void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
                     op != 0 && op != vpiAssignmentOp);
   }
   if (isInUhdmAllIterator()) return;
+  checkClassAssign(object->Lhs(), object->Rhs(), object);
   if (!design_->VpiElaborated()) return;  // -uhdmelab
   if (const ref_obj* lhs = object->Lhs<ref_obj>()) {
     const logic_net* n = lhs->Actual_group<logic_net>();
@@ -1286,11 +1677,29 @@ void UhdmLint::checkEventArgs(const tf_call* call, const task_func* tf) {
   for (const any* a : *call->Tf_call_args()) {
     const size_t idx = i++;
     const ref_obj* r = any_cast<const ref_obj*>(a);
-    if (r == nullptr) continue;
-    const any* actual = r->Actual_group();
-    if (actual == nullptr ||
-        actual->UhdmType() != UHDM_OBJECT_TYPE::uhdmnamed_event)
+    if (r == nullptr || r->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj)
       continue;
+    const any* actual = r->Actual_group();
+    if (actual == nullptr) continue;
+    // A whole unpacked array bound to a formal that is not an array.
+    if (ios != nullptr && idx < ios->size() &&
+        (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var ||
+         actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net)) {
+      const io_decl* io = ios->at(idx);
+      const typespec* ts =
+          io->Typespec() ? io->Typespec()->Actual_typespec() : nullptr;
+      if ((io->Ranges() == nullptr || io->Ranges()->empty()) && ts &&
+          (ts->UhdmType() == UHDM_OBJECT_TYPE::uhdmlogic_typespec ||
+           ts->UhdmType() == UHDM_OBJECT_TYPE::uhdmbit_typespec ||
+           ts->UhdmType() == UHDM_OBJECT_TYPE::uhdmint_typespec ||
+           ts->UhdmType() == UHDM_OBJECT_TYPE::uhdminteger_typespec) &&
+          reportOnce(a, "array-arg"))
+        serializer_->GetErrorHandler()(
+            ErrorType::UHDM_ILLEGAL_UNPACKED_ARRAY_ASSIGN,
+            std::string(r->VpiName()), a, nullptr);
+      continue;
+    }
+    if (actual->UhdmType() != UHDM_OBJECT_TYPE::uhdmnamed_event) continue;
     if (ios != nullptr && idx < ios->size()) {
       if (const ref_typespec* rt = ios->at(idx)->Typespec()) {
         if (const typespec* ts = rt->Actual_typespec())
