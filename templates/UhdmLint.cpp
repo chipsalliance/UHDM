@@ -1363,7 +1363,9 @@ void UhdmLint::checkPackageScopedRef(const ref_obj* ref) {
   if (pos == std::string_view::npos || pos == 0) return;
   const std::string_view pkg = name.substr(0, pos);
   const std::string_view member = name.substr(pos + 2);
-  if (member.empty() || member.find("::") != std::string_view::npos) return;
+  if (member.empty() || member.find("::") != std::string_view::npos ||
+      member.find('@') != std::string_view::npos)  // @@BAD_SYMBOL@@
+    return;
   if (pkg == "$unit" || pkg == "std") return;
   bool known = false;
   std::set<std::string, std::less<>> visited;
