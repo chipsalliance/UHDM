@@ -2008,6 +2008,16 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
               found = true;
             }
           }
+          // `u.t.c` where the struct/union `t` has no member `c`.
+          if (!found && current->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj &&
+              (ttype == UHDM_OBJECT_TYPE::uhdmstruct_typespec ||
+               ttype == UHDM_OBJECT_TYPE::uhdmunion_typespec) &&
+              !elaboratorContext->m_elaborator.muteErrors() &&
+              !elaboratorContext->m_elaborator.isInUhdmAllIterator()) {
+            const std::string errMsg(VpiName());
+            context->m_serializer->GetErrorHandler()(
+                ErrorType::UHDM_UNRESOLVED_HIER_PATH, errMsg, this, nullptr);
+          }
         } else if (previous->UhdmType() == UHDM_OBJECT_TYPE::uhdmparameter) {
           // A struct-typed PARAMETER member (`CFG.HSK`, where `CFG` is an
           // interface parameter of a struct type): navigate into the

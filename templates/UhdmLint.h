@@ -89,6 +89,14 @@ class UhdmLint final : public VpiListener {
 
   void leaveRef_obj(const ref_obj* object, vpiHandle handle) override;
 
+  void leaveHier_path(const hier_path* object, vpiHandle handle) override;
+
+  // LRM 26.3: `P::name` must name a member of package P.
+  void checkPackageScopedRef(const ref_obj* ref);
+  // LRM 26.3: a name a module imports is not reachable as `inst.name`.
+  void checkImportedHierRef(const hier_path* path);
+  bool reportOnce(const any* where, const char* tag);
+
   void leaveVar_select(const var_select* object, vpiHandle handle) override;
 
   void leaveFunc_call(const func_call* object, vpiHandle handle) override;
@@ -139,6 +147,7 @@ class UhdmLint final : public VpiListener {
   std::map<std::string, ImplicitNetUse> implicitNets_;
   std::vector<std::string> implicitNetOrder_;
   std::set<std::tuple<std::string, uint32_t, uint16_t>> reportedCalls_;
+  std::set<std::tuple<std::string, uint32_t, uint16_t>> reportedOnce_;
   std::set<std::tuple<std::string, uint32_t, uint16_t>> reportedEnumAssigns_;
   // Every name the design DECLARES somewhere.  Surelog also fabricates a net
   // for a declared name it fails to bind (a block-local localparam, a $unit
