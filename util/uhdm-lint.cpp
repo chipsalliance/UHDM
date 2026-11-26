@@ -208,6 +208,15 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_RECURSIVE_TYPE:
             errmsg = "Type recursively depends on its own definition";
             break;
+          case UHDM::UHDM_NO_PACKAGE_MEMBER:
+            errmsg = "Package has no member of that name";
+            break;
+          case UHDM::UHDM_TASK_CALLED_AS_FUNCTION:
+            errmsg = "Task called as a function";
+            break;
+          case UHDM::UHDM_IMPORTED_NAME_IN_HIER_PATH:
+            errmsg = "Imported name accessed through a hierarchical name";
+            break;
           case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
             errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
             break;

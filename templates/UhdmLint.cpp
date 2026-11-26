@@ -1238,6 +1238,185 @@ void UhdmLint::noteImplicitNetRef(const ref_obj* ref) {
 
 void UhdmLint::leaveRef_obj(const ref_obj* object, vpiHandle handle) {
   noteImplicitNetRef(object);
+  checkPackageScopedRef(object);
+}
+
+void UhdmLint::leaveHier_path(const hier_path* object, vpiHandle handle) {
+  checkImportedHierRef(object);
+}
+
+bool UhdmLint::reportOnce(const any* where, const char* tag) {
+  return reportedOnce_
+      .emplace(std::string(where->VpiFile()) + "#" + tag, where->VpiLineNo(),
+               where->VpiColumnNo())
+      .second;
+}
+
+// The name a declaration is known by, without any `P::` / `work@` scope.
+static std::string_view leafName(std::string_view name) {
+  const size_t pos = name.rfind("::");
+  if (pos != std::string_view::npos) name.remove_prefix(pos + 2);
+  return name;
+}
+
+// Calls `f` on every object package `p` declares (variables, nets,
+// parameters, typedefs, enum constants, tasks and functions, classes, ...).
+template <typename F>
+static void forEachPackageMember(const package* p, F&& f) {
+  // An anonymous enum (`enum {A, B} e;`) declares its constants through the
+  // object it types.
+  auto enumConsts = [&](const typespec* ts) {
+    if (ts == nullptr || ts->UhdmType() != UHDM_OBJECT_TYPE::uhdmenum_typespec)
+      return;
+    if (const auto* consts = ((const enum_typespec*)ts)->Enum_consts()) {
+      for (const enum_const* c : *consts) f(c);
+    }
+  };
+  auto each = [&](const auto* vec) {
+    if (vec == nullptr) return;
+    for (const any* o : *vec) {
+      f(o);
+      const ref_typespec* rt = nullptr;
+      if (const expr* e = any_cast<const expr*>(o)) {
+        rt = e->Typespec();
+      } else if (o->UhdmType() == UHDM_OBJECT_TYPE::uhdmparameter) {
+        rt = ((const parameter*)o)->Typespec();
+      }
+      if (rt != nullptr) enumConsts(rt->Actual_typespec());
+    }
+  };
+  each(p->Variables());
+  each(p->Nets());
+  each(p->Array_nets());
+  each(p->Array_vars());
+  each(p->Logic_vars());
+  each(p->Parameters());
+  each(p->Task_funcs());
+  each(p->Class_defns());
+  each(p->Let_decls());
+  each(p->Named_events());
+  each(p->Named_event_arrays());
+  each(p->Property_decls());
+  each(p->Sequence_decls());
+  each(p->Spec_params());
+  each(p->Virtual_interface_vars());
+  each(p->Scopes());
+  if (const auto* pas = p->Param_assigns()) {
+    for (const param_assign* pa : *pas) {
+      if (pa->Lhs()) f(pa->Lhs());
+    }
+  }
+  if (const auto* tss = p->Typespecs()) {
+    for (const typespec* ts : *tss) {
+      f(ts);
+      enumConsts(ts);
+    }
+  }
+}
+
+// Whether a package named `pkg` declares `member`.  A package that imports
+// another one is also credited with that package's members: Surelog copies
+// an export into the exporting package, and the rules that decide what is
+// exported are checked elsewhere.  `known` is false when no package of that
+// name exists.
+// Both views: an alias typedef (`typedef base_t alias_t`) is only on the
+// elaborated package.
+static std::vector<const package*> allPackageViews(const design* d) {
+  std::vector<const package*> res;
+  if (d == nullptr) return res;
+  for (const auto* vec : {d->AllPackages(), d->TopPackages()}) {
+    if (vec == nullptr) continue;
+    for (const package* p : *vec) res.push_back(p);
+  }
+  return res;
+}
+
+static bool packageHasMember(const design* d, std::string_view pkg,
+                             std::string_view member, bool& known,
+                             std::set<std::string, std::less<>>& visited) {
+  if (!visited.emplace(pkg).second) return false;
+  bool found = false;
+  for (const package* p : allPackageViews(d)) {
+    if (p->VpiName() != pkg) continue;
+    known = true;
+    std::vector<std::string_view> imported;
+    forEachPackageMember(p, [&](const any* o) {
+      if (o->UhdmType() == UHDM_OBJECT_TYPE::uhdmimport_typespec) {
+        imported.push_back(o->VpiName());
+        return;
+      }
+      if (leafName(o->VpiName()) == member) found = true;
+    });
+    if (found) return true;
+    for (std::string_view other : imported) {
+      bool dummy = false;
+      if (packageHasMember(d, other, member, dummy, visited)) return true;
+    }
+  }
+  return found;
+}
+
+void UhdmLint::checkPackageScopedRef(const ref_obj* ref) {
+  if (ref->Actual_group() != nullptr) return;
+  const std::string_view name = ref->VpiName();
+  const size_t pos = name.find("::");
+  if (pos == std::string_view::npos || pos == 0) return;
+  const std::string_view pkg = name.substr(0, pos);
+  const std::string_view member = name.substr(pos + 2);
+  if (member.empty() || member.find("::") != std::string_view::npos ||
+      member.find('@') != std::string_view::npos)  // @@BAD_SYMBOL@@
+    return;
+  if (pkg == "$unit" || pkg == "std") return;
+  bool known = false;
+  std::set<std::string, std::less<>> visited;
+  if (packageHasMember(design_, pkg, member, known, visited)) return;
+  if (!known) return;
+  if (!reportOnce(ref, "pkgmember")) return;
+  serializer_->GetErrorHandler()(ErrorType::UHDM_NO_PACKAGE_MEMBER,
+                                 std::string(name), ref, nullptr);
+}
+
+// `m.x` where `x` is visible in the instance `m` only because `m` imports it
+// from a package (LRM 26.3: an imported name is not a member of the
+// importing scope).  Surelog copies the imported declaration into the
+// module, so the copy is recognised by sharing the package declaration's
+// source position.
+void UhdmLint::checkImportedHierRef(const hier_path* path) {
+  const VectorOfany* elems = path->Path_elems();
+  if (elems == nullptr || elems->size() < 2) return;
+  const any* last = elems->back();
+  if (last->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) return;
+  const any* before = (*elems)[elems->size() - 2];
+  if (before->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) return;
+  const any* scope = ((const ref_obj*)before)->Actual_group();
+  if (scope == nullptr ||
+      (scope->UhdmType() != UHDM_OBJECT_TYPE::uhdmmodule_inst &&
+       scope->UhdmType() != UHDM_OBJECT_TYPE::uhdminterface_inst))
+    return;
+  const any* actual = ((const ref_obj*)last)->Actual_group();
+  if (actual == nullptr || any_cast<const variables*>(actual) == nullptr)
+    return;
+  // A declaration of the instance's own definition is not a copy.
+  if (actual->VpiFile() == scope->VpiFile() &&
+      actual->VpiLineNo() >= scope->VpiLineNo() &&
+      actual->VpiLineNo() <= scope->VpiEndLineNo())
+    return;
+  bool copied = false;
+  for (const package* p : allPackageViews(design_)) {
+    forEachPackageMember(p, [&](const any* o) {
+      if (o->VpiName() == actual->VpiName() ||
+          leafName(o->VpiName()) == actual->VpiName()) {
+        if (o->VpiFile() == actual->VpiFile() &&
+            o->VpiLineNo() == actual->VpiLineNo() &&
+            o->VpiColumnNo() == actual->VpiColumnNo())
+          copied = true;
+      }
+    });
+    if (copied) break;
+  }
+  if (!copied || !reportOnce(path, "importhier")) return;
+  serializer_->GetErrorHandler()(ErrorType::UHDM_IMPORTED_NAME_IN_HIER_PATH,
+                                 std::string(path->VpiName()), path, nullptr);
 }
 
 void UhdmLint::leaveVar_select(const var_select* object, vpiHandle handle) {
@@ -1558,6 +1737,28 @@ void UhdmLint::leaveFunc_call(const func_call* object, vpiHandle handle) {
 }
 
 void UhdmLint::leaveTask_call(const task_call* object, vpiHandle handle) {
+  // LRM 13.3: a task has no value, so it cannot be called inside an
+  // expression (`y = P::t(10)`).
+  if (const any* parent = object->VpiParent()) {
+    bool inExpr = false;
+    switch (parent->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmoperation:
+        inExpr = true;
+        break;
+      case UHDM_OBJECT_TYPE::uhdmassignment:
+        inExpr = ((const assignment*)parent)->Rhs() == object;
+        break;
+      case UHDM_OBJECT_TYPE::uhdmcont_assign:
+        inExpr = ((const cont_assign*)parent)->Rhs() == object;
+        break;
+      default:
+        break;
+    }
+    if (inExpr && object->Task() != nullptr && reportOnce(object, "taskexpr"))
+      serializer_->GetErrorHandler()(ErrorType::UHDM_TASK_CALLED_AS_FUNCTION,
+                                     std::string(object->VpiName()), object,
+                                     nullptr);
+  }
   reportUndefinedTaskFunc(object, object->Task() != nullptr);
   checkEnumCallArgs(object, object->Task());
   checkTfArgCount(object, object->Task());
@@ -1643,6 +1844,7 @@ void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
   implicitNets_.clear();
   implicitNetOrder_.clear();
   reportedCalls_.clear();
+  reportedOnce_.clear();
   declaredNames_.clear();
   elaboratedDefs_.clear();
 }
