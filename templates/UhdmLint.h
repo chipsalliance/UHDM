@@ -74,6 +74,7 @@ class UhdmLint final : public VpiListener {
   void leaveSys_func_call(const sys_func_call* object, vpiHandle handle) override;
 
   void leavePort(const port* object, vpiHandle handle) override;
+  void leaveSwitch_tran(const switch_tran* object, vpiHandle handle) override;
 
   void leavePart_select(const part_select* object, vpiHandle handle) override;
 
@@ -127,6 +128,8 @@ class UhdmLint final : public VpiListener {
   void checkContAssignLhsSelects(const any* lhs);
   bool checkUnknownBits(const any* ex, const any* where);
   void checkTfArgCount(const tf_call* call, const task_func* tf);
+  void checkOperandTypes(const operation* op);
+  void checkEventArgs(const tf_call* call, const task_func* tf);
   void checkPatternCount(const operation* pattern);
   void checkScopeNameClashes(const module_inst* mi);
   void checkEnumDuplicateValues(const enum_typespec* object,
