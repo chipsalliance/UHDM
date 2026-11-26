@@ -710,6 +710,7 @@ void UhdmLint::checkUnpackedArrayAssign(const any* lhs, const any* rhs,
 }
 
 void UhdmLint::leaveCont_assign(const cont_assign* object, vpiHandle handle) {
+  noteContDrivenVariable(object);
   checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
   checkEnumAssign(object->Lhs(), object->Rhs(), object, false);
   checkContAssignLhsSelects(object->Lhs());
@@ -917,6 +918,7 @@ void UhdmLint::checkClassAssign(const any* lhs, const any* rhs,
 }
 
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
+  noteProcDrivenVariable(object);
   checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
   {
     const int op = object->VpiOpType();
@@ -2163,8 +2165,221 @@ void UhdmLint::checkImportedHierRef(const hier_path* path) {
                                  std::string(path->VpiName()), path, nullptr);
 }
 
+// The number of packed dimensions a typespec has, or -1 when it cannot be
+// told for sure (a typedef, a struct, an element chain, ...).
+static int packedDimsOf(const typespec* ts) {
+  if (ts == nullptr || !ts->VpiName().empty()) return -1;
+  switch (ts->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmlogic_typespec: {
+      const logic_typespec* lt = (const logic_typespec*)ts;
+      if (lt->Elem_typespec() != nullptr) return -1;
+      return lt->Ranges() ? (int)lt->Ranges()->size() : 0;
+    }
+    case UHDM_OBJECT_TYPE::uhdmbit_typespec: {
+      const bit_typespec* bt = (const bit_typespec*)ts;
+      if (bt->Bit_typespec() != nullptr) return -1;
+      return bt->Ranges() ? (int)bt->Ranges()->size() : 0;
+    }
+    case UHDM_OBJECT_TYPE::uhdmint_typespec:
+    case UHDM_OBJECT_TYPE::uhdminteger_typespec:
+    case UHDM_OBJECT_TYPE::uhdmshort_int_typespec:
+    case UHDM_OBJECT_TYPE::uhdmlong_int_typespec:
+    case UHDM_OBJECT_TYPE::uhdmbyte_typespec:
+      return 1;
+    default:
+      return -1;
+  }
+}
+
+static const typespec* ownTypespec(const any* o) {
+  const expr* e = any_cast<const expr*>(o);
+  if (e == nullptr || e->Typespec() == nullptr) return nullptr;
+  return e->Typespec()->Actual_typespec();
+}
+
+// True if a module port is named like `obj`: a port's net may carry only the
+// element type of the port's declared type (see the reader's CLAUDE.md).
+static bool namedLikePort(const any* obj) {
+  for (const any* p = obj->VpiParent(); p != nullptr; p = p->VpiParent()) {
+    if (p->UhdmType() != UHDM_OBJECT_TYPE::uhdmmodule_inst) continue;
+    if (const auto ports = ((const module_inst*)p)->Ports())
+      for (const port* pt : *ports)
+        if (pt->VpiName() == obj->VpiName()) return true;
+    return false;
+  }
+  return false;
+}
+
+// The total number of unpacked and packed dimensions of a declared object,
+// or -1 when unknown.
+static int totalDims(const any* actual) {
+  if (actual == nullptr || namedLikePort(actual)) return -1;
+  switch (actual->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmarray_net:
+    case UHDM_OBJECT_TYPE::uhdmarray_var: {
+      const VectorOfrange* ranges = unpackedRanges(actual);
+      const any* elem = unpackedElement(actual);
+      if (ranges == nullptr || elem == nullptr) return -1;
+      const int p = packedDimsOf(ownTypespec(elem));
+      return p < 0 ? -1 : (int)ranges->size() + p;
+    }
+    case UHDM_OBJECT_TYPE::uhdmlogic_net:
+    case UHDM_OBJECT_TYPE::uhdmlogic_var:
+    case UHDM_OBJECT_TYPE::uhdmbit_var:
+    case UHDM_OBJECT_TYPE::uhdmint_var:
+    case UHDM_OBJECT_TYPE::uhdminteger_var:
+    case UHDM_OBJECT_TYPE::uhdmbyte_var:
+    case UHDM_OBJECT_TYPE::uhdmshort_int_var:
+    case UHDM_OBJECT_TYPE::uhdmlong_int_var:
+      return packedDimsOf(ownTypespec(actual));
+    default:
+      return -1;
+  }
+}
+
+// `vector[0][0]` on a `reg [15:0] vector`: one index more than the object
+// has dimensions (LRM 7.4.5, 11.5.1).
 void UhdmLint::leaveVar_select(const var_select* object, vpiHandle handle) {
   noteImplicitNetRef(object);
+  if (isInUhdmAllIterator() || object->Exprs() == nullptr || inClass(object))
+    return;
+  const int dims = totalDims(object->Actual_group());
+  if (dims >= 0 && (int)object->Exprs()->size() > dims &&
+      reportOnce(object, "too-many-indices"))
+    serializer_->GetErrorHandler()(ErrorType::UHDM_TOO_MANY_INDICES,
+                                   std::string(object->VpiName()), object,
+                                   nullptr);
+}
+
+void UhdmLint::leaveForeach_stmt(const foreach_stmt* object,
+                                 vpiHandle handle) {
+  if (isInUhdmAllIterator() || object->VpiLoopVars() == nullptr ||
+      inClass(object))
+    return;
+  const any* arr = object->Variable();
+  const any* actual = nullptr;
+  if (const ref_var* rv = any_cast<const ref_var*>(arr))
+    actual = rv->Actual_group();
+  else if (const ref_obj* ro = any_cast<const ref_obj*>(arr))
+    actual = ro->Actual_group();
+  if (actual == nullptr) return;
+  const int dims = totalDims(actual);
+  if (dims >= 0 && (int)object->VpiLoopVars()->size() > dims &&
+      reportOnce(object, "too-many-indices"))
+    serializer_->GetErrorHandler()(ErrorType::UHDM_TOO_MANY_INDICES,
+                                   std::string(arr->VpiName()), object,
+                                   nullptr);
+}
+
+// LRM 6.5: a variable written by a continuous assignment has no other
+// driver -- neither another continuous assignment nor a procedural write.
+static bool isVariableObject(const any* a) {
+  if (a == nullptr) return false;
+  switch (a->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmlogic_var:
+    case UHDM_OBJECT_TYPE::uhdmbit_var:
+    case UHDM_OBJECT_TYPE::uhdmint_var:
+    case UHDM_OBJECT_TYPE::uhdminteger_var:
+    case UHDM_OBJECT_TYPE::uhdmbyte_var:
+    case UHDM_OBJECT_TYPE::uhdmshort_int_var:
+    case UHDM_OBJECT_TYPE::uhdmlong_int_var:
+    case UHDM_OBJECT_TYPE::uhdmreal_var:
+    case UHDM_OBJECT_TYPE::uhdmenum_var:
+    case UHDM_OBJECT_TYPE::uhdmstruct_var:
+      return true;
+    default:
+      return false;
+  }
+}
+
+void UhdmLint::noteContDrivenVariable(const cont_assign* object) {
+  if (isInUhdmAllIterator() || inClass(object)) return;
+  const ref_obj* lhs = any_cast<const ref_obj*>(object->Lhs());
+  if (lhs == nullptr || lhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj)
+    return;
+  const any* actual = lhs->Actual_group();
+  if (!isVariableObject(actual)) return;
+  auto [it, inserted] = contDrivenVars_.emplace(actual, object);
+  if (inserted) {
+    contDrivenOrder_.push_back(actual);
+    return;
+  }
+  // The same source assign seen twice (an interface array element's own
+  // assign reaches one variable through each view) is one driver.
+  const cont_assign* first = it->second;
+  if (first->VpiFile() == object->VpiFile() &&
+      first->VpiLineNo() == object->VpiLineNo() &&
+      first->VpiColumnNo() == object->VpiColumnNo())
+    return;
+  if (reportOnce(object, "var-drivers")) {
+    serializer_->GetErrorHandler()(ErrorType::UHDM_VARIABLE_MULTIPLE_DRIVERS,
+                                   std::string(lhs->VpiName()), object,
+                                   nullptr);
+  }
+}
+
+void UhdmLint::noteProcDrivenVariable(const assignment* object) {
+  if (isInUhdmAllIterator() || inClass(object)) return;
+  bool inProcess = false;
+  for (const any* p = object->VpiParent(); p != nullptr; p = p->VpiParent()) {
+    const UHDM_OBJECT_TYPE t = p->UhdmType();
+    if (t == UHDM_OBJECT_TYPE::uhdmfunction ||
+        t == UHDM_OBJECT_TYPE::uhdmtask)
+      return;
+    if (t == UHDM_OBJECT_TYPE::uhdmalways ||
+        t == UHDM_OBJECT_TYPE::uhdminitial ||
+        t == UHDM_OBJECT_TYPE::uhdmfinal_stmt) {
+      inProcess = true;
+      break;
+    }
+  }
+  if (!inProcess) return;
+  const ref_obj* lhs = any_cast<const ref_obj*>(object->Lhs());
+  if (lhs == nullptr) return;
+  const any* actual = lhs->Actual_group();
+  if (isVariableObject(actual)) procDrivenVars_.emplace(actual, object);
+}
+
+void UhdmLint::reportContProcDrivenVariables() {
+  for (const any* var : contDrivenOrder_) {
+    if (procDrivenVars_.find(var) == procDrivenVars_.end()) continue;
+    const cont_assign* ca = contDrivenVars_[var];
+    if (reportOnce(ca, "var-drivers"))
+      serializer_->GetErrorHandler()(ErrorType::UHDM_VARIABLE_MULTIPLE_DRIVERS,
+                                     std::string(var->VpiName()), ca, nullptr);
+  }
+  contDrivenVars_.clear();
+  contDrivenOrder_.clear();
+  procDrivenVars_.clear();
+}
+
+// An assignment pattern (LRM 10.9) builds an array or a structure; a scalar
+// `bit x = '{1'b1};` has neither elements nor members.
+void UhdmLint::checkPatternToScalar(const any* var, const any* rhs) {
+  const operation* op = any_cast<const operation*>(rhs);
+  if (op == nullptr || (op->VpiOpType() != vpiAssignmentPatternOp &&
+                        op->VpiOpType() != vpiMultiAssignmentPatternOp))
+    return;
+  if (var == nullptr || (var->UhdmType() != UHDM_OBJECT_TYPE::uhdmbit_var &&
+                         var->UhdmType() != UHDM_OBJECT_TYPE::uhdmlogic_var))
+    return;
+  // The element variable of an unpacked array shares the array's pattern.
+  if (const any* p = var->VpiParent())
+    if (p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var ||
+        p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net)
+      return;
+  if (packedDimsOf(ownTypespec(var)) != 0) return;
+  if (reportOnce(rhs, "pattern-scalar"))
+    serializer_->GetErrorHandler()(ErrorType::UHDM_PATTERN_TO_SCALAR,
+                                   std::string(var->VpiName()), rhs, nullptr);
+}
+
+void UhdmLint::leaveBit_var(const bit_var* object, vpiHandle handle) {
+  if (!isInUhdmAllIterator()) checkPatternToScalar(object, object->Expr());
+}
+
+void UhdmLint::leaveLogic_var(const logic_var* object, vpiHandle handle) {
+  if (!isInUhdmAllIterator()) checkPatternToScalar(object, object->Expr());
 }
 
 // ---------------------------------------------------------------------------
@@ -2586,6 +2801,7 @@ void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
     serializer_->GetErrorHandler()(ErrorType::UHDM_UNDEFINED_TASK_FUNC,
                                    std::string(call->VpiName()), call, nullptr);
   }
+  reportContProcDrivenVariables();
   unboundCalls_.clear();
   implicitNets_.clear();
   implicitNetOrder_.clear();
