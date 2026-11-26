@@ -539,6 +539,8 @@ static bool isUnpackedElementSelect(const any* e) {
   return ranges != nullptr && ranges->size() == 1;
 }
 
+static const any* nonConstantRef(const any* e, bool netsOnly);
+
 // A positional assignment pattern for a static unpacked array names one
 // item per element of the outer dimension (LRM 10.9.1): `ms_t ms[1:0] =
 // '{0, 0, 1, 1}` gives four items to two struct elements.
@@ -561,8 +563,40 @@ void UhdmLint::checkArrayPatternCount(const any* arr, const any* rhs,
 }
 
 void UhdmLint::leaveArray_var(const array_var* object, vpiHandle handle) {
+  checkQueueBound(object->Ranges());
   if (wholeUnpackedArray(object) != nullptr)
     checkArrayPatternCount(object, object->Expr(), object->Expr());
+}
+
+// A bounded queue `q[$:N]` (LRM 7.10): N is a constant, known, non-negative
+// expression.  Surelog keeps it as a range whose left bound is `$`.
+void UhdmLint::leaveArray_net(const array_net* object, vpiHandle handle) {
+  checkQueueBound(object->Ranges());
+}
+
+void UhdmLint::checkQueueBound(const VectorOfrange* ranges) {
+  if (isInUhdmAllIterator() || ranges == nullptr) return;
+  for (const range* r : *ranges) {
+    const constant* l = any_cast<const constant*>(r->Left_expr());
+    if (l == nullptr || l->VpiDecompile() != "$") continue;
+    const any* right = r->Right_expr();
+    if (right == nullptr) continue;
+    if (const constant* c = any_cast<const constant*>(right)) {
+      std::string_view v = c->VpiValue();
+      if (c->VpiSize() < 0) {
+        // A fill literal: `'x` / `'z` has no value, `'0` / `'1` is fine.
+        if (v.find_first_of("xXzZ", 4) != std::string_view::npos &&
+            reportOnce(right, "queue-bound"))
+          serializer_->GetErrorHandler()(ErrorType::UHDM_UNKNOWN_BITS_VALUE,
+                                         std::string(v), right, nullptr);
+        continue;
+      }
+      if (reportOnce(right, "queue-bound"))
+        checkNonPositive(right, right, 0, true);
+    } else if (nonConstantRef(right, false) && reportOnce(right, "queue-bound")) {
+      checkConstantExpr(right, false);
+    }
+  }
 }
 
 // Assigning a whole unpacked array (LRM 7.6): the right-hand side must be an
@@ -1396,6 +1430,72 @@ static const any* nonConstantRef(const any* e, bool netsOnly) {
     default:
       return nullptr;
   }
+}
+
+// LRM 10.6: the target of a procedural continuous assignment (`assign`,
+// `deassign`, `force`, `release`) is fixed when the statement executes; a
+// select of it with a variable index (`assign v[idx] = 1'b1;`) is illegal.
+void UhdmLint::checkProcContTarget(const any* lhs, const any* where) {
+  if (lhs == nullptr) return;
+  const any* index = nullptr;
+  std::string_view name;
+  switch (lhs->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmbit_select: {
+      const bit_select* bs = (const bit_select*)lhs;
+      index = nonConstantRef(bs->VpiIndex(), false);
+      name = bs->VpiName();
+      break;
+    }
+    case UHDM_OBJECT_TYPE::uhdmpart_select: {
+      const part_select* ps = (const part_select*)lhs;
+      index = nonConstantRef(ps->Left_range(), false);
+      if (index == nullptr) index = nonConstantRef(ps->Right_range(), false);
+      name = ps->VpiName();
+      break;
+    }
+    case UHDM_OBJECT_TYPE::uhdmindexed_part_select: {
+      const indexed_part_select* ips = (const indexed_part_select*)lhs;
+      index = nonConstantRef(ips->Base_expr(), false);
+      name = ips->VpiName();
+      break;
+    }
+    case UHDM_OBJECT_TYPE::uhdmvar_select: {
+      const var_select* vs = (const var_select*)lhs;
+      if (vs->Exprs())
+        for (const any* e : *vs->Exprs())
+          if ((index = nonConstantRef(e, false)) != nullptr) break;
+      name = vs->VpiName();
+      break;
+    }
+    case UHDM_OBJECT_TYPE::uhdmoperation: {
+      const operation* op = (const operation*)lhs;
+      if (op->VpiOpType() == vpiConcatOp && op->Operands())
+        for (const any* o : *op->Operands()) checkProcContTarget(o, where);
+      return;
+    }
+    default:
+      return;
+  }
+  if (index != nullptr && reportOnce(lhs, "proc-cont-select"))
+    serializer_->GetErrorHandler()(
+        ErrorType::UHDM_NON_CONSTANT_PROC_CONT_SELECT, std::string(name), lhs,
+        nullptr);
+}
+
+void UhdmLint::leaveAssign_stmt(const assign_stmt* object, vpiHandle handle) {
+  checkProcContTarget(object->Lhs(), object);
+}
+
+void UhdmLint::leaveDeassign(const deassign* object, vpiHandle handle) {
+  checkProcContTarget(object->Lhs(), object);
+}
+
+void UhdmLint::leaveForce(const force* object, vpiHandle handle) {
+  checkProcContTarget(object->Lhs(), object);
+}
+
+void UhdmLint::leaveRelease(const release* object, vpiHandle handle) {
+  checkProcContTarget(object->Lhs(), object);
 }
 
 void UhdmLint::checkConstantExpr(const any* expr, bool netsOnly) {

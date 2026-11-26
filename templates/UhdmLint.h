@@ -59,6 +59,13 @@ class UhdmLint final : public VpiListener {
   void leaveAssignment(const assignment* object, vpiHandle handle) override;
 
   void leaveArray_var(const array_var* object, vpiHandle handle) override;
+  void leaveAssign_stmt(const assign_stmt* object, vpiHandle handle) override;
+  void leaveDeassign(const deassign* object, vpiHandle handle) override;
+  void leaveForce(const force* object, vpiHandle handle) override;
+  void leaveRelease(const release* object, vpiHandle handle) override;
+  void checkProcContTarget(const any* lhs, const any* where);
+  void checkQueueBound(const VectorOfrange* ranges);
+  void leaveArray_net(const array_net* object, vpiHandle handle) override;
   void leaveCont_assign(const cont_assign* object, vpiHandle handle) override;
 
   void checkClassAssign(const any* lhs, const any* rhs, const any* where);
