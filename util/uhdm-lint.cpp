@@ -217,6 +217,12 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_IMPORTED_NAME_IN_HIER_PATH:
             errmsg = "Imported name accessed through a hierarchical name";
             break;
+          case UHDM::UHDM_VARIABLE_ON_INOUT:
+            errmsg = "Variable connected to an inout terminal";
+            break;
+          case UHDM::UHDM_NOT_ASSIGNABLE:
+            errmsg = "Expression is not assignable";
+            break;
           case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
             errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
             break;

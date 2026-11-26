@@ -74,6 +74,7 @@ class UhdmLint final : public VpiListener {
   void leaveSys_func_call(const sys_func_call* object, vpiHandle handle) override;
 
   void leavePort(const port* object, vpiHandle handle) override;
+  void leaveSwitch_tran(const switch_tran* object, vpiHandle handle) override;
 
   void leavePart_select(const part_select* object, vpiHandle handle) override;
 

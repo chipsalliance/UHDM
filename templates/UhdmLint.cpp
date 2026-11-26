@@ -451,6 +451,45 @@ void UhdmLint::leaveCont_assign(const cont_assign* object, vpiHandle handle) {
   checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
   checkEnumAssign(object->Lhs(), object->Rhs(), object, false);
   checkContAssignLhsSelects(object->Lhs());
+  // A parameter is a constant: it cannot be the target of an assign.
+  if (isInUhdmAllIterator()) return;
+  if (const ref_obj* lhs = object->Lhs<ref_obj>()) {
+    if (const any* actual = lhs->Actual_group()) {
+      if (actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmparameter &&
+          reportOnce(lhs, "not-assignable")) {
+        serializer_->GetErrorHandler()(ErrorType::UHDM_NOT_ASSIGNABLE,
+                                       std::string(lhs->VpiName()), lhs,
+                                       nullptr);
+      }
+    }
+  }
+}
+
+// A `reg` on a bidirectional terminal: switch terminals (LRM 28.8) and inout
+// ports (23.3.3.3) connect only nets.  Surelog keeps `reg` as a logic_net
+// stamped vpiReg; `logic` is ambiguous (vpiLogicNet) and left alone.
+static const logic_net* regNetOf(const any* expr) {
+  const ref_obj* ref = any_cast<const ref_obj*>(expr);
+  if (ref == nullptr) return nullptr;
+  const logic_net* n = ref->Actual_group<logic_net>();
+  if (n != nullptr && n->VpiNetType() == vpiReg) return n;
+  return nullptr;
+}
+
+void UhdmLint::leaveSwitch_tran(const switch_tran* object, vpiHandle handle) {
+  if (isInUhdmAllIterator()) return;
+  if (object->Prim_terms() == nullptr) return;
+  for (const prim_term* t : *object->Prim_terms()) {
+    // tranif/rtranif: the third terminal is the control input.
+    if (t->VpiDirection() != vpiInout || t->VpiTermIndex() > 1) continue;
+    if (const logic_net* n = regNetOf(t->Expr())) {
+      if (reportOnce(t->Expr(), "var-on-inout")) {
+        serializer_->GetErrorHandler()(ErrorType::UHDM_VARIABLE_ON_INOUT,
+                                       std::string(n->VpiName()), t->Expr(),
+                                       nullptr);
+      }
+    }
+  }
 }
 
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
@@ -463,7 +502,15 @@ void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
   if (isInUhdmAllIterator()) return;
   if (!design_->VpiElaborated()) return;  // -uhdmelab
   if (const ref_obj* lhs = object->Lhs<ref_obj>()) {
-    if (const logic_net* n = lhs->Actual_group<logic_net>()) {
+    const logic_net* n = lhs->Actual_group<logic_net>();
+    // A select of an array of wires (`icim[0] <= ...`).
+    if (n == nullptr) {
+      if (const array_net* an = lhs->Actual_group<array_net>()) {
+        if (an->Nets() != nullptr && !an->Nets()->empty())
+          n = any_cast<const logic_net*>(an->Nets()->front());
+      }
+    }
+    if (n != nullptr) {
       if (n->VpiNetType() == vpiWire) {
         bool inProcess = false;
         const any* tmp = object;
@@ -763,6 +810,26 @@ void UhdmLint::leaveSys_func_call(const sys_func_call* object,
 
 void UhdmLint::leavePort(const port* object, vpiHandle handle) {
   if (isInUhdmAllIterator()) return;
+  if (object->VpiDirection() == vpiInout) {
+    if (const logic_net* n = regNetOf(object->Low_conn())) {
+      if (reportOnce(n, "var-on-inout")) {
+        serializer_->GetErrorHandler()(ErrorType::UHDM_VARIABLE_ON_INOUT,
+                                       std::string(n->VpiName()), object,
+                                       nullptr);
+      }
+    }
+    // An inout actual must be a net lvalue: a replication or any other
+    // computed expression cannot be driven back.
+    if (const operation* op = object->High_conn<operation>()) {
+      const int t = op->VpiOpType();
+      if (t != vpiConcatOp && t != vpiNullOp &&
+          reportOnce(op, "not-assignable")) {
+        serializer_->GetErrorHandler()(ErrorType::UHDM_NOT_ASSIGNABLE,
+                                       std::string(object->VpiName()), op,
+                                       nullptr);
+      }
+    }
+  }
   bool signedHighConn = false;
   bool signedLowConn = false;
   bool highConn = false;
