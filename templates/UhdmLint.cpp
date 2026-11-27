@@ -1657,9 +1657,44 @@ void UhdmLint::leaveRange(const range* object, vpiHandle handle) {
                      object);
 }
 
+// A function called in a constant expression without some of its trailing
+// arguments uses their DEFAULTS (LRM 13.5.3), which must then be constant
+// too: `localparam r = k(3);` over `function k(int i, int j = a + b)`.
+static const any* nonConstantDefaultArg(const any* e) {
+  if (e == nullptr) return nullptr;
+  switch (e->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmoperation: {
+      const operation* op = (const operation*)e;
+      if (op->Operands())
+        for (const any* o : *op->Operands())
+          if (const any* r = nonConstantDefaultArg(o)) return r;
+      return nullptr;
+    }
+    case UHDM_OBJECT_TYPE::uhdmfunc_call: {
+      const func_call* fc = (const func_call*)e;
+      const size_t given = fc->Tf_call_args() ? fc->Tf_call_args()->size() : 0;
+      if (fc->Tf_call_args())
+        for (const any* a : *fc->Tf_call_args())
+          if (const any* r = nonConstantDefaultArg(a)) return r;
+      const function* f = fc->Function();
+      if (f == nullptr || f->Io_decls() == nullptr) return nullptr;
+      for (size_t i = given; i < f->Io_decls()->size(); ++i)
+        if (const any* r = nonConstantRef(f->Io_decls()->at(i)->Expr(), false))
+          return r;
+      return nullptr;
+    }
+    default:
+      return nullptr;
+  }
+}
+
 void UhdmLint::leaveParam_assign(const param_assign* object,
                                  vpiHandle handle) {
   checkConstantExpr(object->Rhs(), false);
+  if (const any* r = nonConstantDefaultArg(object->Rhs());
+      r != nullptr && reportOnce(r, "nonconst-default-arg"))
+    serializer_->GetErrorHandler()(ErrorType::UHDM_NON_CONSTANT_EXPRESSION,
+                                   std::string(r->VpiName()), r, nullptr);
 }
 
 // `ex` itself when it is a constant; the value of a module parameter it names,
