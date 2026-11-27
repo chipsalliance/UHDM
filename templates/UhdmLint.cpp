@@ -234,6 +234,53 @@ void UhdmLint::leaveModule_inst(const module_inst* object, vpiHandle handle) {
   checkScopeNameClashes(object);
 }
 
+// LRM 6.19: an enum constant is declared in the scope of its enum, so in a
+// class it may not repeat the name of a typedef, property, method or parameter
+// of that class.
+void UhdmLint::leaveClass_defn(const class_defn* object, vpiHandle handle) {
+  std::map<std::string, const enum_const*, std::less<>> consts;
+  std::set<std::string, std::less<>> enumTypes;
+  auto addEnum = [&](const typespec* ts) {
+    if (ts == nullptr || ts->UhdmType() != UHDM_OBJECT_TYPE::uhdmenum_typespec)
+      return;
+    const enum_typespec* et = (const enum_typespec*)ts;
+    if (!et->VpiName().empty()) enumTypes.emplace(et->VpiName());
+    if (et->Enum_consts())
+      for (const enum_const* c : *et->Enum_consts())
+        consts.emplace(c->VpiName(), c);
+  };
+  if (object->Variables())
+    for (const variables* v : *object->Variables())
+      if (const ref_typespec* rt = v->Typespec())
+        addEnum(rt->Actual_typespec());
+  if (object->Typespecs())
+    for (const typespec* ts : *object->Typespecs()) addEnum(ts);
+  if (consts.empty()) return;
+  std::vector<const any*> others;
+  if (object->Variables())
+    for (const any* o : *object->Variables()) others.push_back(o);
+  if (object->Typespecs())
+    for (const typespec* ts : *object->Typespecs())
+      if (ts->UhdmType() != UHDM_OBJECT_TYPE::uhdmenum_typespec)
+        others.push_back(ts);
+  if (object->Task_funcs())
+    for (const any* o : *object->Task_funcs()) others.push_back(o);
+  if (object->Parameters())
+    for (const any* o : *object->Parameters()) others.push_back(o);
+  for (const any* o : others) {
+    auto it = consts.find(o->VpiName());
+    if (it == consts.end()) continue;
+    const enum_const* c = it->second;
+    if (!reportedCalls_
+             .emplace(std::string(c->VpiFile()) + "#enumname", c->VpiLineNo(),
+                      c->VpiColumnNo())
+             .second)
+      continue;
+    serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_NAME_REDECLARED,
+                                   std::string(c->VpiName()), o, nullptr);
+  }
+}
+
 // LRM 3.13, 27.6: a generate block's name lives in the module's scope, so it
 // may not repeat the name of a net, variable, parameter, task, function,
 // instance or named block there -- nor of ANOTHER generate block.  The
@@ -2785,8 +2832,104 @@ void UhdmLint::checkEnumValue(const enum_typespec* target, const any* rhs,
                                  errMsg, rhs, nullptr);
 }
 
+// `m1.e`, written in an elaborated instance: the variable reached by walking
+// child instances down from the instance holding the statement.  Surelog
+// leaves the path elements of such a hier_path unbound.
+// A statement of a module body is shared by its definition and every
+// elaborated instance; the first elaborated instance of the definition stands
+// for all of them (the child instances below it are the same in each).
+const module_inst* UhdmLint::elabInstanceOf(const module_inst* mi) {
+  if (mi->Modules() != nullptr) return mi;
+  if (!elabByDefBuilt_) {
+    elabByDefBuilt_ = true;
+    std::vector<const module_inst*> work;
+    if (design_ && design_->TopModules())
+      for (const module_inst* t : *design_->TopModules()) work.push_back(t);
+    while (!work.empty()) {
+      const module_inst* m = work.back();
+      work.pop_back();
+      elabByDef_.emplace(std::string(m->VpiDefName()), m);
+      if (m->Modules())
+        for (const module_inst* c : *m->Modules()) work.push_back(c);
+    }
+  }
+  auto it = elabByDef_.find(mi->VpiDefName());
+  return it == elabByDef_.end() ? nullptr : it->second;
+}
+
+const any* UhdmLint::instHierVar(const hier_path* hp, const any* where) {
+  if (hp == nullptr || hp->Path_elems() == nullptr ||
+      hp->Path_elems()->size() < 2)
+    return nullptr;
+  const any* p = where;
+  while (p && p->UhdmType() != UHDM_OBJECT_TYPE::uhdmmodule_inst)
+    p = p->VpiParent();
+  if (p == nullptr) return nullptr;
+  const module_inst* mi = elabInstanceOf((const module_inst*)p);
+  if (mi == nullptr) return nullptr;
+  const auto& elems = *hp->Path_elems();
+  for (size_t i = 0; i + 1 < elems.size(); ++i) {
+    if (elems[i]->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) return nullptr;
+    const std::string_view name = elems[i]->VpiName();
+    const module_inst* next = nullptr;
+    if (mi->Modules())
+      for (const module_inst* c : *mi->Modules())
+        if (c->VpiName() == name) next = c;
+    if (next == nullptr) return nullptr;
+    mi = next;
+  }
+  const any* last = elems.back();
+  if (last->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) return nullptr;
+  if (mi->Variables())
+    for (const any* v : *mi->Variables())
+      if (v->VpiName() == last->VpiName()) return v;
+  return nullptr;
+}
+
+// The module instance an enum typespec was declared in, or null when it comes
+// from anywhere else (a package, $unit, a class).
+static const module_inst* enumDeclInstance(const enum_typespec* ts) {
+  if (ts->VpiName().find("::") != std::string_view::npos) return nullptr;
+  for (const any* p = ts->VpiParent(); p; p = p->VpiParent()) {
+    if (p->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst)
+      return (const module_inst*)p;
+    if (any_cast<const typespec*>(p) == nullptr &&
+        any_cast<const variables*>(p) == nullptr &&
+        any_cast<const nets*>(p) == nullptr &&
+        p->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_typespec)
+      return nullptr;
+  }
+  return nullptr;
+}
+
 void UhdmLint::checkEnumAssign(const any* lhs, const any* rhs, const any* where,
                                bool compound) {
+  // `m1.e = m2.e`: an enum declared inside a module is a distinct type in
+  // every instance of it (LRM 6.22.1), even though the members match.
+  if (!compound && lhs && rhs &&
+      lhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmhier_path &&
+      rhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmhier_path) {
+    const any* lv = instHierVar((const hier_path*)lhs, where);
+    const any* rv = instHierVar((const hier_path*)rhs, where);
+    const ValType lt = typeOfTypespec(declTypespec(lv));
+    const ValType rt = typeOfTypespec(declTypespec(rv));
+    if (lv && rv && lt.kind == ValKind::Enum && rt.kind == ValKind::Enum &&
+        lt.ets != rt.ets) {
+      const module_inst* li = enumDeclInstance(lt.ets);
+      const module_inst* ri = enumDeclInstance(rt.ets);
+      if (li && ri && li != ri && !inClass(where) &&
+          reportedEnumAssigns_
+              .emplace(std::string(rhs->VpiFile()), rhs->VpiLineNo(),
+                       rhs->VpiColumnNo())
+              .second) {
+        const std::string errMsg(lt.ets->VpiName().empty() ? "<anonymous>"
+                                                           : lt.ets->VpiName());
+        serializer_->GetErrorHandler()(ErrorType::UHDM_ENUM_ASSIGN_INCOMPATIBLE,
+                                       errMsg, rhs, nullptr);
+        return;
+      }
+    }
+  }
   const ValType t = targetType(lhs);
   if (t.kind != ValKind::Enum) return;
   // `e += 1` is `e = e + 1`: an integral value (LRM 6.19.4).
