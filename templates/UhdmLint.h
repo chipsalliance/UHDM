@@ -181,7 +181,8 @@ class UhdmLint final : public VpiListener {
   std::map<const any*, const assignment*> procDrivenVars_;
   std::vector<std::pair<const tf_call*, std::string>> unboundCalls_;
   std::vector<std::pair<const ref_obj*, std::string>> unboundSelects_;
-  std::vector<const unsupported_typespec*> unresolvedArgTypes_;
+  std::vector<std::pair<const unsupported_typespec*, std::string>>
+      unresolvedArgTypes_;
   // Definitions with at least one ELABORATED instance.  A module nothing
   // instantiates is not elaborated, so its names are not resolved.
   std::set<std::string, std::less<>> elaboratedDefs_;

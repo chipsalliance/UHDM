@@ -79,9 +79,12 @@ static const any* returnWithValue(const any* stmt) {
   return nullptr;
 }
 
+static std::string ownerDefName(const any* obj);
+
 // A task or function argument declared over a type name that never
 // resolved: Surelog keeps an unsupported_typespec named after it.  Class
-// methods are left alone (their types are bound by a separate pass).
+// methods are left alone (their types are bound by a separate pass), and
+// so are unelaborated modules (as for the other undeclared-name checks).
 void UhdmLint::checkTfArgTypes(const task_func* tf) {
   if (tf->Io_decls() == nullptr) return;
   for (const any* p = tf->VpiParent(); p != nullptr; p = p->VpiParent()) {
@@ -97,7 +100,7 @@ void UhdmLint::checkTfArgTypes(const task_func* tf) {
     if (name.empty() || name.find(':') != std::string_view::npos ||
         name.find('.') != std::string_view::npos)
       continue;
-    unresolvedArgTypes_.push_back(ut);
+    unresolvedArgTypes_.emplace_back(ut, ownerDefName(tf));
   }
 }
 
@@ -3014,10 +3017,11 @@ void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
                                    std::string(ref->VpiName()), ref, nullptr);
   }
   unboundSelects_.clear();
-  for (const unsupported_typespec* ut : unresolvedArgTypes_) {
+  for (const auto& [ut, ownerDef] : unresolvedArgTypes_) {
     if (declaredNames_.find(ut->VpiName()) != declaredNames_.end() ||
         scopeNames_.find(ut->VpiName()) != scopeNames_.end())
       continue;
+    if (elaboratedDefs_.find(ownerDef) == elaboratedDefs_.end()) continue;
     if (!reportedOnce_
              .emplace(std::string(ut->VpiFile()) + "#undefined-type",
                       ut->VpiLineNo(), ut->VpiColumnNo())
