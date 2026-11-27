@@ -57,6 +57,7 @@ class UhdmLint final : public VpiListener {
   void checkAggregateTypespec(const typespec* object, bool packed);
 
   void leaveModule_inst(const module_inst* object, vpiHandle handle) override;
+  void leaveClass_defn(const class_defn* object, vpiHandle handle) override;
 
   void leaveAssignment(const assignment* object, vpiHandle handle) override;
 
@@ -151,6 +152,8 @@ class UhdmLint final : public VpiListener {
   void checkEventArgs(const tf_call* call, const task_func* tf);
   void checkPatternCount(const operation* pattern);
   void checkScopeNameClashes(const module_inst* mi);
+  const module_inst* elabInstanceOf(const module_inst* mi);
+  const any* instHierVar(const hier_path* hp, const any* where);
   void checkEnumDuplicateValues(const enum_typespec* object,
                                 uint64_t baseSize);
 
@@ -186,6 +189,8 @@ class UhdmLint final : public VpiListener {
   // Definitions with at least one ELABORATED instance.  A module nothing
   // instantiates is not elaborated, so its names are not resolved.
   std::set<std::string, std::less<>> elaboratedDefs_;
+  std::map<std::string, const module_inst*, std::less<>> elabByDef_;
+  bool elabByDefBuilt_ = false;
 };
 
 }  // namespace UHDM

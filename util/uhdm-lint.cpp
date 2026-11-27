@@ -253,6 +253,9 @@ int32_t main(int32_t argc, char **argv) {
           case UHDM::UHDM_UNDEFINED_TYPE:
             errmsg = "Undefined type";
             break;
+          case UHDM::UHDM_ENUM_NAME_REDECLARED:
+            errmsg = "Enum constant name already declared in this scope";
+            break;
           case UHDM::UHDM_FORCING_UNSIGNED_TYPE:
             errmsg = "Critical: Forcing signal to unsigned type due to unsigned port binding ";
             break;
