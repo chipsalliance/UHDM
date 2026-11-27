@@ -1954,6 +1954,59 @@ static std::string ownerDefName(const any* obj) {
 
 void UhdmLint::noteImplicitNetRef(const ref_obj* ref) {
   const any* actual = ref->Actual_group();
+  // A SELECT of a name Surelog could not bind at all (`$fwrite(f, "%c",
+  // undeclared[7:0])`): no net is fabricated for it, so the implicit-net
+  // bookkeeping never sees it.  Reported from leaveDesign when the name is
+  // declared nowhere in the design.
+  if (actual == nullptr) {
+    switch (ref->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmbit_select:
+      case UHDM_OBJECT_TYPE::uhdmpart_select:
+      case UHDM_OBJECT_TYPE::uhdmindexed_part_select: {
+        const std::string_view name = ref->VpiName();
+        if (name.empty() || name.find('.') != std::string_view::npos ||
+            name.find(':') != std::string_view::npos || inClass(ref))
+          return;
+        if (const any* p = ref->VpiParent();
+            p == nullptr || p->UhdmType() == UHDM_OBJECT_TYPE::uhdmhier_path)
+          return;
+        // Only a READ in an always / initial / final body: continuous
+        // assignment targets, function and task bodies (out-of-class method
+        // definitions) and generate-scope names are bound too unreliably.
+        bool inProcess = false;
+        const any* prev = ref;
+        for (const any* p = ref->VpiParent(); p != nullptr;
+             prev = p, p = p->VpiParent()) {
+          const UHDM_OBJECT_TYPE t = p->UhdmType();
+          if (t == UHDM_OBJECT_TYPE::uhdmassignment &&
+              ((const assignment*)p)->Lhs() == prev)
+            return;
+          if (t == UHDM_OBJECT_TYPE::uhdmfunction ||
+              t == UHDM_OBJECT_TYPE::uhdmtask ||
+              t == UHDM_OBJECT_TYPE::uhdmgen_scope ||
+              t == UHDM_OBJECT_TYPE::uhdmcont_assign)
+            return;
+          if (t == UHDM_OBJECT_TYPE::uhdmalways ||
+              t == UHDM_OBJECT_TYPE::uhdminitial ||
+              t == UHDM_OBJECT_TYPE::uhdmfinal_stmt) {
+            inProcess = true;
+            break;
+          }
+          if (t == UHDM_OBJECT_TYPE::uhdmmodule_inst) break;
+        }
+        if (!inProcess) return;
+        if (!reportedOnce_
+                 .emplace(std::string(ref->VpiFile()) + "#unbound-select",
+                          ref->VpiLineNo(), ref->VpiColumnNo())
+                 .second)
+          return;
+        unboundSelects_.emplace_back(ref, ownerDefName(ref));
+        return;
+      }
+      default:
+        return;
+    }
+  }
   if (actual == nullptr ||
       actual->UhdmType() != UHDM_OBJECT_TYPE::uhdmlogic_net)
     return;
@@ -2416,6 +2469,21 @@ static const any* hierPathLeaf(const hier_path* hp) {
   const any* actual = ((const ref_obj*)last)->Actual_group();
   if (actual && actual->UhdmType() == UHDM_OBJECT_TYPE::uhdmtypespec_member)
     return actual;
+  // `c.e`: a property of an object reached through a class handle.  Only for
+  // a class with no parameters: Surelog binds a parameterised class's type
+  // parameters to their defaults.
+  if (actual && hp->Path_elems()->size() == 2 &&
+      any_cast<const variables*>(actual)) {
+    const any* first = hp->Path_elems()->front();
+    const ref_obj* root = any_cast<const ref_obj*>(first);
+    const any* cls = actual->VpiParent();
+    if (root && root->Actual_group() &&
+        root->Actual_group()->UhdmType() == UHDM_OBJECT_TYPE::uhdmclass_var &&
+        cls && cls->UhdmType() == UHDM_OBJECT_TYPE::uhdmclass_defn &&
+        (((const class_defn*)cls)->Parameters() == nullptr ||
+         ((const class_defn*)cls)->Parameters()->empty()))
+      return actual;
+  }
   return nullptr;
 }
 
@@ -2801,6 +2869,13 @@ void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
     serializer_->GetErrorHandler()(ErrorType::UHDM_UNDEFINED_TASK_FUNC,
                                    std::string(call->VpiName()), call, nullptr);
   }
+  for (const auto& [ref, ownerDef] : unboundSelects_) {
+    if (declaredNames_.find(ref->VpiName()) != declaredNames_.end()) continue;
+    if (elaboratedDefs_.find(ownerDef) == elaboratedDefs_.end()) continue;
+    serializer_->GetErrorHandler()(ErrorType::UHDM_UNDECLARED_IDENTIFIER,
+                                   std::string(ref->VpiName()), ref, nullptr);
+  }
+  unboundSelects_.clear();
   reportContProcDrivenVariables();
   unboundCalls_.clear();
   implicitNets_.clear();
