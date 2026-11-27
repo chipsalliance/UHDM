@@ -152,6 +152,7 @@ class UhdmLint final : public VpiListener {
   void checkEventArgs(const tf_call* call, const task_func* tf);
   void checkPatternCount(const operation* pattern);
   void checkScopeNameClashes(const module_inst* mi);
+  void checkStreamFits(const any* lhs, const any* rhs, const any* where);
   const module_inst* elabInstanceOf(const module_inst* mi);
   const any* instHierVar(const hier_path* hp, const any* where);
   void checkEnumDuplicateValues(const enum_typespec* object,

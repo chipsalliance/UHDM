@@ -997,6 +997,8 @@ void UhdmLint::checkClassAssign(const any* lhs, const any* rhs,
 void UhdmLint::leaveAssignment(const assignment* object, vpiHandle handle) {
   noteProcDrivenVariable(object);
   checkUnpackedArrayAssign(object->Lhs(), object->Rhs(), object);
+  if (object->VpiOpType() == 0 || object->VpiOpType() == vpiAssignmentOp)
+    checkStreamFits(object->Lhs(), object->Rhs(), object);
   {
     const int op = object->VpiOpType();
     checkEnumAssign(object->Lhs(), object->Rhs(), object,
@@ -2701,6 +2703,81 @@ static ValType elementType(const any* actual) {
       return typeOfTypespec(declTypespec(an->Nets()->at(0)));
   }
   return {};
+}
+
+// The width of a plain integral variable, 0 when it is anything else (an
+// array, a dynamic type, a struct, a width that is not constant).
+static uint64_t integralBits(const any* v) {
+  if (v == nullptr || (any_cast<const variables*>(v) == nullptr &&
+                       any_cast<const nets*>(v) == nullptr))
+    return 0;
+  if (const any* p = v->VpiParent())
+    if (p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_var ||
+        p->UhdmType() == UHDM_OBJECT_TYPE::uhdmpacked_array_var ||
+        p->UhdmType() == UHDM_OBJECT_TYPE::uhdmarray_net ||
+        p->UhdmType() == UHDM_OBJECT_TYPE::uhdmpacked_array_net)
+      return 0;
+  const typespec* ts = declTypespec(v);
+  if (ts == nullptr) return 0;
+  switch (ts->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmbyte_typespec: return 8;
+    case UHDM_OBJECT_TYPE::uhdmshort_int_typespec: return 16;
+    case UHDM_OBJECT_TYPE::uhdmint_typespec:
+    case UHDM_OBJECT_TYPE::uhdminteger_typespec: return 32;
+    case UHDM_OBJECT_TYPE::uhdmlong_int_typespec: return 64;
+    case UHDM_OBJECT_TYPE::uhdmlogic_typespec:
+    case UHDM_OBJECT_TYPE::uhdmbit_typespec: {
+      ExprEval eval;
+      bool invalid = false;
+      const uint64_t w = eval.size(ts, invalid, nullptr, nullptr, true);
+      return invalid ? 0 : w;
+    }
+    default:
+      return 0;
+  }
+}
+
+// `int d = {<<{a, b, c}}`: a stream used as a value must fit its target, which
+// is padded on the right when wider but never truncated (LRM 11.4.14).  Only
+// a stream over plain integral variables into a plain integral variable.
+void UhdmLint::checkStreamFits(const any* lhs, const any* rhs,
+                               const any* where) {
+  if (lhs == nullptr || rhs == nullptr ||
+      rhs->UhdmType() != UHDM_OBJECT_TYPE::uhdmoperation)
+    return;
+  const operation* op = (const operation*)rhs;
+  if (op->VpiOpType() != vpiStreamLROp && op->VpiOpType() != vpiStreamRLOp)
+    return;
+  const any* target = lhs;
+  if (lhs->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj)
+    target = ((const ref_obj*)lhs)->Actual_group();
+  const uint64_t tbits = integralBits(target);
+  if (tbits == 0 || op->Operands() == nullptr || op->Operands()->empty())
+    return;
+  // The slice size, if any, comes first; the stream concatenation last.
+  const any* body = op->Operands()->back();
+  std::vector<const any*> items;
+  if (body->UhdmType() == UHDM_OBJECT_TYPE::uhdmoperation &&
+      ((const operation*)body)->VpiOpType() == vpiConcatOp) {
+    if (((const operation*)body)->Operands())
+      for (const any* o : *((const operation*)body)->Operands())
+        items.push_back(o);
+  } else {
+    items.push_back(body);
+  }
+  uint64_t sbits = 0;
+  for (const any* o : items) {
+    if (o->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_obj) return;
+    const uint64_t w = integralBits(((const ref_obj*)o)->Actual_group());
+    if (w == 0) return;
+    sbits += w;
+  }
+  if (sbits <= tbits || inClass(where) || !reportOnce(where, "stream-fit"))
+    return;
+  serializer_->GetErrorHandler()(
+      ErrorType::UHDM_STREAM_TOO_WIDE,
+      std::to_string(sbits) + " bits into " + std::to_string(tbits), rhs,
+      nullptr);
 }
 
 // The type of the object a write lands in (only shapes known exactly).
