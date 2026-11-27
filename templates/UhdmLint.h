@@ -45,6 +45,8 @@ class UhdmLint final : public VpiListener {
   void leaveBit_select(const bit_select* object, vpiHandle handle) override;
 
   void leaveFunction(const function* object, vpiHandle handle) override;
+  void leaveTask(const task* object, vpiHandle handle) override;
+  void checkTfArgTypes(const task_func* tf);
 
   void leaveStruct_typespec(const struct_typespec* object,
                             vpiHandle handle) override;
@@ -173,11 +175,14 @@ class UhdmLint final : public VpiListener {
   // for a declared name it fails to bind (a block-local localparam, a $unit
   // parameter, a property formal); only a name declared nowhere is reported.
   std::set<std::string, std::less<>> declaredNames_;
+  std::set<std::string, std::less<>> scopeNames_;
   std::map<const any*, const cont_assign*> contDrivenVars_;
   std::vector<const any*> contDrivenOrder_;
   std::map<const any*, const assignment*> procDrivenVars_;
   std::vector<std::pair<const tf_call*, std::string>> unboundCalls_;
   std::vector<std::pair<const ref_obj*, std::string>> unboundSelects_;
+  std::vector<std::pair<const unsupported_typespec*, std::string>>
+      unresolvedArgTypes_;
   // Definitions with at least one ELABORATED instance.  A module nothing
   // instantiates is not elaborated, so its names are not resolved.
   std::set<std::string, std::less<>> elaboratedDefs_;

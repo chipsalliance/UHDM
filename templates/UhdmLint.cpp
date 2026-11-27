@@ -79,7 +79,37 @@ static const any* returnWithValue(const any* stmt) {
   return nullptr;
 }
 
+static std::string ownerDefName(const any* obj);
+
+// A task or function argument declared over a type name that never
+// resolved: Surelog keeps an unsupported_typespec named after it.  Class
+// methods are left alone (their types are bound by a separate pass), and
+// so are unelaborated modules (as for the other undeclared-name checks).
+void UhdmLint::checkTfArgTypes(const task_func* tf) {
+  if (tf->Io_decls() == nullptr) return;
+  for (const any* p = tf->VpiParent(); p != nullptr; p = p->VpiParent()) {
+    if (p->UhdmType() == uhdmclass_defn) return;
+  }
+  for (const io_decl* io : *tf->Io_decls()) {
+    const ref_typespec* rt = io->Typespec();
+    if (rt == nullptr) continue;
+    const unsupported_typespec* ut =
+        rt->Actual_typespec<unsupported_typespec>();
+    if (ut == nullptr) continue;
+    const std::string_view name = ut->VpiName();
+    if (name.empty() || name.find(':') != std::string_view::npos ||
+        name.find('.') != std::string_view::npos)
+      continue;
+    unresolvedArgTypes_.emplace_back(ut, ownerDefName(tf));
+  }
+}
+
+void UhdmLint::leaveTask(const task* object, vpiHandle handle) {
+  checkTfArgTypes(object);
+}
+
 void UhdmLint::leaveFunction(const function* object, vpiHandle handle) {
+  checkTfArgTypes(object);
   if (object->Return() == nullptr) {
     if (const any* st = object->Stmt()) {
       if (const any* ret = returnWithValue(st)) {
@@ -1293,6 +1323,43 @@ void UhdmLint::leaveSys_func_call(const sys_func_call* object,
                                        "real", a, nullptr);
     }
   }
+  // A system TASK has no value (LRM 20.1): `val = $display;`.
+  if (const any* parent = object->VpiParent()) {
+    bool inExpr = false;
+    switch (parent->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmoperation:
+        inExpr = true;
+        break;
+      case UHDM_OBJECT_TYPE::uhdmassignment:
+        inExpr = ((const assignment*)parent)->Rhs() == object;
+        break;
+      case UHDM_OBJECT_TYPE::uhdmcont_assign:
+        inExpr = ((const cont_assign*)parent)->Rhs() == object;
+        break;
+      default:
+        break;
+    }
+    if (inExpr) {
+      const std::string_view n = object->VpiName();
+      for (std::string_view t :
+           {"$display", "$displayb", "$displayh", "$displayo", "$write",
+            "$writeb", "$writeh", "$writeo", "$strobe", "$monitor",
+            "$monitoron", "$monitoroff", "$finish", "$stop", "$exit",
+            "$fdisplay", "$fwrite", "$fstrobe", "$fmonitor", "$fclose",
+            "$fflush", "$readmemb", "$readmemh", "$writememb", "$writememh",
+            "$dumpfile", "$dumpvars", "$dumpon", "$dumpoff", "$dumpall",
+            "$dumpflush", "$printtimescale", "$timeformat", "$info",
+            "$warning", "$error", "$fatal"}) {
+        if (n == t) {
+          if (reportOnce(object, "systaskexpr"))
+            serializer_->GetErrorHandler()(
+                ErrorType::UHDM_TASK_CALLED_AS_FUNCTION, std::string(n),
+                object, nullptr);
+          break;
+        }
+      }
+    }
+  }
   ExprEval eval;
   eval.setDesign(design_);
   if (object->VpiName() == "$past") {
@@ -1959,6 +2026,34 @@ void UhdmLint::noteImplicitNetRef(const ref_obj* ref) {
   // bookkeeping never sees it.  Reported from leaveDesign when the name is
   // declared nowhere in the design.
   if (actual == nullptr) {
+    // A name in a $unit typedef (`typedef struct packed { logic [A-1:0]
+    // a; } t;` at file scope) that nothing declares.
+    if (ref->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj) {
+      const std::string_view name = ref->VpiName();
+      if (name.empty() || name.find('.') != std::string_view::npos ||
+          name.find(':') != std::string_view::npos)
+        return;
+      const any* prev = ref;
+      for (const any* p = ref->VpiParent(); p != nullptr;
+           prev = p, p = p->VpiParent()) {
+        if (p->UhdmType() == UHDM_OBJECT_TYPE::uhdmdesign) {
+          if (any_cast<const typespec*>(prev) != nullptr &&
+              reportedOnce_
+                  .emplace(std::string(ref->VpiFile()) + "#unit-type-ref",
+                           ref->VpiLineNo(), ref->VpiColumnNo())
+                  .second)
+            unboundSelects_.emplace_back(ref, "$unit");
+          return;
+        }
+        if (any_cast<const typespec*>(p) == nullptr &&
+            p->UhdmType() != UHDM_OBJECT_TYPE::uhdmrange &&
+            p->UhdmType() != UHDM_OBJECT_TYPE::uhdmoperation &&
+            p->UhdmType() != UHDM_OBJECT_TYPE::uhdmtypespec_member &&
+            p->UhdmType() != UHDM_OBJECT_TYPE::uhdmref_typespec)
+          return;
+      }
+      return;
+    }
     switch (ref->UhdmType()) {
       case UHDM_OBJECT_TYPE::uhdmbit_select:
       case UHDM_OBJECT_TYPE::uhdmpart_select:
@@ -2824,19 +2919,24 @@ void UhdmLint::leaveAny(const any* object, vpiHandle handle) {
     case UHDM_OBJECT_TYPE::uhdmsys_task_call:
     case UHDM_OBJECT_TYPE::uhdmoperation:
     case UHDM_OBJECT_TYPE::uhdmconstant:
+    // A type name nothing resolved names a use, not a declaration.
+    case UHDM_OBJECT_TYPE::uhdmunsupported_typespec:
       return;
     case UHDM_OBJECT_TYPE::uhdmmodule_inst: {
       // A module's own name is declared too (`$printtimescale(top)`).
+      // Module and instance names are SCOPE names: they may name a scope
+      // for a system task, never a value (see usedAsValue).
       const module_inst* mi = (const module_inst*)object;
       const std::string def = ownerDefName(mi);
       if (!def.empty()) {
-        declaredNames_.emplace(def);
+        scopeNames_.emplace(def);
         const any* up = mi->VpiParent();
         if (mi->VpiTop() ||
             (up && up->UhdmType() == UHDM_OBJECT_TYPE::uhdmmodule_inst))
           elaboratedDefs_.emplace(def);
       }
-      break;
+      if (!mi->VpiName().empty()) scopeNames_.emplace(mi->VpiName());
+      return;
     }
     case UHDM_OBJECT_TYPE::uhdmlogic_net:
       // The fabricated net itself declares nothing.
@@ -2849,6 +2949,38 @@ void UhdmLint::leaveAny(const any* object, vpiHandle handle) {
   if (!name.empty()) declaredNames_.emplace(name);
 }
 
+// True unless `ref` is an argument of a system task or function that takes
+// a scope (`$dumpvars(0, top)`, `$printtimescale(top)`): a module or
+// instance name there is legal, as a value (`$bits(top)`) it is not.
+static bool usedAsValue(const any* ref) {
+  // `@top.ev` reaches us as a ref named `top` whose span still covers the
+  // whole dotted path: a hierarchical name, not a value.
+  if (ref->VpiEndLineNo() != ref->VpiLineNo() ||
+      static_cast<size_t>(ref->VpiEndColumnNo() - ref->VpiColumnNo()) >
+          ref->VpiName().size())
+    return false;
+  for (const any* p = ref->VpiParent(); p != nullptr; p = p->VpiParent()) {
+    switch (p->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmsys_func_call: {
+        const std::string_view n = p->VpiName();
+        for (std::string_view v :
+             {"$bits", "$size", "$left", "$right", "$high", "$low",
+              "$increment", "$dimensions", "$unpacked_dimensions", "$clog2",
+              "$signed", "$unsigned", "$countones", "$onehot", "$onehot0",
+              "$isunknown"})
+          if (n == v) return true;
+        return false;
+      }
+      case UHDM_OBJECT_TYPE::uhdmmodule_inst:
+      case UHDM_OBJECT_TYPE::uhdmdesign:
+        return true;
+      default:
+        break;
+    }
+  }
+  return true;
+}
+
 void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
   // Built-in scope names (`std::randomize`, `this.x`, `super.f()`).
   for (std::string_view builtin : {"std", "this", "super"})
@@ -2858,24 +2990,47 @@ void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
     if (use.legal) continue;
     const std::string_view name = use.firstRef->VpiName();
     if (declaredNames_.find(name) != declaredNames_.end()) continue;
+    if (scopeNames_.find(name) != scopeNames_.end() &&
+        !usedAsValue(use.firstRef))
+      continue;
     if (elaboratedDefs_.find(use.ownerDef) == elaboratedDefs_.end()) continue;
     serializer_->GetErrorHandler()(ErrorType::UHDM_UNDECLARED_IDENTIFIER,
                                    std::string(use.firstRef->VpiName()),
                                    use.firstRef, nullptr);
   }
   for (const auto& [call, ownerDef] : unboundCalls_) {
-    if (declaredNames_.find(call->VpiName()) != declaredNames_.end()) continue;
+    if (declaredNames_.find(call->VpiName()) != declaredNames_.end() ||
+        scopeNames_.find(call->VpiName()) != scopeNames_.end())
+      continue;
     if (elaboratedDefs_.find(ownerDef) == elaboratedDefs_.end()) continue;
     serializer_->GetErrorHandler()(ErrorType::UHDM_UNDEFINED_TASK_FUNC,
                                    std::string(call->VpiName()), call, nullptr);
   }
   for (const auto& [ref, ownerDef] : unboundSelects_) {
-    if (declaredNames_.find(ref->VpiName()) != declaredNames_.end()) continue;
-    if (elaboratedDefs_.find(ownerDef) == elaboratedDefs_.end()) continue;
+    if (declaredNames_.find(ref->VpiName()) != declaredNames_.end() ||
+        scopeNames_.find(ref->VpiName()) != scopeNames_.end())
+      continue;
+    if (ownerDef != "$unit" &&
+        elaboratedDefs_.find(ownerDef) == elaboratedDefs_.end())
+      continue;
     serializer_->GetErrorHandler()(ErrorType::UHDM_UNDECLARED_IDENTIFIER,
                                    std::string(ref->VpiName()), ref, nullptr);
   }
   unboundSelects_.clear();
+  for (const auto& [ut, ownerDef] : unresolvedArgTypes_) {
+    if (declaredNames_.find(ut->VpiName()) != declaredNames_.end() ||
+        scopeNames_.find(ut->VpiName()) != scopeNames_.end())
+      continue;
+    if (elaboratedDefs_.find(ownerDef) == elaboratedDefs_.end()) continue;
+    if (!reportedOnce_
+             .emplace(std::string(ut->VpiFile()) + "#undefined-type",
+                      ut->VpiLineNo(), ut->VpiColumnNo())
+             .second)
+      continue;
+    serializer_->GetErrorHandler()(ErrorType::UHDM_UNDEFINED_TYPE,
+                                   std::string(ut->VpiName()), ut, nullptr);
+  }
+  unresolvedArgTypes_.clear();
   reportContProcDrivenVariables();
   unboundCalls_.clear();
   implicitNets_.clear();
@@ -2883,6 +3038,7 @@ void UhdmLint::leaveDesign(const design* object, vpiHandle handle) {
   reportedCalls_.clear();
   reportedOnce_.clear();
   declaredNames_.clear();
+  scopeNames_.clear();
   elaboratedDefs_.clear();
 }
 
