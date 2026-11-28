@@ -1073,7 +1073,11 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
             // without parentheses.  Give it the shape of the `e.first()`
             // form, which every case below already accepts.
             bool builtinCall = false;
+            // Only on a plain name: `arr[i].size` selects an ELEMENT (a
+            // struct member `size` of OpenTitan otp_ctrl's
+            // part_otp_arb_bundle[i]), and bit_select derives from ref_obj.
             if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj &&
+                previous->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj &&
                 obj == vec->back() && isBuiltinNoArgMethod(actual, name)) {
               method_func_call* call =
                   context->m_serializer->MakeMethod_func_call();
