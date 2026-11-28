@@ -39,6 +39,11 @@ void UhdmLint::leaveBit_select(const bit_select* object, vpiHandle handle) {
   noteImplicitNetRef(object);
   if (const ref_obj* index = object->VpiIndex<ref_obj>()) {
     if (const real_var* actual = index->Actual_group<real_var>()) {
+      // A foreach loop variable is an integer index (LRM 12.7.3), whatever
+      // type the model gives it (the element type of a `real` array).
+      if (const any* p = actual->VpiParent();
+          p != nullptr && p->UhdmType() == UHDM_OBJECT_TYPE::uhdmforeach_stmt)
+        return;
       const std::string errMsg(actual->VpiName());
       serializer_->GetErrorHandler()(ErrorType::UHDM_REAL_TYPE_AS_SELECT,
                                      errMsg, index, nullptr);
