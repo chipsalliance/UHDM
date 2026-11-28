@@ -1263,16 +1263,10 @@ void UhdmLint::leaveProperty_spec(const property_spec* prop_s,
                                   vpiHandle handle) {
   if (isInUhdmAllIterator()) return;
   if (const any* exp = prop_s->VpiPropertyExpr()) {
-    if (exp->UhdmType() == uhdmref_obj) {
-      const ref_obj* ref = any_cast<const ref_obj*>(exp);
-      if (ref->Actual_group()) {
-        if (ref->Actual_group()->UhdmType() == uhdmlogic_net) {
-          const std::string errMsg(ref->VpiName());
-          serializer_->GetErrorHandler()(ErrorType::UHDM_UNRESOLVED_PROPERTY,
-                                         errMsg, ref, nullptr);
-        }
-      }
-    }
+    // A property expression that is a bare name bound to a net is a
+    // boolean property over that signal (`@(posedge clk) out`, LRM 16.12),
+    // not an unresolved property name: UHDM_UNRESOLVED_PROPERTY is no
+    // longer reported for it.
     {
       if (prop_s->VpiClockingEvent()) {
         DetectSequenceInst seqDetector;
