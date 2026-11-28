@@ -1503,6 +1503,18 @@ void UhdmLint::leavePort(const port* object, vpiHandle handle) {
 // `parameter P = some_integer;`.  Reported on the first offending
 // reference.  A net Surelog FABRICATED for a name it could not resolve (no
 // typespec of its own) is not a declared net and is left alone.
+// A port's net in a module DEFINITION carries no typespec of its own (the
+// port does), so the missing typespec alone does not mark it fabricated.
+static bool isPortNet(const logic_net* n) {
+  const any* p = n->VpiParent();
+  if (p == nullptr || p->UhdmType() != UHDM_OBJECT_TYPE::uhdmmodule_inst)
+    return false;
+  if (const VectorOfport* ports = ((const module_inst*)p)->Ports())
+    for (const port* pt : *ports)
+      if (pt->VpiName() == n->VpiName()) return true;
+  return false;
+}
+
 static const any* nonConstantRef(const any* e, bool netsOnly) {
   if (e == nullptr) return nullptr;
   switch (e->UhdmType()) {
@@ -1516,7 +1528,7 @@ static const any* nonConstantRef(const any* e, bool netsOnly) {
           // RTL and accepted by other tools -- like any other variable it is
           // only reported in a parameter value.
           const logic_net* n = (const logic_net*)actual;
-          if (n->Typespec() == nullptr) return nullptr;
+          if (n->Typespec() == nullptr && !isPortNet(n)) return nullptr;
           if (n->VpiNetType() == vpiReg) return netsOnly ? nullptr : e;
           return e;
         }
