@@ -29,6 +29,62 @@
 
 namespace UHDM {
 
+// True when `name` is a built-in method of `var` that takes no arguments, so
+// that the LRM lets a call omit its parentheses (13.4.1): `e.first`,
+// `arr.sum`, `q.pop_back`, `s.len`.  Struct members can carry the same names
+// (`pkt.size`), which is why this looks at the TYPE of the variable rather
+// than at the name alone.
+static bool isBuiltinNoArgMethod(const any* var, std::string_view name) {
+  if (var == nullptr) return false;
+  static constexpr std::string_view kEnum[] = {"first", "last", "next",
+                                               "prev",  "num",  "name"};
+  static constexpr std::string_view kArray[] = {
+      "sum",     "product", "and",          "or",      "xor",  "min",
+      "max",     "unique",  "unique_index", "reverse", "sort", "rsort",
+      "shuffle", "size",    "num",          "delete"};
+  static constexpr std::string_view kQueue[] = {"pop_front", "pop_back"};
+  static constexpr std::string_view kString[] = {"len",    "toupper", "tolower",
+                                                 "atoi",   "atohex",  "atooct",
+                                                 "atobin", "atoreal"};
+  auto in = [name](const auto& list) {
+    for (std::string_view m : list)
+      if (m == name) return true;
+    return false;
+  };
+  const typespec* tps = nullptr;
+  if (const expr* e = any_cast<const expr*>(var)) {
+    if (const ref_typespec* rt = e->Typespec()) tps = rt->Actual_typespec();
+  }
+  switch (var->UhdmType()) {
+    case UHDM_OBJECT_TYPE::uhdmenum_var:
+      return in(kEnum);
+    case UHDM_OBJECT_TYPE::uhdmstring_var:
+      return in(kString);
+    case UHDM_OBJECT_TYPE::uhdmarray_var: {
+      if (in(kArray)) return true;
+      return ((const array_var*)var)->VpiArrayType() == vpiQueueArray &&
+             in(kQueue);
+    }
+    default:
+      break;
+  }
+  if (tps != nullptr) {
+    switch (tps->UhdmType()) {
+      case UHDM_OBJECT_TYPE::uhdmenum_typespec:
+        return in(kEnum);
+      case UHDM_OBJECT_TYPE::uhdmstring_typespec:
+        return in(kString);
+      case UHDM_OBJECT_TYPE::uhdmarray_typespec:
+        if (in(kArray)) return true;
+        return ((const array_typespec*)tps)->VpiArrayType() == vpiQueueArray &&
+               in(kQueue);
+      default:
+        break;
+    }
+  }
+  return false;
+}
+
 // Evaluate an index expression to a numeric value, following Actual_group()
 // pointers on ref_obj elements to resolve parameters/localparams.
 // Returns true if successful, false if the expression can't be evaluated.
@@ -982,9 +1038,54 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
           if ((actual == nullptr) && (previous->VpiName() == "$root")) {
             actual = elaboratorContext->m_elaborator.currentDesign();
           }
+          if ((actual == nullptr) && (previous == clone_vec->front())) {
+            // `ok.error` / `fun1.tmp`: the head of the path names a task or
+            // function of the enclosing instance.
+            for (const any* p = clone->VpiParent(); p != nullptr;
+                 p = p->VpiParent()) {
+              const UHDM_OBJECT_TYPE pt = p->UhdmType();
+              if (pt != UHDM_OBJECT_TYPE::uhdmmodule_inst &&
+                  pt != UHDM_OBJECT_TYPE::uhdminterface_inst &&
+                  pt != UHDM_OBJECT_TYPE::uhdmprogram)
+                continue;
+              if (const VectorOftask_func* tfs =
+                      ((const instance*)p)->Task_funcs()) {
+                for (task_func* tf : *tfs) {
+                  if (tf->VpiName() == previous->VpiName()) {
+                    pro->Actual_group(tf);
+                    actual = tf;
+                    break;
+                  }
+                }
+              }
+              break;
+            }
+          }
           if (actual) {
             UHDM_OBJECT_TYPE actual_type = actual->UhdmType();
-            switch (actual_type) {
+            // `e.first`, `arr.sum`, `q.pop_back`: a built-in method called
+            // without parentheses.  Give it the shape of the `e.first()`
+            // form, which every case below already accepts.
+            bool builtinCall = false;
+            if (current->UhdmType() == UHDM_OBJECT_TYPE::uhdmref_obj &&
+                obj == vec->back() && isBuiltinNoArgMethod(actual, name)) {
+              method_func_call* call =
+                  context->m_serializer->MakeMethod_func_call();
+              call->VpiName(name);
+              call->VpiParent(clone);
+              call->VpiFile(current->VpiFile());
+              call->VpiLineNo(current->VpiLineNo());
+              call->VpiColumnNo(current->VpiColumnNo());
+              call->VpiEndLineNo(current->VpiEndLineNo());
+              call->VpiEndColumnNo(current->VpiEndColumnNo());
+              clone_vec->back() = call;
+              current = call;
+              found = true;
+              builtinCall = true;
+            }
+            // (unsupported_expr: no case below matches it.)
+            switch (builtinCall ? UHDM_OBJECT_TYPE::uhdmunsupported_expr
+                                : actual_type) {
               case UHDM_OBJECT_TYPE::uhdmdesign: {
                 design* scope = (design*)actual;
                 if (scope->TopModules()) {
@@ -1297,6 +1398,37 @@ hier_path* hier_path::DeepClone(BaseClass* parent,
                 if (!found && begin->Array_vars()) {
                   for (auto m : *begin->Array_vars()) {
                     if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                      found = true;
+                      previous = m;
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(m);
+                      }
+                      break;
+                    }
+                  }
+                }
+                break;
+              }
+              case UHDM_OBJECT_TYPE::uhdmtask:
+              case UHDM_OBJECT_TYPE::uhdmfunction: {
+                // `ok.error`, `fun1.tmp`: a variable or argument declared
+                // inside a task or function, named through the task.
+                task_func* tf = (task_func*)actual;
+                if (!found && tf->Variables()) {
+                  for (auto m : *tf->Variables()) {
+                    if (m->VpiName() == name || m->VpiName() == nameIndexed) {
+                      found = true;
+                      previous = m;
+                      if (ref_obj* cro = any_cast<ref_obj*>(current)) {
+                        cro->Actual_group(m);
+                      }
+                      break;
+                    }
+                  }
+                }
+                if (!found && tf->Io_decls()) {
+                  for (auto m : *tf->Io_decls()) {
+                    if (m->VpiName() == name) {
                       found = true;
                       previous = m;
                       if (ref_obj* cro = any_cast<ref_obj*>(current)) {
