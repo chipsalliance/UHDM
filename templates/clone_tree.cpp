@@ -36,6 +36,12 @@ namespace UHDM {
 // than at the name alone.
 static bool isBuiltinNoArgMethod(const any* var, std::string_view name) {
   if (var == nullptr) return false;
+  // A foreach loop variable takes the INDEX type of the array (a struct key
+  // of an associative array: `range.min` in UVM's uvm_reg_map), whatever
+  // shape Surelog gives it.
+  if (const any* p = var->VpiParent();
+      p != nullptr && p->UhdmType() == UHDM_OBJECT_TYPE::uhdmforeach_stmt)
+    return false;
   static constexpr std::string_view kEnum[] = {"first", "last", "next",
                                                "prev",  "num",  "name"};
   static constexpr std::string_view kArray[] = {
