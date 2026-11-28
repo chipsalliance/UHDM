@@ -1417,7 +1417,13 @@ uint64_t ExprEval::size(const any *ts, bool &invalidValue, const any *inst,
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmreal_typespec: {
-      bits = 32;
+      // `real` is an IEEE 754 double (LRM 6.12).
+      bits = 64;
+      break;
+    }
+    case UHDM_OBJECT_TYPE::uhdmtime_typespec: {
+      // `time` is a 64-bit unsigned integer (LRM 6.11).
+      bits = 64;
       break;
     }
     case UHDM_OBJECT_TYPE::uhdmbyte_typespec: {
